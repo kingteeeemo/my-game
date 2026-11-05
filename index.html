@@ -523,8 +523,9 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   /* 가운데: 퀘스트 등 */
   .quest{grid-column:2/4;grid-row:2;min-width:0}
   .bossbar{grid-column:2/4;grid-row:3/5}
-  .lstack{display:flex;grid-column:2/4;grid-row:2/5;align-self:start;min-width:0;max-width:195px}
-  .autoeq{display:block;text-align:left;width:112px;max-width:112px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
+  .lstack{display:contents}
+  .autoeq{grid-column:1/3;grid-row:7;justify-self:start;display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
+  #topStack .env{width:100%;text-align:center;max-width:none}#topStack .env.min{width:max-content}
   .feed{grid-column:2/4;grid-row:8;margin-top:0}
   /* 우측 세로: 골드 · 정수 · 전체화면 · 정지 · 슬롯 */
   .rcol>.goldline:not(.essline),.rcol>.goldline.essline,.rcol>.rail:not(.v) .tbtn.sm,.rcol>.rail:not(.v)>.tbtn.sm{grid-column:4;grid-row:auto;justify-self:end;align-self:center}
@@ -2794,8 +2795,12 @@ function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=inpu
 /* ================= HUD ================= */
 let toastT=0;
 function toast(t,s,col){$('tt').textContent=t;$('tt').style.color=col||'';$('ts').style.color=col?'#efe8da':'';$('ts').textContent=s||'';$('toast').classList.add('on');toastT=2.6}
+/* v113: 세로=보스바 아래(상단 스택), 가로=좌측 열(체력바 아래) */
+const PORT_MQ=matchMedia('(max-width:640px) and (orientation:portrait)');
+function placeEnv(){const e=$('qenv'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){if(e.parentNode!==ts)ts.insertBefore(e,$('bossExit'))}else if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild)}
+PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
 let envMin=false;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
-function hud(){
+function hud(){placeEnv();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
   stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
