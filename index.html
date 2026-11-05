@@ -60,8 +60,8 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot{width:56px;height:56px;font-size:11px;gap:0}
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
-#topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(340px,58vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.env{pointer-events:auto;cursor:pointer}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
-#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(280px,40vw)}#bossExit{padding:3px 12px;font-size:12px}}
+#topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}#topStack .env{width:100%;text-align:center;margin:0;font-size:10.8px;line-height:1.35}#topStack .env.min{width:max-content}.autoeq .l2{display:block}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
+#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
 .stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:none;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .stagechip{flex-direction:column;gap:2px;padding:6px 16px 6px 8px;border-radius:16px}.scrow{display:flex;align-items:center;gap:10px}
 .stagechip em{font:800 12px var(--en);font-stretch:87%;font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted)}.stagechip em i{font-style:normal}
@@ -71,7 +71,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .sbanner small{font:800 13px var(--en);font-stretch:87%;letter-spacing:.35em;color:var(--ember);text-transform:uppercase}.sbanner b{font:900 46px var(--ko);color:#f4e6d2;text-shadow:0 0 24px rgba(255,110,40,.6),0 3px 0 #000}.sbanner span{font:800 20px var(--ko);color:#ffd0a0;text-shadow:0 2px 8px #000}
 .sbanner.eg small{color:#5ae0d0}.sbanner.eg b{text-shadow:0 0 24px rgba(90,224,208,.6),0 3px 0 #000}
 .sbanner.on{animation:sban 3s ease-out forwards}@keyframes sban{0%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
-@media (max-width:640px) and (orientation:portrait){.hud{padding-top:calc(70px + env(safe-area-inset-top,0px))}.stagechip b{font-size:16px}.stagechip span{font-size:14px}.sbanner b{font-size:36px}}
+@media (max-width:640px) and (orientation:portrait){#topStack{top:calc(env(safe-area-inset-top,0px) + 74px)}.hud{padding-top:calc(70px + env(safe-area-inset-top,0px))}.stagechip b{font-size:16px}.stagechip span{font-size:14px}.sbanner b{font-size:36px}}
 @media (orientation:landscape) and (max-height:520px){.stagechip{top:-6px;padding:3px 12px 3px 5px}.stagechip b{font-size:14px}.stagechip span{font-size:12px}.sbanner b{font-size:32px}}
 .toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;transition:opacity .4s;opacity:0;width:86%}
 .toast.on{opacity:1}
@@ -522,8 +522,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   #openInv{grid-column:1;grid-row:2}#openTown{grid-column:1;grid-row:3}#openMenu{grid-column:1;grid-row:4}#openStage{grid-column:1;grid-row:5}#openStat{grid-column:1;grid-row:6}
   /* 가운데: 퀘스트 등 */
   .quest{grid-column:2/4;grid-row:2;min-width:0}
-  .bossbar{grid-column:2/4;grid-row:3/5}.env{grid-column:2/4;grid-row:5/7;min-width:0}
-  .autoeq{grid-column:2/4;grid-row:7;max-width:none;margin-top:0}
+  .bossbar{grid-column:2/4;grid-row:3/5}
+  .autoeq{grid-column:1/3;grid-row:7;justify-self:start;display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   .feed{grid-column:2/4;grid-row:8;margin-top:0}
   /* 우측 세로: 골드 · 정수 · 전체화면 · 정지 · 슬롯 */
   .rcol>.goldline:not(.essline),.rcol>.goldline.essline,.rcol>.rail:not(.v) .tbtn.sm,.rcol>.rail:not(.v)>.tbtn.sm{grid-column:4;grid-row:auto;justify-self:end;align-self:center}
@@ -592,7 +592,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="hud">
   <div id="names"></div>
   <div class="top">
-  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden>↩ 나가기</button></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><em id="scD"></em></div>
+  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><div class="env" id="qenv" hidden></div><button id="bossExit" hidden>↩ 나가기</button></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><em id="scD"></em></div>
     <div class="lcol">
       <div class="vitals">
         <div class="lvbox"><small>LV</small><span id="lv">1</span></div>
@@ -603,7 +603,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
         </div>
       </div>
       <div class="quest"><i class="dia"></i><div class="tag" id="qtag" hidden></div><b id="qtitle"></b><span id="qprog"></span></div>
-      <div class="env" id="qenv" hidden></div>
       <div class="rail v">
         <button class="tbtn" id="openInv" style="color:#f0d040"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg><span style="color:var(--ink)">장비</span></button>
         <button class="tbtn" id="openTown" style="color:#ffb070"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span style="color:var(--ink)">마을</span></button>
@@ -2463,7 +2462,7 @@ function addItem(it){
 function upgrades(){const out=[];for(const k of EQS){let best=null;for(const it of S.inv)if(it.slot===k&&isBetter(it,best||S.eq[k]))best=it;if(best)out.push(best)}return out}
 function equipBest(){const ups=upgrades();for(const it of ups){const i=S.inv.indexOf(it),old=S.eq[it.slot];S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1)}
   if(ups.length){refreshMax();save();feed(`장비 ${ups.length}개 자동 장착`,'#7fe07a')}refreshUpBtn();return ups.length}/* v81: 화면 중앙 알림 없음 */
-function refreshUpBtn(){const n=upgrades().length,b=$('autoEq');b.hidden=!n;if(n)b.innerHTML=`<span class="up">▲</span> 더 좋은 장비 ${n}개 · <b>자동 장착</b>`}
+function refreshUpBtn(){const n=upgrades().length,b=$('autoEq');b.hidden=!n;if(n)b.innerHTML=`<span class="up">▲</span> <span class="l2">더 좋은 장비 ${n}개</span><span class="l2"><b>자동 장착</b></span>`}
 const feedEl=$('feed');
 function feed(t,c){const d=document.createElement('div');d.textContent=t;d.style.color=c;feedEl.prepend(d);while(feedEl.children.length>4)feedEl.lastChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)},3500)}
 /* 물약: 소형 50 · 중형 120 · 대형 300 회복. 누르면 부족한 양에 가장 알맞은 크기를 자동으로 사용 */
