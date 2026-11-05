@@ -519,6 +519,22 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .stagechip{top:-6px;padding:3px 12px 3px 5px}.stagechip b{font-size:14px}.stagechip span{font-size:12px}
   #topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}
 }
+/* v115: PC(마우스) 화면에서는 HUD 전체를 1.7배 — 모바일 가로 모드 구성을 그대로 키움 */
+@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){
+  .acts{width:152px;height:148px;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .act.s1{width:82px;height:82px;font-size:13px}
+  .act.atk{width:48px;height:48px;right:103px;bottom:17px;font-size:11px}
+  .act.pot{width:44px;height:44px}
+  .act.pot.spot{width:38px;height:38px;right:31px;bottom:153px}.autob{width:34px;height:34px;right:74px;bottom:153px;font-size:10px}.autopop{bottom:calc(170px + env(safe-area-inset-bottom,0px));max-height:calc(100vh/1.7 - 190px);overflow-y:auto}.act.pot.spot .flask{width:24px;height:24px}
+  .act.pot.ph{right:51px;bottom:99px}.act.pot.mpot{right:1px;bottom:103px}
+  .flask{width:28px;height:28px;margin-top:-3px}.act.pot b{font-size:11px;margin-top:-4px}
+  .act.mv{width:46px;height:46px;right:89px;bottom:66px;font-size:10px}.act.mv small{display:none}
+  .npcact{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  .toast{top:calc(150px + env(safe-area-inset-top,0px))}.toast b{font-size:17px}
+  .sbanner{top:calc(98px + env(safe-area-inset-top,0px))}.sbanner b{font-size:26px!important}.sbanner span{font-size:15px}.sbanner small{font-size:11px}
+  .feed{font-size:11px}
+  .hud{zoom:1.7}#names{zoom:.58824}.autopop{zoom:1.7;max-height:calc(100vh/1.7 - 150px)}.pchint{zoom:1.25}
+}
 /* v55 세로 폰 메인 UI: 윗줄 [레벨·HP/MP | 던전 정보 | 미니맵], 좌측 세로 [장비·마을·스킬·단계·스탯], 우측 세로 [골드·정수·전체화면·정지·슬롯] */
 @media (max-width:640px) and (orientation:portrait){
   .hud{padding-top:calc(10px + env(safe-area-inset-top,0px))}
@@ -800,7 +816,7 @@ const SK={
   snipe:{n:'저격',role:'보스 공격',tag:'single',en:'Single · Bow',kind:'snipe',mp:10,dmg:3.6,cd:2.2},
   frost:{n:'얼음 보주',role:'다수 공격',tag:'projectile',en:'Projectile · Cold',kind:'orb',gems:['barrage','orbsize','haste'],mp:12,dmg:.5,cd:1.6,proj:1,speed:7,life:1.6,desc:'천천히 날아가는 얼음 보주가 사방으로 파편을 뿌립니다.'},
   quake:{n:'대지 분쇄',role:'다수 공격',tag:'quake',en:'Fissure · Melee',kind:'quake',gems:['qlen','qfork','haste'],mp:12,dmg:1,cd:1.5,desc:'땅을 내리찍어 앞쪽 부채꼴 전체에 흑색 가시를 촘촘히 솟구치게 합니다.'},
-  rain:{n:'화살비',role:'다수 공격',tag:'rain',en:'Area · Bow',kind:'rain',gems:['rarea','rdens','haste'],mp:8,dmg:.3,cd:1.3,desc:'적이 모인 곳에 화살비를 쏟아부어, 범위 안의 적을 계속 공격합니다.'},
+  rain:{n:'화살비',role:'다수 공격',tag:'rain',en:'Area · Bow',kind:'rain',gems:['rarea','rdens','haste'],mp:8,dmg:.345,cd:1.3,desc:'적이 모인 곳에 화살비를 쏟아부어, 범위 안의 적을 계속 공격합니다.'},
   chainl:{n:'연쇄 번개',role:'다수 공격',tag:'chainl',en:'Chain · Lightning',kind:'chainl',gems:['cbounce','cfork','haste'],mp:10,dmg:.9,cd:.9,desc:'가장 가까운 적을 맞힌 번개가 주변 적에게 계속 튕겨 갑니다.'},
   meteor:{n:'유성 낙하',role:'보스 공격',tag:'single',en:'Single · Fire',kind:'meteor',mp:14,dmg:4.6,cd:2.8}
 };
@@ -2374,15 +2390,16 @@ function kill(e){
   dropEss(e);
   dropGold(e.pos,goldOf(e));
   /* 물약 드롭률은 기존의 30% */
+  const MD=S.ch<4?2:1;/* v115: 1~4장 마나 물약 드롭 ×2 */
   const PD=S.ch>=NCH?.054:.3;/* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
   if(e.final){for(let i=0;i<3;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2)}
-  else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2)potDrop(e.pos,'mp')}
-  else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp')}
-  else if(e.rank===1){if(Math.random()<.15)dropItem(e.pos,false);if(Math.random()<.3*PD)potDrop(e.pos,Math.random()<.55?'hp':'mp')}
+  else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2*MD)potDrop(e.pos,'mp')}
+  else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp');if(MD>1&&Math.random()<PD*.5)potDrop(e.pos,'mp')}
+  else if(e.rank===1){if(Math.random()<.15)dropItem(e.pos,false);if(Math.random()<.3*PD)potDrop(e.pos,Math.random()<.55?'hp':'mp');if(MD>1&&Math.random()<.3*PD*.45)potDrop(e.pos,'mp')}
   else{const q=Math.random(),ic=e.type==='brute'?.035:.0125;
     if(q<ic)dropItem(e.pos,false);
     else if(q<ic+(S.ch===0?.035:.025)*PD)potDrop(e.pos,'hp');
-    else if(q<ic+(S.ch===0?.055:.045)*PD)potDrop(e.pos,'mp')}
+    else if(q<ic+((S.ch===0?.035:.025)+.02*MD)*PD)potDrop(e.pos,'mp')}
   if(Math.random()<[.0008,.004,.012,.06][e.rank])dropSpd(e.pos);
   gainXp(e.xp);progress(e);
 }
