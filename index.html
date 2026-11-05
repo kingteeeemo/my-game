@@ -210,7 +210,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .flash.on{box-shadow:inset 0 0 90px rgba(200,40,30,.6);transition:none}
 /* sheets */
 .scrim{position:fixed;inset:0;z-index:10;background:rgba(5,5,8,.62);display:flex;align-items:flex-end;justify-content:center}
-.scrim.center{align-items:center}
+.scrim.center{align-items:center}#clear{background:#07060a}.brow,.btx{margin:0}.brow{display:flex;gap:12px;align-items:center}.btx{display:flex;flex-direction:column;gap:2px;min-width:0}.bslot{flex:none;width:52px;height:52px;border-radius:10px;border:2px solid var(--rc);background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(0,0,0,.5));box-shadow:0 0 14px var(--rc),inset 0 0 10px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:800 26px/1 var(--ko);text-decoration:none;color:var(--rc)}.ecine.bonus{background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),transparent 62%),#060408}
 #slots,#classSel{background:#07060a}
 .sheet{width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:#17171d;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
@@ -796,9 +796,9 @@ const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 �
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
 const novaSt=L=>({iv:(.56-.06*L)/1.3,r:(2.6+.4*L)*1.26,m:.5+.2*L});/* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
 const flameSt=L=>{const f5=2/(.42-.15),f1=2/(.42-.03)/2,f=f1+(f5-f1)*Math.pow((L-1)/4,1.5);return{iv:1/f,rm:1.5+.2*L,m:.9+.3*L}};/* v71: 1단계=기존 1/2(초당 2.6회), 5단계 동일(7.4회), 지수 1.5 곡선 *//* v65: 초당 횟수 2배(1회 피해 그대로) *//* 5단계: 0.27초 · 250% · ×2.4 */
-const retSt=L=>({p:[0,.5,.75,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
+const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
-const INF_D=.03,infCost=L=>({e:30+10*L,g:30000+15000*L}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
+const INF_D=.04,infCost=L=>({e:Math.max(1,Math.round((30+10*L)/4)),g:30000+15000*L}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
 const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 /* 스탯: 레벨업마다 3포인트, 언제든 되돌리기 가능 */
 /* 스탯: 레벨업마다 1포인트, 되돌리기 없음 */
@@ -812,7 +812,7 @@ const STATS={
 const SK={
   whirl:{n:'회전 베기',role:'다수 공격',tag:'area',en:'Area · Melee',kind:'whirl',gems:['area','swift','haste'],mp:12,dmg:.6,cd:2.2,radius:2.7,hits:5,desc:'제자리에서 회전하며 내 주변 원형 범위의 적을 계속 베어냅니다.'},
   crush:{n:'파쇄 일격',role:'보스 공격',tag:'single',en:'Single · Melee',kind:'crush',mp:12,dmg:4.2,cd:2.6},
-  volley:{n:'다발 사격',role:'다수 공격',tag:'projectile',en:'Projectile · Bow',kind:'proj',gems:['multi','chpierce','haste'],mp:6,dmg:.85,cd:1.1,proj:2,spread:.16,speed:24,color:0xb8f07a,size:.55,life:.9,desc:'부채꼴로 여러 발의 화살을 쏘아 앞쪽 무리를 꿰뚫습니다.'},
+  volley:{n:'다발 사격',role:'다수 공격',tag:'projectile',en:'Projectile · Bow',kind:'proj',gems:['multi','chpierce','haste'],mp:12,dmg:.85,cd:1.1,proj:2,spread:.16,speed:24,color:0xb8f07a,size:.55,life:.9,desc:'부채꼴로 여러 발의 화살을 쏘아 앞쪽 무리를 꿰뚫습니다.'},
   snipe:{n:'저격',role:'보스 공격',tag:'single',en:'Single · Bow',kind:'snipe',mp:10,dmg:3.6,cd:2.2},
   frost:{n:'얼음 보주',role:'다수 공격',tag:'projectile',en:'Projectile · Cold',kind:'orb',gems:['barrage','orbsize','haste'],mp:12,dmg:.5,cd:1.6,proj:1,speed:7,life:1.6,desc:'천천히 날아가는 얼음 보주가 사방으로 파편을 뿌립니다.'},
   quake:{n:'대지 분쇄',role:'다수 공격',tag:'quake',en:'Fissure · Melee',kind:'quake',gems:['qlen','qfork','haste'],mp:12,dmg:1,cd:1.5,desc:'땅을 내리찍어 앞쪽 부채꼴 전체에 흑색 가시를 촘촘히 솟구치게 합니다.'},
@@ -877,7 +877,7 @@ const pctMax=v=>`최대치의 ${(v/10).toFixed(1)}%`;
 const RARE_OPT=['cdr','mreg','mcr','spd','regen','fdmg'],RARE_P=.1;
 const OPT={
   dmgPct:{n:'피해',f:v=>`+${v}%`,slots:['weapon','amulet','ring'],roll:l=>Math.round(rand(4,9)+l*.35)},
-  crit:{n:'치명타 확률',f:v=>`+${v}%`,slots:['weapon','amulet','helm','ring'],roll:l=>Math.round(rand(2,5)+l*.1)},
+  crit:{n:'치명타 확률',f:v=>`+${v}%`,slots:['amulet','ring'],roll:l=>Math.round(rand(2,5)+l*.1)},
   armor:{n:'방어력',f:v=>`+${v}`,slots:['armor','helm','boots'],roll:l=>Math.round(rand(3,7)+l*1.2)},
   regen:{n:'생명력 재생',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['armor'],roll:spRoll},
   hp:{n:'최대 생명력',f:v=>`+${v}`,slots:ALL,roll:l=>Math.round(rand(8,16)+l*2.2)},
@@ -984,7 +984,7 @@ function reconcile(s){if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=1
   if(s.stats&&'vit' in s.stats){s.stats.str=(s.stats.str||0)+s.stats.vit;delete s.stats.vit}
   if(s.autoStat==='vit')s.autoStat='str';s.statV=3;
 }
-function parseSave(raw){try{const s=JSON.parse(raw);if(s&&(Array.isArray(s.picks)||s.sk)&&s.cls){migrate(s);reconcile(s);if(!s.inv)s.inv=[];if(!s.eq)s.eq={};/* 없어진 옵션(적중 시 생명력 등)은 아이템에서 제거 */for(const it of [...s.inv,...Object.values(s.eq)])if(it&&it.opts)it.opts=it.opts.filter(o=>OPT[o.k]);for(const k of EQS)if(!(k in s.eq))s.eq[k]=null;if(!s.pots){const o=s.pot||{hp:3,mp:3};s.pots={hp:{s:0,m:o.hp||0,l:0},mp:{s:0,m:o.mp||0,l:0}};delete s.pot}if(!s.gold)s.gold=0;return s}}catch(e){}return null}
+function parseSave(raw){try{const s=JSON.parse(raw);if(s&&(Array.isArray(s.picks)||s.sk)&&s.cls){migrate(s);reconcile(s);if(!s.inv)s.inv=[];if(!s.eq)s.eq={};/* 없어진 옵션(적중 시 생명력 등)은 아이템에서 제거 */for(const it of [...s.inv,...Object.values(s.eq)])if(it&&it.opts)it.opts=it.opts.filter(o=>OPT[o.k]&&(!OPT[o.k].slots||OPT[o.k].slots.includes(it.slot)));for(const k of EQS)if(!(k in s.eq))s.eq[k]=null;if(!s.pots){const o=s.pot||{hp:3,mp:3};s.pots={hp:{s:0,m:o.hp||0,l:0},mp:{s:0,m:o.mp||0,l:0}};delete s.pot}if(!s.gold)s.gold=0;return s}}catch(e){}return null}
 function readSlot(i){try{return parseSave(localStorage.getItem(slotKey(i)))}catch(e){return null}}
 function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
@@ -1056,7 +1056,7 @@ const BAL={frost:[.77,.448,1.23],volley:[1.61,2.34,.705],whirl:[.93,2.94,.578],q
 function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (id==='whirl'||id==='quake'?1.1:1)*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
-const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;return Math.max(1,Math.round(SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))*(1+.015*inf)*(1-gear().mcr/100)))};
+const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+2*inf)*(1-gear().mcr/100)))};
 const gemsFor=s=>SK[s].gems||Object.keys(GEMS).filter(g=>GEMS[g].t==='any'||GEMS[g].t===SK[s].tag);
 /* 레벨업: 먼저 강화할 스킬을 고르고, 그 스킬의 강화 3개 중 하나를 고름 */
 const openGems=s=>gemsFor(s).filter(g=>gl(s,g)<GMAX);
@@ -1874,7 +1874,7 @@ function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [.
   const eyes=new THREE.MeshBasicMaterial({color:0xff5a1a});for(const sx of [-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(.03,6,5),eyes);e.position.set(sx*.07,.02,.26);u.helm.add(e)}
   return {root:g,legs:[u.legL,u.legR],arms:[],h:2.3,duel:1,u,armor}}
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
-  e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t);e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
+  e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5);e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
   e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;return e}
 function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math.PI/2;
   const bg=new THREE.Mesh(new THREE.CircleGeometry(len,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false}));
@@ -1939,13 +1939,13 @@ function sipeStart(e){const U=S.duel&&S.duel.uber,C={x:0,z:0};e.chg=null;
   const SL=8,half=Math.PI/SL,L=ARENA_R+1,nP=U?4:3;
   for(let w=0;w*2<SIPE_T-1;w++)later(1+w*2,()=>{if(!ok())return;const off=Math.random()<.5?0:half,idx=[...Array(SL).keys()].sort(()=>Math.random()-.5).slice(0,nP);
     for(const i of idx){const a=off+i*half*2;fanTele(C,a,half,L,1.28,()=>{if(!ok())return;shake=Math.max(shake,.35);
-      for(let j=1;j<=4;j++){const d=j*L/4.6,q={x:C.x+Math.sin(a)*d,z:C.z+Math.cos(a)*d};blastFx(q,1.4+j*.35)}
+      duelLava(C,a,half,L);
       if(inFan(P.pos,C,a,half,L))hurtPct(U?.8:.5)})}});
   /* 얇은 직선: 한 방향으로 나란히 훑고 지나가다 방향을 바꿈 */
   const gap=U?.2:.45,lw=1.5;/* v104: 우버는 직사각형 2배 */let n=0;
   for(let t=1.2;t<SIPE_T+.6;t+=gap){const k=n++;later(t,()=>{if(!ok())return;const b=Math.floor(Math.random()*8)*Math.PI/4,o=rand(-.85,.85)*ARENA_R;/* v101: 8방향 */
       const dx=Math.sin(b),dz=Math.cos(b),p0={x:C.x+Math.cos(b)*o-dx*L,z:C.z-Math.sin(b)*o-dz*L};
-      lineTele(p0,b,L*2,lw,.8,()=>{if(!ok())return;for(let j=0;j<6;j++){const d=L*.25+j*L*.3,q={x:p0.x+dx*d,z:p0.z+dz*d};if(Math.hypot(q.x,q.z)<ARENA_R)emit(PADD,{x:q.x,y:.6,z:q.z,vy:3,life:.3,s0:1.6,s1:.3,c0:0xffe0b0,c1:0xff3a10,a:.9,tex:1})}
+      lineTele(p0,b,L*2,lw,.8,()=>{if(!ok())return;laserFx(p0,b,L*2,lw);
         if(inLine(P.pos,p0,b,L*2,lw))hurtPct(U?.4:.2)})})}}
 function poopCast(e){const U=S.duel&&S.duel.uber,dur=3;
   const g=new THREE.Group(),ring=flatMesh(ringGeo,0x9a4aff,.9),fill=flatMesh(discGeo,0x6a2aaa,.3);ring.scale.set(POOL_R,POOL_R,1);g.add(ring,fill);scene.add(g);
@@ -1991,10 +1991,10 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
     else if(A.k==='sipe'){px=-3.1*e2(t/.5);py=Math.sin(t*2)*.15;u.body.rotation.x=-.25}}
   u.piv.rotation.x=px;u.piv.rotation.y=py;if(u.cape)u.cape.rotation.x=.12+(moving?.3:0)+(A&&A.k==='slam'&&A.t<A.hit?.6:0);
   if(Math.random()<dt*10*QM()){const p=new THREE.Vector3();u.weaponTip.getWorldPosition(p);emit(PADD,{x:p.x,y:p.y,z:p.z,vy:rnd(.4,1.2),life:rnd(.3,.6),s0:.8,s1:.1,c0:0xffa040,c1:0xa01800,a:.8,tex:1})}}
-function duelEnter(m='n'){if(S.ch<NCH)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m};save();mapLoad(DUEL.n,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${DUEL.n}`,`위험도 ${D.tier} 고정`);stageBanner()})}
+function duelEnter(m='n'){if(S.ch<NCH)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m};save();mapLoad(DUEL.n,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${DUEL.n}`,`위험도 ${D.tier} 추천`);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
-  for(let i=0;i<5;i++){later(i*.12,()=>dropGold(e.pos,Math.round(gold/5)))}
+  S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,rolled:false,res:[]};
   later(1.6,()=>victory('격파!',`${U?'우버 ':''}${DUEL.n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 우버에서만 확정 강화 주문서(10%)를 각각 따로 굴림 */
@@ -2003,7 +2003,7 @@ function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.re
   if(Math.random()<SCR_P){const sc={v:DUEL_M[b.m].v};S.scrolls=(S.scrolls||[]).concat(sc);b.res.push({t:'scr',sc})}
   if(b.U&&Math.random()<TK_P){S.tickets=(S.tickets||0)+1;b.res.push({t:'tk'})}
   save()}
-const bonusLine=r=>r.t==='scr'?`<b style="color:${r.sc.v>=10?'#c890ff':'#5ae0d0'}">★ ${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:#ffd24a">✦ 확정 강화 주문서</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`;
+const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
 function bonusCine(done){const b=duelBonus,res=b.res,got=res.length>0,el=document.createElement('div');el.className='ecine charge bonus';el.style.setProperty('--ec',b.U?'180,130,255':'230,200,120');
   el.innerHTML=`<div class="rune"></div><div class="rune r2"></div><div class="orb"></div><div class="wait"><small>BONUS REWARD</small><b>?</b><span>추가 보상 확인 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   document.body.appendChild(el);let over=0,rv=0,cc=0,tm=0;
@@ -2093,6 +2093,17 @@ function telegraph(p,r,dmg){
 /* 직선 경고 장판 (v40, 최종 보스): p0에서 각도 a 방향으로 길이 len · 폭 w. dur 동안 앞쪽부터 차오르고 끝나면 end() */
 const lineGeo=new THREE.PlaneGeometry(1,1);
 function inLine(q,p0,a,len,w){const dx=q.x-p0.x,dz=q.z-p0.z,al=dx*Math.sin(a)+dz*Math.cos(a),pe=Math.abs(dx*Math.cos(a)-dz*Math.sin(a));return al>=-.5&&al<=len+.5&&pe<=w/2+.4}
+/* v117: 피자판 — 예고 후 용암 바닥이 깔렸다가 빠르게 사라짐 / 직선 — 레이저 */
+function duelLava(p0,a,half,len){const ts=a-half-Math.PI/2,g=new THREE.Group(),geo=new THREE.CircleGeometry(len,40,ts,half*2);
+  const m1=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xff4a10,transparent:true,opacity:.9,depthWrite:false,side:THREE.DoubleSide})),m2=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xffc060,transparent:true,opacity:.7,depthWrite:false,side:THREE.DoubleSide}));
+  for(const m of [m1,m2])m.rotation.x=-Math.PI/2;m2.position.y=.01;g.add(m1,m2);g.position.set(p0.x,.08,p0.z);scene.add(g);flash(p0,0xff6a20,2);
+  fx.push({m:g,t:0,dur:.7,upd(k){const f=k<.15?1:1-(k-.15)/.85;m1.material.opacity=.9*f;m2.material.opacity=.7*f*(1-k);m2.scale.setScalar(1-.25*k)}})}
+function laserFx(p0,a,len,w){const g=new THREE.Group();g.position.set(p0.x,.08,p0.z);g.rotation.y=a;
+  const mk=(c,o)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,depthWrite:false,side:THREE.DoubleSide});
+  const o1=new THREE.Mesh(lineGeo,mk(0xff5a20,.85)),o2=new THREE.Mesh(lineGeo,mk(0xfff0c0,1)),wall=new THREE.Mesh(lineGeo,mk(0xff8a40,.55));
+  for(const m of [o1,o2]){m.rotation.x=-Math.PI/2;m.position.z=len/2}o1.scale.set(w,len,1);o2.scale.set(w*.4,len,1);o2.position.y=.01;
+  wall.scale.set(len,2.2,1);wall.rotation.y=Math.PI/2;wall.position.set(0,1.1,len/2);g.add(o1,o2,wall);scene.add(g);
+  fx.push({m:g,t:0,dur:.4,upd(k){const f=1-k;o1.material.opacity=.85*f;o2.material.opacity=f;wall.material.opacity=.55*f;o1.scale.x=w*(1+.3*k);o2.scale.x=w*.4*(1-.6*k)}})}
 function lineTele(p0,a,len,w,dur,end){const g=new THREE.Group();g.position.set(p0.x,.065,p0.z);g.rotation.y=a;
   const bg=flatMesh(lineGeo,0xff3a28,.3);bg.scale.set(w,len,1);bg.position.z=len/2;
   const fill=flatMesh(lineGeo,0xff3a28,.55);fill.position.y=.005;
@@ -2388,7 +2399,7 @@ function kill(e){
   ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);
   if(S.demo)return;
   dropEss(e);
-  dropGold(e.pos,goldOf(e));
+  if(!e.duel)dropGold(e.pos,goldOf(e));
   /* 물약 드롭률은 기존의 30% */
   const MD=S.ch<4?2:1;/* v115: 1~4장 마나 물약 드롭 ×2 */
   const PD=S.ch>=NCH?.054:.3;/* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
@@ -2414,7 +2425,7 @@ function hurtPlayer(d){
 }
 function die(){
   if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.6,showDuelFail);return}
-  if(!inArena())toast('쓰러졌습니다','성역 중앙에서 다시 일어섭니다');
+  if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
   if(inArena()){P.pos.set(FB_START.x,0,FB_START.z);for(const e of enemies)if(e.final){if(e.rage){e.rage=false;e.spd/=1.3}e.air=null;e.ip=0;e.g.position.y=0;e.g.children.forEach(c=>c.visible=true);e.hp=e.mhp;e.aggro=false;e.nova=5;e.chg=null;e.pat=4;e.patN=0;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.6,showArenaFail);return}
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.chBoss){e.hp=e.mhp;e.aggro=false;e.pos.set(ALTAR.x,0,ALTAR.z)}else if(e.boss)e.hp=e.mhp;else if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<16)dropEnemy(e)}
@@ -3447,7 +3458,7 @@ function renderStage(){
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 200마리를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
-  ${eg?['n','u'].map(m=>{const D=DUEL_M[m],rq=duelReq(m);return `<div class="cmp2 duelc"><div class="dt"><b>결투장 · ${D.n} ${DUEL.n}</b><small>위험도 ${D.tier} 고정<br>보상: 골드 대량 + 30% 확률로 <span style="color:${m==='u'?'#c890ff':'#5ae0d0'}">${m==='u'?'상급 각인의 서':'각인의 서'}</span>(★ ${D.v}%)${m==='u'?' · 패턴이 더 빠르고 아픔':''}</small></div><button class="primary" data-duel="${m}" style="width:auto;padding:10px 16px" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m?'도전 중':'도전'}</button></div>`}).join(''):''}
+  ${eg?['n','u'].map(m=>{const D=DUEL_M[m],rq=duelReq(m);return `<div class="cmp2 duelc"><div class="dt"><b>결투장 · ${D.n} ${DUEL.n}</b><small>위험도 ${D.tier} 추천<br>보상: 골드 대량 + 30% 확률로 <span style="color:${m==='u'?'#c890ff':'#5ae0d0'}">${m==='u'?'상급 각인의 서':'각인의 서'}</span>(★ ${D.v}%)${m==='u'?' · 패턴이 더 빠르고 아픔':''}</small></div><button class="primary" data-duel="${m}" style="width:auto;padding:10px 16px" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m?'도전 중':'도전'}</button></div>`}).join(''):''}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
@@ -3581,7 +3592,7 @@ function enhFx(ok){const f=$('buyFlash');f.className='buyflash';void f.offsetWid
 $('smith').addEventListener('click',e=>{if(e.target.id==='smith')closeSmith()});
 
 /* ================= 전승사 (v77): 특수 능력치를 같은 부위의 다른 전설 장비로 옮김 · 옛 장비는 사라짐 ================= */
-let heirSrc=null,heirMsg='',heirScr=-1;
+let heirSrc=null,heirMsg='',heirScr=-1,heirSlot=null;
 const spOf=it=>it&&it.opts.find(o=>OPT[o.k]&&OPT[o.k].sp);
 const allItems=()=>EQS.map(k=>S.eq[k]).filter(Boolean).concat(S.inv);
 const itemById=id=>allItems().find(x=>x.id===id);
@@ -3597,9 +3608,11 @@ function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
   let h=`<div class="shead"><div><div class="chap">Inheritance · ${TOWN.heir}</div><h2>${heirSrc?'옮길 장비 고르기':'특수 능력치 전승'}</h2></div><button class="close" id="hrClose">닫기</button></div>${goldBar()}`;
   if(!heirSrc&&scr.length)h+=`<div class="gslot"><div class="gslhd"><span class="k">각인의 서 ${scr.length}장</span><small>결투장 ${DUEL.n}에게서 얻은 서를 아무 전설 장비에 새깁니다. 부위에 맞는 특수 능력치가 붙습니다</small></div><div class="smgrid">${scr.map((sc,i)=>`<button class="smslot" data-scr="${i}"><b style="color:${sc.v>=10?'#c890ff':'#5ae0d0'}">★ ${scrName(sc)}</b><small>특수 능력치 ${sc.v}%</small></button>`).join('')}</div></div>`;
   const src=heirSrc&&itemById(heirSrc);
-  if(!src){heirSrc=null;const list=allItems().filter(spOf).sort((a,b)=>EQS.indexOf(a.slot)-EQS.indexOf(b.slot)||b.ilvl-a.ilvl);
-    h+=`<p class="hint" style="margin:0">특수 능력치(★)가 붙은 장비를 고르면, 그 능력치를 <b style="color:var(--ink)">같은 부위의 다른 전설 장비</b>로 옮깁니다. 수치는 그대로이고, <b style="color:#ff8a6a">원래 장비는 사라집니다.</b></p>`;
-    h+=list.length?`<div class="smgrid">${list.map(it=>heirCard(it,`data-hsrc="${it.id}"`)).join('')}</div>`:`<p class="hint">특수 능력치가 붙은 장비가 없습니다. 무기상 뽑기나 사냥으로 얻을 수 있습니다.</p>`}
+  if(!src){heirSrc=null;const all=allItems().filter(spOf);
+    h+=`<p class="hint" style="margin:0">먼저 <b style="color:var(--ink)">계승할 부위</b>를 고르세요. 그 부위의 특수 능력치(★) 장비만 나옵니다. 능력치를 <b style="color:var(--ink)">같은 부위의 다른 전설 장비</b>로 옮기며, 수치는 그대로이고 <b style="color:#ff8a6a">원래 장비는 사라집니다.</b></p>`;
+    if(heirSlot&&!all.some(x=>x.slot===heirSlot))heirSlot=null;
+    if(!heirSlot){h+=all.length?`<div class="smgrid">${EQS.filter(k=>all.some(x=>x.slot===k)).map(k=>`<button class="smslot" data-hslot="${k}"><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small>★ 장비 ${all.filter(x=>x.slot===k).length}개</small></button>`).join('')}</div>`:`<p class="hint">특수 능력치가 붙은 장비가 없습니다. 무기상 뽑기나 사냥으로 얻을 수 있습니다.</p>`}
+    else{const list=all.filter(x=>x.slot===heirSlot).sort((a,b)=>b.ilvl-a.ilvl);h+=`<div class="smgrid">${list.map(it=>heirCard(it,`data-hsrc="${it.id}"`)).join('')}</div><button class="ghost" id="hrSlot">← 부위 다시 고르기</button>`}}
   else{const sp=spOf(src),tg=allItems().filter(x=>x!==src&&x.slot===src.slot&&x.rar===3).sort((a,b)=>b.ilvl-a.ilvl||b.base-a.base),best=tg[0];
     h+=`<div class="gslot"><div class="gslhd"><span class="k">옮길 능력치</span><b style="color:#5ae0d0">★ ${OPT[sp.k].n} ${OPT[sp.k].f(sp.v)}</b><small>${src.name} · iLv ${src.ilvl} (전승 후 사라짐)</small></div></div>`;
     h+=tg.length?`<div class="gslot" style="border-color:#5ae0d0"><div class="gslhd"><span class="k" style="color:#5ae0d0">추천 · 가장 좋은 ${SLOTN[src.slot]}</span><small>보유 중인 같은 부위 전설 장비 중 가장 성능이 좋은 장비를 먼저 띄웠습니다.${best.ilvl<src.ilvl?` 단, 지금 장비(iLv ${src.ilvl})가 더 좋으니 옮기면 약해질 수 있습니다.`:''}</small></div><div class="smgrid">${heirCard(best,`data-htg="${best.id}" ${S.gold>=heirCost(best)?'':'disabled'}`,`<small style="color:${S.gold>=heirCost(best)?'#ffd24a':'#ff7a6a'}">★ 추천 · 전승 ${fmtG(heirCost(best))}G${spOf(best)?' · 기존 ★ 덮어씀':''}</small>`)}</div></div>${tg.length>1?`<p class="hint" style="margin:0">다른 장비에 옮기려면 아래에서 고르세요. 비용은 받는 장비 레벨에 따라 정해집니다.</p><div class="smgrid">${tg.slice(1).map(it=>{const c=heirCost(it),o=spOf(it);
@@ -3623,10 +3636,12 @@ $('heirSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.id==='hrBack'){heirSrc=null;heirScr=-1;heirMsg='';return renderHeir()}
   if(b.dataset.scr!==undefined){heirScr=+b.dataset.scr;heirMsg='';return renderHeir()}
   if(b.dataset.etg){const tg=itemById(+b.dataset.etg)||itemById(b.dataset.etg);if(tg)engrave(heirScr,tg);return}
+  if(b.id==='hrSlot'){heirSlot=null;return renderHeir()}
+  if(b.dataset.hslot){heirSlot=b.dataset.hslot;heirMsg='';return renderHeir()}
   if(b.dataset.hsrc){heirSrc=+b.dataset.hsrc;heirMsg='';return renderHeir()}
   if(b.dataset.htg){const s_=itemById(heirSrc),t=itemById(+b.dataset.htg);if(s_&&t)heirDo(s_,t)}});
 $('heir').addEventListener('click',e=>{if(e.target.id==='heir')closeHeir()});
-function openHeir(){closeAllSheets();heirOpen=true;heirSrc=null;heirScr=-1;heirMsg='';goldFx=null;renderHeir();$('heir').hidden=false;releaseAll();guide('heir')}
+function openHeir(){closeAllSheets();heirOpen=true;heirSrc=null;heirSlot=null;heirScr=-1;heirMsg='';goldFx=null;renderHeir();$('heir').hidden=false;releaseAll();guide('heir')}
 function closeHeir(){heirOpen=false;$('heir').hidden=true}
 function openSmith(){closeAllSheets();smithOpen=true;smithMsg='';smithSel=null;smithRes=null;goldFx=null;renderSmith();$('smith').hidden=false;releaseAll();guide('smith')}
 function closeSmith(){smithOpen=false;$('smith').hidden=true}
@@ -3654,7 +3669,7 @@ function drawMini(){
   if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,W/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
   const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,W/40),0,7);mctx.fill()}
   if(mapKind==='story'){const ax=clamp(mx(ALTAR.x),4,W-4),az=clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,W/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
-  for(const p of pickups){mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';mctx.fillRect(mx(p.m.position.x)-k*.5,mz(p.m.position.z)-k*.5,k,k)}
+  for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';mctx.fillRect(mx(p.m.position.x)-k*.5,mz(p.m.position.z)-k*.5,k,k)}
   for(const e of enemies){if(Math.abs(e.pos.x-cx)>V||Math.abs(e.pos.z-cz)>V)continue;const r=[1.1,1.5,2,3.2][e.rank]*k*(W/108)*1.1;mctx.fillStyle=RANK[e.rank].c;mctx.globalAlpha=e.idle?.5:1;mctx.beginPath();mctx.arc(mx(e.pos.x),mz(e.pos.z),Math.max(1,r),0,7);mctx.fill()}mctx.globalAlpha=1;
   const px=W/2,pz=W/2,f=P.face,sz=W/22;
   mctx.fillStyle='#ffb070';mctx.strokeStyle='#1a1008';mctx.lineWidth=1;mctx.beginPath();
