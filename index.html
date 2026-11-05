@@ -60,8 +60,8 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot{width:56px;height:56px;font-size:11px;gap:0}
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
-#topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}#topStack .env{width:100%;text-align:center;margin:0;font-size:10.8px;line-height:1.35}#topStack .env.min{width:max-content}.autoeq .l2{display:block}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
-#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw);transform:none;margin-left:calc(min(224px,32vw)/-2)}#topStack .env{position:fixed;left:calc(8px + env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 100px);width:min(230px,30vw);text-align:left}#topStack .env.min{width:max-content}#bossExit{padding:3px 12px;font-size:12px}}
+#topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
+#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
 .stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:none;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .stagechip{flex-direction:column;gap:2px;padding:6px 16px 6px 8px;border-radius:16px}.scrow{display:flex;align-items:center;gap:10px}
 .stagechip em{font:800 12px var(--en);font-stretch:87%;font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted)}.stagechip em i{font-style:normal}
@@ -192,7 +192,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .smbig{position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-top:3px solid var(--rc);border-radius:14px;padding:14px;background:var(--card);overflow:hidden}
 .smlv{display:flex;align-items:baseline;gap:10px}.smlv small{font-size:11px;color:var(--muted)}.smlv .enh{font-size:30px}.smlv .nx{font:800 22px var(--en);font-stretch:87%;color:#ffd24a}.arr{color:var(--muted)}
 .smcmp{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--muted)}.smcmp b{color:var(--ink);font:800 15px var(--en);font-stretch:87%}.smcmp b.p{color:#7fe07a}
-#clearSheet{max-width:min(640px,94vw);padding:24px 22px;gap:14px}#clearSheet h2{font-size:30px;line-height:1.2}#clearSheet .chap{font-size:13px}#clearSheet .hint{font-size:16px;line-height:1.5}#clearSheet .primary,#clearSheet .ghost{padding:16px;font-size:17px}#clearSheet .dlist b{font-size:18px}#clearSheet .dlist small{font-size:13px}#clearSheet .dlist div{padding:12px 14px}
+#clearSheet{max-width:min(330px,84vw);padding:13px 14px;gap:8px}#clearSheet h2{font-size:17px;line-height:1.2}#clearSheet .chap{font-size:9px}#clearSheet .hint{font-size:10.5px;line-height:1.45}#clearSheet .primary,#clearSheet .ghost{padding:9px;font-size:12px}#clearSheet .dlist b{font-size:11px}#clearSheet .dlist small{font-size:9px}#clearSheet .dlist div{padding:7px 9px}
 .bonusbtn{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:20px!important;background:linear-gradient(180deg,#ffb84a,#c8601a)!important;box-shadow:0 0 22px rgba(255,160,60,.55);animation:bnp 1.2s ease-in-out infinite}.bonusbtn small{font-size:13px;font-weight:700;opacity:.95}@keyframes bnp{50%{box-shadow:0 0 34px rgba(255,190,80,.95)}}
 .vict .core b{font-size:clamp(70px,24vmin,170px)}.vict .core span{font-size:clamp(22px,5.4vmin,38px)}.vict .core small{font-size:clamp(14px,3vmin,20px)}
 .ecine.none{background:radial-gradient(circle at 50% 46%,rgba(90,90,110,.4),rgba(6,4,8,.94) 62%)}.ecine.none .rays{display:none}.ecine .core b.dim{font-size:clamp(50px,16vmin,110px);background:linear-gradient(180deg,#fff,#9a9aaa 60%,#3a3a48);-webkit-background-clip:text;background-clip:text;color:transparent;filter:none}
@@ -523,7 +523,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   /* 가운데: 퀘스트 등 */
   .quest{grid-column:2/4;grid-row:2;min-width:0}
   .bossbar{grid-column:2/4;grid-row:3/5}
-  .autoeq{grid-column:1/3;grid-row:7;justify-self:start;display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
+  .lstack{display:flex;grid-column:2/4;grid-row:2/5;align-self:start;min-width:0;max-width:195px}
+  .autoeq{display:block;text-align:left;width:112px;max-width:112px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   .feed{grid-column:2/4;grid-row:8;margin-top:0}
   /* 우측 세로: 골드 · 정수 · 전체화면 · 정지 · 슬롯 */
   .rcol>.goldline:not(.essline),.rcol>.goldline.essline,.rcol>.rail:not(.v) .tbtn.sm,.rcol>.rail:not(.v)>.tbtn.sm{grid-column:4;grid-row:auto;justify-self:end;align-self:center}
@@ -592,7 +593,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="hud">
   <div id="names"></div>
   <div class="top">
-  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><div class="env" id="qenv" hidden></div><button id="bossExit" hidden>↩ 나가기</button></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><em id="scD"></em></div>
+  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden>↩ 나가기</button></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><em id="scD"></em></div>
     <div class="lcol">
       <div class="vitals">
         <div class="lvbox"><small>LV</small><span id="lv">1</span></div>
@@ -607,8 +608,9 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
         <button class="tbtn" id="openInv" style="color:#f0d040"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg><span style="color:var(--ink)">장비</span></button>
         <button class="tbtn" id="openTown" style="color:#ffb070"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span style="color:var(--ink)">마을</span></button>
       </div>
+      <div class="lstack"><div class="env" id="qenv" hidden></div>
       <button class="autoeq" id="autoEq" hidden></button>
-      <button class="autoeq fbgo" id="fbGo" hidden>⚔ <b>최종 결전 재도전</b></button>
+      <button class="autoeq fbgo" id="fbGo" hidden>⚔ <b>최종 결전 재도전</b></button></div>
       <div class="feed" id="feed"></div>
     </div>
     <div class="rcol">
