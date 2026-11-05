@@ -143,7 +143,8 @@ table.stage .pm.wide{padding:4px 8px;font-size:11px}
 .flash{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 80px rgba(200,40,30,0);transition:box-shadow .25s}
 .rfade{position:fixed;inset:0;pointer-events:none;background:#07060a;opacity:0;z-index:25;display:flex;align-items:center;justify-content:center;text-align:center}
 .rfade.hold{opacity:1;transition:opacity .2s}.rfade.on{animation:rfade 1.2s ease-out forwards}
-.rfade div{display:flex;flex-direction:column;gap:8px}.rfade small{font:700 13px var(--ko);color:var(--ember);letter-spacing:.2em}.rfade b{font:900 34px var(--ko);color:#f4e6d2}.rfade span{font:800 16px var(--en);font-stretch:87%;color:var(--muted)}@keyframes rfade{0%{opacity:1}100%{opacity:0}}
+.rfade div{display:flex;flex-direction:column;gap:8px}.rfade small{font:700 13px var(--ko);color:var(--ember);letter-spacing:.2em}.rfade b{font:900 34px var(--ko);color:#f4e6d2}.ldbar{width:180px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;margin:6px auto 2px;display:block!important}.ldbar i{display:block;height:100%;width:0;background:var(--ember);animation:ldb .8s ease-out forwards}@keyframes ldb{to{width:100%}}
+.rfade span{font:800 16px var(--en);font-stretch:87%;color:var(--muted)}@keyframes rfade{0%{opacity:1}100%{opacity:0}}
 .scrim.peek{background:transparent;transition:background .2s}.scrim.peek .sheet{animation:peek 1.9s ease-in-out}
 #smith.peek .sheet{animation-duration:1.5s}
 @keyframes peek{0%{transform:none}15%{transform:translateY(62%)}75%{transform:translateY(62%)}100%{transform:none}}
@@ -507,6 +508,17 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .rcol>.rail:not(.v){grid-column:2;grid-row:4;gap:5px}
 .rcol .tbtn.sm{width:30px;height:30px}
 @media (orientation:landscape) and (max-height:520px){.rcol{display:flex}}
+/* v114: PC·태블릿(가로, 높이 521px 이상)도 모바일 가로 모드와 같은 HUD 배치 — 상단 우측 아이콘 줄, 좌측 체력바 아래 스택, 작은 칩 */
+@media (orientation:landscape) and (min-height:521px){
+  .hud{padding-top:calc(6px + env(safe-area-inset-top,0px))}
+  .lcol{width:min(230px,38vw)}
+  .top .rail,.lcol .rail.v{display:none}
+  .lsstrip{display:flex;top:calc(6px + env(safe-area-inset-top,0px));right:calc(max(14px,env(safe-area-inset-right,0px)) + 102px);width:172px}
+  .lsstrip .tbtn{position:relative}
+  .rcol{display:flex}.mini{width:94px;height:94px}
+  .stagechip{top:-6px;padding:3px 12px 3px 5px}.stagechip b{font-size:14px}.stagechip span{font-size:12px}
+  #topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}
+}
 /* v55 세로 폰 메인 UI: 윗줄 [레벨·HP/MP | 던전 정보 | 미니맵], 좌측 세로 [장비·마을·스킬·단계·스탯], 우측 세로 [골드·정수·전체화면·정지·슬롯] */
 @media (max-width:640px) and (orientation:portrait){
   .hud{padding-top:calc(10px + env(safe-area-inset-top,0px))}
@@ -1367,10 +1379,19 @@ function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,9
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML=`<span>${npcName(n.id)}</span><small>${NPCN[n.id][1]}</small>`;d.hidden=true;$('names').appendChild(d);return d});
 function collectAll(){for(const p of pickups){scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold')S.gold+=p.amt;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
+/* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
+let ldBusy=false;
+function mapLoad(title,sub,fn,after){
+  if(ldBusy){fn();after&&after();return}
+  ldBusy=true;const f=$('regionFade');
+  f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;
+  requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
+    setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
+const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 function goTown(){if(inTown||!S.cls)return;if(S.duel){collectAll();S.duel=null}clearPools();if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}setTimeout(()=>guide('town'),900);collectAll();inTown=true;for(const e of [...enemies])dropEnemy(e);for(const p of projs)scene.remove(p.m);projs.length=0;timers.length=0;P.mv=null;
-  setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save();toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요')}
-function leaveTown(){if(!inTown)return;inTown=false;$('npcAct').hidden=true;setMap(true);applyTheme();resetWorld();
-  toast(S.ch>=NCH?`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:S.ch===LAST&&S.phase===3?'최종 결전':`${S.ch+1}장 · ${CH[S.ch].n}`,'사냥터로 돌아왔습니다');stageBanner()}
+  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'))}
+function leaveTown(){if(!inTown)return;inTown=false;$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
+  toast(S.ch>=NCH?`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:S.ch===LAST&&S.phase===3?'최종 결전':`${S.ch+1}장 · ${CH[S.ch].n}`,'사냥터로 돌아왔습니다');stageBanner()})}
 function toggleTown(){inTown?leaveTown():goTown()}
 let npcNear=null;
 function townUpd(){let near=null;if(inTown)for(const n of NPCS)if(Math.hypot(P.pos.x-n.x,P.pos.z-n.z)<3)near=n;
@@ -1954,8 +1975,8 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
     else if(A.k==='sipe'){px=-3.1*e2(t/.5);py=Math.sin(t*2)*.15;u.body.rotation.x=-.25}}
   u.piv.rotation.x=px;u.piv.rotation.y=py;if(u.cape)u.cape.rotation.x=.12+(moving?.3:0)+(A&&A.k==='slam'&&A.t<A.hit?.6:0);
   if(Math.random()<dt*10*QM()){const p=new THREE.Vector3();u.weaponTip.getWorldPosition(p);emit(PADD,{x:p.x,y:p.y,z:p.z,vy:rnd(.4,1.2),life:rnd(.3,.6),s0:.8,s1:.1,c0:0xffa040,c1:0xa01800,a:.8,tex:1})}}
-function duelEnter(m='n'){if(S.ch<NCH)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m};save();setMap(true);applyTheme();resetWorld();toast(`결투장 · ${D.n} ${DUEL.n}`,`위험도 ${D.tier} 고정`);stageBanner()}
-function duelLeave(){collectAll();S.duel=null;save();setMap(true);applyTheme();resetWorld();stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)}
+function duelEnter(m='n'){if(S.ch<NCH)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m};save();mapLoad(DUEL.n,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${DUEL.n}`,`위험도 ${D.tier} 고정`);stageBanner()})}
+function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   for(let i=0;i<5;i++){later(i*.12,()=>dropGold(e.pos,Math.round(gold/5)))}
   S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,rolled:false,res:[]};
@@ -3052,7 +3073,7 @@ function showArenaFail(){const me=skillDps(C().skills[0]).main,req=fbReq(),r=me/
   $('clear').hidden=false;releaseAll()}
 let bxT=0;$('bossExit').addEventListener('click',()=>{const b=$('bossExit');if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='한 번 더 누르면 나갑니다';clearTimeout(bxT);bxT=setTimeout(()=>{b.classList.remove('arm');b.textContent='↩ 나가기'},3000);return}
   clearTimeout(bxT);b.classList.remove('arm');b.textContent='↩ 나가기';b.hidden=true;if(S.duel)duelLeave();else retreatToCh5()});
-function retreatToCh5(){S.phase=5;save();setMap(true);applyTheme();resetWorld();toast(`${NCH}장 · ${CH[LAST].n}`,'장비를 모으고 강화한 뒤 「최종 결전 재도전」을 누르세요')}
+function retreatToCh5(){S.phase=5;save();mapLoad(`${NCH}장 · ${CH[LAST].n}`,'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>toast(`${NCH}장 · ${CH[LAST].n}`,'장비를 모으고 강화한 뒤 「최종 결전 재도전」을 누르세요'))}
 function showFinalClear(){
   $('clearSheet').innerHTML=`<div><div class="chap">Final Chapter Clear</div><h2>${FINAL.boss} 처치</h2></div>
     <p class="hint">잿불 왕좌의 불길이 꺼졌습니다. (스토리 준비 중 · 이 자리에 엔딩 이야기가 들어갑니다)</p>
@@ -3068,12 +3089,11 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='toFinal'){$('clear').hidden=true;playCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
-  if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();setMap(true);applyTheme();resetWorld();$('clear').hidden=true;
-    toast('끝없는 심연','쓰러뜨릴수록 강해집니다');stageBanner();return}
+  if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();$('clear').hidden=true;mapLoad('끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast('끝없는 심연','쓰러뜨릴수록 강해집니다');stageBanner()});return}
   if(e.target.id!=='nextCh')return;
   S.ch++;S.phase=0;S.kills=0;if(S.ch>=NCH){S.ch=NCH;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1)}
-  save();setMap(true);applyTheme();resetWorld();$('clear').hidden=true;
-  toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?'몰려드는 무리를 처치하라':'위험도 1 · 쓰러뜨릴수록 강해집니다');stageBanner();
+  save();$('clear').hidden=true;mapLoad(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
+  toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?'몰려드는 무리를 처치하라':'위험도 1 · 쓰러뜨릴수록 강해집니다');stageBanner()});
 });
 
 /* ================= 최종 결전 컷신 (v27) =================
@@ -3085,7 +3105,8 @@ function playCine(){releaseAll();cineClear();const el=$('cine');el.hidden=false;
   $('cineBody').innerHTML=CINE_LINES.map(l=>`<p>${l}</p>`).join('')+'<button class="primary" id="cineGo" hidden>잿불 왕좌로</button>';
   const ps=[...$('cineBody').querySelectorAll('p')];ps.forEach((p,i)=>cineTimers.push(setTimeout(()=>p.classList.add('on'),400+i*1500)));
   cineTimers.push(setTimeout(()=>{$('cineGo').hidden=false},400+ps.length*1500))}
-function enterArena(){cineClear();S.phase=3;save();setMap(true);applyTheme();resetWorld();arrow.visible=false;
+function enterArena(){cineClear();S.phase=3;save();mapLoad(FINAL.n,'최종 결전으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld();arrow.visible=false},enterArena2)}
+function enterArena2(){
   const fb=enemies.find(e=>e.final);$('cineBody').innerHTML=`<div class="cineTitle"><span>Final Boss</span><b>${FINAL.boss}</b><small>${FINAL.n}</small></div>`;
   $('cine').className='cine intro';cineFocus=fb?new THREE.Vector3(fb.pos.x,0,fb.pos.z):null;
   cineTimers.push(setTimeout(()=>{cineFocus=null;$('cine').hidden=true;toast('최종 결전',`${FINAL.boss}를 쓰러뜨려라`);stageBanner()},2600))}
