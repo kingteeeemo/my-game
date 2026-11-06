@@ -2730,6 +2730,8 @@ function markFx(p,r,dur,onEnd){
 /* ===== v82 새 주력 스킬 효과 ===== */
 /* v86 대지 분쇄: 완전한 부채꼴 안에서 흑색 가시가 촘촘히 솟구침(가까운 곳부터 바깥으로 0.22초에 걸쳐 퍼짐) */
 let SPK_GEO,SPK_MAT;const spkO=new THREE.Object3D();
+/* v119: 대지 분쇄 가시는 수직이 아니라 바라보는 방향으로 비스듬히 솟음. SPK_ELEV = 지면 기준 솟는 각도(도). 수직 = 90 */
+const SPK_ELEV=40,SPK_UP=new THREE.Vector3(0,1,0);
 function inFan(q,p0,a,half,len,r=0){const dx=q.x-p0.x,dz=q.z-p0.z,d=Math.hypot(dx,dz);if(d>len+r)return false;if(d<.8)return true;
   let t=Math.atan2(dx,dz)-a;t=Math.atan2(Math.sin(t),Math.cos(t));return Math.abs(t)<=half+Math.min(.5,r/d)}
 function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22,S5=5;
@@ -2744,12 +2746,14 @@ function spikeBurst(p0,a,half,len,hs,WAVE){if(!SPK_GEO){SPK_GEO=new THREE.ConeGe
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
   const js=[],gap=.46/Math.sqrt(QM());for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
-      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:f*WAVE,h:hs*rnd(.85,1.25)*(.35+3.2*f*f),w:rnd(.85,1.15)*(.55+1.15*f),lean:rnd(.12,.42),tw:rnd(0,6.28)})}}
+      const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
+      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:f*WAVE,h:hs*rnd(.85,1.25)*(.35+3.2*f*f),w:rnd(.85,1.15)*(.55+1.15*f),dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
   const n=js.length,im=new THREE.InstancedMesh(SPK_GEO,SPK_MAT,n);im.position.set(p0.x,0,p0.z);im.frustumCulled=false;scene.add(im);
   const HOLD=.42,SINK=.22,dur=WAVE+.09+HOLD+SINK;
   const set=t=>{for(let i=0;i<n;i++){const j=js[i],lt=t-j.d;let g;
       if(lt<=0)g=0;else if(lt<.09){const u=lt/.09;g=u*(1+.35*Math.sin(u*Math.PI))}else if(lt<.09+HOLD)g=1;else g=Math.max(0,1-(lt-.09-HOLD)/SINK);
-      spkO.position.set(j.x,g>0?-.05-(1-Math.min(1,g))*.3:-2,j.z);spkO.rotation.set(Math.cos(j.th)*j.lean,j.tw,-Math.sin(j.th)*j.lean,'XYZ');
+      const L=j.h*Math.max(g,0),bk=.14*L;/* 길이의 14%는 땅속에 묻히도록 뒤로 당김(솟는 방향 -d) */
+      spkO.position.set(j.x-j.dx*bk,g>0?-.05-(1-Math.min(1,g))*.3-j.dy*bk:-2,j.z-j.dz*bk);spkO.quaternion.copy(j.q);
       const w=Math.max(.001,j.w*(.5+.5*Math.min(1,g)));spkO.scale.set(w,Math.max(.001,j.h*g),w);spkO.updateMatrix();im.setMatrixAt(i,spkO.matrix)}
     im.instanceMatrix.needsUpdate=true};
   set(0);fx.push({m:im,t:0,dur,keep:1,upd(k){set(k*dur)},end(){im.dispose&&im.dispose()}})}
