@@ -951,7 +951,7 @@ const enhCost=(L,k)=>Math.round(200*Math.pow(1.38,L)*(k==='weapon'?1.3:1));/* v1
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
 const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
-const BOOST_G=20,BOOST_R=3,boostOk=L=>enhRate(L)<=.0701;/* v134: 확률 7% 이하 구간 — 골드 20배로 확률 3배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
+const BOOST_G=10,BOOST_R=3,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 const enhMB=L=>1+ENH_B*enhSum(L),enhMO=L=>1+ENH_O*enhSum(L);
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
@@ -1043,8 +1043,8 @@ const skp=s=>S.skp[s]||0;
 const g2=g=>(S.sk2&&S.sk2[g])||0;
 /* 20레벨부터 필요 경험치 선형 증가: 40레벨 기존의 3배, 70레벨 기존의 10배 (70 이후는 10배 유지) */
 const xpMul=l=>l<=20?1:l<=40?1+2*(l-20)/20:l<=70?3+7*(l-40)/30:10;
-/* v134: 70레벨부터 5레벨마다 필요 경험치 3배 (70=69의 3배, 75=74의 3배 …) · 만렙 120 */
-const LV_MAX=120,xpStep=l=>l>=70?Math.pow(3,Math.floor((l-65)/5)):1;
+/* v135: 70레벨부터 5레벨마다 필요 경험치 ×1.18 누적(70레벨 ×1.18, 75레벨 ×1.39 … 119레벨 ×5.2) · 만렙 120 */
+const LV_MAX=120,XP_STEP=1.18,xpStep=l=>l>=70?Math.pow(XP_STEP,Math.floor((l-65)/5)):1;
 const needXp=()=>Math.round((30+S.lv*20)*xpMul(S.lv)*(S.lv<=20?.6:1)*xpStep(S.lv));
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*Math.pow(1.02,lv-50);/* v68: 30lv 이후 레벨당 +2.3%, 50lv 이후 +2% 복리 */
 const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)};
@@ -2995,7 +2995,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v134';
+const APP_VER='v135';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
