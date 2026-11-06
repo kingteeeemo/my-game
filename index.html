@@ -112,7 +112,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .npcact{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));pointer-events:auto;background:rgba(40,30,16,.94);border:1px solid #ffd24a;color:var(--ink);border-radius:12px;padding:12px 18px;font:500 14px var(--ko);white-space:nowrap}
 .npcact b{color:#ffd24a}
 .acts.town .act:not(.mv){opacity:.3;pointer-events:none}
-.nm.npc span{color:#ffd24a;font-size:12px}.nm.npc small{font:500 10px var(--ko);color:var(--muted)}
+.nm.npc span{color:#ffd24a;font-size:12px}.nm.npc small{font:500 10px var(--ko);color:#f3dfb0;text-shadow:0 1px 2px #000,0 0 4px #000,0 0 8px rgba(0,0,0,.8)}
 .enh{color:#7fe07a;font:800 12px var(--en);font-stretch:87%}
 .smmsg{background:#1f1d24;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px}
 table.stage td:nth-child(4){text-align:right;width:58px;padding-left:6px}
@@ -195,6 +195,9 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .smbar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px}.smbar i{display:block;height:100%;background:#7fe07a}
 .smbig{position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-top:3px solid var(--rc);border-radius:14px;padding:14px;background:var(--card);overflow:hidden}
 .smlv{display:flex;align-items:baseline;gap:10px}.smlv small{font-size:11px;color:var(--muted)}.smlv .enh{font-size:30px}.smlv .nx{font:800 22px var(--en);font-stretch:87%;color:#ffd24a}.arr{color:var(--muted)}
+.primary.smboost{width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff;color:#fff;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25}.primary.smboost small{font-size:10.5px;opacity:.9}.primary.smboost:disabled{opacity:.45}
+.testlv{display:flex;align-items:center;gap:6px;font-size:12px;color:#ffb070;background:rgba(255,160,80,.08);border:1px dashed rgba(255,160,80,.45);border-radius:10px;padding:6px 8px}.testlv span{flex:1}.testlv b{min-width:34px;text-align:center;color:var(--ink);font-size:15px}
+.streset{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px}.streset>div{flex:1;display:flex;flex-direction:column;gap:2px}.streset small{font-size:11px;color:var(--muted)}
 .smauto{width:100%;margin-top:6px}.smauto.on{border-color:#7fe07a;color:#7fe07a;box-shadow:0 0 12px rgba(127,224,122,.35)}.tknote{display:block;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.4}
 .obase{font-size:.85em;color:#a8a0b4;font-weight:500}
 .hmenu{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hbig{padding:16px 14px;gap:6px}.hbig b{font-size:19px!important}.hbig small{white-space:normal!important;line-height:1.4}.hbig:disabled{opacity:.45}
@@ -551,7 +554,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .sbanner{top:calc(98px + env(safe-area-inset-top,0px))}.sbanner b{font-size:26px!important}.sbanner span{font-size:15px}.sbanner small{font-size:11px}
   .feed{font-size:11px}
   #clearSheet{zoom:2;max-width:min(330px,calc((100vw - 32px)/2));max-height:calc((100vh - 32px)/2);overflow-y:auto}/* v131: PC는 스토리 클리어·패배 창 2배 */
-  .hud{zoom:1.7}#names{zoom:.58824}.autopop{zoom:1.7;max-height:calc(100vh/1.7 - 150px)}.pchint{zoom:1.25}
+  .hud{zoom:var(--hz,1.7)}#names{zoom:calc(1/var(--hz,1.7))}.autopop{zoom:var(--hz,1.7);max-height:calc(100vh/var(--hz,1.7) - 150px)}.pchint{zoom:1.25}
+  .nm.npc span{font-size:24px}.nm.npc small{font-size:19px;font-weight:600}/* v134: PC NPC 이름·설명 2배 */
 }
 /* v55 세로 폰 메인 UI: 윗줄 [레벨·HP/MP | 던전 정보 | 미니맵], 좌측 세로 [장비·마을·스킬·단계·스탯], 우측 세로 [골드·정수·전체화면·정지·슬롯] */
 @media (max-width:640px) and (orientation:portrait){
@@ -733,6 +737,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <p class="hint">설정을 여는 동안 게임이 멈춥니다. PC는 Esc로도 열고 닫을 수 있어요.</p>
   <div class="gfx"><span>화질</span><div class="seg" id="gfxSeg"><button data-q="0">하</button><button data-q="1">중</button><button data-q="2">상</button></div></div>
   <p class="hint" id="gfxHint" style="width:100%;text-align:left"></p>
+  <div class="gfx"><span>카메라</span><div class="seg" id="camSeg"><button data-z="-30">−30%</button><button data-z="-15">−15%</button><button data-z="0">기본</button><button data-z="15">+15%</button><button data-z="30">+30%</button></div></div>
+  <p class="hint" style="width:100%;text-align:left">+는 확대(가깝게), −는 축소(멀리 넓게) 봅니다.</p>
   <button class="ghost" id="pGuide" style="width:100%">가이드 다시 보기</button>
   <button class="ghost" id="pSlots" style="width:100%">슬롯 · 처음부터</button>
   <button class="primary" id="pResume" style="width:100%">계속하기</button>
@@ -830,9 +836,8 @@ const flameSt=L=>{const f5=2/(.42-.15),f1=2/(.42-.03)/2,f=f1+(f5-f1)*Math.pow((L
 const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
 /* v131 2차 강화 후 피해 증가(정수): 단계별 증가량이 정수 요구량에 따라 커짐 — 처음 +1%, (요구 정수/첫 요구량)^0.6 배. 마나는 피해 1%당 +0.5. 골드 전 구간 ×1.3 */
-const infE=L=>Math.max(1,Math.round((30+10*L)/4)),infStep=L=>.01*Math.pow(infE(L)/infE(0),.6),INF_C=[0];
-const infDmg=L=>{while(INF_C.length<=L)INF_C.push(INF_C[INF_C.length-1]+infStep(INF_C.length-1));return INF_C[L]},infMpAdd=L=>Math.round(infDmg(L)*100*.5);
-const INF_D=.04,infCost=L=>({e:infE(L),g:Math.round((30000+15000*L)*1.3)}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
+/* v134: v131 변경 원복 — 단계당 +4% 고정, 마나 단계당 +2, 골드 30000+15000×단계 */
+const INF_D=.04,infDmg=L=>INF_D*L,infMpAdd=L=>2*L,infCost=L=>({e:Math.max(1,Math.round((30+10*L)/4)),g:30000+15000*L}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
 const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 /* 스탯: 레벨업마다 3포인트, 언제든 되돌리기 가능 */
 /* 스탯: 레벨업마다 1포인트, 되돌리기 없음 */
@@ -945,8 +950,9 @@ const enhCost=(L,k)=>Math.round(200*Math.pow(1.38,L)*(k==='weapon'?1.3:1));/* v1
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
-const ENH_PW=1.6;/* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
-const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
+const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
+const BOOST_G=20,BOOST_R=3,boostOk=L=>enhRate(L)<=.0701;/* v134: 확률 7% 이하 구간 — 골드 20배로 확률 3배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
+const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 const enhMB=L=>1+ENH_B*enhSum(L),enhMO=L=>1+ENH_O*enhSum(L);
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
@@ -1037,7 +1043,9 @@ const skp=s=>S.skp[s]||0;
 const g2=g=>(S.sk2&&S.sk2[g])||0;
 /* 20레벨부터 필요 경험치 선형 증가: 40레벨 기존의 3배, 70레벨 기존의 10배 (70 이후는 10배 유지) */
 const xpMul=l=>l<=20?1:l<=40?1+2*(l-20)/20:l<=70?3+7*(l-40)/30:10;
-const needXp=()=>Math.round((30+S.lv*20)*xpMul(S.lv)*(S.lv<=20?.6:1));
+/* v134: 70레벨부터 5레벨마다 필요 경험치 3배 (70=69의 3배, 75=74의 3배 …) · 만렙 120 */
+const LV_MAX=120,xpStep=l=>l>=70?Math.pow(3,Math.floor((l-65)/5)):1;
+const needXp=()=>Math.round((30+S.lv*20)*xpMul(S.lv)*(S.lv<=20?.6:1)*xpStep(S.lv));
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*Math.pow(1.02,lv-50);/* v68: 30lv 이후 레벨당 +2.3%, 50lv 이후 +2% 복리 */
 const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)};
 const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear().hp);
@@ -1045,7 +1053,9 @@ const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('
 /* 기본 재생 없음: 체력·마력 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·마력)으로 얻는 초당 재생량 +5~30% */
 const mpRegen=()=>P.mmp*.002*stN('int')/* v58: 3배 → v75: 절반 */*(1+gear().mreg/100);
-const envDrain=()=>inTown?0:P.mhp*(diff().drain||0)*(envName()==='심연의 냉기'?2:1);/* v58: 심연의 냉기 2배 */
+/* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
+const COLD65=1300,coldAt=(t,d35)=>{if(t<=35)return d35;const tg=Math.max(COLD65,d35);if(t<=65)return d35+(tg-d35)*Math.pow((t-35)/30,1.5);return tg+(tg-d35)/30*(t-65)};
+const envDrain=()=>{if(inTown)return 0;const d=P.mhp*(diff().drain||0)*(envName()==='심연의 냉기'?2:1);return S.ch>=NCH&&S.tier>35&&envName()==='심연의 냉기'?coldAt(S.tier,d):d};/* v58: 심연의 냉기 2배 */
 const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20%, 민첩+장비(신발) 이동 속도 상승 합계 상한 +150% (신속 물약은 별도) */
@@ -1123,6 +1133,9 @@ scene.background=new THREE.Color(0x0f1014);
 scene.fog=new THREE.Fog(0x0f1014,20,48);
 const camera=new THREE.PerspectiveCamera(45,1,.1,120);
 const CAM_OFF=new THREE.Vector3(0,17,12);
+/* v134: 카메라 확대·축소 (설정) — +30% 확대(거리 0.7배) ~ −30% 축소(거리 1.3배) */
+let CAM_Z=0;try{CAM_Z=Math.max(-30,Math.min(30,+localStorage.getItem('camZ')||0))}catch(e){}
+const camK=()=>1-CAM_Z/100;
 /* 조명: 낮은 환경광 + 그림자를 드리우는 달빛 + 영웅의 횃불 + 가까운 화로 불빛(풀) + 스킬 섬광 */
 const hemi=new THREE.HemisphereLight(0x7684a4,0x1c140e,.55);scene.add(hemi);
 const SUN_OFF=new THREE.Vector3(-8,20,6);
@@ -2443,6 +2456,8 @@ let shake=0;
 
 /* damage numbers */
 const dmgLayer=$('dmg'),dnPool=[];/* v131: PC는 HUD 전체가 zoom 1.7이라 숫자 위치가 1.7배로 밀리던 문제 — 좌표를 zoom으로 나눔 */
+/* v134: PC UI 확대 비율을 창 크기에 맞춤(최대 1.7배) — 좁은 창에서 위쪽 패널·버튼·미니맵이 겹치지 않게 */
+const pcHz=()=>{const r=document.documentElement;if(matchMedia('(orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine)').matches){r.style.setProperty('--hz',Math.max(1,Math.min(1.7,innerWidth/960,innerHeight/530)).toFixed(3))}else r.style.removeProperty('--hz')};pcHz();addEventListener('resize',pcHz);
 let dmZ=1;const calcDmZ=()=>{try{dmZ=parseFloat(getComputedStyle(document.querySelector('.hud')).zoom)||1}catch(_){dmZ=1}};calcDmZ();addEventListener('resize',calcDmZ);
 for(let i=0;i<30;i++){const d=document.createElement('div');d.className='dn';d.hidden=true;dmgLayer.appendChild(d);dnPool.push({el:d,live:false,wp:new THREE.Vector3(),t:0})}
 function dmgNum(p,val,cls='',h){const d=dnPool.find(x=>!x.live);if(!d)return;d.live=true;d.t=0;d.wp.set(p.x+rand(-.4,.4),h?Math.max(1,h*.82):2.2,p.z);/* v131: 맞은 몬스터 키에 맞춰 표시 */d.el.textContent=val;d.el.className='dn '+cls;d.el.hidden=false}
@@ -2512,7 +2527,7 @@ const autoStatName=k=>k==='bal'?'균형(고르게)':STATS[k]?STATS[k].n:'';
 function spendAutoStat(){const a=S.autoStat;if(!a)return;if(a==='bal'){while(S.statPts>0){const k=Object.keys(STATS).reduce((m,q)=>S.stats[q]<S.stats[m]?q:m);S.stats[k]++;S.statPts--}}else if(STATS[a]){S.stats[a]+=S.statPts;S.statPts=0}}
 function gainXp(x){if(S.demo)return;
   S.xp+=x;
-  while(S.xp>=needXp()){S.xp-=needXp();S.lv++;S.pending++;lvlDefer=false;if(S.lv%5===0||S.lv<=10)tele('lv');S.statPts=(S.statPts||0)+STAT_PER_LV;spendAutoStat();refreshMax();P.hp=P.mhp;P.mp=P.mmp;ringFx(P.pos,3,0xd9a44a,.6);if(S.lv>=ESS_LV&&!S.n31){S.n31=1;later(.8,showEnhDone)}}
+  while(S.lv<LV_MAX&&S.xp>=needXp()){S.xp-=needXp();S.lv++;S.pending++;lvlDefer=false;if(S.lv%5===0||S.lv<=10)tele('lv');S.statPts=(S.statPts||0)+STAT_PER_LV;spendAutoStat();refreshMax();P.hp=P.mhp;P.mp=P.mmp;ringFx(P.pos,3,0xd9a44a,.6);if(S.lv>=ESS_LV&&!S.n31){S.n31=1;later(.8,showEnhDone)}}
   autoSpend();save();
 }
 /* 자동 강화 (v29): 균형 = 가장 낮은 강화부터, 위에서부터 = 목록 순서대로 최대까지 */
@@ -2557,7 +2572,7 @@ const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStanda
 function dropPouch(p,amt){const q=scatter(p),g=new THREE.Group(),b=new THREE.Mesh(pouchGeo,pouchMat);b.scale.set(1,.9,1);g.add(b);const nk=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,.22,10),pouchMat);nk.position.y=.42;g.add(nk);const ti=new THREE.Mesh(new THREE.TorusGeometry(.16,.04,6,14),coinMat);ti.rotation.x=Math.PI/2;ti.position.y=.36;g.add(ti);
   g.position.set(q.x,.45,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'pouch',amt});ringFx(q,2.6,0xffd24a,.8);flash(q,0xffd24a,2.5);feed('골드 주머니가 떨어졌습니다!','#ffd24a')}
 function pouchFx(amt){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small>GOLD POUCH</small><b>골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
-const fmtG=v=>Math.round(v).toLocaleString('ko-KR');
+const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
 const sellPrice=it=>Math.round((4+it.ilvl*2.5)*[1,2,5,12][it.rar]);
 /* v41 바닥 장비: 부위 모양(검·투구·갑옷·장화·목걸이·반지) + 등급 빛무리 · 희귀 이상 빛기둥 */
 const LG={blade:new THREE.BoxGeometry(.09,.75,.03),guard:new THREE.BoxGeometry(.3,.05,.06),dome:new THREE.SphereGeometry(.22,10,6,0,Math.PI*2,0,Math.PI/2),chest:new THREE.BoxGeometry(.42,.42,.18),
@@ -2980,7 +2995,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v133';
+const APP_VER='v134';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3013,17 +3028,18 @@ const PORT_MQ=matchMedia('(max-width:640px) and (orientation:portrait)');
 function placeEnv(){const e=$('qenv'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){if(e.parentNode!==ts)ts.insertBefore(e,$('bossExit'))}else if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild)}
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
+function hudMoney(){if(!S||!S.cls)return;const gt=fmtG(S.gold||0);if($('goldT').textContent!==gt)$('goldT').textContent=gt;
+  const es=S.lv>=ESS_LV||S.ess>0;$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
   stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`;
-  $('xpb').style.width=(S.xp/needXp()*100)+'%';
+  $('xpb').style.width=(S.lv>=LV_MAX?100:Math.min(100,S.xp/needXp()*100))+'%';
   $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';$('mpt').textContent=`${Math.floor(P.mp)} / ${P.mmp}`;
   {const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);
-   const gt=fmtG(S.gold);if($('goldT').textContent!==gt)$('goldT').textContent=gt;
-   const es=S.lv>=ESS_LV||S.ess>0;$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}
+   hudMoney()}
   {const n=S.spdPot||0;$('nSp').textContent=n;$('bSp').classList.toggle('empty',!n);$('bSp').style.setProperty('--p',P.hasteT>0?1-P.hasteT/SPD_POT.dur:0)}$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
   {const c1=mpCost(C().skills[0]);$('bS1').classList.toggle('nomp',P.mp<c1);const t='MP '+c1;if($('cS1').textContent!==t)$('cS1').textContent=t}
   if(S.ch<NCH){const c=CH[S.ch];$('qtag').textContent=`Main Quest · ${S.ch+1}장 ${c.n}`;
@@ -3168,9 +3184,9 @@ function showClassSel(){
 }
 let testPick=false;
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
-function applyTest(){const sk=C().skills[0];S.test=true;S.testGod=true;S.lv=70;S.xp=0;S.pending=0;S.skp[sk]=gemsFor(sk).length*GMAX;S.sk[sk]={};S.sk2={};S.ess=99999;S.gold=9999999;S.statPts=69;
+function applyTest(){const sk=C().skills[0];S.test=true;S.testGod=true;S.lv=70;S.xp=0;S.pending=0;S.skp[sk]=gemsFor(sk).length*GMAX;S.sk[sk]={};S.sk2={};S.ess=1e30;S.gold=1e30;S.statPts=69*STAT_PER_LV;
   for(const k of EQS)S.eq[k]=makeItem(k,60,2);S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;S.tier=10;S.maxTier=10;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
-setInterval(()=>{if(S&&S.test&&P){P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
+setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 $('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 function startGame(cls,main){
@@ -3401,7 +3417,7 @@ function renderMenu(){
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
       {const L=S.sk2dmg||0,c=infCost(L),done=g2Done(id),can=done&&(S.ess||0)>=c.e&&S.gold>=c.g;
-        h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span><small>${done?`스킬 피해 +${(infDmg(L)*100).toFixed(1)}% · 다음 단계 +${(infStep(L)*100).toFixed(2)}% · 마나 소모 +${infMpAdd(L)}`:'2차 강화를 모두 채우면 열립니다'}</small></span>
+        h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span><small>${done?`스킬 피해 +${Math.round(infDmg(L)*100)}% (단계당 +${INF_D*100}%)`:'2차 강화를 모두 채우면 열립니다'}</small></span>
         <span class="lvp">${L}</span>${S.test?`<button class="pm" data-dinf="1" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-inf="1" ${can?'':'disabled'}>◆ ${c.e}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(c.g)}G</small></button><button class="pm wide" data-infx="1" ${can?'':'disabled'}>전부</button></div>`}
       h+=`</div></div>`}
     h+=`</div>`}
@@ -3421,7 +3437,7 @@ $('sheet').addEventListener('click',e=>{
   if(b.dataset.a2){const g=b.dataset.a2,L=g2(g),c=g2Cost(g,L);if(S.lv>=ESS_LV&&L<g2Max(g)&&(S.ess||0)>=c&&S.gold>=g2Gold(g,L)){S.ess-=c;S.gold-=g2Gold(g,L);S.sk2[g]=L+1;feed(`${GEMS2[g].n} Lv ${L+1}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.ax){const [s,g]=b.dataset.ax.split(',');const n=Math.min(skp(s),GMAX-gl(s,g));if(n>0){S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+n;S.skp[s]-=n;refreshMax();feed(`${GEMS[g].n} Lv ${gl(s,g)}`,GEMS[g].c);save();renderMenu()}return}
   if(b.dataset.el){const c=elCost();if(b.dataset.el===arEl()||S.gold<c)return;S.gold-=c;S.arEl=b.dataset.el;feed(`폭발 속성: ${S.arEl==='fire'?'화염':'번개'} (−${fmtG(c)}G)`,S.arEl==='fire'?'#ff9a6a':'#c8b0ff');ringFx(P.pos,2.4,S.arEl==='fire'?0xff7a3a:0xa88aff,.5);save();renderMenu();return}
-  if(b.dataset.inf||b.dataset.infx){const id=C().skills[0];if(!g2Done(id))return;let n=0;do{const c=infCost(S.sk2dmg||0);if((S.ess||0)<c.e||S.gold<c.g)break;S.ess-=c.e;S.gold-=c.g;S.sk2dmg=(S.sk2dmg||0)+1;n++}while(b.dataset.infx);
+  if(b.dataset.inf||b.dataset.infx){const id=C().skills[0];if(!g2Done(id))return;let n=0;do{const c=infCost(S.sk2dmg||0);if((S.ess||0)<c.e||S.gold<c.g)break;S.ess-=c.e;S.gold-=c.g;S.sk2dmg=(S.sk2dmg||0)+1;n++}while(b.dataset.infx&&!(S.test&&n>=10));/* v134: 테스트(무한 재화)는 「전부」 10단계씩 */
     if(n){feed(`피해 증가 Lv ${S.sk2dmg}`,'#ff8a6a');ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.dinf&&S.test){const L=S.sk2dmg||0;if(L>0){S.sk2dmg=L-1;const c=infCost(L-1);S.ess+=c.e;S.gold+=c.g;renderMenu()}return}
   if(b.dataset.ax2){const g=b.dataset.ax2;let L=g2(g),n=0;if(S.lv>=ESS_LV)while(L<g2Max(g)&&(S.ess||0)>=g2Cost(g,L)&&S.gold>=g2Gold(g,L)){S.ess-=g2Cost(g,L);S.gold-=g2Gold(g,L);L++;n++}if(n){S.sk2[g]=L;feed(`${GEMS2[g].n} Lv ${L}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
@@ -3437,8 +3453,8 @@ let statOpen=false;
 function renderStat(){
   const pts=S.statPts,auto=S.autoStat;
   let h=`<div class="shead"><div><div class="chap">Attributes · Lv ${S.lv}</div><h2>스탯</h2></div><button class="close" id="sClose">닫기</button></div>
-  <p class="hint">레벨이 오를 때마다 ${STAT_PER_LV}포인트를 받습니다. 「전부」는 남은 포인트를 그 스탯에 한 번에 넣습니다. 찍은 포인트는 되돌릴 수 없어요. 수치는 1포인트당 효과입니다.</p>
-  <div class="ptsline"><span>남은 스탯 포인트</span><b>${pts}</b></div><div class="gems">`;
+  <p class="hint">레벨이 오를 때마다 ${STAT_PER_LV}포인트를 받습니다. 「전부」는 남은 포인트를 그 스탯에 한 번에 넣습니다. 찍은 포인트는 ${RESET_LV}레벨부터 골드로 초기화할 수 있어요. 수치는 1포인트당 효과입니다.</p>
+  <div class="ptsline"><span>남은 스탯 포인트</span><b>${pts}</b></div>${S.test?`<div class="testlv"><span>테스트 레벨</span><button class="pm" data-tlv="-10">−10</button><button class="pm" data-tlv="-1">−1</button><b>${S.lv}</b><button class="pm" data-tlv="1">+1</button><button class="pm" data-tlv="10">+10</button></div>`:''}<div class="gems">`;
   for(const k in STATS){const v=stN(k);
     h+=`<div class="grow"><span class="gd" style="background:${STATS[k].c}"></span><span class="t">${STATS[k].n} <span style="font:500 10px var(--en);font-stretch:87%;letter-spacing:.12em;color:var(--muted)">${STATS[k].en}</span><small class="lines">${STATS[k].d.map(x=>`<span>${x}</span>`).join('')}</small></span>
     <span class="lvp">${v}</span><button class="pm" data-sa="${k}" ${pts?'':'disabled'} aria-label="${STATS[k].n} 올리기">+</button><button class="pm wide" data-sx="${k}" ${pts?'':'disabled'}>전부</button></div>`}
@@ -3446,11 +3462,19 @@ function renderStat(){
   <div><div class="tag" style="margin-bottom:8px">레벨업 시 자동 배분</div><div class="seg"><button data-auto="" class="${auto?'':'on'}">끄기</button>${Object.keys(STATS).map(k=>`<button data-auto="${k}" class="${auto===k?'on':''}">${STATS[k].n}</button>`).join('')}<button data-auto="bal" class="${auto==='bal'?'on':''}">균형</button></div>
   <p class="hint" style="margin-top:6px">${auto==='bal'?'앞으로 레벨업할 때마다 힘·민첩·마력 중 가장 낮은 스탯부터 1점씩 고르게 들어갑니다.':auto?`앞으로 레벨업할 때마다 포인트가 ${autoStatName(auto)}에 자동으로 들어갑니다.`:'끄면 포인트가 쌓이고, 직접 찍습니다.'}</p></div>
 `;
+  if(S.lv>=RESET_LV||S.test){const spent=Object.values(S.stats).reduce((a,b)=>a+b,0),can=spent>0&&(S.test||S.gold>=RESET_G);
+    h+=`<div class="streset"><div><b>스탯 초기화</b><small>찍은 포인트 ${spent}점을 모두 돌려받습니다 · ${S.lv>=RESET_LV?'':'(테스트) '}${fmtG(RESET_G)}G</small></div><button class="ghost" id="sReset" ${can?'':'disabled'}>초기화</button></div>`}
+  else h+=`<p class="hint" style="margin:0">${RESET_LV}레벨부터 골드 ${fmtG(RESET_G)}으로 스탯을 초기화할 수 있습니다.</p>`;
   $('statSheet').innerHTML=h;
 }
+const RESET_LV=90,RESET_G=1e8;/* v134: 90레벨부터 스탯 초기화 (1억 골드) */
+function testSetLv(n){S.lv=Math.max(1,Math.min(LV_MAX,n));S.xp=0;S.stats={str:0,agi:0,int:0};S.statPts=(S.lv-1)*STAT_PER_LV;spendAutoStat();refreshMax();P.hp=P.mhp;P.mp=P.mmp}
 $('statSheet').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='sClose'){closeStat();return}
+  if(b.dataset.tlv&&S.test){testSetLv(S.lv+ +b.dataset.tlv);renderStat();return}
+  if(b.id==='sReset'){const spent=Object.values(S.stats).reduce((a,c)=>a+c,0);if(!spent)return;
+    askConfirm('스탯 초기화',`${S.test?'':`골드 ${fmtG(RESET_G)}을 써서 `}찍은 포인트 ${spent}점을 모두 돌려받습니다. 레벨업 자동 배분은 꺼집니다.`,'초기화',()=>{if(!S.test&&S.gold<RESET_G)return;if(!S.test)S.gold-=RESET_G;S.statPts+=spent;S.stats={str:0,agi:0,int:0};S.autoStat=null;refreshMax();P.hp=Math.min(P.hp,P.mhp);P.mp=Math.min(P.mp,P.mmp);save();renderStat();toast('스탯 초기화',`포인트 ${spent}점을 돌려받았습니다`)});return}
   if(b.dataset.sa&&S.statPts>0){S.stats[b.dataset.sa]++;S.statPts--;if(b.dataset.sa==='agi'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다 · 민첩은 치명타 확률만 오릅니다`)}
   else if(b.dataset.sx&&S.statPts>0){S.stats[b.dataset.sx]+=S.statPts;S.statPts=0;if(b.dataset.sx==='agi'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다 · 민첩은 치명타 확률만 오릅니다`)}
   else if(b.dataset.auto!==undefined){S.autoStat=b.dataset.auto||null;spendAutoStat()}
@@ -3732,11 +3756,11 @@ function renderSmith(){
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
       info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1))}</b>`}</div>${itemList(it,L)}`:'',
-      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L)-1)*100)}%</b></span><span>이번 단계 상승량 <b>×${Math.pow(1/enhRate(L),ENH_PW).toFixed(1)}</b></span>`,
+      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L)-1)*100)}%</b></span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
       hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():''),
-      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`강화 ${fmtG(cc)}G`}</button></div>${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
+      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`${boostOk(L)&&!tkOn?'일반 강화 ':'강화 '}${fmtG(cc)}G`}</button></div>${!max&&boostOk(L)&&!tkOn?`<button class="primary smboost" id="smGo20" ${S.gold>=c*BOOST_G&&!smAuto?'':'disabled'}>골드 ${BOOST_G}배 강화 · 확률 ${+(Math.min(1,rt*BOOST_R)*100).toFixed(1)}% <small>${fmtG(c*BOOST_G)}G</small></button>`:''}${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
       <div class="spR"><div class="smbig smact" style="--rc:${rc}">${res}${lv}${rateBig}<div class="smstats">${rate}</div>${hint}</div>${btns}</div></div>`;
@@ -3748,11 +3772,12 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='smBack'){smAutoStop();smithSel=null;smithRes=null;renderSmith();return}
   if(b.id==='smTk'){useTk=!useTk;renderSmith();return}
   if(b.id==='smAuto'){smAuto?smAutoStop():smAutoStart();return}
-  if(b.id==='smGo'){if(!smAuto)smithTry(false)}});
-function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need,c=enhCost(L,k)*(tkUse?TK_GOLD:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
+  if(b.id==='smGo'){if(!smAuto)smithTry(false)}
+  if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
+function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=20&&!auto;
-    if(tkUse||Math.random()<enhRate(L)){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
+    if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
     else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
@@ -3876,7 +3901,7 @@ $('rOk').onclick=()=>{try{localStorage.removeItem(KEY)}catch(err){}closeRestart(
 
 /* ================= minimap ================= */
 const mini=$('mini'),mctx=mini.getContext('2d');let miniT=0;
-function sizeMini(){const d=Math.min(window.devicePixelRatio||1,2),w=mini.clientWidth||108;mini.width=Math.round(w*d);mini.height=Math.round(w*d)}
+function sizeMini(){const d=Math.min(window.devicePixelRatio||1,2)*(dmZ||1),w=mini.clientWidth||108;mini.width=Math.round(w*d);mini.height=Math.round(w*d)}
 function drawMini(){
   /* v41: 내 위치 중심 (반경 40m). 스토리 맵은 골짜기 길과 끝 제단을 표시 */
   const W=mini.width,V=40,k=W/(2*V),cx=P.pos.x,cz=P.pos.z,mx=v=>(v-cx+V)*k,mz=v=>(v-cz+V)*k;
@@ -4147,14 +4172,14 @@ function frameCam(dt,target=P.pos){
   if(S.demo&&target===P.pos){const port=innerWidth<innerHeight;target=_dt.set(P.pos.x+(port?0:4.5),0,P.pos.z+(port?6:0))}/* v82: 시연 중에는 선택 창에 가리지 않게 캐릭터를 위(세로)·왼쪽(가로)으로 */
   else if(S.duel&&target===P.pos){const b=enemies.find(e=>e.duel);if(b)target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*.3,0,P.pos.z+(b.pos.z-P.pos.z)*.3-1.5)}/* v95: 결투장은 거대 보스가 화면에 들어오게 */
   camT.lerp(target,Math.min(1,dt*6));
-  camera.position.copy(camT).add(CAM_OFF);
+  camera.position.copy(camT).addScaledVector(CAM_OFF,camK());
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
   camera.lookAt(camT.x,camT.y+1,camT.z);
 }
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
 let mobView=false;
 function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
-  CAM_OFF.set(0,17,12);scene.fog.near=20;scene.fog.far=48;camera.updateProjectionMatrix();if(PP.rt)ppSize()}
+  CAM_OFF.set(0,17,12);scene.fog.near=20*camK();scene.fog.far=48*camK();camera.updateProjectionMatrix();if(PP.rt)ppSize()}
 addEventListener('resize',resize);resize();
 /* ================= 전체화면 ================= */
 const FS_IN='M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',FS_OUT='M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
@@ -4203,7 +4228,7 @@ function fxTick(dt){time+=dt;pfxUpdate(dt);for(let i=fx.length-1;i>=0;i--){const
 function loop(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const fo=paused()&&fxOnly();
-  if(!paused()){update(dt);updDmg(dt);hud()}else if(fo)fxTick(dt);
+  if(!paused()){update(dt);updDmg(dt);hud()}else{if(fo)fxTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
   if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);renderFrame(now/1000);requestAnimationFrame(loop);
 }
@@ -4212,6 +4237,8 @@ function loop(now){
 camT.set(0,0,0);frameCam(1);
 applyTheme();applyGfx();
 document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click',()=>{GUQ=+b.dataset.q;try{localStorage.setItem(GFX_KEY,String(GUQ))}catch(e){}applyGfx()}));
+function camSegUI(){document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.z===CAM_Z))}
+document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click',()=>{CAM_Z=+b.dataset.z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(e){}camSegUI();resize();frameCam(1)}));camSegUI();
 (function(){const e=$('emb');for(let i=0;i<26;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 $('goStart').onclick=()=>{$('title').hidden=true;showSlots()};
 hud();
