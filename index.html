@@ -97,6 +97,8 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.s2{width:62px;height:62px;right:18px;bottom:96px;color:#e8c07a}
 .act.down{background:rgba(60,56,64,.9)}
 .act.nomp{opacity:.45}
+.act.pot.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}/* v126: 자동 복용이 켜진 물약 버튼 */
+@keyframes apSpin{to{transform:rotate(360deg)}}
 .act.pot b{font:800 13px var(--en);font-stretch:87%;color:var(--ink);line-height:1;margin-top:-5px;text-shadow:0 1px 2px #000}
 .flask{width:36px;height:36px;margin-top:-4px;flex:none;filter:drop-shadow(0 0 5px var(--glow))}
 .ph{--liq:#e0443a;--glow:rgba(224,68,58,.55)}.mpot{--liq:#3f86e0;--glow:rgba(74,143,224,.55)}
@@ -743,7 +745,7 @@ const GEMS={
   multi:{n:'투사체 증가',t:'projectile',c:'#5ad1c8',d:L=>`화살 ${2+volN(L)}발\n피해 +${Math.round(volD(L)*100)}%`},
   pierce:{n:'관통',t:'projectile',c:'#7ab0ff',d:L=>`적 ${L}명을 더 꿰뚫음`},
   chain:{n:'연쇄',t:'projectile',c:'#c88aff',d:L=>`명중 후 근처 적에게 ${L}회 튕김`},
-  chpierce:{n:'연쇄 - 관통',t:'projectile',c:'#9ad0ff',d:L=>{const c=chpSt(L);return `처음 맞힌 적에게서 화살 ${c.n}개로 갈라짐 (갈라진 화살 피해 ×${c.m.toFixed(2)})\n${c.p?`적 ${c.p}명 관통`:'관통 없음 (2단계부터)'}`}},
+  chpierce:{n:'연쇄 - 관통',t:'projectile',c:'#9ad0ff',d:L=>{const c=chpSt(L);return `처음 맞힌 적에게서 화살 ${c.n}개가 무작위 방향으로 갈라지고, 갈라진 화살이 적을 맞히면 한 번 더 갈라짐 (갈라진 화살 피해 ×${c.m.toFixed(2)})\n${c.p?`적 ${c.p}명 관통`:'관통 없음 (2단계부터)'}`}},
   blast:{n:'폭발',t:'projectile',c:'#ff7a4a',d:L=>`명중 시 반경 ${(1.8*(1+.2*L)).toFixed(1)}m 폭발\n범위 +${20*L}% · 피해 ×${(.4+.05*L).toFixed(2)}`},
   area:{n:'범위 확대',t:'area',c:'#e8c07a',d:L=>`효과 범위 +${20*L}%`},
   echo:{n:'메아리',t:'area',c:'#d9d06a',d:L=>`${Math.ceil(L/3)}회 더 발동 (피해 ×${(.55+.03*L).toFixed(2)})`},
@@ -920,7 +922,7 @@ const dropLvl=()=>Math.max(1,S.lv);/* v76: 드롭 아이템 레벨 = 내 레벨 
    더 좋은 장비로 바꿔도 강화 단계는 그 부위에 남음 */
 const ENH_MAX=Infinity,ENH_B=.06,ENH_O=.05;/* v44: 강화 단계 제한 없음 */
 const enhL=k=>(S.enh&&S.enh[k])||0;
-const enhCost=L=>Math.round(200*Math.pow(1.38,L));
+const enhCost=(L,k)=>Math.round(200*Math.pow(1.38,L)*(k==='weapon'?1.3:1));/* v126: 무기 강화 비용 전 구간 +30% */
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
@@ -2534,7 +2536,10 @@ function addItem(it){
 function upgrades(){const out=[];for(const k of EQS){let best=null;for(const it of S.inv)if(it.slot===k&&isBetter(it,best||S.eq[k]))best=it;if(best)out.push(best)}return out}
 function equipBest(){const ups=upgrades();for(const it of ups){const i=S.inv.indexOf(it),old=S.eq[it.slot];S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1)}
   if(ups.length){refreshMax();save();feed(`장비 ${ups.length}개 자동 장착`,'#7fe07a')}refreshUpBtn();return ups.length}/* v81: 화면 중앙 알림 없음 */
-function refreshUpBtn(){const n=upgrades().length,b=$('autoEq');b.hidden=!n;if(n)b.innerHTML=`<span class="up">▲</span> <span class="l2">더 좋은 장비 ${n}개</span><span class="l2"><b>자동 장착</b></span>`}
+let upSig='',upUntil=0,upTm=0;/* v126: 자동 장착 알림은 4초 후 사라짐 (장비창의 「자동 장착」으로 계속 가능) */
+function refreshUpBtn(){const ups=upgrades(),n=ups.length,b=$('autoEq');if(!n){upSig='';b.hidden=true;return}
+  const sig=ups.map(x=>x.id).join(',');if(sig!==upSig){upSig=sig;upUntil=Date.now()+4000;clearTimeout(upTm);upTm=setTimeout(refreshUpBtn,4050)}
+  b.hidden=Date.now()>upUntil;if(!b.hidden)b.innerHTML=`<span class="up">▲</span> <span class="l2">더 좋은 장비 ${n}개</span><span class="l2"><b>자동 장착</b></span>`}
 const feedEl=$('feed');
 function feed(t,c){const d=document.createElement('div');d.textContent=t;d.style.color=c;feedEl.prepend(d);while(feedEl.children.length>4)feedEl.lastChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)},3500)}
 /* 물약: 소형 50 · 중형 120 · 대형 300 회복. 누르면 부족한 양에 가장 알맞은 크기를 자동으로 사용 */
@@ -2888,10 +2893,10 @@ function toast(t,s,col){$('tt').textContent=t;$('tt').style.color=col||'';$('ts'
 const PORT_MQ=matchMedia('(max-width:640px) and (orientation:portrait)');
 function placeEnv(){const e=$('qenv'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){if(e.parentNode!==ts)ts.insertBefore(e,$('bossExit'))}else if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild)}
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
-let envMin=false;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
+let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
 function hud(){placeEnv();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
-  stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));
+  stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`;
@@ -2907,7 +2912,7 @@ function hud(){placeEnv();
     else if(S.phase>=3){const fb=enemies.find(e=>e.final);$('qtitle').textContent=`최종 결전 · ${FINAL.boss} 처치`;$('qprog').textContent=fb?`${Math.ceil(fb.hp/fb.mhp*100)}%`:'완료'}
     else if(S.phase===0){$('qtitle').textContent=`${S.ch+1}장 · 무리를 처치하라`;$('qprog').textContent=`${S.kills} / ${c.goal}`}
     else{$('qtitle').textContent=`${c.boss} 처치`;$('qprog').textContent=`끝까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`}}
-  {const d=envDrain(),el=$('qenv');if(d>0){const rg=hpRegen(),bad=d>rg;el.hidden=false;el.className='env'+(bad?' bad':'')+(envMin?' min':'');
+  {const d=envDrain(),el=$('qenv');if(d>0&&envSeen!==envName()){envSeen=envName();envMin=false;try{localStorage.setItem('envMin','')}catch(e){}}/* v126: 처음 생겼을 때는 펼쳐진 상태 */if(d>0){const rg=hpRegen(),bad=d>rg;el.hidden=false;el.className='env'+(bad?' bad':'')+(envMin?' min':'');
     const t=envMin?`${envName()} ${bad?'⚠ ':''}▸ 보기`:`${envName()} 초당 −${d.toFixed(1)} · 재생 +${rg.toFixed(1)}${bad?' · 재생이 부족합니다':''}  ▾ 숨기기`;if(el.textContent!==t)el.textContent=t}else el.hidden=true}
   $('qenv').onclick=()=>{envMin=!envMin;try{localStorage.setItem('envMin',envMin?'1':'')}catch(e){}hud()};
   {const qb=document.querySelector('.quest');const sh=!!S.tutor&&!inTown;if(qb.hidden===sh)qb.hidden=!sh}
@@ -3571,6 +3576,10 @@ let gachaLock=0;/* v70: 특수 능력치가 나오면 2초간 뽑기 잠금 */
 let smithOpen=false,smithMsg='',smithSel=null,smithRes=null;
 /* v41: 6부위 중 하나를 먼저 고르고, 고른 부위의 강화 상태만 크게 보여 줌 (돌아가기로 목록 복귀) */
 let useTk=false;
+/* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
+function cdrCapNote(){let raw=0;for(const q of EQS){const it=S.eq&&S.eq[q];if(!it)continue;const mo=enhMO(enhL(q));for(const o of it.opts)if(o.k==='cdr')raw+=o.v*mo}
+  if(raw<=0)return '';const capped=raw>=40;
+  return `<p class="hint" style="margin:6px 0 0;${capped?'color:#ffb070':''}">쿨타임 감소는 장비 합계 <b>40%</b>가 상한입니다. 현재 ${Math.min(40,raw).toFixed(1)}%${capped?' — 상한에 도달해 더 강화해도 쿨감은 늘지 않습니다.':'.'}</p>`}
 function renderSmith(){
   let h=`<div class="shead"><div><div class="chap">Blacksmith · ${TOWN.smith}</div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
   if(!smithSel){
@@ -3578,7 +3587,7 @@ function renderSmith(){
     for(const k of EQS){const L=enhL(k),it=S.eq[k];
       h+=`<button class="smslot" data-sel="${k}" style="--rc:${it?RAR[it.rar].c:'#555'}"><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]} <span class="enh">+${L}</span></b><small>${it?it.name:'장비 없음'}</small><span class="smbar"><i style="width:${Math.min(100,L*5)}%"></i></span></button>`}
     h+=`</div>`}
-  else{const k=smithSel,L=enhL(k),it=S.eq[k],c=enhCost(L),rt=enhRate(L),max=L>=ENH_MAX;
+  else{const k=smithSel,L=enhL(k),it=S.eq[k],c=enhCost(L,k),rt=enhRate(L),max=L>=ENH_MAX;
     /* v118: 컷신이 결과를 보여 주는 구간(+20 이상)에서는 강화 창에 성공/실패 문구를 띄우지 않고 수치만 갱신(컷신에서 결과가 나오는 순간 renderSmith 호출) */
     const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
     const tk=S.tickets||0;if(!tk)useTk=false;const tkOn=useTk&&tk>0;
@@ -3589,7 +3598,7 @@ function renderSmith(){
       bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L)-1)*100)}%</b></span><span>이번 단계 상승량 <b>×${Math.pow(1/enhRate(L),ENH_PW).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개</span>${tk?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?'사용 중 · 성공 확정':'사용 안 함'}</button>`:`<small>우버 결투장 추가 보상</small>`}</div>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
-      hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`,
+      hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():''),
       btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=c?'':'disabled'}>${max?'최대 단계':`강화 ${fmtG(c)}G`}</button></div>`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
@@ -3601,7 +3610,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.dataset.sel){smithSel=b.dataset.sel;smithRes=null;renderSmith();return}
   if(b.id==='smBack'){smithSel=null;smithRes=null;renderSmith();return}
   if(b.id==='smTk'){useTk=!useTk;renderSmith();return}
-  if(b.id==='smGo'){let cine=0;const k=smithSel,L=enhL(k),c=enhCost(L);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
+  if(b.id==='smGo'){let cine=0;const k=smithSel,L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
     const tkUse=useTk&&(S.tickets||0)>0;if(tkUse){S.tickets--;if(!S.tickets)useTk=false}/* v107: 확정 강화 주문서 */
     if(tkUse||Math.random()<enhRate(L)){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:L>=20};refreshMax();if(L>=20){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true)}else{smithRes={ok:false,c,t:Date.now(),cine:L>=20};if(L>=20){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
     save();if(!cine)renderSmith()}});
@@ -3924,7 +3933,8 @@ function update(dt){
       p.hit.add(e);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid){if(e.vId===p.vid)e.vN++;else{e.vId=p.vid;e.vN=0}vm=Math.pow(VOL_K,e.vN)}hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
       if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined);
       if(p.split&&!p.back){const sp=p.split,h=Math.atan2(p.vx,p.vz),hs=new Set(p.hit);p.split=null;
-        for(let j=0;j<sp.n;j++){const a=h+(j-(sp.n-1)/2)*.55+(sp.n===2?0:0);shoot(a,{vid:p.vid,from:pp,color:0x9ad0ff,size:.42,long:true,trail:1.5,tw:.12,speed:p.speed,life:.45,dmg:p.dmg*sp.m,blast:p.blast,bolt:p.bolt,br:p.br*.8,bm:p.bm,child:true});projs[projs.length-1].hit=new Set(hs)}}
+        const dp=p.depth||0,a0=Math.random()*Math.PI*2;/* v126: 갈라진 화살은 무작위 방향으로 튀고, 다시 맞히면 한 번 더 갈라짐(연쇄) */
+        for(let j=0;j<sp.n;j++){const a=a0+j*Math.PI*2/sp.n+(Math.random()-.5)*.7;shoot(a,{vid:p.vid,from:pp,color:0x9ad0ff,size:.42,long:true,trail:1.5,tw:.12,speed:p.speed,life:.45,dmg:p.dmg*sp.m,blast:p.blast,bolt:p.bolt,br:p.br*.8,bm:p.bm,child:true,split:dp<1?sp:null});const c=projs[projs.length-1];c.hit=new Set(hs);c.depth=dp+1}}
       if(p.chain>0){const n=nearestEnemy(pp,9,p.hit);if(n){p.chain--;const ax=n.pos.x-pp.x,az=n.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx=ax/l*p.speed;p.vz=az/l*p.speed;p.life=.8;break}}
       if(p.pierce>0){p.pierce--;continue}
       dead=true;break}}
@@ -3993,7 +4003,7 @@ function autoRender(){let h=`<div class="aphd"><b>물약 자동 복용</b><butto
       <div class="ampr"><input type="range" data-apc="${k}" min="5" max="95" step="5" value="${v}" aria-label="${nm} 자동 사용 기준"><output>${v}%</output></div>
       <div class="apsz">${[['a','알맞게'],['s','소형'],['m','중형'],['l','대형']].map(([q,t])=>`<button data-asz="${k},${q}" class="${z===q?'on':''}">${t}${q!=='a'?` <i>${S.pots[k][q]||0}</i>`:''}</button>`).join('')}</div>
       <small>${nm}이 ${v}% 이하가 되면 ${z==='a'?'부족한 양에 알맞은 크기':POT[z].n+' 물약(없으면 다른 크기)'}을 마십니다</small></div>`}
-  $('autoPop').innerHTML=h;$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn))}
+  $('autoPop').innerHTML=h;$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn)}
 $('autoBtn').addEventListener('click',e=>{e.stopPropagation();const p=$('autoPop');if(p.hidden){autoRender();p.hidden=false}else p.hidden=true});
 $('autoPop').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='apX'){$('autoPop').hidden=true;return}
