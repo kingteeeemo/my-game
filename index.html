@@ -2965,7 +2965,7 @@ addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.he
    신호를 받으면 실제 index.html 의 버전을 확인하고, 새 버전이면 안내 후 10초 뒤 저장하고 다시 불러옵니다.
    GitHub 배포가 끝나면 .github/workflows/notify-update.yml 이 같은 주제(NTFY_TOPIC)로 신호를 보냅니다. */
 /* v132: 익명 플레이 기록 자동 수집 — TELE_URL(구글 Apps Script 웹앱 주소)이 비어 있으면 아무것도 보내지 않음 */
-const TELE_URL='';
+const TELE_URL='https://script.google.com/macros/s/AKfycbwQtrXGzFp4_6O1UY6EH5LoQ6Mu_pj6hO1L4kM65sL0Rsb1GxfYbYNFxwdN0ojOprhaIw/exec';
 const TELE_KEY='tele_q',TELE_PID='tele_pid';
 let teleQ=[],teleSid=Math.random().toString(36).slice(2,8),teleLast=Date.now(),teleAct=0,teleBusy=false;
 const telePid=()=>{try{let p=localStorage.getItem(TELE_PID);if(!p){p=Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,6);localStorage.setItem(TELE_PID,p)}return p}catch(e){return'anon'}};
@@ -2980,7 +2980,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v132';
+const APP_VER='v133';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
