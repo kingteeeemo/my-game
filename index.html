@@ -2649,8 +2649,8 @@ function castSkill(slot){
   if(!S.test&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','MP 물약을 쓰거나 잠시 기다리세요');P.mpWarn=2}return}
   if(P.cast||P.mv)return;
   P.mp-=cost;P.cd[slot]=st.cd;
-  /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦(회전 베기는 장비 쿨감을 별도로 적용) */
-  const ct=Math.min(CAST_MAX,CAST_K*st.cd*(b.kind==='whirl'?cdMul():1));
+  /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
+  const ct=b.kind==='whirl'?0:Math.min(CAST_MAX,CAST_K*st.cd);/* 회전 베기는 시전시간 없음 */
   if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
   castFire(slot,id)}
 const CAST_K=.25,CAST_MAX=.6;
@@ -3793,7 +3793,10 @@ function moveDir(){let mx=input.x,mz=input.z;
   const l=Math.hypot(mx,mz);if(l>.05)return {x:mx/l,z:mz/l};
   if(pcMode){const dx=mouseW.x-P.pos.x,dz=mouseW.z-P.pos.z,d=Math.hypot(dx,dz);if(d>.3)return {x:dx/d,z:dz/d}}
   return {x:Math.sin(P.face),z:Math.cos(P.face)}}
-function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.cast||P.hp<=0)return;const d=moveDir();
+function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.hp<=0)return;const d=moveDir();
+  P.cast=null;/* 시전 중이면 시전을 취소하고 구르기(마나·쿨타임은 이미 소모됨) */
+  if(P.spin>0){P.spin=0;P.vortex=null;P.spinFire=false;P.dashT=0;P.swing=0}/* 회전 베기 도중에도 구르기로 빠져나감 */
+  
   P.cd.mv=mvCd();P.face=Math.atan2(d.x,d.z);P.mv={go:0,dx:d.x,dz:d.z};hero.rotation.y=P.face;P.inv=Math.max(P.inv,MV_GO);ringFx(P.pos,1.1,MV[S.cls].c,.25)}
 function mvStep(dt){const m=P.mv;if(!m)return;
   const step=Math.min(dt,MV_GO-m.go),k0=m.go/MV_GO,k1=(m.go+step)/MV_GO,ease=k=>k*k*(3-2*k);/* 부드럽게 가속·감속 */
