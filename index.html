@@ -940,7 +940,7 @@ function isBetter(it,cur){if(!cur)return true;
 function score(it){let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({tut:{},v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
+const fresh=()=>({tut:{},v118:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 function migrate(s){
@@ -950,7 +950,11 @@ function migrate(s){
   delete s.picks;
 }
 function reconcile(s){if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=11;/* v105: 상급 각인의 서 10% → 11% */if(s&&!s.tut)s.tut=s.lv>=2?{intro:1}:{};/* v93: 기존 세이브는 첫 안내 생략 */if(s&&s.lv>=ESS_LV)s.n31=1;if(s&&s.ch>=4)s.n5=1;/* v70: 이미 31레벨 이상인 세이브는 안내 창 생략 */
-  if(!s.cls)return;const v=CLS[s.cls].skills;let pts=0;
+  if(!s.cls)return;
+  /* v118: 불러오는 세이브 자신의 주력 스킬(s.main)로 판정. 전에는 전역 S.main(불러오기 전엔 비어 있음)을 써서 두 번째 주력 스킬(대지 분쇄·화살비·연쇄 번개)의 강화가 재접속 때마다 지워졌음 */
+  const _op=CLS[s.cls].opts,v=[_op.includes(s.main)?s.main:_op[0]];let pts=0;
+  /* v118 복구: 버그로 다른 주력 스킬의 강화 포인트로 옮겨진 값을 실제 주력 스킬로 되돌림 */
+  if(!s.v118){s.v118=1;s.skp=s.skp||{};for(const o of _op)if(o!==v[0]&&s.skp[o]>0){s.skp[v[0]]=(s.skp[v[0]]||0)+s.skp[o];delete s.skp[o]}}
   const MOVE={nova:'frost'};
   /* v65 궁수: 1차 「폭발」 단계 → 「연쇄 - 관통」, 2차 「분열 화살」 단계 → 「번개 폭발」(같은 5단계 비용표) */
   if(!s.v65arc){s.v65arc=1;const v=s.sk&&s.sk.volley;if(v&&v.blast){v.chpierce=(v.chpierce||0)+v.blast;delete v.blast}if(s.sk2&&s.sk2.split){s.sk2.lblast=s.sk2.split;delete s.sk2.split}if(s.autoGem==='g:blast')s.autoGem='g:chpierce'}
@@ -2439,10 +2443,10 @@ function gainXp(x){if(S.demo)return;
   autoSpend();save();
 }
 /* 자동 강화 (v29): 균형 = 가장 낮은 강화부터, 위에서부터 = 목록 순서대로 최대까지 */
-function autoSpend(){if(!S.autoGem||!S.cls)return;let n=0;
+function autoSpend(mode){const am=mode||S.autoGem;if(!am||!S.cls)return 0;let n=0;/* v118: mode로 설정과 무관하게 지정한 방식으로 자동 강화(레벨업 창 「자동 찍기」) */
   while(S.pending>0){const s=C().skills[0],op=openGems(s);if(!op.length){S.pending--;continue}/* v65: 강화를 다 채운 뒤에는 보상 없음 */
-    const pref=S.autoGem.startsWith('g:')?S.autoGem.slice(2):null,g=pref&&op.includes(pref)?pref:op.reduce((a,b)=>gl(s,b)<gl(s,a)?b:a);S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+1;S.pending--;n++;feed(`${GEMS[g].n} Lv ${gl(s,g)} · 자동 강화`,GEMS[g].c)}
-  if(n){refreshMax();offer=null;lvlSkill=null}}
+    const pref=am.startsWith('g:')?am.slice(2):null,g=pref&&op.includes(pref)?pref:op.reduce((a,b)=>gl(s,b)<gl(s,a)?b:a);S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+1;S.pending--;n++;feed(`${GEMS[g].n} Lv ${gl(s,g)} · 자동 강화`,GEMS[g].c)}
+  if(n){refreshMax();offer=null;lvlSkill=null}return n}
 function progress(e){if(S.tutor){tutKill(e);save();return}if(e.duel){duelWin(e);save();return}
   if(S.ch<NCH){
     if(S.phase===3){if(e.final){S.phase=4;later(1.4,()=>victory('격파!',`${FINAL.boss} 처치`,'255,206,74',showFinalClear))}}
@@ -3060,20 +3064,25 @@ function showLevelUp(){
     h=`<div class="shead"><div><div class="chap">Level ${Lv}</div><h2>강화할 스킬을 고르세요</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     sk.forEach((s,i)=>{const n=openGems(s).length,tot=gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
       h+=`<button class="card" data-k="${s}" ${n?'':'disabled'}><span class="badge2">${i+1}</span><span><span class="en">${SK[s].role} · ${SK[s].en}</span>${SK[s].n}<small>${n?`강화 합계 ${tot}단계 · 올릴 수 있는 강화 ${n}개`:'모든 강화가 최대 단계입니다'}</small></span></button>`});
-    h+=`</div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''}</p>`;
+    h+=`</div><div class="btns"><button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''}</p>`;
   }else{
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
     h=`<div class="shead"><div><div class="chap">Level ${Lv} · ${SK[s].role}</div><h2>${SK[s].n} 강화</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small>${GEMS[p.g].d(L+1)}</small></span></button>`});
-    h+=`</div>${sk.length>1?'<div class="btns"><button class="ghost" id="lvBack">다른 스킬 고르기</button></div>':''}<p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다.</p>`;
+    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다.</p>`;
   }
   $('lvlSheet').innerHTML=h;$('lvl').hidden=false;releaseAll();guide('lvup');
 }
 let lvlDefer=false;
+/* v118: 레벨업 창 「자동 찍기」 — 설정의 자동 강화 방식(강화 지정)을 쓰고, 꺼져 있으면 균형(가장 낮은 강화부터). 남은 레벨업을 한 번에 처리 */
+function autoLabel(){const g=S.autoGem&&S.autoGem.startsWith('g:')?GEMS[S.autoGem.slice(2)]:null;return `자동 찍기${S.pending>1?` (${S.pending}회)`:''} · ${g?g.n+' 우선':'균형'}`}
+function autoPickNow(){const k=S.pending,n=autoSpend(S.autoGem||'bal');offer=null;lvlSkill=null;refreshMax();save();
+  if(S.pending>0)showLevelUp();else{$('lvl').hidden=true;toast('자동 강화 완료',n?`강화 ${n}회를 자동으로 올렸습니다`:`강화 ${k}회 처리`)}}
 function closeLevelUp(){lvlDefer=true;lvlSkill=null;offer=null;$('lvl').hidden=true;toast('강화는 나중에 고를 수 있어요','「스킬」에서 「지금 고르기」를 누르세요')}
 $('lvlSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='lvClose'){closeLevelUp();return}
+  if(b.id==='lvAuto'){autoPickNow();return}
   if(b.dataset.k){lvlSkill=b.dataset.k;offer=null;showLevelUp();return}
   if(b.id==='lvBack'){lvlSkill=null;offer=null;showLevelUp();return}
   if(b.dataset.o===undefined)return;
@@ -3536,7 +3545,8 @@ function renderSmith(){
       h+=`<button class="smslot" data-sel="${k}" style="--rc:${it?RAR[it.rar].c:'#555'}"><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]} <span class="enh">+${L}</span></b><small>${it?it.name:'장비 없음'}</small><span class="smbar"><i style="width:${Math.min(100,L*5)}%"></i></span></button>`}
     h+=`</div>`}
   else{const k=smithSel,L=enhL(k),it=S.eq[k],c=enhCost(L),rt=enhRate(L),max=L>=ENH_MAX;
-    const res=smithRes?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
+    /* v118: 컷신이 결과를 보여 주는 구간(+20 이상)에서는 강화 창에 성공/실패 문구를 띄우지 않고 수치만 갱신(컷신에서 결과가 나오는 순간 renderSmith 호출) */
+    const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
     const tk=S.tickets||0;if(!tk)useTk=false;const tkOn=useTk&&tk>0;
     const rc=it?RAR[it.rar].c:'#555',
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
@@ -3559,7 +3569,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='smTk'){useTk=!useTk;renderSmith();return}
   if(b.id==='smGo'){let cine=0;const k=smithSel,L=enhL(k),c=enhCost(L);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
     const tkUse=useTk&&(S.tickets||0)>0;if(tkUse){S.tickets--;if(!S.tickets)useTk=false}/* v107: 확정 강화 주문서 */
-    if(tkUse||Math.random()<enhRate(L)){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now()};refreshMax();if(L>=20){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true)}else{smithRes={ok:false,c,t:Date.now()};if(L>=20){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
+    if(tkUse||Math.random()<enhRate(L)){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:L>=20};refreshMax();if(L>=20){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true)}else{smithRes={ok:false,c,t:Date.now(),cine:L>=20};if(L>=20){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
     save();if(!cine)renderSmith()}});
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
