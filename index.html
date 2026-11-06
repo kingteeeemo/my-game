@@ -2632,20 +2632,26 @@ function orbEnd(p){const n=p.orb.burst||10;for(let i=0;i<n;i++)orbShard(p,p.ea+i
 /* 회귀 시작: 그 순간 내 위치를 향해 곧게 날아와 나를 지나쳐 원래 사거리만큼 더 날아간 뒤 사라짐 (모든 적 관통) */
 function retStart(p){const pp=p.m.position,dx=P.pos.x-pp.x,dz=P.pos.z-pp.z,l=Math.hypot(dx,dz)||1;
   p.vx=dx/l*p.speed;p.vz=dz/l*p.speed;p.life=(l+(p.rng||12))/p.speed;p.back=true;p.park=false;p.hit=new Set();p.pierce=999;p.chain=0;p.split=null;p.dmg*=p.ret;p.ret=0;p.home=false}
+/* v128: 기본 공격도 스킬과 같은 방식 — 쿨타임의 25%(최대 0.3초) 시전 후 발동, 누를 때마다 한 번만 */
 function basicAttack(){
-  if(P.cast)return;
-  const b=C().basic;P.skSwing=false;
+  if(P.cast||P.mv)return;
+  const b=C().basic,cd=(b==='melee'?.42:b==='arrow'?.45:.55)*cdMul(),ct=Math.min(.3,CAST_K*cd);
+  P.cd.atk=cd;
+  if(ct>=.04){aim(b==='melee'?4:16);P.cast={slot:'atk',id:'atk',t:ct,T:ct};P.skSwing=false;return}
+  basicFire()}
+function basicFire(){
+  const b=C().basic;P.skSwing=false;const setCd=v=>{if(!P.castPre)P.cd.atk=v};
   if(b==='melee'){
-    aim(4);P.cd.atk=.42*cdMul();P.swing=.18;P.swingDir*=-1;swingFx();
+    aim(4);setCd(.42*cdMul());P.swing=.18;P.swingDir*=-1;swingFx();
     const fx_=Math.sin(P.face),fz=Math.cos(P.face);let n=0;
     for(const e of [...enemies]){const dx=e.pos.x-P.pos.x,dz=e.pos.z-P.pos.z,d=Math.hypot(dx,dz);
       if(d<2.6+e.r&&(dx*fx_+dz*fz)/(d||1)>Math.cos(1.0)){hitSpark(e.pos,0xfff0d0,0xff8a30,4);hurt(e,baseDmg());n++}}
     /* 전사: 베기가 적중하면 적 1명당 마나 2 회복 (한 번에 최대 8) */
     if(S.cls==='warrior'&&n)P.mp=Math.min(P.mmp,P.mp+Math.min(8,n*2));
   }else if(b==='arrow'){
-    aim(16);P.cd.atk=.45*cdMul();P.swing=.12;shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0});
+    aim(16);setCd(.45*cdMul());P.swing=.12;shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0});
   }else{
-    aim(16);P.cd.atk=.55*cdMul();P.swing=.15;shoot(P.face,{color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
+    aim(16);setCd(.55*cdMul());P.swing=.15;shoot(P.face,{color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
   }
 }
 function castSkill(slot){
@@ -2864,9 +2870,9 @@ function mouseBtn(e,down){
   if(Date.now()-lastTouch<900)return;
   if(down){pcMode=true;mNdc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);updMouseWorld()}
   if(e.button===0)input.held.s1=down;if(e.button===2)input.held.s2=down;
-  if(down&&e.button===0)fireNow('s1');
+  if(down&&e.button===0)fireNow('s1');if(down&&e.button===2)fireNow('atk');
 }
-function fireNow(k){if(paused()||!S.cls||P.hp<=0)return;if(k==='s1'&&P.cd.s1<=0&&!inTown)castSkill('s1');else if(k==='mv'){input.held.mv=false;startMove()}}
+function fireNow(k){if(paused()||!S.cls||P.hp<=0)return;if(k==='s1'&&P.cd.s1<=0&&!inTown)castSkill('s1');else if(k==='atk'&&P.cd.atk<=0&&P.spin<=0&&!inTown)basicAttack();else if(k==='mv'){input.held.mv=false;startMove()}}
 ['mousedown'].forEach(ev=>{canvas.addEventListener(ev,e=>mouseBtn(e,true));stick.addEventListener(ev,e=>mouseBtn(e,true))});
 addEventListener('mouseup',e=>mouseBtn(e,false));
 addEventListener('mousemove',e=>{if(Date.now()-lastTouch<900)return;mNdc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
@@ -2882,8 +2888,24 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
-addEventListener('keydown',e=>{if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())toggleTown();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
+addEventListener('keydown',e=>{if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())toggleTown();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
+/* ================= v128: 새 버전 자동 감지 =================
+   GitHub Pages에 새 버전이 올라오면 안내 문구와 함께 5초 후 게임을 저장하고 다시 불러옵니다. */
+const APP_VER='v128';
+(function(){if(location.protocol==='file:')return;let busy=false;
+  const base=location.href.split('#')[0].split('?')[0];
+  function banner(nv){const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
+    d.style.cssText='position:fixed;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:99999;max-width:min(92vw,440px);padding:12px 16px;border-radius:14px;background:rgba(24,20,16,.96);border:1px solid #ffb070;color:#fff;font:700 14px/1.45 var(--ko,system-ui);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.6)';
+    document.body.appendChild(d);let n=5;
+    const go=()=>{try{save()}catch(e){}try{sessionStorage.setItem('updTry',nv)}catch(e){}location.href=base+'?v='+encodeURIComponent(nv)};
+    const draw=()=>{d.innerHTML=`새 버전 <b style="color:#ffb070">${nv}</b>이 나왔습니다.<br>저장 후 <b>${n}초</b> 뒤 게임을 다시 불러옵니다.<br><button style="margin-top:8px;padding:6px 14px;border-radius:10px;border:1px solid #ffb070;background:#3a2a1c;color:#fff;font:700 13px var(--ko,system-ui)">지금 업데이트</button>`;d.querySelector('button').onclick=go};
+    draw();const t=setInterval(()=>{n--;if(n<=0){clearInterval(t);go()}else draw()},1000)}
+  async function check(){if(busy||document.hidden||$('updBar'))return;busy=true;
+    try{const r=await fetch(base+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/APP_VER\s*=\s*'(v\d+)'/);
+      if(m&&m[1]!==APP_VER){let tried='';try{tried=sessionStorage.getItem('updTry')||''}catch(e){}if(tried!==m[1])banner(m[1])}}
+    catch(e){}finally{busy=false}}
+  setTimeout(check,8000);setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(check,500)})})();
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
 /* ================= HUD ================= */
@@ -3829,7 +3851,7 @@ function update(dt){
   const ml=Math.hypot(mx,mz);
   mvStep(dt);
   if(P.hp<=0)P.cast=null;
-  if(P.cast){P.cast.t-=dt;if(P.cast.t<=0){const c=P.cast;P.cast=null;P.castPre=true;try{castFire(c.slot,c.id)}finally{P.castPre=false}}}
+  if(P.cast){P.cast.t-=dt;if(P.cast.t<=0){const c=P.cast;P.cast=null;P.castPre=true;try{if(c.id==='atk')basicFire();else castFire(c.slot,c.id)}finally{P.castPre=false}}}
   if(ml>.05&&!P.mv&&!P.cast){const k=Math.min(1,ml)/ml;const spd=heroSpd()*(P.dashT>0?P.dashM:1)*(P.spin>0?.5+.05*gl('whirl','swift'):P.swing>0&&!P.skSwing?.55:1);P.pos.x+=mx*k*spd*dt;P.pos.z+=mz*k*spd*dt;if(P.swing<=0&&P.spin<=0)P.face=Math.atan2(mx,mz)}
   pushOut(P.pos,.45);
   for(const k in P.cd)P.cd[k]=Math.max(0,P.cd[k]-dt);
@@ -3837,9 +3859,7 @@ function update(dt){
     if(d<V.r+e.r&&d>e.r+.7){const m=Math.min(V.sp*dt,d-e.r-.7);e.pos.x+=dx/d*m;e.pos.z+=dz/d*m}}}
   P.inv-=dt;P.swing-=dt;P.spin-=dt;P.dashT=(P.dashT||0)-dt;
   if(!inTown){
-  if(input.held.atk&&P.cd.atk<=0&&P.spin<=0)basicAttack();
   /* v127: 스킬은 누를 때마다 한 번만 발동(꾹 눌러도 연발 없음) — 눌렀을 때 fireNow('s1')에서 처리 */
-  if(input.held.s2&&P.cd.atk<=0&&P.spin<=0)basicAttack();
   if(input.held.php){input.held.php=false;usePot('hp')}
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
   if(S.autoHpOn&&P.cd.pot<=0&&P.hp/P.mhp*100<=(S.autoHpPct||30)&&potN('hp')>0)usePot('hp',S.autoHpSz);
@@ -3874,7 +3894,7 @@ function update(dt){
     if(P.sky>0){const k=1-P.sky/.42,up=Math.min(1,k/.25),rel=k<.75?0:(k-.75)/.25,e=(1-Math.pow(1-up,2))*(1-rel);
       u.armL.rotation.x=-1.3-1.25*e;u.body.rotation.x=-.28*e;arm.rotation.x=-.5-1.9*e;piv.position.z=.05+(k>.24&&k<.5?-.15:0)}
     else arm.rotation.x=-.5}
-  if(P.cast){const u=hero.userData,k=1-P.cast.t/P.cast.T,e=1-Math.pow(1-Math.min(1,k*2.2),2);/* v122: 시전 중 자세 */
+  if(P.cast&&P.cast.id!=='atk'){const u=hero.userData,k=1-P.cast.t/P.cast.T,e=1-Math.pow(1-Math.min(1,k*2.2),2);/* v122: 시전 중 자세 */
     if(S.cls==='warrior'){piv.rotation.y=0;piv.rotation.x=-2.3*e;u.body.rotation.x=-.12*e}
     else if(S.cls==='archer'){u.armL.rotation.x=-1.3-1.25*e;u.body.rotation.x=-.28*e;piv.children[0].rotation.x=-.5-1.9*e}
     else{u.armL.rotation.x=-.3-1.7*e;u.body.rotation.x=-.18*e;u.body.position.y=.05*e}
