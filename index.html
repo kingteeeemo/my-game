@@ -2890,22 +2890,33 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
 addEventListener('keydown',e=>{if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())toggleTown();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
-/* ================= v128: 새 버전 자동 감지 =================
-   GitHub Pages에 새 버전이 올라오면 안내 문구와 함께 5초 후 게임을 저장하고 다시 불러옵니다. */
-const APP_VER='v129';
-(function(){if(location.protocol==='file:')return;let busy=false;
+/* ================= v128~v130: 새 버전 자동 감지 =================
+   v130: ntfy.sh 로 '새 버전 나옴' 신호를 실시간으로 받습니다(연결만 열어 두고 신호가 올 때만 동작, 주기 확인 없음).
+   신호를 받으면 실제 index.html 의 버전을 확인하고, 새 버전이면 안내 후 10초 뒤 저장하고 다시 불러옵니다.
+   GitHub 배포가 끝나면 .github/workflows/notify-update.yml 이 같은 주제(NTFY_TOPIC)로 신호를 보냅니다. */
+const APP_VER='v130';
+const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
+(function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
   function banner(nv){const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
     d.style.cssText='position:fixed;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:99999;max-width:min(92vw,440px);padding:12px 16px;border-radius:14px;background:rgba(24,20,16,.96);border:1px solid #ffb070;color:#fff;font:700 14px/1.45 var(--ko,system-ui);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.6)';
-    document.body.appendChild(d);let n=5;
+    document.body.appendChild(d);let n=10;
     const go=()=>{try{save()}catch(e){}try{sessionStorage.setItem('updTry',nv)}catch(e){}location.href=base+'?v='+encodeURIComponent(nv)};
-    const draw=()=>{d.innerHTML=`새 버전 <b style="color:#ffb070">${nv}</b>이 나왔습니다.<br>저장 후 <b>${n}초</b> 뒤 게임을 다시 불러옵니다.<br><button style="margin-top:8px;padding:6px 14px;border-radius:10px;border:1px solid #ffb070;background:#3a2a1c;color:#fff;font:700 13px var(--ko,system-ui)">지금 업데이트</button>`;d.querySelector('button').onclick=go};
+    const draw=()=>{d.innerHTML=`새 버전 <b style="color:#ffb070">${nv}</b>이 나왔습니다.<br>저장 후 <b>${n}초</b> 뒤 게임을 종료하고 다시 실행합니다.<br><button style="margin-top:8px;padding:6px 14px;border-radius:10px;border:1px solid #ffb070;background:#3a2a1c;color:#fff;font:700 13px var(--ko,system-ui)">지금 업데이트</button>`;d.querySelector('button').onclick=go};
     draw();const t=setInterval(()=>{n--;if(n<=0){clearInterval(t);go()}else draw()},1000)}
-  async function check(){if(busy||document.hidden||$('updBar'))return;busy=true;
-    try{const r=await fetch(base+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/APP_VER\s*=\s*'(v\d+)'/);
-      if(m&&m[1]!==APP_VER){let tried='';try{tried=sessionStorage.getItem('updTry')||''}catch(e){}if(tried!==m[1])banner(m[1])}}
-    catch(e){}finally{busy=false}}
-  setTimeout(check,3000);/* v129: 주기적 확인 없음 — 게임을 켰을 때와 탭/앱으로 돌아왔을 때만 확인 */document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(check,500)})})();
+  /* 새 버전을 찾았거나 이미 안내 중이면 true, 못 찾았거나 오류면 false */
+  async function check(){if($('updBar'))return true;if(busy||document.hidden)return false;busy=true;
+    try{const r=await fetch(base+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return false;const m=(await r.text()).match(/APP_VER\s*=\s*'(v\d+)'/);
+      if(m&&m[1]!==APP_VER){let tried='';try{tried=sessionStorage.getItem('updTry')||''}catch(e){}if(tried!==m[1])banner(m[1]);return true}}
+    catch(e){}finally{busy=false}return false}
+  /* 신호를 받으면: 배포 반영까지 시간이 걸릴 수 있어 6초 간격으로 최대 10번 확인 */
+  function onPush(){clearTimeout(rt);let i=0;const step=async()=>{if(await check()||++i>=10)return;rt=setTimeout(step,6000)};step()}
+  function listen(){if(es||document.hidden||typeof EventSource==='undefined')return;
+    try{es=new EventSource('https://ntfy.sh/'+NTFY_TOPIC+'/sse');es.onmessage=onPush}catch(e){es=null}}
+  function unlisten(){if(es){try{es.close()}catch(e){}es=null}}
+  setTimeout(()=>{check();listen()},3000);
+  /* 화면을 떠나면 연결을 닫고, 돌아오면 다시 연결하면서 한 번 확인합니다 */
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)unlisten();else{listen();setTimeout(check,500)}})})();
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
 /* ================= HUD ================= */

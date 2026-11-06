@@ -1,0 +1,12 @@
+name: notify-update
+# GitHub Pages 배포가 끝나면 플레이 중인 게임에 '새 버전' 신호를 보냅니다.
+on:
+  page_build:
+  workflow_dispatch:
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send ntfy signal
+        run: |
+          curl -fsS -m 20 -H "Title: update" -d "new-version" "https://ntfy.sh/ashsanct-upd-c28d97c28f3c741e"
