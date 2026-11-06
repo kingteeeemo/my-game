@@ -1,10 +1,13 @@
 name: notify-update
-# GitHub Pages 배포가 끝나면 플레이 중인 게임에 '새 버전' 신호를 보냅니다.
+# GitHub Pages 배포("pages build and deployment")가 성공하면 플레이 중인 게임에 '새 버전' 신호를 보냅니다.
 on:
-  page_build:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
   workflow_dispatch:
 jobs:
   notify:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Send ntfy signal
