@@ -2118,7 +2118,7 @@ function spawnFinalBoss(){if(enemies.some(e=>e.final))return;const e=spawnEnemy(
 const gateNeed=t=>t>0&&t%GATE_EVERY===0&&!(S.gates||[]).includes(t);
 const gatePending=()=>S.ch>=NCH&&S.tier===S.maxTier&&gateNeed(S.tier)&&S.tierKills>=TIER_KILLS;
 function tierCheck(){if(S.ch<NCH||S.tierKills<TIER_KILLS)return;S.tierKills=TIER_KILLS;
-  if(S.tier===S.maxTier){if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}S.maxTier++;toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
+  if(S.tier===S.maxTier){if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}S.maxTier++;tele('tier');toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
   if(S.autoTier&&S.tier<S.maxTier)setTier(S.tier+1,true)}
 function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tierKills=0;S.egK=0;save();
   if(m0!==m1){if(!inTown){const f=$('regionFade');f.innerHTML=`<div><small>다음 지역으로 이동합니다</small><b>${EGMAPS[m1].n}</b><span>위험도 ${t}</span></div>`;f.className='rfade hold';P.inv=99;
@@ -2132,7 +2132,7 @@ function spawnGate(){const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*12,-B
   const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:true});e.gate=S.tier;e.hp=e.mhp=e.mhp*4;e.dmg*=1.2;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
   toast('관문 보스 출현',`${e.name} · 쓰러뜨려야 다음 위험도가 열립니다`)}
 function gateClear(e){const t=e.gate;if(!(S.gates||[]).includes(t)){S.gates=(S.gates||[]).concat(t);for(let i=0;i<2;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2);toast('관문 돌파',`위험도 ${t} 관문지기 처치 · 전설 장비 2개`)}
-  S.maxTier=Math.max(S.maxTier,t+1);if(egMapFor(t+1)!==egMapFor(t))warmRegion(egMapFor(t+1));if(S.autoTier){toast('관문 돌파',`잠시 후 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`);later(3,()=>{if(S.ch>=5&&S.tier===t)setTier(t+1,true)})}else toast('관문 돌파',`「단계」 창에서 위험도 ${t+1}을 고르면 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`)}
+  S.maxTier=Math.max(S.maxTier,t+1);tele('gate',{g:t});if(egMapFor(t+1)!==egMapFor(t))warmRegion(egMapFor(t+1));if(S.autoTier){toast('관문 돌파',`잠시 후 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`);later(3,()=>{if(S.ch>=5&&S.tier===t)setTier(t+1,true)})}else toast('관문 돌파',`「단계」 창에서 위험도 ${t+1}을 고르면 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`)}
 function spawnEchoBoss(){
   const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*14,-B,B),z=clamp(P.pos.z+Math.sin(a)*14,-B,B);
   const src=CH[Math.random()*5|0];spawnEnemy('boss',x,z,3,{name:`${src.boss}의 메아리`,aggro:true});
@@ -2500,7 +2500,7 @@ function hurtPlayer(d){
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);
   if(P.hp<=0)die();
 }
-function die(){
+function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});
   if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.25,()=>defeatCine(`${DUEL.n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
@@ -2512,7 +2512,7 @@ const autoStatName=k=>k==='bal'?'균형(고르게)':STATS[k]?STATS[k].n:'';
 function spendAutoStat(){const a=S.autoStat;if(!a)return;if(a==='bal'){while(S.statPts>0){const k=Object.keys(STATS).reduce((m,q)=>S.stats[q]<S.stats[m]?q:m);S.stats[k]++;S.statPts--}}else if(STATS[a]){S.stats[a]+=S.statPts;S.statPts=0}}
 function gainXp(x){if(S.demo)return;
   S.xp+=x;
-  while(S.xp>=needXp()){S.xp-=needXp();S.lv++;S.pending++;lvlDefer=false;S.statPts=(S.statPts||0)+STAT_PER_LV;spendAutoStat();refreshMax();P.hp=P.mhp;P.mp=P.mmp;ringFx(P.pos,3,0xd9a44a,.6);if(S.lv>=ESS_LV&&!S.n31){S.n31=1;later(.8,showEnhDone)}}
+  while(S.xp>=needXp()){S.xp-=needXp();S.lv++;S.pending++;lvlDefer=false;if(S.lv%5===0||S.lv<=10)tele('lv');S.statPts=(S.statPts||0)+STAT_PER_LV;spendAutoStat();refreshMax();P.hp=P.mhp;P.mp=P.mmp;ringFx(P.pos,3,0xd9a44a,.6);if(S.lv>=ESS_LV&&!S.n31){S.n31=1;later(.8,showEnhDone)}}
   autoSpend();save();
 }
 /* 자동 강화 (v29): 균형 = 가장 낮은 강화부터, 위에서부터 = 목록 순서대로 최대까지 */
@@ -2964,7 +2964,23 @@ addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.he
    v130: ntfy.sh 로 '새 버전 나옴' 신호를 실시간으로 받습니다(연결만 열어 두고 신호가 올 때만 동작, 주기 확인 없음).
    신호를 받으면 실제 index.html 의 버전을 확인하고, 새 버전이면 안내 후 10초 뒤 저장하고 다시 불러옵니다.
    GitHub 배포가 끝나면 .github/workflows/notify-update.yml 이 같은 주제(NTFY_TOPIC)로 신호를 보냅니다. */
-const APP_VER='v131';
+/* v132: 익명 플레이 기록 자동 수집 — TELE_URL(구글 Apps Script 웹앱 주소)이 비어 있으면 아무것도 보내지 않음 */
+const TELE_URL='';
+const TELE_KEY='tele_q',TELE_PID='tele_pid';
+let teleQ=[],teleSid=Math.random().toString(36).slice(2,8),teleLast=Date.now(),teleAct=0,teleBusy=false;
+const telePid=()=>{try{let p=localStorage.getItem(TELE_PID);if(!p){p=Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,6);localStorage.setItem(TELE_PID,p)}return p}catch(e){return'anon'}};
+try{teleQ=JSON.parse(localStorage.getItem(TELE_KEY)||'[]')}catch(e){teleQ=[]}
+function teleSnap(){const eq={};for(const k of EQS){const it=S.eq[k];eq[k]=(it?it.ilvl:0)+'/'+enhL(k)}
+  return{cls:S.cls,lv:S.lv,ch:S.ch,tier:S.tier,mt:S.maxTier,gold:Math.round(S.gold||0),ess:S.ess||0,st:[S.stats.str,S.stats.agi,S.stats.int].join('/'),eq:Object.values(eq).join(','),hp:Math.round(P.mhp||0),inf:S.inf?JSON.stringify(S.inf):''}}
+function tele(ev,d){if(!TELE_URL||!S||!S.cls||S.test||S.demo||S.tutor)return;
+  const now=Date.now();if(document.visibilityState==='visible'&&now-teleLast<120000)teleAct+=Math.round((now-teleLast)/1000);teleLast=now;
+  let r;try{r=Object.assign({t:now,pid:telePid(),sid:teleSid,v:APP_VER,slot:curSlot,ev,act:teleAct},teleSnap(),d||{})}catch(e){return}
+  teleQ.push(r);if(teleQ.length>300)teleQ.splice(0,teleQ.length-300);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}
+function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;const batch=teleQ.slice(0,50);
+  fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
+    .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
+if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
+const APP_VER='v132';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3279,7 +3295,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
   if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();$('clear').hidden=true;mapLoad('끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast('끝없는 심연','쓰러뜨릴수록 강해집니다');stageBanner()});return}
   if(e.target.id!=='nextCh')return;
-  S.ch++;S.phase=0;S.kills=0;if(S.ch>=NCH){S.ch=NCH;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1)}
+  tele('chclear',{c:S.ch});S.ch++;S.phase=0;S.kills=0;if(S.ch>=NCH){S.ch=NCH;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1)}
   save();$('clear').hidden=true;mapLoad(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
   toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?'몰려드는 무리를 처치하라':'위험도 1 · 쓰러뜨릴수록 강해집니다');stageBanner()});
 });
@@ -3738,7 +3754,7 @@ function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),t
     if(auto)smAutoN++;const big=L>=20&&!auto;
     if(tkUse||Math.random()<enhRate(L)){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
     else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
-    save();if(!cine)renderSmith()}
+    if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
 function enhCine(k,L,ok,done){let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
@@ -3908,6 +3924,7 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
     showSlots()}
 });
 function enterGame(){
+  tele('start');
   if(S.ch>=NCH)egMapFor(S.tier);
   inTown=false;$('npcAct').hidden=true;npcNear=null;
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
