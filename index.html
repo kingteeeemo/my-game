@@ -2995,7 +2995,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v135';
+const APP_VER='v136';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3736,7 +3736,7 @@ const tkNeed=(L,k)=>k==='weapon'?(L>=40?4:L>=35?3:L>=30?2:1):(L>=40?3:L>=35?2:1)
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();const L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},350);renderSmith()}
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},350);renderSmith()}
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){let raw=0;for(const q of EQS){const it=S.eq&&S.eq[q];if(!it)continue;const mo=enhMO(enhL(q));for(const o of it.opts)if(o.k==='cdr')raw+=o.v*mo}
   if(raw<=0)return '';const capped=raw>=40;
@@ -3776,24 +3776,25 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
 function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
-    if(auto)smAutoN++;const big=L>=20&&!auto;
-    if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith())}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
-    else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith())}else enhFx(false)}
+    if(auto)smAutoN++;const big=L>=20;/* v136: 자동 강화도 컷신 구간(+20~)이면 컷신 재생 */
+    if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
+    else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
-function enhCine(k,L,ok,done){let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
+let enhCineOn=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
+function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
   const base=L>=26?'200,120,255':'255,150,50';el.style.setProperty('--ec',base);
   let sp='';for(let i=0;i<16;i++){sp+=`<i class="in" style="left:${10+Math.random()*80}%;top:${66+Math.random()*24}%;--x:${((Math.random()-.5)*8).toFixed(1)}vmin;--y:-${(28+Math.random()*26).toFixed(1)}vmin;animation-delay:${(Math.random()*1).toFixed(2)}s;width:${2+Math.random()*3|0}px;height:${2+Math.random()*3|0}px"></i>`}
   el.innerHTML=`<div class="cring"></div>${sp}<div class="orb"></div><div class="wait"><small>${L>=25?'MYTHIC':'LEGENDARY'} ENHANCE</small><b>+${L}</b><span>${SLOTN[k]} 강화 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   document.body.appendChild(el);
-  const fin=()=>{if(over)return;over=1;el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
+  const fin=()=>{if(over)return;over=1;enhCineOn=0;el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
   setTimeout(()=>el.addEventListener('click',()=>{if(!revealed&&rv)rv();else if(canClose)fin()}),150);
   const T=1.14;/* 슈유육… 모이는 시간 */
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
   rv=()=>{
-    if(over||revealed)return;revealed=1;clearTimeout(tm);setTimeout(()=>{canClose=1},250);done&&done();/* v103: 결과가 나오는 순간 강화 창도 같이 갱신 */el.classList.remove('charge');el.classList.add(ok?'win':'lose');
+    if(over||revealed)return;revealed=1;clearTimeout(tm);setTimeout(()=>{canClose=1},250);if(auto)setTimeout(fin,1700);/* v136: 자동 강화 중에는 결과를 1.7초 보여 준 뒤 스스로 닫힘 */done&&done();/* v103: 결과가 나오는 순간 강화 창도 같이 갱신 */el.classList.remove('charge');el.classList.add(ok?'win':'lose');
     const col=ok?(L>=25?'200,120,255':'255,206,74'):'255,50,40';el.style.setProperty('--ec',col);
     el.querySelectorAll('.wait,.cring,.orb,i.in').forEach(n=>n.remove());
     const fl=el.querySelector('.flashw');if(ok)fl.style.animation='ecFlash .6s ease-out forwards';else fl.remove();
