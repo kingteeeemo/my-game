@@ -2892,7 +2892,7 @@ addEventListener('keydown',e=>{if(!$('guide').hidden){if(e.code==='Escape')guide
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
 /* ================= v128: 새 버전 자동 감지 =================
    GitHub Pages에 새 버전이 올라오면 안내 문구와 함께 5초 후 게임을 저장하고 다시 불러옵니다. */
-const APP_VER='v128';
+const APP_VER='v129';
 (function(){if(location.protocol==='file:')return;let busy=false;
   const base=location.href.split('#')[0].split('?')[0];
   function banner(nv){const d=document.createElement('div');d.id='updBar';d.setAttribute('role','alert');
@@ -2905,7 +2905,7 @@ const APP_VER='v128';
     try{const r=await fetch(base+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/APP_VER\s*=\s*'(v\d+)'/);
       if(m&&m[1]!==APP_VER){let tried='';try{tried=sessionStorage.getItem('updTry')||''}catch(e){}if(tried!==m[1])banner(m[1])}}
     catch(e){}finally{busy=false}}
-  setTimeout(check,8000);setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(check,500)})})();
+  setTimeout(check,3000);/* v129: 주기적 확인 없음 — 게임을 켰을 때와 탭/앱으로 돌아왔을 때만 확인 */document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(check,500)})})();
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
 /* ================= HUD ================= */
