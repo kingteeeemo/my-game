@@ -3081,21 +3081,21 @@ function showLevelUp(){
     h=`<div class="shead"><div><div class="chap">Level ${Lv}</div><h2>강화할 스킬을 고르세요</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     sk.forEach((s,i)=>{const n=openGems(s).length,tot=gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
       h+=`<button class="card" data-k="${s}" ${n?'':'disabled'}><span class="badge2">${i+1}</span><span><span class="en">${SK[s].role} · ${SK[s].en}</span>${SK[s].n}<small>${n?`강화 합계 ${tot}단계 · 올릴 수 있는 강화 ${n}개`:'모든 강화가 최대 단계입니다'}</small></span></button>`});
-    h+=`</div><div class="btns"><button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''}</p>`;
+    h+=`</div><div class="btns"><button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''} 「자동 찍기」를 누르면 이후 레벨업도 균형으로 자동 분배되며, 「스킬」 메뉴에서 다시 끌 수 있습니다.</p>`;
   }else{
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
     h=`<div class="shead"><div><div class="chap">Level ${Lv} · ${SK[s].role}</div><h2>${SK[s].n} 강화</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<div class="crow"><button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small>${GEMS[p.g].d(L+1)}</small></span></button><button class="ghost autog" data-oa="${i}" aria-label="${GEMS[p.g].n} 자동 강화">자동<small>이것만</small></button></div>`});
-    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다.</p>`;
+    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다. 자동을 누르면 이후 레벨업도 자동으로 분배되며, 「스킬」 메뉴의 「레벨업 시 자동 강화」에서 다시 끌 수 있습니다.</p>`;
   }
   $('lvlSheet').innerHTML=h;$('lvl').hidden=false;releaseAll();guide('lvup');
 }
 let lvlDefer=false;
 /* v118: 레벨업 창 「자동 찍기」 — 설정의 자동 강화 방식(강화 지정)을 쓰고, 꺼져 있으면 균형(가장 낮은 강화부터). 남은 레벨업을 한 번에 처리 */
 function autoLabel(){const g=S.autoGem&&S.autoGem.startsWith('g:')?GEMS[S.autoGem.slice(2)]:null;return `자동 찍기${S.pending>1?` (${S.pending}회)`:''} · ${g?g.n+' 우선':'균형'}`}
-function autoPickNow(){const k=S.pending,n=autoSpend(S.autoGem||'bal');offer=null;lvlSkill=null;refreshMax();save();
-  if(S.pending>0)showLevelUp();else{$('lvl').hidden=true;toast('자동 강화 완료',n?`강화 ${n}회를 자동으로 올렸습니다`:`강화 ${k}회 처리`)}}
+function autoPickNow(){const k=S.pending;if(!S.autoGem)S.autoGem='bal';/* v121: 누르면 균형 자동 강화가 설정으로 유지됨(이후 레벨업에는 창이 뜨지 않음) */const n=autoSpend(S.autoGem);offer=null;lvlSkill=null;refreshMax();save();
+  if(S.pending>0)showLevelUp();else{$('lvl').hidden=true;toast('자동 강화 켜짐',(n?`강화 ${n}회를 올렸습니다 · `:'')+'이후 레벨업은 자동 분배 · 「스킬」에서 끌 수 있어요')}}
 function closeLevelUp(){lvlDefer=true;lvlSkill=null;offer=null;$('lvl').hidden=true;toast('강화는 나중에 고를 수 있어요','「스킬」에서 「지금 고르기」를 누르세요')}
 $('lvlSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='lvClose'){closeLevelUp();return}
