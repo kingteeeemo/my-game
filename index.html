@@ -751,7 +751,7 @@ const GEMS={
   burn:{n:'화염 지대',t:'area',c:'#ff9a3a',d:L=>`회전하는 동안 지나간 자리에 불바닥 ${(2.5+.15*L).toFixed(1)}초 (초당 ${Math.round((.6+.12*L)*100)}%)`},
   knock:{n:'충격파',t:'area',c:'#a0d8a0',d:L=>`적을 밀쳐냄`},
   swift:{n:'질풍 회전',t:'whirl',c:'#a0d8a0',d:L=>`회전 중 이동 속도 ${50+5*L}%\n회전 범위의 ${100+5*L}% 안의 적을 초당 ${(3+.7*L).toFixed(1)}m 끌어당김\n(고유 몬스터 제외)`},
-  haste:{n:'가속',t:'any',c:'#f2f2f2',d:L=>`재사용 대기시간 -${Math.round(hasteP()*100*L)}%`},
+  haste:{n:'가속',t:'any',c:'#f2f2f2',d:L=>`재사용 대기시간 -${Math.round(hasteP()*100*L)}%\n스킬 시전시간 감소 (최대 단계에서 절반 수준)`},
   orbsize:{n:'거대 보주',t:'orb',c:'#bfe8ff',d:L=>{const g=gOrb(L);return `보주 크기·적중 범위 +${26*L}%\n끝에서 반경 ${g.br.toFixed(1)}m 폭발 (피해 ×${g.bm.toFixed(2)})`}},
   barrage:{n:'파편 난사',t:'orb',c:'#9fe8ff',d:L=>{const b=barr(L);return `파편 ${b.cnt}갈래 · 발사 빈도 +${Math.round((b.rate-1)*100)}%\n파편 크기 +${Math.round((b.sz-1)*100)}% · 속도 +${Math.round((b.sp-1)*100)}%\n끝에서 파편 ${b.burst}개`}},
   qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m · 부채꼴 +${3*L}%\n피해 +${6*L}%`},
@@ -2418,16 +2418,16 @@ function kill(e){
   dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e));
   /* 물약 드롭률은 기존의 30% */
-  const MD=S.ch<4?2:1;/* v115: 1~4장 마나 물약 드롭 ×2 */
+  const MD=S.ch<4?2:1,M3=S.ch<NCH?3:1;/* v115: 1~4장 마나 물약 드롭 ×2 / v124: 1~7장은 추가로 ×3 */
   const PD=S.ch>=NCH?.054:.3;/* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
   if(e.final){for(let i=0;i<3;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2)}
-  else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2*MD)potDrop(e.pos,'mp')}
-  else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp');if(MD>1&&Math.random()<PD*.5)potDrop(e.pos,'mp')}
-  else if(e.rank===1){if(Math.random()<.15)dropItem(e.pos,false);if(Math.random()<.3*PD)potDrop(e.pos,Math.random()<.55?'hp':'mp');if(MD>1&&Math.random()<.3*PD*.45)potDrop(e.pos,'mp')}
+  else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2*MD*M3)potDrop(e.pos,'mp')}
+  else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp');if(MD>1&&Math.random()<PD*.5)potDrop(e.pos,'mp');if(M3>1&&Math.random()<(PD*.5+(MD>1?PD*.5:0))*(M3-1))potDrop(e.pos,'mp')}
+  else if(e.rank===1){if(Math.random()<.15)dropItem(e.pos,false);if(Math.random()<.3*PD)potDrop(e.pos,Math.random()<.55?'hp':'mp');if(MD>1&&Math.random()<.3*PD*.45)potDrop(e.pos,'mp');if(M3>1&&Math.random()<.3*PD*.45*(1+(MD>1?1:0))*(M3-1))potDrop(e.pos,'mp')}
   else{const q=Math.random(),ic=e.type==='brute'?.035:.0125;
     if(q<ic)dropItem(e.pos,false);
     else if(q<ic+(S.ch===0?.035:.025)*PD)potDrop(e.pos,'hp');
-    else if(q<ic+((S.ch===0?.035:.025)+.02*MD)*PD)potDrop(e.pos,'mp')}
+    else if(q<ic+((S.ch===0?.035:.025)+.02*MD*M3)*PD)potDrop(e.pos,'mp')}
   if(Math.random()<[.0008,.004,.012,.06][e.rank])dropSpd(e.pos);
   gainXp(e.xp);progress(e);
 }
@@ -2650,10 +2650,12 @@ function castSkill(slot){
   if(P.cast||P.mv)return;
   P.mp-=cost;P.cd[slot]=st.cd;
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
-  const ct=b.kind==='whirl'?0:Math.min(CAST_MAX,CAST_K*st.cd);/* 회전 베기는 시전시간 없음 */
+  const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
   if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
   castFire(slot,id)}
 const CAST_K=.25,CAST_MAX=.6;
+/* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
+function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(.05,1-hp*L),old10=1-hp*GMAX,f=1-(L/GMAX)*(1-.5*old10);return Math.min(CAST_MAX,CAST_K*base*f)}
 function castFire(slot,id){
   const b=SK[id],st=skillStats(id),base=baseDmg();P.skSwing=true;
   if(b.kind==='proj'){
@@ -2665,15 +2667,17 @@ function castFire(slot,id){
     P.swing=.15;return;
   }
   if(b.kind==='whirl'){
-    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1})},t=delay+i*.2;t>0?later(t,f):f()}};
+    const tok=P.wTok=(P.wTok||0)+1,alive=()=>P.wTok===tok;/* v124: 구르기로 취소하면 예약된 타격·효과가 모두 사라짐 */
+    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1})},t=delay+i*.2;t>0?later(t,f):f()}};
     round(1,0);for(let i=1;i<=st.echo;i++)round(st.echoMul,i*(st.hits*.2+.05));
-    P.spin=st.hits*.2*(1+st.echo);P.spinFire=!!st.flame;whirlFx(st.radius,P.spin,!!st.flame);
+    P.spin=st.hits*.2*(1+st.echo);P.spinFire=!!st.flame;const n0=fx.length;whirlFx(st.radius,P.spin,!!st.flame);
     /* 화염 지대: 회전하는 동안 이동 경로를 따라 불바닥을 깔아 둠 */
     if(st.dash){P.dashT=P.spin;P.dashM=st.dash}/* 질주 (v40): 회전하는 동안만 */
     P.vortex=st.vortex?{r:st.radius*st.vortex.rm,sp:st.vortex.sp}:null;
     if(P.vortex)swirlFx(P.vortex.r,P.spin);
-    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r)})}
-    if(st.burn){const n=Math.ceil(P.spin/.2);for(let i=0;i<n;i++)later(i*.2,()=>burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur))}
+    P.wFx=fx.slice(n0);
+    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(alive()&&P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r)})}
+    if(st.burn){const n=Math.ceil(P.spin/.2);for(let i=0;i<n;i++)later(i*.2,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur))}
     return;
   }
   if(b.kind==='orb'){
@@ -3793,9 +3797,11 @@ function moveDir(){let mx=input.x,mz=input.z;
   const l=Math.hypot(mx,mz);if(l>.05)return {x:mx/l,z:mz/l};
   if(pcMode){const dx=mouseW.x-P.pos.x,dz=mouseW.z-P.pos.z,d=Math.hypot(dx,dz);if(d>.3)return {x:dx/d,z:dz/d}}
   return {x:Math.sin(P.face),z:Math.cos(P.face)}}
+function cancelWhirl(){P.wTok=(P.wTok||0)+1;P.spin=0;P.vortex=null;P.spinFire=false;P.dashT=0;P.swing=0;
+  for(const f of P.wFx||[]){const i=fx.indexOf(f);if(i<0)continue;if(f.end)f.end();scene.remove(f.m);f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose();fx.splice(i,1)}P.wFx=null}
 function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.hp<=0)return;const d=moveDir();
   P.cast=null;/* 시전 중이면 시전을 취소하고 구르기(마나·쿨타임은 이미 소모됨) */
-  if(P.spin>0){P.spin=0;P.vortex=null;P.spinFire=false;P.dashT=0;P.swing=0}/* 회전 베기 도중에도 구르기로 빠져나감 */
+  if(P.spin>0)cancelWhirl();/* 회전 베기 도중에도 구르기로 빠져나감 — 예약된 타격·이펙트 모두 취소 */
   
   P.cd.mv=mvCd();P.face=Math.atan2(d.x,d.z);P.mv={go:0,dx:d.x,dz:d.z};hero.rotation.y=P.face;P.inv=Math.max(P.inv,MV_GO);ringFx(P.pos,1.1,MV[S.cls].c,.25)}
 function mvStep(dt){const m=P.mv;if(!m)return;
