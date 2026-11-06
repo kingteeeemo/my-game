@@ -614,6 +614,19 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skd{font-size:12px;color:#c9c2b4;line-height:1.45}.skg{font-size:11px;color:var(--muted);line-height:1.4}.skg em{font-style:normal;color:#5ae0d0;font-weight:700;margin-right:5px}
 @media (orientation:landscape){.skillsel{top:0;left:auto;align-items:stretch}.skillsel .sheet{width:min(400px,46vw);max-height:none;height:100%;border-radius:16px 0 0 16px;overflow-y:auto;padding:12px 14px;gap:8px}.skcs{grid-template-columns:1fr}}
 @media (orientation:landscape) and (max-height:560px){.skillsel .hint{display:none}.skillsel h2{font-size:16px}.skc{padding:8px 10px;gap:3px}.skd{font-size:11.5px}.skillsel .btns button{padding-top:8px;padding-bottom:8px}}
+
+/* v120: 레벨업 강화 창 — 강화마다 우측 「자동」 버튼 */
+.crow{display:flex;gap:8px;align-items:stretch}.crow .card{flex:1;min-width:0}
+.autog{flex:none;width:58px;padding:0 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:800 13px var(--ko);color:#ffd0a0;border-color:rgba(255,138,58,.55);line-height:1.2}.autog small{font:600 10px var(--ko);color:#b89a80}
+/* v120: 폰 가로 — 물약 자동 복용 창·레벨업 강화 창이 스크롤 없이 한 화면에 들어오도록 가로로 넓히고 세로를 늘림 */
+@media (orientation:landscape) and (max-height:520px){
+  .autopop{top:50%;bottom:auto;transform:translateY(-50%);right:max(70px,env(safe-area-inset-right,0px));width:min(600px,calc(100vw - 150px));max-height:calc(100vh - 12px);overflow-y:auto;flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:6px 8px;padding:9px 10px}
+  .autopop .aphd{flex:0 0 100%}.autopop .apblk{flex:1 1 230px;min-width:0;gap:5px;padding:8px}
+  #lvlSheet{zoom:.88;width:min(740px,calc((100vw - 24px)/.88));max-width:none;max-height:calc((100vh - 12px)/.88);padding:12px 14px;gap:8px}
+  @media (max-height:400px){#lvlSheet{zoom:.78;width:min(740px,calc((100vw - 24px)/.78));max-height:calc((100vh - 8px)/.78)}}
+  #lvlSheet .shead h2{font-size:17px}#lvlSheet .cards{gap:6px}#lvlSheet .card{padding:8px 11px;gap:10px;font-size:14px}#lvlSheet .card small{margin-top:1px;line-height:1.35}#lvlSheet .btns .ghost{padding:8px}#lvlSheet .hint{line-height:1.4}
+  #lvlSheet .autog{width:62px}
+}
 </style>
 
 <canvas id="c"></canvas>
@@ -3073,8 +3086,8 @@ function showLevelUp(){
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
     h=`<div class="shead"><div><div class="chap">Level ${Lv} · ${SK[s].role}</div><h2>${SK[s].n} 강화</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
-    offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small>${GEMS[p.g].d(L+1)}</small></span></button>`});
-    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다.</p>`;
+    offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<div class="crow"><button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small>${GEMS[p.g].d(L+1)}</small></span></button><button class="ghost autog" data-oa="${i}" aria-label="${GEMS[p.g].n} 자동 강화">자동<small>이것만</small></button></div>`});
+    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다.</p>`;
   }
   $('lvlSheet').innerHTML=h;$('lvl').hidden=false;releaseAll();guide('lvup');
 }
@@ -3087,6 +3100,7 @@ function closeLevelUp(){lvlDefer=true;lvlSkill=null;offer=null;$('lvl').hidden=t
 $('lvlSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='lvClose'){closeLevelUp();return}
   if(b.id==='lvAuto'){autoPickNow();return}
+  if(b.dataset.oa!==undefined){const p=offer&&offer[+b.dataset.oa];if(!p)return;S.autoGem='g:'+p.g;autoPickNow();return}/* v120: 고른 강화만 자동 분배(설정의 자동 강화에도 저장) */
   if(b.dataset.k){lvlSkill=b.dataset.k;offer=null;showLevelUp();return}
   if(b.id==='lvBack'){lvlSkill=null;offer=null;showLevelUp();return}
   if(b.dataset.o===undefined)return;
@@ -3930,7 +3944,7 @@ function frameCam(dt,target=P.pos){
 }
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
 let mobView=false;
-function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?67.9:(matchMedia('(pointer:coarse)').matches||h<=520)?35.5:47.3;/* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
+function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
   CAM_OFF.set(0,17,12);scene.fog.near=20;scene.fog.far=48;camera.updateProjectionMatrix();if(PP.rt)ppSize()}
 addEventListener('resize',resize);resize();
 /* ================= 전체화면 ================= */
