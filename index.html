@@ -689,7 +689,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     <button class="act atk" id="bAtk" data-k="atk"><span id="lAtk">공격</span><small>ATTACK</small></button>
     <button class="act s1" id="bS1" data-k="s1"><span id="lS1"></span><small id="cS1">SKILL</small></button>
     <button class="act s2" id="bS2" data-k="s2"><span id="lS2"></span><small id="cS2">SKILL</small></button>
-    <button class="act mv" id="bMv" data-k="mv"><span id="lMv">이동</span><small>MOVE</small></button>
+    <button class="act mv" id="bMv" data-k="mv"><span id="lMv">구르기</span><small>ROLL</small></button>
     <button class="act pot ph" id="bHp" data-k="php" aria-label="생명력 물약"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nHp">0</b></button>
     <button class="act pot mpot" id="bMp" data-k="pmp" aria-label="마나 물약"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nMp">0</b></button>
     <button class="autob" id="autoBtn" aria-label="물약 자동 복용 설정">자동</button>
@@ -1417,7 +1417,7 @@ let ldBusy=false;
 function mapLoad(title,sub,fn,after){
   if(ldBusy){fn();after&&after();return}
   ldBusy=true;const f=$('regionFade');
-  f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;
+  f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;P.cast=null;
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
@@ -2628,6 +2628,7 @@ function orbEnd(p){const n=p.orb.burst||10;for(let i=0;i<n;i++)orbShard(p,p.ea+i
 function retStart(p){const pp=p.m.position,dx=P.pos.x-pp.x,dz=P.pos.z-pp.z,l=Math.hypot(dx,dz)||1;
   p.vx=dx/l*p.speed;p.vz=dz/l*p.speed;p.life=(l+(p.rng||12))/p.speed;p.back=true;p.park=false;p.hit=new Set();p.pierce=999;p.chain=0;p.split=null;p.dmg*=p.ret;p.ret=0;p.home=false}
 function basicAttack(){
+  if(P.cast)return;
   const b=C().basic;P.skSwing=false;
   if(b==='melee'){
     aim(4);P.cd.atk=.42*cdMul();P.swing=.18;P.swingDir*=-1;swingFx();
@@ -2646,7 +2647,15 @@ function castSkill(slot){
   const id=C().skills[slot==='s1'?0:1],b=SK[id],st=skillStats(id),base=baseDmg();
   const cost=mpCost(id);
   if(!S.test&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','MP 물약을 쓰거나 잠시 기다리세요');P.mpWarn=2}return}
-  P.mp-=cost;P.cd[slot]=st.cd;P.skSwing=true;/* 스킬은 선딜레이·이동 감속 없음 */
+  if(P.cast||P.mv)return;
+  P.mp-=cost;P.cd[slot]=st.cd;
+  /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦(회전 베기는 장비 쿨감을 별도로 적용) */
+  const ct=Math.min(CAST_MAX,CAST_K*st.cd*(b.kind==='whirl'?cdMul():1));
+  if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
+  castFire(slot,id)}
+const CAST_K=.25,CAST_MAX=.6;
+function castFire(slot,id){
+  const b=SK[id],st=skillStats(id),base=baseDmg();P.skSwing=true;
   if(b.kind==='proj'){
     aim(16);{const fx_=P.pos.x+Math.sin(P.face)*.9,fz=P.pos.z+Math.cos(P.face)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xdaff9a,c1:0x6ac030,a:.9,tex:1});streaks({x:fx_,z:fz},6,{dir:P.face,cone:.45,sp:[8,14],up:[0,1.5],y:[1.1,1.3],life:[.12,.22],w:.06,len:.8,c0:0xeaffc0,c1:0x4a9a20,drag:4})}const spr=Math.min(b.spread,1.4/Math.max(1,st.proj-1));
     /* 회귀 화살 (v40): 화살 속도가 빨라져도 사거리는 같음. 회귀하는 화살은 모두 같은 순간(사거리 끝 시점)에 한꺼번에 돌아옴 */
@@ -2681,7 +2690,7 @@ function castSkill(slot){
     P.swing=.2;return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
-    const SLAM=.34,HIT=.15;P.slam=SLAM;P.swing=SLAM;/* v89: 검을 머리 위로 들었다가 바닥을 내려찍는 모션, 찍는 순간 가시 */
+    const pre=P.castPre,SLAM=pre?.2:.34,HIT=pre?.04:.15;P.slam=SLAM;P.swing=SLAM;P.slamK=pre?.42:0;/* v89: 검을 머리 위로 들었다가 바닥을 내려찍는 모션, 찍는 순간 가시 */
     later(HIT,()=>{const q={x:p0.x+Math.sin(a)*1.3,z:p0.z+Math.cos(a)*1.3};shake=Math.max(shake,.32);
       groundFx(q,shockTex,0x9a8070,.3,2.2,.28,.7,false,.07);groundFx(q,dotTex,0xffd8a0,.2,1.2,.12,.6,true,.08);
       spray(PNRM,q,10,{sp:[2,5],up:[3,7],y:[.1,.3],life:[.4,.8],s0:[.3,.6],s1:[.1,.2],c0:0x5a4a48,c1:0x1a1418,a:.9,drag:1.5,tex:2});
@@ -2747,11 +2756,14 @@ let SPK_GEO,SPK_MAT;const spkO=new THREE.Object3D();
 const SPK_ELEV=40,SPK_UP=new THREE.Vector3(0,1,0);
 function inFan(q,p0,a,half,len,r=0){const dx=q.x-p0.x,dz=q.z-p0.z,d=Math.hypot(dx,dz);if(d>len+r)return false;if(d<.8)return true;
   let t=Math.atan2(dx,dz)-a;t=Math.atan2(Math.sin(t),Math.cos(t));return Math.abs(t)<=half+Math.min(.5,r/d)}
-function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22,S5=5;
+function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22,S5=5,done=new Set();/* v122: 판정 확대 — 몸 크기+여유만큼 각도·거리를 넓히고, 인접 구간이 겹치게 하되 한 번 맞은 적은 다시 맞지 않음 */
   for(let j=0;j<S5;j++){const r0=j*len/S5,r1=(j+1)*len/S5;later(delay+WAVE*(j+.5)/S5,()=>{
-    for(const e of [...enemies]){if(e.air||e.hp<=0)continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz);
-      if(d<(j?r0:0)||d>=(j===S5-1?r1+e.r*.6:r1)||!inFan(e.pos,p0,a,half,len,e.r*.6))continue;
-      let t=Math.atan2(dx,dz)-a;t=Math.abs(Math.atan2(Math.sin(t),Math.cos(t)));hitKind='rock';hurt(e,dmg*(t<=core+.05?1:sideM),j%2===1);hitKind=null}
+    for(const e of [...enemies]){if(e.air||e.hp<=0||done.has(e))continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz),de=Math.max(0,d-e.r*.5);
+      if(de<(j?r0-.7:-1)||de>=(j===S5-1?r1+e.r+.9:r1+.7))continue;
+      let t=Math.atan2(dx,dz)-a;t=Math.abs(Math.atan2(Math.sin(t),Math.cos(t)));
+      const tol=Math.min(.95,(e.r*.8+.6)/Math.max(d,.6));
+      if(d<1.6?t>Math.PI/2:t>half+tol)continue;/* 바로 앞(1.6m 이내)은 앞쪽 반원 전체 */
+      done.add(e);hitKind='rock';hurt(e,dmg*(t<=core+.05||d<1.6?1:sideM),j%2===1);hitKind=null}
     const rm=(r0+r1)/2,nb=first?4:2;for(let k=0;k<nb;k++){const th=a+rnd(-half,half),q={x:p0.x+Math.sin(th)*rm,z:p0.z+Math.cos(th)*rm};
       spray(PNRM,q,first?3:2,{sp:[.8,2.4],up:[3,6],y:[.1,.4],life:[.4,.7],s0:[.25,.45],s1:[.1,.2],c0:0x3a3238,c1:0x141016,a:.85,drag:1,tex:2})}})}
   later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,WAVE))}
@@ -2771,7 +2783,7 @@ function spikeBurst(p0,a,half,len,hs,WAVE){if(!SPK_GEO){SPK_GEO=new THREE.ConeGe
     im.instanceMatrix.needsUpdate=true};
   set(0);fx.push({m:im,t:0,dur,keep:1,upd(k){set(k*dur)},end(){im.dispose&&im.dispose()}})}
 function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0;/* v88: 바닥 부채꼴 면은 그리지 않고 불씨만 */
-  fx.push({m,t:0,dur,upd(k,dt){tick-=dt;    if(tick<=0){tick=.25;for(const e of [...enemies])if(!e.air&&inFan(e.pos,p0,a,half,len,e.r*.5))hurt(e,dps*.25,true)}
+  fx.push({m,t:0,dur,upd(k,dt){tick-=dt;    if(tick<=0){tick=.25;for(const e of [...enemies])if(!e.air&&inFan(e.pos,p0,a,half,len,e.r*.5+.4))hurt(e,dps*.25,true)}
     if(Math.random()<dt*14*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;emit(PADD,{x:p0.x+Math.sin(th)*d,y:.15,z:p0.z+Math.cos(th)*d,vy:rnd(.8,2),life:rnd(.4,.7),s0:.9,s1:.2,c0:0xffc070,c1:0xff3a08,a:.8,tex:1})}}})}
 const arrowGeo=new THREE.BoxGeometry(.05,1.1,.05),arrowMat=new THREE.MeshBasicMaterial({color:0xeaf6c0});
 function fallArrow(q){const m=new THREE.Mesh(arrowGeo,arrowMat);m.position.set(q.x,7,q.z);m.rotation.z=.12;scene.add(m);
@@ -2927,7 +2939,7 @@ function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">Ch
     <p class="hint"><b style="color:var(--ink)">힘 스탯</b>이나 장비의 <b style="color:var(--ink)">생명력 재생 능력치</b>로 상쇄할 수 있습니다. 화면 위쪽의 환경 표시에서 감소량과 내 재생량을 확인하세요.</p>
     <button class="primary" id="noticeOk">확인</button>`;$('notice').hidden=false;releaseAll()}
 function stageBanner(){if(!S.cls)return;if(S.ch===4&&S.phase<3&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;el.className='sbanner '+i.c;void el.offsetWidth;el.className='sbanner on '+i.c}
-function labelButtons(){const c=C(),s1=SK[c.skills[0]];$('lAtk').textContent=c.bn;$('lS1').textContent=s1.n;$('cS1').textContent='MP '+mpCost(c.skills[0]);$('hL').textContent=s1.n;$('hR').textContent=c.bn;$('bS2').hidden=true;$('lMv').textContent=MV[S.cls]?MV[S.cls].n:'이동';$('hM').textContent=MV[S.cls]?MV[S.cls].n:'이동'}
+function labelButtons(){const c=C(),s1=SK[c.skills[0]];$('lAtk').textContent=c.bn;$('lS1').textContent=s1.n;$('cS1').textContent='MP '+mpCost(c.skills[0]);$('hL').textContent=s1.n;$('hR').textContent=c.bn;$('bS2').hidden=true;$('lMv').textContent='구르기';$('hM').textContent='구르기'}
 
 /* ================= class select ================= */
 /* ===== v93 가이드: 첫 시작 안내(버튼 강조) + 각 기능을 처음 열 때 한 번씩 설명. 설정 → 「가이드 다시 보기」 ===== */
@@ -3752,7 +3764,7 @@ function resetWorld(){clearPools();
   for(const p of projs)scene.remove(p.m);projs.length=0;
   for(const p of pickups)scene.remove(p.m);pickups.length=0;
   timers.length=0;P.cd={atk:0,s1:0,s2:0,pot:0,mv:0};
-  {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;P.mv=null;
+  {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;P.mv=null;P.cast=null;
   if(inArena())P.pos.set(FB_START.x,0,FB_START.z);camT.copy(P.pos);
   if(S.ch<NCH&&S.phase===0){S.phase=1;S.kills=0}/* v75: 처치 목표 없음 — 처음부터 길 끝 보스 */
   storyProg=0;
@@ -3771,28 +3783,23 @@ function pushOut(p,r){
   mapClamp(p,r);
   if(mapKind==='arena'||mapKind==='town'){const d=Math.hypot(p.x,p.z),m=(mapKind==='town'?TOWN_R:ARENA_R)-r;if(d>m){p.x*=m/d;p.z*=m/d}}
 }
-/* ================= 이동 스킬 (v24) =================
-   전사 돌진 · 궁수 도약 · 마법사 순간이동. 거리·선딜레이·쿨타임 공통.
-   선딜레이: 1레벨 0.23초 → 40레벨부터 0초 (선형). 쿨타임 2초 (재사용 감소 미적용) */
-const MV={warrior:{n:'돌진',c:0xffc08a},archer:{n:'도약',c:0xb8f07a},mage:{n:'순간이동',c:0xa08aff}},MV_DIST=7,MV_GO=.18;
-const mvCd=()=>S.lv>=40?.5:3-2.5*(S.lv-1)/39;/* v29: 1레벨 3초 → 40레벨 0.5초 (선형) */
-const mvWind=()=>S.lv>=40?0:.23*(40-S.lv)/39;/* v25: 1레벨 0.23초 → 40레벨 0초 */
+/* ================= 구르기 (v122) =================
+   전사·궁수·마법사 공통. 선딜레이 없이 즉시, 쿨타임 2.5초(레벨·재사용 감소 무관), 구르는 동안 무적. */
+const MV={warrior:{n:'구르기',c:0xffc08a},archer:{n:'구르기',c:0xb8f07a},mage:{n:'구르기',c:0xa08aff}},MV_DIST=6,MV_GO=.4;
+const mvCd=()=>2.5;
 function moveDir(){let mx=input.x,mz=input.z;
   if(input.keys.KeyW||input.keys.ArrowUp)mz=-1;if(input.keys.KeyS||input.keys.ArrowDown)mz=1;
   if(input.keys.KeyA||input.keys.ArrowLeft)mx=-1;if(input.keys.KeyD||input.keys.ArrowRight)mx=1;
   const l=Math.hypot(mx,mz);if(l>.05)return {x:mx/l,z:mz/l};
   if(pcMode){const dx=mouseW.x-P.pos.x,dz=mouseW.z-P.pos.z,d=Math.hypot(dx,dz);if(d>.3)return {x:dx/d,z:dz/d}}
   return {x:Math.sin(P.face),z:Math.cos(P.face)}}
-function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.hp<=0)return;const d=moveDir(),w=mvWind();
-  P.cd.mv=mvCd();P.face=Math.atan2(d.x,d.z);P.mv={t:w,go:-1,dx:d.x,dz:d.z};
-  if(w>0)ringFx(P.pos,1.3,MV[S.cls].c,w)}
+function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.cast||P.hp<=0)return;const d=moveDir();
+  P.cd.mv=mvCd();P.face=Math.atan2(d.x,d.z);P.mv={go:0,dx:d.x,dz:d.z};hero.rotation.y=P.face;P.inv=Math.max(P.inv,MV_GO);ringFx(P.pos,1.1,MV[S.cls].c,.25)}
 function mvStep(dt){const m=P.mv;if(!m)return;
-  if(m.go<0){m.t-=dt;if(m.t>0)return;
-    if(S.cls==='mage'){ringFx(P.pos,1.4,MV.mage.c,.3);P.pos.x+=m.dx*MV_DIST;P.pos.z+=m.dz*MV_DIST;pushOut(P.pos,.45);ringFx(P.pos,1.4,MV.mage.c,.3);P.inv=Math.max(P.inv,.1);P.mv=null;return}
-    m.go=0}
-  const step=Math.min(dt,MV_GO-m.go);P.pos.x+=m.dx*MV_DIST/MV_GO*step;P.pos.z+=m.dz*MV_DIST/MV_GO*step;m.go+=step;P.inv=Math.max(P.inv,.05);
-  if(S.cls==='warrior'&&Math.random()<.5)ringFx(P.pos,.7,MV.warrior.c,.2);
-  if(m.go>=MV_GO-1e-6){if(S.cls==='archer')ringFx(P.pos,1.2,MV.archer.c,.25);P.mv=null}}
+  const step=Math.min(dt,MV_GO-m.go),k0=m.go/MV_GO,k1=(m.go+step)/MV_GO,ease=k=>k*k*(3-2*k);/* 부드럽게 가속·감속 */
+  const dd=MV_DIST*(ease(k1)-ease(k0));P.pos.x+=m.dx*dd;P.pos.z+=m.dz*dd;m.go+=step;P.inv=Math.max(P.inv,.05);pushOut(P.pos,.45);
+  if(Math.random()<.6)ringFx(P.pos,.6,MV[S.cls].c,.18);
+  if(m.go>=MV_GO-1e-6){ringFx(P.pos,1,MV[S.cls].c,.2);P.mv=null}}
 let spawnT=1.5,saveT=0,time=0;const egLim=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel,egRoom=()=>TIER_KILLS-S.tierKills-enemies.filter(e=>!e.boss).length;/* v109: 처치+생존이 200을 넘지 않게 */
 const EGM=()=>S.ch>=NCH&&mapKind!=='story'?3:1;/* v108: 엔드게임 몬스터 수·젠 속도 ×3 */
 function update(dt){
@@ -3803,7 +3810,9 @@ function update(dt){
   if(input.keys.KeyA||input.keys.ArrowLeft)mx=-1;if(input.keys.KeyD||input.keys.ArrowRight)mx=1;
   const ml=Math.hypot(mx,mz);
   mvStep(dt);
-  if(ml>.05&&!P.mv){const k=Math.min(1,ml)/ml;const spd=heroSpd()*(P.dashT>0?P.dashM:1)*(P.spin>0?.5+.05*gl('whirl','swift'):P.swing>0&&!P.skSwing?.55:1);P.pos.x+=mx*k*spd*dt;P.pos.z+=mz*k*spd*dt;if(P.swing<=0&&P.spin<=0)P.face=Math.atan2(mx,mz)}
+  if(P.hp<=0)P.cast=null;
+  if(P.cast){P.cast.t-=dt;if(P.cast.t<=0){const c=P.cast;P.cast=null;P.castPre=true;try{castFire(c.slot,c.id)}finally{P.castPre=false}}}
+  if(ml>.05&&!P.mv&&!P.cast){const k=Math.min(1,ml)/ml;const spd=heroSpd()*(P.dashT>0?P.dashM:1)*(P.spin>0?.5+.05*gl('whirl','swift'):P.swing>0&&!P.skSwing?.55:1);P.pos.x+=mx*k*spd*dt;P.pos.z+=mz*k*spd*dt;if(P.swing<=0&&P.spin<=0)P.face=Math.atan2(mx,mz)}
   pushOut(P.pos,.45);
   for(const k in P.cd)P.cd[k]=Math.max(0,P.cd[k]-dt);
   if(P.spin>0&&P.vortex){const V=P.vortex;for(const e of enemies){if(e.boss||e.rank>=3)continue;const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,d=Math.hypot(dx,dz);
@@ -3827,17 +3836,18 @@ function update(dt){
   /* 지역 환경 피해: 최대 생명력의 일정 비율이 초당 감소 (환경만으로는 1 이하로 떨어지지 않음) */
   {const dr_=envDrain();if(dr_>0&&P.hp>1)P.hp=Math.max(1,P.hp-dr_*dt)}
   hero.position.copy(P.pos);
-  if(P.mv&&P.mv.go>=0&&S.cls==='archer')hero.position.y=Math.sin(Math.PI*P.mv.go/MV_GO)*1.8;
+  hero.rotation.order='YXZ';/* v122: 구르기 — 진행 방향으로 앞구르기(몸 중심을 축으로 한 바퀴) */
+  if(P.mv){const a=Math.PI*2*Math.min(1,P.mv.go/MV_GO),f=P.face,o=-.9*Math.sin(a);hero.rotation.x=a;hero.position.set(P.pos.x+Math.sin(f)*o,.9-.9*Math.cos(a),P.pos.z+Math.cos(f)*o)}else hero.rotation.x=0;
   if(P.spin>0)hero.rotation.y+=dt*22;
   else{let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,dt*18)}
   const piv=hero.userData.piv;
   if(hero.userData.blade){const on=P.spin>0||P.swing>0,bm=hero.userData.blade.material;bm.emissive.setHex(on?(P.spin>0&&P.spinFire?0xff6a20:0x6a8ad0):(hero.userData.bladeBase||0x221a10))}
   if(S.cls==='warrior')piv.rotation.y=P.swing>0?P.swingDir*(P.swing/.18*2.2-1.1):-.2;
   else piv.position.z=P.swing>0?.05-P.swing*.8:.05;
-  heroAnim(dt,ml>.05&&!P.mv);
+  heroAnim(dt,ml>.05&&!P.mv&&!P.cast);
   P.slam=(P.slam||0)-dt;
   if(S.cls==='warrior'){const u=hero.userData;
-    if(P.slam>0){const k=1-P.slam/.34,up=Math.min(1,k/.42),dn=k<.42?0:Math.min(1,(k-.42)/.12),rec=k<.7?0:(k-.7)/.3,e1=1-Math.pow(1-up,2);
+    if(P.slam>0){const k=P.slamK>0?.42+(1-P.slam/.2)*.58:1-P.slam/.34,up=Math.min(1,k/.42),dn=k<.42?0:Math.min(1,(k-.42)/.12),rec=k<.7?0:(k-.7)/.3,e1=1-Math.pow(1-up,2);
       piv.rotation.y=0;piv.rotation.x=(-2.3*e1)*(1-dn)+(1.6*dn)*(1-rec);
       u.body.rotation.x=(-.12*e1)*(1-dn)+(.45*dn)*(1-rec);u.body.position.y=-.22*dn*(1-rec)+.05*e1*(1-dn)}
     else piv.rotation.x=0}
@@ -3846,6 +3856,11 @@ function update(dt){
     if(P.sky>0){const k=1-P.sky/.42,up=Math.min(1,k/.25),rel=k<.75?0:(k-.75)/.25,e=(1-Math.pow(1-up,2))*(1-rel);
       u.armL.rotation.x=-1.3-1.25*e;u.body.rotation.x=-.28*e;arm.rotation.x=-.5-1.9*e;piv.position.z=.05+(k>.24&&k<.5?-.15:0)}
     else arm.rotation.x=-.5}
+  if(P.cast){const u=hero.userData,k=1-P.cast.t/P.cast.T,e=1-Math.pow(1-Math.min(1,k*2.2),2);/* v122: 시전 중 자세 */
+    if(S.cls==='warrior'){piv.rotation.y=0;piv.rotation.x=-2.3*e;u.body.rotation.x=-.12*e}
+    else if(S.cls==='archer'){u.armL.rotation.x=-1.3-1.25*e;u.body.rotation.x=-.28*e;piv.children[0].rotation.x=-.5-1.9*e}
+    else{u.armL.rotation.x=-.3-1.7*e;u.body.rotation.x=-.18*e;u.body.position.y=.05*e}
+    if(Math.random()<dt*30*QM())emit(PADD,{x:P.pos.x+rnd(-.5,.5),y:rnd(.2,1.6),z:P.pos.z+rnd(-.5,.5),vy:rnd(.5,1.6),life:.3,s0:.3,s1:.05,c0:0xffe0a8,c1:0x8a4a20,a:.7,tex:1})}
 
   /* spawner: 장마다 수와 속도가 일정하게 증가 */
   const d=diff();
