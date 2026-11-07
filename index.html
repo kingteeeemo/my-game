@@ -1074,7 +1074,9 @@ const SPD_CAP=150,spdRaw=()=>1.4*stN('agi')+gear().spd;
 const heroSpd=()=>C().spd*.8*(1+Math.min(SPD_CAP,spdRaw())/100)*(P.hasteT>0?1.6:1);
 function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
   return `<p class="hint" style="margin:6px 0 0;${cap?'color:#ffb070':''}">이동 속도 상승(민첩+신발)은 합계 <b>+${SPD_CAP}%</b>가 상한입니다. 현재 +${Math.min(SPD_CAP,r).toFixed(1)}%${cap?` — 상한에 도달해 민첩을 더 찍거나 신발을 강화해도 이동 속도는 늘지 않습니다.${r>SPD_CAP?` (초과분 +${(r-SPD_CAP).toFixed(1)}%)`:''}`:'.'}</p>`}
-const cdMul=()=>Math.max(.1,1-gear().cdr/100);
+/* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
+   (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
+const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
 const critCh=()=>.1+gear().crit/100+.008/3*stN('agi');
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
@@ -1109,7 +1111,7 @@ function skillStats(id){
   st.cd*=(1-hasteP()*L('haste'))*(b.kind==='whirl'?1:cdMul());/* v44: 회전 베기는 장비 쿨감 대신 화염 폭발 빈도 증가 */
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
-  if(b.kind==='whirl'){const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*gear().cdr/100),r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
+  if(b.kind==='whirl'){const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
   if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
@@ -3039,7 +3041,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v148';
+const APP_VER='v149';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3577,7 +3579,7 @@ function renderInv(){
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null;
   const head=`<div class="shead"><div><div class="chap">Equipment · Bag</div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
   const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):'';
-  const sum=`<div class="sum">보유 골드 <b style="color:#ffd24a">${fmtG(S.gold)} G</b> · 피해 <b>${Math.round(baseDmg())}</b> · 생명력 <b>${heroMax()}</b> · 마나 <b>${heroMp()}</b> · 받는 피해 <b>-${Math.round(dr()*100)}%</b> · 치명타 <b>${Math.round(critCh()*100)}%</b>${g.cdr?` · 대기시간 <b>-${g.cdr}%</b>`:''}${g.regen?` · 생명력 재생 <b>+${g.regen}%</b>`:''}${g.spd?` · 이동 <b>+${g.spd}%</b>`:''}${g.mcr?` · 마나 소모 <b>-${g.mcr}%</b>`:''}${g.mreg?` · 마나 재생 <b>+${g.mreg}%</b>`:''}${g.fdmg?` · 최종 피해 <b>+${g.fdmg}%</b>`:''}</div>`;
+  const sum=`<div class="sum">보유 골드 <b style="color:#ffd24a">${fmtG(S.gold)} G</b> · 피해 <b>${Math.round(baseDmg())}</b> · 생명력 <b>${heroMax()}</b> · 마나 <b>${heroMp()}</b> · 받는 피해 <b>-${Math.round(dr()*100)}%</b> · 치명타 <b>${Math.round(critCh()*100)}%</b>${g.cdr?` · 대기시간 <b>-${Math.round((1-cdMul())*1000)/10}%</b>`:''}${g.regen?` · 생명력 재생 <b>+${g.regen}%</b>`:''}${g.spd?` · 이동 <b>+${g.spd}%</b>`:''}${g.mcr?` · 마나 소모 <b>-${g.mcr}%</b>`:''}${g.mreg?` · 마나 재생 <b>+${g.mreg}%</b>`:''}${g.fdmg?` · 최종 피해 <b>+${g.fdmg}%</b>`:''}</div>`;
   const foot=`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span>${upgrades().length?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}</div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
   const IFS=[['all','전체'],...EQS.map(k=>[k,SLOTN[k]]),['sp','★ 특수'],['lock','🔒 잠금']],ifOk=x=>invFilter==='all'||invFilter===x.slot||invFilter==='sp'&&!!spOf(x)||invFilter==='lock'&&!!x.lock;
@@ -3782,7 +3784,7 @@ function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toa
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
   smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<700)return;/* v148: 컷신 구간은 컷신이 끝난 뒤 0.7초 쉬고 다음 강화 */if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},443);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
-function cdrCapNote(){return ''}/* v146: 상한 폐지로 안내 없음 */
+function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 대기시간 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다.</p>`}/* v149 */
 function renderSmith(){
   let h=`<div class="shead"><div><div class="chap">Blacksmith · ${TOWN.smith}</div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
   if(!smithSel){
