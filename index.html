@@ -2808,7 +2808,7 @@ function basicFire(){
 /* ================= v172 신규 주력 스킬 3종 (초안) =================
    전사 「검기」(wave)      : 검을 휘둘러 초승달 검기를 앞으로 날림 — 길을 따라 적을 모두 벰
    궁수 「폭발 사격」(boom) : 화살이 바로 앞 짧은 거리에 꽂히며 크게 폭발 — 2차 「연발 폭격」으로 최대 4발
-   마법사 「사슬 폭발」(pillar): 적의 자리에 마력 기둥이 내리꽂히며 폭발 — 2차 「연쇄 작렬」로 폭발이 근처 적에게 번짐 */
+   마법사 「사술 폭발」(pillar): 적의 자리에 긴 사술 기둥이 내리꽂히며 폭발 — 2차 「연쇄 작렬」로 폭발이 근처 적에게 번짐 */
 const PAL_WAVE={c:[0xffffff,0xffc070,0x3a1808],core:[0xffffff,0xfff0d0,0xffb060],ring:0xffe0b0,fl:0xffd090,st:[0xffffff,0xff9a30],sp:[0xffffff,0xffb060],smoke:0,ember:0,fast:1},
   PAL_ARC={c:[0xfff0ff,0xd060ff,0x2a0a40],core:[0xffffff,0xf0c0ff,0xb050ff],ring:0xe0a0ff,fl:0xd080ff,st:[0xffffff,0xb050ff],sp:[0xffffff,0xd090ff],smoke:0,ember:0xc070ff,fast:1};
 /* 수치 */
@@ -2821,7 +2821,7 @@ const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L>=10?3:L>=7?2:L>=4?
 const SK_NEW={
   wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
-  pillar:{n:'사슬 폭발',role:'다수 공격',tag:'pillar',en:'Chain Blast · Arcane',kind:'pillar',gems:['prad','pecho','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 마력 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
+  pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','pecho','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);/* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
 for(const [c,k] of [['warrior','wave'],['archer','boom'],['mage','pillar']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 Object.assign(GEMS,{
@@ -2871,38 +2871,60 @@ function shootWave(a,o){const W=o.w||1;
     if(o.burst){const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r,Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3,PAL_WAVE);shake=Math.max(shake,.12);aoe(c,o.burst.r,o.burst.dmg,{quiet:true,so:o.so})}};
   return p}
 /* ---------- 궁수: 폭발 사격 ---------- */
-function boomExplode(c,o){const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,R*.62,Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3);shake=Math.max(shake,Math.min(.3,.12+R*.03));groundFx(c,shockTex,0xffb070,R*.3,R*1.25,.3,.7,true,.07);
-  decalFx(c,crackTex,0x1a0c06,R*.9,3,.8,false);decalFx(c,dotTex,0xff7a20,R*.8,.6,.6,true);
+/* v174 폭발 사격 폭발: 화염 불덩이·번개와 다른 「충격 폭발」 — 흰빛 섬광 심지 + 두꺼운 호박색 충격파 고리 2겹 + 바닥을 따라 뻗는 빛살 + 돌 파편·흙먼지 고리 + 크레이터 */
+const PAL_BOOM={ring:0xffc040,ring2:0xfff0c0,spoke0:0xffffff,spoke1:0xffa020,dust0:0xa08868,dust1:0x3a2c20};
+function boomFx(c,R,FK){const q=QM();shake=Math.max(shake,Math.min(.32,.14+R*.03));flash(c,0xffd080,Math.min(2.8,1+R*.3)*FK);
+  popFx(c.x,.8,c.z,.4,R*1.3,.12,0xffffff,.95*FK);popFx(c.x,.7,c.z,R*.5,R*1.6,.22,0xffc050,.5*FK);
+  /* 충격파 고리: 안쪽 흰 고리가 먼저, 호박색 두꺼운 고리가 뒤따라 넓게 */
+  for(const [col,d0,dur,s0,s1,op] of [[PAL_BOOM.ring2,0,.22,.2,1.15,.9],[PAL_BOOM.ring,.03,.4,.15,1.7,.8]]){const sw=new THREE.Mesh(fxPlane,SHOCK_MAT(col));sw.rotation.x=-Math.PI/2;sw.position.set(c.x,.08,c.z);later(d0,()=>{scene.add(sw);
+    fx.push({m:sw,t:0,dur,upd(k){const e=1-Math.pow(1-k,2.4);sw.scale.setScalar(R*(s0+(s1-s0)*e));sw.material.uniforms.k.value=k;sw.material.uniforms.ff.value=op*FK}})})}
+  /* 바닥 빛살: 중심에서 사방으로 빠르게 뻗는 줄 */
+  const ns=Math.round(14*q);for(let i=0;i<ns;i++){const a=i*Math.PI*2/ns+rnd(-.1,.1),sp=R*rnd(7,11);streak({x:c.x,y:.35,z:c.z,vx:Math.sin(a)*sp,vy:rnd(0,.6),vz:Math.cos(a)*sp,life:rnd(.16,.26),w:.12,len:R*.45,c0:PAL_BOOM.spoke0,c1:PAL_BOOM.spoke1,drag:4})}
+  streaks(c,Math.round(10*q*FK),{sp:[R*2,R*4],up:[6,12],y:[.4,.9],life:[.4,.7],w:.08,len:.9,c0:0xffffff,c1:0xffa020,drag:1.5,grav:-18});
+  /* 돌 파편 + 흙먼지 고리(바깥으로 밀려남) */
+  debris(c,{n:Math.round(7*q),color:0x3a2e26,geo:octaGeo,sp:[R*1.2,R*2.6],up:[4,9],y:[.2,.5],sz:[.1,.24],r0:R*.3,dur:.9,g:24});
+  const nd=Math.round(12*q);for(let i=0;i<nd;i++){const a=i*Math.PI*2/nd+rnd(-.2,.2),sp=R*rnd(2.2,3.4);emit(PNRM,{x:c.x+Math.sin(a)*R*.3,y:.3,z:c.z+Math.cos(a)*R*.3,vx:Math.sin(a)*sp,vy:rnd(.8,2),vz:Math.cos(a)*sp,life:rnd(.5,.9),s0:R*.3,s1:R*.75,c0:PAL_BOOM.dust0,c1:PAL_BOOM.dust1,a:.55*FK,drag:2.2,rv:1,tex:2})}
+  groundFx(c,dotTex,0xffd090,R*.2,R*.9,.14,.7*FK,true,.08);
+  decalFx(c,crackTex,0x120a06,R*.95,3.2,.85,false);decalFx(c,dotTex,0x2a1a10,R*.7,2.4,.6,false);decalFx(c,dotTex,0xff8a30,R*.45,.5,.55*FK,true)}
+function boomExplode(c,o){const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();boomFx(c,R,Math.max(.55,1/Math.sqrt(fbT.length)));
   aoe(c,R,o.dmg,{quiet:true,so:o.so});
   if(o.ember)burnField(c,R*.75,o.ember.dps,o.ember.dur);
   if(o.shrap){const n=o.shrap.n,a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*Math.PI*2/n;
     shoot(a,{from:c,color:0xffc070,size:.3,hr:.4,trail:1.2,tw:.1,tcol:0xff8a30,glow:1,gcol:0xff9a40,speed:14,life:.42,dmg:o.shrap.dmg,so:o.so});const p=projs[projs.length-1];p.m.position.y=.9;
-    p.onEnd=()=>{const q=p.m.position;explode({x:q.x,z:q.z},o.shrap.dmg*.5,null,1.2)}}}}
+    p.onEnd=()=>{const q=p.m.position,cc={x:q.x,z:q.z};popFx(q.x,.6,q.z,.3,1.6,.14,0xffe0a0,.8);groundFx(cc,shockTex,0xffc060,.3,1.4,.2,.6,true,.07);aoe(cc,1.2,o.shrap.dmg*.5,{quiet:true,so:o.so})}}}}
+/* v174: 직선으로 날아가 바닥 근처에서 터짐 (포물선 제거) */
 function shootBoom(a,dist,o){const sp=26,life=dist/sp;
   shoot(a,{color:0xffd090,size:.5,long:true,trail:2.2,tw:.16,tcol:0xff9a40,glow:1.8,gcol:0xff9a40,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0xff9a30,c1:0xfff4d0,cw:.22}});const p=projs[projs.length-1];
-  const y0=1.2;p.upd=()=>{const k=1-p.life/life;p.m.position.y=y0+Math.sin(k*Math.PI)*1.3-k*.8;if(Math.random()<.5*QM())emit(PADD,{x:p.m.position.x,y:p.m.position.y,z:p.m.position.z,life:.2,s0:.3,s1:.05,c0:0xffe0a0,c1:0xff6a10,a:.8,tex:1})};
+  p.upd=()=>{const k=1-p.life/life;p.m.position.y=1.2-.7*k;if(Math.random()<.5*QM())emit(PADD,{x:p.m.position.x,y:p.m.position.y,z:p.m.position.z,life:.2,s0:.3,s1:.05,c0:0xffe0a0,c1:0xff6a10,a:.8,tex:1})};
   p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o)}}
-/* ---------- 마법사: 사슬 폭발 ---------- */
-function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=9;
+/* ---------- 마법사: 사술 폭발 ---------- */
+/* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
+const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1};
+function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
-  const outer=new THREE.Mesh(pillarGeo,pillarMat(0xa050ff,0xf0d0ff)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));outer.scale.set(R*.2,H,R*.2);inner.scale.set(R*.07,H,R*.07);
-  const disc=flatMesh(discGeo,0xd080ff,0);disc.position.y=.06;disc.scale.setScalar(R*.9);const ring=flatMesh(ringGeo,0xf0d0ff,0);ring.position.y=.07;ring.scale.setScalar(R);
-  g.add(outer,inner,disc,ring);let tt=0,boomed=false;
-  const PRE=.14,HOLD=.22,FADE=.3,D=PRE+HOLD+FADE;
-  fx.push({m:g,t:0,dur:D,upd(k,dt){tt+=dt;const u1=outer.material.uniforms,u2=inner.material.uniforms;u1.uT.value=u2.uT.value=tt;
-      if(tt<PRE){const e=tt/PRE;const top=H*(1-e*e);outer.position.y=inner.position.y=top;u1.uOp.value=.35*Math.min(1,tt/.04);u2.uOp.value=.8*Math.min(1,tt/.04);disc.material.opacity=.25*e;ring.material.opacity=.8*e;ring.scale.setScalar(R*(1.6-.6*e))}
-      else{if(!boomed){boomed=true;outer.position.y=inner.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst({x:c.x,z:c.z},R*.45,.7*Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3,PAL_ARC);radialBolts({x:c.x,z:c.z},R*.9,Math.round(4*QM()),0xc070ff);
-          groundFx({x:c.x,z:c.z},shockTex,0xe0b0ff,R*.3,R*1.3,.3,.7,true,.07);decalFx({x:c.x,z:c.z},crackTex,0x7a40c0,R*.9,1.4,.7,true);decalFx({x:c.x,z:c.z},crackTex,0x0e0618,R,2.6,.6,false);shake=Math.max(shake,.16);
+  const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
+  for(const m of [outer,mid]){m.material.blending=THREE.CustomBlending;m.material.blendSrc=THREE.OneFactor;m.material.blendDst=THREE.OneMinusSrcAlphaFactor}/* 진한 보라가 바탕을 덮도록 */
+  const W0=[R*.26,R*.15,R*.05];outer.scale.set(W0[0],H,W0[0]);mid.scale.set(W0[1],H,W0[1]);inner.scale.set(W0[2],H,W0[2]);
+  const disc=flatMesh(discGeo,0x2a0848,0);disc.material.blending=THREE.NormalBlending;disc.position.y=.06;disc.scale.setScalar(R*.95);const ring=flatMesh(ringGeo,0xff80f0,0);ring.position.y=.07;ring.scale.setScalar(R);
+  g.add(outer,mid,inner,disc,ring);let tt=0,boomed=false;
+  const PRE=.07,HOLD=.16,FADE=.34,D=PRE+HOLD+FADE;
+  fx.push({m:g,t:0,dur:D,upd(k,dt){tt+=dt;const us=[outer,mid,inner].map(m=>m.material.uniforms);for(const u of us)u.uT.value=tt;
+      if(tt<PRE){const e=tt/PRE;const bot=H*(1-e*e);for(const m of [outer,mid,inner])m.position.y=bot;us[0].uOp.value=.85;us[1].uOp.value=.9;us[2].uOp.value=1;disc.material.opacity=.5*e;ring.material.opacity=.9*e;ring.scale.setScalar(R*(1.5-.5*e))}
+      else{if(!boomed){boomed=true;for(const m of [outer,mid,inner])m.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));
+          fireBurst({x:c.x,z:c.z},R*.5,.8*FK,fbT.length<3,PAL_HEX);radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
+          groundFx({x:c.x,z:c.z},shockTex,0xd060ff,R*.3,R*1.35,.3,.8*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*.95,1.2,.8,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R,3,.75,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*.8,2.4,.6,false);shake=Math.max(shake,.22);
+          spray(PNRM,{x:c.x,z:c.z},Math.round(8*QM()),{sp:[R*.8,R*1.8],up:[1.5,3.5],y:[.2,.8],r0:R*.3,life:[.6,1],s0:[R*.25,R*.4],s1:[R*.7,R*1.1],c0:0x3a1060,c1:0x08000f,a:.6*FK,drag:1.8,rv:1,tex:2});/* 어두운 보라 연기 */
           aoe({x:c.x,z:c.z},R,o.dmg,{quiet:true,so:o.so});if(o.after)o.after()}
-        const f=tt<PRE+HOLD?1:Math.max(0,1-(tt-PRE-HOLD)/FADE);const w=1+(tt-PRE)*1.6;outer.scale.set(R*.2*w,H,R*.2*w);inner.scale.set(R*.07*w,H*f,R*.07*w);
-        u1.uOp.value=.35*f;u2.uOp.value=.8*f;disc.material.opacity=.25*f;ring.material.opacity=.7*f;ring.scale.setScalar(R*(1+(tt-PRE)*.5));
-        if(f>0&&Math.random()<dt*30*QM())emit(PADD,{x:c.x+rnd(-.3,.3)*R,y:rnd(.2,3),z:c.z+rnd(-.3,.3)*R,vy:rnd(2,5),life:rnd(.25,.45),s0:.45,s1:.1,c0:0xffffff,c1:0xb050ff,a:.8,tex:1})}},
-    end(){outer.material.dispose();inner.material.dispose();disc.material.dispose();ring.material.dispose()}})};
+        const f=tt<PRE+HOLD?1:Math.max(0,1-(tt-PRE-HOLD)/FADE),w=.25+.75*f;/* 꽂힌 뒤 가늘어지며 사라짐 */
+        outer.scale.set(W0[0]*w,H,W0[0]*w);mid.scale.set(W0[1]*w,H,W0[1]*w);inner.scale.set(W0[2]*(.5+.5*f),H,W0[2]*(.5+.5*f));
+        us[0].uOp.value=.85*f;us[1].uOp.value=.9*f;us[2].uOp.value=f;disc.material.opacity=.5*f;ring.material.opacity=.8*f;ring.scale.setScalar(R*(1+(tt-PRE)*.6));
+        if(f>0&&Math.random()<dt*40*QM())emit(PADD,{x:c.x+rnd(-.25,.25)*R,y:rnd(.2,6),z:c.z+rnd(-.25,.25)*R,vy:rnd(3,8),life:rnd(.25,.45),s0:.4,s1:.08,c0:0xff90f0,c1:0x8010e0,a:.9,tex:1})}},
+    end(){for(const m of [outer,mid,inner,disc,ring])m.material.dispose()}})};
   if(delay>0)later(delay,go);else go()}
 function pillarCast(c,o,hit,depth){const after=()=>{
-    if(o.echo){for(let i=1;i<=o.echo.n;i++)later(.18*i,()=>{const q={x:c.x+rnd(-.4,.4),z:c.z+rnd(-.4,.4)};fireBurst(q,o.r*.3,.5,false,PAL_ARC);groundFx(q,shockTex,0xd8a0ff,o.r*.2,o.r*.8,.22,.6,true,.07);aoe(q,o.r*.8,o.echo.dmg,{quiet:true,so:o.so})})}
+    if(o.echo){for(let i=1;i<=o.echo.n;i++)later(.18*i,()=>{const q={x:c.x+rnd(-.4,.4),z:c.z+rnd(-.4,.4)};fireBurst(q,o.r*.3,.5,false,PAL_HEX);groundFx(q,shockTex,0xd060ff,o.r*.2,o.r*.8,.22,.6,true,.07);aoe(q,o.r*.8,o.echo.dmg,{quiet:true,so:o.so})})}
     if(o.chain&&depth<o.chain.n){const skip=hit;const t=nearestEnemy(c,o.chain.r,skip);if(t){hit.add(t);const o2=Object.assign({},o,{dmg:o.dmg*o.chain.m,echo:o.echo?{n:o.echo.n,dmg:o.echo.dmg*o.chain.m}:null});
-        const b={x:c.x,y:2.2,z:c.z},e={x:t.pos.x,y:2.2,z:t.pos.z};boltFx(b,e,{lv:4,w:.4,dur:.2,cg:0xc070ff,cc:0xffffff});
+        const b={x:c.x,y:2.2,z:c.z},e={x:t.pos.x,y:2.2,z:t.pos.z};boltFx(b,e,{lv:4,w:.4,dur:.2,cg:0xb030ff,cc:0xffc0ff});
         later(.14,()=>pillarCast({x:t.pos.x,z:t.pos.z},o2,hit,depth+1))}}};
   pillarStrike(c,Object.assign({},o,{after}))}
 function castSkill(slot){
@@ -3257,7 +3279,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v173';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v174';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
