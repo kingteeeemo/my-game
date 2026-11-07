@@ -811,7 +811,7 @@ const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},5:{e:[9,18,30,48,72],g:[3000,80
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>G2C[g2Max(g)].e[L],g2Gold=(g,L)=>G2C[g2Max(g)].g[L];
 /* v82 새 주력 스킬 보조 수치 */
 const qLen=L=>L<1?7:7.56+(15-7.56)*(L-1)/9,/* v146: 1단계 7.56m 유지 → 10단계 15m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[30,60,90,130,170,210],qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
-const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:2+.2*L,m:.5+.125*L});/* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
+const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:1.8,m:(2+.2*L)*(.5+.125*L)/1.8});/* v153: 지속시간 1.8초 고정, 단계는 피해만 증가 — 총 피해량(×dur×m)은 v145와 동일(10단계 7.0) *//* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
 const SHK_HALF0=.26,SHK_DEN=.7;/* v145: 충격파 수는 부채꼴 넓이에 비례 (30° 기준 옛 횟수의 70%) */
 const shkCnt=(L,half)=>Math.max(1,Math.round(shkN(L)*SHK_DEN*half/SHK_HALF0));
 const rR=L=>2.6*(1+.12*L),rDur=L=>2+.1*L,rDen=L=>({rate:6*(1+.08*L),zones:L>=10?3:L>=5?2:1});
@@ -3041,7 +3041,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v152';
+const APP_VER='v153';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
