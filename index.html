@@ -2452,11 +2452,11 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float rays=pow(.5+.5*sin(a*26.+seed*5.+(fbm(vec2(a*5.,seed))-.5)*9.),3.);/* 중심에서 뻗는 얼음 결 */
     float cells=smoothstep(.55,.9,fbm(q*7.+seed*3.));/* 얼어붙은 판 무늬 */
     float melt=1.-smoothstep(.55,1.,k);/* v184: 불투명한 흰 얼음판이 깔리며 퍼지고, 뒤에 녹아 사라짐 */
-    float sheet=inside*melt*ff;float flake=texture2D(tex,q*.5+.5).a;float flake2=texture2D(tex,vec2(q.y,-q.x)*1.1+.5).a;/* 눈꽃 결정이 퍼질 때부터 얼음판에 새겨짐 */
+    float sheet=inside*melt*ff;float flake=texture2D(tex,q*.95+seed).a;float flake2=texture2D(tex,vec2(q.y,-q.x)*1.7+seed*2.3).a;/* v187: 눈꽃 결정을 여러 개 타일링(큰 것 ~2개·작은 것 ~3.5개 지름당) — 폭발 반경에 비례해 작아짐 */
     float shade=(.62+.08*rays*smoothstep(.05,.8,d/max(.05,fr))+.08*cells)*(.86+.3*max(flake,flake2*.8));/* v186: 밝기 -20% */
     float spark=inside*smoothstep(.84,1.,fbm(q*16.+seed*4.+vec2(k*3.,-k*2.)))*melt;
     float crest=(band*.9*(1.-k*.5)+lead*.7*(1.-k))*ff*(1.-smoothstep(.8,1.,k));
-    vec3 ice=mix(vec3(.96,.98,1.),vec3(.8,.9,1.),cells*.6)*shade;/* 흰-하늘빛 얼음 */
+    vec3 ice=mix(vec3(1.,1.,1.),vec3(.9,.95,1.),cells*.5)*shade;/* v187: 더 희게(눈) *//* 흰-하늘빛 얼음 */
     vec3 c=ice*sheet+core*(crest*.8+spark*.65);float al=clamp(sheet*.99+crest*.5,0.,1.);gl_FragColor=vec4(c,al);}`;
   return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:null}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
@@ -2496,7 +2496,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     /* v180: 서리 원판·테두리·충격파 고리 제거 → 부드러운 서리 빛 번짐 + 서리 구름 + 얼음 가시 + 사방으로 튀는 얼음 조각 */
     fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));
     /* v182: 바닥에 촥 펼쳐지는 서리 파동(셰이더) — 들쭉날쭉한 결정 마루가 피해 반경까지 번져 나가고, 그 뒤로 중심에서 뻗는 얼음 결 무늬와 반짝임이 남았다가 녹아 사라짐 */
-    {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*Math.max(.6,FK);u.tex.value=frostTex;
+    {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*Math.max(.6,FK);u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
       m.renderOrder=2;fx.push({m,t:0,dur:.8,upd(k){u.k.value=k}})}
     popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.45*ka*FK);
     /* v183: 마루를 따라 공간을 채우며 퍼지는 흰 얼음 안개 — 3단계로 바깥으로 밀려나며 부풀고, 천천히 흩어짐 */
@@ -3323,7 +3323,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v186';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v187';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
