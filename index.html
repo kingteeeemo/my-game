@@ -3051,7 +3051,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v156';
+const APP_VER='v157';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3239,14 +3239,24 @@ function showClassSel(){
   $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
 }
 let testPick=false;
-/* v156: 테스트 캐릭터 버튼은 숨김 — 제목 로고를 3초 안에 5번 누르고 암호를 맞히면 이 기기에서만 열림(기기 저장소). 소스에는 암호 해시만 있음 */
-const DEV_H='1c92d61d2b9c328ef63823b900e09e446d86ef5606a3604b912fd6793b0a76dc',devOk=()=>{try{return localStorage.getItem('dev_ok')===DEV_H}catch(e){return false}};
-(()=>{let n=0,t0=0;const h=document.querySelector('#title h1');if(!h)return;h.style.cursor='default';
-  h.addEventListener('click',async()=>{const now=Date.now();if(now-t0>3000)n=0;t0=now;if(++n<5)return;n=0;
-    if(devOk()){toast('테스트 모드','이미 이 기기에서 켜져 있습니다');return}
-    const pw=prompt('암호');if(!pw)return;
-    try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ember-sanctum:'+pw.trim())),hx=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
-      if(hx===DEV_H){localStorage.setItem('dev_ok',DEV_H);toast('테스트 모드 켜짐','슬롯 화면에 테스트 캐릭터 버튼이 나타납니다')}else toast('암호가 다릅니다','')}catch(e){}})})();
+/* v157: 테스트 캐릭터 — 슬롯 화면 버튼 삭제. 제목의 「잿불 성역」 로고를 3초 안에 5번 누르면(처음 한 번은 암호 입력) 바로 테스트 캐릭터 직업 선택으로 들어감.
+   암호는 소스에 SHA-256 해시만 있고(동기식 자체 구현 — prompt()·crypto.subtle 없이 어떤 환경에서도 동작), 맞히면 이 기기에 기억 */
+const DEV_H='0e179924e6b5ea0e29796294d9fc4690146dbec671e5758dff40719eec377327',devOk=()=>{try{return localStorage.getItem('dev_ok')===DEV_H}catch(e){return false}};
+function sha256(str){const u=new TextEncoder().encode(str),K=[],H=[];let p=2,n=0;const isP=x=>{for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true};
+  const fr=x=>((x-Math.floor(x))*4294967296)|0;while(n<64){if(isP(p)){if(n<8)H[n]=fr(Math.pow(p,.5));K[n]=fr(Math.pow(p,1/3));n++}p++}
+  const l=u.length,nb=((l+9+63)>>6)<<6,m=new Uint8Array(nb);m.set(u);m[l]=128;new DataView(m.buffer).setUint32(nb-4,l*8>>>0);new DataView(m.buffer).setUint32(nb-8,Math.floor(l*8/4294967296));
+  const w=new Int32Array(64),R=(x,c)=>(x>>>c)|(x<<(32-c));
+  for(let o=0;o<nb;o+=64){const dv=new DataView(m.buffer,o,64);for(let i=0;i<16;i++)w[i]=dv.getInt32(i*4);for(let i=16;i<64;i++){const a=w[i-15],b=w[i-2];w[i]=(w[i-16]+(R(a,7)^R(a,18)^(a>>>3))+w[i-7]+(R(b,17)^R(b,19)^(b>>>10)))|0}
+    let [a,b,c,d,e,f,g,h]=H;for(let i=0;i<64;i++){const t1=(h+(R(e,6)^R(e,11)^R(e,25))+((e&f)^(~e&g))+K[i]+w[i])|0,t2=((R(a,2)^R(a,13)^R(a,22))+((a&b)^(a&c)^(b&c)))|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0}
+  return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
+function startTestFlow(){$('notice').style.zIndex='';testPick=true;curSlot=null;S=fresh();for(const e of [...enemies])dropEnemy(e);$('title').hidden=true;$('slots').hidden=true;$('notice').hidden=true;showClassSel()}
+function devAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Developer</div><h2>암호</h2></div><input id="devPw" type="password" autocomplete="off" autocapitalize="off" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px"><p class="hint" id="devMsg" style="color:#ff8a70;min-height:1.2em;margin:4px 0 0"></p><div class="btns"><button class="ghost" id="devNo">취소</button><button class="primary" id="devOk">확인</button></div>`;$('notice').style.zIndex=60;/* 제목 화면(z 30) 위로 */$('notice').hidden=false;setTimeout(()=>{const i=$('devPw');i&&i.focus()},50)}
+$('noticeSheet').addEventListener('click',e=>{if(e.target.id==='devNo'){$('notice').hidden=true;$('notice').style.zIndex=''}else if(e.target.id==='devOk'){const pw=($('devPw').value||'').trim();
+  if(sha256('ember-sanctum:'+pw)===DEV_H){try{localStorage.setItem('dev_ok',DEV_H)}catch(err){}startTestFlow()}else $('devMsg').textContent='암호가 다릅니다'}});
+$('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&e.target.id==='devPw')$('devOk').click()});
+(()=>{let n=0,t0=0;const box=document.querySelector('#title h1').parentElement;box.style.userSelect=box.style.webkitUserSelect='none';
+  box.addEventListener('click',()=>{const now=Date.now();if(now-t0>3000)n=0;t0=now;if(++n<5)return;n=0;if(devOk())startTestFlow();else devAsk()})})();
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
 function applyTest(){const sk=C().skills[0];S.test=true;S.testGod=true;S.lv=70;S.xp=0;S.pending=0;S.skp[sk]=gemsFor(sk).length*GMAX;S.sk[sk]={};S.sk2={};S.ess=1e30;S.gold=1e30;S.statPts=69*STAT_PER_LV;
   for(const k of EQS)S.eq[k]=makeItem(k,60,2);S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;S.tier=10;S.maxTier=10;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
@@ -3996,14 +4006,13 @@ function showSlots(){
   for(let i=0;i<SLOTS;i++){const d=readSlot(i),arm=slotArm.i===i&&Date.now()-slotArm.t<3000;
     if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${c.n} · Lv ${d.lv}</b><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div>`}
     else h+=`<div class="slotrow"><button class="slotmain empty" data-new="${i}"><span class="badge empty">+</span><span class="st"><span class="en">Slot ${i+1}</span><b>빈 슬롯</b><small>새로 시작하기</small></span></button></div>`}
-  h+=`</div>${devOk()?`<button class="ghost" id="slTest" style="margin-top:10px;border-style:dashed">테스트 캐릭터로 시작 <small style="color:var(--muted)">· 70레벨 · 모든 강화 자유 조절 · 저장 안 됨</small></button>`:''}`;
+  h+=`</div>`;
   $('slotSheet').innerHTML=h;$('slots').hidden=false;releaseAll();
 }
 function closeSlots(){if(curSlot!==null&&S.cls)$('slots').hidden=true}
 $('slots').addEventListener('click',e=>{if(e.target.id==='slots')closeSlots()});
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
-  if(b.id==='slTest'){testPick=true;curSlot=null;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
   if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();curSlot=i;S=d;$('slots').hidden=true;enterGame();return}
   if(b.dataset.new!==undefined){curSlot=+b.dataset.new;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}
