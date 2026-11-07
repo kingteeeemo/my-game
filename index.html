@@ -3018,8 +3018,10 @@ function castFire(slot,id){
     const cand=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<14&&onScr(e.pos,.9)).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z));
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
     const mk=c=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch},hit,0);
-    if(!tg.length){mk(pcMode?{x:ap.x,z:ap.z}:{x:P.pos.x+Math.sin(P.face)*5,z:P.pos.z+Math.cos(P.face)*5});return}
-    tg.forEach((e,i)=>{const c={x:e.pos.x,z:e.pos.z};i?later(i*.08,()=>mk(c)):mk(c)});return}
+    /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 */
+    if(!cand.length){const c0=pcMode?{x:ap.x,z:ap.z}:{x:P.pos.x+Math.sin(P.face)*5,z:P.pos.z+Math.cos(P.face)*5};for(let i=0;i<n;i++){const o=i?{x:c0.x+rnd(-.9,.9),z:c0.z+rnd(-.9,.9)}:c0;i?later(i*.08,()=>mk(o)):mk(o)}return}
+    for(let i=0;i<n;i++){const e=cand[i%cand.length],rep=i>=cand.length,c={x:e.pos.x+(rep?rnd(-.7,.7):0),z:e.pos.z+(rep?rnd(-.7,.7):0)};
+      i?later(i*.08,()=>mk(c)):mk(c)}return}
   if(b.kind==='crush'){
     const t=pickTarget(4.2);
     const hit=mul=>{const tt=t&&t.hp>0?t:pickTarget(4.2);P.swing=.2;P.swingDir*=-1;swingFx();
@@ -3280,7 +3282,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v177';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v178';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
