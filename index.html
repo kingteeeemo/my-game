@@ -817,7 +817,7 @@ const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:
 const cBnc=L=>({n:Math.max(3,2+L),/* v140: 1단계 3명 → 10단계 12명 */k:.85+.01*L,jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
 const csSt=L=>({r:(1.4+.25*L)*(1+.1*L),m:.3+.12*L}),ovSt=L=>({dur:1.5+.5*L,m:.25+.15*L});
 const GEMS2={
-  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟을 때 내리꽂은 자리에서 충격파가 퍼짐\n반경 = 가시 사거리의 60% · 피해 ×${aftM(L).toFixed(2)}`},
+  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟는 구간마다 작은 충격파(반경 1.8m)가 ${3*(2+L)}번 무작위로 터짐\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
   magma:{s:'quake',n:'용암 균열',c:'#ff6a2a',d:L=>{const m=magSt(L);return `가시가 솟은 자리에 용암이 ${m.dur.toFixed(1)}초 남음\n초당 피해 ×${m.m.toFixed(2)}`}},
   meteor2:{s:'rain',n:'분열 화살',c:'#e8ffb0',max:3,d:L=>{const x=splSt(L);return `땅에 꽂힌 화살이 파편 ${x.n}개로 갈라져 튐\n최대 ${x.d.toFixed(1)}m 바깥까지 · 파편 피해 ×${x.m.toFixed(2)}`}},
   relem:{s:'rain',get n(){return arEl()==='fire'?'화염 화살비':'번개 화살비'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=relSt(L);return `화살비 안에서 초당 ${x.rate.toFixed(1)}회 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(1)} 화살 세례분`}},
@@ -2806,8 +2806,8 @@ function castFire(slot,id){
       const sw={x:p0.x+Math.sin(a)*.82+Math.cos(a)*.46,z:p0.z+Math.cos(a)*.82-Math.sin(a)*.46};
       decalFx(sw,crackTex,0x140c08,1.5,2.2,.95,false);decalFx(sw,crackTex,0xff8a3a,1.1,.7,.55,true);
       debris(sw,{n:6,color:0x5a4a40,geo:tetraGeo,sp:[1.5,3.5],up:[3,6],y:[.05,.2],sz:[.06,.14],r0:.2,dur:.8,g:24});
-      if(st.aft)quakeShock(sw,len*.6,dmg*st.aft.m)});
-    spikeFan(p0,a,half,len,core,dmg,st.fork.m,HIT,true);
+      });
+    spikeFan(p0,a,half,len,core,dmg,st.fork.m,HIT,true,st.aft);
     if(st.mag)later(HIT+.25,()=>lavaFan(p0,a,half,len,st.mag.dur,dmg*st.mag.m));
     return}
   if(b.kind==='rain'){const t=aim(16);let c0;
@@ -2867,32 +2867,41 @@ let SPK_GEO,SPK_MAT;const spkO=new THREE.Object3D();
 const SPK_ELEV=40,SPK_UP=new THREE.Vector3(0,1,0);
 function inFan(q,p0,a,half,len,r=0){const dx=q.x-p0.x,dz=q.z-p0.z,d=Math.hypot(dx,dz);if(d>len+r)return false;if(d<.8)return true;
   let t=Math.atan2(dx,dz)-a;t=Math.atan2(Math.sin(t),Math.cos(t));return Math.abs(t)<=half+Math.min(.5,r/d)}
-/* v140 충격파(2차, 옛 여진 자리): 꽂은 자리에서 둥글게 퍼지며 지나가는 적에게 한 번씩 피해 */
-function quakeShock(c,R,dmg){shake=Math.max(shake,.4);groundFx(c,shockTex,0xe0c090,.6,R*1.15,.5,.85,false,.07);ringFx(c,R,0xffd8a0,.45);later(.07,()=>ringFx(c,R*.8,0xfff0d0,.35));
-  const n=Math.round(20*QM());for(let i=0;i<n;i++){const t=i/n*6.28;later(.05+.25*Math.random(),()=>{const d=R*rnd(.5,1);spray(PNRM,{x:c.x+Math.sin(t)*d,z:c.z+Math.cos(t)*d},1,{sp:[1,3],up:[1,3],y:[.1,.3],life:[.4,.7],s0:[.6,1],s1:[1.2,1.8],c0:0x8a7a68,c1:0x3a3028,a:.55,drag:2,tex:2})})}
-  for(const e of [...enemies]){if(e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-c.x,e.pos.z-c.z);if(d>R+e.r*.5)continue;later(.3*Math.min(1,d/R),()=>{if(e.hp>0){hitKind='rock';hurt(e,dmg,false);hitKind=null}})}}
-function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22*Math.max(1,len/7.5),S5=5,done=new Set();/* v140: 사거리가 길면 퍼지는 시간도 비례 *//* v122: 판정 확대 — 몸 크기+여유만큼 각도·거리를 넓히고, 인접 구간이 겹치게 하되 한 번 맞은 적은 다시 맞지 않음 */
-  for(let j=0;j<S5;j++){const r0=j*len/S5,r1=(j+1)*len/S5;later(delay+WAVE*(j+.5)/S5,()=>{
+/* v141: 가시가 3단계로 팡·팡·팡 솟음(1/3 → 2/3 → 끝). 단계마다 땅이 박살나며 돌덩이·흙먼지·균열이 튀고,
+   2차 충격파는 그 단계 구간 안 무작위 자리에서 작은 충격파가 파바박 터짐 */
+const QST=[0,.1,.22];
+function miniShock(q,r,dmg){groundFx(q,shockTex,0xe8c898,.3,r*1.15,.32,.85,false,.075);ringFx(q,r,0xffe0b0,.28);
+  spray(PNRM,q,3,{sp:[1.5,3.5],up:[.5,2],y:[.1,.3],life:[.4,.7],s0:[.5,.8],s1:[1.2,1.8],c0:0x9a8a74,c1:0x3a3028,a:.6,drag:2.5,tex:2});
+  emit(PADD,{x:q.x,y:.3,z:q.z,life:.14,s0:2.2,s1:.6,c0:0xfff0d0,c1:0xffa050,a:.8,tex:1});
+  for(const e of [...enemies]){if(e.air||e.hp<=0)continue;if(Math.hypot(e.pos.x-q.x,e.pos.z-q.z)<r+e.r*.5){hitKind='rock';hurt(e,dmg,true);hitKind=null}}}
+function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=new Set();
+  const SR=1.8,sn=shk?2+shk.L:0,pb=shk?Math.min(shk.m,shk.m*half*len*len/(NS*sn*Math.PI*SR*SR)):0;/* 충격파 1발 피해: 부채꼴 안 적 1명이 평균적으로 받는 총량 = 충격파 배율 */
+  for(let j=0;j<NS;j++){const r0=j*len/NS,r1=(j+1)*len/NS;later(delay+QST[j],()=>{
     for(const e of [...enemies]){if(e.air||e.hp<=0||done.has(e))continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz),de=Math.max(0,d-e.r*.5);
-      if(de<(j?r0-.7:-1)||de>=(j===S5-1?r1+e.r+.9:r1+.7))continue;
+      if(de<(j?r0-.7:-1)||de>=(j===NS-1?r1+e.r+.9:r1+.7))continue;
       let t=Math.atan2(dx,dz)-a;t=Math.abs(Math.atan2(Math.sin(t),Math.cos(t)));
       const tol=Math.min(.95,(e.r*.8+.6)/Math.max(d,.6));
-      if(d<1.6?t>Math.PI/2:t>half+tol)continue;/* 바로 앞(1.6m 이내)은 앞쪽 반원 전체 */
+      if(d<1.6?t>Math.PI/2:t>half+tol)continue;
       done.add(e);hitKind='rock';hurt(e,dmg*(t<=core+.05||d<1.6?1:sideM),j%2===1);hitKind=null}
-    const rm=(r0+r1)/2,nb=first?4:2;for(let k=0;k<nb;k++){const th=a+rnd(-half,half),q={x:p0.x+Math.sin(th)*rm,z:p0.z+Math.cos(th)*rm};
-      spray(PNRM,q,first?3:2,{sp:[.8,2.4],up:[3,6],y:[.1,.4],life:[.4,.7],s0:[.25,.45],s1:[.1,.2],c0:0x3a3238,c1:0x141016,a:.85,drag:1,tex:2});
-      /* v140: 땅을 뚫고 나오는 느낌 — 돌덩이가 위로 튀고 흙먼지가 피어오름 */
-      debris(q,{n:Math.max(1,Math.round(2*QM())),color:0x4e4238,geo:tetraGeo,sp:[1,3],up:[5,9],y:[.05,.25],sz:[.1,.24],r0:.4,dur:1,g:24});
-      spray(PNRM,q,1,{sp:[.3,1],up:[1,2],y:[.1,.3],life:[.5,.9],s0:[.6,1],s1:[1.2,1.8],c0:0x6a5a4a,c1:0x2a221c,a:.5,drag:2,tex:2})}})}
-  later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,WAVE))}
-function spikeBurst(p0,a,half,len,hs,WAVE){if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
+    shake=Math.max(shake,.2+.07*j);
+    const band=()=>{const th=a+rnd(-half,half)*.95,rr=rnd(Math.max(.8,r0),r1);return {x:p0.x+Math.sin(th)*rr,z:p0.z+Math.cos(th)*rr}};
+    const nb=Math.max(3,Math.round((3+3*j)*(.5+.5*QM())*Math.max(1,len/9)));
+    for(let k=0;k<nb;k++){const q=band();
+      debris(q,{n:Math.max(2,Math.round(3*QM())),color:k%2?0x5a4c40:0x3e342e,geo:tetraGeo,sp:[1.5,4.5],up:[6,12],y:[.05,.3],sz:[.14,.36],r0:.5,dur:1.2,g:26});
+      spray(PNRM,q,3,{sp:[1,3],up:[3,7],y:[.1,.4],life:[.4,.7],s0:[.25,.45],s1:[.1,.2],c0:0x3a3238,c1:0x141016,a:.9,drag:1,tex:2});
+      spray(PNRM,q,2,{sp:[.5,1.6],up:[1.5,3.5],y:[.2,.5],life:[.8,1.3],s0:[.9,1.4],s1:[2,3],c0:0x8a7660,c1:0x2e261e,a:.6,drag:2,tex:2});
+      emit(PADD,{x:q.x,y:.25,z:q.z,life:.12,s0:1.4,s1:.4,c0:0xffe8c0,c1:0xa06030,a:.7,tex:1})}
+    for(let k=0;k<1+j;k++)decalFx(band(),crackTex,0x120a08,rnd(1.6,2.4),1.6,.9,false);
+    for(let k=0;k<sn;k++){const q=band();later(rnd(.02,.12),()=>miniShock(q,SR,pb))}})}
+  later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75))}
+function spikeBurst(p0,a,half,len,hs){if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
   const js=[],gap=.46/Math.sqrt(QM());for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
       const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
-      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:f*WAVE,h:hs*rnd(.85,1.25)*(.35+3.2*f*f),w:rnd(.85,1.15)*(.55+1.15*f),dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
+      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:hs*rnd(.85,1.25)*(.35+3.2*f*f),w:rnd(.85,1.15)*(.55+1.15*f),dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
   const n=js.length,im=new THREE.InstancedMesh(SPK_GEO,SPK_MAT,n);im.position.set(p0.x,0,p0.z);im.frustumCulled=false;scene.add(im);
-  const HOLD=.42,SINK=.22,dur=WAVE+.09+HOLD+SINK;
+  const HOLD=.42,SINK=.22,dur=QST[2]+.02+.09+HOLD+SINK;
   const set=t=>{for(let i=0;i<n;i++){const j=js[i],lt=t-j.d;let g;
       if(lt<=0)g=0;else if(lt<.09){const u=lt/.09;g=u*(1+.35*Math.sin(u*Math.PI))}else if(lt<.09+HOLD)g=1;else g=Math.max(0,1-(lt-.09-HOLD)/SINK);
       const L=j.h*Math.max(g,0),bk=.14*L;/* 길이의 14%는 땅속에 묻히도록 뒤로 당김(솟는 방향 -d) */
@@ -3025,7 +3034,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v140';
+const APP_VER='v141';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
