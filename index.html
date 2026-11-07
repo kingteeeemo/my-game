@@ -784,7 +784,7 @@ const GEMS={
   haste:{n:'가속',t:'any',c:'#f2f2f2',d:L=>`재사용 대기시간 -${Math.round(hasteP()*100*L)}%\n스킬 시전시간 감소 (최대 단계에서 절반 수준)`},
   orbsize:{n:'거대 보주',t:'orb',c:'#bfe8ff',d:L=>{const g=gOrb(L);return `보주 크기·적중 범위 +${26*L}%\n끝에서 반경 ${g.br.toFixed(1)}m 폭발 (피해 ×${g.bm.toFixed(2)})`}},
   barrage:{n:'파편 난사',t:'orb',c:'#9fe8ff',d:L=>{const b=barr(L);return `파편 ${b.cnt}갈래 · 발사 빈도 +${Math.round((b.rate-1)*100)}%\n파편 크기 +${Math.round((b.sz-1)*100)}% · 속도 +${Math.round((b.sp-1)*100)}%\n끝에서 파편 ${b.burst}개`}},
-  qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m · 부채꼴 +${3*L}%\n피해 +${6*L}%`},
+  qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m\n피해 +${6*L}%`},
   qfork:{n:'가시 확산',t:'quake',c:'#ffb070',d:L=>{const f=qFork(L);return `부채꼴 ${Math.round(qHalf(f.n,0)*2*57.3)}° (가장자리 피해 ×${f.m.toFixed(2)})${f.n<5?` · 6단계에 크게 넓어짐`:''}`}},
   rarea:{n:'넓은 화살비',t:'rain',c:'#c8e07a',d:L=>`화살비 반경 ${rR(L).toFixed(1)}m · 지속 ${rDur(L).toFixed(1)}초`},
   rdens:{n:'집중 사격',t:'rain',c:'#e0f08a',d:L=>{const d=rDen(L);return `초당 ${d.rate.toFixed(1)}회 화살 세례 · 맞은 적 둔화\n동시 화살비 ${d.zones}곳${d.zones<3?` (${d.zones<2?5:10}단계에 +1곳)`:''}`}},
@@ -810,14 +810,14 @@ const ESS_LV=31,G2MAX=5;let mapOpen=false,heirOpen=false;
 const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>G2C[g2Max(g)].e[L],g2Gold=(g,L)=>G2C[g2Max(g)].g[L];
 /* v82 새 주력 스킬 보조 수치 */
-const qLen=L=>7*(1+.08*L),qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,qFork=L=>({n:L>=6?5:L>=1?3:1,m:.45+.04*L}),qHalf=(n,l)=>(n>=5?.78:n>=3?.52:.26)*(1+.03*l);
-const aftM=L=>.5+.1*L,magSt=L=>({dur:2+.4*L,m:.5+.25*L});
+const qLen=L=>L<1?7:7.56+(15-7.56)*(L-1)/9,/* v140: 1단계 7.56m 유지 → 10단계 15m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,qFork=L=>({n:L>=6?5:L>=1?3:1,m:.45+.04*L}),qHalf=(n,l)=>(n>=5?.78:n>=3?.52:.26);/* v140: 균열 확장의 부채꼴 확대 제거 */
+const aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:2+.4*L,m:.5+.25*L});
 const rR=L=>2.6*(1+.12*L),rDur=L=>2+.1*L,rDen=L=>({rate:6*(1+.08*L),zones:L>=10?3:L>=5?2:1});
-const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:1+L,m:.5+.37*L,d:1.6+.5*L});
-const cBnc=L=>({n:3+L,k:.85+.01*L,jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
+const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:1+L,m:.5+.37*L,d:2*(1.6+.5*L)});/* v140: 파편 거리 2배 (3단계 6.2m) */
+const cBnc=L=>({n:Math.max(3,2+L),/* v140: 1단계 3명 → 10단계 12명 */k:.85+.01*L,jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
 const csSt=L=>({r:(1.4+.25*L)*(1+.1*L),m:.3+.12*L}),ovSt=L=>({dur:1.5+.5*L,m:.25+.15*L});
 const GEMS2={
-  aftsh:{s:'quake',n:'여진',c:'#e0b080',max:3,d:L=>`가시가 0.35초 간격으로 ${L}번 더 터짐 (피해 ×${aftM(L).toFixed(2)})`},
+  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟을 때 내리꽂은 자리에서 충격파가 퍼짐\n반경 = 가시 사거리의 60% · 피해 ×${aftM(L).toFixed(2)}`},
   magma:{s:'quake',n:'용암 균열',c:'#ff6a2a',d:L=>{const m=magSt(L);return `가시가 솟은 자리에 용암이 ${m.dur.toFixed(1)}초 남음\n초당 피해 ×${m.m.toFixed(2)}`}},
   meteor2:{s:'rain',n:'분열 화살',c:'#e8ffb0',max:3,d:L=>{const x=splSt(L);return `땅에 꽂힌 화살이 파편 ${x.n}개로 갈라져 튐\n최대 ${x.d.toFixed(1)}m 바깥까지 · 파편 피해 ×${x.m.toFixed(2)}`}},
   relem:{s:'rain',get n(){return arEl()==='fire'?'화염 화살비':'번개 화살비'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=relSt(L);return `화살비 안에서 초당 ${x.rate.toFixed(1)}회 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(1)} 화살 세례분`}},
@@ -1105,7 +1105,7 @@ function skillStats(id){
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
   if(b.kind==='whirl'){const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*gear().cdr/100),r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
-  if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);st.fork=qFork(L('qfork'));st.half=qHalf(st.fork.n,l);const a=g2('aftsh'),m=g2('magma');st.aft=a?{n:a,m:aftM(a)}:null;st.mag=m?magSt(m):null}
+  if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);st.fork=qFork(L('qfork'));st.half=qHalf(st.fork.n,l);const a=g2('aftsh'),m=g2('magma');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
@@ -1791,11 +1791,11 @@ function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar
 /* v131 대지 분쇄 자세: r=들어 올림(0~1), p=내려꽂기(0~1), lift=시전 없을 때 들어 올리는 진행, dip=예비 웅크림. 팔을 비틀어(armR.y=π) 칼끝이 아래로 향하게 */
 const sm=x=>x*x*(3-2*x),ease3=x=>x*x*x;
 function qPose(u,r,p,lift,dip=0){const up=p>0?1:lift;
-  const RP=-2.75,RF=-2.35,EP=-1.4,EF=-.65;/* 정점(머리 위, 칼끝 아래) → 끝(웅크려 앞에 수직으로 꽂음) */
+  const RP=-2.75,RF=-2.35,EP=-2.7,EF=-1.7;/* v140: 끝 자세 — 칼날이 거의 수직(기울기 8° 이내)으로 몸 앞 0.8m 땅속 0.25m까지 박힘, 왼손도 손잡이로 */
   const tw=Math.min(1,up*1.6),P_=up*RP+(EP-up*RP)*p,F_=-1.05+(RF+1.05)*up+(EF-(-1.05+(RF+1.05)*up))*p;
-  u.piv.rotation.x=P_*r;u.armR.rotation.set(-.45*(1-tw*r),Math.PI*tw*r,0);u.fore.rotation.x=-1.05+(F_+1.05)*r;
-  u.body.rotation.x=(-.12*up*(1-p)+.35*p)*r+.12*dip;u.body.position.y=(.05*up*(1-p)-.3*p)*r-.08*dip;
-  u.legL.rotation.x=-.7*p*r-.15*dip;u.legR.rotation.x=.5*p*r+.1*dip;u.armL.rotation.x=-.5-.4*p*r}
+  u.piv.rotation.x=P_*r;u.armR.rotation.set(-.45*(1-tw*r),Math.PI*tw*r,-.3*p*r);u.fore.rotation.x=-1.05+(F_+1.05)*r;
+  u.body.rotation.x=(-.12*up*(1-p)+.4*p)*r+.12*dip;u.body.position.y=(.05*up*(1-p)-.4*p)*r-.08*dip;
+  u.legL.rotation.x=-.9*p*r-.15*dip;u.legR.rotation.x=.6*p*r+.1*dip;u.armL.rotation.x=-.5-.8*p*r}
 function heroAnim(dt,moving){const u=hero.userData;if(!u.body)return;u.walk+=dt*(moving?9.5:0);const w=Math.sin(u.walk),br=Math.sin(time*2.2);
   const amp=moving?.62:0;u.legL.rotation.x=w*amp;u.legR.rotation.x=-w*amp;u.body.position.y=moving?Math.abs(Math.cos(u.walk))*.07:br*.012;u.body.rotation.x=moving?.08:0;
   if(u.cls!=='archer'||!moving)u.armL.rotation.x=(u.cls==='warrior'?-.5:u.cls==='archer'?-1.3:-.3)+(moving&&u.cls==='mage'?-w*.35:0);
@@ -2801,9 +2801,13 @@ function castFire(slot,id){
     later(HIT,()=>{const q={x:p0.x+Math.sin(a)*1.3,z:p0.z+Math.cos(a)*1.3};shake=Math.max(shake,.32);
       groundFx(q,shockTex,0x9a8070,.3,2.2,.28,.7,false,.07);groundFx(q,dotTex,0xffd8a0,.2,1.2,.12,.6,true,.08);
       spray(PNRM,q,10,{sp:[2,5],up:[3,7],y:[.1,.3],life:[.4,.8],s0:[.3,.6],s1:[.1,.2],c0:0x5a4a48,c1:0x1a1418,a:.9,drag:1.5,tex:2});
-      debris(q,{n:5,color:0x2a2228,geo:tetraGeo,sp:[2,5],up:[3,6],y:[.1,.3],sz:[.1,.22],r0:.3,dur:.9,g:22})});
-    const erupt=(mul,delay,first)=>spikeFan(p0,a,half,len,core,dmg*mul,st.fork.m,delay,first);
-    erupt(1,HIT,true);if(st.aft)for(let k=1;k<=st.aft.n;k++)erupt(st.aft.m,HIT+k*.35,false);
+      debris(q,{n:5,color:0x2a2228,geo:tetraGeo,sp:[2,5],up:[3,6],y:[.1,.3],sz:[.1,.22],r0:.3,dur:.9,g:22});
+      /* v140: 칼이 박힌 자리 — 어두운 균열 + 틈새 불빛 + 튀는 돌 조각 */
+      const sw={x:p0.x+Math.sin(a)*.82+Math.cos(a)*.46,z:p0.z+Math.cos(a)*.82-Math.sin(a)*.46};
+      decalFx(sw,crackTex,0x140c08,1.5,2.2,.95,false);decalFx(sw,crackTex,0xff8a3a,1.1,.7,.55,true);
+      debris(sw,{n:6,color:0x5a4a40,geo:tetraGeo,sp:[1.5,3.5],up:[3,6],y:[.05,.2],sz:[.06,.14],r0:.2,dur:.8,g:24});
+      if(st.aft)quakeShock(sw,len*.6,dmg*st.aft.m)});
+    spikeFan(p0,a,half,len,core,dmg,st.fork.m,HIT,true);
     if(st.mag)later(HIT+.25,()=>lavaFan(p0,a,half,len,st.mag.dur,dmg*st.mag.m));
     return}
   if(b.kind==='rain'){const t=aim(16);let c0;
@@ -2863,7 +2867,11 @@ let SPK_GEO,SPK_MAT;const spkO=new THREE.Object3D();
 const SPK_ELEV=40,SPK_UP=new THREE.Vector3(0,1,0);
 function inFan(q,p0,a,half,len,r=0){const dx=q.x-p0.x,dz=q.z-p0.z,d=Math.hypot(dx,dz);if(d>len+r)return false;if(d<.8)return true;
   let t=Math.atan2(dx,dz)-a;t=Math.atan2(Math.sin(t),Math.cos(t));return Math.abs(t)<=half+Math.min(.5,r/d)}
-function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22,S5=5,done=new Set();/* v122: 판정 확대 — 몸 크기+여유만큼 각도·거리를 넓히고, 인접 구간이 겹치게 하되 한 번 맞은 적은 다시 맞지 않음 */
+/* v140 충격파(2차, 옛 여진 자리): 꽂은 자리에서 둥글게 퍼지며 지나가는 적에게 한 번씩 피해 */
+function quakeShock(c,R,dmg){shake=Math.max(shake,.4);groundFx(c,shockTex,0xe0c090,.6,R*1.15,.5,.85,false,.07);ringFx(c,R,0xffd8a0,.45);later(.07,()=>ringFx(c,R*.8,0xfff0d0,.35));
+  const n=Math.round(20*QM());for(let i=0;i<n;i++){const t=i/n*6.28;later(.05+.25*Math.random(),()=>{const d=R*rnd(.5,1);spray(PNRM,{x:c.x+Math.sin(t)*d,z:c.z+Math.cos(t)*d},1,{sp:[1,3],up:[1,3],y:[.1,.3],life:[.4,.7],s0:[.6,1],s1:[1.2,1.8],c0:0x8a7a68,c1:0x3a3028,a:.55,drag:2,tex:2})})}
+  for(const e of [...enemies]){if(e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-c.x,e.pos.z-c.z);if(d>R+e.r*.5)continue;later(.3*Math.min(1,d/R),()=>{if(e.hp>0){hitKind='rock';hurt(e,dmg,false);hitKind=null}})}}
+function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22*Math.max(1,len/7.5),S5=5,done=new Set();/* v140: 사거리가 길면 퍼지는 시간도 비례 *//* v122: 판정 확대 — 몸 크기+여유만큼 각도·거리를 넓히고, 인접 구간이 겹치게 하되 한 번 맞은 적은 다시 맞지 않음 */
   for(let j=0;j<S5;j++){const r0=j*len/S5,r1=(j+1)*len/S5;later(delay+WAVE*(j+.5)/S5,()=>{
     for(const e of [...enemies]){if(e.air||e.hp<=0||done.has(e))continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz),de=Math.max(0,d-e.r*.5);
       if(de<(j?r0-.7:-1)||de>=(j===S5-1?r1+e.r+.9:r1+.7))continue;
@@ -2872,7 +2880,10 @@ function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first){const WAVE=.22,S5=5,
       if(d<1.6?t>Math.PI/2:t>half+tol)continue;/* 바로 앞(1.6m 이내)은 앞쪽 반원 전체 */
       done.add(e);hitKind='rock';hurt(e,dmg*(t<=core+.05||d<1.6?1:sideM),j%2===1);hitKind=null}
     const rm=(r0+r1)/2,nb=first?4:2;for(let k=0;k<nb;k++){const th=a+rnd(-half,half),q={x:p0.x+Math.sin(th)*rm,z:p0.z+Math.cos(th)*rm};
-      spray(PNRM,q,first?3:2,{sp:[.8,2.4],up:[3,6],y:[.1,.4],life:[.4,.7],s0:[.25,.45],s1:[.1,.2],c0:0x3a3238,c1:0x141016,a:.85,drag:1,tex:2})}})}
+      spray(PNRM,q,first?3:2,{sp:[.8,2.4],up:[3,6],y:[.1,.4],life:[.4,.7],s0:[.25,.45],s1:[.1,.2],c0:0x3a3238,c1:0x141016,a:.85,drag:1,tex:2});
+      /* v140: 땅을 뚫고 나오는 느낌 — 돌덩이가 위로 튀고 흙먼지가 피어오름 */
+      debris(q,{n:Math.max(1,Math.round(2*QM())),color:0x4e4238,geo:tetraGeo,sp:[1,3],up:[5,9],y:[.05,.25],sz:[.1,.24],r0:.4,dur:1,g:24});
+      spray(PNRM,q,1,{sp:[.3,1],up:[1,2],y:[.1,.3],life:[.5,.9],s0:[.6,1],s1:[1.2,1.8],c0:0x6a5a4a,c1:0x2a221c,a:.5,drag:2,tex:2})}})}
   later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,WAVE))}
 function spikeBurst(p0,a,half,len,hs,WAVE){if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
@@ -2889,23 +2900,35 @@ function spikeBurst(p0,a,half,len,hs,WAVE){if(!SPK_GEO){SPK_GEO=new THREE.ConeGe
       const w=Math.max(.001,j.w*(.5+.5*Math.min(1,g)));spkO.scale.set(w,Math.max(.001,j.h*g),w);spkO.updateMatrix();im.setMatrixAt(i,spkO.matrix)}
     im.instanceMatrix.needsUpdate=true};
   set(0);fx.push({m:im,t:0,dur,keep:1,upd(k){set(k*dur)},end(){im.dispose&&im.dispose()}})}
-function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0;/* v88: 바닥 부채꼴 면은 그리지 않고 불씨만 */
-  fx.push({m,t:0,dur,upd(k,dt){tick-=dt;    if(tick<=0){tick=.25;for(const e of [...enemies])if(!e.air&&inFan(e.pos,p0,a,half,len,e.r*.5+.4))hurt(e,dps*.25,true)}
-    if(Math.random()<dt*14*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;emit(PADD,{x:p0.x+Math.sin(th)*d,y:.15,z:p0.z+Math.cos(th)*d,vy:rnd(.8,2),life:rnd(.4,.7),s0:.9,s1:.2,c0:0xffc070,c1:0xff3a08,a:.8,tex:1})}}})}
+function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0,tt=0;/* v140: 가시 자리마다 빛나는 용암 균열 + 붉은 웅덩이 빛 + 불씨·연기 */
+  const cm=new THREE.MeshBasicMaterial({map:crackTex,color:0xff5a10,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}),
+    gm=new THREE.MeshBasicMaterial({map:dotTex,color:0xff3a00,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}),
+    dm=new THREE.MeshBasicMaterial({map:crackTex,color:0x120604,transparent:true,opacity:0,depthWrite:false});
+  for(let r=1.2;r<len;r+=1.7){const k=Math.max(1,Math.round(2*half*r/2.2));for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.3,.3))/k,rr=r+rnd(-.4,.4),x=p0.x+Math.sin(th)*rr,z=p0.z+Math.cos(th)*rr,sz=rnd(1.6,2.4);
+    const d=new THREE.Mesh(fxPlane,dm);d.rotation.set(-Math.PI/2,0,rnd(0,6.28));d.position.set(x,.045,z);d.scale.setScalar(sz*1.1);
+    const c=new THREE.Mesh(fxPlane,cm);c.rotation.set(-Math.PI/2,0,rnd(0,6.28));c.position.set(x,.055,z);c.scale.setScalar(sz);
+    const g=new THREE.Mesh(fxPlane,gm);g.rotation.x=-Math.PI/2;g.position.set(x,.05,z);g.scale.setScalar(sz*.9);m.add(d,c,g)}}
+  fx.push({m,t:0,dur,upd(k,dt){tt+=dt;const f=Math.min(1,k*dur/.25)*(k>.85?(1-k)/.15:1),pl=.8+.2*Math.sin(tt*7);cm.opacity=.82*f*pl;gm.opacity=.42*f*pl;dm.opacity=.8*f;
+    if(Math.random()<dt*8*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;spray(PNRM,{x:p0.x+Math.sin(th)*d,z:p0.z+Math.cos(th)*d},1,{sp:[.1,.4],up:[1,2],y:[.2,.4],life:[.8,1.3],s0:[.6,1],s1:[1.4,2],c0:0x3a2a22,c1:0x120c0a,a:.35,drag:1,tex:2})}
+    tick-=dt;    if(tick<=0){tick=.25;for(const e of [...enemies])if(!e.air&&inFan(e.pos,p0,a,half,len,e.r*.5+.4))hurt(e,dps*.25,true)}
+    if(Math.random()<dt*36*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;emit(PADD,{x:p0.x+Math.sin(th)*d,y:.15,z:p0.z+Math.cos(th)*d,vy:rnd(1,2.6),life:rnd(.5,.9),s0:1.1,s1:.2,c0:0xffd080,c1:0xff3a08,a:.9,tex:1})}}})}
 const arrowGeo=new THREE.BoxGeometry(.05,1.1,.05),arrowMat=new THREE.MeshBasicMaterial({color:0xeaf6c0});
-function fallArrow(q){const m=new THREE.Mesh(arrowGeo,arrowMat);m.position.set(q.x,7,q.z);m.rotation.z=.12;scene.add(m);
-  fx.push({m,t:0,dur:.16,keep:1,upd(k){m.position.y=.55+6.5*(1-k)},end(){emit(PADD,{x:q.x,y:.15,z:q.z,life:.15,s0:.8,s1:.2,c0:0xeaffc0,c1:0x6ac030,a:.8,tex:1})}})}
+function fallArrow(q,sp=1){const m=new THREE.Mesh(arrowGeo,arrowMat);m.position.set(q.x,7,q.z);m.rotation.z=.12;scene.add(m);/* v140: 집중 사격 단계만큼 더 빨리 떨어지고 긴 빛줄기가 남음 */
+  if(sp>1.15)streak({x:q.x,y:7.4,z:q.z,vx:0,vy:-6.5/(.16/sp),vz:0,life:.16/sp,w:.035,len:1.2+1.6*(sp-1),c0:0xf8ffe0,c1:0x8ad040,drag:0});
+  fx.push({m,t:0,dur:.16/sp,keep:1,upd(k){m.position.y=.55+6.5*(1-k)},end(){emit(PADD,{x:q.x,y:.15,z:q.z,life:.15,s0:.8,s1:.2,c0:0xeaffc0,c1:0x6ac030,a:.8,tex:1})}})}
 /* v91 분열 화살: 꽂힌 자리에서 파편이 바닥을 따라 사방으로 튀어 끝자리 근처 적 1명씩 타격 */
 function splitArrow(q,sp,dmg){const n=sp.n,a0=Math.random()*6.28;later(.16,()=>{emit(PADD,{x:q.x,y:.2,z:q.z,life:.15,s0:.8,s1:.2,c0:0xf4ffd0,c1:0x8ad040,a:.8,tex:1});
   for(let i=0;i<n;i++){const a=a0+i/n*6.28+rnd(-.3,.3),d=sp.d*rnd(.75,1),ex=q.x+Math.sin(a)*d,ez=q.z+Math.cos(a)*d;
-    streak({x:q.x,y:.35,z:q.z,vx:Math.sin(a)*d*5,vy:2.5,vz:Math.cos(a)*d*5,life:.2,w:.05,len:.8,c0:0xf8ffe0,c1:0x7ac040,drag:0});
-    later(.08,()=>{let best=null,bd=.9;for(const e of enemies){if(e.air||e.hp<=0)continue;const dd=Math.hypot(e.pos.x-ex,e.pos.z-ez)-e.r*.5;if(dd<bd){bd=dd;best=e}}
-      if(best)hurt(best,dmg*sp.m,true);emit(PADD,{x:ex,y:.15,z:ez,life:.12,s0:.5,s1:.1,c0:0xeaffc0,c1:0x6ac030,a:.7,tex:1})})}})}
+    const ft=Math.max(.12,d/26);/* v140: 파편이 잘 보이게 — 굵은 빛줄기 + 빛나는 머리 + 꼬리 불티, 맞은 자리 섬광 */
+    streak({x:q.x,y:.45,z:q.z,vx:Math.sin(a)*d/ft,vy:1.2,vz:Math.cos(a)*d/ft,life:ft,w:.13,len:1.5,c0:0xffffd0,c1:0xb8f060,drag:0});
+    for(let k=1;k<=3;k++)later(ft*k/4,()=>emit(PADD,{x:q.x+Math.sin(a)*d*k/4,y:.45,z:q.z+Math.cos(a)*d*k/4,life:.22,s0:.9,s1:.15,c0:0xfff8c0,c1:0x9ae040,a:.9,tex:1}));
+    later(ft,()=>{let best=null,bd=1.2;for(const e of enemies){if(e.air||e.hp<=0)continue;const dd=Math.hypot(e.pos.x-ex,e.pos.z-ez)-e.r*.5;if(dd<bd){bd=dd;best=e}}
+      if(best)hurt(best,dmg*sp.m,true);emit(PADD,{x:ex,y:.2,z:ez,life:.2,s0:1.4,s1:.2,c0:0xffffe0,c1:0x8ad040,a:1,tex:1})})}})}
 function arrowRain(c,st,dmg){const R=st.radius,ring=flatMesh(ringGeo,0xd8f0a0,.6),disc=flatMesh(discGeo,0x9ac060,.12),g=new THREE.Group();
   ring.position.set(c.x,.07,c.z);ring.scale.set(R,R,1);disc.position.set(c.x,.06,c.z);disc.scale.set(R,R,1);g.add(ring,disc);scene.add(g);
-  let tick=0,et=1/(st.rel?st.rel.rate:1);const iv=1/st.rate;
+  let tick=0,et=1/(st.rel?st.rel.rate:1);const iv=1/st.rate,vsp=st.rate/6;
   fx.push({m:g,t:0,dur:st.dur,upd(k,dt){ring.material.opacity=.6*(1-Math.pow(k,4));disc.material.opacity=.12*(1-k);
-    tick-=dt;while(tick<=0){tick+=iv;const na=Math.max(1,Math.round(3*QM()));for(let i=0;i<na;i++){const a=Math.random()*6.28,r=R*Math.sqrt(Math.random());fallArrow({x:c.x+Math.cos(a)*r,z:c.z+Math.sin(a)*r})}
+    tick-=dt;while(tick<=0){tick+=iv;const na=Math.min(8,Math.max(1,Math.round(3*QM()*vsp*vsp)));for(let i=0;i<na;i++){const a=Math.random()*6.28,r=R*Math.sqrt(Math.random()),q={x:c.x+Math.cos(a)*r,z:c.z+Math.sin(a)*r};later(Math.random()*iv,()=>fallArrow(q,vsp))}/* v140: 한 번에 몰아 떨어지지 않고 사이사이 고르게 */
       for(const e of [...enemies])if(!e.air&&Math.hypot(e.pos.x-c.x,e.pos.z-c.z)<R+e.r*.5){if(st.rslow)e.slowT=Math.max(e.slowT,.5);hurt(e,dmg,true)}
       if(st.spl)for(let i=0;i<2;i++){const a=Math.random()*6.28,r=R*Math.sqrt(Math.random());splitArrow({x:c.x+Math.cos(a)*r,z:c.z+Math.sin(a)*r},st.spl,dmg)}}
     if(st.rel){et-=dt;while(et<=0){et+=1/st.rel.rate;const a=Math.random()*6.28,r=R*.8*Math.sqrt(Math.random());explode({x:c.x+Math.cos(a)*r,z:c.z+Math.sin(a)*r},dmg*st.rel.m,null,st.rel.r,st.bolt?'bolt':undefined)}}},
@@ -2946,7 +2969,7 @@ function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air
 function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e0;
   for(let j=0;j<st.bn;j++){let nb=null,bd=st.jr;for(const e of enemies){if(hit.has(e)||e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-cur.pos.x,e.pos.z-cur.pos.z);if(d<bd){bd=d;nb=e}}if(!nb)break;hit.add(nb);path.push(nb);cur=nb}
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
-    later(j*.112,()=>{zapFx(fr,to);/* v100: 0.056 → 0.112 (번개 속도 50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
+    later(j*.0747,()=>{zapFx(fr,to);/* v140: 0.112 → 0.0747 (튕기는 속도 +50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
       if(e.hp>0){if(st.csl)e.slowT=Math.max(e.slowT,st.csl);hitKind='zap';hurt(e,dmg*Math.pow(st.bk,j)*vm);hitKind=null}
       if(st.cst)stormBurst({x:to.x,z:to.z},st.cst.r,dmg*Math.pow(st.bk,j)*st.cst.m*vm);
       if(st.ovl&&j===path.length-1)overloadOrb({x:to.x,z:to.z},dmg*st.ovl.m,st.ovl.dur)})})}
@@ -3002,7 +3025,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v139';
+const APP_VER='v140';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3344,7 +3367,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   const parts=[`피해 ${Math.round(s.dmg*100)}%`];
   if(b.tag==='single'){if(s.extra)parts.push(`추가 타격 ${s.extra}회`);if(s.so.crit)parts.push(`치명타 +${Math.round(s.so.crit*100)}%`);if(s.so.exec)parts.push(`처형 +${Math.round(s.so.exec*100)}%`);if(s.so.giant)parts.push(`거인 사냥 +${Math.round(s.so.giant*100)}%`)}
   else if(b.kind==='orb'){if(s.orbScale>1)parts.push(`크기 ${Math.round(s.orbScale*100)}%`);if(s.proj>1)parts.push(`보주 ${s.proj}개`);if(s.cnt>1)parts.push(`파편 ${s.cnt}갈래`);if(s.rate>1)parts.push(`파편 빈도 ${Math.round(s.rate*100)}% · 끝 파편 ${s.burst}개`);if(s.blast)parts.push('끝에서 폭발');if(s.nova)parts.push(`서리 폭발 초당 ${(s.proj/s.nova.iv).toFixed(1)}회`);parts.push('둔화')}
-  else if(b.kind==='quake'){parts.push(`부채꼴 ${Math.round(s.half*2*57.3)}° · 사거리 ${s.len.toFixed(1)}m`);if(s.aft)parts.push(`여진 ${s.aft.n}회`);if(s.mag)parts.push(`용암 ${s.mag.dur.toFixed(1)}초`)}
+  else if(b.kind==='quake'){parts.push(`부채꼴 ${Math.round(s.half*2*57.3)}° · 사거리 ${s.len.toFixed(1)}m`);if(s.aft)parts.push(`충격파 ×${s.aft.m.toFixed(1)}`);if(s.mag)parts.push(`용암 ${s.mag.dur.toFixed(1)}초`)}
   else if(b.kind==='rain'){parts.push(`반경 ${s.radius.toFixed(1)}m · ${s.dur.toFixed(1)}초 · 초당 ${s.rate.toFixed(1)}회`);if(s.zones>1)parts.push(`화살비 ${s.zones}곳`);if(s.rel)parts.push(`속성 폭발 초당 ${s.rel.rate.toFixed(1)}회`);if(s.spl)parts.push(`분열 파편 ${s.spl.n}개`)}
   else if(b.kind==='chainl'){parts.push(`번개 ${s.forks}줄 · ${s.bn}번 튕김`);if(s.cst)parts.push(`번개 폭풍 ${s.cst.r.toFixed(1)}m`);if(s.ovl)parts.push(`과부하 ${s.ovl.dur.toFixed(1)}초`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
@@ -3355,7 +3378,7 @@ const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
 function skillDps(id){
   const b=SK[id],st=skillStats(id),base=baseDmg(),crit=1+critCh()*.8,cd=Math.max(.05,st.cd);
   if(b.kind==='quake'){const hit=base*st.dmg*crit,aft=st.aft?st.aft.n*st.aft.m:0,mag=st.mag?st.mag.m*st.mag.dur:0;
-    return {main:hit*(1+aft+mag)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${aft?` · 여진 ${st.aft.n}회`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
+    return {main:hit*(1+aft+mag)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${aft?` · 충격파 ×${st.aft.m.toFixed(1)}`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
   if(b.kind==='rain'){const tk=base*st.dmg*crit,per=tk*st.rate*st.dur,rel=st.rel?tk*st.rel.m*st.rel.rate*st.dur*.5:0,met=st.spl?tk*st.spl.m*st.rate*st.dur*.5:0;
     return {main:(per+rel+met)/cd,label:'화살비 안의 적 1명당',sub:`화살 세례 1회 ${fmtN(tk)} · 초당 ${st.rate.toFixed(1)}회 · ${st.dur.toFixed(1)}초${rel?` · 속성 폭발`:''}${met?` · 분열 파편`:''}`}}
   if(b.kind==='chainl'){const hit=base*st.dmg*crit,stm=st.cst?hit*st.cst.m*1.5:0,ov=st.ovl?hit*st.ovl.m*(st.ovl.dur/.3)*.5:0;
