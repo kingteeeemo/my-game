@@ -2193,7 +2193,7 @@ let _EMB=null;const EMBER_MAT=()=>(_EMB||(_EMB=(()=>{const vs=`varying vec2 vUv;
     float breath=.65+.35*sin(uT*2.3+em*12.)*sin(uT*3.7+cr*9.);
     float glow=smoothstep(.42,.8,em)*breath;float hot=crack*smoothstep(.35,.7,em)*(.5+.5*sin(uT*7.+cr*30.));
     float gk=1.-smoothstep(.55,1.,uK);/* 뒤로 갈수록 불씨가 식음 */float sk=1.-smoothstep(.8,1.,uK);/* 그을음은 마지막에 옅어짐 */
-    float scorch=mask*.8*sk*uOp;vec3 col=cA*scorch+(cB*glow*.85+cC*hot*1.3)*mask*gk*uOp;
+    float scorch=mask*.34*sk*uOp;vec3 col=cA*scorch+(cB*glow*.42+cC*hot*.85)*mask*gk*uOp;/* v180: 바닥 덜 진하게 */
     gl_FragColor=vec4(col,scorch);}`;
   return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{uT:{value:Math.random()*9},uK:{value:0},uOp:{value:0},seed:{value:Math.random()*10},cA:{value:new THREE.Color(0x0e0806)},cB:{value:new THREE.Color(0xff4a10)},cC:{value:new THREE.Color(0xffc040)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})()))();/* FIRE_NOISE가 뒤에 정의되므로 처음 쓸 때 만듦 */
 function burnField(p,r,dmg,dur=3){
@@ -2439,8 +2439,8 @@ const DOME_MAT=(()=>{const vs=`varying vec3 vN,vV;void main(){vec4 w=modelMatrix
   fs=`precision mediump float;varying vec3 vN,vV;uniform float k,ff;uniform vec3 col;void main(){float fr=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.2);float al=fr*(1.-k)*(1.-k)*.35*ff;gl_FragColor=vec4(col*al,al);}`;
   return(c)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},ff:{value:1},col:{value:new THREE.Color(c)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.BackSide})})();
 const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10],ring:0xffb878,fl:0xff9a50,st:[0xfff0c0,0xff3a00],sp:[0xffe0a0,0xff5a10],smoke:0x4a3c34,ember:0xff7a20},
-  PAL_BOLT={c:[0xf4f0ff,0xa070ff,0x1a0a40],core:[0xffffff,0xe0d0ff,0x8a5aff],ring:0xc0a8ff,fl:0xb8a0ff,st:[0xffffff,0x9a7aff],sp:[0xffffff,0xb08aff],smoke:0,ember:0xb090ff,fast:1},
-  PAL_ICE={c:[0xffffff,0x9ae0ff,0x0c2a58],core:[0xffffff,0xdff6ff,0x6ab8ff],ring:0xbfe8ff,fl:0x9ad8ff,st:[0xffffff,0x4a9aff],sp:[0xffffff,0x9ad8ff],smoke:0,ember:0,fast:1},
+  PAL_BOLT={c:[0xf4f0ff,0xa070ff,0x1a0a40],core:[0xffffff,0xe0d0ff,0x8a5aff],ring:0xc0a8ff,fl:0xb8a0ff,st:[0xffffff,0x9a7aff],sp:[0xffffff,0xb08aff],smoke:0,ember:0xb090ff,fast:1,noring:1,soft:1.7},
+  PAL_ICE={c:[0xffffff,0x9ae0ff,0x0c2a58],core:[0xffffff,0xdff6ff,0x6ab8ff],ring:0xbfe8ff,fl:0x9ad8ff,st:[0xffffff,0x4a9aff],sp:[0xffffff,0x9ad8ff],smoke:0,ember:0,fast:1,noring:1,soft:1.7},
   PAL_DUST={c:[0xcdb9a0,0x8a7258,0x2a1e16],core:[0xffe8c0,0xb09070,0x6a4a30],ring:0xd8c0a0,fl:0xc8a070,st:[0xd8c8b0,0x6a4a30],sp:[0xc8b090,0x4a3a2a],smoke:0x4a3c34,ember:0,fast:1,dim:1};
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
@@ -2466,22 +2466,20 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* v65 번개 폭발(궁수): 보라·흰 섬광 + 사방으로 갈라지는 번개 줄기(InstancedMesh) + 전기 불꽃 + 짧은 충격파 + 그을린 금 */
   if(ice==='bolt'){blastLoad+=.6;const k=Math.min(1,4.6/R);if(r>=2)shake=Math.max(shake,Math.min(.16,r*.025));
     flash(p,0xb8a0ff,Math.min(2,.8+R*.25)*k);popFx(p.x,.9,p.z,R*.45,R*.8,.09,0xffffff,.9*k);popFx(p.x,.8,p.z,R*.55,R*1.4,.2,0x8a6aff,.55*k);
-    fireBurst(p,R*.8,k,blastLoad<8,PAL_BOLT);radialBolts(p,R,QM()>=.75?5:3,0x8a5aff);/* v166: 번개 폭발 — 보라 전기 구름 + 사방 리본 번개 */
+    fireBurst(p,R*.95,k*.85,blastLoad<8,PAL_BOLT);radialBolts(p,R,QM()>=.75?6:3,0x8a5aff);groundFx(p,dotTex,0xc0a8ff,R*.4,R*1.6,.3,.7*k,true,.07);/* v180: 테두리 원 대신 부드러운 빛 번짐 + 번개 줄기 *//* v166: 번개 폭발 — 보라 전기 구름 + 사방 리본 번개 */
     /* v98: 더 화려하게 — 하늘에서 내리꽂는 번개 · 2겹 충격 고리 · 바깥 번개 줄기 · 빛 기둥 */
     if(blastLoad<BLAST_EMER){zapFx({x:p.x+rnd(-.6,.6),y:7,z:p.z+rnd(-.6,.6)},{x:p.x,y:.3,z:p.z});popFx(p.x,2.2,p.z,R*.3,R*.5,.18,0xd8c8ff,.7*k);
-      ringFx(p,R*1.15,0xc0a8ff,.28);later(.07,()=>ringFx(p,R*1.5,0x8a6aff,.3));later(.05,()=>radialBolts(p,R*1.4,3,0xc0b0ff));
+      later(.05,()=>radialBolts(p,R*1.4,4,0xc0b0ff));later(.06,()=>groundFx(p,dotTex,0x8a6aff,R*.6,R*2,.3,.4*k,true,.07));
       spray(PADD,p,8,{sp:[1,3],up:[5,10],y:[.3,.6],r0:R*.3,life:[.25,.45],s0:[.3,.45],s1:[.05,.08],c0:0xffffff,c1:0x9a7aff,a:1,drag:1.5,tex:1})}
     streaks(p,8,{sp:[R*2.4,R*3.6],up:[1,3],y:[.5,1],life:[.1,.18],w:.04,len:.6,c0:0xffffff,c1:0x9a7aff,drag:3});
     spray(PADD,p,10,{sp:[2,6],up:[1,4],y:[.4,1],r0:R*.4,life:[.15,.3],s0:[.18,.26],s1:[.04,.06],c0:0xffffff,c1:0xb08aff,a:1,drag:2,rv:8,tex:3});
     if(R>=1.6)decalFx(p,crackTex,0x9a8aff,R*.9,.9,.5,true);return}
   /* v64 서리 폭발: v60의 하얀 원(서리 원판 + 밝은 테두리 + 충격파) 원복. 눈꽃 자국은 v63처럼 항상 같은 진하기 */
   if(ice==='nova'){blastLoad+=.4;const heavy=blastLoad>BLAST_EMER,ka=Math.min(1,4.6/R);
-    const d=flatMesh(discGeo,0x3a7ac0,.16*ka*.7);d.position.set(p.x,.055,p.z);d.scale.set(R,R,1);d.material.blending=THREE.AdditiveBlending;scene.add(d);
-    fx.push({m:d,t:0,dur:.42,upd(k){const s=R*(.55+.45*Math.min(1,k*3));d.scale.set(s,s,1);d.material.opacity=.16*ka*.7*(1-k)}});
-    const rg=flatMesh(ringGeo,0xbfe8ff,.8*ka*.7);rg.position.set(p.x,.07,p.z);rg.material.blending=THREE.AdditiveBlending;scene.add(rg);
-    fx.push({m:rg,t:0,dur:.38,upd(k){const s=R*(.6+.4*(1-(1-k)*(1-k)));rg.scale.set(s,s,1);rg.material.opacity=.8*ka*.7*(1-k*k)}});
-    groundFx(p,shockTex,0x8ac8f0,R*.3,R*1.05,.3,(heavy?.3:.5)*ka*.7,true,.08);
-    fireBurst(p,R*.6,ka*.7,false,PAL_ICE);/* v166: 서리 구름 */iceSpikes(p,R*.75,Math.max(2,Math.round(4*q)));
+    /* v180: 서리 원판·테두리·충격파 고리 제거 → 부드러운 서리 빛 번짐 + 서리 구름 + 얼음 가시 + 사방으로 튀는 얼음 조각 */
+    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));groundFx(p,dotTex,0x9ad8ff,R*.45,R*1.4,.34,(heavy?.3:.5)*ka*FK,true,.08);popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.45*ka*FK);
+    fireBurst(p,R*.55,ka*.45*FK,false,PAL_ICE);/* v166: 서리 구름 */iceSpikes(p,R*.75,Math.max(2,Math.round(4*q)));
+    if(!heavy)streaks(p,Math.round(8*q),{sp:[R*2,R*3.2],up:[1,3],y:[.4,.9],life:[.14,.24],w:.06,len:.6,c0:0xffffff,c1:0x6ab8ff,drag:3});
     {const cs=[0x5ad8ff,0x8a9aff,0x5affe0,0xb08aff,0x6ab8ff],c=cs[Math.random()*cs.length|0];decalFx(p,frostTex,0xdff4ff,R,2,.21*ka,false);decalFx(p,frostTex,c,R*1.02,2.2,.28*ka,true);decalFx(p,frostTex,0xffffff,R*.5,1.4,.2*ka,true)}/* v98: 눈꽃 자국을 더 진하고 색색으로 · 더 오래 */
     flash(p,0x9ad8ff,Math.min(1.4,.5+R*.15)*ka*.42);return}
   blastLoad+=1;
@@ -2938,6 +2936,8 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
         if(f>0&&Math.random()<dt*40*QM())emit(PADD,{x:c.x+rnd(-.25,.25)*R,y:rnd(.2,6),z:c.z+rnd(-.25,.25)*R,vy:rnd(3,8),life:rnd(.25,.45),s0:.4,s1:.08,c0:0xff90f0,c1:0x8010e0,a:.9,tex:1})}},
     end(){for(const m of [outer,mid,inner,disc,ring])m.material.dispose()}})};
   if(delay>0)later(delay,go);else go()}
+const PILLAR_RANGE=22.4;/* v180: 14m × 1.6 */
+function pillarTargets(ap){return enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<PILLAR_RANGE).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z))}
 function pillarCast(c,o,hit,depth){const after=()=>{
     if(o.echo){for(let i=1;i<=o.echo.n;i++)later(.18*i,()=>{const q={x:c.x+rnd(-.4,.4),z:c.z+rnd(-.4,.4)};fireBurst(q,o.r*.3,.5,false,PAL_HEX);groundFx(q,dotTex,0xe080ff,o.r*.25,o.r*.9,.24,.5,true,.07);aoe(q,o.r*.8,o.echo.dmg,{quiet:true,so:o.so})})}
     if(o.chain&&depth<o.chain.n){const skip=hit;const t=nearestEnemy(c,o.chain.r,skip);if(t){hit.add(t);const o2=Object.assign({},o,{dmg:o.dmg*o.chain.m,echo:o.echo?{n:o.echo.n,dmg:o.echo.dmg*o.chain.m}:null});
@@ -2949,6 +2949,7 @@ function castSkill(slot){
   const cost=mpCost(id);
   if(!S.test&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','MP 물약을 쓰거나 잠시 기다리세요');P.mpWarn=2}return}
   if(P.cast||P.mv)return;
+  if(b.kind==='pillar'&&!pillarTargets(pcMode?mouseW:P.pos).length){if(P.mpWarn<=0){toast('사거리 안에 적이 없습니다','사술 폭발은 적이 있어야 발동합니다');P.mpWarn=1.5}return}/* v180: 사거리 안에 적이 없으면 발동하지 않음(마나·대기시간 소모 없음) */
   P.mp-=cost;P.cd[slot]=st.cd;
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
   const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
@@ -3028,10 +3029,10 @@ function castFire(slot,id){
       for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*fan.sp,m=d===0?1:fan.m;shootWave(aa,{speed:16,life:st.len/16,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(16);P.swing=.18;const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
-    for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7;/* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 */later(i*.06,()=>{if(P.hp<=0)return;const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
-      shootBoom(aa,dist,{r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null,shrap:st.shrap?{n:st.shrap.n,dmg:base*st.dmg*st.multi.m*st.shrap.m}:null})})}return}
-  if(b.kind==='pillar'){aim(14);P.swing=.15;const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
-    const cand=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<14&&onScr(e.pos,.9)).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z));
+    for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7;/* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
+      shootBoom(aa,dist,{r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null,shrap:st.shrap?{n:st.shrap.n,dmg:base*st.dmg*st.multi.m*st.shrap.m}:null})}}return}
+  if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
+    const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
     const mk=c=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch},hit,0);
     /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 */
@@ -3227,16 +3228,16 @@ function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air
   stormN++;const heavy=stormN%2===0||QM()>=1;stormL=Math.max(0,stormL-(time-stormT)*8);stormT=time;stormL++;const dm=1/(1+stormL*.18);/* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 밝기 자동 감쇠 */
   popFx(p.x,.9,p.z,r*.25,r*.8,.12,0xcfe6ff,.8*dm);popFx(p.x,.8,p.z,r*.6,r*1.9,.3,0x1e6aff,.7*dm,.02);
   emit(PADD,{x:p.x,y:.7,z:p.z,life:.3,s0:r*.5,s1:r*1.8,c0:0x4a90ff,c1:0x081e90,a:.75*dm,tex:1});
-  groundFx(p,shockTex,0x2f7cff,r*.2,r*1.25,.28,.95*Math.max(.5,dm),true,.08);groundFx(p,dotTex,0x1450ff,r*.6,r*1.6,.45,.5*dm,true,.06);
-  const rg=(c,t0,dur,op)=>{const m=flatMesh(ringGeo,c,op);m.material.blending=THREE.AdditiveBlending;m.position.set(p.x,.09,p.z);scene.add(m);fx.push({m,t:0,dur,upd(k){const e_=1-(1-k)*(1-k)*(1-k),s_=r*(t0+(1.1-t0)*e_);m.scale.set(s_,s_,1);m.material.opacity=op*(1-k)}})};
-  rg(0x8cc4ff,.2,.18,Math.max(.6,dm));rg(0x2266ff,.35,.36,.8);
-  if(heavy)radialBolts(p,r*1.15,4,0x7ab4ff);
+  /* v180: 충격파·고리 제거 → 부드러운 푸른 빛 번짐(빠르게 퍼짐) + 전기 구름 + 방사 번개로 폭발을 보임 */
+  groundFx(p,dotTex,0x5a9aff,r*.3,r*1.7,.3,.9*Math.max(.5,dm),true,.08);groundFx(p,dotTex,0x1450ff,r*.6,r*2,.45,.5*dm,true,.06);
+  fireBurst(p,r*.6,.45*dm,false,PAL_BOLT);
+  radialBolts(p,r*1.15,heavy?5:3,0x7ab4ff);
   flash(p,0x2a6aff,1.4);
   /* v100: 더 화려하게 — 하늘에서 내리꽂는 번개 + 빛기둥 + 바닥 균열 + 3번째 넓은 고리 + 솟구치는 전기 줄기 */
   if(heavy||stormL<4){const sx=p.x+rnd(-1,1),sz=p.z+rnd(-1,1);zapFx({x:sx,y:9,z:sz},{x:p.x,y:.2,z:p.z});if(QM()>=1&&stormL<3)zapFx({x:p.x+rnd(-2,2),y:8,z:p.z+rnd(-2,2)},{x:p.x,y:.2,z:p.z});
     emit(PADD,{x:p.x,y:2.2,z:p.z,life:.22,s0:r*.5,s1:r*.15,c0:0xffffff,c1:0x5aa0ff,a:.9*dm,tex:1});
     for(let i=0;i<3;i++)emit(PADD,{x:p.x,y:.6+i*1.4,z:p.z,vy:6,life:.25,s0:r*.35,s1:.2,c0:0xeaf4ff,c1:0x2a6aff,a:.7*dm,tex:1});
-    if(r>=1.6)decalFx(p,crackTex,0x5a9aff,r*.95,.9,.55*dm,true);rg(0xbfe0ff,.5,.55,.5*dm)}
+    if(r>=1.6)decalFx(p,crackTex,0x5a9aff,r*rnd(.8,1.1),.9,.45*dm,true)}
   streaks(p,Math.max(4,Math.round(9*QM())),{sp:[r*2.2,r*3.4],up:[2,6],y:[.4,1],life:[.12,.24],w:.05,len:.7,c0:0xffffff,c1:0x4a8aff,drag:3});
   const n=Math.max(3,Math.round(10*QM()));for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(4,9)*r/2;emit(PADD,{x:p.x,y:.7,z:p.z,vx:Math.cos(a)*v,vy:rnd(1,5),vz:Math.sin(a)*v,life:rnd(.2,.4),s0:rnd(.35,.6),s1:.08,c0:0xffffff,c1:0x2a6aff,a:1,drag:4,tex:1})}}
 function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e0;
@@ -3298,7 +3299,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v179';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v180';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
