@@ -3039,7 +3039,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v146';
+const APP_VER='v147';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3780,7 +3780,7 @@ const tkNeed=(L,k)=>k==='weapon'?(L>=40?4:L>=35?3:L>=30?2:1):(L>=40?3:L>=35?2:1)
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},403);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) */
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},443);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){return ''}/* v146: 상한 폐지로 안내 없음 */
 function renderSmith(){
@@ -3791,7 +3791,7 @@ function renderSmith(){
       h+=`<button class="smslot" data-sel="${k}" style="--rc:${it?RAR[it.rar].c:'#555'}"><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]} <span class="enh">+${L}</span></b><small>${it?it.name:'장비 없음'}</small><span class="smbar"><i style="width:${Math.min(100,L*5)}%"></i></span></button>`}
     h+=`</div>`}
   else{const k=smithSel,L=enhL(k),it=S.eq[k],c=enhCost(L,k),rt=enhRate(L),max=L>=ENH_MAX;
-    /* v118: 컷신이 결과를 보여 주는 구간(+20 이상)에서는 강화 창에 성공/실패 문구를 띄우지 않고 수치만 갱신(컷신에서 결과가 나오는 순간 renderSmith 호출) */
+    /* v118: 컷신이 결과를 보여 주는 구간(+24→25 이상)에서는 강화 창에 성공/실패 문구를 띄우지 않고 수치만 갱신(컷신에서 결과가 나오는 순간 renderSmith 호출) */
     const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
     const tk=S.tickets||0,need=tkNeed(L,k);if(tk<need)useTk=false;const tkOn=useTk&&tk>=need,cc=c*(tkOn?TK_GOLD:1);
     const rc=it?RAR[it.rar].c:'#555',
@@ -3818,7 +3818,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
 function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
-    if(auto)smAutoN++;const big=L>=20;/* v136: 자동 강화도 컷신 구간(+20~)이면 컷신 재생 */
+    if(auto)smAutoN++;const big=L>=24;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
     if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
     else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
