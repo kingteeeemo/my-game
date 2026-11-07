@@ -1164,10 +1164,10 @@ const PP={cam:new THREE.OrthographicCamera(-1,1,1,-1,0,1),sc:new THREE.Scene(),r
 PP.quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));PP.quad.frustumCulled=false;PP.sc.add(PP.quad);
 const ppVS='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}';
 const ppM=(u,fs)=>new THREE.ShaderMaterial({uniforms:u,vertexShader:ppVS,fragmentShader:fs,depthTest:false,depthWrite:false});
-PP.bright=ppM({t:{value:null},th:{value:.74}},'uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float m=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c*smoothstep(th,th+.3,m),1.);}');
+PP.bright=ppM({t:{value:null},th:{value:.78}},'uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float m=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c*smoothstep(th,th+.3,m),1.);}');
 PP.blur=ppM({t:{value:null},d:{value:new THREE.Vector2()}},'uniform sampler2D t;uniform vec2 d;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227;c+=(texture2D(t,vUv+d*1.385).rgb+texture2D(t,vUv-d*1.385).rgb)*.316;c+=(texture2D(t,vUv+d*3.231).rgb+texture2D(t,vUv-d*3.231).rgb)*.07;gl_FragColor=vec4(c,1.);}');
-PP.comp=ppM({t:{value:null},bl:{value:null},k:{value:1.15},time:{value:0},res:{value:new THREE.Vector2(1,1)}},`uniform sampler2D t;uniform sampler2D bl;uniform float k;uniform float time;uniform vec2 res;varying vec2 vUv;
-void main(){vec3 c=texture2D(t,vUv).rgb+texture2D(bl,vUv).rgb*k;
+PP.comp=ppM({t:{value:null},bl:{value:null},bl2:{value:null},k:{value:.75},k2:{value:.35},time:{value:0},res:{value:new THREE.Vector2(1,1)}},`uniform sampler2D t;uniform sampler2D bl;uniform sampler2D bl2;uniform float k,k2;uniform float time;uniform vec2 res;varying vec2 vUv;
+void main(){vec3 c=texture2D(t,vUv).rgb+texture2D(bl,vUv).rgb*k+texture2D(bl2,vUv).rgb*k2;/* v164: 좁은 번짐 + 넓은 번짐(1/4 해상도) 2단 블룸 */
 float l=dot(c,vec3(.299,.587,.114));c=mix(vec3(l),c,.8);
 c+=vec3(-.01,-.002,.02)*(1.-smoothstep(0.,.3,l))+vec3(.04,.014,-.02)*smoothstep(.4,1.,l);
 c=pow(max(c,0.),vec3(1.06))*1.08;
@@ -1177,8 +1177,8 @@ gl_FragColor=vec4(c,1.);}`);
 function ppSize(){const v=renderer.getDrawingBufferSize(new THREE.Vector2()),w=Math.max(1,v.x),h=Math.max(1,v.y);
   const o={minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat};
   if(!PP.rt){if(renderer.capabilities.isWebGL2&&THREE.WebGLMultisampleRenderTarget){PP.rt=new THREE.WebGLMultisampleRenderTarget(w,h,o);PP.rt.samples=4}else PP.rt=new THREE.WebGLRenderTarget(w,h,o);
-    const o2=Object.assign({depthBuffer:false},o);PP.a=new THREE.WebGLRenderTarget(1,1,o2);PP.b=new THREE.WebGLRenderTarget(1,1,o2)}
-  PP.rt.setSize(w,h);PP.bw=Math.max(1,w>>1);PP.bh=Math.max(1,h>>1);PP.a.setSize(PP.bw,PP.bh);PP.b.setSize(PP.bw,PP.bh);PP.comp.uniforms.res.value.set(w,h)}
+    const o2=Object.assign({depthBuffer:false},o);PP.a=new THREE.WebGLRenderTarget(1,1,o2);PP.b=new THREE.WebGLRenderTarget(1,1,o2);PP.c=new THREE.WebGLRenderTarget(1,1,o2);PP.d=new THREE.WebGLRenderTarget(1,1,o2)}
+  PP.rt.setSize(w,h);PP.bw=Math.max(1,w>>1);PP.bh=Math.max(1,h>>1);PP.a.setSize(PP.bw,PP.bh);PP.b.setSize(PP.bw,PP.bh);PP.cw=Math.max(1,w>>2);PP.ch=Math.max(1,h>>2);PP.c.setSize(PP.cw,PP.ch);PP.d.setSize(PP.cw,PP.ch);PP.comp.uniforms.res.value.set(w,h)}
 function ppPass(mat,target){PP.quad.material=mat;renderer.setRenderTarget(target);renderer.render(PP.sc,PP.cam)}
 function renderFrame(t){
   if(!GQS[GUQ].post){renderer.setRenderTarget(null);renderer.render(scene,camera);return}
@@ -1187,7 +1187,8 @@ function renderFrame(t){
   PP.bright.uniforms.t.value=PP.rt.texture;ppPass(PP.bright,PP.a);
   const bu=PP.blur.uniforms;
   for(let i=1;i<=2;i++){bu.t.value=PP.a.texture;bu.d.value.set(i/PP.bw,0);ppPass(PP.blur,PP.b);bu.t.value=PP.b.texture;bu.d.value.set(0,i/PP.bh);ppPass(PP.blur,PP.a)}
-  const cu=PP.comp.uniforms;cu.t.value=PP.rt.texture;cu.bl.value=PP.a.texture;cu.time.value=t%97;ppPass(PP.comp,null)}
+  bu.t.value=PP.a.texture;bu.d.value.set(0,0);ppPass(PP.blur,PP.c);for(let i=1;i<=2;i++){bu.t.value=PP.c.texture;bu.d.value.set(i*1.6/PP.cw,0);ppPass(PP.blur,PP.d);bu.t.value=PP.d.texture;bu.d.value.set(0,i*1.6/PP.ch);ppPass(PP.blur,PP.c)}
+  const cu=PP.comp.uniforms;cu.t.value=PP.rt.texture;cu.bl.value=PP.a.texture;cu.bl2.value=PP.c.texture;cu.time.value=t%97;ppPass(PP.comp,null)}
 
 /* ---- 절차적 텍스처 (v28): 타일 반복 노이즈 · 보로노이 판석 ---- */
 function tnoise(N,g){const L=new Float32Array(g*g);for(let i=0;i<g*g;i++)L[i]=Math.random();const o=new Float32Array(N*N),k=g/N;
@@ -2419,14 +2420,16 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     spray(PADD,p,ice?3:Math.min(8,3+R),ice?{sp:[1,3],up:[1,3],y:[.4,1.2],life:[.4,.7],s0:[.3,.4],s1:[.1,.15],c0:0xffffff,c1:0x9ad8ff,rv:4,tex:3}:{sp:[R*1.2,R*2.4],up:[.5,2],y:[.5,1.2],life:[.3,.5],s0:[.8+R*.25,1+R*.3],s1:[1.4+R*.35,1.8+R*.4],c0:0xfff0b0,c1:0xff3a08,a:.85,drag:5,rv:2,tex:0});return}
   const lite=ice==='lite';
   if(!ice){
-    flash(p,0xff9a50,Math.min(2.6,.8+r*.3));if(r>=2)shake=Math.max(shake,Math.min(.22,r*.035));
-    emit(PADD,{x:p.x,y:.9,z:p.z,life:.12,s0:R*1,s1:R*1.7,c0:0xffc070,c1:0xff6a10,a:.6,tex:1});
-    groundFx(p,shockTex,0xffb070,R*.2,R*1.2,.32,.9,true,.08);
-    const n=Math.min(26,6+R*3.2);spray(PADD,p,n,{sp:[R*1.2,R*2.8],up:[.5,2.5],y:[.5,1.2],r0:R*.25,life:[.35,.6],s0:[.7+R*.25,1+R*.32],s1:[1.6+R*.35,2.2+R*.45],c0:0xffb050,c1:0xc02000,a:.55,drag:5,grav:1,rv:2,tex:0});
-    spray(PADD,p,n*.5,{sp:[R*.4,R*1.2],up:[1,3],y:[.6,1],r0:R*.15,life:[.25,.4],s0:[.6+R*.3,.8+R*.35],s1:[.2,.4],c0:0xffe090,c1:0xff6a10,a:.6,drag:4,rv:3,tex:0});
+    /* v164: 화염 폭발이 짧은 시간에 겹치면(회전 베기 화염 등) 밝기를 1/√n 로 낮춰 블룸이 하얗게 뭉개지지 않게 */
+    fbT.push(time);while(fbT.length&&fbT[0]<time-.4)fbT.shift();const FK=1/Math.sqrt(fbT.length);
+    if(FK>.7)flash(p,0xff9a50,Math.min(2.6,.8+r*.3));if(r>=2)shake=Math.max(shake,Math.min(.22,r*.035));
+    emit(PADD,{x:p.x,y:.9,z:p.z,life:.12,s0:R*1,s1:R*1.7,c0:0xffc070,c1:0xff6a10,a:.4*FK,tex:1});
+    groundFx(p,shockTex,0xffb070,R*.2,R*1.2,.32,.6*FK,true,.08);/* v164: 블룸 2단에 맞춰 밝기 완화 */
+    const n=Math.min(26,6+R*3.2);spray(PADD,p,n,{sp:[R*1.2,R*2.8],up:[.5,2.5],y:[.5,1.2],r0:R*.25,life:[.35,.6],s0:[.7+R*.25,1+R*.32],s1:[1.6+R*.35,2.2+R*.45],c0:0xffb050,c1:0xc02000,a:.4*FK,drag:5,grav:1,rv:2,tex:0});
+    spray(PADD,p,n*.5,{sp:[R*.4,R*1.2],up:[1,3],y:[.6,1],r0:R*.15,life:[.25,.4],s0:[.6+R*.3,.8+R*.35],s1:[.2,.4],c0:0xffe090,c1:0xff6a10,a:.42*FK,drag:4,rv:3,tex:0});
     streaks(p,12+R*3,{sp:[6,16],up:[3,9],y:[.6,1.2],life:[.4,.9],w:.09,len:.9,c0:0xffe0a0,c1:0xff2a00,drag:.9,grav:-14});
-    spray(PADD,p,6+R,{sp:[.3,1.2],up:[3,6],y:[.5,1],r0:R*.15,life:[.45,.75],s0:[.6+R*.2,.8+R*.25],s1:[1.2+R*.3,1.6+R*.35],c0:0xffc060,c1:0x801000,a:.45,drag:2.2,rv:2,del:[.03,.1],tex:0});
-    groundFx(p,shockTex,0xffd090,R*.3,R*1.7,.5,.45,true,.1);
+    spray(PADD,p,6+R,{sp:[.3,1.2],up:[3,6],y:[.5,1],r0:R*.15,life:[.45,.75],s0:[.6+R*.2,.8+R*.25],s1:[1.2+R*.3,1.6+R*.35],c0:0xffc060,c1:0x801000,a:.45*FK,drag:2.2,rv:2,del:[.03,.1],tex:0});
+    groundFx(p,shockTex,0xffd090,R*.3,R*1.7,.5,.45*FK,true,.1);
     if(R>=1.6)decalFx(p,crackTex,0xff7a2a,R*.95,1.4,.9,true);
     spray(PNRM,p,Math.min(12,3+R*1.4),{sp:[R*.4,R*1],up:[1.2,2.6],y:[.6,1.3],r0:R*.35,life:[.9,1.5],s0:[R*.45,R*.6],s1:[R*.95,R*1.3],c0:0x4a4038,c1:0x1c1a18,a:.5,drag:1.6,grav:.6,rv:.8,del:[.08,.18],tex:2});
     if(R>=1.5)debris(p,{n:Math.round(4*q),color:0x3a2c22,geo:tetraGeo,sp:[3,6],up:[3,6],y:[.3,.8],sz:[.06,.12],dur:.7,g:20});
@@ -2723,7 +2726,7 @@ function shoot(a,o){
    if(o.trail){const t=new THREE.Mesh(fxPlane,trailMat(o.tcol||o.color));t.rotation.x=-Math.PI/2;t.scale.set((o.tw||.12)/sx,o.trail/2/sz,1);t.position.z=-(o.trail/2)/sz;m.add(t)}
    if(o.glow){const g=new THREE.Sprite(glowMat(o.gcol||o.color));g.scale.setScalar(o.glow);m.add(g)}
    if(o.rings){for(let i=0;i<1;i++){const r=new THREE.Mesh(ringTorus,ringMat);r.scale.setScalar(1.25);r.rotation.set(i?1.1:-.5,i?.4:1.2,0);r.userData.ring=i?1:-1;m.add(r)}}}
-  projs.push({vid:o.vid||0,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
+  projs.push({rib:o.rib?ribStart(o.rib,m.position):null,vid:o.vid||0,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
 }
 function orbShard(p,a){const z=p.orb.ssz||1;shoot(a,{from:p.m.position,color:0xd8f4ff,size:.32*z,hr:.35*z,trail:.75*z,tw:.09*z,tcol:0x9ad8ff,speed:15*(p.orb.ssp||1),life:.45,dmg:p.orb.sd,pierce:p.orb.sp,chain:p.orb.sc,slow:true,frz:p.orb.frz,nofx:true})}
 function orbEnd(p){const n=p.orb.burst||10;for(let i=0;i<n;i++)orbShard(p,p.ea+i*Math.PI*2/n);{const q=p.m.position,S2=p.m.scale.x;groundFx(q,shockTex,0x9ad8ff,.3,1.8*S2,.28,.55,true,.08);flash(q,0x9ad8ff,.8)}
@@ -2750,7 +2753,7 @@ function basicFire(){
   }else if(b==='arrow'){
     aim(16);setCd(.45*cdMul());P.swing=.12;shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0});
   }else{
-    aim(16);setCd(.55*cdMul());P.swing=.15;shoot(P.face,{color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
+    aim(16);setCd(.55*cdMul());P.swing=.15;shoot(P.face,{rib:{helix:.32,spin:12,n:12,w:.22,c0:0x8a5aff,c1:0xf0e8ff,cw:.3},color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
   }
 }
 function castSkill(slot){
@@ -2773,7 +2776,7 @@ function castFire(slot,id){
     /* 회귀 화살 (v40): 화살 속도가 빨라져도 사거리는 같음. 회귀하는 화살은 모두 같은 순간(사거리 끝 시점)에 한꺼번에 돌아옴 */
     const rt=st.ret,sm=rt?rt.sp:1,life=b.life/sm,retAt=time+life;
     const vid=id==='volley'?++volSeq:0;for(let i=0;i<st.proj;i++){const a=P.face+(i-(st.proj-1)/2)*spr;
-      shoot(a,{vid,color:b.color,size:b.size,long:id==='volley',trail:2.6,tw:.16,glow:1.6,gcol:0x8ad040,speed:b.speed*sm,life,dmg:base*st.dmg,pierce:st.pierce,chain:st.chain,blast:st.blast,bolt:st.bolt,br:st.br,bm:st.bm,ret:rt&&Math.random()<rt.p?rt.m:0,retAt,rng:b.speed*b.life,split:st.split})}
+      shoot(a,{rib:id==='volley'?{n:9,w:.2,c0:0x8ad040,c1:0xf4ffd8,cw:.2}:null,vid,color:b.color,size:b.size,long:id==='volley',trail:2.6,tw:.16,glow:1.6,gcol:0x8ad040,speed:b.speed*sm,life,dmg:base*st.dmg,pierce:st.pierce,chain:st.chain,blast:st.blast,bolt:st.bolt,br:st.br,bm:st.bm,ret:rt&&Math.random()<rt.p?rt.m:0,retAt,rng:b.speed*b.life,split:st.split})}
     P.swing=.15;return;
   }
   if(b.kind==='whirl'){
@@ -2800,7 +2803,7 @@ function castFire(slot,id){
     const dk=n>1?.2:0,lc=(a,b)=>new THREE.Color(a).lerp(new THREE.Color(b),dk).getHex();
     const oc=lc(0x9ad8ff,0x1e4a78),gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
     for(let i=0;i<n;i++){const a=n>=3?P.face+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
-      shoot(a,{color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5),gcol:gc,rings:true,coreM:cm,coreS:.45*(1-dk*.5),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
+      shoot(a,{rib:{helix:.6*st.orbScale,spin:9,n:16,w:.16*st.orbScale,c0:0x5aa8ff,c1:0xd8f0ff,cw:.2,fade:.6},color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5),gcol:gc,rings:true,coreM:cm,coreS:.45*(1-dk*.5),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
@@ -2996,16 +2999,24 @@ function bodyArcs(c,r,h,n,col){const paths=[];for(let i=0;i<n;i++){const a0=Math
     paths.push({p:boltPath({x:c.x+Math.sin(a0)*rr,y:y0,z:c.z+Math.cos(a0)*rr},{x:c.x+Math.sin(a1)*rr,y:y1,z:c.z+Math.cos(a1)*rr},2,.14),w:.2,w1:.5})}
   const mat=BOLT_MAT(col||0x4a8aff,0xffffff);mat.uniforms.cw.value=.18;const m=new THREE.Mesh(boltGeo(paths),mat);m.frustumCulled=false;scene.add(m);let rt=0;
   fx.push({m,t:0,dur:.2,upd(k,dt){rt+=dt;if(rt>.04){rt=0;for(const q of paths){const p=q.p;for(let i=1;i<p.length-1;i++){p[i][0]+=rnd(-.05,.05);p[i][1]+=rnd(-.04,.04);p[i][2]+=rnd(-.05,.05)}}boltGeo(paths,m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(1-k)*(Math.random()<.3?.5:1)},end(){m.geometry.dispose();mat.dispose()}})}
+/* v164 투사체 리본 꼬리: 지나온 자리를 띠로 이어 그림(끝으로 갈수록 가늘어짐). helix=보주 주위를 도는 얼음 띠 2가닥 */
+function ribStart(o,p){const mat=BOLT_MAT(o.c0||0x8ad040,o.c1||0xffffff);mat.uniforms.cw.value=o.cw||.22;mat.uniforms.fade.value=o.fade||1;return {o,h:[[p.x,p.y,p.z]],m:null,mat,t:0}}
+function ribStep(p,dt){const R=p.rib,pp=p.m.position,o=R.o;R.t+=dt;R.h.unshift([pp.x,pp.y,pp.z]);if(R.h.length>(o.n||10))R.h.length=o.n||10;if(R.h.length<3)return;
+  let paths;if(o.helix){paths=[];const rr=o.helix,n=R.h.length;for(const ph of [0,Math.PI]){const q=[];for(let i=0;i<n;i++){const h=R.h[i],a=ph+R.t*o.spin-i*.55;q.push([h[0]+Math.cos(a)*rr,h[1]+Math.sin(a)*rr*.7,h[2]+Math.sin(a)*rr*.6])}paths.push({p:q,w:o.w,w1:.1})}}
+  else paths=[{p:R.h,w:o.w,w1:.08}];
+  if(!R.m){R.m=new THREE.Mesh(boltGeo(paths),R.mat);R.m.frustumCulled=false;scene.add(R.m)}else{if(R.m.geometry.attributes.position.count!==paths.reduce((a,q)=>a+q.p.length*2,0)){R.m.geometry.dispose();R.m.geometry=boltGeo(paths)}else boltGeo(paths,R.m.geometry)}
+  R.mat.uniforms.t.value=R.t}
+function ribEnd(p){const R=p.rib;if(!R||!R.m)return;const m=R.m,mat=R.mat;const f0=mat.uniforms.fade.value;fx.push({m,t:0,dur:.16,upd(k){mat.uniforms.fade.value=f0*(1-k)},end(){m.geometry.dispose();mat.dispose()}});p.rib=null}
 function zapFx(a,b,o){boltFx(a,b);if(!o){popFx(b.x,b.y,b.z,.5,2,.14,0xffffff,.8);popFx(b.x,b.y,b.z,1,3,.26,0x3a7aff,.5);return}/* 옵션 없이 부르면(번개 폭풍 하늘 번개·과부하·폭발) 줄기+섬광만 */
   const first=o.first,tgt=o.tgt,bigE=tgt&&tgt.rank>=2;
   /* 맞은 자리: 순간 섬광(흰→파랑) + 몸을 감는 아크 + 바닥 빛 번짐·그을음 + 조명 + 튀는 불티 */
-  popFx(b.x,b.y,b.z,.6,2.4,.14,0xffffff,.9);popFx(b.x,b.y,b.z,1.2,3.6,.3,0x3a7aff,.55);flash({x:b.x,z:b.z},0x6a9aff,bigE?2.2:1.5);
+  popFx(b.x,b.y,b.z,.4,1.4,.12,0xffffff,.45);popFx(b.x,b.y,b.z,1.2,3,.3,0x3a7aff,.4);flash({x:b.x,z:b.z},0x6a9aff,bigE?2.2:1.5);
   if(QM()>=.75)bodyArcs({x:b.x,z:b.z},tgt?tgt.r*.9:.45,tgt?tgt.h:1.4,bigE?6:4);
   decalFx({x:b.x,z:b.z},dotTex,0x4a8aff,tgt?tgt.r*3.2:1.6,.22,.55,true);decalFx({x:b.x,z:b.z},crackTex,0x7ab0ff,tgt?tgt.r*2:1,.3,.6,true);decalFx({x:b.x,z:b.z},crackTex,0x0a0c14,tgt?tgt.r*2.2:1.1,1.6,.5,false);
   for(let i=0;i<6;i++)emit(PADD,{x:b.x,y:b.y,z:b.z,vx:rnd(-6,6),vy:rnd(1,6),vz:rnd(-6,6),life:rnd(.14,.3),s0:.34,s1:.06,c0:0xffffff,c1:0x3a7aff,a:1,drag:3,grav:-14,tex:1});
-  if(first){popFx(a.x,a.y,a.z,.5,1.8,.16,0xdff0ff,.9);if(QM()>=.75)bodyArcs({x:a.x,z:a.z},.3,a.y+.3,3,0x8ab8ff)}}
+  if(first){popFx(a.x,a.y,a.z,.4,1.3,.16,0xdff0ff,.5);if(QM()>=.75)bodyArcs({x:a.x,z:a.z},.3,a.y+.3,3,0x8ab8ff)}}
 /* v85 번개 폭풍: 「팡」 터지는 푸른 폭발 — 순간 섬광(하양→파랑) + 부풀어 오르는 푸른 광구 + 바닥 빛 번짐 + 빠른 고리·느린 고리 2겹 + 작은 방사 번개 + 튀는 불꽃 */
-let stormN=0,stormL=0,stormT=0;
+let stormN=0,stormL=0,stormT=0,fbT=[];
 function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air&&e.hp>0&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true);hitKind=null;
   stormN++;const heavy=stormN%2===0||QM()>=1;stormL=Math.max(0,stormL-(time-stormT)*8);stormT=time;stormL++;const dm=1/(1+stormL*.18);/* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 밝기 자동 감쇠 */
   popFx(p.x,.9,p.z,r*.25,r*.8,.12,0xcfe6ff,.8*dm);popFx(p.x,.8,p.z,r*.6,r*1.9,.3,0x1e6aff,.7*dm,.02);
@@ -3081,7 +3092,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v163';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v164';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4225,7 +4236,7 @@ function update(dt){
     if(p.park){if(time>=p.retAt)retStart(p);else continue}
     if(p.home){const t=nearestEnemy(pp,7,p.hit);if(t){const ax=t.pos.x-pp.x,az=t.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx+=(ax/l*p.speed-p.vx)*Math.min(1,dt*5);p.vz+=(az/l*p.speed-p.vz)*Math.min(1,dt*5)}}
     if(p.col===0xb8f07a&&Math.random()<dt*8*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vy:rnd(0,.6),life:rnd(.25,.4),s0:.35,s1:.05,c0:0xeaffb0,c1:0x4a9a20,a:.8,tex:1});
-    pp.x+=p.vx*dt;pp.z+=p.vz*dt;p.m.rotation.y=Math.atan2(p.vx,p.vz);p.life-=dt;let dead=p.life<=0;
+    pp.x+=p.vx*dt;pp.z+=p.vz*dt;p.m.rotation.y=Math.atan2(p.vx,p.vz);p.life-=dt;let dead=p.life<=0;if(p.rib)ribStep(p,dt);
     if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova')}}
     if(p.orb&&!dead){const S2=p.m.scale.x;for(const c of p.m.children)if(c.userData.ring){c.rotation.x+=dt*5*c.userData.ring;c.rotation.y+=dt*3.3}
       if(Math.random()<dt*14*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vx:-p.vx*.15,vz:-p.vz*.15,life:.35,s0:S2*.7,s1:S2*.3,c0:0x7fc0ef,c1:0x10305a,a:.2*(1-p.dim),drag:3,tex:1})}
@@ -4242,7 +4253,7 @@ function update(dt){
       if(p.pierce>0){p.pierce--;continue}
       dead=true;break}}
     if(dead&&p.ret&&!p.back){dead=false;if(p.life<=0||time>=p.retAt)retStart(p);else{p.park=true;p.vx=p.vz=0}}
-    if(dead){if(p.orb)orbEnd(p);scene.remove(p.m);projs.splice(i,1)}}
+    if(dead){if(p.orb)orbEnd(p);if(p.rib)ribEnd(p);scene.remove(p.m);projs.splice(i,1)}}
 
   pfxUpdate(dt);
   for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
