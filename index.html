@@ -810,7 +810,7 @@ const ESS_LV=31,G2MAX=5;let mapOpen=false,heirOpen=false;
 const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>G2C[g2Max(g)].e[L],g2Gold=(g,L)=>G2C[g2Max(g)].g[L];
 /* v82 새 주력 스킬 보조 수치 */
-const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v142: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[30,60,90,130,170,210],qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
+const qLen=L=>L<1?7:7.56+(15-7.56)*(L-1)/9,/* v146: 1단계 7.56m 유지 → 10단계 15m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[30,60,90,130,170,210],qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
 const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:2+.2*L,m:.5+.125*L});/* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
 const SHK_HALF0=.26,SHK_DEN=.7;/* v145: 충격파 수는 부채꼴 넓이에 비례 (30° 기준 옛 횟수의 70%) */
 const shkCnt=(L,half)=>Math.max(1,Math.round(shkN(L)*SHK_DEN*half/SHK_HALF0));
@@ -959,7 +959,7 @@ const enhCost=(L,k)=>Math.round(200*Math.pow(1.38,L)*(k==='weapon'?1.3:1));/* v1
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
 const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
-const BOOST_G=10,BOOST_R=3,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
+const BOOST_G=10,BOOST_R=4,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 → v146: 4배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 const enhMB=L=>1+ENH_B*enhSum(L),enhMO=L=>1+ENH_O*enhSum(L);
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
@@ -967,7 +967,7 @@ function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,rege
   for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L),mo=enhMO(L),b=it.base*mb;
     if(k==='weapon')g.wdmg+=b;else if(k==='amulet')g.mp+=b;else if(k==='ring')g.hp+=b;else g.armor+=b;for(const o of it.opts)g[o.k]=(g[o.k]||0)+o.v*mo}
   for(const k of ['wdmg','armor','hp','mp'])g[k]=Math.round(g[k]);for(const k of ['dmgPct','crit','cdr','spd','regen','mreg','mcr','fdmg'])g[k]=Math.round(g[k]*10)/10;
-  g.cdr=Math.min(g.cdr,40);g.mcr=Math.min(g.mcr,50);return g}
+  /* v146: 쿨타임 감소 상한(40%) 폐지 — 쿨다운 배율은 최소 10%로만 보호 */g.mcr=Math.min(g.mcr,50);return g}
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
    일반 옵션(최대 생명력 기준)이 iLv에 비례해 커지는 만큼, 특수 능력치의 평균 수치 증가분을 뺀 비율로 가중치를 올려
    iLv 5 이후로는 일반 옵션 대비 비중이 일정하게 유지됨. iLv 5 이하는 기존 가중치 그대로 */
@@ -1074,7 +1074,7 @@ const SPD_CAP=150,spdRaw=()=>1.4*stN('agi')+gear().spd;
 const heroSpd=()=>C().spd*.8*(1+Math.min(SPD_CAP,spdRaw())/100)*(P.hasteT>0?1.6:1);
 function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
   return `<p class="hint" style="margin:6px 0 0;${cap?'color:#ffb070':''}">이동 속도 상승(민첩+신발)은 합계 <b>+${SPD_CAP}%</b>가 상한입니다. 현재 +${Math.min(SPD_CAP,r).toFixed(1)}%${cap?` — 상한에 도달해 민첩을 더 찍거나 신발을 강화해도 이동 속도는 늘지 않습니다.${r>SPD_CAP?` (초과분 +${(r-SPD_CAP).toFixed(1)}%)`:''}`:'.'}</p>`}
-const cdMul=()=>1-gear().cdr/100;
+const cdMul=()=>Math.max(.1,1-gear().cdr/100);
 const critCh=()=>.1+gear().crit/100+.008/3*stN('agi');
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
@@ -3039,7 +3039,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v145';
+const APP_VER='v146';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3533,7 +3533,7 @@ function closeAllSheets(){if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeo
 
 /* ================= equipment & bag ================= */
 let invOpen=false,invSel=null,clearArm=0;
-const optLine=(o,L=0)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,enhMO(L)))}${OPT[o.k].sp&&L>0&&ev(o.v,enhMO(L))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}${o.k==='cdr'&&S.cls==='warrior'?' (전사: 화염 폭발 빈도 증가)':''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
+const optLine=(o,L=0)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,enhMO(L)))}${OPT[o.k].sp&&L>0&&ev(o.v,enhMO(L))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
 const baseName=sl=>sl==='weapon'?'무기 피해':sl==='amulet'?'최대 마나':sl==='ring'?'최대 생명력':'방어력';
 const baseLine=(it,L=0)=>`${baseName(it.slot)} +${Math.round(it.base*enhMB(L))}`;
 /* 특수 능력치(부위 전용: 투구 재사용 대기시간 · 신발 이동 속도 · 목걸이 마나 재생 · 반지 마나 소모)는 첫 줄에 강조 */
@@ -3782,9 +3782,7 @@ function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toa
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
   smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},403);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
-function cdrCapNote(){let raw=0;for(const q of EQS){const it=S.eq&&S.eq[q];if(!it)continue;const mo=enhMO(enhL(q));for(const o of it.opts)if(o.k==='cdr')raw+=o.v*mo}
-  if(raw<=0)return '';const capped=raw>=40;
-  return `<p class="hint" style="margin:6px 0 0;${capped?'color:#ffb070':''}">쿨타임 감소는 장비 합계 <b>40%</b>가 상한입니다. 현재 ${Math.min(40,raw).toFixed(1)}%${capped?' — 상한에 도달해 더 강화해도 쿨감은 늘지 않습니다.':'.'}</p>`}
+function cdrCapNote(){return ''}/* v146: 상한 폐지로 안내 없음 */
 function renderSmith(){
   let h=`<div class="shead"><div><div class="chap">Blacksmith · ${TOWN.smith}</div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
   if(!smithSel){
@@ -3804,7 +3802,7 @@ function renderSmith(){
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
       hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():''),
-      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`${boostOk(L)&&!tkOn?'일반 강화 ':'강화 '}${fmtG(cc)}G`}</button></div>${!max&&boostOk(L)&&!tkOn?`<button class="primary smboost" id="smGo20" ${S.gold>=c*BOOST_G&&!smAuto?'':'disabled'}>골드 ${BOOST_G}배 강화 · 확률 ${+(Math.min(1,rt*BOOST_R)*100).toFixed(1)}% <small>${fmtG(c*BOOST_G)}G</small></button>`:''}${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
+      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`${boostOk(L)&&!tkOn?'일반 강화 ':'강화 '}${fmtG(cc)}G`}</button></div>${!max&&boostOk(L)&&!tkOn?`<button class="primary smboost" id="smGo20" ${S.gold>=c*BOOST_G&&!smAuto?'':'disabled'}>골드 ${BOOST_G}배 강화 · 확률 ${BOOST_R}배 (${+(Math.min(1,rt*BOOST_R)*100).toFixed(1)}%) <small>${fmtG(c*BOOST_G)}G</small></button>`:''}${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
       <div class="spR"><div class="smbig smact" style="--rc:${rc}">${res}${lv}${rateBig}<div class="smstats">${rate}</div>${hint}</div>${btns}</div></div>`;
