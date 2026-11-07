@@ -2028,7 +2028,7 @@ function donutTele(p,r0,r1,dur,end){const g=new THREE.Group(),bg=new THREE.Mesh(
       피자 일반 50% · 우버 80% / 직선 일반 20% · 우버 40% (최대 체력 비율, 고정)
    ② 「잿더미 장판」 주기적: 플레이어 주위에 원(따라다님, 피할 수 없음) → 3초 뒤 그 자리에 사라지지 않는 장판. 위에 있으면 초당 일반 10% · 우버 20% */
 const SIPE_T=15,DPOOLS=[],POOL_R=2.6*1.6;/* v131: 장판 크기 ×1.6 */
-function clearPools(){for(const q of DPOOLS){scene.remove(q.g);q.g.traverse(o=>{if(o.material)o.material.dispose()})}DPOOLS.length=0}
+function clearPools(){for(const q of DPOOLS){scene.remove(q.g);q.g.traverse(o=>{if(o.material)mfree(o.material)})}DPOOLS.length=0}
 function sipeStart(e){const U=S.duel&&S.duel.uber,C={x:0,z:0};e.chg=null;
   const A={k:'sipe',t:0,a:e.g.rotation.y,dur:SIPE_T+1.4,hit:.8,from:{x:e.pos.x,z:e.pos.z},to:C};e.dA=A;
   toast('불꽃 분할',`${e.name}이(가) 투기장 중앙에서 검을 치켜듭니다 — 붉은 조각과 줄을 피하세요!`);shake=Math.max(shake,.4);
@@ -2181,7 +2181,11 @@ function nearestEnemy(p,maxd,skip){let best=null,bd=maxd;for(const e of enemies)
 
 /* ================= fx ================= */
 const ringGeo=new THREE.RingGeometry(.86,1,44),discGeo=new THREE.CircleGeometry(1,36);
-function flatMesh(geo,color,op){const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:op,depthWrite:false,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;return m}
+/* v194 재질 풀: 이펙트마다 새 재질을 만들고 버리던 것(초당 수백 개 → 셰이더 캐시 키 계산·GC 부담)을 재사용. 모양·밝기는 그대로 */
+const MPOOL={};function mtake(k,make,reset){const a=MPOOL[k];let m=a&&a.pop();if(!m){m=make();m.userData.pk=k}m.userData.free=false;reset(m);return m}
+function mfree(m){if(!m)return;const u=m.userData;if(u&&u.pk){if(u.free)return;u.free=true;const a=MPOOL[u.pk]||(MPOOL[u.pk]=[]);if(a.length<300)a.push(m);else{u.pk=null;m.dispose()}}else m.dispose()}
+const basicMat=(k,o)=>mtake(k,()=>new THREE.MeshBasicMaterial(o),m=>{m.color.setHex(o.color);m.opacity=o.opacity;m.blending=o.blending||THREE.NormalBlending;m.side=o.side||THREE.FrontSide;m.depthTest=o.depthTest!==false;m.depthWrite=false;m.transparent=true});
+function flatMesh(geo,color,op){const m=new THREE.Mesh(geo,basicMat('fm',{color,opacity:op,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;return m}
 function ringFx(p,r,color,dur=.35,grow=true){if(r>=1.4)flash(p,color,Math.min(2.4,.5+r*.3));const m=flatMesh(ringGeo,color,.9);m.position.set(p.x,.06,p.z);scene.add(m);fx.push({m,t:0,dur,upd(k){const s=r*(grow?.35+.65*(1-(1-k)*(1-k)):1);m.scale.set(s,s,1);m.material.opacity=.9*(1-k)}})}
 /* v179 잔불 바닥: 셰이더 — 그을린 검은 바닥(울퉁불퉁한 가장자리) 위에 숯처럼 갈라진 불씨가 노이즈로 깜빡이고, 갈라진 틈이 노랗게 달아오름. 불티가 띄엄띄엄 떠오르고 옅은 연기 */
 let _EMB=null;const EMBER_MAT=()=>(_EMB||(_EMB=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -2312,7 +2316,7 @@ function spray(P,p,n,o){n=Math.max(1,Math.round(n*QM()));for(let i=0;i<n;i++){co
 const fxPlane=new THREE.PlaneGeometry(2,2);
 
 const shockTex=(()=>{const c=mkCv(128),g=c.getContext('2d'),q=g.createRadialGradient(64,64,0,64,64,64);q.addColorStop(0,'rgba(255,255,255,0)');q.addColorStop(.62,'rgba(255,255,255,0)');q.addColorStop(.86,'rgba(255,255,255,.9)');q.addColorStop(.93,'rgba(255,255,255,.5)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)})();
-function groundFx(p,tex,color,r0,r1,dur,op,add,y){const m=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:tex,color,transparent:true,opacity:op,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
+function groundFx(p,tex,color,r0,r1,dur,op,add,y){const m=new THREE.Mesh(fxPlane,basicMat('gd'+(add?1:0)+tex.id,{map:tex,color,opacity:op,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
   m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,y||.06,p.z);m.scale.setScalar(Math.max(.01,r0));scene.add(m);
   fx.push({m,t:0,dur,upd(k){const e=1-(1-k)*(1-k)*(1-k);m.scale.setScalar(Math.max(.01,r0+(r1-r0)*e));m.material.opacity=op*(1-k)}});return m}
 
@@ -2354,7 +2358,7 @@ function whirlFx(R,dur,fire){const geo=arcGeo(Math.max(.5,R*.42),R,-4.4,0,64),ge
       if(Math.random()<dt*30*q){const sn=Math.sin(a),cs=Math.cos(a);streak({x:P.pos.x+sn*R*.97,y:.95+rnd(-.15,.25),z:P.pos.z+cs*R*.97,vx:cs*rnd(8,14)+sn*2,vy:rnd(0,2),vz:-sn*rnd(8,14)+cs*2,life:rnd(.18,.3),w:.08,len:1.1,c0:fire?0xffe0a0:0xffffff,c1:fire?0xff3a00:0x5a8aff,drag:2})}
       if(fire&&Math.random()<dt*24*q){const b=a-rnd(.2,1.2),rr=R*rnd(.5,.95);emit(PADD,{x:P.pos.x+Math.sin(b)*rr,y:rnd(.6,1.3),z:P.pos.z+Math.cos(b)*rr,vy:rnd(1,2.5),life:rnd(.3,.5),s0:rnd(.6,.9),s1:.2,c0:0xffb050,c1:0xa02000,a:.5,drag:2,rv:2,tex:0})}}
     if(tt<dur&&Math.random()<dt*40*QM()){const sn=Math.sin(a),cs=Math.cos(a);emit(PADD,{x:P.pos.x+sn*R*.95,y:.95+rnd(-.2,.3),z:P.pos.z+cs*R*.95,vx:cs*rnd(5,9),vy:rnd(.5,2.5),vz:-sn*rnd(5,9),life:rnd(.18,.32),s0:.35,s1:.05,c0:fire?0xffe0a0:0xffffff,c1:fire?0xff4010:0x6a9aff,drag:3,tex:1})}},
-    end(){geo2.dispose();if(rb&&rb.m){scene.remove(rb.m);rb.m.geometry.dispose();rb.mat.dispose()}}})}
+    end(){geo2.dispose();if(rb&&rb.m){scene.remove(rb.m);rb.m.geometry.dispose()}if(rb)mfree(rb.mat)}})}
 /* 소용돌이: 바닥에서 안쪽으로 감겨 드는 나선 + 빨려 드는 바람 입자 */
 const SWIRL_FS=`uniform float uT,uOp;uniform vec3 uCol;varying vec2 vUv;
 void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;float th=atan(q.y,q.x);
@@ -2370,7 +2374,7 @@ function hitSpark(p,c0,c1,n){emit(PADD,{x:p.x,y:1,z:p.z,life:.14,s0:1.6,s1:.5,c0
   streaks({x:p.x,z:p.z},n||5,{sp:[7,14],up:[0,4],y:[.8,1.2],life:[.14,.28],w:.07,len:.7,c0,c1,drag:3,grav:-6})}
 /* 얼음 가시: 바닥에서 솟았다가 부서지듯 꺼짐 */
 const spikeGeo=new THREE.ConeGeometry(.2,1,5);spikeGeo.translate(0,.5,0);
-function iceSpikes(p,r,n){const mat=new THREE.MeshLambertMaterial({color:0xcfefff,emissive:0x3a86c8,transparent:true,opacity:.92,flatShading:true}),g=new THREE.Group(),sp=[];
+function iceSpikes(p,r,n){const mat=mtake('ice',()=>new THREE.MeshLambertMaterial({color:0xcfefff,emissive:0x3a86c8,transparent:true,opacity:.92,flatShading:true}),q=>{q.opacity=.92}),g=new THREE.Group(),sp=[];
   for(let i=0;i<n;i++){const a=Math.random()*6.28,d=r*rnd(.15,.85),m=new THREE.Mesh(spikeGeo,mat),h=rnd(.7,1.5)*Math.min(1.6,.5+r*.25);
     m.position.set(p.x+Math.sin(a)*d,0,p.z+Math.cos(a)*d);m.rotation.set(Math.cos(a)*rnd(.15,.5),rnd(0,6),-Math.sin(a)*rnd(.15,.5));m.scale.set(1,.01,1);g.add(m);sp.push({m,h,w:rnd(.7,1.3)})}
   scene.add(g);fx.push({m:g,t:0,dur:.75,upd(k){const gk=Math.min(1,k/.14),e=1-(1-gk)*(1-gk);for(const q of sp){q.m.scale.set(q.w*(k>.6?1-(k-.6)/.4*.6:1),Math.max(.01,q.h*e*(k>.6?1-(k-.6)/.4:1)),q.w)}mat.opacity=k<.6?.9:.9*(1-(k-.6)/.4)}})}
@@ -2378,7 +2382,7 @@ function iceSpikes(p,r,n){const mat=new THREE.MeshLambertMaterial({color:0xcfeff
 /* 파편 이펙트 (v33): 작은 조각이 튀어 오르고 떨어지며 사라짐. 화질에 따라 동시 조각 수 제한 */
 const tetraGeo=new THREE.TetrahedronGeometry(1,0),octaGeo=new THREE.OctahedronGeometry(1,0),sparkGeo=new THREE.OctahedronGeometry(1,0);let debrisN=0;
 function debris(p,o){const n=o.n;if(n<=0)return;/* v50: 파편 개수 제한 해제 */debrisN+=n;
-  const grp=new THREE.Group(),mat=o.add?new THREE.MeshBasicMaterial({color:o.color,transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending}):new THREE.MeshLambertMaterial({color:o.color,emissive:new THREE.Color(o.color).multiplyScalar(.3),transparent:true,opacity:1,flatShading:true});
+  const grp=new THREE.Group(),mat=o.add?basicMat('dba',{color:o.color,opacity:1,blending:THREE.AdditiveBlending}):mtake('dbl',()=>new THREE.MeshLambertMaterial({color:o.color,transparent:true,opacity:1,flatShading:true}),q=>{q.color.setHex(o.color);q.emissive.setHex(o.color).multiplyScalar(.3);q.opacity=1});
   const ps=[];for(let i=0;i<n;i++){const m=new THREE.Mesh(o.geo||tetraGeo,mat),a=rand(0,Math.PI*2),sp=rand(o.sp[0],o.sp[1]),sz=rand(o.sz[0],o.sz[1]);
     m.scale.set(sz,sz*rand(.7,1.6),sz);m.position.set(p.x+Math.sin(a)*(o.r0||0)*Math.random(),rand(o.y[0],o.y[1]),p.z+Math.cos(a)*(o.r0||0)*Math.random());m.rotation.set(rand(0,6),rand(0,6),rand(0,6));grp.add(m);
     ps.push({m,vx:Math.sin(a)*sp,vz:Math.cos(a)*sp,vy:rand(o.up[0],o.up[1]),rx:rand(-12,12),ry:rand(-12,12)})}
@@ -2409,7 +2413,7 @@ function novaRing(p,R,op,ka){const n=18,mat=new THREE.MeshBasicMaterial({color:0
   /* 결정 고리를 따라 퍼지는 냉기 안개 */
   for(let i=0;i<10;i++){const a=ph+i/10*6.28,v=R*3.1;emit(PADD,{x:p.x+Math.sin(a)*R*.12,y:.45,z:p.z+Math.cos(a)*R*.12,vx:Math.sin(a)*v,vz:Math.cos(a)*v,life:.3,s0:R*.18,s1:R*.42,c0:0xe0f6ff,c1:0x2a6ad0,a:.3*ka,drag:3.4,tex:1})}}
 /* v62: 큰 빛 번짐은 점 입자 크기 한계(기기마다 다름)에 걸리지 않게 스프라이트로. del초 뒤 터져 dur초 동안 s0→s1로 부풀며 사라짐 */
-function popFx(x,y,z,s0,s1,dur,col,op,del=0){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));m.position.set(x,y,z);m.scale.setScalar(s0);scene.add(m);
+function popFx(x,y,z,s0,s1,dur,col,op,del=0){const m=new THREE.Sprite(mtake('pop',()=>new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}),q=>{q.color.setHex(col);q.opacity=0}));m.position.set(x,y,z);m.scale.setScalar(s0);scene.add(m);
   fx.push({m,t:-del,dur,upd(k){if(k<0){m.material.opacity=0;return}const e=1-(1-k)*(1-k);m.scale.setScalar(s0+(s1-s0)*e);m.material.opacity=op*(1-k)*(k<.12?k/.12:1)}})}
 /* v165 화염 폭발 재작성 — 노이즈 불덩이(셰이더, 안쪽 흰빛→주황→검붉게 식어감, 가장자리가 녹아 사라짐) + 너덜너덜한 충격파 고리(셰이더)
    + 열기 돔(프레넬) + 포물선 불꽃 파편 + 바닥 불씨 + 연기. 겹치면 밝기 ×1/√n (fbT) */
@@ -2427,13 +2431,13 @@ const FIREBALL_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;vec
     vec3 col=mix(c2,c1,smoothstep(.06,.42,heat));col=mix(col,c0,smoothstep(.5,.9,heat));col*=1.25;
     float al=body*pow(1.-k,1.1)*ff;col*=al;/* premultiplied: 밝은 심지는 더해지고 검붉은 가장자리는 덮음 */
     gl_FragColor=vec4(col,al*(.3+.7*smoothstep(.0,.45,heat)));}`;
-  return(c0,c1,c2)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},sf:{value:1},c0:{value:new THREE.Color(c0)},c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
+  return(c0,c1,c2)=>mtake('fb',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:0},ff:{value:1},sf:{value:1},c0:{value:new THREE.Color()},c1:{value:new THREE.Color()},c2:{value:new THREE.Color()}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1;u.sf.value=1;u.c0.value.setHex(c0);u.c1.value.setHex(c1);u.c2.value.setHex(c2)})})();
 const SHOCK_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col;${FIRE_NOISE}
   void main(){float d=length(vUv),a=atan(vUv.y,vUv.x);float rg=.78+(fbm(vec2(a*2.2+seed,k*3.))-.5)*.22;/* 너덜너덜한 테두리 */
     float w=.1+.08*k;float band=1.-smoothstep(0.,w,abs(d-rg));float inner=(1.-smoothstep(rg-.45,rg,d))*.25*(1.-k);
     float al=(band*1.2+inner)*(1.-k)*ff;gl_FragColor=vec4(col*al,al*.5);}`;
-  return(c)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},col:{value:new THREE.Color(c)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})})();
+  return(c)=>mtake('sh',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:0},ff:{value:1},col:{value:new THREE.Color()}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1;u.col.value.setHex(c)})})();
 const DOME_GEO=new THREE.SphereGeometry(1,20,10,0,Math.PI*2,0,Math.PI/2);
 const DOME_MAT=(()=>{const vs=`varying vec3 vN,vV;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
   fs=`precision mediump float;varying vec3 vN,vV;uniform float k,ff;uniform vec3 col;void main(){float fr=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.2);float al=fr*(1.-k)*(1.-k)*.35*ff;gl_FragColor=vec4(col*al,al);}`;
@@ -2458,7 +2462,7 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float crest=(band*.9*(1.-k*.5)+lead*.7*(1.-k))*ff*(1.-smoothstep(.8,1.,k));
     vec3 ice=vec3(1.)*shade;/* 흰-하늘빛 얼음 */
     vec3 c=ice*sheet+core*(crest*.8+spark*.65);float al=clamp(sheet*.99+crest*.5,0.,1.);gl_FragColor=vec4(c,al);}`;
-  return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:null}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
+  return()=>mtake('nova',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:0},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:null}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1})})();
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
   const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
@@ -2590,7 +2594,7 @@ function hurt(e,amt,quiet,so){
 /* 동결: 잠시 이동·공격 불가. 풀린 뒤 1초간은 다시 얼지 않음, 고유 몬스터는 지속시간 35% */
 function freeze(e,t){if(e.frzT>0||(e.frzI||0)>0)return;e.frzT=e.boss?t*.35:t}
 function aoe(c,r,dmg,o={}){
-  for(const e of [...enemies]){const dx=e.pos.x-c.x,dz=e.pos.z-c.z,d=Math.hypot(dx,dz);
+  for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e)continue;/* v194: 배열 복사 없이 뒤에서부터 */const dx=e.pos.x-c.x,dz=e.pos.z-c.z,d=Math.hypot(dx,dz);
     if(d<r+e.r*.6){if(o.knock&&!e.boss){e.kbT=.22;e.kbx=dx/(d||1)*16;e.kbz=dz/(d||1)*16}if(o.slow)e.slowT=2;if(o.spark&&Math.random()<.7)hitSpark(e.pos,0xffffff,0x6a9aff,2);hurt(e,dmg,o.quiet,o.so)}}
 }
 function kill(e){
@@ -2802,7 +2806,7 @@ const frostTex=(()=>{const c=mkCv(256),g=c.getContext('2d');g.lineCap='round';g.
   const fern=(x,y,a,len,w,d)=>{g.lineWidth=w;g.beginPath();g.moveTo(x,y);const ex=x+Math.cos(a)*len,ey=y+Math.sin(a)*len;g.lineTo(ex,ey);g.stroke();if(d<3)for(let t=.3;t<1;t+=.22){const bx=x+Math.cos(a)*len*t,by=y+Math.sin(a)*len*t;fern(bx,by,a+.7,len*.35*(1.1-t),w*.6,d+1);fern(bx,by,a-.7,len*.35*(1.1-t),w*.6,d+1)}};
   for(let i=0;i<8;i++)fern(128,128,i/8*6.28,rand(80,110),3,0);
   const q=g.createRadialGradient(128,128,0,128,128,128);q.addColorStop(0,'rgba(255,255,255,.55)');q.addColorStop(.5,'rgba(255,255,255,.15)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,256,256);return new THREE.CanvasTexture(c)})();
-function decalFx(p,tex,color,r,dur,op,add){const m=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:tex,color,transparent:true,opacity:op,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
+function decalFx(p,tex,color,r,dur,op,add){const m=new THREE.Mesh(fxPlane,basicMat('gd'+(add?1:0)+tex.id,{map:tex,color,opacity:op,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
   m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.05,p.z);m.scale.setScalar(r);scene.add(m);fx.push({m,t:0,dur,upd(k){m.material.opacity=op*(k<.15?k/.15:1-(k-.15)/.85)}})}
 /* 회전 베기 바람벽: 몸 주위를 감싸며 도는 원통형 바람 줄기 */
 const WIND_FS=`uniform float uT,uOp;uniform vec3 uCol;varying vec2 vUv;
@@ -2912,7 +2916,7 @@ function shootWave(a,o){const W=o.w||1;
     const q=QM();if(Math.random()<dt*18*q){const s=Math.random()<.5?1:-1,ta=ry+rnd(.3,1.3)*s;streak({x:pp.x+Math.sin(ta)*1.6*W,y:1+rnd(-.2,.2),z:pp.z+Math.cos(ta)*1.6*W,vx:-Math.sin(ry)*rnd(3,6)+Math.sin(ta)*2,vy:rnd(0,1.5),vz:-Math.cos(ry)*rnd(3,6)+Math.cos(ta)*2,life:rnd(.15,.28),w:.07,len:.8,c0:0xffffff,c1:0xff9a30,drag:3})}
     if(Math.random()<dt*20*q)emit(PADD,{x:pp.x+rnd(-1,1)*W,y:.3,z:pp.z+rnd(-.5,.5),vy:rnd(.5,1.5),life:rnd(.2,.4),s0:.5,s1:.1,c0:0xffe0b0,c1:0xff8a30,a:.6,tex:1})};
   p.onHit=(e,pp)=>{hitSpark(e.pos,0xffffff,0xffa040,3);ringFx(e.pos,e.r*1.4,0xffd090,.18);streaks({x:e.pos.x,z:e.pos.z},4,{dir:p.m.rotation.y,cone:.9,sp:[4,8],up:[1,3],y:[.8,1.3],life:[.15,.3],w:.06,len:.7,c0:0xffffff,c1:0xff8a30,drag:3,grav:-10})};
-  p.onEnd=()=>{gl_.material.dispose();if(rb&&rb.m){const m=rb.m,mat=rb.mat;p.rbm=null;fx.push({m,t:0,dur:.14,upd(k){mat.uniforms.fade.value=1-k},end(){m.geometry.dispose();mat.dispose()}})}geo.dispose();geo2.dispose();for(const x of [m1,m2,m3])x.material.dispose();
+  p.onEnd=()=>{gl_.material.dispose();if(rb&&rb.m){const m=rb.m,mat=rb.mat;p.rbm=null;fx.push({m,t:0,dur:.14,upd(k){mat.uniforms.fade.value=1-k},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */})}geo.dispose();geo2.dispose();for(const x of [m1,m2,m3])x.material.dispose();
     if(o.burst){const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r,Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3,PAL_WAVE);shake=Math.max(shake,.12);aoe(c,o.burst.r,o.burst.dmg,{quiet:true,so:o.so})}};
   return p}
 /* ---------- 궁수: 폭발 사격 ---------- */
@@ -3208,20 +3212,21 @@ const BOLT_MAT=(()=>{const vs=`attribute float fm;varying vec2 vUv;varying float
   void main(){float d=abs(vUv.y);float core=1.-smoothstep(0.,cw,d);float glow=pow(max(0.,1.-d),1.9);float mid=1.-smoothstep(cw,cw*2.6,d);
     float fl=.7+.3*h(floor(vUv.x*11.)+floor(t*70.));float f=max(0.,fade-(1.-vF)*(1.-fade)*1.5);
     vec3 c=cg*(glow*.9+mid*1.2)+cc*core*1.6;float a=(glow*.62+mid*.6+core)*f*fl;gl_FragColor=vec4(c*a,a);}`;
-  return(cg,cc)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{fade:{value:1},t:{value:0},seed:{value:Math.random()*100},cw:{value:.3},cg:{value:new THREE.Color(cg)},cc:{value:new THREE.Color(cc)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})})();
+  return(cg,cc)=>mtake('bolt',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{fade:{value:1},t:{value:0},seed:{value:0},cw:{value:.3},cg:{value:new THREE.Color()},cc:{value:new THREE.Color()}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.fade.value=1;u.t.value=0;u.seed.value=Math.random()*100;u.cw.value=.3;u.cg.value.setHex(cg);u.cc.value.setHex(cc)})})();
 /* 두 점 사이 프랙탈 번개 경로: 중점 변위 lv단계 (lv=4 → 17점). jit=최대 흔들림(m) */
 function boltPath(a,b,lv,jit){let pts=[[a.x,a.y,a.z],[b.x,b.y,b.z]];const dx=b.x-a.x,dz=b.z-a.z,dl=Math.hypot(dx,dz)||1,nx=-dz/dl,nz=dx/dl;let J=jit;
   for(let l=0;l<lv;l++){const nx_=[];for(let i=0;i<pts.length-1;i++){const p=pts[i],q=pts[i+1],o=rnd(-J,J),oy=rnd(-J*.5,J*.5);nx_.push(p,[(p[0]+q[0])/2+nx*o,Math.max(.12,(p[1]+q[1])/2+oy),(p[2]+q[2])/2+nz*o])}nx_.push(pts[pts.length-1]);pts=nx_;J*=.55}return pts}
 /* 경로 목록 → 띠 지오메트리. 각 경로 {p:[[x,y,z]…], w:굵기, w1:끝 굵기 비율, f:수명 배율} · 카메라를 향하도록 옆 벡터 = 접선 × 시선 */
 function boltGeo(paths,geo){let nv=0,ni=0;for(const q of paths){nv+=q.p.length*2;ni+=(q.p.length-1)*6}
-  const pos=new Float32Array(nv*3),uv=new Float32Array(nv*2),fm=new Float32Array(nv),idx=new (nv>65000?Uint32Array:Uint16Array)(ni);let v=0,ii=0;const cp=camera.position;
+  /* v194: 기존 지오메트리가 있으면 위치 버퍼에 바로 씀(매 프레임 배열 할당 제거) */
+  const upd=!!geo,pos=upd?geo.attributes.position.array:new Float32Array(nv*3),uv=upd?null:new Float32Array(nv*2),fm=upd?null:new Float32Array(nv),idx=upd?null:new (nv>65000?Uint32Array:Uint16Array)(ni);let v=0,ii=0;const cp=camera.position;
   for(const q of paths){const P=q.p,n=P.length,b0=v;for(let i=0;i<n;i++){const p=P[i],pr=P[Math.max(0,i-1)],nx=P[Math.min(n-1,i+1)];
       let tx=nx[0]-pr[0],ty=nx[1]-pr[1],tz=nx[2]-pr[2];const vx=cp.x-p[0],vy=cp.y-p[1],vz=cp.z-p[2];
       let sx=ty*vz-tz*vy,sy=tz*vx-tx*vz,sz=tx*vy-ty*vx;const sl=Math.hypot(sx,sy,sz)||1;const u=i/(n-1),w=q.w*(1-(1-(q.w1===undefined?.45:q.w1))*u)*.5;sx=sx/sl*w;sy=sy/sl*w;sz=sz/sl*w;
-      for(const s of [-1,1]){const k=v*3;pos[k]=p[0]+sx*s;pos[k+1]=p[1]+sy*s;pos[k+2]=p[2]+sz*s;uv[v*2]=u;uv[v*2+1]=s;fm[v]=q.f===undefined?1:q.f;v++}}
-    for(let i=0;i<n-1;i++){const a=b0+i*2;idx[ii++]=a;idx[ii++]=a+1;idx[ii++]=a+2;idx[ii++]=a+1;idx[ii++]=a+3;idx[ii++]=a+2}}
+      for(let s=-1;s<=1;s+=2){const k=v*3;pos[k]=p[0]+sx*s;pos[k+1]=p[1]+sy*s;pos[k+2]=p[2]+sz*s;if(!upd){uv[v*2]=u;uv[v*2+1]=s;fm[v]=q.f===undefined?1:q.f}v++}}
+    if(!upd)for(let i=0;i<n-1;i++){const a=b0+i*2;idx[ii++]=a;idx[ii++]=a+1;idx[ii++]=a+2;idx[ii++]=a+1;idx[ii++]=a+3;idx[ii++]=a+2}}
   if(!geo){geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));geo.setAttribute('fm',new THREE.BufferAttribute(fm,1));geo.setIndex(new THREE.BufferAttribute(idx,1))}
-  else{geo.attributes.position.array.set(pos);geo.attributes.position.needsUpdate=true}return geo}
+  else geo.attributes.position.needsUpdate=true;return geo}
 /* 번개 한 줄기: 본 경로 + 곁가지. regen 간격마다 경로를 다시 흔듦 */
 function boltFx(a,b,o={}){const dl=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z)||1,lv=o.lv||4,jit=o.jit!==undefined?o.jit:Math.min(.55,.1+dl*.07),w=o.w||.95,dur=o.dur||.32,nb=o.br===undefined?(QM()>=.75?3:1):o.br;
   const build=()=>{const main=boltPath(a,b,lv,jit),paths=[{p:main,w,w1:.4}];
@@ -3229,12 +3234,12 @@ function boltFx(a,b,o={}){const dl=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z)||1,lv=o.l
       const dx=(tx*cs-tz*sn)/tl,dz=(tx*sn+tz*cs)/tl,L=rnd(.35,.8)*Math.min(2.2,.6+dl*.25),e={x:p[0]+dx*L,y:Math.max(.1,p[1]-rnd(.1,.6)),z:p[2]+dz*L};
       paths.push({p:boltPath({x:p[0],y:p[1],z:p[2]},e,2,jit*.45),w:w*.5,w1:.25,f:.55})}return paths};
   const mat=BOLT_MAT(o.cg||0x3a78ff,o.cc||0xf4f8ff);mat.uniforms.cw.value=o.cw||.11;const m=new THREE.Mesh(boltGeo(build()),mat);m.frustumCulled=false;scene.add(m);let rt=0;const RG=o.regen||.045;
-  fx.push({m,t:0,dur,upd(k,dt){rt+=dt;if(rt>=RG&&k<.8){rt=0;boltGeo(build(),m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(k<.35?1:Math.pow(1-(k-.35)/.65,1.3))*(Math.random()<.2?.55:1)},end(){m.geometry.dispose();mat.dispose()}});return m}
+  fx.push({m,t:0,dur,upd(k,dt){rt+=dt;if(rt>=RG&&k<.8){rt=0;boltGeo(build(),m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(k<.35?1:Math.pow(1-(k-.35)/.65,1.3))*(Math.random()<.2?.55:1)},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */});return m}
 /* 몸을 감는 작은 아크: 중심 c, 반지름 r, 높이 h 주위를 몇 가닥이 지직거림 */
 function bodyArcs(c,r,h,n,col){const paths=[];for(let i=0;i<n;i++){const a0=Math.random()*6.28,a1=a0+rnd(.9,2.2)*(Math.random()<.5?-1:1),y0=rnd(.2,h),y1=Math.max(.15,y0+rnd(-.5,.5)),rr=r*rnd(.9,1.35);
     paths.push({p:boltPath({x:c.x+Math.sin(a0)*rr,y:y0,z:c.z+Math.cos(a0)*rr},{x:c.x+Math.sin(a1)*rr,y:y1,z:c.z+Math.cos(a1)*rr},2,.14),w:.2,w1:.5})}
   const mat=BOLT_MAT(col||0x4a8aff,0xffffff);mat.uniforms.cw.value=.18;const m=new THREE.Mesh(boltGeo(paths),mat);m.frustumCulled=false;scene.add(m);let rt=0;
-  fx.push({m,t:0,dur:.2,upd(k,dt){rt+=dt;if(rt>.04){rt=0;for(const q of paths){const p=q.p;for(let i=1;i<p.length-1;i++){p[i][0]+=rnd(-.05,.05);p[i][1]+=rnd(-.04,.04);p[i][2]+=rnd(-.05,.05)}}boltGeo(paths,m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(1-k)*(Math.random()<.3?.5:1)},end(){m.geometry.dispose();mat.dispose()}})}
+  fx.push({m,t:0,dur:.2,upd(k,dt){rt+=dt;if(rt>.04){rt=0;for(const q of paths){const p=q.p;for(let i=1;i<p.length-1;i++){p[i][0]+=rnd(-.05,.05);p[i][1]+=rnd(-.04,.04);p[i][2]+=rnd(-.05,.05)}}boltGeo(paths,m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(1-k)*(Math.random()<.3?.5:1)},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */})}
 /* v166 사방 리본 번개: 중심에서 반지름 R 안 무작위 끝점으로 n줄기 */
 function radialBolts(p,R,n,cg){for(let i=0;i<n;i++){const a=Math.random()*6.28,d=R*rnd(.6,1.05);boltFx({x:p.x,y:.9,z:p.z},{x:p.x+Math.sin(a)*d,y:.15,z:p.z+Math.cos(a)*d},{lv:3,w:.55,dur:.22,br:1,cg,jit:.35})}}
 /* v164 투사체 리본 꼬리: 지나온 자리를 띠로 이어 그림(끝으로 갈수록 가늘어짐). helix=보주 주위를 도는 얼음 띠 2가닥 */
@@ -3244,7 +3249,7 @@ function ribStep(p,dt){const R=p.rib,pp=p.m.position,o=R.o;R.t+=dt;R.h.unshift([
   else paths=[{p:R.h,w:o.w,w1:.08}];
   if(!R.m){R.m=new THREE.Mesh(boltGeo(paths),R.mat);R.m.frustumCulled=false;scene.add(R.m)}else{if(R.m.geometry.attributes.position.count!==paths.reduce((a,q)=>a+q.p.length*2,0)){R.m.geometry.dispose();R.m.geometry=boltGeo(paths)}else boltGeo(paths,R.m.geometry)}
   R.mat.uniforms.t.value=R.t}
-function ribEnd(p){const R=p.rib;if(!R||!R.m)return;const m=R.m,mat=R.mat;const f0=mat.uniforms.fade.value;fx.push({m,t:0,dur:.16,upd(k){mat.uniforms.fade.value=f0*(1-k)},end(){m.geometry.dispose();mat.dispose()}});p.rib=null}
+function ribEnd(p){const R=p.rib;if(!R||!R.m)return;const m=R.m,mat=R.mat;const f0=mat.uniforms.fade.value;fx.push({m,t:0,dur:.16,upd(k){mat.uniforms.fade.value=f0*(1-k)},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */});p.rib=null}
 function zapFx(a,b,o){boltFx(a,b);if(!o){popFx(b.x,b.y,b.z,.5,2,.14,0xffffff,.8);popFx(b.x,b.y,b.z,1,3,.26,0x3a7aff,.5);return}/* 옵션 없이 부르면(번개 폭풍 하늘 번개·과부하·폭발) 줄기+섬광만 */
   const first=o.first,tgt=o.tgt,bigE=tgt&&tgt.rank>=2;
   /* 맞은 자리: 순간 섬광(흰→파랑) + 몸을 감는 아크 + 바닥 빛 번짐·그을음 + 조명 + 튀는 불티 */
@@ -3281,7 +3286,7 @@ function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e
 function overloadOrb(p,dmg,dur){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0x4a8aff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));s.scale.setScalar(1.6);s.position.set(p.x,1.2,p.z);scene.add(s);let tk=0;
   fx.push({m:s,t:0,dur,upd(k,dt){s.scale.setScalar(1.4+.4*Math.sin(time*20));s.material.opacity=1-k*k;tk-=dt;
     if(tk<=0){tk=.3;let n=0;for(const e of [...enemies]){if(e.air||e.hp<=0||n>=3)continue;if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<4){n++;zapFx({x:p.x,y:1.2,z:p.z},{x:e.pos.x,y:1,z:e.pos.z});hurt(e,dmg,true)}}}}})}
-function explode(p,dmg,skip,r=2.4,ice){blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(const e of [...enemies])if(e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true);hitKind=hk}
+function explode(p,dmg,skip,r=2.4,ice){blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true)}hitKind=hk}
 
 /* ================= input ================= */
 const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
@@ -3330,7 +3335,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v193';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v194';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3553,8 +3558,8 @@ function startGame(cls,main){
 let demo=null;
 /* v83: 시연을 바꿀 때 남아 있는 모든 이펙트·입자·예약된 효과를 지움 */
 /* v171: 모든 이펙트·투사체(리본 꼬리 포함)·입자·예약 타이머를 한 번에 정리. 시연 전환뿐 아니라 맵 이동·마을·사망 부활·위험도 이동 등 resetWorld/goTown에서도 호출 */
-function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose()}fx.length=0;
-  timers.length=0;for(const p of projs){scene.remove(p.m);if(p.rib&&p.rib.m){scene.remove(p.rib.m);p.rib.m.geometry.dispose();p.rib.mat.dispose()}if(p.rbm){scene.remove(p.rbm);p.rbm.geometry.dispose();p.rbm.material.dispose()}}projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;fbT.length=0;novaN.length=0;flashL.intensity=0;
+function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose()}fx.length=0;
+  timers.length=0;for(const p of projs){scene.remove(p.m);if(p.rib&&p.rib.m){scene.remove(p.rib.m);p.rib.m.geometry.dispose();mfree(p.rib.mat)}if(p.rbm){scene.remove(p.rbm);p.rbm.geometry.dispose();mfree(p.rbm.material)}}projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;fbT.length=0;novaN.length=0;flashL.intensity=0;
   for(const d of dnPool){d.live=false;d.el.hidden=true}
   Object.assign(P,{spin:0,vortex:null,dashT:0,swing:0,spinFire:false,hasteT:0,wFx:null})}
 function fxReset(){wipeFx();P.cd.s1=0}
@@ -4360,7 +4365,7 @@ function moveDir(){let mx=input.x,mz=input.z;
   if(pcMode){const dx=mouseW.x-P.pos.x,dz=mouseW.z-P.pos.z,d=Math.hypot(dx,dz);if(d>.3)return {x:dx/d,z:dz/d}}
   return {x:Math.sin(P.face),z:Math.cos(P.face)}}
 function cancelWhirl(){P.wTok=(P.wTok||0)+1;P.spin=0;P.vortex=null;P.spinFire=false;P.dashT=0;P.swing=0;
-  for(const f of P.wFx||[]){const i=fx.indexOf(f);if(i<0)continue;if(f.end)f.end();scene.remove(f.m);f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose();fx.splice(i,1)}P.wFx=null}
+  for(const f of P.wFx||[]){const i=fx.indexOf(f);if(i<0)continue;if(f.end)f.end();scene.remove(f.m);f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose();fx.splice(i,1)}P.wFx=null}
 function startMove(){if(!S.cls||P.cd.mv>0||P.mv||P.hp<=0)return;const d=moveDir();
   P.cast=null;/* 시전 중이면 시전을 취소하고 구르기(마나·쿨타임은 이미 소모됨) */
   if(P.spin>0)cancelWhirl();/* 회전 베기 도중에도 구르기로 빠져나감 — 예약된 타격·이펙트 모두 취소 */
@@ -4502,7 +4507,7 @@ function update(dt){
     if(dead){if(p.orb)orbEnd(p);if(p.rib)ribEnd(p);if(p.onEnd){try{p.onEnd()}catch(e){}}scene.remove(p.m);projs.splice(i,1)}}
 
   pfxUpdate(dt);
-  for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
+  for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const fn=timers[i].fn;timers.splice(i,1);fn()}}
 
   for(let i=pickups.length-1;i>=0;i--){const p=pickups[i];p.t+=dt;p.m.rotation.y+=dt*2;
@@ -4585,9 +4590,21 @@ const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menu
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
-function fxTick(dt){time+=dt;pfxUpdate(dt);for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
+function fxTick(dt){time+=dt;pfxUpdate(dt);for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const fn=timers[i].fn;timers.splice(i,1);fn()}}}
+/* v194 셰이더 예열: 이펙트 재질을 처음 쓰는 순간 셰이더 컴파일로 끊기던 것을 시작할 때 미리 컴파일. 풀도 미리 채움 */
+let fxWarm=0;function prewarmFx(){fxWarm=1;const g=new THREE.Group(),ms=[],tk=[];const add=(mat,geo)=>{const m=geo==='spr'?new THREE.Sprite(mat):new THREE.Mesh(geo||fxPlane,mat);m.frustumCulled=false;g.add(m);ms.push(mat)};
+  for(let i=0;i<24;i++){tk.push(FIREBALL_MAT(0xffffff,0xff8a20,0x521408),SHOCK_MAT(0xffb878),BOLT_MAT(0x2f6cff,0xffffff),basicMat('fm',{color:0xffffff,opacity:.5,side:THREE.DoubleSide}))}
+  for(let i=0;i<16;i++)for(const t of [dotTex,shockTex,crackTex,frostTex,scorchTex])for(const a of [0,1])tk.push(basicMat('gd'+a+t.id,{map:t,color:0xffffff,opacity:.5,blending:a?THREE.AdditiveBlending:THREE.NormalBlending}));
+  for(let i=0;i<24;i++)tk.push(mtake('pop',()=>new THREE.SpriteMaterial({map:dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}),q=>{}));
+  for(let i=0;i<8;i++)tk.push(basicMat('dba',{color:0xffffff,opacity:1,blending:THREE.AdditiveBlending}),mtake('dbl',()=>new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:1,flatShading:true}),q=>{}));
+  for(let i=0;i<16;i++)tk.push(NOVA_MAT());for(let i=0;i<6;i++)tk.push(mtake('ice',()=>new THREE.MeshLambertMaterial({color:0xcfefff,emissive:0x3a86c8,transparent:true,opacity:.92,flatShading:true}),q=>{}));
+  for(const m of tk)add(m,m.isSpriteMaterial?'spr':m.isMeshLambertMaterial?octaGeo:null);
+  for(const m of [EMBER_MAT(),DOME_MAT(0xff9a40),pillarMat(0x4a0a9a,0xa030ff),waveMat(0xff9a30,0xffffff),slashMat(0xffffff,0xffffff,1)])add(m);
+  scene.add(g);try{if(GQS[GUQ].post){if(!PP.rt)ppSize();renderer.setRenderTarget(PP.rt)}renderer.compile(scene,camera);for(const m of [PP.bright,PP.blur,PP.comp]){PP.quad.material=m;renderer.compile(PP.sc,PP.cam)}}catch(e){}
+  renderer.setRenderTarget(null);scene.remove(g);for(const m of tk)mfree(m)}
 function loop(now){
+  if(!fxWarm)prewarmFx();
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const fo=paused()&&fxOnly();
   if(!paused()){update(dt);updDmg(dt);hud()}else{if(fo)fxTick(dt);hudMoney()}
