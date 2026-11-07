@@ -2183,10 +2183,26 @@ function nearestEnemy(p,maxd,skip){let best=null,bd=maxd;for(const e of enemies)
 const ringGeo=new THREE.RingGeometry(.86,1,44),discGeo=new THREE.CircleGeometry(1,36);
 function flatMesh(geo,color,op){const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:op,depthWrite:false,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;return m}
 function ringFx(p,r,color,dur=.35,grow=true){if(r>=1.4)flash(p,color,Math.min(2.4,.5+r*.3));const m=flatMesh(ringGeo,color,.9);m.position.set(p.x,.06,p.z);scene.add(m);fx.push({m,t:0,dur,upd(k){const s=r*(grow?.35+.65*(1-(1-k)*(1-k)):1);m.scale.set(s,s,1);m.material.opacity=.9*(1-k)}})}
+/* v179 잔불 바닥: 셰이더 — 그을린 검은 바닥(울퉁불퉁한 가장자리) 위에 숯처럼 갈라진 불씨가 노이즈로 깜빡이고, 갈라진 틈이 노랗게 달아오름. 불티가 띄엄띄엄 떠오르고 옅은 연기 */
+let _EMB=null;const EMBER_MAT=()=>(_EMB||(_EMB=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fs=`precision mediump float;varying vec2 vUv;uniform float uT,uK,uOp,seed;uniform vec3 cA,cB,cC;${FIRE_NOISE}
+  void main(){vec2 q=vUv;float d=length(q);if(d>1.)discard;
+    float n0=fbm(q*2.4+seed);float mask=1.-smoothstep(.5,1.,d+(n0-.5)*.6);if(mask<=.003)discard;/* 울퉁불퉁하고 부드러운 가장자리 */
+    float em=fbm(q*4.5+seed*3.1+vec2(uT*.05,-uT*.03));float cr=fbm(q*10.+seed*7.+vec2(0.,uT*.12));
+    float cell=abs(fbm(q*7.+seed*2.)-.5);float crack=1.-smoothstep(.02,.09,cell);/* 숯 사이 갈라진 틈 */
+    float breath=.65+.35*sin(uT*2.3+em*12.)*sin(uT*3.7+cr*9.);
+    float glow=smoothstep(.42,.8,em)*breath;float hot=crack*smoothstep(.35,.7,em)*(.5+.5*sin(uT*7.+cr*30.));
+    float gk=1.-smoothstep(.55,1.,uK);/* 뒤로 갈수록 불씨가 식음 */float sk=1.-smoothstep(.8,1.,uK);/* 그을음은 마지막에 옅어짐 */
+    float scorch=mask*.8*sk*uOp;vec3 col=cA*scorch+(cB*glow*.85+cC*hot*1.3)*mask*gk*uOp;
+    gl_FragColor=vec4(col,scorch);}`;
+  return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{uT:{value:Math.random()*9},uK:{value:0},uOp:{value:0},seed:{value:Math.random()*10},cA:{value:new THREE.Color(0x0e0806)},cB:{value:new THREE.Color(0xff4a10)},cC:{value:new THREE.Color(0xffc040)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})()))();/* FIRE_NOISE가 뒤에 정의되므로 처음 쓸 때 만듦 */
 function burnField(p,r,dmg,dur=3){
-  const m=flatMesh(discGeo,0xff6a20,.32);m.position.set(p.x,.05,p.z);m.scale.set(r,r,1);scene.add(m);
-  let tick=0;
-  fx.push({m,t:0,dur,upd(k,dt){m.material.opacity=.22+.12*Math.sin(k*40*dur/3);tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}}});
+  const m=new THREE.Mesh(fxPlane,EMBER_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.05,p.z);m.scale.set(r*1.15,r*1.15,1);m.renderOrder=1;scene.add(m);
+  let tick=0;const u=m.material.uniforms,q=QM();
+  fx.push({m,t:0,dur,upd(k,dt){u.uT.value+=dt;u.uK.value=k;u.uOp.value=Math.min(1,k*dur/.25);
+      tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}
+      if(k<.75){if(Math.random()<dt*r*5*q){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:.1,z:p.z+Math.cos(a)*rr,vx:rnd(-.4,.4),vy:rnd(.8,2.2),vz:rnd(-.4,.4),life:rnd(.5,1.1),s0:rnd(.1,.18),s1:.03,c0:0xffd060,c1:0xff3a00,a:.9,drag:.8,grav:-1.5,tex:1})}
+        if(Math.random()<dt*r*.9*q){const a=Math.random()*6.28,rr=r*Math.random()*.8;emit(PNRM,{x:p.x+Math.sin(a)*rr,y:.2,z:p.z+Math.cos(a)*rr,vy:rnd(.5,1),life:rnd(1,1.6),s0:.3,s1:1.1,c0:0x3a3028,c1:0x1a1512,a:.22,drag:1,rv:.6,tex:2})}}}});
 }
 function telegraph(p,r,dmg){
   const ring=flatMesh(ringGeo,0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
@@ -2401,17 +2417,17 @@ const FIRE_NOISE=`float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*4
 float vno(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hsh(i),hsh(i+vec2(1,0)),f.x),mix(hsh(i+vec2(0,1)),hsh(i+vec2(1,1)),f.x),f.y);}
 float fbm(vec2 p){return vno(p)*.55+vno(p*2.1+3.7)*.3+vno(p*4.3+9.1)*.15;}`;
 const FIREBALL_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;vec4 mv=modelViewMatrix*vec4(0.,0.,0.,1.);mv.xy+=position.xy*vec2(length(modelMatrix[0].xyz),length(modelMatrix[1].xyz));gl_Position=projectionMatrix*mv;}`,
-  fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 c0,c1,c2;${FIRE_NOISE}
+  fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff,sf;uniform vec3 c0,c1,c2;${FIRE_NOISE}
   void main(){float d=length(vUv);if(d>1.)discard;float a=atan(vUv.y,vUv.x);
     float n=fbm(vUv*2.6+vec2(seed,seed*1.7)+vec2(0.,-k*1.4));float n2=fbm(vec2(a*1.6+seed,d*3.-k*2.));
-    float edge=d+(n-.5)*.55+(n2-.5)*.25;/* 울퉁불퉁한 외곽 */
+    float edge=d+(n-.5)*.55*sf+(n2-.5)*.25*sf;/* 울퉁불퉁한 외곽 (sf: 부드러움) */
     float er=mix(.72,1.2,k);/* 시간이 갈수록 바깥에서 안쪽으로 녹아 사라짐 */
-    float body=(1.-smoothstep(er-.28,er,edge))*(1.-smoothstep(.55,1.,d))*(.7+.3*n);if(body<=.002)discard;
+    float body=(1.-smoothstep(er-.28*sf,er,edge))*(1.-smoothstep(.55-.2*(sf-1.),1.,d))*(.7+.3*n);if(body<=.002)discard;
     float heat=(1.-smoothstep(0.,.9,edge))*(1.-k*.7)+n*.22*(1.-k);
     vec3 col=mix(c2,c1,smoothstep(.06,.42,heat));col=mix(col,c0,smoothstep(.5,.9,heat));col*=1.25;
     float al=body*pow(1.-k,1.1)*ff;col*=al;/* premultiplied: 밝은 심지는 더해지고 검붉은 가장자리는 덮음 */
     gl_FragColor=vec4(col,al*(.3+.7*smoothstep(.0,.45,heat)));}`;
-  return(c0,c1,c2)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},c0:{value:new THREE.Color(c0)},c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
+  return(c0,c1,c2)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},sf:{value:1},c0:{value:new THREE.Color(c0)},c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
 const SHOCK_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col;${FIRE_NOISE}
   void main(){float d=length(vUv),a=atan(vUv.y,vUv.x);float rg=.78+(fbm(vec2(a*2.2+seed,k*3.))-.5)*.22;/* 너덜너덜한 테두리 */
@@ -2429,9 +2445,9 @@ const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10]
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
   const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
-  {const SK_=.6+.4*FK,fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.c[0],pal.c[1],pal.c[2]));fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7*SK_,s1=RV*1.35*SK_;/* v167: 겹치는 폭발은 생략 대신 작고 옅게 */
+  {const SK_=.6+.4*FK,fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.c[0],pal.c[1],pal.c[2]));if(pal.soft)fb.material.uniforms.sf.value=pal.soft;fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7*SK_,s1=RV*1.35*SK_;/* v167: 겹치는 폭발은 생략 대신 작고 옅게 */
     fx.push({m:fb,t:0,dur:(.42+RV*.04)*FA,upd(k){const e=1-Math.pow(1-k,4);const s=s0+(s1-s0)*e;fb.scale.set(s,s*.9,1);fb.position.y=.5+RV*.3+e*RV*.3;fb.material.uniforms.k.value=k;fb.material.uniforms.ff.value=FK}})}
-  const co=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.core[0],pal.core[1],pal.core[2]));co.position.set(p.x,.55+RV*.25,p.z);scene.add(co);
+  const co=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.core[0],pal.core[1],pal.core[2]));if(pal.soft)co.material.uniforms.sf.value=pal.soft;co.position.set(p.x,.55+RV*.25,p.z);scene.add(co);
   fx.push({m:co,t:0,dur:.22,upd(k){const s=RV*(.25+.5*Math.sqrt(k))*(.6+.4*FK);co.scale.set(s,s,1);co.material.uniforms.k.value=k*.9;co.material.uniforms.ff.value=FK*.9}});
   /* 너덜너덜한 충격파 고리 (바닥) + 열기 돔 */
   if(!pal.noring){const sw=new THREE.Mesh(fxPlane,SHOCK_MAT(pal.ring));sw.rotation.x=-Math.PI/2;sw.position.set(p.x,.07,p.z);scene.add(sw);
@@ -2895,17 +2911,17 @@ function boomExplode(c,o){const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<ti
 /* v174: 직선으로 날아가 바닥 근처에서 터짐 (포물선 제거) */
 function shootBoom(a,dist,o){const sp=26,life=dist/sp;
   shoot(a,{color:0xffd090,size:.5,long:true,trail:2.2,tw:.16,tcol:0xff9a40,glow:1.8,gcol:0xff9a40,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0xff9a30,c1:0xfff4d0,cw:.22}});const p=projs[projs.length-1];
-  p.upd=()=>{const k=1-p.life/life;p.m.position.y=1.2-.7*k;if(Math.random()<.5*QM())emit(PADD,{x:p.m.position.x,y:p.m.position.y,z:p.m.position.z,life:.2,s0:.3,s1:.05,c0:0xffe0a0,c1:0xff6a10,a:.8,tex:1})};
+  p.upd=()=>{const k=1-p.life/life;p.m.position.y=1.2-.7*k;if(p.life>.02){const pp=p.m.position;for(const e of enemies){if(e.air||e.hp<=0)continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+.5){p.life=0;break}}}if(Math.random()<.5*QM())emit(PADD,{x:p.m.position.x,y:p.m.position.y,z:p.m.position.z,life:.2,s0:.3,s1:.05,c0:0xffe0a0,c1:0xff6a10,a:.8,tex:1})};
   p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o)}}
 /* ---------- 마법사: 사술 폭발 ---------- */
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
-const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1};
+const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
 function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
   const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
   for(const m of [outer,mid]){m.material.blending=THREE.CustomBlending;m.material.blendSrc=THREE.OneFactor;m.material.blendDst=THREE.OneMinusSrcAlphaFactor}/* 진한 보라가 바탕을 덮도록 */
   const W0=[R*.18,R*.1,R*.04];/* v175: 살짝 얇게 */outer.scale.set(W0[0],H,W0[0]);mid.scale.set(W0[1],H,W0[1]);inner.scale.set(W0[2],H,W0[2]);
-  const disc=flatMesh(discGeo,0x2a0848,0);disc.material.blending=THREE.NormalBlending;disc.position.y=.06;disc.scale.setScalar(R*.95);const ring=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:dotTex,color:0xd060ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));ring.rotation.x=-Math.PI/2;ring.position.y=.07;ring.scale.setScalar(R*.6);/* v175: 테두리 원 대신 부드러운 빛 번짐 */
+  const disc=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:dotTex,color:0x1a0530,transparent:true,opacity:0,depthWrite:false}));disc.rotation.x=-Math.PI/2;disc.position.y=.06;disc.scale.setScalar(R*1.3);/* v179: 경계 없는 부드러운 어둠 */const ring=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:dotTex,color:0xd060ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));ring.rotation.x=-Math.PI/2;ring.position.y=.07;ring.scale.setScalar(R*.6);/* v175: 테두리 원 대신 부드러운 빛 번짐 */
   g.add(outer,mid,inner,disc,ring);let tt=0,boomed=false;
   const PRE=.07,HOLD=.16,FADE=.34,D=PRE+HOLD+FADE;
   fx.push({m:g,t:0,dur:D,upd(k,dt){tt+=dt;const us=[outer,mid,inner].map(m=>m.material.uniforms);for(const u of us)u.uT.value=tt;
@@ -2913,7 +2929,7 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
       else{if(!boomed){boomed=true;for(const m of [outer,mid,inner])m.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));
           fireBurst({x:c.x,z:c.z},R*.85,.5*FK,fbT.length<3,PAL_HEX);/* v176: 덜 밝게, 효과 범위만큼 넓게 */
           for(let i=0;i<Math.round(4*QM());i++){const a=Math.random()*6.28,d=R*rnd(.35,.8);later(rnd(.02,.1),()=>fireBurst({x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},R*.4,.35*FK,false,PAL_HEX))}radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
-          groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.6,R*2.1,.4,.5*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*.95,1.2,.8,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R,3,.75,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*.8,2.4,.6,false);shake=Math.max(shake,.22);
+          groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.6,R*2.1,.4,.5*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*rnd(.8,1.1),1.2,.6,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R*rnd(.9,1.2),3,.6,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*1.3,2.6,.55,false);shake=Math.max(shake,.22);
           spray(PNRM,{x:c.x,z:c.z},Math.round(8*QM()),{sp:[R*.8,R*1.8],up:[1.5,3.5],y:[.2,.8],r0:R*.3,life:[.6,1],s0:[R*.25,R*.4],s1:[R*.7,R*1.1],c0:0x3a1060,c1:0x08000f,a:.6*FK,drag:1.8,rv:1,tex:2});/* 어두운 보라 연기 */
           aoe({x:c.x,z:c.z},R,o.dmg,{quiet:true,so:o.so});if(o.after)o.after()}
         const f=tt<PRE+HOLD?1:Math.max(0,1-(tt-PRE-HOLD)/FADE),w=.25+.75*f;/* 꽂힌 뒤 가늘어지며 사라짐 */
@@ -3012,7 +3028,7 @@ function castFire(slot,id){
       for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*fan.sp,m=d===0?1:fan.m;shootWave(aa,{speed:16,life:st.len/16,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(16);P.swing=.18;const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
-    for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=4.5+Math.abs(d)*1.1;later(i*.06,()=>{if(P.hp<=0)return;const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
+    for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7;/* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 */later(i*.06,()=>{if(P.hp<=0)return;const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
       shootBoom(aa,dist,{r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null,shrap:st.shrap?{n:st.shrap.n,dmg:base*st.dmg*st.multi.m*st.shrap.m}:null})})}return}
   if(b.kind==='pillar'){aim(14);P.swing=.15;const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
     const cand=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<14&&onScr(e.pos,.9)).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z));
@@ -3282,7 +3298,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v178';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v179';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
