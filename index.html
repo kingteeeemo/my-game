@@ -2426,8 +2426,8 @@ const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10]
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
   const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
-  if(FK>=.75){const fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.c[0],pal.c[1],pal.c[2]));fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7,s1=RV*1.35;
-    fx.push({m:fb,t:0,dur:(.42+RV*.04)*FA,upd(k){const e=1-Math.pow(1-k,4);const s=s0+(s1-s0)*e;fb.scale.set(s,s*.9,1);fb.position.y=.5+RV*.3+e*RV*.3;fb.material.uniforms.k.value=k;fb.material.uniforms.ff.value=FK}})}/* 겹치는 연속 폭발(회전 베기 화염)은 큰 불덩이 생략 */
+  {const SK_=.6+.4*FK,fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.c[0],pal.c[1],pal.c[2]));fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7*SK_,s1=RV*1.35*SK_;/* v167: 겹치는 폭발은 생략 대신 작고 옅게 */
+    fx.push({m:fb,t:0,dur:(.42+RV*.04)*FA,upd(k){const e=1-Math.pow(1-k,4);const s=s0+(s1-s0)*e;fb.scale.set(s,s*.9,1);fb.position.y=.5+RV*.3+e*RV*.3;fb.material.uniforms.k.value=k;fb.material.uniforms.ff.value=FK}})}
   const co=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.core[0],pal.core[1],pal.core[2]));co.position.set(p.x,.55+RV*.25,p.z);scene.add(co);
   fx.push({m:co,t:0,dur:.22,upd(k){const s=RV*(.25+.5*Math.sqrt(k))*(.6+.4*FK);co.scale.set(s,s,1);co.material.uniforms.k.value=k*.9;co.material.uniforms.ff.value=FK*.9}});
   /* 너덜너덜한 충격파 고리 (바닥) + 열기 돔 */
@@ -2474,7 +2474,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     spray(PADD,p,ice?3:Math.min(8,3+R),ice?{sp:[1,3],up:[1,3],y:[.4,1.2],life:[.4,.7],s0:[.3,.4],s1:[.1,.15],c0:0xffffff,c1:0x9ad8ff,rv:4,tex:3}:{sp:[R*1.2,R*2.4],up:[.5,2],y:[.5,1.2],life:[.3,.5],s0:[.8+R*.25,1+R*.3],s1:[1.4+R*.35,1.8+R*.4],c0:0xfff0b0,c1:0xff3a08,a:.85,drag:5,rv:2,tex:0});return}
   const lite=ice==='lite';
   if(!ice){/* v165: 화염 폭발 재작성 → fireBurst */
-    fbT.push(time);while(fbT.length&&fbT[0]<time-.4)fbT.shift();const FK=1/Math.sqrt(fbT.length);
+    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));/* v167: 하한 0.55 — 연속 폭발도 항상 보이게 */
     if(r>=2)shake=Math.max(shake,Math.min(.22,r*.035));
     fireBurst(p,R,FK,blastLoad<8);
     if(R>=1.6)decalFx(p,crackTex,0xff7a2a,R*.95,1.4,.8*FK,true);
@@ -3141,7 +3141,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v166';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v167';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
