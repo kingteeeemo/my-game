@@ -2453,7 +2453,7 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float cells=smoothstep(.55,.9,fbm(q*7.+seed*3.));/* 얼어붙은 판 무늬 */
     float melt=1.-smoothstep(.55,1.,k);/* v184: 불투명한 흰 얼음판이 깔리며 퍼지고, 뒤에 녹아 사라짐 */
     float sheet=inside*melt*ff;/* v188: 터지는 동안은 눈꽃 없음 (눈꽃은 뒤에 남는 자국만) */
-    float shade=.9+.06*rays*smoothstep(.05,.8,d/max(.05,fr))+.04*cells;/* v188: 순백 */
+    float shade=.84+.05*rays*smoothstep(.05,.8,d/max(.05,fr))+.03*cells;/* v188: 순백 · v189: 블룸 문턱 아래로 */
     float spark=inside*smoothstep(.84,1.,fbm(q*16.+seed*4.+vec2(k*3.,-k*2.)))*melt;
     float crest=(band*.9*(1.-k*.5)+lead*.7*(1.-k))*ff*(1.-smoothstep(.8,1.,k));
     vec3 ice=vec3(1.)*shade;/* 흰-하늘빛 얼음 */
@@ -2494,9 +2494,9 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* v64 서리 폭발: v60의 하얀 원(서리 원판 + 밝은 테두리 + 충격파) 원복. 눈꽃 자국은 v63처럼 항상 같은 진하기 */
   if(ice==='nova'){blastLoad+=.4;const heavy=blastLoad>BLAST_EMER,ka=Math.min(1,4.6/R);
     /* v180: 서리 원판·테두리·충격파 고리 제거 → 부드러운 서리 빛 번짐 + 서리 구름 + 얼음 가시 + 사방으로 튀는 얼음 조각 */
-    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));
+    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length)),FS=Math.max(.3,1.15/fbT.length);/* v189: 얼음판은 겹칠수록 훨씬 옅게 (1개 1.0 · 2개 .58 · 3개 .38 · 5개 .3) */
     /* v182: 바닥에 촥 펼쳐지는 서리 파동(셰이더) — 들쭉날쭉한 결정 마루가 피해 반경까지 번져 나가고, 그 뒤로 중심에서 뻗는 얼음 결 무늬와 반짝임이 남았다가 녹아 사라짐 */
-    {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*Math.max(.6,FK);u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
+    {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*FS;u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
       m.renderOrder=2;fx.push({m,t:0,dur:.8,upd(k){u.k.value=k}})}
     popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.45*ka*FK);
     /* v188: 얼음판이 퍼지며 땅이 갈라지고(흰 서리 금 → 어두운 균열이 남음) 돌조각·얼음 조각이 마루를 따라 바깥으로 튐 */
@@ -3328,7 +3328,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v188';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v189';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
