@@ -785,7 +785,7 @@ const GEMS={
   orbsize:{n:'거대 보주',t:'orb',c:'#bfe8ff',d:L=>{const g=gOrb(L);return `보주 크기·적중 범위 +${26*L}%\n끝에서 반경 ${g.br.toFixed(1)}m 폭발 (피해 ×${g.bm.toFixed(2)})`}},
   barrage:{n:'파편 난사',t:'orb',c:'#9fe8ff',d:L=>{const b=barr(L);return `파편 ${b.cnt}갈래 · 발사 빈도 +${Math.round((b.rate-1)*100)}%\n파편 크기 +${Math.round((b.sz-1)*100)}% · 속도 +${Math.round((b.sp-1)*100)}%\n끝에서 파편 ${b.burst}개`}},
   qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m\n피해 +${6*L}%`},
-  qfork:{n:'가시 확산',t:'quake',c:'#ffb070',d:L=>{const f=qFork(L);return `부채꼴 ${Math.round(qHalf(f.n,L)*2*57.3)}° (가장자리 피해 ×${f.m.toFixed(2)})${f.n<5?` · 6단계에 크게 넓어짐`:''}`}},
+  qmag:{n:'용암 균열',t:'quake',c:'#ff6a2a',d:L=>{if(!L)return '가시가 솟은 자리에 용암이 남음';const m=magSt(L);return `가시가 솟은 자리에 용암이 ${m.dur.toFixed(1)}초 남음\n초당 피해 ×${m.m.toFixed(2)}`}},/* v145: 2차 → 1차 강화 (10단계 = 옛 2차 5단계) */
   rarea:{n:'넓은 화살비',t:'rain',c:'#c8e07a',d:L=>`화살비 반경 ${rR(L).toFixed(1)}m · 지속 ${rDur(L).toFixed(1)}초`},
   rdens:{n:'집중 사격',t:'rain',c:'#e0f08a',d:L=>{const d=rDen(L);return `초당 ${d.rate.toFixed(1)}회 화살 세례 · 맞은 적 둔화\n동시 화살비 ${d.zones}곳${d.zones<3?` (${d.zones<2?5:10}단계에 +1곳)`:''}`}},
   cbounce:{n:'연쇄 증폭',t:'chainl',c:'#c8b8ff',d:L=>{const c=cBnc(L);return `${c.n}번 튕김 · 튕길 때마다 피해 ×${c.k.toFixed(2)}\n튕기는 거리 ${c.jr.toFixed(1)}m`}},
@@ -810,15 +810,17 @@ const ESS_LV=31,G2MAX=5;let mapOpen=false,heirOpen=false;
 const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>G2C[g2Max(g)].e[L],g2Gold=(g,L)=>G2C[g2Max(g)].g[L];
 /* v82 새 주력 스킬 보조 수치 */
-const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v142: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,qFork=L=>({n:L>=6?5:L>=1?3:1,m:.45+.04*L}),qHalf=(n,fl)=>(n>=5?.78+(Math.PI*7/12-.78)*Math.max(0,Math.min(1,(fl-6)/4)):n>=3?.52:.26);/* v142: 가시 확산 6단계 90° → 10단계 210° *//* v140: 균열 확장의 부채꼴 확대 제거 */
-const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:2+.4*L,m:.5+.25*L});
+const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v142: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[30,60,90,130,170,210],qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
+const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:2+.2*L,m:.5+.125*L});/* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
+const SHK_HALF0=.26,SHK_DEN=.7;/* v145: 충격파 수는 부채꼴 넓이에 비례 (30° 기준 옛 횟수의 70%) */
+const shkCnt=(L,half)=>Math.max(1,Math.round(shkN(L)*SHK_DEN*half/SHK_HALF0));
 const rR=L=>2.6*(1+.12*L),rDur=L=>2+.1*L,rDen=L=>({rate:6*(1+.08*L),zones:L>=10?3:L>=5?2:1});
 const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:1+L,m:.5+.37*L,d:2*(1.6+.5*L)});/* v140: 파편 거리 2배 (3단계 6.2m) */
 const cBnc=L=>({n:Math.max(3,2+L),/* v140: 1단계 3명 → 10단계 12명 */k:.85+.01*L,jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
 const csSt=L=>({r:(1.4+.25*L)*(1+.1*L),m:.3+.12*L}),ovSt=L=>({dur:1.5+.5*L,m:.25+.15*L});
 const GEMS2={
-  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟는 구간마다 작은 충격파(반경 ${shkR(L).toFixed(1)}m)가 ${shkN(L)}번 무작위로 터짐\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
-  magma:{s:'quake',n:'용암 균열',c:'#ff6a2a',d:L=>{const m=magSt(L);return `가시가 솟은 자리에 용암이 ${m.dur.toFixed(1)}초 남음\n초당 피해 ×${m.m.toFixed(2)}`}},
+  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟는 구간 곳곳에서 작은 충격파(반경 ${shkR(L).toFixed(1)}m)가 무작위로 터짐 · 부채꼴이 넓을수록 더 많이\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
+  qspread:{s:'quake',n:'가시 확산',c:'#ffb070',d:L=>{const f=qFork(L);return `부채꼴 ${QSP_DEG[Math.min(5,L)]}° (가장자리 피해 ×${f.m.toFixed(2)})`}},
   meteor2:{s:'rain',n:'분열 화살',c:'#e8ffb0',max:3,d:L=>{const x=splSt(L);return `땅에 꽂힌 화살이 파편 ${x.n}개로 갈라져 튐\n최대 ${x.d.toFixed(1)}m 바깥까지 · 파편 피해 ×${x.m.toFixed(2)}`}},
   relem:{s:'rain',get n(){return arEl()==='fire'?'화염 화살비':'번개 화살비'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=relSt(L);return `화살비 안에서 초당 ${x.rate.toFixed(1)}회 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(1)} 화살 세례분`}},
   overl:{s:'chainl',n:'과부하',c:'#e0d0ff',max:3,d:L=>{const o=ovSt(L);return `연쇄가 끝난 자리에 번개 구체가 ${o.dur.toFixed(1)}초 남아 반경 4m를 0.3초마다 감전 (피해 ×${o.m.toFixed(2)})`}},
@@ -860,7 +862,7 @@ const SK={
   volley:{n:'다발 사격',role:'다수 공격',tag:'projectile',en:'Projectile · Bow',kind:'proj',gems:['multi','chpierce','haste'],mp:12,dmg:.85,cd:1.1,proj:2,spread:.16,speed:24,color:0xb8f07a,size:.55,life:.9,desc:'부채꼴로 여러 발의 화살을 쏘아 앞쪽 무리를 꿰뚫습니다.'},
   snipe:{n:'저격',role:'보스 공격',tag:'single',en:'Single · Bow',kind:'snipe',mp:10,dmg:3.6,cd:2.2},
   frost:{n:'얼음 보주',role:'다수 공격',tag:'projectile',en:'Projectile · Cold',kind:'orb',gems:['barrage','orbsize','haste'],mp:12,dmg:.5,cd:1.6,proj:1,speed:7,life:1.6,desc:'천천히 날아가는 얼음 보주가 사방으로 파편을 뿌립니다.'},
-  quake:{n:'대지 분쇄',role:'다수 공격',tag:'quake',en:'Fissure · Melee',kind:'quake',gems:['qlen','qfork','haste'],mp:12,dmg:1,cd:1.5,desc:'땅을 내리찍어 앞쪽 부채꼴 전체에 흑색 가시를 촘촘히 솟구치게 합니다.'},
+  quake:{n:'대지 분쇄',role:'다수 공격',tag:'quake',en:'Fissure · Melee',kind:'quake',gems:['qlen','qmag','haste'],mp:12,dmg:1,cd:1.5,desc:'땅을 내리찍어 앞쪽 부채꼴 전체에 흑색 가시를 촘촘히 솟구치게 합니다.'},
   rain:{n:'화살비',role:'다수 공격',tag:'rain',en:'Area · Bow',kind:'rain',gems:['rarea','rdens','haste'],mp:8,dmg:.345,cd:1.3,desc:'적이 모인 곳에 화살비를 쏟아부어, 범위 안의 적을 계속 공격합니다.'},
   chainl:{n:'연쇄 번개',role:'다수 공격',tag:'chainl',en:'Chain · Lightning',kind:'chainl',gems:['cbounce','cfork','haste'],mp:10,dmg:.9,cd:.9,desc:'가장 가까운 적을 맞힌 번개가 주변 적에게 계속 튕겨 갑니다.'},
   meteor:{n:'유성 낙하',role:'보스 공격',tag:'single',en:'Single · Fire',kind:'meteor',mp:14,dmg:4.6,cd:2.8}
@@ -986,7 +988,7 @@ function isBetter(it,cur){if(!cur)return true;
 function score(it){let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({tut:{},v118:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
+const fresh=()=>({tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 function migrate(s){
@@ -1022,6 +1024,9 @@ function reconcile(s){if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=1
     s.v59tri=1}
   if(!s.v40){s.v40=1;const O5=[9,18,30,48,72],O10=[5,9,13,18,24,31,39,48,58,70],sum=(a,n)=>a.slice(0,n).reduce((x,y)=>x+y,0);
     for(const g of Object.keys(s.sk2||{})){if(!GEMS2[g]){delete s.sk2[g];continue}const L=s.sk2[g]||0,nl=Math.min(L,g2Max(g)),r=sum(g==='flame'?O10:O5,L)-sum(G2C[g2Max(g)].e,nl);s.sk2[g]=nl;if(r>0)s.ess=(s.ess||0)+r}}
+  /* v145: 대지 분쇄 — 가시 확산(1차)·용암 균열(2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
+  if(!s.v145q){s.v145q=1;const q=s.sk&&s.sk.quake;if(q&&q.qfork){s.skp.quake=(s.skp.quake||0)+q.qfork;delete q.qfork}
+    const mL=(s.sk2&&s.sk2.magma)||0;if(mL){const c=G2C[5];for(let i=0;i<mL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.magma}
   /* 강화가 모두 최대인데 남은 강화 포인트(삭제된 강화에서 반환)는 스탯 포인트로 전환 */
   for(const k of v)if((s.skp[k]||0)>0&&(SK[k].gems||[]).every(g=>((s.sk[k]||{})[g]||0)>=GMAX)){s.statPts=(s.statPts||0)+s.skp[k];s.skp[k]=0}
   /* v44: 5장 → 7장. 이전 장은 같은 이름의 장으로, 엔드게임(5)은 7로 */
@@ -1105,7 +1110,7 @@ function skillStats(id){
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
   if(b.kind==='whirl'){const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*gear().cdr/100),r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
-  if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);st.fork=qFork(L('qfork'));st.half=qHalf(st.fork.n,L('qfork'));const a=g2('aftsh'),m=g2('magma');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null}
+  if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
@@ -2875,7 +2880,7 @@ function miniShock(q,r,dmg){groundFx(q,shockTex,0xe8c898,.3,r*1.15,.32,.85,false
   emit(PADD,{x:q.x,y:.3,z:q.z,life:.14,s0:2.2,s1:.6,c0:0xfff0d0,c1:0xffa050,a:.8,tex:1});
   for(const e of [...enemies]){if(e.air||e.hp<=0)continue;if(Math.hypot(e.pos.x-q.x,e.pos.z-q.z)<r+e.r*.5){hitKind='rock';hurt(e,dmg,true);hitKind=null}}}
 function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=new Set();
-  const SR=shk?shkR(shk.L):1.8,sn=shk?shkN(shk.L):0,pb=shk?Math.min(shk.m,shk.m*half*len*len/(NS*sn*Math.PI*SR*SR)):0;/* 충격파 1발 피해: 부채꼴 안 적 1명이 평균적으로 받는 총량 = 충격파 배율 */
+  const SR=shk?shkR(shk.L):1.8,sn=shk?shkCnt(shk.L,half):0,pb=shk?Math.min(shk.m,shk.m*half*len*len/(NS*sn*Math.PI*SR*SR)):0;/* 충격파 1발 피해: 부채꼴 안 적 1명이 평균적으로 받는 총량 = 충격파 배율 */
   for(let j=0;j<NS;j++){const r0=j*len/NS,r1=(j+1)*len/NS;later(delay+QST[j],()=>{
     for(const e of [...enemies]){if(e.air||e.hp<=0||done.has(e))continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz),de=Math.max(0,d-e.r*.5);
       if(de<(j?r0-.7:-1)||de>=(j===NS-1?r1+e.r+.9:r1+.7))continue;
@@ -3034,7 +3039,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v144';
+const APP_VER='v145';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
