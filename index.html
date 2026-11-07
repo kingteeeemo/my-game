@@ -2445,18 +2445,18 @@ const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10]
 const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col,core;${FIRE_NOISE}
   void main(){vec2 q=vUv;float d=length(q);if(d>1.)discard;float a=atan(q.y,q.x);
-    float e=1.-pow(1.-k,2.4);float fr=.12+.86*e;/* 퍼져 나가는 마루 반지름 */
+    float e=1.-pow(1.-min(1.,k*1.8),2.6);float fr=.12+.86*e;/* 퍼져 나가는 마루 반지름 (v185: 더 빠르게 — 전체의 55% 시점에 다 퍼짐) */
     float jag=(fbm(vec2(a*2.+seed,k*1.5))-.5)*.14+(fbm(vec2(a*7.+seed*2.,d*3.))-.5)*.08+(fbm(vec2(a*19.+seed*3.,d*6.))-.5)*.04;float dd=d+jag;
     float band=1.-smoothstep(0.,.12,abs(dd-fr));float lead=smoothstep(-.07,0.,dd-fr)*(1.-smoothstep(0.,.025,dd-fr));/* 마루 + 바깥 얇은 선단 */
     float inside=1.-smoothstep(fr-.04,fr+.02,dd);
     float rays=pow(.5+.5*sin(a*26.+seed*5.+(fbm(vec2(a*5.,seed))-.5)*9.),3.);/* 중심에서 뻗는 얼음 결 */
     float cells=smoothstep(.55,.9,fbm(q*7.+seed*3.));/* 얼어붙은 판 무늬 */
-    float melt=1.-smoothstep(.5,1.,k);/* v184: 불투명한 흰 얼음판이 깔리며 퍼지고, 뒤에 녹아 사라짐 */
-    float sheet=inside*melt*ff;float shade=.6+.16*rays*smoothstep(.05,.8,d/max(.05,fr))+.14*cells;/* 얼음판 밝기 결 */
+    float melt=1.-smoothstep(.55,1.,k);/* v184: 불투명한 흰 얼음판이 깔리며 퍼지고, 뒤에 녹아 사라짐 */
+    float sheet=inside*melt*ff;float shade=.8+.1*rays*smoothstep(.05,.8,d/max(.05,fr))+.1*cells;/* v185: 눈처럼 희게 *//* 얼음판 밝기 결 */
     float spark=inside*smoothstep(.84,1.,fbm(q*16.+seed*4.+vec2(k*3.,-k*2.)))*melt;
     float crest=(band*.9*(1.-k*.5)+lead*.7*(1.-k))*ff*(1.-smoothstep(.8,1.,k));
-    vec3 ice=mix(vec3(.8,.9,1.),vec3(.5,.72,1.),cells*.7)*shade;/* 흰-하늘빛 얼음 */
-    vec3 c=ice*sheet+core*(crest+spark*.8);float al=clamp(sheet*.92+crest*.6,0.,1.);gl_FragColor=vec4(c,al);}`;
+    vec3 ice=mix(vec3(.96,.98,1.),vec3(.8,.9,1.),cells*.6)*shade;/* 흰-하늘빛 얼음 */
+    vec3 c=ice*sheet+core*(crest+spark*.8);float al=clamp(sheet*.99+crest*.6,0.,1.);gl_FragColor=vec4(c,al);}`;
   return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
@@ -3322,7 +3322,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v184';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v185';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
