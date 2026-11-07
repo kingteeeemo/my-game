@@ -2881,7 +2881,16 @@ function miniShock(q,r,dmg){groundFx(q,shockTex,0xe8c898,.3,r*1.15,.32,.85,false
   spray(PNRM,q,3,{sp:[1.5,3.5],up:[.5,2],y:[.1,.3],life:[.4,.7],s0:[.5,.8],s1:[1.2,1.8],c0:0x9a8a74,c1:0x3a3028,a:.6,drag:2.5,tex:2});
   emit(PADD,{x:q.x,y:.3,z:q.z,life:.14,s0:2.2,s1:.6,c0:0xfff0d0,c1:0xffa050,a:.8,tex:1});
   for(const e of [...enemies]){if(e.air||e.hp<=0)continue;if(Math.hypot(e.pos.x-q.x,e.pos.z-q.z)<r+e.r*.5){hitKind='rock';hurt(e,dmg,true);hitKind=null}}}
-function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=new Set();
+/* v154: 부채꼴 끝이 피자판처럼 칼같이 잘리지 않게 — 각도마다 끝 거리가 울퉁불퉁(80~100%), 양옆 모서리는 둥글게.
+   끝에서 2.2m 안쪽부터 가시가 낮아지고 성겨져 자연스럽게 사라짐. 용암도 같은 모양을 씀 */
+let qShp=null;
+function qShape(a,half,len){const p1=rnd(0,6.28),p2=rnd(0,6.28),p3=rnd(0,6.28);
+  const R=th=>{let t=th-a;t=Math.atan2(Math.sin(t),Math.cos(t));const u=Math.min(1,Math.abs(t)/half),
+      n=.5+.25*Math.sin(t*5+p1)+.15*Math.sin(t*11+p2)+.1*Math.sin(t*23+p3);
+    return len*(.8+.2*n)*Math.pow(Math.max(0,1-Math.pow(u,5)),.35)};
+  const tp=(th,rr)=>{let t=th-a;t=Math.atan2(Math.sin(t),Math.cos(t));const d=Math.min(R(th)-rr,(half-Math.abs(t))*Math.max(rr,1)*1.4),x=Math.max(0,Math.min(1,d/2.2));return x*x*(3-2*x)};
+  return {a,len,R,tp}}
+function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=new Set();if(first||!qShp)qShp=qShape(a,half,len);const shp=qShp;
   const SR=shk?shkR(shk.L):1.8,sn=shk?shkCnt(shk.L,half):0,pb=shk?Math.min(shk.m,shk.m*half*len*len/(NS*sn*Math.PI*SR*SR)):0;/* 충격파 1발 피해: 부채꼴 안 적 1명이 평균적으로 받는 총량 = 충격파 배율 */
   for(let j=0;j<NS;j++){const r0=j*len/NS,r1=(j+1)*len/NS;later(delay+QST[j],()=>{
     for(const e of [...enemies]){if(e.air||e.hp<=0||done.has(e))continue;const dx=e.pos.x-p0.x,dz=e.pos.z-p0.z,d=Math.hypot(dx,dz),de=Math.max(0,d-e.r*.5);
@@ -2900,13 +2909,14 @@ function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=
       emit(PADD,{x:q.x,y:.25,z:q.z,life:.12,s0:1.4,s1:.4,c0:0xffe8c0,c1:0xa06030,a:.7,tex:1})}
     for(let k=0;k<1+j;k++)decalFx(band(),crackTex,0x120a08,rnd(1.6,2.4),1.6,.9,false);
     for(let k=0;k<sn;k++){const q=band();later(rnd(.02,.12),()=>miniShock(q,SR,pb))}})}
-  later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75))}
-function spikeBurst(p0,a,half,len,hs){if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
+  later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,shp))}
+function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
   const js=[],gap=.46/Math.sqrt(QM());for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
+      if(rr>shp.R(th))continue;const tp=shp.tp(th,rr);if(Math.random()>.3+.7*tp)continue;const tq=.3+.7*tp;
       const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
-      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:hs*rnd(.85,1.25)*(.35+3.2*f*f),w:rnd(.85,1.15)*(.55+1.15*f),dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
+      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:hs*rnd(.85,1.25)*(.35+3.2*f*f)*tq,w:rnd(.85,1.15)*(.55+1.15*f)*(.6+.4*tp),dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
   const n=js.length,im=new THREE.InstancedMesh(SPK_GEO,SPK_MAT,n);im.position.set(p0.x,0,p0.z);im.frustumCulled=false;scene.add(im);
   const HOLD=.42,SINK=.22,dur=QST[2]+.02+.09+HOLD+SINK;
   const set=t=>{for(let i=0;i<n;i++){const j=js[i],lt=t-j.d;let g;
@@ -2916,18 +2926,18 @@ function spikeBurst(p0,a,half,len,hs){if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometr
       const w=Math.max(.001,j.w*(.5+.5*Math.min(1,g)));spkO.scale.set(w,Math.max(.001,j.h*g),w);spkO.updateMatrix();im.setMatrixAt(i,spkO.matrix)}
     im.instanceMatrix.needsUpdate=true};
   set(0);fx.push({m:im,t:0,dur,keep:1,upd(k){set(k*dur)},end(){im.dispose&&im.dispose()}})}
-function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0,tt=0;/* v140: 가시 자리마다 빛나는 용암 균열 + 붉은 웅덩이 빛 + 불씨·연기 */
+function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0,tt=0;const shp=qShp&&qShp.a===a&&qShp.len===len?qShp:qShape(a,half,len);/* v140: 가시 자리마다 빛나는 용암 균열 + 붉은 웅덩이 빛 + 불씨·연기 */
   const cm=new THREE.MeshBasicMaterial({map:crackTex,color:0xff5a10,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}),
     gm=new THREE.MeshBasicMaterial({map:dotTex,color:0xff3a00,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}),
     dm=new THREE.MeshBasicMaterial({map:crackTex,color:0x120604,transparent:true,opacity:0,depthWrite:false});
-  for(let r=1.2;r<len;r+=1.7){const k=Math.max(1,Math.round(2*half*r/2.2));for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.3,.3))/k,rr=r+rnd(-.4,.4),x=p0.x+Math.sin(th)*rr,z=p0.z+Math.cos(th)*rr,sz=rnd(1.6,2.4);
+  for(let r=1.2;r<len;r+=1.7){const k=Math.max(1,Math.round(2*half*r/2.2));for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.3,.3))/k,rr=r+rnd(-.4,.4),Rm=shp.R(th);if(rr>Rm-.2)continue;const tp=shp.tp(th,rr);if(Math.random()>.45+.55*tp)continue;const x=p0.x+Math.sin(th)*rr,z=p0.z+Math.cos(th)*rr,sz=rnd(1.6,2.4)*(.45+.55*tp);/* v154: 끝으로 갈수록 작고 듬성듬성 */
     const d=new THREE.Mesh(fxPlane,dm);d.rotation.set(-Math.PI/2,0,rnd(0,6.28));d.position.set(x,.045,z);d.scale.setScalar(sz*1.1);
     const c=new THREE.Mesh(fxPlane,cm);c.rotation.set(-Math.PI/2,0,rnd(0,6.28));c.position.set(x,.055,z);c.scale.setScalar(sz);
     const g=new THREE.Mesh(fxPlane,gm);g.rotation.x=-Math.PI/2;g.position.set(x,.05,z);g.scale.setScalar(sz*.9);m.add(d,c,g)}}
   fx.push({m,t:0,dur,upd(k,dt){tt+=dt;const f=Math.min(1,k*dur/.25)*(k>.85?(1-k)/.15:1),pl=.8+.2*Math.sin(tt*7);cm.opacity=.82*f*pl;gm.opacity=.42*f*pl;dm.opacity=.8*f;
-    if(Math.random()<dt*8*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;spray(PNRM,{x:p0.x+Math.sin(th)*d,z:p0.z+Math.cos(th)*d},1,{sp:[.1,.4],up:[1,2],y:[.2,.4],life:[.8,1.3],s0:[.6,1],s1:[1.4,2],c0:0x3a2a22,c1:0x120c0a,a:.35,drag:1,tex:2})}
+    if(Math.random()<dt*8*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*shp.R(th)*.92;spray(PNRM,{x:p0.x+Math.sin(th)*d,z:p0.z+Math.cos(th)*d},1,{sp:[.1,.4],up:[1,2],y:[.2,.4],life:[.8,1.3],s0:[.6,1],s1:[1.4,2],c0:0x3a2a22,c1:0x120c0a,a:.35,drag:1,tex:2})}
     tick-=dt;    if(tick<=0){tick=.25;for(const e of [...enemies])if(!e.air&&inFan(e.pos,p0,a,half,len,e.r*.5+.4))hurt(e,dps*.25,true)}
-    if(Math.random()<dt*36*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*len;emit(PADD,{x:p0.x+Math.sin(th)*d,y:.15,z:p0.z+Math.cos(th)*d,vy:rnd(1,2.6),life:rnd(.5,.9),s0:1.1,s1:.2,c0:0xffd080,c1:0xff3a08,a:.9,tex:1})}}})}
+    if(Math.random()<dt*36*QM()){const th=a+rnd(-half,half),d=Math.sqrt(Math.random())*shp.R(th)*.92;emit(PADD,{x:p0.x+Math.sin(th)*d,y:.15,z:p0.z+Math.cos(th)*d,vy:rnd(1,2.6),life:rnd(.5,.9),s0:1.1,s1:.2,c0:0xffd080,c1:0xff3a08,a:.9,tex:1})}}})}
 const arrowGeo=new THREE.BoxGeometry(.05,1.1,.05),arrowMat=new THREE.MeshBasicMaterial({color:0xeaf6c0});
 function fallArrow(q,sp=1){const m=new THREE.Mesh(arrowGeo,arrowMat);m.position.set(q.x,7,q.z);m.rotation.z=.12;scene.add(m);/* v140: 집중 사격 단계만큼 더 빨리 떨어지고 긴 빛줄기가 남음 */
   if(sp>1.15)streak({x:q.x,y:7.4,z:q.z,vx:0,vy:-6.5/(.16/sp),vz:0,life:.16/sp,w:.035,len:1.2+1.6*(sp-1),c0:0xf8ffe0,c1:0x8ad040,drag:0});
@@ -3041,7 +3051,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v153';
+const APP_VER='v154';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
