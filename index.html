@@ -3280,7 +3280,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v176';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v177';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3494,7 +3494,7 @@ setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;P.mp=P.mmp;if(S.testGod
 $('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 function startGame(cls,main){
-  inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){testPick=false;applyTest()}save();
+  inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test)setTimeout(tutAsk,900);}
