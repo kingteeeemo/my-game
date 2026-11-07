@@ -3141,7 +3141,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v168';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v169';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3362,8 +3362,8 @@ function startGame(cls,main){
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
 /* v83: 시연을 바꿀 때 남아 있는 모든 이펙트·입자·예약된 효과를 지움 */
-function fxReset(){for(const f of fx){scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose()}fx.length=0;
-  timers.length=0;for(const p of projs)scene.remove(p.m);projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;
+function fxReset(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)o.material.dispose()});if(f.geo)f.geo.dispose()}fx.length=0;
+  timers.length=0;for(const p of projs){scene.remove(p.m);if(p.rib&&p.rib.m){scene.remove(p.rib.m);p.rib.m.geometry.dispose();p.rib.mat.dispose()}}projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;
   for(const d of dnPool){d.live=false;d.el.hidden=true}
   Object.assign(P,{spin:0,vortex:null,dashT:0,swing:0,spinFire:false,hasteT:0});P.cd.s1=0}
 function demoSetup(cls,sk){fxReset();S=fresh();Object.assign(S,{arEl:sk==='volley'?'fire':'bolt',cls,main:sk,demo:true,testGod:true,lv:70,n31:1,n5:1,ch:NCH,tier:1,maxTier:1,autoTier:false});
