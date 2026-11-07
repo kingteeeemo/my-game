@@ -2822,7 +2822,8 @@ const SK_NEW={
   wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
   pillar:{n:'사슬 폭발',role:'다수 공격',tag:'pillar',en:'Chain Blast · Arcane',kind:'pillar',gems:['prad','pecho','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 마력 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
-Object.assign(SK,SK_NEW);CLS.warrior.opts.push('wave');CLS.archer.opts.push('boom');CLS.mage.opts.push('pillar');
+Object.assign(SK,SK_NEW);/* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
+for(const [c,k] of [['warrior','wave'],['archer','boom'],['mage','pillar']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 Object.assign(GEMS,{
   wlen:{n:'참격 연장',t:'wave',c:'#ffc080',d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
   wecho:{n:'연속 참격',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${4*L}%${e.n?`\n검기 ${e.n}번 더 연속으로 날림 (피해 ×${e.m.toFixed(2)})`:'\n5단계·10단계에 검기를 1번씩 더 날림'}`}},
@@ -3256,7 +3257,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v172';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v173';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
