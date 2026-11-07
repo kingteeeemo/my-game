@@ -3141,7 +3141,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v169';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v170';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3345,8 +3345,9 @@ function devAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Developer</
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='devNo'){$('notice').hidden=true;$('notice').style.zIndex=''}else if(e.target.id==='devOk'){const pw=($('devPw').value||'').trim();
   if(sha256('ember-sanctum:'+pw)===DEV_H){try{localStorage.setItem('dev_ok',DEV_H)}catch(err){}startTestFlow()}else $('devMsg').textContent='암호가 다릅니다'}});
 $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&e.target.id==='devPw')$('devOk').click()});
-(()=>{let n=0,t0=0;const box=document.querySelector('#title h1').parentElement;box.style.userSelect=box.style.webkitUserSelect='none';
-  box.addEventListener('click',()=>{const now=Date.now();if(now-t0>3000)n=0;t0=now;if(++n<5)return;n=0;if(devOk())startTestFlow();else devAsk()})})();
+(()=>{let n=0,t0=0;const box=document.querySelector('#title h1').parentElement;box.style.userSelect=box.style.webkitUserSelect='none';box.style.touchAction='manipulation';box.style.cursor='pointer';box.style.webkitTapHighlightColor='transparent';box.style.padding='14px 28px';/* v170: 모바일에서 연타 시 더블탭 확대·click 누락 → pointerup 사용 + 터치 영역 확대 */
+  box.addEventListener('contextmenu',e=>e.preventDefault());
+  box.addEventListener('pointerup',()=>{const now=Date.now();if(now-t0>3000)n=0;t0=now;if(++n<5)return;n=0;if(devOk())startTestFlow();else devAsk()})})();
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
 function applyTest(){const sk=C().skills[0];S.test=true;S.testGod=true;S.lv=70;S.xp=0;S.pending=0;S.skp[sk]=gemsFor(sk).length*GMAX;S.sk[sk]={};S.sk2={};S.ess=1e30;S.gold=1e30;S.statPts=69*STAT_PER_LV;
   for(const k of EQS)S.eq[k]=makeItem(k,60,2);S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;S.tier=10;S.maxTier=10;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
