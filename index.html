@@ -2829,7 +2829,7 @@ function castFire(slot,id){
     for(const q of tg)arrowRain(q,st,base*st.dmg);return}
   if(b.kind==='chainl'){aim(14);P.swing=.15;const hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6},ap=pcMode?mouseW:P.pos;
     const first=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<14&&onScr(e.pos,.9)).sort(/* v138: 첫 번개는 화면 안의 적만 · 튕기는 연쇄는 그대로 */(a,b)=>Math.hypot(a.pos.x-ap.x,a.pos.z-ap.z)-Math.hypot(b.pos.x-ap.x,b.pos.z-ap.z));
-    if(!first.length){zapFx(hand,{x:P.pos.x+Math.sin(P.face)*6,y:.3,z:P.pos.z+Math.cos(P.face)*6});return}
+    if(!first.length){zapFx(hand,{x:P.pos.x+Math.sin(P.face)*6,y:.3,z:P.pos.z+Math.cos(P.face)*6},{first:true});return}
     const hit=new Set(),cid=++volSeq;for(let f=0;f<st.forks;f++){if(f<first.length){if(!hit.has(first[f]))chainFrom(first[f],hand,base*st.dmg,st,hit,cid)}else{const t=first[f%first.length];later(f*.08,()=>{if(t.hp>0)chainFrom(t,{x:hand.x+rnd(-.3,.3),y:hand.y+rnd(-.2,.3),z:hand.z+rnd(-.3,.3)},base*st.dmg,st,new Set(),cid)})}}/* v98: 적이 갈래 수보다 적으면 남은 갈래도 같은 적에게 */
     return}
   if(b.kind==='crush'){
@@ -2961,19 +2961,49 @@ function arrowRain(c,st,dmg){const R=st.radius,ring=flatMesh(ringGeo,0xd8f0a0,.6
     })}
 /* v84 연쇄 번개: 푸른 번개 (바깥 진한 파랑 광채 + 중간 파랑 + 하얀 심지), 같은 지그재그 경로를 3겹으로 그리고 잔가지 2개. 0.28초 동안 깜빡이며 사라짐 */
 const ZAP_L=[{c:0x1240ff,w:.36,o:.5},{c:0x2f7dff,w:.13,o:.85},{c:0xd8ecff,w:.045,o:.9}];
-function zapFx(a,b){const M=10,pts=[[a.x,a.y,a.z]],dx=b.x-a.x,dz=b.z-a.z,dl=Math.hypot(dx,dz)||1,nx=-dz/dl,nz=dx/dl,J=Math.min(.6,.12+dl*.06);
-  for(let m=1;m<M;m++){const t=m/M,o=rnd(-J,J);pts.push([a.x+dx*t+nx*o,a.y+(b.y-a.y)*t+rnd(-.25,.25),a.z+dz*t+nz*o])}pts.push([b.x,b.y,b.z]);
-  const br=[];for(let k=0;k<2;k++){const i=2+(Math.random()*(M-4)|0),p=pts[i],s=k?1:-1,L=rnd(.6,1.3);let q=p;const seg=[p];for(let j=1;j<=3;j++){q=[q[0]+(dx/dl*.4+nx*s*.6)*L/3*1.6+rnd(-.15,.15),q[1]-rnd(0,.25),q[2]+(dz/dl*.4+nz*s*.6)*L/3*1.6+rnd(-.15,.15)];seg.push(q)}br.push(seg)}
-  const g=new THREE.Group(),mats=[];
-  ZAP_L.forEach((ly,li)=>{const mat=new THREE.MeshBasicMaterial({color:ly.c,transparent:true,opacity:ly.o,depthWrite:false,blending:THREE.AdditiveBlending});mats.push([mat,ly.o]);
-    const segs=[];for(let i=1;i<pts.length;i++)segs.push([pts[i-1],pts[i],ly.w]);if(li)for(const s_ of br)for(let i=1;i<s_.length;i++)segs.push([s_[i-1],s_[i],ly.w*.55]);
-    const im=new THREE.InstancedMesh(ARC_GEO,mat,segs.length);im.frustumCulled=false;
-    segs.forEach(([p,q,w],i)=>{arcO.position.set((p[0]+q[0])/2,(p[1]+q[1])/2,(p[2]+q[2])/2);arcV.set(q[0],q[1],q[2]);arcO.lookAt(arcV);arcO.scale.set(w,w,Math.hypot(q[0]-p[0],q[1]-p[1],q[2]-p[2])+w*.6);arcO.updateMatrix();im.setMatrixAt(i,arcO.matrix)});
-    im.instanceMatrix.needsUpdate=true;g.add(im)});
-  scene.add(g);fx.push({m:g,t:0,dur:.28,upd(k){const f=(1-k*k)*(Math.random()<.25?.45:1);for(const [m,o] of mats)m.opacity=o*f}});
-  emit(PADD,{x:b.x,y:b.y,z:b.z,life:.24,s0:2.6,s1:.6,c0:0xffffff,c1:0x2a6aff,a:1,tex:1});emit(PADD,{x:b.x,y:b.y,z:b.z,life:.32,s0:4,s1:1.4,c0:0x4a8aff,c1:0x0a2aa0,a:.6,tex:1});
-  if(Math.random()<.6)emit(PADD,{x:a.x,y:a.y,z:a.z,life:.16,s0:1.6,s1:.4,c0:0xdff0ff,c1:0x2a6aff,a:.9,tex:1});
-  for(let i=0;i<4;i++)emit(PADD,{x:b.x,y:b.y,z:b.z,vx:rnd(-5,5),vy:rnd(1,5),vz:rnd(-5,5),life:rnd(.15,.3),s0:.5,s1:.1,c0:0xeaf4ff,c1:0x3a7aff,a:1,drag:3,tex:1})}
+/* v163 연쇄 번개 리본 — 프랙탈(중점 변위) 경로를 카메라를 향한 띠로 그리고, 셰이더로 흰 심지 + 푸른 광채(가짜 블룸)를 입힘.
+   살아 있는 동안 경로를 몇 번 다시 흔들어(재생성) 지직거리게 하고, 끝으로 갈수록 가늘어짐. 곁가지·몸을 감는 작은 아크·바닥 그을음 포함 */
+const BOLT_MAT=(()=>{const vs=`attribute float fm;varying vec2 vUv;varying float vF;void main(){vUv=uv;vF=fm;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fs=`precision mediump float;varying vec2 vUv;varying float vF;uniform float fade,t,seed,cw;uniform vec3 cg,cc;
+  float h(float x){return fract(sin(x*127.1+seed)*43758.5453);}
+  void main(){float d=abs(vUv.y);float core=1.-smoothstep(0.,cw,d);float glow=pow(max(0.,1.-d),1.9);float mid=1.-smoothstep(cw,cw*2.6,d);
+    float fl=.7+.3*h(floor(vUv.x*11.)+floor(t*70.));float f=max(0.,fade-(1.-vF)*(1.-fade)*1.5);
+    vec3 c=cg*(glow*.9+mid*1.2)+cc*core*1.6;float a=(glow*.62+mid*.6+core)*f*fl;gl_FragColor=vec4(c*a,a);}`;
+  return(cg,cc)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{fade:{value:1},t:{value:0},seed:{value:Math.random()*100},cw:{value:.3},cg:{value:new THREE.Color(cg)},cc:{value:new THREE.Color(cc)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})})();
+/* 두 점 사이 프랙탈 번개 경로: 중점 변위 lv단계 (lv=4 → 17점). jit=최대 흔들림(m) */
+function boltPath(a,b,lv,jit){let pts=[[a.x,a.y,a.z],[b.x,b.y,b.z]];const dx=b.x-a.x,dz=b.z-a.z,dl=Math.hypot(dx,dz)||1,nx=-dz/dl,nz=dx/dl;let J=jit;
+  for(let l=0;l<lv;l++){const nx_=[];for(let i=0;i<pts.length-1;i++){const p=pts[i],q=pts[i+1],o=rnd(-J,J),oy=rnd(-J*.5,J*.5);nx_.push(p,[(p[0]+q[0])/2+nx*o,Math.max(.12,(p[1]+q[1])/2+oy),(p[2]+q[2])/2+nz*o])}nx_.push(pts[pts.length-1]);pts=nx_;J*=.55}return pts}
+/* 경로 목록 → 띠 지오메트리. 각 경로 {p:[[x,y,z]…], w:굵기, w1:끝 굵기 비율, f:수명 배율} · 카메라를 향하도록 옆 벡터 = 접선 × 시선 */
+function boltGeo(paths,geo){let nv=0,ni=0;for(const q of paths){nv+=q.p.length*2;ni+=(q.p.length-1)*6}
+  const pos=new Float32Array(nv*3),uv=new Float32Array(nv*2),fm=new Float32Array(nv),idx=new (nv>65000?Uint32Array:Uint16Array)(ni);let v=0,ii=0;const cp=camera.position;
+  for(const q of paths){const P=q.p,n=P.length,b0=v;for(let i=0;i<n;i++){const p=P[i],pr=P[Math.max(0,i-1)],nx=P[Math.min(n-1,i+1)];
+      let tx=nx[0]-pr[0],ty=nx[1]-pr[1],tz=nx[2]-pr[2];const vx=cp.x-p[0],vy=cp.y-p[1],vz=cp.z-p[2];
+      let sx=ty*vz-tz*vy,sy=tz*vx-tx*vz,sz=tx*vy-ty*vx;const sl=Math.hypot(sx,sy,sz)||1;const u=i/(n-1),w=q.w*(1-(1-(q.w1===undefined?.45:q.w1))*u)*.5;sx=sx/sl*w;sy=sy/sl*w;sz=sz/sl*w;
+      for(const s of [-1,1]){const k=v*3;pos[k]=p[0]+sx*s;pos[k+1]=p[1]+sy*s;pos[k+2]=p[2]+sz*s;uv[v*2]=u;uv[v*2+1]=s;fm[v]=q.f===undefined?1:q.f;v++}}
+    for(let i=0;i<n-1;i++){const a=b0+i*2;idx[ii++]=a;idx[ii++]=a+1;idx[ii++]=a+2;idx[ii++]=a+1;idx[ii++]=a+3;idx[ii++]=a+2}}
+  if(!geo){geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));geo.setAttribute('fm',new THREE.BufferAttribute(fm,1));geo.setIndex(new THREE.BufferAttribute(idx,1))}
+  else{geo.attributes.position.array.set(pos);geo.attributes.position.needsUpdate=true}return geo}
+/* 번개 한 줄기: 본 경로 + 곁가지. regen 간격마다 경로를 다시 흔듦 */
+function boltFx(a,b,o={}){const dl=Math.hypot(b.x-a.x,b.y-a.y,b.z-a.z)||1,lv=o.lv||4,jit=o.jit!==undefined?o.jit:Math.min(.55,.1+dl*.07),w=o.w||.95,dur=o.dur||.32,nb=o.br===undefined?(QM()>=.75?3:1):o.br;
+  const build=()=>{const main=boltPath(a,b,lv,jit),paths=[{p:main,w,w1:.4}];
+    for(let k=0;k<nb;k++){const i=2+Math.floor(Math.random()*(main.length-5)),p=main[i],q=main[i+1],tx=q[0]-p[0],tz=q[2]-p[2],tl=Math.hypot(tx,tz)||1,s=k%2?1:-1,ang=rnd(.5,1.1)*s,cs=Math.cos(ang),sn=Math.sin(ang);
+      const dx=(tx*cs-tz*sn)/tl,dz=(tx*sn+tz*cs)/tl,L=rnd(.35,.8)*Math.min(2.2,.6+dl*.25),e={x:p[0]+dx*L,y:Math.max(.1,p[1]-rnd(.1,.6)),z:p[2]+dz*L};
+      paths.push({p:boltPath({x:p[0],y:p[1],z:p[2]},e,2,jit*.45),w:w*.5,w1:.25,f:.55})}return paths};
+  const mat=BOLT_MAT(o.cg||0x3a78ff,o.cc||0xf4f8ff);mat.uniforms.cw.value=o.cw||.11;const m=new THREE.Mesh(boltGeo(build()),mat);m.frustumCulled=false;scene.add(m);let rt=0;const RG=o.regen||.045;
+  fx.push({m,t:0,dur,upd(k,dt){rt+=dt;if(rt>=RG&&k<.8){rt=0;boltGeo(build(),m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(k<.35?1:Math.pow(1-(k-.35)/.65,1.3))*(Math.random()<.2?.55:1)},end(){m.geometry.dispose();mat.dispose()}});return m}
+/* 몸을 감는 작은 아크: 중심 c, 반지름 r, 높이 h 주위를 몇 가닥이 지직거림 */
+function bodyArcs(c,r,h,n,col){const paths=[];for(let i=0;i<n;i++){const a0=Math.random()*6.28,a1=a0+rnd(.9,2.2)*(Math.random()<.5?-1:1),y0=rnd(.2,h),y1=Math.max(.15,y0+rnd(-.5,.5)),rr=r*rnd(.9,1.35);
+    paths.push({p:boltPath({x:c.x+Math.sin(a0)*rr,y:y0,z:c.z+Math.cos(a0)*rr},{x:c.x+Math.sin(a1)*rr,y:y1,z:c.z+Math.cos(a1)*rr},2,.14),w:.2,w1:.5})}
+  const mat=BOLT_MAT(col||0x4a8aff,0xffffff);mat.uniforms.cw.value=.18;const m=new THREE.Mesh(boltGeo(paths),mat);m.frustumCulled=false;scene.add(m);let rt=0;
+  fx.push({m,t:0,dur:.2,upd(k,dt){rt+=dt;if(rt>.04){rt=0;for(const q of paths){const p=q.p;for(let i=1;i<p.length-1;i++){p[i][0]+=rnd(-.05,.05);p[i][1]+=rnd(-.04,.04);p[i][2]+=rnd(-.05,.05)}}boltGeo(paths,m.geometry)}mat.uniforms.t.value+=dt;mat.uniforms.fade.value=(1-k)*(Math.random()<.3?.5:1)},end(){m.geometry.dispose();mat.dispose()}})}
+function zapFx(a,b,o){boltFx(a,b);if(!o){popFx(b.x,b.y,b.z,.5,2,.14,0xffffff,.8);popFx(b.x,b.y,b.z,1,3,.26,0x3a7aff,.5);return}/* 옵션 없이 부르면(번개 폭풍 하늘 번개·과부하·폭발) 줄기+섬광만 */
+  const first=o.first,tgt=o.tgt,bigE=tgt&&tgt.rank>=2;
+  /* 맞은 자리: 순간 섬광(흰→파랑) + 몸을 감는 아크 + 바닥 빛 번짐·그을음 + 조명 + 튀는 불티 */
+  popFx(b.x,b.y,b.z,.6,2.4,.14,0xffffff,.9);popFx(b.x,b.y,b.z,1.2,3.6,.3,0x3a7aff,.55);flash({x:b.x,z:b.z},0x6a9aff,bigE?2.2:1.5);
+  if(QM()>=.75)bodyArcs({x:b.x,z:b.z},tgt?tgt.r*.9:.45,tgt?tgt.h:1.4,bigE?6:4);
+  decalFx({x:b.x,z:b.z},dotTex,0x4a8aff,tgt?tgt.r*3.2:1.6,.22,.55,true);decalFx({x:b.x,z:b.z},crackTex,0x7ab0ff,tgt?tgt.r*2:1,.3,.6,true);decalFx({x:b.x,z:b.z},crackTex,0x0a0c14,tgt?tgt.r*2.2:1.1,1.6,.5,false);
+  for(let i=0;i<6;i++)emit(PADD,{x:b.x,y:b.y,z:b.z,vx:rnd(-6,6),vy:rnd(1,6),vz:rnd(-6,6),life:rnd(.14,.3),s0:.34,s1:.06,c0:0xffffff,c1:0x3a7aff,a:1,drag:3,grav:-14,tex:1});
+  if(first){popFx(a.x,a.y,a.z,.5,1.8,.16,0xdff0ff,.9);if(QM()>=.75)bodyArcs({x:a.x,z:a.z},.3,a.y+.3,3,0x8ab8ff)}}
 /* v85 번개 폭풍: 「팡」 터지는 푸른 폭발 — 순간 섬광(하양→파랑) + 부풀어 오르는 푸른 광구 + 바닥 빛 번짐 + 빠른 고리·느린 고리 2겹 + 작은 방사 번개 + 튀는 불꽃 */
 let stormN=0,stormL=0,stormT=0;
 function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air&&e.hp>0&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true);hitKind=null;
@@ -2995,7 +3025,7 @@ function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air
 function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e0;
   for(let j=0;j<st.bn;j++){let nb=null,bd=st.jr;for(const e of enemies){if(hit.has(e)||e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-cur.pos.x,e.pos.z-cur.pos.z);if(d<bd){bd=d;nb=e}}if(!nb)break;hit.add(nb);path.push(nb);cur=nb}
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
-    later(j*.0747,()=>{zapFx(fr,to);/* v140: 0.112 → 0.0747 (튕기는 속도 +50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
+    later(j*.0747,()=>{zapFx(fr,to,{first:j===0,tgt:e});/* v140: 0.112 → 0.0747 (튕기는 속도 +50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
       if(e.hp>0){if(st.csl)e.slowT=Math.max(e.slowT,st.csl);hitKind='zap';hurt(e,dmg*Math.pow(st.bk,j)*vm);hitKind=null}
       if(st.cst)stormBurst({x:to.x,z:to.z},st.cst.r,dmg*Math.pow(st.bk,j)*st.cst.m*vm);
       if(st.ovl&&j===path.length-1)overloadOrb({x:to.x,z:to.z},dmg*st.ovl.m,st.ovl.dur)})})}
@@ -3051,7 +3081,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v162';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v163';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
