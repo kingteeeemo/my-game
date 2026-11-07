@@ -954,7 +954,7 @@ const dropLvl=()=>Math.max(1,S.lv);/* v76: 드롭 아이템 레벨 = 내 레벨 
    더 좋은 장비로 바꿔도 강화 단계는 그 부위에 남음 */
 const ENH_MAX=Infinity,ENH_B=.06,ENH_O=.05;/* v44: 강화 단계 제한 없음 */
 const enhL=k=>(S.enh&&S.enh[k])||0;
-const enhCost=(L,k)=>Math.round(200*Math.pow(1.38,L)*(k==='weapon'?1.3:1));/* v126: 무기 강화 비용 전 구간 +30% */
+const enhCost=(L,k)=>Math.round(200*Math.pow(1.418,L)*(k==='weapon'?1.3:1));/* v126: 무기 강화 비용 전 구간 +30% · v150: 단계당 상승률 38% → 41.8%(10% 상향) */
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
@@ -3041,7 +3041,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v149';
+const APP_VER='v150';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3782,7 +3782,7 @@ const tkNeed=(L,k)=>k==='weapon'?(L>=40?4:L>=35?3:L>=30?2:1):(L>=40?3:L>=35?2:1)
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<700)return;/* v148: 컷신 구간은 컷신이 끝난 뒤 0.7초 쉬고 다음 강화 */if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},443);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<530)return;/* v148→v150: 컷신 구간은 컷신이 끝난 뒤 0.53초 쉬고 다음 강화 */if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},443);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 대기시간 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다.</p>`}/* v149 */
 function renderSmith(){
