@@ -2388,6 +2388,52 @@ function novaRing(p,R,op,ka){const n=18,mat=new THREE.MeshBasicMaterial({color:0
 /* v62: 큰 빛 번짐은 점 입자 크기 한계(기기마다 다름)에 걸리지 않게 스프라이트로. del초 뒤 터져 dur초 동안 s0→s1로 부풀며 사라짐 */
 function popFx(x,y,z,s0,s1,dur,col,op,del=0){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));m.position.set(x,y,z);m.scale.setScalar(s0);scene.add(m);
   fx.push({m,t:-del,dur,upd(k){if(k<0){m.material.opacity=0;return}const e=1-(1-k)*(1-k);m.scale.setScalar(s0+(s1-s0)*e);m.material.opacity=op*(1-k)*(k<.12?k/.12:1)}})}
+/* v165 화염 폭발 재작성 — 노이즈 불덩이(셰이더, 안쪽 흰빛→주황→검붉게 식어감, 가장자리가 녹아 사라짐) + 너덜너덜한 충격파 고리(셰이더)
+   + 열기 돔(프레넬) + 포물선 불꽃 파편 + 바닥 불씨 + 연기. 겹치면 밝기 ×1/√n (fbT) */
+const FIRE_NOISE=`float hsh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vno(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hsh(i),hsh(i+vec2(1,0)),f.x),mix(hsh(i+vec2(0,1)),hsh(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){return vno(p)*.55+vno(p*2.1+3.7)*.3+vno(p*4.3+9.1)*.15;}`;
+const FIREBALL_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;vec4 mv=modelViewMatrix*vec4(0.,0.,0.,1.);mv.xy+=position.xy*vec2(length(modelMatrix[0].xyz),length(modelMatrix[1].xyz));gl_Position=projectionMatrix*mv;}`,
+  fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 c0,c1,c2;${FIRE_NOISE}
+  void main(){float d=length(vUv);if(d>1.)discard;float a=atan(vUv.y,vUv.x);
+    float n=fbm(vUv*2.6+vec2(seed,seed*1.7)+vec2(0.,-k*1.4));float n2=fbm(vec2(a*1.6+seed,d*3.-k*2.));
+    float edge=d+(n-.5)*.55+(n2-.5)*.25;/* 울퉁불퉁한 외곽 */
+    float er=mix(.72,1.2,k);/* 시간이 갈수록 바깥에서 안쪽으로 녹아 사라짐 */
+    float body=(1.-smoothstep(er-.28,er,edge))*(1.-smoothstep(.55,1.,d))*(.7+.3*n);if(body<=.002)discard;
+    float heat=(1.-smoothstep(0.,.9,edge))*(1.-k*.7)+n*.22*(1.-k);
+    vec3 col=mix(c2,c1,smoothstep(.06,.42,heat));col=mix(col,c0,smoothstep(.5,.9,heat));col*=1.25;
+    float al=body*pow(1.-k,1.1)*ff;col*=al;/* premultiplied: 밝은 심지는 더해지고 검붉은 가장자리는 덮음 */
+    gl_FragColor=vec4(col,al*(.3+.7*smoothstep(.0,.45,heat)));}`;
+  return(c0,c1,c2)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},c0:{value:new THREE.Color(c0)},c1:{value:new THREE.Color(c1)},c2:{value:new THREE.Color(c2)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})();
+const SHOCK_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fs=`precision mediump float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col;${FIRE_NOISE}
+  void main(){float d=length(vUv),a=atan(vUv.y,vUv.x);float rg=.78+(fbm(vec2(a*2.2+seed,k*3.))-.5)*.22;/* 너덜너덜한 테두리 */
+    float w=.1+.08*k;float band=1.-smoothstep(0.,w,abs(d-rg));float inner=(1.-smoothstep(rg-.45,rg,d))*.25*(1.-k);
+    float al=(band*1.2+inner)*(1.-k)*ff;gl_FragColor=vec4(col*al,al*.5);}`;
+  return(c)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:Math.random()*10},ff:{value:1},col:{value:new THREE.Color(c)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})})();
+const DOME_GEO=new THREE.SphereGeometry(1,20,10,0,Math.PI*2,0,Math.PI/2);
+const DOME_MAT=(()=>{const vs=`varying vec3 vN,vV;void main(){vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
+  fs=`precision mediump float;varying vec3 vN,vV;uniform float k,ff;uniform vec3 col;void main(){float fr=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.2);float al=fr*(1.-k)*(1.-k)*.35*ff;gl_FragColor=vec4(col*al,al);}`;
+  return(c)=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},ff:{value:1},col:{value:new THREE.Color(c)}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.BackSide})})();
+function fireBurst(p,R,FK,heavy){const q=QM();
+  /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
+  const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
+  if(FK>=.75){const fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(0xfff4d0,0xff8a20,0x521408));fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7,s1=RV*1.35;
+    fx.push({m:fb,t:0,dur:.42+RV*.04,upd(k){const e=1-Math.pow(1-k,4);const s=s0+(s1-s0)*e;fb.scale.set(s,s*.9,1);fb.position.y=.5+RV*.3+e*RV*.3;fb.material.uniforms.k.value=k;fb.material.uniforms.ff.value=FK}})}/* 겹치는 연속 폭발(회전 베기 화염)은 큰 불덩이 생략 */
+  const co=new THREE.Mesh(fxPlane,FIREBALL_MAT(0xffffff,0xffd080,0xff6a10));co.position.set(p.x,.55+RV*.25,p.z);scene.add(co);
+  fx.push({m:co,t:0,dur:.22,upd(k){const s=RV*(.25+.5*Math.sqrt(k))*(.6+.4*FK);co.scale.set(s,s,1);co.material.uniforms.k.value=k*.9;co.material.uniforms.ff.value=FK*.9}});
+  /* 너덜너덜한 충격파 고리 (바닥) + 열기 돔 */
+  const sw=new THREE.Mesh(fxPlane,SHOCK_MAT(0xffb878));sw.rotation.x=-Math.PI/2;sw.position.set(p.x,.07,p.z);scene.add(sw);
+  fx.push({m:sw,t:0,dur:.42,upd(k){const e=1-Math.pow(1-k,2.6);sw.scale.setScalar(R*(.35+1.35*e));sw.material.uniforms.k.value=k;sw.material.uniforms.ff.value=FK}});
+  /* 열기 돔은 카메라가 안에 들어가면 화면 전체가 물들어 제외 */
+  flash(p,0xff9a50,Math.min(2.6,.8+R*.3)*FK);
+  /* 포물선 불꽃 파편 + 불티 + 바닥 불씨 + 연기 */
+  const n=Math.round((6+R*2.5)*q*FK);
+  streaks(p,n,{sp:[R*1.6,R*4],up:[4,10],y:[.5,1],life:[.45,.9],w:.1,len:1,c0:0xfff0c0,c1:0xff3a00,drag:1.2,grav:-16});
+  spray(PADD,p,Math.round(n*.8),{sp:[R*.8,R*2.2],up:[2,6],y:[.5,1.1],r0:R*.2,life:[.4,.8],s0:[.22,.4],s1:[.03,.06],c0:0xffe0a0,c1:0xff5a10,a:1,drag:1.5,grav:-12,tex:1});
+  if(heavy){spray(PNRM,p,Math.round(Math.min(6,2+R*.8)*q),{sp:[R*.5,R*1.1],up:[1.2,2.8],y:[.6,1.3],r0:R*.35,life:[.8,1.3],s0:[R*.25,R*.35],s1:[R*.6,R*.85],c0:0x4a3c34,c1:0x151210,a:.32*FK,drag:1.5,grav:.5,rv:.8,del:[.12,.25],tex:2});
+    for(let i=0;i<Math.round(3*q);i++){const a=Math.random()*6.28,d=R*rnd(.3,.9);later(rnd(.05,.25),()=>decalFx({x:p.x+Math.sin(a)*d,z:p.z+Math.cos(a)*d},dotTex,0xff7a20,rnd(.35,.6),rnd(.8,1.4),.7*FK,true))}}
+}
 function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* 서리 폭발 (v40): 범위가 한눈에 보이도록 서리 원판 + 밝은 테두리 + 충격파 + 얼음 가시. 초당 여러 번 터지므로 부하 제한과 별도로 가볍게 */
   /* v65 번개 폭발(궁수): 보라·흰 섬광 + 사방으로 갈라지는 번개 줄기(InstancedMesh) + 전기 불꽃 + 짧은 충격파 + 그을린 금 */
@@ -2419,20 +2465,12 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     else groundFx(p,shockTex,0xaee0ff,R*.25,R*1.05,.26,.5,true,.08);
     spray(PADD,p,ice?3:Math.min(8,3+R),ice?{sp:[1,3],up:[1,3],y:[.4,1.2],life:[.4,.7],s0:[.3,.4],s1:[.1,.15],c0:0xffffff,c1:0x9ad8ff,rv:4,tex:3}:{sp:[R*1.2,R*2.4],up:[.5,2],y:[.5,1.2],life:[.3,.5],s0:[.8+R*.25,1+R*.3],s1:[1.4+R*.35,1.8+R*.4],c0:0xfff0b0,c1:0xff3a08,a:.85,drag:5,rv:2,tex:0});return}
   const lite=ice==='lite';
-  if(!ice){
-    /* v164: 화염 폭발이 짧은 시간에 겹치면(회전 베기 화염 등) 밝기를 1/√n 로 낮춰 블룸이 하얗게 뭉개지지 않게 */
+  if(!ice){/* v165: 화염 폭발 재작성 → fireBurst */
     fbT.push(time);while(fbT.length&&fbT[0]<time-.4)fbT.shift();const FK=1/Math.sqrt(fbT.length);
-    if(FK>.7)flash(p,0xff9a50,Math.min(2.6,.8+r*.3));if(r>=2)shake=Math.max(shake,Math.min(.22,r*.035));
-    emit(PADD,{x:p.x,y:.9,z:p.z,life:.12,s0:R*1,s1:R*1.7,c0:0xffc070,c1:0xff6a10,a:.4*FK,tex:1});
-    groundFx(p,shockTex,0xffb070,R*.2,R*1.2,.32,.6*FK,true,.08);/* v164: 블룸 2단에 맞춰 밝기 완화 */
-    const n=Math.min(26,6+R*3.2);spray(PADD,p,n,{sp:[R*1.2,R*2.8],up:[.5,2.5],y:[.5,1.2],r0:R*.25,life:[.35,.6],s0:[.7+R*.25,1+R*.32],s1:[1.6+R*.35,2.2+R*.45],c0:0xffb050,c1:0xc02000,a:.4*FK,drag:5,grav:1,rv:2,tex:0});
-    spray(PADD,p,n*.5,{sp:[R*.4,R*1.2],up:[1,3],y:[.6,1],r0:R*.15,life:[.25,.4],s0:[.6+R*.3,.8+R*.35],s1:[.2,.4],c0:0xffe090,c1:0xff6a10,a:.42*FK,drag:4,rv:3,tex:0});
-    streaks(p,12+R*3,{sp:[6,16],up:[3,9],y:[.6,1.2],life:[.4,.9],w:.09,len:.9,c0:0xffe0a0,c1:0xff2a00,drag:.9,grav:-14});
-    spray(PADD,p,6+R,{sp:[.3,1.2],up:[3,6],y:[.5,1],r0:R*.15,life:[.45,.75],s0:[.6+R*.2,.8+R*.25],s1:[1.2+R*.3,1.6+R*.35],c0:0xffc060,c1:0x801000,a:.45*FK,drag:2.2,rv:2,del:[.03,.1],tex:0});
-    groundFx(p,shockTex,0xffd090,R*.3,R*1.7,.5,.45*FK,true,.1);
-    if(R>=1.6)decalFx(p,crackTex,0xff7a2a,R*.95,1.4,.9,true);
-    spray(PNRM,p,Math.min(12,3+R*1.4),{sp:[R*.4,R*1],up:[1.2,2.6],y:[.6,1.3],r0:R*.35,life:[.9,1.5],s0:[R*.45,R*.6],s1:[R*.95,R*1.3],c0:0x4a4038,c1:0x1c1a18,a:.5,drag:1.6,grav:.6,rv:.8,del:[.08,.18],tex:2});
-    if(R>=1.5)debris(p,{n:Math.round(4*q),color:0x3a2c22,geo:tetraGeo,sp:[3,6],up:[3,6],y:[.3,.8],sz:[.06,.12],dur:.7,g:20});
+    if(r>=2)shake=Math.max(shake,Math.min(.22,r*.035));
+    fireBurst(p,R,FK,blastLoad<8);
+    if(R>=1.6)decalFx(p,crackTex,0xff7a2a,R*.95,1.4,.8*FK,true);
+    if(R>=1.5&&blastLoad<8)debris(p,{n:Math.round(4*q),color:0x3a2c22,geo:tetraGeo,sp:[3,6],up:[3,6],y:[.3,.8],sz:[.06,.12],dur:.7,g:20});
     scorchFx(p,R);
     return}
   /* 얼음 (v37 간결화): 짧은 섬광 + 충격파 고리 1개 + 얼음 가시 몇 개 + 옅은 서리 자국. 서리 폭발(lite)은 고리와 가시 2개만 */
@@ -3092,7 +3130,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v164';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v165';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
