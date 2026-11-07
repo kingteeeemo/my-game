@@ -2477,8 +2477,16 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* v64 서리 폭발: v60의 하얀 원(서리 원판 + 밝은 테두리 + 충격파) 원복. 눈꽃 자국은 v63처럼 항상 같은 진하기 */
   if(ice==='nova'){blastLoad+=.4;const heavy=blastLoad>BLAST_EMER,ka=Math.min(1,4.6/R);
     /* v180: 서리 원판·테두리·충격파 고리 제거 → 부드러운 서리 빛 번짐 + 서리 구름 + 얼음 가시 + 사방으로 튀는 얼음 조각 */
-    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));groundFx(p,dotTex,0x9ad8ff,R*.45,R*1.4,.34,(heavy?.3:.5)*ka*FK,true,.08);popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.45*ka*FK);
-    fireBurst(p,R*.55,ka*.45*FK,false,PAL_ICE);/* v166: 서리 구름 */iceSpikes(p,R*.75,Math.max(2,Math.round(4*q)));
+    fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));
+    /* v181: PoE 얼음 폭발처럼 — 중심에서 피해 반경까지 퍼져 나가는 두꺼운 얼음 고리(너덜너덜한 결정 테두리) + 그 뒤에 남는 서리 원판 + 고리 가장자리를 따라 솟는 얼음 가시 */
+    {const sw=new THREE.Mesh(fxPlane,SHOCK_MAT(0xbfe8ff));sw.rotation.x=-Math.PI/2;sw.position.set(p.x,.08,p.z);scene.add(sw);
+      fx.push({m:sw,t:0,dur:.36,upd(k){const e=1-Math.pow(1-k,2.2);sw.scale.setScalar(R*(.25+.95*e));sw.material.uniforms.k.value=k*.8;sw.material.uniforms.ff.value=1.3*ka*Math.max(.6,FK)}})}
+    {const rg=flatMesh(ringGeo,0xdff6ff,.95);rg.material.blending=THREE.AdditiveBlending;rg.position.set(p.x,.09,p.z);scene.add(rg);/* 선명한 얼음 고리: 피해 반경까지 퍼진 뒤 사라짐 */
+      fx.push({m:rg,t:0,dur:.42,upd(k){const e=1-Math.pow(1-k,2.4);const s_=R*(.2+.82*e);rg.scale.set(s_,s_,1);rg.material.opacity=.95*ka*Math.max(.6,FK)*(k<.6?1:1-(k-.6)/.4)}})}
+    {const fd=new THREE.Mesh(fxPlane,new THREE.MeshBasicMaterial({map:frostTex,color:0x8ad0ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));fd.rotation.x=-Math.PI/2;fd.rotation.z=Math.random()*6.28;fd.position.set(p.x,.06,p.z);scene.add(fd);
+      fx.push({m:fd,t:0,dur:.7,upd(k){const e=1-Math.pow(1-Math.min(1,k*2.2),2.2);fd.scale.setScalar(R*1.1*(.3+.7*e));fd.material.opacity=.7*ka*FK*(k<.3?1:1-(k-.3)/.7)}})}
+    groundFx(p,dotTex,0x9ad8ff,R*.45,R*1.4,.34,(heavy?.3:.45)*ka*FK,true,.08);popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.45*ka*FK);
+    fireBurst(p,R*.5,ka*.4*FK,false,PAL_ICE);/* v166: 서리 구름 */iceSpikes(p,R*.75,Math.max(2,Math.round(4*q)));later(.16,()=>iceSpikes(p,R*1.02,Math.max(3,Math.round(6*q))));/* v181: 고리 가장자리의 얼음 가시 */
     if(!heavy)streaks(p,Math.round(8*q),{sp:[R*2,R*3.2],up:[1,3],y:[.4,.9],life:[.14,.24],w:.06,len:.6,c0:0xffffff,c1:0x6ab8ff,drag:3});
     {const cs=[0x5ad8ff,0x8a9aff,0x5affe0,0xb08aff,0x6ab8ff],c=cs[Math.random()*cs.length|0];decalFx(p,frostTex,0xdff4ff,R,2,.21*ka,false);decalFx(p,frostTex,c,R*1.02,2.2,.28*ka,true);decalFx(p,frostTex,0xffffff,R*.5,1.4,.2*ka,true)}/* v98: 눈꽃 자국을 더 진하고 색색으로 · 더 오래 */
     flash(p,0x9ad8ff,Math.min(1.4,.5+R*.15)*ka*.42);return}
@@ -3229,17 +3237,17 @@ function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air
   popFx(p.x,.9,p.z,r*.25,r*.8,.12,0xcfe6ff,.8*dm);popFx(p.x,.8,p.z,r*.6,r*1.9,.3,0x1e6aff,.7*dm,.02);
   emit(PADD,{x:p.x,y:.7,z:p.z,life:.3,s0:r*.5,s1:r*1.8,c0:0x4a90ff,c1:0x081e90,a:.75*dm,tex:1});
   /* v180: 충격파·고리 제거 → 부드러운 푸른 빛 번짐(빠르게 퍼짐) + 전기 구름 + 방사 번개로 폭발을 보임 */
-  groundFx(p,dotTex,0x5a9aff,r*.3,r*1.7,.3,.9*Math.max(.5,dm),true,.08);groundFx(p,dotTex,0x1450ff,r*.6,r*2,.45,.5*dm,true,.06);
-  fireBurst(p,r*.6,.45*dm,false,PAL_BOLT);
-  radialBolts(p,r*1.15,heavy?5:3,0x7ab4ff);
+  groundFx(p,dotTex,0x5a9aff,r*.4,r*2.4,.32,.95*Math.max(.5,dm),true,.08);groundFx(p,dotTex,0x1450ff,r*.8,r*2.8,.5,.55*dm,true,.06);/* v181: 폭발 범위가 피해 반경까지 보이도록 확대 */
+  fireBurst(p,r*.85,.5*dm,false,PAL_BOLT);
+  radialBolts(p,r*1.3,heavy?6:4,0x7ab4ff);
   flash(p,0x2a6aff,1.4);
   /* v100: 더 화려하게 — 하늘에서 내리꽂는 번개 + 빛기둥 + 바닥 균열 + 3번째 넓은 고리 + 솟구치는 전기 줄기 */
   if(heavy||stormL<4){const sx=p.x+rnd(-1,1),sz=p.z+rnd(-1,1);zapFx({x:sx,y:9,z:sz},{x:p.x,y:.2,z:p.z});if(QM()>=1&&stormL<3)zapFx({x:p.x+rnd(-2,2),y:8,z:p.z+rnd(-2,2)},{x:p.x,y:.2,z:p.z});
     emit(PADD,{x:p.x,y:2.2,z:p.z,life:.22,s0:r*.5,s1:r*.15,c0:0xffffff,c1:0x5aa0ff,a:.9*dm,tex:1});
     for(let i=0;i<3;i++)emit(PADD,{x:p.x,y:.6+i*1.4,z:p.z,vy:6,life:.25,s0:r*.35,s1:.2,c0:0xeaf4ff,c1:0x2a6aff,a:.7*dm,tex:1});
     if(r>=1.6)decalFx(p,crackTex,0x5a9aff,r*rnd(.8,1.1),.9,.45*dm,true)}
-  streaks(p,Math.max(4,Math.round(9*QM())),{sp:[r*2.2,r*3.4],up:[2,6],y:[.4,1],life:[.12,.24],w:.05,len:.7,c0:0xffffff,c1:0x4a8aff,drag:3});
-  const n=Math.max(3,Math.round(10*QM()));for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(4,9)*r/2;emit(PADD,{x:p.x,y:.7,z:p.z,vx:Math.cos(a)*v,vy:rnd(1,5),vz:Math.sin(a)*v,life:rnd(.2,.4),s0:rnd(.35,.6),s1:.08,c0:0xffffff,c1:0x2a6aff,a:1,drag:4,tex:1})}}
+  streaks(p,Math.max(4,Math.round(10*QM())),{sp:[r*3,r*4.6],up:[2,6],y:[.4,1],life:[.14,.26],w:.06,len:.9,c0:0xffffff,c1:0x4a8aff,drag:3});
+  const n=Math.max(3,Math.round(12*QM()));for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(6,12)*r/2;emit(PADD,{x:p.x,y:.7,z:p.z,vx:Math.cos(a)*v,vy:rnd(1,5),vz:Math.sin(a)*v,life:rnd(.2,.4),s0:rnd(.35,.6),s1:.08,c0:0xffffff,c1:0x2a6aff,a:1,drag:4,tex:1})}}
 function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e0;
   for(let j=0;j<st.bn;j++){let nb=null,bd=st.jr;for(const e of enemies){if(hit.has(e)||e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-cur.pos.x,e.pos.z-cur.pos.z);if(d<bd){bd=d;nb=e}}if(!nb)break;hit.add(nb);path.push(nb);cur=nb}
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
@@ -3299,7 +3307,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v180';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v181';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
