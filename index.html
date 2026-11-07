@@ -773,7 +773,7 @@ const GEMS={
   multi:{n:'투사체 증가',t:'projectile',c:'#5ad1c8',d:L=>`화살 ${2+volN(L)}발\n한 발 피해 ×${volD(L).toFixed(2)}`},
   pierce:{n:'관통',t:'projectile',c:'#7ab0ff',d:L=>`적 ${L}명을 더 꿰뚫음`},
   chain:{n:'연쇄',t:'projectile',c:'#c88aff',d:L=>`명중 후 근처 적에게 ${L}회 튕김`},
-  chpierce:{n:'연쇄 - 관통',t:'projectile',c:'#9ad0ff',d:L=>{const c=chpSt(L);return `처음 맞힌 적에게서 화살 ${c.n}개가 무작위 방향으로 갈라지고, 갈라진 화살이 적을 맞히면 한 번 더 갈라짐 (갈라진 화살 피해 ×${c.m.toFixed(2)})\n${c.p?`적 ${c.p}명 관통`:'관통 없음 (2단계부터)'}`}},
+  chpierce:{n:'연쇄 - 관통',t:'projectile',c:'#9ad0ff',d:L=>{const c=chpSt(L);return `처음 맞힌 적에게서 화살 ${c.n}개가 사방으로 같은 간격(정${c.n}각형 꼭짓점 방향)으로 갈라지고, 갈라진 화살이 적을 맞히면 한 번 더 갈라짐 (갈라진 화살 피해 ×${c.m.toFixed(2)})\n${c.p?`적 ${c.p}명 관통`:'관통 없음 (2단계부터)'}`}},
   blast:{n:'폭발',t:'projectile',c:'#ff7a4a',d:L=>`명중 시 반경 ${(1.8*(1+.2*L)).toFixed(1)}m 폭발\n범위 +${20*L}% · 피해 ×${(.4+.05*L).toFixed(2)}`},
   area:{n:'범위 확대',t:'area',c:'#e8c07a',d:L=>`효과 범위 +${20*L}%`},
   echo:{n:'메아리',t:'area',c:'#d9d06a',d:L=>`${Math.ceil(L/3)}회 더 발동 (피해 ×${(.55+.03*L).toFixed(2)})`},
@@ -831,7 +831,7 @@ const GEMS2={
   lblast:{s:'volley',get n(){return arEl()==='fire'?'화염 폭발':'번개 폭발'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=lbSt(L);return `화살이 맞은 자리에 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(2)}`}}
 };
 /* v65 궁수: 1차 「연쇄 - 관통」(10단계, 옛 2차 분열 화살을 10단계로 + 관통 최대 4명), 2차 「번개 폭발」(5단계, 옛 1차 폭발보다 강하게) */
-const chpSt=L=>({n:L>=8?3:2,m:.35+.04*L,p:Math.round(L*.4)});
+const chpSt=L=>({n:L>0?3+Math.floor((L-1)*4/9):0,/* v139: 1단계 3발 → 10단계 7발 */m:.35+.04*L,p:Math.round(L*.4)});
 const lbSt=L=>({r:1.8*(1+.4*L),m:.6+.15*L});
 /* v66: 궁수 2차 폭발 속성 — 번개(기본) / 화염. 바꿀 때 골드 소모, 캐릭터 레벨이 높을수록 비쌈. 피해·범위는 같고 이펙트만 다름 */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
@@ -3002,7 +3002,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v138';
+const APP_VER='v139';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4141,9 +4141,9 @@ function update(dt){
       p.hit.add(e);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid){if(e.vId===p.vid)e.vN++;else{e.vId=p.vid;e.vN=0}vm=Math.pow(VOL_K,e.vN)}hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
       if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined);
       if(p.split&&!p.back){const sp=p.split,h=Math.atan2(p.vx,p.vz),hs=new Set(p.hit);p.split=null;
-        const dp=p.depth||0,a0=Math.random()*Math.PI*2;/* v138: 갈라진 화살은 가까운 적(서로 다른 적 우선) 방향으로 튐 · 사거리 약 1.8배 · 보라색 · 2차 폭발도 그대로 터짐 */
-        const tg=enemies.filter(x=>x.hp>0&&!x.air&&!hs.has(x)&&Math.hypot(x.pos.x-pp.x,x.pos.z-pp.z)<14).sort((u,v)=>Math.hypot(u.pos.x-pp.x,u.pos.z-pp.z)-Math.hypot(v.pos.x-pp.x,v.pos.z-pp.z));
-        for(let j=0;j<sp.n;j++){const t=tg.length?tg[j%tg.length]:null,a=t?Math.atan2(t.pos.x-pp.x,t.pos.z-pp.z)+(j>=tg.length?(Math.random()-.5)*.5:0):a0+j*Math.PI*2/sp.n+(Math.random()-.5)*.7;shoot(a,{vid:p.vid,from:pp,color:0xb070ff,tcol:0x9a50ff,glow:1,gcol:0xa060ff,size:.42,long:true,trail:1.5,tw:.12,speed:p.speed,life:.8,home:!!t,dmg:p.dmg*sp.m,blast:p.blast,bolt:p.bolt,br:p.br*.8,bm:p.bm,child:true,split:dp<1?sp:null});const c=projs[projs.length-1];c.hit=new Set(hs);c.depth=dp+1}}
+        const dp=p.depth||0;
+        /* v139: 유도 없이 날아가던 방향을 기준으로 사방 같은 간격(3발=정삼각형, 4발=정사각형 …) · 갈라진 화살에는 2차 폭발 없음 */
+        for(let j=0;j<sp.n;j++){const a=h+j*Math.PI*2/sp.n;shoot(a,{vid:p.vid,from:pp,color:0xb070ff,tcol:0x9a50ff,glow:1,gcol:0xa060ff,size:.42,long:true,trail:1.5,tw:.12,speed:p.speed,life:.8,dmg:p.dmg*sp.m,blast:false,bolt:false,br:p.br*.8,bm:p.bm,child:true,split:dp<1?sp:null});const c=projs[projs.length-1];c.hit=new Set(hs);c.depth=dp+1}}
       if(p.chain>0){const n=nearestEnemy(pp,9,p.hit);if(n){p.chain--;const ax=n.pos.x-pp.x,az=n.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx=ax/l*p.speed;p.vz=az/l*p.speed;p.life=.8;break}}
       if(p.pierce>0){p.pierce--;continue}
       dead=true;break}}
