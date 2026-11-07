@@ -2911,8 +2911,9 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   fx.push({m:g,t:0,dur:D,upd(k,dt){tt+=dt;const us=[outer,mid,inner].map(m=>m.material.uniforms);for(const u of us)u.uT.value=tt;
       if(tt<PRE){const e=tt/PRE;const bot=H*(1-e*e);for(const m of [outer,mid,inner])m.position.y=bot;us[0].uOp.value=.85;us[1].uOp.value=.9;us[2].uOp.value=1;disc.material.opacity=.5*e;ring.material.opacity=.5*e;ring.scale.setScalar(R*.6)}
       else{if(!boomed){boomed=true;for(const m of [outer,mid,inner])m.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));
-          fireBurst({x:c.x,z:c.z},R*.5,.8*FK,fbT.length<3,PAL_HEX);radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
-          groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.4,R*1.5,.32,.6*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*.95,1.2,.8,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R,3,.75,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*.8,2.4,.6,false);shake=Math.max(shake,.22);
+          fireBurst({x:c.x,z:c.z},R*.85,.5*FK,fbT.length<3,PAL_HEX);/* v176: 덜 밝게, 효과 범위만큼 넓게 */
+          for(let i=0;i<Math.round(4*QM());i++){const a=Math.random()*6.28,d=R*rnd(.35,.8);later(rnd(.02,.1),()=>fireBurst({x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},R*.4,.35*FK,false,PAL_HEX))}radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
+          groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.6,R*2.1,.4,.5*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*.95,1.2,.8,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R,3,.75,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*.8,2.4,.6,false);shake=Math.max(shake,.22);
           spray(PNRM,{x:c.x,z:c.z},Math.round(8*QM()),{sp:[R*.8,R*1.8],up:[1.5,3.5],y:[.2,.8],r0:R*.3,life:[.6,1],s0:[R*.25,R*.4],s1:[R*.7,R*1.1],c0:0x3a1060,c1:0x08000f,a:.6*FK,drag:1.8,rv:1,tex:2});/* 어두운 보라 연기 */
           aoe({x:c.x,z:c.z},R,o.dmg,{quiet:true,so:o.so});if(o.after)o.after()}
         const f=tt<PRE+HOLD?1:Math.max(0,1-(tt-PRE-HOLD)/FADE),w=.25+.75*f;/* 꽂힌 뒤 가늘어지며 사라짐 */
@@ -3279,7 +3280,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v175';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v176';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
