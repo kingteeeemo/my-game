@@ -3034,7 +3034,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v142';
+const APP_VER='v143';
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3831,10 +3831,10 @@ function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,
   const fin=()=>{if(over)return;over=1;enhCineOn=0;el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
   setTimeout(()=>el.addEventListener('click',()=>{if(!revealed&&rv)rv();else if(canClose)fin()}),150);
-  const T=auto?.4:1.14;/* 슈유육… 모이는 시간 (자동 강화는 빠르게) */
+  const T=auto?.4/.7:1.14;/* 슈유육… 모이는 시간 (자동 강화는 빠르게) */
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
   rv=()=>{
-    if(over||revealed)return;revealed=1;clearTimeout(tm);setTimeout(()=>{canClose=1},250);if(auto)setTimeout(fin,850);/* v137: 자동 강화는 모으기 0.4초 + 결과 0.85초로 빠르게, 화면 클릭은 통과 */done&&done();/* v103: 결과가 나오는 순간 강화 창도 같이 갱신 */el.classList.remove('charge');el.classList.add(ok?'win':'lose');
+    if(over||revealed)return;revealed=1;clearTimeout(tm);setTimeout(()=>{canClose=1},250);if(auto)setTimeout(fin,850/.7);/* v137: 자동 강화는 모으기 0.4초 + 결과 0.85초로 빠르게, 화면 클릭은 통과 */done&&done();/* v103: 결과가 나오는 순간 강화 창도 같이 갱신 */el.classList.remove('charge');el.classList.add(ok?'win':'lose');
     const col=ok?(L>=25?'200,120,255':'255,206,74'):'255,50,40';el.style.setProperty('--ec',col);
     el.querySelectorAll('.wait,.cring,.orb,i.in').forEach(n=>n.remove());
     const fl=el.querySelector('.flashw');if(ok)fl.style.animation='ecFlash .6s ease-out forwards';else fl.remove();
