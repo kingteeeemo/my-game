@@ -2423,7 +2423,7 @@ const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10]
   PAL_BOLT={c:[0xf4f0ff,0xa070ff,0x1a0a40],core:[0xffffff,0xe0d0ff,0x8a5aff],ring:0xc0a8ff,fl:0xb8a0ff,st:[0xffffff,0x9a7aff],sp:[0xffffff,0xb08aff],smoke:0,ember:0xb090ff,fast:1},
   PAL_ICE={c:[0xffffff,0x9ae0ff,0x0c2a58],core:[0xffffff,0xdff6ff,0x6ab8ff],ring:0xbfe8ff,fl:0x9ad8ff,st:[0xffffff,0x4a9aff],sp:[0xffffff,0x9ad8ff],smoke:0,ember:0,fast:1},
   PAL_DUST={c:[0xcdb9a0,0x8a7258,0x2a1e16],core:[0xffe8c0,0xb09070,0x6a4a30],ring:0xd8c0a0,fl:0xc8a070,st:[0xd8c8b0,0x6a4a30],sp:[0xc8b090,0x4a3a2a],smoke:0x4a3c34,ember:0,fast:1,dim:1};
-function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;
+function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
   const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
   {const SK_=.6+.4*FK,fb=new THREE.Mesh(fxPlane,FIREBALL_MAT(pal.c[0],pal.c[1],pal.c[2]));fb.position.set(p.x,.5+RV*.3,p.z);scene.add(fb);const s0=RV*.7*SK_,s1=RV*1.35*SK_;/* v167: 겹치는 폭발은 생략 대신 작고 옅게 */
@@ -3141,7 +3141,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v167';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v168';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
