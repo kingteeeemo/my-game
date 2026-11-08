@@ -407,7 +407,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .grow .t small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:1px;white-space:pre-line;line-height:1.5}
 .card small{white-space:pre-line}
 .lvp{font:800 12px var(--en);font-stretch:87%;font-variant-numeric:tabular-nums;color:var(--ink);min-width:38px;text-align:center}
-.pips{display:flex;gap:2px;margin-top:4px}.pips i{width:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.12)}.pips i.on{background:var(--c,#fff)}
+.pips{display:flex;gap:3px;margin-top:6px}.pips i{flex:1 1 0;max-width:24px;min-width:9px;height:9px;border-radius:3px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.pips i.on{box-shadow:0 0 6px var(--c,#fff)}.pips i.nx{background:transparent;box-shadow:inset 0 0 0 2px var(--c,#fff);animation:pipnx 1s ease-in-out infinite}@keyframes pipnx{50%{opacity:.35}}body:not(.skdet) .gdesc{display:none!important}.card .pips{width:min(240px,48vw)}.grow .pips{width:min(300px,100%)}.detbtn{flex:none;margin-left:auto}.ptsline .detbtn{margin-left:10px}.t2h .detbtn{margin-left:8px}/* v236 */.pips i.on{background:var(--c,#fff)}
 .pm{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#2c2c36;color:var(--ink);font:800 16px var(--en);flex-shrink:0;padding:0}
 .pm:disabled{opacity:.25}
 .ptsline{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
@@ -786,7 +786,7 @@ const GEMS={
   burn:{n:'화염 지대',t:'area',c:'#ff9a3a',d:L=>`회전하는 동안 지나간 자리에 불바닥 ${(2.5+.15*L).toFixed(1)}초 (초당 ${Math.round((.6+.12*L)*100)}%)`},
   knock:{n:'충격파',t:'area',c:'#a0d8a0',d:L=>`적을 밀쳐냄`},
   swift:{n:'질풍 회전',t:'whirl',c:'#a0d8a0',d:L=>`회전 중 이동 속도 ${50+5*L}%\n회전 범위의 ${100+5*L}% 안의 적을 초당 ${(3+.7*L).toFixed(1)}m 끌어당김\n(고유 몬스터 제외)`},
-  haste:{n:'가속',t:'any',c:'#f2f2f2',d:L=>`쿨타임 -${Math.round(hasteP()*100*L)}%\n스킬 시전시간 감소 (최대 단계에서 절반 수준)`},
+  haste:{n:'가속',t:'any',c:'#f2f2f2',d:L=>`쿨타임 -${Math.round(hasteP()*100*L)}%\n스킬 시전시간 감소`},
   orbsize:{n:'거대 보주',t:'orb',c:'#bfe8ff',d:L=>{const g=gOrb(L);return `보주 크기·적중 범위 +${26*L}%\n끝에서 반경 ${g.br.toFixed(1)}m 폭발 (피해 ×${g.bm.toFixed(2)})`}},
   barrage:{n:'파편 난사',t:'orb',c:'#9fe8ff',d:L=>{const b=barr(L);return `파편 ${b.cnt}갈래 · 발사 빈도 +${Math.round((b.rate-1)*100)}%\n파편 크기 +${Math.round((b.sz-1)*100)}% · 속도 +${Math.round((b.sp-1)*100)}%\n끝에서 파편 ${b.burst}개`}},
   qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m\n피해 +${6*L}%`},
@@ -1076,7 +1076,9 @@ const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('
 const mpRegen=()=>P.mmp*.001*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
 const COLD65=1300,coldAt=(t,d35)=>{if(t<=35)return d35;const tg=Math.max(COLD65,d35);if(t<=65)return d35+(tg-d35)*Math.pow((t-35)/30,1.5);return tg+(tg-d35)/30*(t-65)};
-const envDrain=()=>{if(inTown)return 0;const d=P.mhp*(diff().drain||0)*(envName()==='심연의 냉기'?2:1);const tt=S.duel?S.duel.tier:S.tier;return S.ch>=NCH&&tt>35&&envName()==='심연의 냉기'?coldAt(tt,d):d};/* v58: 심연의 냉기 2배 */
+/* v236: 스토리(1~7장·최종 결전)는 환경 피해 없음. 엔드게임 위험도 t = 옛 곡선을 3칸 당긴 값(1=옛 5장 열기 0.5% · 2=옛 6장 0.6% · 3=옛 7장 1.4% · 4=옛 위험도1 …, 35·65 기준점도 38·68로), 전체 ×0.8 */
+const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)return P.mhp*.006;if(t===0)return P.mhp*.007*2;const d=P.mhp*Math.min(.015,CH[LAST].drain+.001*t)*2;return t>35?coldAt(t,d):d};
+const envDrain=()=>{if(inTown||S.ch<NCH)return 0;const tt=S.duel?S.duel.tier:S.tier;return coldRaw(Math.max(1,tt)-COLD_SH)*COLD_K};/* v58: 심연의 냉기 2배 */
 const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20%, 민첩+장비(신발) 이동 속도 상승 합계 상한 +150% (신속 물약은 별도) */
@@ -1978,7 +1980,7 @@ function dragonAnim(e,dt,moving){const M=e.M,t=time+e.ph,A=e.air,air=!!A&&A.st!=
   M.jaw.rotation.x=(A&&A.st==='fly')?.6:.05+at*.55;M.body.rotation.x=air?-.12:0}
 /* ===== v72 사이 페이즈: 체력 70%·35%에서 날아올라 직선 브레스 4회 + 낙석(작은 원형 장판) ===== */
 const FLY_Y=4.6,rockGeo=new THREE.ConeGeometry(.42,2,6),rockMat=new THREE.MeshStandardMaterial({color:0x5a4a44,roughness:.9}),_mv=new THREE.Vector3();
-function fallRock(p,r,dmg){telegraph(p,r,dmg);const m=new THREE.Mesh(rockGeo,rockMat);m.rotation.x=Math.PI;m.position.set(p.x,40,p.z);scene.add(m);
+function fallRock(p,r,dmg){telegraph(p,r,dmg,1);const m=new THREE.Mesh(rockGeo,rockMat);m.rotation.x=Math.PI;m.position.set(p.x,40,p.z);scene.add(m);
   fx.push({m,t:0,dur:1.1*TELE_S,keep:1,upd(k){const f=Math.max(0,(k-.5)/.5);m.position.y=1+16*(1-f*f)+(f>0?0:30)},end(){spray(PNRM,p,8,{sp:[2,5],up:[2,5],y:[.2,.6],life:[.4,.7],s0:[.3,.5],s1:[.05,.1],c0:0x8a7a70,c1:0x3a3230,a:.8,drag:1,tex:2})}})}
 function startAir(e){e.chg=null;e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});e.air={st:'up',t:0,n:0,rk:.6,sc:0,y0:e.g.position.y};
   toast('사이 페이즈',`${e.name}이(가) 날아오릅니다 · 브레스와 낙석을 피하세요`,'#ff8a5a');shake=.35;ringFx(e.pos,6,0xff6a2a,.6);groundFx(e.pos,shockTex,0xffb070,1,7,.6,.8,true,.08)}
@@ -2437,12 +2439,16 @@ function burnField(p,r,dmg,dur=3){
         if(Math.random()<dt*r*.9*q){const a=Math.random()*6.28,rr=r*Math.random()*.8;emit(PNRM,{x:p.x+Math.sin(a)*rr,y:.2,z:p.z+Math.cos(a)*rr,vy:rnd(.5,1),life:rnd(1,1.6),s0:.3,s1:1.1,c0:0x3a3028,c1:0x1a1512,a:.22,drag:1,rv:.6,tex:2})}}}});
 }
 const TELE_S=1.44,BOSS_CD=1.3,BOSS_DM=.9;/* v202: 스토리 보스 예고→타격 20% 늦춤 → v203: 20% 더(×1.44) · 패턴 간격 +30% · 모든 공격 피해 -10% (일반·격노 모두) */
-function telegraph(p,r,dmg){
+function telegraph(p,r,dmg,noLava){
   const ring=flatMesh(ringGeo,0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
   const fill=flatMesh(discGeo,0xd04a3a,.25);fill.position.set(p.x,.06,p.z);
   const grp=new THREE.Group();grp.add(ring,fill);scene.add(grp);
-  fx.push({m:grp,t:0,dur:1.1*TELE_S,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
+  fx.push({m:grp,t:0,dur:1.1*TELE_S,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
 }
+/* v236: 스토리 보스 원형 장판 — 예고만 있던 타격에 용암 바닥이 깔렸다 빠르게 식는 이펙트 (피해 판정은 그대로 순간 1회) */
+function lavaFloor(p,r){duelLava(p,0,Math.PI,r);decalFx(p,crackTex,0xff7a2a,r*1.05,1.4,.8,true);
+  spray(PADD,{x:p.x,z:p.z},Math.round(8+r*4),{sp:[1,3.5],up:[2,6],y:[.1,.4],life:[.35,.8],s0:[.25,.45],s1:[.04,.1],c0:0xffe0a0,c1:0xff3a00,drag:1.5,grav:-8,tex:1,r0:r*.8});
+  for(let i=0;i<Math.round(2+r);i++){const a=rnd(0,6.28),d=r*Math.sqrt(Math.random())*.8;emit(PNRM,{x:p.x+Math.sin(a)*d,y:.3,z:p.z+Math.cos(a)*d,vy:rnd(.6,1.2),life:rnd(.9,1.4),s0:.5,s1:1.6,c0:0x3a2a20,c1:0x14100c,a:.25,drag:1,rv:.6,tex:2})}}
 /* 직선 경고 장판 (v40, 최종 보스): p0에서 각도 a 방향으로 길이 len · 폭 w. dur 동안 앞쪽부터 차오르고 끝나면 end() */
 const lineGeo=new THREE.PlaneGeometry(1,1);
 function inLine(q,p0,a,len,w){const dx=q.x-p0.x,dz=q.z-p0.z,al=dx*Math.sin(a)+dz*Math.cos(a),pe=Math.abs(dx*Math.cos(a)-dz*Math.sin(a));return al>=-.5&&al<=len+.5&&pe<=w/2+.4}
@@ -2812,7 +2818,7 @@ function updDmg(dt){for(const d of dnPool){if(!d.live)continue;d.t+=dt;d.wp.y+=d
 function hurt(e,amt,quiet,so){
   if(e.hp<=0||e.air)return;
   if(e.duel&&e.dA&&e.dA.k==='sipe'){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 잿불 검귀 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 */
-  if(e.chBoss||e.final)amt*=STORY_BOSS_DR;/* v235: 스토리 장 보스·최종 보스 받는 피해 -20% (표기 없음) */
+  if(e.chBoss)amt*=STORY_BOSS_DR;/* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
   const crit=(!quiet||quiet>=2)&&Math.random()<critCh()+(so?so.crit:0);
@@ -3569,7 +3575,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v235';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v236';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3652,11 +3658,11 @@ let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
   {const el=$('scD');if(inTown){if(dpsKey!=='t'){el.textContent='';dpsKey='t'}}else{const me=skillDpsCache(),req=S.duel?duelReq():S.ch>=NCH?stageReq(NCH,S.tier):inArena()?fbReq():stageReq(S.ch),r=me/req,c=r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a',k=Math.round(me)+'/'+Math.round(req);
     const pr=chipProg(),k2=k+'|'+pr;if(k2!==dpsKey){dpsKey=k2;el.innerHTML=`DPS <i style="color:var(--ink)">${fmtN(me)}</i>${pr?` · <i style="color:#ffb070;font-style:normal">${pr}</i>`:''}`/* v98: 적정 DPS 표기 숨김 · v109: 진행도를 칩에 합침 */}}}
   const k=i.c+i.n+i.t;if(k===chipKey)return;chipKey=k;const el=$('stageChip');el.className='stagechip '+i.c;$('scN').textContent=i.n;$('scT').textContent=i.t}
-function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">Chapter 5</div><h2>생명력이 계속 줄어듭니다</h2></div>
-    <p class="hint">5장부터 이곳의 열기로 <b style="color:#ff8a6a">생명력이 초당 계속 감소</b>하기 시작합니다. 장이 깊어질수록 감소량이 커집니다.</p>
+function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">Endless Abyss</div><h2>생명력이 계속 줄어듭니다</h2></div>
+    <p class="hint">엔드게임부터 심연의 냉기로 <b style="color:#ff8a6a">생명력이 초당 계속 감소</b>합니다. 위험도가 오를수록 감소량이 커집니다.</p>
     <p class="hint"><b style="color:var(--ink)">힘 스탯</b>이나 장비의 <b style="color:var(--ink)">생명력 재생 능력치</b>로 상쇄할 수 있습니다. 화면 위쪽의 환경 표시에서 감소량과 내 재생량을 확인하세요.</p>
     <button class="primary" id="noticeOk">확인</button>`;$('notice').hidden=false;releaseAll()}
-function stageBanner(){if(!S.cls)return;if(S.ch===4&&S.phase<3&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;el.className='sbanner '+i.c;void el.offsetWidth;el.className='sbanner on '+i.c}
+function stageBanner(){if(!S.cls)return;if(S.ch>=NCH&&!S.duel&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}/* v236: 환경 피해 안내는 엔드게임 첫 진입 때 */const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;el.className='sbanner '+i.c;void el.offsetWidth;el.className='sbanner on '+i.c}
 function labelButtons(){const c=C(),s1=SK[c.skills[0]];$('lAtk').textContent=c.bn;$('lS1').textContent=s1.n;$('cS1').textContent='MP '+mpCost(c.skills[0]);$('hL').textContent=s1.n;$('hR').textContent=c.bn;$('bS2').hidden=true;$('lMv').textContent='구르기';$('hM').textContent='구르기'}
 
 /* ================= class select ================= */
@@ -3674,7 +3680,7 @@ const GUIDES={
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}설정(톱니바퀴)</b> → 「가이드 다시 보기」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
   lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`스탯 포인트도 ${STAT_PER_LV}점 받습니다. ${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수로 하는 ${GB}2차 강화</b>가 열립니다.`}]},
   skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
-  stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 5장부터는 생명력이 계속 줄어드는 지역이 나오니 힘(재생)도 챙기세요.`}]},
+  stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 엔드게임부터는 심연의 냉기로 생명력이 계속 줄어드니 힘(재생)도 챙기세요.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
   town:{n:'마을',steps:()=>[{t:'잿불 마을',d:`NPC에게 가까이 가면 대화 버튼이 뜹니다.`,d2:`${GB}${TOWN.shop}</b> 물약 상점 · ${GB}${TOWN.gear}</b> 장비 뽑기 · ${GB}${TOWN.smith}</b> 부위 강화 · ${GB}${TOWN.heir}</b> 특수 능력치 전승`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
   pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약을 크기별로 삽니다. 큰 물약일수록 많이 회복합니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`사냥 중에는 하단 물약 버튼(1·2·3)으로 마시고, 「자동」을 켜면 알아서 마십니다.`}]},
@@ -3827,6 +3833,12 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
 
 /* ================= level-up choice ================= */
 let offer=null,lvlSkill=null;
+/* v236: 강화 설명은 「상세보기」를 눌렀을 때만 (스킬 창·레벨업 창 공통, 기기별 localStorage skDet) */
+let skDet=false;try{skDet=localStorage.getItem('skDet')==='1'}catch(e){}
+document.body.classList.toggle('skdet',skDet);
+const detBtn=big=>`<button class="${big?'ghost':'pm wide'} detbtn" data-det="1" aria-pressed="${skDet}">${skDet?'설명 닫기':'상세보기'}</button>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.detbtn');if(!b)return;skDet=!skDet;try{localStorage.setItem('skDet',skDet?'1':'0')}catch(_){}
+  document.body.classList.toggle('skdet',skDet);document.querySelectorAll('.detbtn').forEach(x=>{x.textContent=skDet?'설명 닫기':'상세보기';x.setAttribute('aria-pressed',skDet)})},true);
 function showLevelUp(){
   const sk=C().skills,Lv=S.lv-S.pending+1;
   if(!sk.some(s=>openGems(s).length)){S.pending=0;save();if(S.pending>0)showLevelUp();else $('lvl').hidden=true;return}
@@ -3841,8 +3853,8 @@ function showLevelUp(){
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
     h=`<div class="shead"><div><div class="chap">Level ${Lv} · ${SK[s].role}</div><h2>${SK[s].n} 강화</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
-    offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<div class="crow"><button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small>${GEMS[p.g].d(L+1)}</small></span></button><button class="ghost autog" data-oa="${i}" aria-label="${GEMS[p.g].n} 자동 강화">자동<small>이것만</small></button></div>`});
-    h+=`</div><div class="btns">${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다. 자동을 누르면 이후 레벨업도 자동으로 분배되며, 「스킬」 메뉴의 「레벨업 시 자동 강화」에서 다시 끌 수 있습니다.</p>`;
+    offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<div class="crow"><button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small class="gdesc">${GEMS[p.g].d(L+1)}</small><span class="pips nx" style="--c:${GEMS[p.g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':i===L?' class="nx"':''}></i>`).join('')}</span></span></button><button class="ghost autog" data-oa="${i}" aria-label="${GEMS[p.g].n} 자동 강화">자동<small>이것만</small></button></div>`});
+    h+=`</div><div class="btns">${detBtn(1)}${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다. 자동을 누르면 이후 레벨업도 자동으로 분배되며, 「스킬」 메뉴의 「레벨업 시 자동 강화」에서 다시 끌 수 있습니다.</p>`;
   }
   $('lvlSheet').innerHTML=h;$('lvl').hidden=false;releaseAll();guide('lvup');
 }
@@ -4006,17 +4018,17 @@ function renderMenu(){
   for(const id of c.skills){
     const pts=skp(id);
     h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="dps">${dpsHtml(id)}</div><button class="ghost" data-gostage="1" style="padding:8px">단계별 적정 DPS 보기</button><div class="stats">${statLine(id)}</div>
-    <div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b></div><div class="gems">`;
+    <div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b>${detBtn()}</div><div class="gems">`;
     for(const g of gemsFor(id)){const L=gl(id,g);
-      h+=`<div class="grow"><span class="gd" style="background:${GEMS[g].c}"></span><span class="t">${GEMS[g].n}<small>${L?GEMS[g].d(L):'다음: '+GEMS[g].d(1)}</small><span class="pips" style="--c:${GEMS[g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
+      h+=`<div class="grow"><span class="gd" style="background:${GEMS[g].c}"></span><span class="t">${GEMS[g].n}<small class="gdesc">${L?GEMS[g].d(L):'다음: '+GEMS[g].d(1)}</small><span class="pips" style="--c:${GEMS[g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
       <span class="lvp">${L}/${GMAX}</span>${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button></div>`}
     h+=`</div>`;
     const g2s=gems2For(id);
     if(g2s.length){const open=done1(id);
-      h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span></div>
+      h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span>${detBtn()}</div>
       <p class="hint" style="margin:0">${open?'잿불 정수와 골드로 올립니다. 실패는 없습니다.':`이 스킬의 1차 강화를 모두 채우면 해금됩니다. 잿불 정수는 엔드게임(위험도 모드)의 몬스터가 떨어뜨립니다.`}</p><div class="gems">`;
       for(const g of g2s){const L=g2(g),M=g2Max(g),c=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=c&&S.gold>=gc;
-        h+=`<div class="grow${open?'':' off'}"><span class="gd" style="background:${GEMS2[g].c};border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">${GEMS2[g].n}<small>${L?GEMS2[g].d(L):'다음: '+GEMS2[g].d(1)}</small><span class="pips" style="--c:${GEMS2[g].c}">${Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
+        h+=`<div class="grow${open?'':' off'}"><span class="gd" style="background:${GEMS2[g].c};border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">${GEMS2[g].n}<small class="gdesc">${L?GEMS2[g].d(L):'다음: '+GEMS2[g].d(1)}</small><span class="pips" style="--c:${GEMS2[g].c}">${Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
         <span class="lvp">${L}/${M}</span>${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button></div>`}
       if(id==='volley'||id==='rain'){const el=arEl(),c=elCost(),can=S.gold>=c;
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
