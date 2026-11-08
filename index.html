@@ -1129,7 +1129,7 @@ function skillStats(id){
 const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
 /* v41 직업 간 DPS 보정: 1차 강화 합계(0~30)와 2차 강화 합계(0~8)에 따라 선형 보간.
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
-const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.367,0.484,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
+const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.337,0.444,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
 function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (id==='whirl'||id==='quake'||id==='wave'?1.1:1)*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
@@ -3052,8 +3052,8 @@ function castFire(slot,id){
       decalFx(sw,crackTex,0x140c08,1.5,2.2,.95,false);decalFx(sw,crackTex,0xff8a3a,1.1,.7,.55,true);
       debris(sw,{n:6,color:0x5a4a40,geo:octaGeo,sp:[1.5,3.5],up:[3,6],y:[.05,.2],sz:[.06,.14],r0:.2,dur:.8,g:24});
       });
-    spikeFan(p0,a,half,len,core,dmg,st.fork.m,HIT,true,st.aft);
-    if(st.mag)later(HIT+.25,()=>lavaFan(p0,a,half,len,st.mag.dur,dmg*st.mag.m));
+    spikeFan(p0,a,half,len,core,dmg*QSPK,st.fork.m,HIT,true,st.aft);
+    if(st.mag)later(HIT+.25,()=>lavaFan(p0,a,half,len,st.mag.dur,dmg*st.mag.m*QLAV));
     return}
   if(b.kind==='rain'){const t=aim(16);let c0;
     if(pcMode){const dx=mouseW.x-P.pos.x,dz=mouseW.z-P.pos.z,d=Math.hypot(dx,dz)||1,k=Math.min(d,14)/d;c0={x:P.pos.x+dx*k,z:P.pos.z+dz*k}}
@@ -3143,6 +3143,7 @@ function qShape(a,half,len){const p1=rnd(0,6.28),p2=rnd(0,6.28),p3=rnd(0,6.28);
     return len*(.8+.2*n)*Math.pow(Math.max(0,1-Math.pow(u,5)),.35)};
   const tp=(th,rr)=>{let t=th-a;t=Math.atan2(Math.sin(t),Math.cos(t));const d=Math.min(R(th)-rr,(half-Math.abs(t))*Math.max(rr,1)*1.4),x=Math.max(0,Math.min(1,d/2.2));return x*x*(3-2*x)};
   return {a,len,R,tp}}
+const QSPK=5,QLAV=.45;/* v208: 대지 분쇄 — 가시 피해 ×5 · 용암 피해 ×0.45 (보스 기준 가시 12%/용암 88% → 가시 약 60%/용암 약 40%, 총합 유지) */
 function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=new Set();if(first||!qShp)qShp=qShape(a,half,len);const shp=qShp;
   const SR=shk?shkR(shk.L):1.8,sn=shk?shkCnt(shk.L,half):0,pb=shk?Math.min(shk.m,shk.m*half*len*len/(NS*sn*Math.PI*SR*SR)):0;/* 충격파 1발 피해: 부채꼴 안 적 1명이 평균적으로 받는 총량 = 충격파 배율 */
   for(let j=0;j<NS;j++){const r0=j*len/NS,r1=(j+1)*len/NS;later(delay+QST[j],()=>{
@@ -3162,7 +3163,7 @@ function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=
       spray(PNRM,q,2,{sp:[.5,1.6],up:[1.5,3.5],y:[.2,.5],life:[.8,1.3],s0:[.9,1.4],s1:[2,3],c0:0x8a7660,c1:0x2e261e,a:.6,drag:2,tex:2});
       emit(PADD,{x:q.x,y:.25,z:q.z,life:.12,s0:1.4,s1:.4,c0:0xffe8c0,c1:0xa06030,a:.7,tex:1})}
     for(let k=0;k<1+j;k++)decalFx(band(),crackTex,0x120a08,rnd(1.6,2.4),1.6,.9,false);
-    for(let k=0;k<sn;k++){const q=band();later(rnd(.02,.12),()=>miniShock(q,SR,pb))}})}
+    for(let k=0;k<sn;k++){const q=band();later(rnd(.02,.12),()=>miniShock(q,SR,dmg*pb/QSPK))}})}
   later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,shp))}
 function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
@@ -3346,7 +3347,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v207';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v208';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3723,7 +3724,7 @@ const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
 function skillDps(id){
   const b=SK[id],st=skillStats(id),base=baseDmg(),crit=1+critCh()*.8,cd=Math.max(.05,st.cd);
   if(b.kind==='quake'){const hit=base*st.dmg*crit,aft=st.aft?st.aft.n*st.aft.m:0,mag=st.mag?st.mag.m*st.mag.dur:0;
-    return {main:hit*(1+aft+mag)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${aft?` · 충격파 ×${st.aft.m.toFixed(1)}`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
+    return {main:hit*(QSPK+aft+mag*QLAV)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit*QSPK)}${aft?` · 충격파 ×${st.aft.m.toFixed(1)}`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
   if(b.kind==='rain'){const tk=base*st.dmg*crit,per=tk*st.rate*st.dur,rel=st.rel?tk*st.rel.m*st.rel.rate*st.dur*.5:0,met=st.spl?tk*st.spl.m*st.rate*st.dur*.5:0;
     return {main:(per+rel+met)/cd,label:'화살비 안의 적 1명당',sub:`화살 세례 1회 ${fmtN(tk)} · 초당 ${st.rate.toFixed(1)}회 · ${st.dur.toFixed(1)}초${rel?` · 속성 폭발`:''}${met?` · 분열 파편`:''}`}}
   if(b.kind==='chainl'){const hit=base*st.dmg*crit,stm=st.cst?hit*st.cst.m*1.5:0,ov=st.ovl?hit*st.ovl.m*(st.ovl.dur/.3)*.5:0;
