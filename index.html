@@ -2952,6 +2952,8 @@ function shootBoom(a,dist,o){const sp=26,life=dist/sp;
 /* ---------- 마법사: 사술 폭발 ---------- */
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
+/* v198: 대상이 폭발 자리를 벗어나도 피해는 반드시 들어감 — 반경 안은 일반 범위 피해, 반경 밖으로 도망간 지정 대상은 직접 피해 */
+function pillarAoe(q,r,dmg,o,lock){aoe(q,r,dmg,{quiet:true,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,true,o.so)}
 function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
   const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
@@ -2967,7 +2969,7 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
           for(let i=0;i<Math.round(4*QM());i++){const a=Math.random()*6.28,d=R*rnd(.35,.8);later(rnd(.02,.1),()=>fireBurst({x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},R*.4,.35*FK,false,PAL_HEX))}radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
           groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.6,R*2.1,.4,.5*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*rnd(.8,1.1),1.2,.6,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R*rnd(.9,1.2),3,.6,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*1.3,2.6,.55,false);shake=Math.max(shake,.22);
           spray(PNRM,{x:c.x,z:c.z},Math.round(8*QM()),{sp:[R*.8,R*1.8],up:[1.5,3.5],y:[.2,.8],r0:R*.3,life:[.6,1],s0:[R*.25,R*.4],s1:[R*.7,R*1.1],c0:0x3a1060,c1:0x08000f,a:.6*FK,drag:1.8,rv:1,tex:2});/* 어두운 보라 연기 */
-          aoe({x:c.x,z:c.z},R,o.dmg,{quiet:true,so:o.so});if(o.after)o.after()}
+          pillarAoe({x:c.x,z:c.z},R,o.dmg,o,o.lock);if(o.after)o.after()}
         const f=tt<PRE+HOLD?1:Math.max(0,1-(tt-PRE-HOLD)/FADE),w=.25+.75*f;/* 꽂힌 뒤 가늘어지며 사라짐 */
         outer.scale.set(W0[0]*w,H,W0[0]*w);mid.scale.set(W0[1]*w,H,W0[1]*w);inner.scale.set(W0[2]*(.5+.5*f),H,W0[2]*(.5+.5*f));
         us[0].uOp.value=.85*f;us[1].uOp.value=.9*f;us[2].uOp.value=f;disc.material.opacity=.5*f;ring.material.opacity=.7*f;ring.scale.setScalar(R*(.7+(tt-PRE)*1.2));
@@ -2977,8 +2979,8 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
 const PILLAR_RANGE=22.4;/* v180: 14m × 1.6 */
 function pillarTargets(ap){return enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<PILLAR_RANGE).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z))}
 function pillarCast(c,o,hit,depth){const after=()=>{
-    if(o.echo){for(let i=1;i<=o.echo.n;i++)later(.18*i,()=>{const q={x:c.x+rnd(-.4,.4),z:c.z+rnd(-.4,.4)};fireBurst(q,o.r*.3,.5,false,PAL_HEX);groundFx(q,dotTex,0xe080ff,o.r*.25,o.r*.9,.24,.5,true,.07);aoe(q,o.r*.8,o.echo.dmg,{quiet:true,so:o.so})})}
-    if(o.chain&&depth<o.chain.n){const skip=hit;const t=nearestEnemy(c,o.chain.r,skip);if(t){hit.add(t);const o2=Object.assign({},o,{dmg:o.dmg*o.chain.m,echo:o.echo?{n:o.echo.n,dmg:o.echo.dmg*o.chain.m}:null});
+    if(o.echo){for(let i=1;i<=o.echo.n;i++)later(.18*i,()=>{const q={x:c.x+rnd(-.4,.4),z:c.z+rnd(-.4,.4)};fireBurst(q,o.r*.3,.5,false,PAL_HEX);groundFx(q,dotTex,0xe080ff,o.r*.25,o.r*.9,.24,.5,true,.07);pillarAoe(q,o.r*.8,o.echo.dmg,o,o.lock)})}
+    if(o.chain&&depth<o.chain.n){const skip=hit;const t=nearestEnemy(c,o.chain.r,skip);if(t){hit.add(t);const o2=Object.assign({},o,{lock:t,dmg:o.dmg*o.chain.m,echo:o.echo?{n:o.echo.n,dmg:o.echo.dmg*o.chain.m}:null});
         const b={x:c.x,y:2.2,z:c.z},e={x:t.pos.x,y:2.2,z:t.pos.z};boltFx(b,e,{lv:4,w:.4,dur:.2,cg:0xb030ff,cc:0xffc0ff});
         later(.14,()=>pillarCast({x:t.pos.x,z:t.pos.z},o2,hit,depth+1))}}};
   pillarStrike(c,Object.assign({},o,{after}))}
@@ -3072,11 +3074,11 @@ function castFire(slot,id){
   if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
     const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
-    const mk=c=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch},hit,0);
+    const mk=(c,lk)=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch,lock:lk},hit,0);
     /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 */
     if(!cand.length){const c0=pcMode?{x:ap.x,z:ap.z}:{x:P.pos.x+Math.sin(P.face)*5,z:P.pos.z+Math.cos(P.face)*5};for(let i=0;i<n;i++){const o=i?{x:c0.x+rnd(-.9,.9),z:c0.z+rnd(-.9,.9)}:c0;i?later(i*.08,()=>mk(o)):mk(o)}return}
     for(let i=0;i<n;i++){const e=cand[i%cand.length],rep=i>=cand.length,c={x:e.pos.x+(rep?rnd(-.7,.7):0),z:e.pos.z+(rep?rnd(-.7,.7):0)};
-      i?later(i*.08,()=>mk(c)):mk(c)}return}
+      i?later(i*.08,()=>mk(c,e)):mk(c,e)}return}
   if(b.kind==='crush'){
     const t=pickTarget(4.2);
     const hit=mul=>{const tt=t&&t.hp>0?t:pickTarget(4.2);P.swing=.2;P.swingDir*=-1;swingFx();
@@ -3338,7 +3340,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v197';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v198';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
