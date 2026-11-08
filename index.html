@@ -2040,7 +2040,7 @@ const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84*1.1,/* v204에서 ×.8 → 
 const FB_TIME=90,FB_AIR=26;/* v73: 제한 시간 90초 기준. 사이 페이즈 2회(약 26초)는 무적이라 실제 딜 시간은 64초 */
 const fbReq=()=>ETYPES.boss.hp*CH[LAST].hp*FB_HP/(FB_TIME-FB_AIR)*1.3;/* v58: +30% */
 /* ===== v95 결투장: 엔드게임 이후 도전하는 거대 기사 보스 「잿불 검귀」 (캐릭터의 3배 크기). 패턴: 검기(긴 부채꼴) · 전방 휘두르기(넓은 부채꼴) · 점프 내려찍기(원) · 돌진(직사각형) ===== */
-const DUEL={n:'잿불 검귀',t:70},SCR_P=.3,scrP=m=>m==='u'?.2:SCR_P;/* v131: 우버 상급 각인의 서 20% *//* v101: 각인의 서 드롭률 30% (v96: 10%) · 수치 8% 고정 */
+const DUEL={n:'잿불 검귀',t:70},SCR_P=.3,scrP=m=>m==='u'?.3:SCR_P;/* v131: 우버 상급 각인의 서 20% → v245: 30% *//* v101: 각인의 서 드롭률 30% (v96: 10%) · 수치 8% 고정 */
 const DUEL_M={n:{tier:10,b:10,n:'일반',v:8},u:{tier:40,b:30,n:'우버',v:11}};/* v97: 난이도 고정 — 일반 위험도 10 · 우버 위험도 30 → v159: 우버 위험도 40(냉기 등 환경). b=체력·보상·필요 DPS 기준 위험도(우버는 옛 30 유지) */
 const spKeyOf=slot=>RARE_OPT.find(k=>OPT[k].slots.includes(slot)),scrName=sc=>sc.v>=10?'상급 각인의 서':'각인의 서';/* t: 위험도 권장 DPS로 약 70초 */
 const DUEL_MAW={n:{tier:40,b:40},u:{tier:50,b:50}};/* v221: 심연의 아귀 위험도 — 일반 40 · 우버 50 */
@@ -2328,7 +2328,7 @@ function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!
   S.duelWins=(S.duelWins||0)+1;if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 잿불 검귀를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 잿불 검귀는 각인의 서만, 심연의 아귀는 확정 강화 주문서만 굴림(v227 분리) */
-const TK_P=.1;let duelBonus=null;
+const TK_P=.3;/* v245: 아귀 확정 강화 주문서 10% → 30% (+20%p, 일반·우버 공통) */let duelBonus=null;
 function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.res=[];
   if(!b.mb&&Math.random()<scrP(b.m)){const sc={v:DUEL_M[b.m].v};/* v227: 각인의 서는 잿불 검귀에서만 */S.scrolls=(S.scrolls||[]).concat(sc);b.res.push({t:'scr',sc})}
   if(b.mb&&Math.random()<TK_P){const q=Math.random(),n=b.U?(q<.2?5:q<.5?4:3):1;S.tickets=(S.tickets||0)+n;b.res.push({t:'tk',n})}/* v224: 우버 아귀 — 획득 시 5개 20% · 4개 30% · 3개 50% (일반은 1개) *//* v221: 확정 강화 주문서는 심연의 아귀에서만 — 일반 1개 · 우버 3개, 확률 10% */
@@ -3302,8 +3302,9 @@ function castFire(slot,id){
     later(.1,()=>{const fx_=Math.sin(P.face),fz=Math.cos(P.face),bx=P.pos.x+fx_*.5,bz=P.pos.z+fz*.5;emit(PADD,{x:bx,y:2.6,z:bz,vy:9,life:.25,s0:1.2,s1:.3,c0:0xeaffc0,c1:0x6ac030,a:.9,tex:1});
       for(let i=0;i<7;i++)streak({x:bx+rnd(-.2,.2),y:2.6,z:bz+rnd(-.2,.2),vx:fx_*rnd(2,4)+rnd(-1.5,1.5),vy:rnd(22,30),vz:fz*rnd(2,4)+rnd(-1.5,1.5),life:.35,w:.06,len:1.4,c0:0xf4ffd8,c1:0x6ac030,drag:0})});
     for(const q of tg)arrowRain(q,st,base*st.dmg);return}
-  if(b.kind==='chainl'){aim(14);P.swing=.15;poseStart('chain',.46,{pre:P.castPre});const hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6},ap=pcMode?mouseW:P.pos;
-    const first=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<14&&onScr(e.pos,.9)).sort(/* v138: 첫 번개는 화면 안의 적만 · 튕기는 연쇄는 그대로 */(a,b)=>Math.hypot(a.pos.x-ap.x,a.pos.z-ap.z)-Math.hypot(b.pos.x-ap.x,b.pos.z-ap.z));
+  const CH_RNG=21;/* v245: 연쇄 번개 사거리 14 → 21m (×1.5) */
+  if(b.kind==='chainl'){aim(CH_RNG);P.swing=.15;poseStart('chain',.46,{pre:P.castPre});const hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6},ap=pcMode?mouseW:P.pos;
+    const first=enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<CH_RNG&&onScr(e.pos,.9)).sort(/* v138: 첫 번개는 화면 안의 적만 · 튕기는 연쇄는 그대로 */(a,b)=>Math.hypot(a.pos.x-ap.x,a.pos.z-ap.z)-Math.hypot(b.pos.x-ap.x,b.pos.z-ap.z));
     if(!first.length){zapFx(hand,{x:P.pos.x+Math.sin(P.face)*6,y:.3,z:P.pos.z+Math.cos(P.face)*6},{first:true});return}
     const hit=new Set(),cid=++volSeq;for(let f=0;f<st.forks;f++){if(f<first.length){if(!hit.has(first[f]))chainFrom(first[f],hand,base*st.dmg,st,hit,cid)}else{const t=first[f%first.length];later(f*.08,()=>{if(t.hp>0)chainFrom(t,{x:hand.x+rnd(-.3,.3),y:hand.y+rnd(-.2,.3),z:hand.z+rnd(-.3,.3)},base*st.dmg,st,new Set(),cid)})}}/* v98: 적이 갈래 수보다 적으면 남은 갈래도 같은 적에게 */
     return}
@@ -3501,11 +3502,13 @@ function ribStep(p,dt){const R=p.rib,pp=p.m.position,o=R.o;R.t+=dt;R.h.unshift([
 function ribEnd(p){const R=p.rib;if(!R||!R.m)return;const m=R.m,mat=R.mat;const f0=mat.uniforms.fade.value;fx.push({m,t:0,dur:.16,upd(k){mat.uniforms.fade.value=f0*(1-k)},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */});p.rib=null}
 function zapFx(a,b,o){boltFx(a,b,o?{w:1.9}:{});/* v242b: 연쇄 번개 줄기 굵기 ×2 (0.95→1.9) */if(!o){popFx(b.x,b.y,b.z,.5,2,.14,0xffffff,.8);popFx(b.x,b.y,b.z,1,3,.26,0x3a7aff,.5);return}/* 옵션 없이 부르면(번개 폭풍 하늘 번개·과부하·폭발) 줄기+섬광만 */
   const first=o.first,tgt=o.tgt,bigE=tgt&&tgt.rank>=2;
+  /* v245: 같은 적에게 갈래가 겹쳐 꽂히면(보스 등 단일 대상) 맞은 자리 이펙트가 가산 합성으로 하얗게 번지던 문제 → 겹칠수록 섬광·빛 번짐·균열·불티를 줄이고 몸 아크는 생략 */
+  let zn=0;if(tgt){zn=(time-(tgt.zT===undefined?-9:tgt.zT)<.25)?(tgt.zN||0)+1:0;tgt.zT=time;tgt.zN=zn}const dm=1/(1+zn*1.2);
   /* 맞은 자리: 순간 섬광(흰→파랑) + 몸을 감는 아크 + 바닥 빛 번짐·그을음 + 조명 + 튀는 불티 */
-  popFx(b.x,b.y,b.z,.4,1.4,.12,0xffffff,.45);popFx(b.x,b.y,b.z,1.2,3,.3,0x3a7aff,.4);flash({x:b.x,z:b.z},0x6a9aff,bigE?2.2:1.5);
-  if(QM()>=.75)bodyArcs({x:b.x,z:b.z},tgt?tgt.r*.9:.45,tgt?tgt.h:1.4,bigE?6:4);
-  decalFx({x:b.x,z:b.z},dotTex,0x4a8aff,tgt?tgt.r*3.2:1.6,.22,.55,true);decalFx({x:b.x,z:b.z},crackTex,0x7ab0ff,tgt?tgt.r*2:1,.3,.6,true);decalFx({x:b.x,z:b.z},crackTex,0x0a0c14,tgt?tgt.r*2.2:1.1,1.6,.5,false);
-  for(let i=0;i<6;i++)emit(PADD,{x:b.x,y:b.y,z:b.z,vx:rnd(-6,6),vy:rnd(1,6),vz:rnd(-6,6),life:rnd(.14,.3),s0:.34,s1:.06,c0:0xffffff,c1:0x3a7aff,a:1,drag:3,grav:-14,tex:1});
+  popFx(b.x,b.y,b.z,.4,1.4,.12,0xffffff,.45*dm);popFx(b.x,b.y,b.z,1.2,3,.3,0x3a7aff,.4*dm);flash({x:b.x,z:b.z},0x6a9aff,(bigE?2.2:1.5)*(zn?.7:1));
+  if(!zn&&QM()>=.75)bodyArcs({x:b.x,z:b.z},tgt?tgt.r*.9:.45,tgt?tgt.h:1.4,bigE?6:4);
+  decalFx({x:b.x,z:b.z},dotTex,0x4a8aff,tgt?tgt.r*3.2:1.6,.22,.55*dm,true);decalFx({x:b.x,z:b.z},crackTex,0x7ab0ff,tgt?tgt.r*2:1,.3,.6*dm,true);decalFx({x:b.x,z:b.z},crackTex,0x0a0c14,tgt?tgt.r*2.2:1.1,1.6,.5,false);
+  for(let i=0,n=zn?2:6;i<n;i++)emit(PADD,{x:b.x,y:b.y,z:b.z,vx:rnd(-6,6),vy:rnd(1,6),vz:rnd(-6,6),life:rnd(.14,.3),s0:.34,s1:.06,c0:0xffffff,c1:0x3a7aff,a:1,drag:3,grav:-14,tex:1});
   if(first){popFx(a.x,a.y,a.z,.4,1.3,.16,0xdff0ff,.5);if(QM()>=.75)bodyArcs({x:a.x,z:a.z},.3,a.y+.3,3,0x8ab8ff)}}
 /* v85 번개 폭풍: 「팡」 터지는 푸른 폭발 — 순간 섬광(하양→파랑) + 부풀어 오르는 푸른 광구 + 바닥 빛 번짐 + 빠른 고리·느린 고리 2겹 + 작은 방사 번개 + 튀는 불꽃 */
 let stormN=0,stormL=0,stormT=0,fbT=[],novaN=[];
@@ -3613,7 +3616,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v244';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v245';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
