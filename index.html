@@ -2720,7 +2720,7 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float cells=smoothstep(.55,.9,fbm(q*7.+seed*3.));/* 얼어붙은 판 무늬 */
     float melt=1.-smoothstep(.55,1.,k);/* v184: 불투명한 흰 얼음판이 깔리며 퍼지고, 뒤에 녹아 사라짐 */
     float sheet=inside*melt*ff;/* v188: 터지는 동안은 눈꽃 없음 (눈꽃은 뒤에 남는 자국만) */
-    float shade=.8+.03*cells;/* v287: 얼음 결(rays) 없이 눈처럼 고른 흰색 · v288: 밝기 .97 → .8 (색은 무채색 흰색 그대로, 겹쳐 깔려도 덜 밝게) */
+    float rr=clamp(dd/max(fr,.1),0.,1.);float shade=mix(.42,.9,smoothstep(.05,.95,rr))+.03*cells;/* v290: 중앙 회색(.42) → 끝으로 갈수록 흰색(.9), 퍼지는 판 반지름 기준 *//* v287: 얼음 결(rays) 없이 눈처럼 고른 흰색 · v288: 밝기 .97 → .8 (색은 무채색 흰색 그대로, 겹쳐 깔려도 덜 밝게) */
     float spark=inside*smoothstep(.84,1.,fbm(q*16.+seed*4.+vec2(k*3.,-k*2.)))*melt;
     float crest=(band*.9*(1.-k*.5)+lead*.7*(1.-k))*ff*(1.-smoothstep(.8,1.,k));
     vec3 ice=vec3(1.)*shade;/* 흰-하늘빛 얼음 */
@@ -3644,7 +3644,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v289';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v290';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
