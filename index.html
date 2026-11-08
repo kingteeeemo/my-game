@@ -1027,6 +1027,9 @@ function reconcile(s){if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=1
   /* v145: 대지 분쇄 — 가시 확산(1차)·용암 균열(2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
   if(!s.v145q){s.v145q=1;const q=s.sk&&s.sk.quake;if(q&&q.qfork){s.skp.quake=(s.skp.quake||0)+q.qfork;delete q.qfork}
     const mL=(s.sk2&&s.sk2.magma)||0;if(mL){const c=G2C[5];for(let i=0;i<mL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.magma}
+  /* v195: 사술 폭발 — 다중 기둥(2차→1차)·여진(1차→2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
+  if(!s.v195p){s.v195p=1;const q=s.sk&&s.sk.pillar;if(q&&q.pecho){s.skp.pillar=(s.skp.pillar||0)+q.pecho;delete q.pecho}
+    const tL=(s.sk2&&s.sk2.ptwin)||0;if(tL){const c=G2C[3];for(let i=0;i<tL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.ptwin}
   /* 강화가 모두 최대인데 남은 강화 포인트(삭제된 강화에서 반환)는 스탯 포인트로 전환 */
   for(const k of v)if((s.skp[k]||0)>0&&(SK[k].gems||[]).every(g=>((s.sk[k]||{})[g]||0)>=GMAX)){s.statPts=(s.statPts||0)+s.skp[k];s.skp[k]=0}
   /* v44: 5장 → 7장. 이전 장은 같은 이름의 장으로, 엔드게임(5)은 7로 */
@@ -1117,7 +1120,7 @@ function skillStats(id){
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);st.dmg*=(1+.05*l)*(1+.04*e);st.wec=wvEcho(e);const f=g2('wfan'),bu=g2('wburst');st.fan=wvFan(f);st.burst=bu?wvBurst(bu):null}
   if(b.kind==='boom'){const r=L('brad'),e=L('bember');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=e?bmEmber(e):null;st.multi=bmMulti(g2('bmulti'));const x=g2('bshrap');st.shrap=x?bmShrap(x):null}
-  if(b.kind==='pillar'){const r=L('prad'),e=L('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(g2('ptwin'))}
+  if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
 }
@@ -2865,12 +2868,12 @@ const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m
   wvFan=L=>({n:L>=4?5:L>=1?3:1,m:.5+.08*L,sp:.22+.03*L}),/* 부채 검기(5단계): 1단계 3갈래 → 4단계 5갈래 */wvBurst=L=>({r:2.2+.5*L,m:.8+.3*L});/* 검기 폭발(3단계): 사거리 끝에서 폭발 */
 const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
-const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L>=10?3:L>=7?2:L>=4?1:L>=1?1:0,m:.4+.03*L}),/* 여진: 1·4·7·10단계 */
-  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>({n:1+L,m:.8});/* 다중 기둥(3단계): 2·3·4개 */
+const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
+  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>({n:L>=7?4:L>=4?3:L>=1?2:1,m:.6+.02*L});/* v195: 다중 기둥은 1차(10단계) — 1·4·7단계에 2·3·4개, 10단계 = 옛 3단계(4개 ×.80) */
 const SK_NEW={
   wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
-  pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','pecho','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
+  pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
 for(const [c,k] of [['warrior','wave'],['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 Object.assign(GEMS,{
@@ -2879,14 +2882,14 @@ Object.assign(GEMS,{
   brad:{n:'대폭발',t:'boom',c:'#ff9a4a',d:L=>`폭발 반경 ${bmRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   bember:{n:'잔불',t:'boom',c:'#ff7a3a',d:L=>{const e=bmEmber(L);return `폭발 자리에 불바닥 ${e.dur.toFixed(1)}초 (초당 피해 ×${e.m.toFixed(2)})`}},
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
-  pecho:{n:'여진',t:'pillar',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})${e.n<3?'\n4·7·10단계에 +1회':''}`}}});
+  ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})${t.n<4?'\n1·4·7단계에 +1개':''}`}}});
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'부채 검기',c:'#ffd090',d:L=>{const f=wvFan(L);return `검기 ${f.n}갈래를 부채꼴로 날림 (옆 검기 피해 ×${f.m.toFixed(2)})${f.n<5?'\n4단계에 5갈래':''}`}},
   wburst:{s:'wave',n:'검기 폭발',c:'#ffb060',max:3,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})`}},
   bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',max:3,d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
   bshrap:{s:'boom',n:'파편 작렬',c:'#ffa060',d:L=>{const s=bmShrap(L);return `폭발할 때 불꽃 파편 ${s.n}개가 사방으로 튐 (파편 피해 ×${s.m.toFixed(2)})`}},
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
-  ptwin:{s:'pillar',n:'다중 기둥',c:'#c890ff',max:3,d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})`}}});
+  pecho:{s:'pillar',n:'여진',c:'#f0c0ff',max:3,d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
   PILLAR_FS=`precision mediump float;varying float vH;varying vec3 vN,vV;uniform float uT,uOp;uniform vec3 uCol,uCore;
@@ -3335,7 +3338,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v195';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v196';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
