@@ -1141,7 +1141,7 @@ function skillStats(id){
     else{const nc=cdCurve(CD_U*(st.cd/b.cd)*h,gear().cdr);st.dmg*=nc/old;st.cd=nc}}/* v274: 회전 베기 외 모든 스킬 쿨타임 통일(기본 1.6초 · 가속 10단계 0.8초 · 장비 쿨감 358%(110 테스트 스펙)에서 0.28초, 무한 강화 시 0.25초 수렴 — v275). 타격 횟수가 줄어든 만큼 피해를 올려 DPS는 기존과 동일 */
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
-  if(b.kind==='whirl'){st.cd=Math.max(st.cd,st.hits*WIV*(1+st.echo));/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
+  if(b.kind==='whirl'){const sp_=st.hits*WIV*(1+st.echo),r_=sp_/Math.max(.01,st.cd);st.bossK=WHIRL_BM*Math.max(1,Math.pow(r_/WH_R0,WH_K));/* v276: 쿨감이 회전 시간 하한에 막혀 버려지는 만큼 보스 피해로 일부 보정 — 90 테스트 스펙(r≈2.25)까지 ×2.43, 이후 (r/2.25)^0.46 */st.cd=Math.max(st.cd,sp_);/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
   if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null;if(bossOn('quake')){st.half*=.2;st.dmg*=5}/* v263 보스 모드 */}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
@@ -1155,7 +1155,7 @@ function skillStats(id){
 const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
 /* v41 직업 간 DPS 보정: 1차 강화 합계(0~30)와 2차 강화 합계(0~8)에 따라 선형 보간.
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
-const WHIRL_BM=2.43;/* v264: 회전 베기는 보스(결투·보스·최종 보스)를 벨 때만 ×3.26 → v272: 쿨감·가속 적용으로 시전이 빨라져 ×2.43(우버 아귀 허수아비 29초 유지) — 필드 사냥 수치는 v262 그대로 */
+const WHIRL_BM=2.43,WH_R0=2.25,WH_K=.46;/* v264: 회전 베기는 보스(결투·보스·최종 보스)를 벨 때만 ×3.26 → v272: 쿨감·가속 적용으로 시전이 빨라져 ×2.43(우버 아귀 허수아비 29초 유지) — 필드 사냥 수치는 v262 그대로 */
 const SKM={whirl:1.1,quake:4.318,wave:1.1,pillar:.9,frost:1.941,chainl:1.716,/* v273: 얼음 보주·연쇄 번개 +15% (보스·필드·DPS 표기 모두) */volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
 const FIELD_K={rain:1.1,quake:1.1},bossCtx=()=>{try{if(S.duel)return true;if(inTown)return false;for(const e of enemies)if((e.boss||e.final||e.duel)&&e.aggro&&e.hp>0)return true}catch(_){}return false};/* v272: 화살비·연쇄 번개·얼음 보주·대지 분쇄 필드 사냥 피해 +10% — 결투장·보스(깨어난 스토리 보스·최종 보스) 전투 중에는 적용 안 함, DPS 표기에도 미적용 */
 const SKM_OLD={whirl:1.1,quake:1.1,wave:1.1,pillar:.9,frost:1.3225,chainl:1.3225};/* v269: DPS 표기용 — v262까지의 계수 */
@@ -3279,7 +3279,7 @@ function castFire(slot,id){
   }
   if(b.kind==='whirl'){
     const tok=P.wTok=(P.wTok||0)+1,alive=()=>P.wTok===tok;/* v124: 구르기로 취소하면 예약된 타격·효과가 모두 사라짐 */
-    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1,bm:WHIRL_BM})},t=delay+i*WIV;t>0?later(t,f):f()}};
+    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1,bm:st.bossK})},t=delay+i*WIV;t>0?later(t,f):f()}};
     round(1,0);for(let i=1;i<=st.echo;i++)round(st.echoMul,i*(st.hits*WIV+.05));
     P.spin=st.hits*WIV*(1+st.echo);P.spinFire=!!st.flame;poseStart('whirl',P.spin,{});const n0=fx.length;whirlFx(st.radius,P.spin,!!st.flame);
     /* 화염 지대: 회전하는 동안 이동 경로를 따라 불바닥을 깔아 둠 */
@@ -3287,8 +3287,8 @@ function castFire(slot,id){
     P.vortex=st.vortex?{r:st.radius*st.vortex.rm,sp:st.vortex.sp}:null;
     if(P.vortex)swirlFx(P.vortex.r,P.spin);
     P.wFx=fx.slice(n0);
-    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(alive()&&P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r,undefined,WHIRL_BM)})}
-    if(st.burn){const n=Math.ceil(P.spin/WIV);for(let i=0;i<n;i++)later(i*WIV,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur,WHIRL_BM))}
+    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(alive()&&P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r,undefined,st.bossK)})}
+    if(st.burn){const n=Math.ceil(P.spin/WIV);for(let i=0;i<n;i++)later(i*WIV,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur,st.bossK))}
     return;
   }
   if(b.kind==='orb'){
@@ -3643,7 +3643,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v275';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v276';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4037,7 +4037,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ember)parts.push(`잔불 ${s.ember.dur.toFixed(1)}초`);if(s.shrap)parts.push(`파편 ${s.shrap.n}개`)}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
-  else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${WHIRL_BM}`);if(s.hits)parts.push(`${s.hits}회 타격`);if(s.echo)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(`화염 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
+  else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${(s.bossK||WHIRL_BM).toFixed(2)}`);if(s.hits)parts.push(`${s.hits}회 타격`);if(s.echo)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(`화염 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
   parts.push(`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
