@@ -356,6 +356,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .slotmain .en{font-family:var(--en);font-stretch:87%;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
 .slotmain .badge{width:42px;height:42px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font:800 13px var(--en);font-stretch:87%;color:#111}
 .slotmain .badge.empty{background:#23232c;color:var(--muted);font-size:20px}
+#nickIn{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 17px var(--ko);box-sizing:border-box}#nickIn:focus{outline:none;border-color:var(--ember)}.nickrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;min-height:1.3em}.nickrow .bad{color:#ff8a70}.slotmain .st small.nk{color:var(--ink)}.slotmain .st small.nk.none{color:#ff9a6a}
 .slotdel{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:0 12px;font:700 12px var(--ko);flex-shrink:0}
 .slotdel.arm{background:var(--hp);border-color:var(--hp);color:#fff}
 .act.mv{width:58px;height:58px;right:114px;bottom:85px;font-size:11px;color:#9ad0ff;border-color:rgba(154,208,255,.45)}
@@ -732,6 +733,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim" id="heir" hidden><div class="sheet" id="heirSheet"></div></div>
 <div class="title" id="title"><div class="emb" id="emb" aria-hidden="true"></div><div><h1>잿불 성역</h1><div class="sub">Ember Sanctum</div></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div>
 <div class="scrim center" id="slots" hidden><div class="sheet modal" id="slotSheet"></div></div>
+<div class="scrim center" id="nick" hidden style="z-index:60"><div class="sheet modal" id="nickSheet"></div></div>
 <div class="scrim center" id="restart" hidden><div class="sheet modal" id="restartSheet">
   <div><div class="chap">New Game</div><h2>처음부터 다시 시작할까요?</h2></div>
   <p class="hint">레벨, 스킬 강화, 스탯, 장비, 가방, 장 진행이 모두 지워지고 직업 선택부터 다시 시작합니다. 되돌릴 수 없습니다.</p>
@@ -842,7 +844,7 @@ const GEMS2={
 const chpSt=L=>({n:L>0?3+Math.floor((L-1)*4/9):0,/* v139: 1단계 3발 → 10단계 7발 */m:.35+.04*L,p:Math.round(L*.4)});
 const lbSt=L=>({r:1.8*(1+.4*L),m:.6+.15*L});
 /* v66: 궁수 2차 폭발 속성 — 번개(기본) / 화염. 바꿀 때 골드 소모, 캐릭터 레벨이 높을수록 비쌈. 피해·범위는 같고 이펙트만 다름 */
-const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.5초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},bossOn=id=>!!(typeof S!=='undefined'&&S&&S.boss&&S.boss[id]);/* v263: 보스 모드 */
+const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.5초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>{if(typeof S==='undefined'||!S)return false;if(S.duel)return true;for(const e of enemies)if((e.boss||e.duel||e.final)&&e.aggro&&e.hp>0)return true;return false}/* 아직 깨우지 않은 스토리 보스는 해당 없음 — 가까이 가서 전투가 시작(aggro)되면 적용 */,bossOn=id=>!!(typeof S!=='undefined'&&S&&!(S.bossOff&&S.bossOff[id])&&inBossFight());/* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
@@ -999,7 +1001,7 @@ function isBetter(it,cur){if(!cur)return true;
 function score(it){let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
+const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 function migrate(s){
@@ -3628,7 +3630,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v264';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v265';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3856,7 +3858,7 @@ const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=1;S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 function startGame(cls,main,skip){
-  inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
+  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   if(S.test)toast(`테스트 캐릭터 · 위험도 ${TEST_TIER}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
@@ -4097,9 +4099,9 @@ function renderMenu(){
       if(id==='volley'||id==='rain'){const el=arEl(),c=elCost(),can=S.gold>=c;
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
-      if(BOSS_IDS.includes(id)){const on=bossOn(id);
-        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>${BOSS_D[id]} · 언제든 무료로 전환</small></span>
-          <span class="elseg"><button class="pm wide${on?'':' on'}" data-boss="${id},0" ${on?'':'disabled'}>일반</button><button class="pm wide${on?' on':''}" data-boss="${id},1" ${on?'disabled':''}>보스</button></span></div>`}
+      if(BOSS_IDS.includes(id)){const on=!(S.bossOff&&S.bossOff[id]);
+        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>보스전에 입장하면 자동 적용 · ${BOSS_D[id]} · 필드에서는 항상 일반 · 언제든 무료로 전환</small></span>
+          <span class="elseg"><button class="pm wide${on?' on':''}" data-boss="${id},1" ${on?'disabled':''}>켜짐</button><button class="pm wide${on?'':' on'}" data-boss="${id},0" ${on?'':'disabled'}>꺼짐</button></span></div>`}
       {const L=S.sk2dmg||0,c=infCost(L),done=g2Done(id),can=done&&(S.ess||0)>=c.e&&S.gold>=c.g;
         h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span></span>
         <span class="lvp">${L}</span>${S.test?`<button class="pm" data-dinf="1" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-inf="1" ${can?'':'disabled'}>◆ ${c.e}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(c.g)}G</small></button><button class="pm wide" data-infx="1" ${can?'':'disabled'}>전부</button><small class="gsub">${done?`스킬 피해 +${Math.round(infDmg(L)*100)}% (단계당 +${INF_D*100}%)`:'2차 강화를 모두 채우면 열립니다'}</small></div>`}
@@ -4121,7 +4123,7 @@ $('sheet').addEventListener('click',e=>{
   if(b.dataset.d2&&S.test){const g=b.dataset.d2,L=g2(g);if(L>0){S.sk2[g]=L-1;S.ess+=g2Cost(g,L-1);S.gold+=g2Gold(g,L-1);renderMenu()}return}
   if(b.dataset.a2){const g=b.dataset.a2,L=g2(g),c=g2Cost(g,L);if(done1(GEMS2[g].s)&&L<g2Max(g)&&(S.ess||0)>=c&&S.gold>=g2Gold(g,L)){S.ess-=c;S.gold-=g2Gold(g,L);S.sk2[g]=L+1;feed(`${GEMS2[g].n} Lv ${L+1}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.ax){const [s,g]=b.dataset.ax.split(',');const n=Math.min(skp(s),GMAX-gl(s,g));if(n>0){S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+n;S.skp[s]-=n;refreshMax();feed(`${GEMS[g].n} Lv ${gl(s,g)}`,GEMS[g].c);save();renderMenu()}return}
-  if(b.dataset.boss){const [id,v]=b.dataset.boss.split(',');S.boss=S.boss||{};if(+v)S.boss[id]=1;else delete S.boss[id];feed(`${SK[id].n}: ${+v?'보스 모드':'일반 모드'}`,+v?'#ff9a6a':'#9ab');save();renderMenu();return}
+  if(b.dataset.boss){const [id,v]=b.dataset.boss.split(',');S.bossOff=S.bossOff||{};if(+v)delete S.bossOff[id];else S.bossOff[id]=1;feed(`${SK[id].n}: ${+v?'보스 모드':'일반 모드'}`,+v?'#ff9a6a':'#9ab');save();renderMenu();return}
   if(b.dataset.el){const c=elCost();if(b.dataset.el===arEl()||S.gold<c)return;S.gold-=c;S.arEl=b.dataset.el;feed(`폭발 속성: ${S.arEl==='fire'?'화염':'번개'} (−${fmtG(c)}G)`,S.arEl==='fire'?'#ff9a6a':'#c8b0ff');ringFx(P.pos,2.4,S.arEl==='fire'?0xff7a3a:0xa88aff,.5);save();renderMenu();return}
   if(b.dataset.inf||b.dataset.infx){const id=C().skills[0];if(!g2Done(id))return;let n=0;do{const c=infCost(S.sk2dmg||0);if((S.ess||0)<c.e||S.gold<c.g)break;S.ess-=c.e;S.gold-=c.g;S.sk2dmg=(S.sk2dmg||0)+1;n++}while(b.dataset.infx&&!(S.test&&n>=10));/* v134: 테스트(무한 재화)는 「전부」 10단계씩 */
     if(n){feed(`피해 증가 Lv ${S.sk2dmg}`,'#ff8a6a');ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
@@ -4623,24 +4625,43 @@ addEventListener('resize',sizeMini);sizeMini();
 
 /* ================= save slots ================= */
 let slotArm={i:-1,t:0};
+const nickSafe=n=>String(n).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,16),fmtPlay=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h}시간 ${m}분`:`${m}분`};
 function fmtTime(t){if(!t)return '';const d=new Date(t),p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`}
 function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 잿불 왕좌':'최종 보스 처치 완료'):s.ch>=5?`끝없는 심연 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
 function showSlots(){
+  if(curSlot!==null&&S.cls)save();/* v265: 플레이 시간이 최신으로 보이도록 */
   const canClose=curSlot!==null&&!!S.cls;
   let h=`<div class="shead"><div><div class="chap">Ember Sanctum · Save Slots</div><h2>저장 슬롯</h2></div>${canClose?'<button class="close" id="slClose">닫기</button>':'<button class="close" id="slTitle">처음 화면</button>'}</div><p class="hint">플레이할 슬롯을 고르세요. 빈 슬롯은 직업 선택부터 새로 시작하고, 진행 내용은 그 슬롯에 자동 저장됩니다.</p><div class="slots">`;
   for(let i=0;i<SLOTS;i++){const d=readSlot(i),arm=slotArm.i===i&&Date.now()-slotArm.t<3000;
-    if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${c.n} · Lv ${d.lv}</b><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div>`}
+    if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${d.nick?nickSafe(d.nick):'닉네임 미설정'}</b><small class="nk${d.nick?'':' none'}">${c.n} · Lv ${d.lv} · ⏱ ${fmtPlay(d.playSec)}</small><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div>`}
     else h+=`<div class="slotrow"><button class="slotmain empty" data-new="${i}"><span class="badge empty">+</span><span class="st"><span class="en">Slot ${i+1}</span><b>빈 슬롯</b><small>새로 시작하기</small></span></button></div>`}
   h+=`</div>`;
   $('slotSheet').innerHTML=h;$('slots').hidden=false;releaseAll();
 }
 function closeSlots(){if(curSlot!==null&&S.cls)$('slots').hidden=true}
 $('slots').addEventListener('click',e=>{if(e.target.id==='slots')closeSlots()});
+/* v265: 닉네임 — 한글(완성형) 최대 8자 · 영문/숫자 최대 16자, 섞으면 한글 2칸 · 영문 1칸으로 합쳐 16칸 */
+const NICK_MAX=16,nickW=s=>[...s].reduce((a,c)=>a+(/[가-힣]/.test(c)?2:1),0),nickClean=v=>{let o='',w=0;for(const c of v){if(!/[가-힣A-Za-z0-9]/.test(c))continue;const cw=/[가-힣]/.test(c)?2:1;if(w+cw>NICK_MAX)break;o+=c;w+=cw}return o};
+let pendNick='',nickCb=null;
+setInterval(()=>{if(curSlot!==null&&S.cls&&!S.demo&&!S.test&&$('nick').hidden)save()},30000);/* v265: 30초마다 자동 저장(플레이 시간 보존) */
+addEventListener('pagehide',()=>{if(curSlot!==null&&S.cls&&!S.demo)save()});
+function askNick(o){nickCb=o;
+  $('nickSheet').innerHTML=`<div><div class="chap">Ember Sanctum · Nickname</div><h2>${o.title||'닉네임을 정하세요'}</h2></div><p class="hint">한글 최대 8자 · 영문/숫자 최대 16자 (섞어 쓰면 한글 2칸, 영문·숫자 1칸으로 합쳐 16칸). 특수문자·공백은 쓸 수 없습니다.</p>
+   <input id="nickIn" type="text" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="닉네임" value="${nickSafe(o.init||'')}"><div class="nickrow"><span id="nickMsg"></span><span id="nickCnt">0/16</span></div>
+   <div class="btns"><button class="ghost" id="nickNo">${o.cancel||'취소'}</button><button class="primary" id="nickOk" disabled>확인</button></div>`;
+  $('nick').hidden=false;releaseAll();nickUpd();setTimeout(()=>{try{$('nickIn').focus()}catch(e){}},50)}
+function nickUpd(){const i=$('nickIn');if(!i)return;const raw=i.value,w=nickW(nickClean(raw)),bad=raw!==nickClean(raw)&&raw.length>0;
+  $('nickCnt').textContent=`${w}/${NICK_MAX}`;$('nickMsg').innerHTML=bad?'<span class="bad">사용할 수 없는 글자는 입력되지 않습니다</span>':'';$('nickOk').disabled=w<1}
+function nickDone(ok){if(!nickCb)return;const cb=nickCb,v=nickClean($('nickIn').value);if(ok&&nickW(v)<1)return;nickCb=null;$('nick').hidden=true;if(ok)cb.ok(v);else if(cb.no)cb.no()}
+$('nickSheet').addEventListener('input',e=>{if(e.target.id!=='nickIn')return;if(!e.isComposing){const c=nickClean(e.target.value);if(c!==e.target.value){e.target.value=c;nickUpd();return}}nickUpd()});
+$('nickSheet').addEventListener('compositionend',e=>{if(e.target.id!=='nickIn')return;const c=nickClean(e.target.value);if(c!==e.target.value)e.target.value=c;nickUpd()});
+$('nickSheet').addEventListener('keydown',e=>{if(e.target.id==='nickIn'&&e.key==='Enter'&&!e.isComposing){e.preventDefault();nickDone(true)}else if(e.key==='Escape'){nickDone(false)}});
+$('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='nickOk')nickDone(true);else if(b.id==='nickNo')nickDone(false)});
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
-  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();curSlot=i;S=d;$('slots').hidden=true;enterGame();return}
-  if(b.dataset.new!==undefined){curSlot=+b.dataset.new;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}
+  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();const go=()=>{curSlot=i;S=d;$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
+  if(b.dataset.new!==undefined){const i=+b.dataset.new;askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel()}});return}
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
     else slotArm={i,t:Date.now()};
@@ -4919,7 +4940,7 @@ function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
-const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||heirOpen||!$('slots').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
@@ -4940,7 +4961,7 @@ function loop(now){
   if(!fxWarm)prewarmFx();
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const fo=paused()&&fxOnly();
-  if(!paused()){update(dt);updDmg(dt);hud()}else{if(fo)fxTick(dt);hudMoney()}
+  if(!paused()){update(dt);updDmg(dt);hud();if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
   if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);renderFrame(now/1000);requestAnimationFrame(loop);
 }
