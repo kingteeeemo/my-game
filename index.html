@@ -2201,7 +2201,7 @@ function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber);let a0=Math.atan
   else if(k==='wave'){const W=1.6;A={k,t:0,a:a0,dur:W+.9,upd(){e.jaw=A.t<W?.3:1}};
     {const dome=new THREE.Mesh(new THREE.SphereGeometry(MAW_SAFE,48,24,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xffd98a,transparent:true,opacity:.11,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));dome.position.set(0,.05,0);/* v218: 옅은 노란 보호막, 격자선 없음 */
       const dome2=new THREE.Mesh(new THREE.SphereGeometry(MAW_SAFE*.97,48,24,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xffe6b0,transparent:true,opacity:.04,side:THREE.BackSide,depthWrite:false,blending:THREE.AdditiveBlending}));dome.add(dome2);
-      const base=flatMesh(ringGeo,0xffd870,.85);base.scale.set(MAW_SAFE,MAW_SAFE,1);base.position.y=.08;dome.add(base);scene.add(dome);
+      const base={material:{opacity:0}};/* v219: 바닥 테두리 제거 */scene.add(dome);
       fx.push({m:dome,t:0,dur:W+.35,upd(k,dt){const pulse=1+Math.sin(time*9)*.03;dome.scale.set(pulse,1,pulse);dome.material.opacity=.11+.04*Math.sin(time*7);const e2=Math.max(0,(k-(W/(W+.35)))/(.35/(W+.35)));dome.material.opacity*=1-e2;dome2.material.opacity=.04*(1-e2);base.material.opacity=.85*(1-e2)},end(){dome2.geometry.dispose();dome.geometry.dispose();dome2.material.dispose();dome.material.dispose()}})}
     donutTele(O,MAW_SAFE,ARENA_R+1,W,()=>{if(!ok())return;shake=Math.max(shake,.45);flash(O,0x9a40ff,2);
       const ring=flatMesh(ringGeo,0xb060ff,.9);ring.position.set(0,.4,0);scene.add(ring);fx.push({m:ring,t:0,dur:.5,upd(k){const r=MAW_SAFE+(ARENA_R-MAW_SAFE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.9*(1-k)}});
@@ -3482,7 +3482,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v218';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v219';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
