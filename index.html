@@ -1153,9 +1153,9 @@ const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
 /* v41 직업 간 DPS 보정: 1차 강화 합계(0~30)와 2차 강화 합계(0~8)에 따라 선형 보간.
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
 const WHIRL_BM=2.43;/* v264: 회전 베기는 보스(결투·보스·최종 보스)를 벨 때만 ×3.26 → v272: 쿨감·가속 적용으로 시전이 빨라져 ×2.43(우버 아귀 허수아비 29초 유지) — 필드 사냥 수치는 v262 그대로 */
-const SKM={whirl:1.1,quake:4.318,wave:1.1,pillar:.9,frost:1.688,chainl:1.492,volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
-const FIELD_K={rain:1.1,chainl:1.1,frost:1.1,quake:1.1},bossCtx=()=>{try{if(S.duel)return true;if(inTown)return false;for(const e of enemies)if((e.boss||e.final||e.duel)&&e.aggro&&e.hp>0)return true}catch(_){}return false};/* v272: 화살비·연쇄 번개·얼음 보주·대지 분쇄 필드 사냥 피해 +10% — 결투장·보스(깨어난 스토리 보스·최종 보스) 전투 중에는 적용 안 함, DPS 표기에도 미적용 */
-const SKM_OLD={whirl:1.1,quake:1.1,wave:1.1,pillar:.9,frost:1.15,chainl:1.15};/* v269: DPS 표기용 — v262까지의 계수 */
+const SKM={whirl:1.1,quake:4.318,wave:1.1,pillar:.9,frost:1.941,chainl:1.716,/* v273: 얼음 보주·연쇄 번개 +15% (보스·필드·DPS 표기 모두) */volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
+const FIELD_K={rain:1.1,quake:1.1},bossCtx=()=>{try{if(S.duel)return true;if(inTown)return false;for(const e of enemies)if((e.boss||e.final||e.duel)&&e.aggro&&e.hp>0)return true}catch(_){}return false};/* v272: 화살비·연쇄 번개·얼음 보주·대지 분쇄 필드 사냥 피해 +10% — 결투장·보스(깨어난 스토리 보스·최종 보스) 전투 중에는 적용 안 함, DPS 표기에도 미적용 */
+const SKM_OLD={whirl:1.1,quake:1.1,wave:1.1,pillar:.9,frost:1.3225,chainl:1.3225};/* v269: DPS 표기용 — v262까지의 계수 */
 const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.337,0.444,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
 function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (dpsRaw?(SKM_OLD[id]||1):(SKM[id]||1)*(FIELD_K[id]&&!bossCtx()?FIELD_K[id]:1))*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
@@ -2270,7 +2270,7 @@ function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){
   at(1,M.head.position);M.head.position.z+=.4;M.head.quaternion.setFromUnitVectors(_mz,_mt.set(Math.sin(ph*.7)*.06,-.32+Math.sin(ph*1.1)*.04,1).normalize());/* v214: 머리는 항상 플레이어 쪽을 내려다봄 */
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
-  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8:1.3)*(U?DUEL_HPX.u:DUEL_HPX.n));/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
+  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8:1.3)*(U?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.dummy?5:1));if(S.duel&&S.duel.dummy){e.name='허수아비 '+e.name;e.dummy=1}/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
   e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
 function mawReset(e){e.dA=null;e.wv=0;e.pullCd=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
@@ -2329,7 +2329,7 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
         for(let j=0;j<10;j++){const t=a+rnd(-H,H)*.9,d=rnd(3,L);emit(PADD,{x:Math.sin(t)*d,y:rnd(.3,2),z:Math.cos(t)*d,vy:rnd(2,6),life:rnd(.3,.6),s0:1.4,s1:.3,c0:0xd0a0ff,c1:0x4a0a8a,a:.9,tex:1})}
         groundFx({x:Math.sin(a)*L*.5,z:Math.cos(a)*L*.5},dotTex,0x9a40ff,L*.3,L*.6,.35,.6,true,.07);
         if(P.hp>0&&inFan(P.pos,O,a,H,L))hurtPct(C.sipe)})})})}}
-function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;e.pullCd=(e.pullCd||0)-dt;
+function mawStep(e,dt){if(e.dummy){e.dA=null;e.jaw=0;e.sink=0;return}/* v273: 허수아비 — 가만히 있음(패턴·사이페 없음) */const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;e.pullCd=(e.pullCd||0)-dt;
   if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;e.wv=0;e.jaw=0;mawSipe(e);return}/* v220: 체력 50%가 되면 진행 중 패턴을 끊고 즉시 사이 페이즈 */
   if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&e.dA.k!=='breath'&&mawDist()>=MAW_MELEE){/* v217: 브레스 중엔 멀어져도 취소·파동 없음 */e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
   if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?.96:1.44;/* v237: 패턴 간격 -40% (2.4/1.6 → 1.44/0.96) */e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?13:20;/* v240: 흡입 쿨타임 일반 20초·우버 13초 *//* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
@@ -2341,9 +2341,9 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(m==='u'?`☠ ${curseName()} 발동`:`결투장 · ${D.n} ${N}`,m==='u'?`우버 ${N}의 힘이 도전자를 짓누릅니다 — 최종 피해 −20% · 위험도 ${D.tier} 추천`:`위험도 ${D.tier} 추천`,m==='u'?'#c890ff':undefined);stageBanner()})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(m==='u'?`☠ ${curseName()} 발동`:`결투장 · ${D.n} ${N}`,m==='u'?`우버 ${N}의 힘이 도전자를 짓누릅니다 — 최종 피해 −20% · 위험도 ${D.tier} 추천`:`위험도 ${D.tier} 추천`,m==='u'?'#c890ff':undefined);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
-function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
+function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 잿불 검귀를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
@@ -2382,6 +2382,8 @@ function victory(title,sub,col,fn){const el=document.createElement('div');el.cla
   const go=()=>{if(done)return;done=1;el.style.transition='opacity .35s';el.style.opacity=0;setTimeout(()=>el.remove(),350);fn&&fn()};
   setTimeout(()=>el.addEventListener('click',go),400);setTimeout(go,2400)}
 function dropGiven(p,it){const q=scatter(p),g=lootMesh(it);g.position.set(q.x,0,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'item',item:it,ph:Math.random()*6});ringFx(q,2.4,it.mx?0x5ae0d0:0xff8a3a,.7);flash(q,it.mx?0x5ae0d0:0xff8a3a,2)}
+function showDummyClear(sec,dps,hp){collectAll();
+  $('clearSheet').innerHTML=`<div><div class="chap">Test · Dummy</div><h2>허수아비 처치</h2></div><div class="kv"><span>걸린 시간</span><b style="color:#5ad1c8">${sec.toFixed(1)}초</b><span>평균 DPS</span><b>${fmtN(dps)}</b><span>허수아비 체력</span><b>${fmtN(hp)}</b><span>주력 스킬</span><b>${SK[C().skills[0]].n}</b></div><p class="hint">첫 타격부터 처치까지의 시간입니다 · 보상 없음</p><button class="primary" id="dummyAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]};
   $('clearSheet').innerHTML=`<div><div class="chap">Duel Clear · ${S.duel&&S.duel.uber?'우버':'일반'} · 위험도 ${S.duel?S.duel.tier:10}</div><h2>${duelDef().n} 격파!</h2></div>
   <p class="hint">기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p>
@@ -2840,6 +2842,7 @@ function updDmg(dt){for(const d of dnPool){if(!d.live)continue;d.t+=dt;d.wp.y+=d
 /* ================= combat ================= */
 function hurt(e,amt,quiet,so){
   if(e.hp<=0||e.air)return;
+  if(e.dummy&&!e.t0)e.t0=time;/* v273: 허수아비 첫 타격부터 시간 측정 */
   if(e.duel&&e.dA&&e.dA.k==='sipe'&&!(e.dA.t<.8)){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 잿불 검귀 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 · v266: 검귀·아귀 모두 사이페 진입 후 0.8초는 피해가 들어가고, 그 사이 체력 0이면 처치 */
   if(e.chBoss)amt*=STORY_BOSS_DR;/* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
@@ -3637,7 +3640,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v272';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v273';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3988,6 +3991,7 @@ function showFinalClear(){
   $('clear').hidden=false;releaseAll();
 }
 $('clearSheet').addEventListener('click',e=>{
+  if(e.target.id==='dummyAgain'){$('clear').hidden=true;S.duel={tier:duelCfg('u','maw').tier,uber:true,m:'u',b:'maw',dummy:1};collectAll();resetWorld();return}
   if(e.target.id==='duelAgain'){$('clear').hidden=true;const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b;S.duel={tier:duelCfg(m,b).tier,uber:m==='u',m,b};collectAll();resetWorld();return}
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11);bonusCine(()=>showDuelClear(g));return}
@@ -4359,13 +4363,13 @@ function renderStage(){
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 300마리를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
-  ${eg?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${DUEL.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}% (★ ${D.v}%)</small></div><button class="primary" data-duel="${m}" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b!=='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>${`<div class="duelrow">${['n','u'].map(m=>{const D=duelCfg(m,'maw'),U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${MAW.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br>(3개 50% · 4개 30% · 5개 20%)':''}</small></div><button class="primary" data-duel="${m}" data-boss="maw" ${S.duel||S.noMaw?'disabled':''}>${S.noMaw?'도전 불가':S.duel&&S.duel.m===m&&S.duel.b==='maw'?'도전 중':'도전'}</button>${S.noMaw?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}</div>`}).join('')}</div>`}`:''}
+  ${eg?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${DUEL.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}% (★ ${D.v}%)</small></div><button class="primary" data-duel="${m}" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b!=='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>${`<div class="duelrow">${['n','u'].map(m=>{const D=duelCfg(m,'maw'),U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${MAW.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br>(3개 50% · 4개 30% · 5개 20%)':''}</small></div><button class="primary" data-duel="${m}" data-boss="maw" ${S.duel||S.noMaw?'disabled':''}>${S.noMaw?'도전 불가':S.duel&&S.duel.m===m&&S.duel.b==='maw'?'도전 중':'도전'}</button>${S.noMaw?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}</div>`}).join('')}</div>`}`:''}${S.test?`<div class="duelrow"><div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>결투장 · 허수아비 (테스트)</b><small>우버 ${MAW.n} · 가만히 있음</small><small class="rw">체력 우버의 5배 · 패턴·사이페 없음 · 우버 저주 적용 · 처치 시간 표시 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div></div>`:''}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
-  if(b.dataset.duel){closeStage();duelEnter(b.dataset.duel,b.dataset.boss);return}
+  if(b.dataset.duel){closeStage();duelEnter(b.dataset.duel,b.dataset.boss,!!b.dataset.dummy);return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&t<=S.maxTier){if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
@@ -4773,6 +4777,7 @@ function update(dt){packTick();
   P.inv-=dt;P.swing-=dt;P.spin-=dt;P.dashT=(P.dashT||0)-dt;
   if(!inTown){
   /* v127: 스킬은 누를 때마다 한 번만 발동(꾹 눌러도 연발 없음) — 눌렀을 때 fireNow('s1')에서 처리 */
+  if(input.held.s1&&S.cls&&C().skills[0]==='whirl'&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');/* v273: 회전 베기만 꾹 누르고 있으면 쿨타임마다 계속 발동 */
   if(input.held.php){input.held.php=false;usePot('hp')}
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
   if(S.autoHpOn&&P.cd.pot<=0&&P.hp/P.mhp*100<=(S.autoHpPct||30)&&potN('hp')>0)usePot('hp',S.autoHpSz);
