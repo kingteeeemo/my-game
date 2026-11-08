@@ -2233,19 +2233,19 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&!S.test)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
+function duelEnter(m='n',b){if(S.ch<NCH)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 심연의 아귀에서만 확정 강화 주문서(10%, 일반 1개·우버 3개)를 각각 따로 굴림 */
-const TK_P=.1;let duelBonus=null;
+const TK_P=.1,TK_P2=.2;let duelBonus=null;
 function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.res=[];
   if(Math.random()<scrP(b.m)){const sc={v:DUEL_M[b.m].v};S.scrolls=(S.scrolls||[]).concat(sc);b.res.push({t:'scr',sc})}
-  if(b.mb&&Math.random()<TK_P){const n=b.U?3:1;S.tickets=(S.tickets||0)+n;b.res.push({t:'tk',n})}/* v221: 확정 강화 주문서는 심연의 아귀에서만 — 일반 1개 · 우버 3개, 확률 10% */
+  if(b.mb&&Math.random()<TK_P){const n=b.U?3:1;S.tickets=(S.tickets||0)+n;b.res.push({t:'tk',n});if(b.U&&Math.random()<TK_P2){S.tickets+=5;b.res.push({t:'tk',n:5,jp:1})}}/* v222: 우버 아귀 — 주문서 획득 시 20% 확률로 5개 추가(전체 2%) *//* v221: 확정 강화 주문서는 심연의 아귀에서만 — 일반 1개 · 우버 3개, 확률 10% */
   save()}
-const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서 ×${r.n||1}</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
+const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">${r.jp?'추가 보상 · ':''}확정 강화 주문서 ×${r.n||1}</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
 function bonusCine(done){const b=duelBonus,res=b.res,got=res.length>0,el=document.createElement('div');el.className='ecine charge bonus';el.style.setProperty('--ec',b.U?'180,130,255':'230,200,120');
   el.innerHTML=`<div class="rune"></div><div class="rune r2"></div><div class="orb"></div><div class="wait"><small>BONUS REWARD</small><b>?</b><span>추가 보상 확인 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   document.body.appendChild(el);let over=0,rv=0,cc=0,tm=0;
@@ -3485,7 +3485,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v221';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v222';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4177,7 +4177,7 @@ function renderStage(){
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 200마리를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
-  ${eg?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${DUEL.n} · 위험도 ${D.tier} 추천</small><small class="rw">보상: 골드 대량<br><span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}% (★ ${D.v}%)${U?`<br><span style="color:#ffd24a">✦ 확정 강화 주문서</span> ${Math.round(TK_P*100)}%`:''}</small></div><button class="primary" data-duel="${m}" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b!=='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>${S.test?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n} <span style="color:#c890ff">[테스트]</span></b><small>${MAW.n} · 위험도 ${D.tier} 추천</small><small class="rw">고정형 보스 · 모든 피해는 최대 생명력 %<br>보상은 잿불 검귀와 동일</small></div><button class="primary" data-duel="${m}" data-boss="maw" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b==='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>`:''}`:''}
+  ${eg?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${DUEL.n} · 위험도 ${D.tier} 추천</small><small class="rw">보상: 골드 대량<br><span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}% (★ ${D.v}%)</small></div><button class="primary" data-duel="${m}" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b!=='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>${`<div class="duelrow">${['n','u'].map(m=>{const D=duelCfg(m,'maw'),U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${MAW.n} · 위험도 ${D.tier} 추천</small><small class="rw">고정형 보스 · 모든 피해는 최대 생명력 %<br>보상: 골드 대량 · <span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}%<br><span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?3:1}개</span> ${Math.round(TK_P*100)}%${U?` (그중 ${Math.round(TK_P2*100)}%는 5개 추가)`:''}</small></div><button class="primary" data-duel="${m}" data-boss="maw" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b==='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>`}`:''}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
@@ -4248,7 +4248,7 @@ let smithOpen=false,smithMsg='',smithSel=null,smithRes=null;
 /* v41: 6부위 중 하나를 먼저 고르고, 고른 부위의 강화 상태만 크게 보여 줌 (돌아가기로 목록 복귀) */
 let useTk=false;
 /* v131 확정 강화 주문서 필요 개수: 무기 +30~ 2개 · +35~ 3개 · +40~ 4개 / 방어구·장신구 +35~ 2개 · +40~ 3개 (현재 강화 단계 기준). 주문서 사용 시 골드 5배 */
-const tkNeed=(L,k)=>k==='weapon'?(L>=40?4:L>=35?3:L>=30?2:1):(L>=40?3:L>=35?2:1),TK_GOLD=5;
+const tkNeed=(L,k)=>k==='weapon'?(L>=30?2+Math.floor((L-30)/5):1):(L>=35?2+Math.floor((L-35)/5):1),TK_GOLD=5;/* v222: +40 이후에도 5단계마다 1개씩 증가 */
 /* v131 자동 강화: 켜면 골드가 모자라거나 끌 때까지 0.35초마다 강화(주문서는 쓰지 않음, 컷신 없이 결과만) */
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
