@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.ecine{touch-action:manipulation}/* v229: 컷신 연타가 더블탭 확대 방지에 막히지 않게 */
+</style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Archivo:wdth,wght@87,500;87,800&display=swap">
@@ -761,7 +762,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <script>
 /* v138: iOS 핀치·더블탭 확대 방지 (user-scalable=no를 iOS가 무시하는 경우 대비) */
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-let _lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-_lastTE<300&&!(e.target.closest&&e.target.closest('button,input,textarea,select,.act,.stick,canvas')))e.preventDefault();_lastTE=n},{passive:false});
+let _lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-_lastTE<300&&!(e.target.closest&&e.target.closest('button,input,textarea,select,.act,.stick,canvas,.ecine')))e.preventDefault();_lastTE=n},{passive:false});
 
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -3465,7 +3466,7 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
-addEventListener('keydown',e=>{if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
 /* ================= v128~v130: 새 버전 자동 감지 =================
    v130: ntfy.sh 로 '새 버전 나옴' 신호를 실시간으로 받습니다(연결만 열어 두고 신호가 올 때만 동작, 주기 확인 없음).
@@ -3487,7 +3488,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v228';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v229';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3701,13 +3702,13 @@ setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;P.mp=P.mmp;if(S.testGod
 $('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
-function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.pending=0;S.sk={};S.sk[m]={};for(const g of gemsFor(m))S.sk[m][g]=GMAX;S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
+function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=1;S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 function startGame(cls,main,skip){
   inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 스텟 포인트 30점을 분배하세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
+  if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -3734,7 +3735,7 @@ function renderSkillSel(){const c=CLS[demo.cls];
   $('skillSheet').innerHTML=`<div class="shead"><div><div class="chap">${c.en} · 주력 스킬</div><h2>${c.n}의 주력 스킬을 고르세요</h2></div></div>
    <p class="hint" style="margin:0">뒤 화면은 <b style="color:var(--ink)">1차·2차 강화를 모두 채운 최종 진화</b> 모습입니다. 시작한 뒤에는 바꿀 수 없습니다.</p>
    <div class="skcs">${c.opts.map(id=>skillCard(id,id===demo.sk)).join('')}</div>
-   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>${skipOk()?`<button class="primary" id="skGoSkip" style="width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff">☆ 스토리 스킵 · 31레벨 엔드게임으로 시작<small style="display:block;font-weight:400;opacity:.85;margin-top:2px">1차 강화 완료 · 스토리 클리어 수준 장비</small></button>`:''}`}
+   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>${skipOk()?`<button class="primary" id="skGoSkip" style="width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff">☆ 스토리 스킵 · 31레벨 엔드게임으로 시작<small style="display:block;font-weight:400;opacity:.85;margin-top:2px">1차 강화 30회 직접 선택 · 스토리 클리어 수준 장비</small></button>`:''}`}
 function openSkillSel(cls){document.body.classList.add('demo');demoSetup(cls,CLS[cls].opts[0]);renderSkillSel();$('skillSel').hidden=false;releaseAll()}
 function demoEnd(){S.demo=false;demo=null;for(const e of [...enemies])dropEnemy(e);fxReset();document.body.classList.remove('demo');$('skillSel').hidden=true}
 $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!demo)return;
@@ -4280,7 +4281,7 @@ function renderSmith(){
       bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':'마나 소모 감소'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':'mcr',k)-1)*100)}%)</small>`:''}</span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
-      hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():''),
+      hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
       btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`${boostOk(L)&&!tkOn?'일반 강화 ':'강화 '}${fmtG(cc)}G`}</button></div>${!max&&boostOk(L)&&!tkOn?`<button class="primary smboost" id="smGo20" ${S.gold>=c*BOOST_G&&!smAuto?'':'disabled'}>골드 ${BOOST_G}배 강화 · 확률 ${BOOST_R}배 (${+(Math.min(1,rt*BOOST_R)*100).toFixed(1)}%) <small>${fmtG(c*BOOST_G)}G</small></button>`:''}${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
@@ -4292,9 +4293,18 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.dataset.sel){smithSel=b.dataset.sel;smithRes=null;renderSmith();return}
   if(b.id==='smBack'){smAutoStop();smithSel=null;smithRes=null;renderSmith();return}
   if(b.id==='smTk'){useTk=!useTk;renderSmith();return}
+  if(S.test&&smithSel){if(b.dataset.tenh){testSetEnh(smithSel,enhL(smithSel)+ +b.dataset.tenh);return}if(b.id==='tSpSet'){testSetSp(smithSel,$('tSpIn').value);return}if(b.id==='tSpDel'){testSetSp(smithSel,null);return}}
   if(b.id==='smAuto'){smAuto?smAutoStop():smAutoStart();return}
   if(b.id==='smGo'){if(!smAuto)smithTry(false)}
   if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
+/* v229: 테스트 캐릭터 — 강화 단계·특수 능력치 직접 설정 */
+function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k)),cur=it&&spOf(it);
+  return `<div class="ttool" style="display:flex;flex-direction:column;gap:6px;background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:8px 10px;font-size:12px">
+    <b style="color:#5ad1c8">테스트 · 직접 설정</b>
+    <span>강화 단계 <small style="opacity:.7">(숫자를 입력하면 바로 적용)</small></span><div style="display:flex;align-items:center;gap:4px"><button class="pm" data-tenh="-10">−10</button><button class="pm" data-tenh="-1">−1</button><input id="tEnhIn" type="number" inputmode="numeric" min="0" value="${L}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" data-tenh="1">+1</button><button class="pm" data-tenh="10">+10</button></div>
+    ${it&&spk?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>'}</div>`}
+function testSetEnh(k,n){S.enh[k]=Math.max(0,Math.round(n)||0);smithRes=null;refreshMax();renderSmith()}
+function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k));it.opts=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));if(v!==null&&spk)it.opts.unshift({k:spk,v:Math.max(0,+v||0)});refreshMax();renderSmith()}
 function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};smBoost=boost?1:0;if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=24;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
@@ -4312,10 +4322,10 @@ function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,
   document.body.appendChild(el);
   const fin=()=>{if(over)return;over=1;enhCineOn=0;enhCineEnd=Date.now();el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
-  setTimeout(()=>el.addEventListener('click',ev=>{
+  const born=Date.now();el.addEventListener('click',ev=>{/* v229: 리스너를 바로 붙임(기기가 바쁠 때 0.15초 타이머가 늦어져 연타가 씹히던 문제) — 일반 클릭만 0.15초 보호 */
     /* v225: 10배 골드·4배 확률 강화 버튼 위치를 계속 누르면 컷신 즉시 스킵 → 다음 강화가 이어서 진행 */
     if(!auto&&smBoost&&smithOpen){const bt=document.getElementById('smGo20');if(bt&&!bt.disabled){const r=bt.getBoundingClientRect();if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){if(!revealed&&rv)rv();fin();setTimeout(()=>smithTry(false,true),0);return}}}
-    if(!revealed&&rv)rv();else if(canClose)fin()}),150);
+    if(Date.now()-born<150)return;if(!revealed&&rv)rv();else if(canClose)fin()});
   const T=auto?.4*.7:1.14;/* 슈유육… 모이는 시간 (자동 강화는 빠르게) */
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
   rv=()=>{
@@ -4335,6 +4345,7 @@ function enhFx(ok){const f=$('buyFlash');f.className='buyflash';void f.offsetWid
   const a={x:5,z:-1.6};if(ok){ringFx(a,2.4,0xffd24a,.6);ringFx(P.pos,2,0xffd24a,.5);spray(PADD,{x:a.x,z:a.z},30,{sp:[2,6],up:[3,8],y:[.8,1.1],life:[.4,.8],s0:[.3,.5],s1:[.05,.1],c0:0xfff0a0,c1:0xff8a10,drag:1.5,grav:-12,tex:1});streaks({x:a.x,z:a.z},14,{sp:[5,12],up:[3,8],y:[.8,1],life:[.3,.6],w:.06,len:.6,c0:0xffffff,c1:0xffa020,drag:1,grav:-14})}
   else spray(PNRM,{x:a.x,z:a.z},8,{sp:[.5,1.5],up:[1,2],y:[.8,1],life:[.6,1],s0:[.5,.7],s1:[1,1.4],c0:0x4a4038,c1:0x1c1a18,a:.5,drag:1,tex:2})}
 $('smith').addEventListener('click',e=>{if(e.target.id==='smith')closeSmith()});
+$('smithSheet').addEventListener('change',e=>{if(S.test&&smithSel&&e.target.id==='tEnhIn')testSetEnh(smithSel,+e.target.value)});
 
 /* ================= 전승사 (v77): 특수 능력치를 같은 부위의 다른 전설 장비로 옮김 · 옛 장비는 사라짐 ================= */
 let heirSrc=null,heirMsg='',heirScr=-1,heirSlot=null;
