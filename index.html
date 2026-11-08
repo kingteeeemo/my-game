@@ -2745,7 +2745,7 @@ function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*
   if(heavy&&pal.smoke)spray(PNRM,p,Math.round(Math.min(6,2+R*.8)*q),{sp:[R*.5,R*1.1],up:[1.2,2.8],y:[.6,1.3],r0:R*.35,life:[.8,1.3],s0:[R*.25,R*.35],s1:[R*.6,R*.85],c0:pal.smoke,c1:0x151210,a:.32*FK,drag:1.5,grav:.5,rv:.8,del:[.12,.25],tex:2});
   if(heavy&&pal.ember)for(let i=0;i<Math.round(3*q);i++){const a=Math.random()*6.28,d=R*rnd(.3,.9);later(rnd(.05,.25),()=>decalFx({x:p.x+Math.sin(a)*d,z:p.z+Math.cos(a)*d},dotTex,pal.ember,rnd(.35,.6),rnd(.8,1.4),.7*FK,true))}
 }
-const NOVA_L=[];let NOVA_CAP=8,NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
+const NOVA_L=[];let NOVA_CAP=1e9,NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
 function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* 서리 폭발 (v40): 범위가 한눈에 보이도록 서리 원판 + 밝은 테두리 + 충격파 + 얼음 가시. 초당 여러 번 터지므로 부하 제한과 별도로 가볍게 */
   /* v65 번개 폭발(궁수): 보라·흰 섬광 + 사방으로 갈라지는 번개 줄기(InstancedMesh) + 전기 불꽃 + 짧은 충격파 + 그을린 금 */
@@ -3644,7 +3644,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v288';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v289';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
