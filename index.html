@@ -859,7 +859,7 @@ const STAT_PER_LV=1;
 const STATS={
   str:{n:'힘',en:'STR',c:'#ff6a6a',d:['최대 생명력 +2.7%','생명력 재생 +0.15%/초']},
   agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4% (신발 포함 상한 +150%)','치명타 확률 +0.27%']},
-  int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 +0.2%/초']}
+  int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.4%/초']}
 };
 /* 스킬 1 = 다수 공격용, 스킬 2 = 보스(단일 대상) 공격용 */
 const SK={
@@ -916,7 +916,9 @@ const EQS=['weapon','helm','armor','boots','amulet','ring'];
 const SLOTN={weapon:'무기',armor:'갑옷',helm:'투구',boots:'신발',amulet:'목걸이',ring:'반지'},SLOTEN={weapon:'Weapon',armor:'Armor',helm:'Helm',boots:'Boots',amulet:'Amulet',ring:'Ring'};
 const SLOTW={weapon:.22,armor:.2,helm:.16,boots:.16,amulet:.13,ring:.13};
 const itemName=(slot,t)=>slot==='weapon'?WNAME[S.cls||'warrior'][t]:slot==='helm'?HNAME[t]:slot==='boots'?BNAME[t]:slot==='amulet'?NNAME[t]:slot==='ring'?RNAME[t]:ANAME[t];
-const itemBase=(slot,l)=>Math.round(slot==='weapon'?2+l*1.6:slot==='armor'?4+l*3:slot==='helm'?2+l*1.5:slot==='boots'?2+l*1.2:slot==='ring'?8+l*2:6+l*1.5);
+/* v254 생명력·마나 재조정: 장비 생명력·마나(옵션·반지 기본 생명력·목걸이 기본 마나) ×0.5, 강화로 오르는 양 ×0.25 */
+const GEAR_HM=.5,ENH_HM=.25;
+const itemBase=(slot,l)=>Math.round(slot==='weapon'?2+l*1.6:slot==='armor'?4+l*3:slot==='helm'?2+l*1.5:slot==='boots'?2+l*1.2:slot==='ring'?(8+l*2)*GEAR_HM:(6+l*1.5)*GEAR_HM);
 function rollSlot(){let t=Math.random();for(const k of EQS){t-=SLOTW[k];if(t<=0)return k}return 'weapon'}
 /* 옵션별 등장 부위: 쿨타임 감소는 투구, 이동 속도는 신발, 마나 재생은 목걸이 전용 */
 const ALL=['weapon','armor','helm','boots','amulet','ring'];
@@ -933,8 +935,8 @@ const OPT={
   crit:{n:'치명타 확률',f:v=>`+${v}%`,slots:['amulet','ring'],roll:l=>Math.round(rand(2,5)+l*.1)},
   armor:{n:'방어력',f:v=>`+${v}`,slots:['armor','helm','boots'],roll:l=>Math.round(rand(3,7)+l*1.2)},
   regen:{n:'생명력 재생',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['armor'],roll:spRoll},
-  hp:{n:'최대 생명력',f:v=>`+${v}`,slots:ALL,roll:l=>Math.round(rand(8,16)+l*2.2)},
-  mp:{n:'최대 마나',f:v=>`+${v}`,slots:ALL,roll:l=>Math.round(rand(5,10)+l*1.2)},
+  hp:{n:'최대 생명력',f:v=>`+${v}`,slots:ALL,roll:l=>Math.round((rand(8,16)+l*2.2)*GEAR_HM)},
+  mp:{n:'최대 마나',f:v=>`+${v}`,slots:ALL,roll:l=>Math.round((rand(5,10)+l*1.2)*GEAR_HM)},
   cdr:{n:'쿨타임 감소',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['helm'],roll:spRoll},
   spd:{n:'이동 속도',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['boots'],roll:spRoll},
   mreg:{n:'마나 재생',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['amulet'],roll:spRoll},
@@ -968,11 +970,11 @@ const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
 const BOOST_G=10,BOOST_R=4,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 → v146: 4배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
-const enhMB=(L,sl)=>1+ENH_B*enhSum(L)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*enhSum(L)*(ENH_HALF[k]?.5:1)*wk(sl);const ENH_HALF={fdmg:1,spd:1,mcr:1};/* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
+const enhMB=(L,sl)=>1+ENH_B*enhSum(L)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*enhSum(L)*(ENH_HALF[k]||1)*wk(sl);const ENH_HALF={fdmg:.5,spd:.5,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
-  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L,k),mo=enhMO(L,undefined,k),b=it.base*mb;
-    if(k==='weapon')g.wdmg+=b;else if(k==='amulet')g.mp+=b;else if(k==='ring')g.hp+=b;else g.armor+=b;for(const o of it.opts)g[o.k]=(g[o.k]||0)+o.v*(ENH_HALF[o.k]?enhMO(L,o.k,k):mo)}
+  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L,k),mo=enhMO(L,undefined,k),b=it.base*mb,bh=it.base*(1+(mb-1)*ENH_HM),moh=1+(mo-1)*ENH_HM;
+    if(k==='weapon')g.wdmg+=b;else if(k==='amulet')g.mp+=bh;else if(k==='ring')g.hp+=bh;else g.armor+=b;for(const o of it.opts)g[o.k]=(g[o.k]||0)+o.v*(o.k==='hp'||o.k==='mp'?moh:ENH_HALF[o.k]?enhMO(L,o.k,k):mo)}
   for(const k of ['wdmg','armor','hp','mp'])g[k]=Math.round(g[k]);for(const k of ['dmgPct','crit','cdr','spd','regen','mreg','mcr','fdmg'])g[k]=Math.round(g[k]*10)/10;
   /* v146: 쿨타임 감소 상한(40%) 폐지 — 쿨다운 배율은 최소 10%로만 보호 *//* v252: 마나 소모 감소 50% 상한 폐지 — 나눗셈 적용이라 음수가 되지 않음 */return g}
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
@@ -995,7 +997,7 @@ function isBetter(it,cur){if(!cur)return true;
 function score(it){let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
+const fresh=()=>({v254hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 function migrate(s){
@@ -1042,6 +1044,7 @@ function reconcile(s){if(s&&s.noMaw&&s.lv<=LV_MAX)delete s.noMaw;/* v246: 만렙
   /* v44: 5장 → 7장. 이전 장은 같은 이름의 장으로, 엔드게임(5)은 7로 */
   if(!s.v44ch){s.v44ch=1;if(s.ch>=5)s.ch=NCH;else s.ch=[0,1,3,4,6][s.ch]||0}
   /* v44: 특수 능력치 수치 5~30 → 3~8로 환산 */
+  if(!s.v254hm){s.v254hm=1;for(const it of [...(s.inv||[]),...Object.values(s.eq||{})]){if(!it)continue;if(it.slot==='ring'||it.slot==='amulet')it.base=Math.round(it.base*GEAR_HM);if(it.opts)for(const o of it.opts)if(o.k==='hp'||o.k==='mp')o.v=Math.max(1,Math.round(o.v*GEAR_HM))}}/* v254: 기존 장비 생명력·마나 절반 */
   if(!s.v44sp){s.v44sp=1;for(const it of [...(s.inv||[]),...Object.values(s.eq||{})])if(it&&it.opts)for(const o of it.opts)if(OPT[o.k]&&OPT[o.k].sp)o.v=Math.max(3,Math.min(8,Math.round(o.v>8?3+(Math.min(30,o.v)-5)/5:o.v)))}
   if(s.autoGem==='g:vortex')s.autoGem='g:swift';
   if(s.autoGem&&s.autoGem.startsWith('g:')&&!v.some(k=>(SK[k].gems||[]).includes(s.autoGem.slice(2))))s.autoGem='bal';
@@ -1074,9 +1077,10 @@ const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear(
 const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·지능)으로 얻는 초당 재생량 +5~30% */
-const mpRegen=()=>P.mmp*.001*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
+const mpRegen=()=>P.mmp*.004/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
-const COLD65=1300,coldAt=(t,d35)=>{if(t<=35)return d35;const tg=Math.max(COLD65,d35);if(t<=65)return d35+(tg-d35)*Math.pow((t-35)/30,1.5);return tg+(tg-d35)/30*(t-65)};
+/* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
+const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65))};
 /* v236: 스토리(1~7장·최종 결전)는 환경 피해 없음. 엔드게임 위험도 t = 옛 곡선을 3칸 당긴 값(1=옛 5장 열기 0.5% · 2=옛 6장 0.6% · 3=옛 7장 1.4% · 4=옛 위험도1 …, 35·65 기준점도 38·68로), 전체 ×0.8 */
 const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)return P.mhp*.006;if(t===0)return P.mhp*.007*2;const d=P.mhp*Math.min(.015,CH[LAST].drain+.001*t)*2;return t>35?coldAt(t,d):d};
 const envDrain=()=>{if(inTown||S.ch<NCH)return 0;const tt=S.duel?S.duel.tier:S.tier;return coldRaw(Math.max(1,tt)-COLD_SH)*COLD_K};/* v58: 심연의 냉기 2배 */
@@ -1142,7 +1146,8 @@ const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055
 function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (id==='whirl'||id==='quake'||id==='wave'?1.1:1)*(id==='pillar'?.9:id==='frost'||id==='chainl'?1.15:1)/* v250: 사술 폭발 -10% · 얼음 보주·연쇄 번개 +15% */*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
-const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg))/(1+g.mcr/100)))};/* v253: 무기 최종 피해(%)를 반올림한 값만큼 MP 소모 증가(31.8% → +32 · 128.2% → +128), 그 합에 반지 마나 소모 감소를 나눗셈으로 적용(100% = ½, 200% = ⅓) */
+const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
+const MP_PCT=.02;/* v253: 무기 최종 피해(%)를 반올림한 값만큼 MP 소모 증가(31.8% → +32 · 128.2% → +128), 그 합에 반지 마나 소모 감소를 나눗셈으로 적용(100% = ½, 200% = ⅓) */
 const gemsFor=s=>SK[s].gems||Object.keys(GEMS).filter(g=>GEMS[g].t==='any'||GEMS[g].t===SK[s].tag);
 /* 레벨업: 먼저 강화할 스킬을 고르고, 그 스킬의 강화 3개 중 하나를 고름 */
 const openGems=s=>gemsFor(s).filter(g=>gl(s,g)<GMAX);const done1=s=>openGems(s).length===0;/* v209: 2차 강화는 해당 스킬의 1차 강화(가속 포함)를 모두 채우면 해금 — 레벨 무관 */
@@ -3617,7 +3622,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v253';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v254';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4424,7 +4429,7 @@ function renderSmith(){
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
       info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
-      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':'마나 소모 감소'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':'mcr',k)-1)*100)}%)</small>`:''}</span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
+      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring','amulet'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':k==='ring'?'마나 소모 감소':'마나 재생'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':k==='ring'?'mcr':'mreg',k)-1)*100)}%)</small>`:''} <small>(생명력·마나 +${Math.round((enhMO(L,undefined,k)-1)*ENH_HM*100)}%)</small></span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
       hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
