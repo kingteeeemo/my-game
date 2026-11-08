@@ -3643,7 +3643,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v277';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v278';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4780,7 +4780,7 @@ function update(dt){packTick();
   P.inv-=dt;P.swing-=dt;P.spin-=dt;P.dashT=(P.dashT||0)-dt;
   if(!inTown){
   /* v127: 스킬은 누를 때마다 한 번만 발동(꾹 눌러도 연발 없음) — 눌렀을 때 fireNow('s1')에서 처리 */
-  if(input.held.s1&&S.cls&&C().skills[0]==='whirl'&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');/* v273: 회전 베기만 꾹 누르고 있으면 쿨타임마다 계속 발동 */
+  if(input.held.s1&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');/* v278: 모든 스킬이 꾹 누르고 있으면 쿨타임마다 계속 발동(v273에서 회전 베기 한정 → 전체로 확대) */
   if(input.held.php){input.held.php=false;usePot('hp')}
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
   if(S.autoHpOn&&P.cd.pot<=0&&P.hp/P.mhp*100<=(S.autoHpPct||30)&&potN('hp')>0)usePot('hp',S.autoHpSz);
