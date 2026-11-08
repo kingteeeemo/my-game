@@ -2590,7 +2590,7 @@ function hurt(e,amt,quiet,so){
   const crit=!quiet&&Math.random()<critCh()+(so?so.crit:0);
   const v=Math.max(1,Math.round(amt*(crit?1.8:1)*rand(.9,1.1)));
   e.hp-=v;e.flash=.08;
-  if(!quiet||Math.random()<.35)dmgNum(e.pos,v,crit?'crit':'',e.h);
+  if(!quiet||quiet===2||Math.random()<.35)dmgNum(e.pos,v,crit?'crit':'',e.h);
   if(e.boss)e.aggro=true;
   if(e.hp<=0)kill(e);
 }
@@ -2953,7 +2953,7 @@ function shootBoom(a,dist,o){const sp=26,life=dist/sp;
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
 /* v198: 대상이 폭발 자리를 벗어나도 피해는 반드시 들어감 — 반경 안은 일반 범위 피해, 반경 밖으로 도망간 지정 대상은 직접 피해 */
-function pillarAoe(q,r,dmg,o,lock){aoe(q,r,dmg,{quiet:true,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,true,o.so)}
+function pillarAoe(q,r,dmg,o,lock){/* v199: quiet=2 → 치명타 없이 숫자는 항상 표시 */aoe(q,r,dmg,{quiet:2,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,2,o.so)}
 function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
   const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
@@ -3340,7 +3340,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v198';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v199';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
