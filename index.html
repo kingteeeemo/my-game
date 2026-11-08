@@ -3510,21 +3510,21 @@ function zapFx(a,b,o){boltFx(a,b);if(!o){popFx(b.x,b.y,b.z,.5,2,.14,0xffffff,.8)
 /* v85 번개 폭풍: 「팡」 터지는 푸른 폭발 — 순간 섬광(하양→파랑) + 부풀어 오르는 푸른 광구 + 바닥 빛 번짐 + 빠른 고리·느린 고리 2겹 + 작은 방사 번개 + 튀는 불꽃 */
 let stormN=0,stormL=0,stormT=0,fbT=[],novaN=[];
 function stormBurst(p,r,dmg){hitKind='zap';for(const e of [...enemies])if(!e.air&&e.hp>0&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true);hitKind=null;
-  stormN++;const heavy=stormN%2===0||QM()>=1;stormL=Math.max(0,stormL-(time-stormT)*8);stormT=time;stormL++;const dm=1/(1+stormL*.18),dk=Math.max(.7,dm);/* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 넓은 빛만 밝기 자동 감쇠 · v241: 동시에 많이 터지면 폭발 전체가 0.1 밝기까지 꺼져 안 터지는 것처럼 보이던 문제 → 중심 섬광·번개·불꽃(dk)은 최소 0.7 유지 *//* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 밝기 자동 감쇠 */
+  stormN++;const heavy=stormN%2===0||QM()>=1;stormL=Math.max(0,stormL-(time-stormT)*8);stormT=time;stormL++;const dm=.8/(1+stormL*.18),dk=.8*Math.max(.7,dm/.8);/* v242: 폭발 밝기 -20% *//* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 넓은 빛만 밝기 자동 감쇠 · v241: 동시에 많이 터지면 폭발 전체가 0.1 밝기까지 꺼져 안 터지는 것처럼 보이던 문제 → 중심 섬광·번개·불꽃(dk)은 최소 0.7 유지 *//* 한꺼번에 많이 터지면 하얗게 뭉개지지 않도록 밝기 자동 감쇠 */
   popFx(p.x,.9,p.z,r*.2,r*.6,.14,0xeaf4ff,.9*dk);popFx(p.x,.8,p.z,r*.6,r*1.9,.3,0x1e6aff,.7*dm,.02);
   emit(PADD,{x:p.x,y:.7,z:p.z,life:.3,s0:r*.5,s1:r*1.8,c0:0x4a90ff,c1:0x081e90,a:.75*dm,tex:1});
   /* v180: 충격파·고리 제거 → 부드러운 푸른 빛 번짐(빠르게 퍼짐) + 전기 구름 + 방사 번개로 폭발을 보임 */
   groundFx(p,dotTex,0x5a9aff,r*.4,r*2.4,.32,.95*Math.max(.3,dm),true,.08);groundFx(p,dotTex,0x1450ff,r*.8,r*2.8,.5,.55*dm,true,.06);/* v181: 폭발 범위가 피해 반경까지 보이도록 확대 */
   fireBurst(p,r*.85,.5*dm,false,PAL_BOLT);
   radialBolts(p,r*1.3,heavy?6:4,0x7ab4ff);
-  flash(p,0x2a6aff,1.4);
+  flash(p,0x2a6aff,1.12);
   /* v100: 더 화려하게 — 하늘에서 내리꽂는 번개 + 빛기둥 + 바닥 균열 + 3번째 넓은 고리 + 솟구치는 전기 줄기 */
   if(heavy||stormL<10){const sx=p.x+rnd(-1,1),sz=p.z+rnd(-1,1);zapFx({x:sx,y:9,z:sz},{x:p.x,y:.2,z:p.z});if(QM()>=1&&stormL<3)zapFx({x:p.x+rnd(-2,2),y:8,z:p.z+rnd(-2,2)},{x:p.x,y:.2,z:p.z});
     emit(PADD,{x:p.x,y:2.2,z:p.z,life:.22,s0:r*.4,s1:r*.12,c0:0xffffff,c1:0x5aa0ff,a:.9*dk,tex:1});
     for(let i=0;i<3;i++)emit(PADD,{x:p.x,y:.6+i*1.4,z:p.z,vy:6,life:.25,s0:r*.35,s1:.2,c0:0xeaf4ff,c1:0x2a6aff,a:.7*dm,tex:1});
     if(r>=1.6)decalFx(p,crackTex,0x5a9aff,r*rnd(.8,1.1),.9,.45*dk,true)}
   streaks(p,Math.max(4,Math.round(10*QM())),{sp:[r*3,r*4.6],up:[2,6],y:[.4,1],life:[.14,.26],w:.06,len:.9,c0:0xffffff,c1:0x4a8aff,drag:3});
-  const n=Math.max(3,Math.round(12*QM()));for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(6,12)*r/2;emit(PADD,{x:p.x,y:.7,z:p.z,vx:Math.cos(a)*v,vy:rnd(1,5),vz:Math.sin(a)*v,life:rnd(.2,.4),s0:rnd(.35,.6),s1:.08,c0:0xffffff,c1:0x2a6aff,a:1,drag:4,tex:1})}}
+  const n=Math.max(3,Math.round(12*QM()));for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(6,12)*r/2;emit(PADD,{x:p.x,y:.7,z:p.z,vx:Math.cos(a)*v,vy:rnd(1,5),vz:Math.sin(a)*v,life:rnd(.2,.4),s0:rnd(.35,.6),s1:.08,c0:0xffffff,c1:0x2a6aff,a:.8,drag:4,tex:1})}}
 function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e0;
   for(let j=0;j<st.bn;j++){let nb=null,bd=st.jr;for(const e of enemies){if(hit.has(e)||e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-cur.pos.x,e.pos.z-cur.pos.z);if(d<bd){bd=d;nb=e}}if(!nb)break;hit.add(nb);path.push(nb);cur=nb}
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
@@ -3613,7 +3613,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v241';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v242';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
