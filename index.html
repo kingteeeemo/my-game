@@ -1145,7 +1145,8 @@ function skillStats(id){
 const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
 /* v41 직업 간 DPS 보정: 1차 강화 합계(0~30)와 2차 강화 합계(0~8)에 따라 선형 보간.
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
-const SKM={whirl:3.585,quake:4.318,wave:1.1,pillar:.9,frost:1.688,chainl:1.492,volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
+const WHIRL_BM=3.26;/* v264: 회전 베기는 보스(결투·보스·최종 보스)를 벨 때만 ×3.26 — 필드 사냥 수치는 v262 그대로 */
+const SKM={whirl:1.1,quake:4.318,wave:1.1,pillar:.9,frost:1.688,chainl:1.492,volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
 const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.337,0.444,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
 function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (SKM[id]||1)*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
@@ -2443,11 +2444,11 @@ let _EMB=null;const EMBER_MAT=()=>(_EMB||(_EMB=(()=>{const vs=`varying vec2 vUv;
     float scorch=mask*.34*sk*uOp;vec3 col=cA*scorch+(cB*glow*.42+cC*hot*.85)*mask*gk*uOp;/* v180: 바닥 덜 진하게 */
     gl_FragColor=vec4(col,scorch);}`;
   return()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{uT:{value:Math.random()*9},uK:{value:0},uOp:{value:0},seed:{value:Math.random()*10},cA:{value:new THREE.Color(0x0e0806)},cB:{value:new THREE.Color(0xff4a10)},cC:{value:new THREE.Color(0xffc040)}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide})})()))();/* FIRE_NOISE가 뒤에 정의되므로 처음 쓸 때 만듦 */
-function burnField(p,r,dmg,dur=3){
+function burnField(p,r,dmg,dur=3,bm){
   const m=new THREE.Mesh(fxPlane,EMBER_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.05,p.z);m.scale.set(r*1.15,r*1.15,1);m.renderOrder=1;scene.add(m);
   let tick=0;const u=m.material.uniforms,q=QM();
   fx.push({m,t:0,dur,upd(k,dt){u.uT.value+=dt;u.uK.value=k;u.uOp.value=Math.min(1,k*dur/.25);
-      tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}
+      tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3*(bm&&(e.boss||e.duel||e.final)?bm:1),true)}
       if(k<.75){if(Math.random()<dt*r*5*q){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:.1,z:p.z+Math.cos(a)*rr,vx:rnd(-.4,.4),vy:rnd(.8,2.2),vz:rnd(-.4,.4),life:rnd(.5,1.1),s0:rnd(.1,.18),s1:.03,c0:0xffd060,c1:0xff3a00,a:.9,drag:.8,grav:-1.5,tex:1})}
         if(Math.random()<dt*r*.9*q){const a=Math.random()*6.28,rr=r*Math.random()*.8;emit(PNRM,{x:p.x+Math.sin(a)*rr,y:.2,z:p.z+Math.cos(a)*rr,vy:rnd(.5,1),life:rnd(1,1.6),s0:.3,s1:1.1,c0:0x3a3028,c1:0x1a1512,a:.22,drag:1,rv:.6,tex:2})}}}});
 }
@@ -2845,7 +2846,7 @@ function hurt(e,amt,quiet,so){
 function freeze(e,t){if(e.frzT>0||(e.frzI||0)>0)return;e.frzT=e.boss?t*.35:t}
 function aoe(c,r,dmg,o={}){
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e)continue;/* v194: 배열 복사 없이 뒤에서부터 */const dx=e.pos.x-c.x,dz=e.pos.z-c.z,d=Math.hypot(dx,dz);
-    if(d<r+e.r*.6){if(o.knock&&!e.boss){e.kbT=.22;e.kbx=dx/(d||1)*16;e.kbz=dz/(d||1)*16}if(o.slow)e.slowT=2;if(o.spark&&Math.random()<.7)hitSpark(e.pos,0xffffff,0x6a9aff,2);hurt(e,dmg,o.quiet,o.so)}}
+    if(d<r+e.r*.6){if(o.knock&&!e.boss){e.kbT=.22;e.kbx=dx/(d||1)*16;e.kbz=dz/(d||1)*16}if(o.slow)e.slowT=2;if(o.spark&&Math.random()<.7)hitSpark(e.pos,0xffffff,0x6a9aff,2);hurt(e,o.bm&&(e.boss||e.duel||e.final)?dmg*o.bm:dmg,o.quiet,o.so)}}
 }
 function kill(e){
   if(e.boss||e.duel||e.final){bossFall(e)}else{
@@ -3263,7 +3264,7 @@ function castFire(slot,id){
   }
   if(b.kind==='whirl'){
     const tok=P.wTok=(P.wTok||0)+1,alive=()=>P.wTok===tok;/* v124: 구르기로 취소하면 예약된 타격·효과가 모두 사라짐 */
-    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1})},t=delay+i*.2;t>0?later(t,f):f()}};
+    const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1,bm:WHIRL_BM})},t=delay+i*.2;t>0?later(t,f):f()}};
     round(1,0);for(let i=1;i<=st.echo;i++)round(st.echoMul,i*(st.hits*.2+.05));
     P.spin=st.hits*.2*(1+st.echo);P.spinFire=!!st.flame;poseStart('whirl',P.spin,{});const n0=fx.length;whirlFx(st.radius,P.spin,!!st.flame);
     /* 화염 지대: 회전하는 동안 이동 경로를 따라 불바닥을 깔아 둠 */
@@ -3271,8 +3272,8 @@ function castFire(slot,id){
     P.vortex=st.vortex?{r:st.radius*st.vortex.rm,sp:st.vortex.sp}:null;
     if(P.vortex)swirlFx(P.vortex.r,P.spin);
     P.wFx=fx.slice(n0);
-    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(alive()&&P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r)})}
-    if(st.burn){const n=Math.ceil(P.spin/.2);for(let i=0;i<n;i++)later(i*.2,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur))}
+    if(st.flame){const f=st.flame,nx=P.spin/f.iv,n=Math.floor(nx)+(Math.random()<nx%1?1:0);for(let i=1;i<=n;i++)later(i*f.iv,()=>{if(alive()&&P.hp>0&&P.spin>-.05)explode({x:P.pos.x,z:P.pos.z},base*st.dmg*f.m,null,f.r,undefined,WHIRL_BM)})}
+    if(st.burn){const n=Math.ceil(P.spin/.2);for(let i=0;i<n;i++)later(i*.2,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur,WHIRL_BM))}
     return;
   }
   if(b.kind==='orb'){
@@ -3578,7 +3579,7 @@ function overloadOrb(p,dmg,dur){const R=OV_R,Y=1.5,q=QM();
           popFx(e.pos.x,1,e.pos.z,.4,2.2,.14,0xdff0ff,.8);if(q>=.75)bodyArcs({x:e.pos.x,z:e.pos.z},e.r*.9,e.h||1.4,3);hitKind='zap';hurt(e,dmg,true);hitKind=null}}
         if(n){pulse=1;popFx(p.x,c.y,p.z,.8,3,.14,0xffffff,.7);flash(p,0x4a8aff,1.6)}}},
     end(){if(lk<.9)return;/* 맵 이동·정리(wipeFx)로 끊긴 경우엔 마무리 폭발 없음 */fireBurst(p,1.8,.7,false,PAL_BOLT);radialBolts(p,R*.5,4,0x9ac4ff);popFx(p.x,Y,p.z,.6,3.2,.16,0xffffff,.8)}})}
-function explode(p,dmg,skip,r=2.4,ice){blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg,true)}hitKind=hk}
+function explode(p,dmg,skip,r=2.4,ice,bm){blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg,true)}hitKind=hk}
 
 /* ================= input ================= */
 const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
@@ -3627,7 +3628,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v263';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v264';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4018,7 +4019,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ember)parts.push(`잔불 ${s.ember.dur.toFixed(1)}초`);if(s.shrap)parts.push(`파편 ${s.shrap.n}개`)}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
-  else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(s.hits)parts.push(`${s.hits}회 타격`);if(s.echo)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(`화염 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
+  else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${WHIRL_BM}`);if(s.hits)parts.push(`${s.hits}회 타격`);if(s.echo)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(`화염 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
   parts.push(`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
