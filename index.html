@@ -3617,7 +3617,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v250';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v251';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3825,8 +3825,19 @@ $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&
   box.addEventListener('contextmenu',e=>e.preventDefault());
   box.addEventListener('pointerup',()=>{const now=Date.now();if(now-t0>3000)n=0;t0=now;if(++n<5)return;n=0;if(devOk())startTestFlow();else devAsk()})})();
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
-function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=true;S.lv=70;S.xp=0;S.pending=0;S.skp[sk]=gemsFor(sk).length*GMAX;S.sk[sk]={};S.sk2={};S.ess=1e30;S.gold=1e30;S.statPts=69*STAT_PER_LV;
-  for(const k of EQS)S.eq[k]=makeItem(k,60,2);S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;S.tier=10;S.maxTier=10;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
+/* v251 테스트 캐릭터 = 성능 비교용 고정 세팅: 90레벨(균형 자동 배분) · 1차·2차 강화 만렙 · 피해 증가(무한) 10 · 전 부위 90레벨 전설(옵션 고정, 특수 능력치 8%) +30 · 위험도 60.
+   장비·지역은 고정 시드로 만들어 매번 같음. 레벨·강화 조절 등 기존 테스트 기능은 그대로 */
+const TEST_LV=90,TEST_ILV=90,TEST_ENH=30,TEST_TIER=60,TEST_SP=8,TEST_INF=10;
+function testItem(slot){const it={id:++uid,slot,ilvl:TEST_ILV,rar:3,name:'잿불 왕의 '+itemName(slot,4),base:Math.round(itemBase(slot,TEST_ILV)*RAR_M[3]),opts:[]};
+  const ok=Object.keys(OPT).filter(k=>OPT[k].slots.includes(slot)),sp=ok.find(k=>RARE_OPT.includes(k)),nm=ok.filter(k=>!RARE_OPT.includes(k));
+  if(sp)it.opts.push({k:sp,v:TEST_SP});const r0=Math.random;Math.random=()=>.5;/* 일반 옵션은 범위 가운데 값 */
+  try{for(const k of nm.slice(0,RAR[3].o[0]-(sp?1:0)))it.opts.push({k,v:Math.max(1,Math.round(OPT[k].roll(TEST_ILV)*RAR_M[3]))})}finally{Math.random=r0}return it}
+function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=true;S.lv=TEST_LV;S.xp=0;S.pending=0;S.ess=1e30;S.gold=1e30;
+  S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.skp[sk]=0;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);S.sk2dmg=TEST_INF;
+  S.stats={str:0,agi:0,int:0};S.statPts=(TEST_LV-1)*STAT_PER_LV;S.autoStat='bal';spendAutoStat();
+  S.enh={};for(const k of EQS){S.eq[k]=testItem(k);S.enh[k]=TEST_ENH}S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;
+  S.gates=[];for(let t=GATE_EVERY;t<TEST_TIER;t+=GATE_EVERY)S.gates.push(t);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TEST_TIER+GATE_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
+  S.tier=TEST_TIER;S.maxTier=TEST_TIER;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 $('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
@@ -3837,7 +3848,7 @@ function startGame(cls,main,skip){
   inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
+  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TEST_TIER}`,'체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
