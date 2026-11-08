@@ -2587,10 +2587,10 @@ function hurt(e,amt,quiet,so){
   if(e.hp<=0||e.air)return;
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
-  const crit=!quiet&&Math.random()<critCh()+(so?so.crit:0);
+  const crit=(!quiet||quiet>=2)&&Math.random()<critCh()+(so?so.crit:0);
   const v=Math.max(1,Math.round(amt*(crit?1.8:1)*rand(.9,1.1)));
   e.hp-=v;e.flash=.08;
-  if(!quiet||quiet===2||Math.random()<.35)dmgNum(e.pos,v,crit?'crit':'',e.h);
+  if(!quiet||quiet===2||Math.random()<.35)dmgNum(/* v200: quiet 2=치명타O·숫자 항상, 3=치명타O·숫자 35% */e.pos,v,crit?'crit':'',e.h);
   if(e.boss)e.aggro=true;
   if(e.hp<=0)kill(e);
 }
@@ -2920,7 +2920,7 @@ function shootWave(a,o){const W=o.w||1;
     if(Math.random()<dt*20*q)emit(PADD,{x:pp.x+rnd(-1,1)*W,y:.3,z:pp.z+rnd(-.5,.5),vy:rnd(.5,1.5),life:rnd(.2,.4),s0:.5,s1:.1,c0:0xffe0b0,c1:0xff8a30,a:.6,tex:1})};
   p.onHit=(e,pp)=>{hitSpark(e.pos,0xffffff,0xffa040,3);ringFx(e.pos,e.r*1.4,0xffd090,.18);streaks({x:e.pos.x,z:e.pos.z},4,{dir:p.m.rotation.y,cone:.9,sp:[4,8],up:[1,3],y:[.8,1.3],life:[.15,.3],w:.06,len:.7,c0:0xffffff,c1:0xff8a30,drag:3,grav:-10})};
   p.onEnd=()=>{gl_.material.dispose();if(rb&&rb.m){const m=rb.m,mat=rb.mat;p.rbm=null;fx.push({m,t:0,dur:.14,upd(k){mat.uniforms.fade.value=1-k},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */})}geo.dispose();geo2.dispose();for(const x of [m1,m2,m3])x.material.dispose();
-    if(o.burst){const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r,Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3,PAL_WAVE);shake=Math.max(shake,.12);aoe(c,o.burst.r,o.burst.dmg,{quiet:true,so:o.so})}};
+    if(o.burst){const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r,Math.max(.55,1/Math.sqrt(fbT.length)),fbT.length<3,PAL_WAVE);shake=Math.max(shake,.12);aoe(c,o.burst.r,o.burst.dmg,{quiet:2,so:o.so})}};
   return p}
 /* ---------- 궁수: 폭발 사격 ---------- */
 /* v174 폭발 사격 폭발: 화염 불덩이·번개와 다른 「충격 폭발」 — 흰빛 섬광 심지 + 두꺼운 호박색 충격파 고리 2겹 + 바닥을 따라 뻗는 빛살 + 돌 파편·흙먼지 고리 + 크레이터 */
@@ -2939,11 +2939,11 @@ function boomFx(c,R,FK){const q=QM();shake=Math.max(shake,Math.min(.32,.14+R*.03
   groundFx(c,dotTex,0xffd090,R*.2,R*.9,.14,.7*FK,true,.08);
   decalFx(c,crackTex,0x120a06,R*.95,3.2,.85,false);decalFx(c,dotTex,0x2a1a10,R*.7,2.4,.6,false);decalFx(c,dotTex,0xff8a30,R*.45,.5,.55*FK,true)}
 function boomExplode(c,o){const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();boomFx(c,R,Math.max(.55,1/Math.sqrt(fbT.length)));
-  aoe(c,R,o.dmg,{quiet:true,so:o.so});
+  aoe(c,R,o.dmg,{quiet:2,so:o.so});
   if(o.ember)burnField(c,R*.75,o.ember.dps,o.ember.dur);
   if(o.shrap){const n=o.shrap.n,a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*Math.PI*2/n;
     shoot(a,{from:c,color:0xffc070,size:.3,hr:.4,trail:1.2,tw:.1,tcol:0xff8a30,glow:1,gcol:0xff9a40,speed:14,life:.42,dmg:o.shrap.dmg,so:o.so});const p=projs[projs.length-1];p.m.position.y=.9;
-    p.onEnd=()=>{const q=p.m.position,cc={x:q.x,z:q.z};popFx(q.x,.6,q.z,.3,1.6,.14,0xffe0a0,.8);groundFx(cc,shockTex,0xffc060,.3,1.4,.2,.6,true,.07);aoe(cc,1.2,o.shrap.dmg*.5,{quiet:true,so:o.so})}}}}
+    p.onEnd=()=>{const q=p.m.position,cc={x:q.x,z:q.z};popFx(q.x,.6,q.z,.3,1.6,.14,0xffe0a0,.8);groundFx(cc,shockTex,0xffc060,.3,1.4,.2,.6,true,.07);aoe(cc,1.2,o.shrap.dmg*.5,{quiet:3,so:o.so})}}}}
 /* v174: 직선으로 날아가 바닥 근처에서 터짐 (포물선 제거) */
 function shootBoom(a,dist,o){const sp=26,life=dist/sp;
   shoot(a,{color:0xffd090,size:.5,long:true,trail:2.2,tw:.16,tcol:0xff9a40,glow:1.8,gcol:0xff9a40,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0xff9a30,c1:0xfff4d0,cw:.22}});const p=projs[projs.length-1];
@@ -2953,7 +2953,7 @@ function shootBoom(a,dist,o){const sp=26,life=dist/sp;
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
 /* v198: 대상이 폭발 자리를 벗어나도 피해는 반드시 들어감 — 반경 안은 일반 범위 피해, 반경 밖으로 도망간 지정 대상은 직접 피해 */
-function pillarAoe(q,r,dmg,o,lock){/* v199: quiet=2 → 치명타 없이 숫자는 항상 표시 */aoe(q,r,dmg,{quiet:2,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,2,o.so)}
+function pillarAoe(q,r,dmg,o,lock){/* v199/v200: quiet=2 → 치명타 판정 + 숫자 항상 표시 */aoe(q,r,dmg,{quiet:2,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,2,o.so)}
 function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
   const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
@@ -3340,7 +3340,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v199';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v200';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
