@@ -3459,7 +3459,7 @@ addEventListener('mousemove',e=>{if(Date.now()-lastTouch<900)return;mNdc.set(e.c
 addEventListener('touchstart',()=>{lastTouch=Date.now();pcMode=false},{passive:true});
 canvas.addEventListener('contextmenu',e=>e.preventDefault());stick.addEventListener('contextmenu',e=>e.preventDefault());
 stick.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;if(sp)return;sp={id:e.pointerId,x:e.clientX,y:e.clientY};stick.setPointerCapture(e.pointerId);knob.style.left=e.clientX+'px';knob.style.top=(e.clientY-stick.getBoundingClientRect().top)+'px';knob.hidden=false;nub.style.transform=''});
-stick.addEventListener('pointermove',e=>{if(!sp||e.pointerId!==sp.id)return;let dx=e.clientX-sp.x,dy=e.clientY-sp.y;const d=Math.hypot(dx,dy),m=48;if(d>m){dx=dx/d*m;dy=dy/d*m}nub.style.transform=`translate(${dx}px,${dy}px)`;const k=d<6?0:1;input.x=dx/m*k;input.z=dy/m*k});
+stick.addEventListener('pointermove',e=>{if(!sp||e.pointerId!==sp.id)return;let dx=e.clientX-sp.x,dy=e.clientY-sp.y;const d=Math.hypot(dx,dy),m=48;if(d>m){dx=dx/d*m;dy=dy/d*m}nub.style.transform=`translate(${dx}px,${dy}px)`;if(d<6){input.x=input.z=0}else{const L=Math.hypot(dx,dy)||1;input.x=dx/L;input.z=dy/L}/* v233: 살짝만 밀어도 최대 속도(방향만 사용) */});
 const endStick=e=>{if(!sp||e.pointerId!==sp.id)return;sp=null;input.x=input.z=0;knob.hidden=true};
 stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercancel',endStick);
 document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
@@ -3490,7 +3490,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v232';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v233';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
