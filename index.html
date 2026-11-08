@@ -734,6 +734,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="title" id="title"><div class="emb" id="emb" aria-hidden="true"></div><div><h1>잿불 성역</h1><div class="sub">Ember Sanctum</div></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div>
 <div class="scrim center" id="slots" hidden><div class="sheet modal" id="slotSheet"></div></div>
 <div class="scrim center" id="nick" hidden style="z-index:60"><div class="sheet modal" id="nickSheet"></div></div>
+<div class="scrim center" id="bossAsk" hidden style="z-index:60"><div class="sheet modal" id="bossAskSheet"></div></div>
 <div class="scrim center" id="restart" hidden><div class="sheet modal" id="restartSheet">
   <div><div class="chap">New Game</div><h2>처음부터 다시 시작할까요?</h2></div>
   <p class="hint">레벨, 스킬 강화, 스탯, 장비, 가방, 장 진행이 모두 지워지고 직업 선택부터 다시 시작합니다. 되돌릴 수 없습니다.</p>
@@ -844,7 +845,7 @@ const GEMS2={
 const chpSt=L=>({n:L>0?3+Math.floor((L-1)*4/9):0,/* v139: 1단계 3발 → 10단계 7발 */m:.35+.04*L,p:Math.round(L*.4)});
 const lbSt=L=>({r:1.8*(1+.4*L),m:.6+.15*L});
 /* v66: 궁수 2차 폭발 속성 — 번개(기본) / 화염. 바꿀 때 골드 소모, 캐릭터 레벨이 높을수록 비쌈. 피해·범위는 같고 이펙트만 다름 */
-const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.5초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>{if(typeof S==='undefined'||!S)return false;if(S.duel)return true;for(const e of enemies)if((e.boss||e.duel||e.final)&&e.aggro&&e.hp>0)return true;return false}/* 아직 깨우지 않은 스토리 보스는 해당 없음 — 가까이 가서 전투가 시작(aggro)되면 적용 */,bossOn=id=>!!(typeof S!=='undefined'&&S&&!(S.bossOff&&S.bossOff[id])&&inBossFight());/* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
+const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.35초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>{if(typeof S==='undefined'||!S)return false;if(S.duel)return true;for(const e of enemies)if((e.boss||e.duel||e.final)&&e.aggro&&e.hp>0)return true;return false}/* 아직 깨우지 않은 스토리 보스는 해당 없음 — 가까이 가서 전투가 시작(aggro)되면 적용 */,bossOn=id=>!!(typeof S!=='undefined'&&S&&!(S.bossOff&&S.bossOff[id])&&inBossFight());/* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
@@ -2747,7 +2748,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     spray(PADD,p,10,{sp:[2,6],up:[1,4],y:[.4,1],r0:R*.4,life:[.15,.3],s0:[.18,.26],s1:[.04,.06],c0:0xffffff,c1:0xb08aff,a:1,drag:2,rv:8,tex:3});
     if(R>=1.6)decalFx(p,crackTex,0x9a8aff,R*.9,.9,.5,true);return}
   /* v64 서리 폭발: v60의 하얀 원(서리 원판 + 밝은 테두리 + 충격파) 원복. 눈꽃 자국은 v63처럼 항상 같은 진하기 */
-  if(ice==='nova'){blastLoad+=.4;const heavy=blastLoad>BLAST_EMER,ka=Math.min(1,4.6/R);
+  if(ice==='nova'){blastLoad+=.4;const heavy=blastLoad>BLAST_EMER,ka=Math.min(1,4.6/R)*(bossOn('frost')?.8:1);/* v266: 보스 모드 서리 폭발 밝기 -20% */
     /* v180: 서리 원판·테두리·충격파 고리 제거 → 부드러운 서리 빛 번짐 + 서리 구름 + 얼음 가시 + 사방으로 튀는 얼음 조각 */
     fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.4,1/Math.sqrt(fbT.length));
     /* v190: 얼음판 감쇠는 실제로 자리가 겹치는 폭발만 셈 — 보주가 퍼져 서로 떨어지면 다시 원래 진하기 */
@@ -2833,7 +2834,7 @@ function updDmg(dt){for(const d of dnPool){if(!d.live)continue;d.t+=dt;d.wp.y+=d
 /* ================= combat ================= */
 function hurt(e,amt,quiet,so){
   if(e.hp<=0||e.air)return;
-  if(e.duel&&e.dA&&e.dA.k==='sipe'){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 잿불 검귀 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 */
+  if(e.duel&&e.dA&&e.dA.k==='sipe'&&!(e.dA.t<.8)){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 잿불 검귀 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 · v266: 검귀·아귀 모두 사이페 진입 후 0.8초는 피해가 들어가고, 그 사이 체력 0이면 처치 */
   if(e.chBoss)amt*=STORY_BOSS_DR;/* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
@@ -3287,8 +3288,8 @@ function castFire(slot,id){
     /* v49: 여러 개일 때 1개 밝기의 약 80% (색·광채·심지·꼬리 모두 20%만 어둡게) */
     const dk=n>1?.2:0,lc=(a,b)=>new THREE.Color(a).lerp(new THREE.Color(b),dk).getHex();
     const oc=lc(0x9ad8ff,0x1e4a78),gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
-    const BZ=bossOn('frost')&&n>1,biv=BZ?.5/(n-1):0;/* v263 보스 모드: 사방 대신 정면으로 0.5초 안에 연달아 */
-    for(let i=0;i<n;i++){const fire=()=>{const a=BZ?P.face:n>=3?P.face+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
+    const BZ=bossOn('frost')&&n>1,biv=BZ?.35/(n-1):0,af=P.face;/* v263 보스 모드: 사방 대신 정면으로 연달아 · v266: 0.35초 안에, 시전한 순간의 방향으로 고정 */
+    for(let i=0;i<n;i++){const fire=()=>{const a=BZ?af:n>=3?P.face+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
       shoot(a,{rib:{helix:.6*st.orbScale,spin:9,n:16,w:.16*st.orbScale,c0:0x5aa8ff,c1:0xd8f0ff,cw:.2,fade:.6},color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5),gcol:gc,rings:true,coreM:cm,coreS:.45*(1-dk*.5),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};if(BZ&&i)later(i*biv,()=>{if(P.hp>0)fire()});else fire()}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
@@ -3630,7 +3631,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v265';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v266';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4083,7 +4084,7 @@ function renderMenu(){
   <p class="hint" style="margin-top:6px">${S.autoGem==='bal'?'레벨업마다 가장 낮은 강화를 자동으로 올립니다.':S.autoGem&&S.autoGem.startsWith('g:')?`레벨업마다 「${(GEMS[S.autoGem.slice(2)]||{}).n}」을(를) 먼저 올리고, 최대 단계가 되면 가장 낮은 강화부터 올립니다.`:'끄면 레벨업마다 강화를 직접 고릅니다. 강화 이름을 고르면 그 강화를 먼저 올립니다.'}</p></div>`;
   for(const id of c.skills){
     const pts=skp(id);
-    h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="dps">${dpsHtml(id)}</div><button class="ghost" data-gostage="1" style="padding:8px">단계별 적정 DPS 보기</button><div class="stats">${statLine(id)}</div>
+    h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="dps">${dpsHtml(id)}</div><div class="stats">${statLine(id)}</div>
     <div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b>${detBtn()}</div><div class="gems">`;
     for(const g of gemsFor(id)){const L=gl(id,g);
       h+=`<div class="grow"><span class="gd" style="background:${GEMS[g].c}"></span><span class="t">${GEMS[g].n}<span class="pips" style="--c:${GEMS[g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
@@ -4100,7 +4101,7 @@ function renderMenu(){
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
       if(BOSS_IDS.includes(id)){const on=!(S.bossOff&&S.bossOff[id]);
-        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>보스전에 입장하면 자동 적용 · ${BOSS_D[id]} · 필드에서는 항상 일반 · 언제든 무료로 전환</small></span>
+        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>보스전에 입장하면 자동 적용 · ${BOSS_D[id]} · 필드에서는 항상 일반 · 보스 전투 시 스킬창에서 언제든 변경 가능합니다</small></span>
           <span class="elseg"><button class="pm wide${on?' on':''}" data-boss="${id},1" ${on?'disabled':''}>켜짐</button><button class="pm wide${on?'':' on'}" data-boss="${id},0" ${on?'':'disabled'}>꺼짐</button></span></div>`}
       {const L=S.sk2dmg||0,c=infCost(L),done=g2Done(id),can=done&&(S.ess||0)>=c.e&&S.gold>=c.g;
         h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span></span>
@@ -4643,6 +4644,15 @@ $('slots').addEventListener('click',e=>{if(e.target.id==='slots')closeSlots()});
 /* v265: 닉네임 — 한글(완성형) 최대 8자 · 영문/숫자 최대 16자, 섞으면 한글 2칸 · 영문 1칸으로 합쳐 16칸 */
 const NICK_MAX=16,nickW=s=>[...s].reduce((a,c)=>a+(/[가-힣]/.test(c)?2:1),0),nickClean=v=>{let o='',w=0;for(const c of v){if(!/[가-힣A-Za-z0-9]/.test(c))continue;const cw=/[가-힣]/.test(c)?2:1;if(w+cw>NICK_MAX)break;o+=c;w+=cw}return o};
 let pendNick='',nickCb=null;
+/* v266: 보스전에 들어가는 순간 보스 모드 사용 여부를 물음 (예 = 켜짐 · 아니오 = 꺼짐) — 보스 전투 중 스킬창에서 언제든 변경 */
+let bossWas=false,bossAskId=null;
+function bossAskTick(){const ib=!!(S.cls&&!S.demo&&inBossFight());if(ib&&!bossWas){const id=C().skills.find(k=>BOSS_IDS.includes(k));if(id)bossAskOpen(id)}bossWas=ib}
+function bossAskOpen(id){bossAskId=id;releaseAll();
+  $('bossAskSheet').innerHTML=`<div><div class="chap">Boss Mode</div><h2>보스 모드</h2></div><p style="margin:0;line-height:1.55">「${SK[id].n}」은(는) 보스 모드로 변경할 수 있는 스킬입니다.<br>하시겠습니까?</p><p class="hint" style="margin:0">${BOSS_D[id]}<br>보스 전투 시 스킬창에서 언제든 변경 가능합니다.</p><div class="btns"><button class="ghost" id="baNo">아니오</button><button class="primary" id="baYes">예</button></div>`;
+  $('bossAsk').hidden=false}
+$('bossAskSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!bossAskId)return;const id=bossAskId;S.bossOff=S.bossOff||{};
+  if(b.id==='baYes'){delete S.bossOff[id];feed(`${SK[id].n}: 보스 모드`,'#ff9a6a')}else if(b.id==='baNo'){S.bossOff[id]=1;feed(`${SK[id].n}: 일반 모드`,'#9ab')}else return;
+  bossAskId=null;$('bossAsk').hidden=true;save()});
 setInterval(()=>{if(curSlot!==null&&S.cls&&!S.demo&&!S.test&&$('nick').hidden)save()},30000);/* v265: 30초마다 자동 저장(플레이 시간 보존) */
 addEventListener('pagehide',()=>{if(curSlot!==null&&S.cls&&!S.demo)save()});
 function askNick(o){nickCb=o;
@@ -4940,7 +4950,7 @@ function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
-const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
@@ -4961,7 +4971,7 @@ function loop(now){
   if(!fxWarm)prewarmFx();
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const fo=paused()&&fxOnly();
-  if(!paused()){update(dt);updDmg(dt);hud();if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);hudMoney()}
+  if(!paused()){update(dt);updDmg(dt);hud();bossAskTick();if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
   if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);renderFrame(now/1000);requestAnimationFrame(loop);
 }
