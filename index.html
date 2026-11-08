@@ -3485,7 +3485,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v224';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v225';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4253,7 +4253,7 @@ const tkNeed=(L,k)=>k==='weapon'?(L>=30?2+Math.floor((L-30)/5):1):(L>=35?2+Math.
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<530)return;/* v148→v150: 컷신 구간은 컷신이 끝난 뒤 0.53초 쉬고 다음 강화 */if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},443);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<440)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 대기시간 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다.</p>`}/* v149 */
 function renderSmith(){
@@ -4289,7 +4289,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='smAuto'){smAuto?smAutoStop():smAutoStart();return}
   if(b.id==='smGo'){if(!smAuto)smithTry(false)}
   if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
-function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};
+function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};smBoost=boost?1:0;if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=24;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
     if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
@@ -4297,7 +4297,7 @@ function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
-let enhCineOn=0,enhCineEnd=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
+let enhCineOn=0,enhCineEnd=0,smBoost=0,smLastTry=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
 function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
   const base=L>=26?'200,120,255':'255,150,50';el.style.setProperty('--ec',base);
   let sp='';for(let i=0;i<16;i++){sp+=`<i class="in" style="left:${10+Math.random()*80}%;top:${66+Math.random()*24}%;--x:${((Math.random()-.5)*8).toFixed(1)}vmin;--y:-${(28+Math.random()*26).toFixed(1)}vmin;animation-delay:${(Math.random()*1).toFixed(2)}s;width:${2+Math.random()*3|0}px;height:${2+Math.random()*3|0}px"></i>`}
@@ -4306,7 +4306,10 @@ function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,
   document.body.appendChild(el);
   const fin=()=>{if(over)return;over=1;enhCineOn=0;enhCineEnd=Date.now();el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
-  setTimeout(()=>el.addEventListener('click',()=>{if(!revealed&&rv)rv();else if(canClose)fin()}),150);
+  setTimeout(()=>el.addEventListener('click',ev=>{
+    /* v225: 10배 골드·4배 확률 강화 버튼 위치를 계속 누르면 컷신 즉시 스킵 → 다음 강화가 이어서 진행 */
+    if(!auto&&smBoost&&smithOpen){const bt=document.getElementById('smGo20');if(bt&&!bt.disabled){const r=bt.getBoundingClientRect();if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){if(!revealed&&rv)rv();fin();setTimeout(()=>smithTry(false,true),0);return}}}
+    if(!revealed&&rv)rv();else if(canClose)fin()}),150);
   const T=auto?.4*.7:1.14;/* 슈유육… 모이는 시간 (자동 강화는 빠르게) */
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
   rv=()=>{
