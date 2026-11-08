@@ -1069,7 +1069,7 @@ const g2=g=>(S.sk2&&S.sk2[g])||0;
 /* 20레벨부터 필요 경험치 선형 증가: 40레벨 기존의 3배, 70레벨 기존의 10배 (70 이후는 10배 유지) */
 const xpMul=l=>l<=20?1:l<=40?1+2*(l-20)/20:l<=70?3+7*(l-40)/30:10;
 /* v135: 70레벨부터 5레벨마다 필요 경험치 ×1.18 누적(70레벨 ×1.18, 75레벨 ×1.39 … 119레벨 ×5.2) · 만렙 120 */
-const LV_MAX=150,XP_STEP=1.0994,/* v246: 만렙 120 → 150 · 70레벨 이후 5레벨당 ×1.18 → ×1.0994 (150레벨 누적 5.0M, 120레벨 누적 약 2.0M) */xpStep=l=>l>=70?Math.pow(XP_STEP,Math.floor((l-65)/5)):1;
+const LV_MAX=150,XP_STEP=1.18,/* v258: 사용자 표(150레벨 누적 11.17M, 120레벨 누적 3.10M)대로 복귀 — v246의 ×1.0994 완화는 철회, 만렙 150은 유지 */xpStep=l=>l>=70?Math.pow(XP_STEP,Math.floor((l-65)/5)):1;
 const needXp=()=>Math.round((30+S.lv*20)*xpMul(S.lv)*(S.lv<=20?.6:1)*xpStep(S.lv));
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*Math.pow(1.02,lv-50);/* v68: 30lv 이후 레벨당 +2.3%, 50lv 이후 +2% 복리 */
 const CURSE_FD=.8,curseOn=()=>!!(S.duel&&S.duel.uber&&!inTown),curseName=()=>S.duel&&S.duel.b==='maw'?'심연의 저주':'잿불의 저주';/* v227: 우버 결투 — 입장 시 저주 발동, 최종 피해 −20% */
@@ -3623,7 +3623,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v257';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v258';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
