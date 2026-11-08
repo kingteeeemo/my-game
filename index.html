@@ -2115,7 +2115,7 @@ function mawModel(U){const root=new THREE.Group();
     fin=new THREE.MeshStandardMaterial({color:U?0x6a1030:0x2a1060,roughness:.5,metalness:.1,emissive:U?0xff2a5a:0x7a30ff,emissiveIntensity:.35,side:THREE.DoubleSide,transparent:true,opacity:.92}),
     bone=new THREE.MeshStandardMaterial({color:0xcfc6b4,roughness:.45}),tooth=new THREE.MeshStandardMaterial({color:0xeae2d2,roughness:.4}),
     eye=new THREE.MeshBasicMaterial({color:U?0xff3a6a:0xb860ff}),glow=new THREE.MeshBasicMaterial({color:U?0xff2a5a:0x8a40ff,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false});
-  const CP0=[[0,-1.2,-.3],[.7,.8,-.9],[-.9,2.6,-.2],[.3,4.2,.9],[0,5.5,1.9],[0,6.2,2.9]].map(p=>new THREE.Vector3(...p));
+  const CP0=[[0,-1.2,0],[0,1.2,.05],[0,3.3,.25],[0,5.0,.7],[0,6.3,1.5],[0,6.9,2.5]]/* v214: 1자로 솟아 플레이어 쪽으로 머리를 숙임 */.map(p=>new THREE.Vector3(...p));
   const CP=CP0.map(v=>v.clone()),curve=new THREE.CatmullRomCurve3(CP,false,'centripetal',.5);
   const N=34,segs=[],spines=[],plates=[];const rad=t=>.42+1.25*Math.pow(1-t,.75)*(t<.1?.7+3*t:1);
   for(let i=0;i<N;i++){const t=i/(N-1),r=rad(t);const m=new THREE.Mesh(new THREE.SphereGeometry(1,22,16),skin);m.scale.setScalar(r);root.add(m);segs.push({m,t,r});
@@ -2149,14 +2149,14 @@ function mawModel(U){const root=new THREE.Group();
   mawPose(M,0,0);return M}
 /* 곡선을 따라 몸통 재배치 — ph: 물결 위상, open: 턱 벌림 */
 const _mp=new THREE.Vector3(),_mt=new THREE.Vector3(),_mq=new THREE.Quaternion(),_mz=new THREE.Vector3(0,0,1),_my=new THREE.Vector3(0,1,0);
-function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){const k=i/(CP.length-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.28*k,CP0[i].y+Math.sin(ph*.9+i)*.1*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.22*k)}curve.updateArcLengths();
+function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){const k=i/(CP.length-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.12*k,CP0[i].y+Math.sin(ph*.9+i)*.08*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.08*k)}curve.updateArcLengths();
   const at=(t,out)=>curve.getPointAt(Math.min(1,Math.max(0,t)),out);
   for(const s of M.segs){at(s.t,s.m.position)}
   for(const s of M.plates){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);_mq.setFromUnitVectors(_my,_mt);s.m.quaternion.copy(_mq);s.m.position.addScaledVector(_mz.set(0,0,1).applyQuaternion(_mq),s.r*.35)}
   for(const s of M.spines){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);const up=_mp.set(0,0,-1).applyQuaternion(_mq.setFromUnitVectors(_my,_mt));/* 등쪽(뒤) */
     if(s.web){s.m.position.addScaledVector(up,s.r*.9);s.m.quaternion.copy(_mq);s.m.rotateX(Math.PI/2)}else{s.m.position.addScaledVector(up,s.r*.85+.2);s.m.quaternion.setFromUnitVectors(_my,up.clone().add(_mt.clone().multiplyScalar(-.35)).normalize())}}
   for(const s of M.stripes){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);const up=_mp.set(0,0,-1).applyQuaternion(_mq.setFromUnitVectors(_my,_mt));const r=.42+1.25*Math.pow(1-s.t,.75);s.m.position.addScaledVector(up,r*.95);s.m.scale.set(r*.22,r*.12,r*.5);s.m.quaternion.copy(_mq)}
-  at(1,M.head.position);curve.getTangentAt(1,_mt);M.head.quaternion.setFromUnitVectors(_mz,_mt.clone().setY(_mt.y*.35).normalize());M.head.rotateX(-.15);
+  at(1,M.head.position);M.head.position.z+=.4;M.head.quaternion.setFromUnitVectors(_mz,_mt.set(Math.sin(ph*.7)*.06,-.32+Math.sin(ph*1.1)*.04,1).normalize());/* v214: 머리는 항상 플레이어 쪽을 내려다봄 */
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
   e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*MAW.t*2.5*(U?1.96:1));e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
@@ -2164,8 +2164,8 @@ function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{n
 function mawReset(e){e.dA=null;e.wv=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
 function mawMouth(e){const v=new THREE.Vector3();e.M.head.getWorldPosition(v);v.y-=.2;return v}
-function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber),a0=Math.atan2(P.pos.x,P.pos.z),O={x:0,z:0},ok=()=>e.hp>0&&S.duel&&e.dA===A;let A;
-  if(k==='breath'){const BT=MAW_BREATH_T[U?'u':'n'],dir=Math.random()<.5?-1:1,PRE=.8;A={k,t:0,a:a0,dur:PRE+BT+.3,tk:0,rk:.4,upd(dt){if(A.t<PRE){e.jaw=A.t/PRE;return}e.jaw=1;A.a=a0+dir*(A.t-PRE)/BT*Math.PI*2;
+function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber);let a0=Math.atan2(P.pos.x,P.pos.z),O={x:0,z:0},ok=()=>e.hp>0&&S.duel&&e.dA===A;let A;
+  if(k==='breath'){const BT=MAW_BREATH_T[U?'u':'n'],dir=Math.random()<.5?-1:1,PRE=.8;a0=rnd(0,Math.PI*2);/* v214: 시작 각도 랜덤 */A={k,t:0,a:a0,dur:PRE+BT+.3,tk:0,rk:.4,upd(dt){if(A.t<PRE){e.jaw=A.t/PRE;return}e.jaw=1;A.a=a0+dir*(A.t-PRE)/BT*Math.PI*2;
       const m=mawMouth(e),dx=Math.sin(A.a),dz=Math.cos(A.a),LB=ARENA_R+4,n=Math.ceil(dt*560*QM());/* v211: 더 진하고 길게 — 입자 2.5배·사거리 끝까지·굵게 + 반투명 원뿔 빔 */
       for(let i=0;i<n;i++){const d=rnd(1,LB),sp=rnd(.3,.55),off=rnd(-1,1)*d*.3,y=rnd(.1,2.2);emit(PADD,{x:m.x+dx*1.5,y:m.y-.5,z:m.z+dz*1.5,vx:(dx*d-dz*off-dx*1.5)/sp,vy:(y-(m.y-.5))/sp,vz:(dz*d+dx*off-dz*1.5)/sp,life:sp,s0:rnd(1.4,2.4),s1:rnd(3,4.6),c0:0xd8ff80,c1:0x2a0a4a,a:.9,tex:1})}
       for(let i=0;i<Math.ceil(dt*90*QM());i++){const d=rnd(3,LB),off=rnd(-1,1)*d*.3;emit(PNRM,{x:dx*d-dz*off,y:rnd(.1,.6),z:dz*d+dx*off,vy:rnd(.5,1.5),life:rnd(.8,1.4),s0:1.2,s1:3,c0:0x5a8a2a,c1:0x101a08,a:.5,drag:1.5,tex:2})}
@@ -2221,7 +2221,7 @@ function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)})}}
   e.pt-=dt;if(e.pt>0||e.wv||d>=MAW_MELEE)return;const pool=['breath','sting','pull','orbs','wave'];let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
 function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
-  mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
+  mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
 function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&!S.test)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
@@ -3476,7 +3476,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v213';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v214';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
