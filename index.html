@@ -1964,7 +1964,10 @@ const fbReq=()=>ETYPES.boss.hp*CH[LAST].hp*FB_HP/(FB_TIME-FB_AIR)*1.3;/* v58: +3
 const DUEL={n:'잿불 검귀',t:70},SCR_P=.3,scrP=m=>m==='u'?.2:SCR_P;/* v131: 우버 상급 각인의 서 20% *//* v101: 각인의 서 드롭률 30% (v96: 10%) · 수치 8% 고정 */
 const DUEL_M={n:{tier:10,b:10,n:'일반',v:8},u:{tier:40,b:30,n:'우버',v:11}};/* v97: 난이도 고정 — 일반 위험도 10 · 우버 위험도 30 → v159: 우버 위험도 40(냉기 등 환경). b=체력·보상·필요 DPS 기준 위험도(우버는 옛 30 유지) */
 const spKeyOf=slot=>RARE_OPT.find(k=>OPT[k].slots.includes(slot)),scrName=sc=>sc.v>=10?'상급 각인의 서':'각인의 서';/* t: 위험도 권장 DPS로 약 70초 */
-const duelReq=(m)=>{const D=m?DUEL_M[m]:(S.duel&&DUEL_M[S.duel.m||'n'])||DUEL_M.n;return stageReq(NCH,D.b)};
+const DUEL_MAW={n:{tier:40,b:40},u:{tier:50,b:50}};/* v221: 심연의 아귀 위험도 — 일반 40 · 우버 50 */
+const duelCfg=(m,b)=>b==='maw'?{...DUEL_M[m],...DUEL_MAW[m]}:DUEL_M[m];
+const duelReq=(m)=>{const D=m?DUEL_M[m]:(S.duel&&duelCfg(S.duel.m||'n',S.duel.b))||DUEL_M.n;return stageReq(NCH,D.b)};
+const uberKnightHp=()=>Math.round(stageReq(NCH,DUEL_M.u.b)*DUEL.t*2.5*1.96);/* 우버 잿불 검귀 체력 — 아귀 체력 기준 */
 const dh=p=>hurtPct(p*(S.duel&&S.duel.uber?1.15:1));
 function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [...g.children])if(c.isMesh&&!c.userData.pv&&c!==u.body)g.remove(c);
   const mats=new Map();let armor=null;
@@ -2159,7 +2162,7 @@ function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){
   at(1,M.head.position);M.head.position.z+=.4;M.head.quaternion.setFromUnitVectors(_mz,_mt.set(Math.sin(ph*.7)*.06,-.32+Math.sin(ph*1.1)*.04,1).normalize());/* v214: 머리는 항상 플레이어 쪽을 내려다봄 */
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
-  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*MAW.t*2.5*(U?1.96:1));e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
+  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8:1.3));/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
   e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
 function mawReset(e){e.dA=null;e.wv=0;e.pullCd=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
@@ -2230,19 +2233,19 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&!S.test)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
+function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&!S.test)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
-  S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,rolled:false,res:[]};
+  S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
-/* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 우버에서만 확정 강화 주문서(10%)를 각각 따로 굴림 */
+/* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 심연의 아귀에서만 확정 강화 주문서(10%, 일반 1개·우버 3개)를 각각 따로 굴림 */
 const TK_P=.1;let duelBonus=null;
 function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.res=[];
   if(Math.random()<scrP(b.m)){const sc={v:DUEL_M[b.m].v};S.scrolls=(S.scrolls||[]).concat(sc);b.res.push({t:'scr',sc})}
-  if(b.U&&Math.random()<TK_P){S.tickets=(S.tickets||0)+1;b.res.push({t:'tk'})}
+  if(b.mb&&Math.random()<TK_P){const n=b.U?3:1;S.tickets=(S.tickets||0)+n;b.res.push({t:'tk',n})}/* v221: 확정 강화 주문서는 심연의 아귀에서만 — 일반 1개 · 우버 3개, 확률 10% */
   save()}
-const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
+const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서 ×${r.n||1}</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
 function bonusCine(done){const b=duelBonus,res=b.res,got=res.length>0,el=document.createElement('div');el.className='ecine charge bonus';el.style.setProperty('--ec',b.U?'180,130,255':'230,200,120');
   el.innerHTML=`<div class="rune"></div><div class="rune r2"></div><div class="orb"></div><div class="wait"><small>BONUS REWARD</small><b>?</b><span>추가 보상 확인 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   document.body.appendChild(el);let over=0,rv=0,cc=0,tm=0;
@@ -3482,7 +3485,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v220';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v221';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3810,7 +3813,7 @@ function showFinalClear(){
   $('clear').hidden=false;releaseAll();
 }
 $('clearSheet').addEventListener('click',e=>{
-  if(e.target.id==='duelAgain'){$('clear').hidden=true;const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b;S.duel={tier:DUEL_M[m].tier,uber:m==='u',m,b};collectAll();resetWorld();return}
+  if(e.target.id==='duelAgain'){$('clear').hidden=true;const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b;S.duel={tier:duelCfg(m,b).tier,uber:m==='u',m,b};collectAll();resetWorld();return}
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11);bonusCine(()=>showDuelClear(g));return}
   if(e.target.id==='tutEnd'){tutEnd();return}
