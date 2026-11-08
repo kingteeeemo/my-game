@@ -3490,7 +3490,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v231';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v232';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3721,7 +3721,7 @@ function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove
   for(const d of dnPool){d.live=false;d.el.hidden=true}
   Object.assign(P,{spin:0,vortex:null,dashT:0,swing:0,spinFire:false,hasteT:0,wFx:null})}
 function fxReset(){wipeFx();P.cd.s1=0}
-function demoSetup(cls,sk){fxReset();S=fresh();Object.assign(S,{arEl:sk==='volley'?'fire':'bolt',cls,main:sk,demo:true,testGod:true,lv:70,n31:1,n5:1,ch:NCH,tier:1,maxTier:1,autoTier:false});
+function demoSetup(cls,sk){fxReset();S=fresh();Object.assign(S,{arEl:'bolt',cls,main:sk,demo:true,testGod:true,lv:70,n31:1,n5:1,ch:NCH,tier:1,maxTier:1,autoTier:false});
   S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);
   for(const k of EQS)S.eq[k]=makeItem(k,60,3,0);
   inTown=false;scene.remove(hero);hero=makeHero(cls);scene.add(hero);applyGearLook();setMap(true);applyTheme();resetWorld();
