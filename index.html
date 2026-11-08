@@ -962,11 +962,12 @@ const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;
 const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
 const BOOST_G=10,BOOST_R=4,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 → v146: 4배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
-const enhMB=L=>1+ENH_B*enhSum(L),enhMO=(L,k)=>1+ENH_O*enhSum(L)*(ENH_HALF[k]?.5:1);const ENH_HALF={fdmg:1,spd:1,mcr:1};/* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
+let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
+const enhMB=(L,sl)=>1+ENH_B*enhSum(L)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*enhSum(L)*(ENH_HALF[k]?.5:1)*wk(sl);const ENH_HALF={fdmg:1,spd:1,mcr:1};/* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
-  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L),mo=enhMO(L),b=it.base*mb;
-    if(k==='weapon')g.wdmg+=b;else if(k==='amulet')g.mp+=b;else if(k==='ring')g.hp+=b;else g.armor+=b;for(const o of it.opts)g[o.k]=(g[o.k]||0)+o.v*(ENH_HALF[o.k]?enhMO(L,o.k):mo)}
+  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L,k),mo=enhMO(L,undefined,k),b=it.base*mb;
+    if(k==='weapon')g.wdmg+=b;else if(k==='amulet')g.mp+=b;else if(k==='ring')g.hp+=b;else g.armor+=b;for(const o of it.opts)g[o.k]=(g[o.k]||0)+o.v*(ENH_HALF[o.k]?enhMO(L,o.k,k):mo)}
   for(const k of ['wdmg','armor','hp','mp'])g[k]=Math.round(g[k]);for(const k of ['dmgPct','crit','cdr','spd','regen','mreg','mcr','fdmg'])g[k]=Math.round(g[k]*10)/10;
   /* v146: 쿨타임 감소 상한(40%) 폐지 — 쿨다운 배율은 최소 10%로만 보호 */g.mcr=Math.min(g.mcr,50);return g}
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
@@ -3485,7 +3486,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v225';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v226';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4006,12 +4007,12 @@ function closeAllSheets(){if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeo
 
 /* ================= equipment & bag ================= */
 let invOpen=false,invSel=null,clearArm=0;
-const optLine=(o,L=0)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,enhMO(L,o.k)))}${OPT[o.k].sp&&L>0&&ev(o.v,enhMO(L,o.k))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
+const optLine=(o,L=0,sl)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,enhMO(L,o.k,sl)))}${OPT[o.k].sp&&L>0&&ev(o.v,enhMO(L,o.k,sl))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
 const baseName=sl=>sl==='weapon'?'무기 피해':sl==='amulet'?'최대 마나':sl==='ring'?'최대 생명력':'방어력';
-const baseLine=(it,L=0)=>`${baseName(it.slot)} +${Math.round(it.base*enhMB(L))}`;
+const baseLine=(it,L=0)=>`${baseName(it.slot)} +${Math.round(it.base*enhMB(L,it.slot))}`;
 /* 특수 능력치(부위 전용: 투구 재사용 대기시간 · 신발 이동 속도 · 목걸이 마나 재생 · 반지 마나 소모)는 첫 줄에 강조 */
 function itemList(it,L=0,fresh){const sp=it.opts.filter(o=>OPT[o.k]&&OPT[o.k].sp),rest=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));
-  return `<ul>${sp.map(o=>`<li class="spopt${fresh?' fresh':''}"><span>특수</span>${optLine(o,L)}</li>`).join('')}<li>${baseLine(it,L)}</li>${rest.map(o=>`<li>${optLine(o,L)}</li>`).join('')}</ul>`}
+  return `<ul>${sp.map(o=>`<li class="spopt${fresh?' fresh':''}"><span>특수</span>${optLine(o,L,it.slot)}</li>`).join('')}<li>${baseLine(it,L)}</li>${rest.map(o=>`<li>${optLine(o,L,it.slot)}</li>`).join('')}</ul>`}
 /* 뽑기 목록: 부위별 특수 능력치와 이 레벨에서 나올 수 있는 범위·확률 (전설 = 옵션 4개) */
 function spInfo(slot,l){const k=Object.keys(OPT).find(k=>OPT[k].sp&&OPT[k].slots.includes(slot));if(!k)return '';const o=OPT[k],[a,b]=o.rng(l),rare=RARE_OPT.includes(k);
   const normal=Object.keys(OPT).filter(x=>OPT[x].slots.includes(slot)&&!RARE_OPT.includes(x)).length,p=rare?RARE_P:Math.min(1,4/normal);
@@ -4022,7 +4023,7 @@ function cmpLine(it){const cur=S.eq[it.slot];if(!cur)return '<span class="p">빈
 /* v78 장비 화면: 세로 = 위 비교(현재 장착 | 선택) + 장착 6칸 + 가방 / 가로 = 왼쪽 비교 + 장착 목록 · 오른쪽 가방 / PC = 위 비교 + 아래 장착 · 가방 */
 let eqSel=null;
 const invMode=()=>innerWidth<innerHeight?'p':(matchMedia('(pointer:coarse)').matches||innerHeight<=520)?'l':'pc';
-function ivVals(it){const L=enhL(it.slot),m={};m._b=it.base*enhMB(L);for(const o of it.opts)if(OPT[o.k]&&!OPT[o.k].sp)m[o.k]=(m[o.k]||0)+ev(o.v,enhMO(L,o.k));return m}
+function ivVals(it){const L=enhL(it.slot),m={};m._b=it.base*enhMB(L,it.slot);for(const o of it.opts)if(OPT[o.k]&&!OPT[o.k].sp)m[o.k]=(m[o.k]||0)+ev(o.v,enhMO(L,o.k,it.slot));return m}
 const ivFmt=(k,v)=>k==='_b'?`+${Math.round(v)}`:OPT[k].f(v);
 const ivName=(k,sl)=>k==='_b'?baseName(sl):OPT[k].n;
 function ivCard(it,role,other){
@@ -4033,12 +4034,12 @@ function ivCard(it,role,other){
     if(role==='sel'&&ov){if(a===undefined)d=`<span class="d bad">▼ ${ivFmt(k,b).replace(/^[-+]/,'')}</span>`;else if(b===undefined)d='<span class="d good">신규</span>';else{const x=Math.round((a-b)*10)/10;d=x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${ivFmt(k,Math.abs(x)).replace(/^[-+]/,'')}</span>`:'<span class="d same">=</span>'}}
     return `<div class="ivl"><span>${ivName(k,it.slot)}</span><b>${a===undefined?'—':ivFmt(k,a)}</b>${d}</div>`};
   let spl='';
-  if(sp)spl=`<div class="ivl"><span class="spb">특수</span><span class="spt">${optLine(sp,L)}</span>${role==='sel'&&osp?(osp.k===sp.k?(()=>{const x=sp.v-osp.v;return x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${Math.abs(x)}</span>`:'<span class="d same">=</span>'})():`<span class="d bad">기존 ★ 대체</span>`):''}</div>`;
+  if(sp)spl=`<div class="ivl"><span class="spb">특수</span><span class="spt">${optLine(sp,L,it.slot)}</span>${role==='sel'&&osp?(osp.k===sp.k?(()=>{const x=sp.v-osp.v;return x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${Math.abs(x)}</span>`:'<span class="d same">=</span>'})():`<span class="d bad">기존 ★ 대체</span>`):''}</div>`;
   else if(role==='sel'&&osp)spl=`<div class="ivl"><span class="spb off">특수</span><span style="color:var(--muted)">없음</span><span class="d bad">▼ ${OPT[osp.k].n} ${OPT[osp.k].f(osp.v)}</span></div><div class="ivhint">전승사에서 지금 장비의 특수 능력치를 옮길 수 있습니다</div>`;
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
     <b class="ivn" style="color:${RAR[it.rar].c}">${it.name}</b><span class="ivs">${RAR[it.rar].n} · iLv ${it.ilvl}</span>${spl}${keys.map(row).join('')}</div>`}
 function ivAct(it,cur){if(!it)return '';const a=dpsWith(it),b=cur?dpsWith(cur):skillDps(C().skills[0]).main,p=b?(a-b)/b*100:0;
-  const hv=x=>x?(x.slot==='ring'?x.base*enhMB(enhL(x.slot)):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot)):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
+  const hv=x=>x?(x.slot==='ring'?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
   const dh=Math.round(hv(it)-hv(cur)),da=Math.round(av(it)-av(cur)),c=Math.abs(p)<.05?'same':p>0?'good':'bad';
   return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 DPS</span><b>${c==='same'?'변화 없음':`${p>0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%`}</b><small>${dh?`생명력 ${dh>0?'+':''}${dh}`:''}${dh&&da?' · ':''}${da?`방어력 ${da>0?'+':''}${da}`:''}</small></div>
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
@@ -4270,8 +4271,8 @@ function renderSmith(){
     const rc=it?RAR[it.rar].c:'#555',
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
-      info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1))}</b>`}</div>${itemList(it,L)}`:'',
-      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L)-1)*100)}%</b>${['weapon','boots','ring'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':'마나 소모 감소'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':'mcr')-1)*100)}%)</small>`:''}</span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
+      info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
+      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':'마나 소모 감소'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':'mcr',k)-1)*100)}%)</small>`:''}</span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
       hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():''),
