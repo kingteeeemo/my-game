@@ -2869,7 +2869,7 @@ const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m
 const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
-  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>({n:L>=7?4:L>=4?3:L>=1?2:1,m:.6+.02*L});/* v195: 다중 기둥은 1차(10단계) — 1·4·7단계에 2·3·4개, 10단계 = 옛 3단계(4개 ×.80) */
+  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>({n:L>=7?4:L>=4?3:L>=1?2:1,m:1});/* v195: 다중 기둥은 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 기둥당 피해 감소 없음(×1.0) */
 const SK_NEW={
   wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
@@ -3338,7 +3338,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v196';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v197';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
