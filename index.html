@@ -234,6 +234,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 #slots,#classSel{background:#07060a}
 .sheet{width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:#17171d;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
+#smith .sheet>*{flex-shrink:0}
 .shead{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .sheet h2{margin:0;font-size:19px;font-weight:900;text-wrap:balance}
 .close{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;font:700 13px var(--ko)}
@@ -3488,7 +3489,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v229';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v230';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4287,7 +4288,7 @@ function renderSmith(){
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
       <div class="spR"><div class="smbig smact" style="--rc:${rc}">${res}${lv}${rateBig}<div class="smstats">${rate}</div>${hint}</div>${btns}</div></div>`;
     else h+=`<div class="smbig" style="--rc:${rc}">${res}${lv}${rateBig}${nm}${info}<div class="smstats">${bonus}${rate}</div>${hint}</div>${btns}`}
-  $('smithSheet').innerHTML=h;goldFx=null}
+  {const sh=$('smithSheet'),top=sh.scrollTop,same=sh.dataset.sel===(smithSel||'');sh.dataset.sel=smithSel||'';sh.innerHTML=h;if(same)sh.scrollTop=top}goldFx=null}
 $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='smClose'){closeSmith();return}
   if(b.dataset.sel){smithSel=b.dataset.sel;smithRes=null;renderSmith();return}
