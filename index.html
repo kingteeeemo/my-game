@@ -2213,12 +2213,13 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
         groundFx({x:Math.sin(a)*L*.5,z:Math.cos(a)*L*.5},dotTex,0x9a40ff,L*.3,L*.6,.35,.6,true,.07);
         if(P.hp>0&&inFan(P.pos,O,a,H,L))hurtPct(C.sipe)})})})}}
 function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;
+  if(e.dA&&e.dA.k!=='sipe'&&mawDist()>=MAW_MELEE){e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
   if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?1.6:2.4;e.at=0;e.bt=0}return}
   if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;mawSipe(e);return}
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)})}}
-  e.pt-=dt;if(e.pt>0||e.wv)return;const pool=['breath','sting','pull','orbs','wave'];let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
+  e.pt-=dt;if(e.pt>0||e.wv||d>=MAW_MELEE)return;const pool=['breath','sting','pull','orbs','wave'];let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
 function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
@@ -3475,7 +3476,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v212';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v213';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
