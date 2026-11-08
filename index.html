@@ -2104,7 +2104,7 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
    패턴 4 독 구체: 유도 독 구체 3개/5개(직격 20%/30%) — 옆으로 피하거나 구르기. 떨어진 자리에 독 웅덩이.
    패턴 5 심연의 파동: 웅덩이 가까이(안전 원 안)만 안전, 밖은 45%/70% — 가까이 붙기.
    사이 페이즈(체력 50%, 1회): 웅덩이로 잠수·무적. 맵 6등분 → 6칸을 시간차로 예고 → 예고 순서대로 6연타(50%/즉사). 3회 반복 후 종료. 미리 처치하면 생략. */
-const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=7.5;
+const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=8.6,MAW_POOL=3.9;/* v216: 안전 반경 7.5→8.6, 웅덩이 진입 불가 */
 const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:.6,pullV:4.4,orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.4,pullV:3.6,orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
 const duelDef=()=>S.duel&&S.duel.b==='maw'?MAW:DUEL;
 /* 구르기 무적을 무시하는 % 피해 (브레스) */
@@ -2197,10 +2197,14 @@ function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber);let a0=Math.atan
           orb.position.x+=vx*dt;orb.position.z+=vz*dt;orb.position.y=1+Math.sin(time*8)*.1;if(Math.random()<.8)emit(PADD,{x:orb.position.x,y:1,z:orb.position.z,life:.25,s0:.6,s1:.1,c0:0xd0ff90,c1:0x3a7a1a,a:.7,tex:1});
           if(d<1.2||Math.hypot(orb.position.x,orb.position.z)>ARENA_R-.5){boom();orb.visible=false}},end(){if(!done)boom();mfree(orb.material)}})})}
   else if(k==='wave'){const W=1.6;A={k,t:0,a:a0,dur:W+.9,upd(){e.jaw=A.t<W?.3:1}};
+    {const dome=new THREE.Mesh(new THREE.SphereGeometry(MAW_SAFE,48,24,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0x4aa0ff,transparent:true,opacity:.16,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));dome.position.set(0,.05,0);
+      const dome2=new THREE.Mesh(new THREE.SphereGeometry(MAW_SAFE*.995,48,24,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0x9ad8ff,wireframe:true,transparent:true,opacity:.14,depthWrite:false}));dome.add(dome2);
+      const base=flatMesh(ringGeo,0x6ab8ff,.8);base.scale.set(MAW_SAFE,MAW_SAFE,1);base.position.y=.08;dome.add(base);scene.add(dome);
+      fx.push({m:dome,t:0,dur:W+.35,upd(k,dt){const pulse=1+Math.sin(time*9)*.03;dome.scale.set(pulse,1,pulse);dome.material.opacity=.16+.08*Math.sin(time*7);const e2=Math.max(0,(k-(W/(W+.35)))/(.35/(W+.35)));dome.material.opacity*=1-e2;dome2.material.opacity=.14*(1-e2);base.material.opacity=.8*(1-e2)},end(){dome2.geometry.dispose();dome.geometry.dispose();dome2.material.dispose();dome.material.dispose()}})}
     donutTele(O,MAW_SAFE,ARENA_R+1,W,()=>{if(!ok())return;shake=Math.max(shake,.45);flash(O,0x9a40ff,2);
       const ring=flatMesh(ringGeo,0xb060ff,.9);ring.position.set(0,.4,0);scene.add(ring);fx.push({m:ring,t:0,dur:.5,upd(k){const r=MAW_SAFE+(ARENA_R-MAW_SAFE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.9*(1-k)}});
-      if(P.hp>0&&mawDist()>MAW_SAFE)hurtPct(C.wave)});
-    toast('심연의 파동',`${e.name} 가까이, 초록 원 안으로 들어가세요`)}
+      if(P.hp>0&&mawDist()>MAW_SAFE)hurtPct(C.wave)},true);
+    toast('심연의 파동',`${e.name} 가까이, 푸른 보호막 안으로 들어가세요`)}
   e.dA=A}
 /* 사이 페이즈: 잠수(무적) → 6등분 예고 → 순서대로 6연타 ×3회 */
 function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.PI/6,L=ARENA_R+1,INT=C.sipeInt,FL=.4,ROUND=6*FL+.7+6*INT+.9;
@@ -2219,7 +2223,7 @@ function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;toast('전방위 파동',`${e.name}에게 가까이 붙으세요`);donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)},true)}}
-  e.pt-=dt;if(e.pt>0||e.wv||d>=MAW_MELEE)return;const pool=['breath','sting','pull','orbs','wave'];let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
+  e.pt-=dt;if(e.pt>0||e.wv||d>=MAW_MELEE)return;const pool=['breath','sting','pull','orbs'];/* v216: 심연의 파동은 흡입 뒤에만 */let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
 function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
@@ -3476,7 +3480,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v215';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v216';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4493,7 +4497,8 @@ function resetWorld(){clearPools();wipeFx();packQ=[];
 function pushOut(p,r){
   for(const c of colliders){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-4){p.x=c.x+dx/d*m;p.z=c.z+dz/d*m}}
   mapClamp(p,r);
-  if(mapKind==='arena'||mapKind==='town'){const d=Math.hypot(p.x,p.z),m=(mapKind==='town'?TOWN_R:ARENA_R)-r;if(d>m){p.x*=m/d;p.z*=m/d}}
+  if(mapKind==='arena'||mapKind==='town'){const d=Math.hypot(p.x,p.z),m=(mapKind==='town'?TOWN_R:ARENA_R)-r;if(d>m){p.x*=m/d;p.z*=m/d}
+    if(S.duel&&S.duel.b==='maw'&&p===P.pos){const pm=MAW_POOL+r;if(d<pm){if(d<1e-4){p.z=pm}else{p.x*=pm/d;p.z*=pm/d}}}}/* v216: 웅덩이 접근 불가 */
 }
 /* ================= 구르기 (v122) =================
    전사·궁수·마법사 공통. 선딜레이 없이 즉시, 쿨타임 2.5초(레벨·재사용 감소 무관), 구르는 동안 무적. */
