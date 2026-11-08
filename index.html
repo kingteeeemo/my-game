@@ -970,7 +970,7 @@ const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
 const BOOST_G=10,BOOST_R=4,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 → v146: 4배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
-const W35=35,esum=(L,sl)=>sl==='weapon'&&L>W35?enhSum(W35)+(enhSum(L)-enhSum(W35))*.5:enhSum(L);/* v259: 무기 35강 이후 단계별 상승량 절반 */
+const W30=30,W35=35,esum=(L,sl)=>{if(sl!=='weapon'||L<=W30)return enhSum(L);const a=enhSum(W30),m=Math.min(L,W35);let v=a+(enhSum(m)-a)*.7;if(L>W35)v+=(enhSum(L)-enhSum(W35))*.4;return v};/* v259: 무기 35강 이후 단계별 상승량 절반 → v260: 30→35강 구간 70% · 35강 이후 40% */
 const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*esum(L,sl)*(ENH_HALF[k]||1)*wk(sl);const ENH_HALF={fdmg:.5,spd:.5,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
@@ -1072,7 +1072,7 @@ const xpMul=l=>l<=20?1:l<=40?1+2*(l-20)/20:l<=70?3+7*(l-40)/30:10;
 /* v135: 70레벨부터 5레벨마다 필요 경험치 ×1.18 누적(70레벨 ×1.18, 75레벨 ×1.39 … 119레벨 ×5.2) · 만렙 120 */
 const LV_MAX=150,XP_STEP=1.18,/* v258: 사용자 표(150레벨 누적 11.17M, 120레벨 누적 3.10M)대로 복귀 — v246의 ×1.0994 완화는 철회, 만렙 150은 유지 */xpStep=l=>l>=70?Math.pow(XP_STEP,Math.floor((l-65)/5)):1;
 const needXp=()=>Math.round((30+S.lv*20)*xpMul(S.lv)*(S.lv<=20?.6:1)*xpStep(S.lv));
-const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*Math.pow(1.02,lv-50);/* v68: 30lv 이후 레벨당 +2.3%, 50lv 이후 +2% 복리 */
+const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*(lv<=70?Math.pow(1.01,lv-50):Math.pow(1.01,20)*(lv<=90?Math.pow(1.005,lv-70):Math.pow(1.005,20)*Math.pow(1.003,lv-90)));/* v68: 30lv 이후 레벨당 +2.3% 복리 · v260: 50lv 이후 +1% · 70lv 이후 +0.5% · 90lv 이후 +0.3% (복리) */
 const CURSE_FD=.8,curseOn=()=>!!(S.duel&&S.duel.uber&&!inTown),curseName=()=>S.duel&&S.duel.b==='maw'?'심연의 저주':'잿불의 저주';/* v227: 우버 결투 — 입장 시 저주 발동, 최종 피해 −20% */
 const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)*(curseOn()?CURSE_FD:1)};
 const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear().hp);
@@ -3624,7 +3624,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v259';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v260';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
