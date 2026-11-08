@@ -2011,13 +2011,16 @@ function airStep(e,dt){const A=e.air,M=e.M;A.t+=dt;
 function deathFx(e){const g=e.g,side=Math.random()<.5?-1:1;e.mat.transparent=true;const y0=g.position.y;
   fx.push({m:g,t:0,dur:.75,keep:1,upd(k){g.rotation.z=side*Math.min(1,k*2.2)*1.3;g.position.y=y0-Math.max(0,k-.45)*1.2;e.mat.opacity=1-Math.max(0,(k-.4)/.6)},end(){e.mat.dispose()}})}
 /* v131 보스 쓰러짐: 비틀거림 → 옆으로 쓰러짐(쿵, 먼지·흔들림) → 잠시 누워 있다가 땅속으로 가라앉음 */
-function bossFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,y0=g.position.y,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
+function bossFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
+  /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
+  const MW=!!(e.maw&&e.M&&e.M.root),tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
+  const lp=MW?{x:e.pos.x-side*Math.cos(ry)*H*.5,z:e.pos.z+side*Math.sin(ry)*H*.5}:e.pos;
   if(e.air)e.air=null;g.children.forEach(c=>c.visible=true);shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
-  fx.push({m:g,t:0,dur:2.8,keep:1,upd(k){const T=k*2.8;g.rotation.y=ry;
-    if(T<.5){const a=T/.5;g.rotation.order='YXZ';g.rotation.x=-.2*Math.sin(a*Math.PI*.9);g.rotation.z=Math.sin(T*38)*.05*(1-a);g.position.y=y0*(1-a)}
-    else if(T<1.15){const a=(T-.5)/.65;g.rotation.x=-.1*(1-a);g.rotation.z=side*a*a*1.45;g.position.y=0}
-    else{if(!land){land=1;shake=Math.max(shake,.55);groundFx(e.pos,shockTex,0xc8b090,1,e.r*3.4,.55,.8,true,.08);spray(PNRM,e.pos,26,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}
-      const a=T-1.15;g.rotation.z=side*(1.45+.1*Math.sin(a*10)*Math.exp(-a*6));if(T>2.05)g.position.y=-(T-2.05)/.75*H*.7}},
+  fx.push({m:g,t:0,dur:2.8,keep:1,upd(k){const T=k*2.8;if(!MW)g.rotation.y=ry;tg.rotation.order='YXZ';
+    if(T<.5){const a=T/.5;tg.rotation.x=rx0-.2*Math.sin(a*Math.PI*.9);tg.rotation.z=rz0+Math.sin(T*38)*.05*(1-a);tg.position.y=y0*(1-a)}
+    else if(T<1.15){const a=(T-.5)/.65;tg.rotation.x=rx0-.1*(1-a);tg.rotation.z=rz0+side*a*a*1.45;tg.position.y=0}
+    else{if(!land){land=1;shake=Math.max(shake,.55);groundFx(lp,shockTex,MW?0xa080d0:0xc8b090,1,e.r*3.4,.55,.8,true,.08);spray(PNRM,lp,26,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:MW?0x6a5a8a:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}
+      const a=T-1.15;tg.rotation.z=rz0+side*(1.45+.1*Math.sin(a*10)*Math.exp(-a*6));if(T>2.05)tg.position.y=-(T-2.05)/.75*H*.7}},
     end(){try{e.mat.dispose()}catch(_){}}})}
 function dropEnemy(e,anim){if(anim){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);deathFx(e);return}scene.remove(e.g);e.mat.dispose();e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1)}
 /* 스토리 맵: 길을 따라 미리 배치된 무리 (가까이 가면 깨어남) */
@@ -2193,7 +2196,7 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
    패턴 5 심연의 파동: 웅덩이 가까이(안전 원 안)만 안전, 밖은 45%/70% — 가까이 붙기.
    사이 페이즈(체력 50%, 1회): 웅덩이로 잠수·무적. 맵 6등분 → 6칸을 시간차로 예고 → 예고 순서대로 6연타(50%/즉사). 3회 반복 후 종료. 미리 처치하면 생략. */
 const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=9.8,MAW_POOL=3.9;/* v216: 안전 반경 7.5→8.6, 웅덩이 진입 불가 */
-const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:1,pullV:[8,2],orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.7,pullV:[7,1.5],orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
+const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:1,pullV:[16,4],/* v237: 우버 흡입력 2배 */orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.7,pullV:[7,1.5],orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
 const duelDef=()=>S.duel&&S.duel.b==='maw'?MAW:DUEL;
 /* 구르기 무적을 무시하는 % 피해 (브레스) */
 function hurtPctRaw(pct){if(P.hp<=0||S.testGod)return;const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=Math.max(P.inv,.15);dmgNum(P.pos,d,'hurt');const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
@@ -2309,7 +2312,7 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
 function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;e.pullCd=(e.pullCd||0)-dt;
   if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;e.wv=0;e.jaw=0;mawSipe(e);return}/* v220: 체력 50%가 되면 진행 중 패턴을 끊고 즉시 사이 페이즈 */
   if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&e.dA.k!=='breath'&&mawDist()>=MAW_MELEE){/* v217: 브레스 중엔 멀어져도 취소·파동 없음 */e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
-  if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?1.6:2.4;e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?85:110;/* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
+  if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?.96:1.44;/* v237: 패턴 간격 -40% (2.4/1.6 → 1.44/0.96) */e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?60:77;/* v237: -30% *//* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;toast('전방위 파동',`${e.name}에게 가까이 붙으세요`);donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)},true)}}
@@ -2362,7 +2365,7 @@ function dropGiven(p,it){const q=scatter(p),g=lootMesh(it);g.position.set(q.x,0,
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]};
   $('clearSheet').innerHTML=`<div><div class="chap">Duel Clear · ${S.duel&&S.duel.uber?'우버':'일반'} · 위험도 ${S.duel?S.duel.tier:10}</div><h2>${duelDef().n} 격파!</h2></div>
   <p class="hint">기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p>
-  ${b.rolled?(b.res.length?`<div class="dlist">${b.res.map(r=>`<div>${bonusLine(r)}</div>`).join('')}</div>`:`<p class="hint">추가 보상: 이번에는 나오지 않았습니다</p>`):`<button class="primary bonusbtn" id="bonusGo">추가 보상 획득<small>${b.U?`<span style="color:#c890ff">★ 상급 각인의 서</span> ${Math.round(scrP('u')*100)}% · <span style="color:#ffd24a">✦ 확정 강화 주문서</span> ${Math.round(TK_P*100)}%`:`<span style="color:#5ae0d0">★ 각인의 서</span> ${Math.round(scrP('n')*100)}%`}</small></button>`}
+  ${b.rolled?(b.res.length?`<div class="dlist">${b.res.map(r=>`<div>${bonusLine(r)}</div>`).join('')}</div>`:`<p class="hint">추가 보상: 이번에는 나오지 않았습니다</p>`):`<button class="primary bonusbtn" id="bonusGo">추가 보상 획득<small>${b.mb?`<span style="color:#ffd24a">✦ 확정 강화 주문서 ${b.U?'3~5':1}개</span> ${Math.round(TK_P*100)}%`:b.U?`<span style="color:#c890ff">★ 상급 각인의 서</span> ${Math.round(scrP('u')*100)}%`:`<span style="color:#5ae0d0">★ 각인의 서</span> ${Math.round(scrP('n')*100)}%`}</small></button>`}
   <button class="primary" id="duelAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
 function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('clearSheet').innerHTML=`<div><div class="chap">Duel</div><h2>결투에서 패배했습니다</h2></div>
   <p class="hint">${duelDef().n}의 체력이 모두 회복되었습니다.</p>
@@ -3575,7 +3578,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v236';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v237';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
