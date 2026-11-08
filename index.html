@@ -3530,7 +3530,7 @@ function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
     later(j*.0747,()=>{zapFx(fr,to,{first:j===0,tgt:e});/* v140: 0.112 → 0.0747 (튕기는 속도 +50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
       if(e.hp>0){if(st.csl)e.slowT=Math.max(e.slowT,st.csl);hitKind='zap';hurt(e,dmg*Math.pow(st.bk,j)*vm);hitKind=null}
-      if(st.cst)stormBurst({x:to.x,z:to.z},st.cst.r,dmg*Math.pow(st.bk,j)*st.cst.m*vm);
+      if(st.cst)stormBurst({x:to.x,z:to.z},st.cst.r,dmg*Math.pow(st.bk,j)*st.cst.m);/* v244: 폭발 피해는 겹침 감소(vm) 없음 — 뭉친 적에게 폭발마다 전부 들어감 */
       if(st.ovl&&j===path.length-1)overloadOrb({x:to.x,z:to.z},dmg*st.ovl.m,st.ovl.dur)})})}
 /* v239 과부하 재작성: 하늘에서 번개가 내리꽂혀 구체가 생기는 순간(섬광·흔들림·방사 번개·바닥 균열) →
    떠 있는 번개 구체(흰 심지 + 푸른 광륜 + 몸을 감는 아크 + 도는 불꽃) · 바닥에 반경 OV_R 전기장(부드러운 빛 + 바닥 전류) →
@@ -3613,7 +3613,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v243';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v244';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
