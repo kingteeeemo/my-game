@@ -859,7 +859,7 @@ const STAT_PER_LV=1;
 const STATS={
   str:{n:'힘',en:'STR',c:'#ff6a6a',d:['최대 생명력 +2.7%','생명력 재생 +0.15%/초']},
   agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4% (신발 포함 상한 +150%)','치명타 확률 +0.27%']},
-  int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.4%/초']}
+  int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.15%/초']}
 };
 /* 스킬 1 = 다수 공격용, 스킬 2 = 보스(단일 대상) 공격용 */
 const SK={
@@ -1077,7 +1077,7 @@ const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear(
 const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·지능)으로 얻는 초당 재생량 +5~30% */
-const mpRegen=()=>P.mmp*.004/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
+const mpRegen=()=>P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
 /* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
 const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65))};
@@ -3622,7 +3622,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v254';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v255';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
