@@ -2104,8 +2104,8 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
    패턴 4 독 구체: 유도 독 구체 3개/5개(직격 20%/30%) — 옆으로 피하거나 구르기. 떨어진 자리에 독 웅덩이.
    패턴 5 심연의 파동: 웅덩이 가까이(안전 원 안)만 안전, 밖은 45%/70% — 가까이 붙기.
    사이 페이즈(체력 50%, 1회): 웅덩이로 잠수·무적. 맵 6등분 → 6칸을 시간차로 예고 → 예고 순서대로 6연타(50%/즉사). 3회 반복 후 종료. 미리 처치하면 생략. */
-const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=8.6,MAW_POOL=3.9;/* v216: 안전 반경 7.5→8.6, 웅덩이 진입 불가 */
-const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:.6,pullV:4.4,orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.4,pullV:3.6,orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
+const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=9.8,MAW_POOL=3.9;/* v216: 안전 반경 7.5→8.6, 웅덩이 진입 불가 */
+const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:1,pullV:[8,2],orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.7,pullV:[7,1.5],orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
 const duelDef=()=>S.duel&&S.duel.b==='maw'?MAW:DUEL;
 /* 구르기 무적을 무시하는 % 피해 (브레스) */
 function hurtPctRaw(pct){if(P.hp<=0||S.testGod)return;const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=Math.max(P.inv,.15);dmgNum(P.pos,d,'hurt');const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
@@ -2181,11 +2181,11 @@ function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber);let a0=Math.atan
       const s=new THREE.Mesh(new THREE.ConeGeometry(.18,1.1,6),basicMat('mawsting',{color:0xd0ff80,opacity:1}));s.position.copy(m);scene.add(s);
       fx.push({m:s,t:0,dur:.3,upd(k){s.position.set(m.x+(q.x-m.x)*k,m.y+(0-m.y)*k+Math.sin(k*Math.PI)*2,m.z+(q.z-m.z)*k);s.lookAt(q.x,0,q.z);s.rotateX(Math.PI/2)},end(){mfree(s.material)}});
       circTele(q,2.2,.9,()=>{groundFx(q,dotTex,0xa0ff60,.6,3.4,.35,.7,true,.07);spray(PNRM,q,8,{sp:[1,3],up:[1,3],y:[.1,.4],life:[.4,.7],s0:[.4,.7],s1:[1,1.6],c0:0x6aaa3a,c1:0x1a2a10,a:.6,drag:2,tex:2});if(P.hp>0&&Math.hypot(P.pos.x-q.x,P.pos.z-q.z)<2.6)hurtPct(C.sting)})})}
-  else if(k==='pull'){const R=6.8,PT=3;/* v211: 흡입은 맵 전체, 물기는 웅덩이 주변 6.8m */A={k,t:0,a:a0,dur:PT+.7,upd(dt){A.a=Math.atan2(P.pos.x,P.pos.z);e.jaw=A.t<PT?.6+.2*Math.sin(A.t*12):1;if(A.t<PT&&P.hp>0){const d=mawDist();if(d>1){P.pos.x-=P.pos.x/d*C.pullV*dt;P.pos.z-=P.pos.z/d*C.pullV*dt}
+  else if(k==='pull'){const R=8,PT=3;/* v217: 흡입 끝 8m 이내 일반 70%·우버 즉사 *//* v211: 흡입은 맵 전체, 물기는 웅덩이 주변 6.8m */A={k,t:0,a:a0,dur:PT+.7,upd(dt){A.a=Math.atan2(P.pos.x,P.pos.z);e.jaw=A.t<PT?.6+.2*Math.sin(A.t*12):1;if(A.t<PT&&P.hp>0){const d=mawDist();if(d>1){const q=Math.min(1,Math.max(0,(d-MAW_POOL)/(ARENA_R-MAW_POOL))),v=C.pullV[1]+(C.pullV[0]-C.pullV[1])*(1-q)*(1-q);/* v217: 가까울수록 강하게 */P.pos.x-=P.pos.x/d*v*dt;P.pos.z-=P.pos.z/d*v*dt}
         const m=mawMouth(e);for(let i=0;i<Math.ceil(dt*60*QM());i++){const t=rnd(0,6.28),r=rnd(5,ARENA_R),x=Math.sin(t)*r,z=Math.cos(t)*r,sp=rnd(.4,.7);emit(PADD,{x,y:rnd(.2,2),z,vx:(m.x-x)/sp,vy:(m.y-1)/sp,vz:(m.z-z)/sp,life:sp,s0:.5,s1:.1,c0:0xc090ff,c1:0x3a0a5a,a:.6,tex:1})}}}};
     for(let i=0;i<6;i++)later(i*.5,()=>{if(!ok())return;const ring=flatMesh(ringGeo,0xb070ff,.5);ring.position.set(0,.3,0);scene.add(ring);fx.push({m:ring,t:0,dur:.9,upd(k){const r=ARENA_R+1-(ARENA_R-3)*k;ring.scale.set(r,r,1);ring.material.opacity=.5*(1-k*k)}})});
     circTele(O,R,PT,()=>{if(!ok())return;shake=Math.max(shake,.4);ringFx(O,R,0xb050ff,.4);groundFx(O,shockTex,0xc080ff,1,R*1.1,.4,.8,true,.08);if(P.hp>0&&mawDist()<R+.3)hurtPct(C.pull)});
-    toast('흡입',`${e.name}이(가) 맵 전체를 빨아들입니다 — 웅덩이 반대쪽으로 계속 달리세요`)}
+    toast('흡입',`${e.name}이(가) 맵 전체를 빨아들입니다 — 가까울수록 강합니다, 8m 밖으로 달리세요`)}
   else if(k==='orbs'){const n=C.orbN;A={k,t:0,a:a0,dur:.3+n*.45+4.6,upd(){e.jaw=Math.max(0,Math.sin(A.t*6))}};
     for(let i=0;i<n;i++)later(.3+i*.45,()=>{if(!ok())return;const m=mawMouth(e);A.a=Math.atan2(P.pos.x,P.pos.z);const dx0=P.pos.x-m.x,dz0=P.pos.z-m.z,l0=Math.hypot(dx0,dz0)||1;let vx=dx0/l0*9,vz=dz0/l0*9;
       const orb=new THREE.Mesh(new THREE.SphereGeometry(.55,10,8),basicMat('maworb',{color:0x9aff5a,opacity:.95}));orb.position.set(m.x,1,m.z);scene.add(orb);let done=false;
@@ -2217,7 +2217,7 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
         groundFx({x:Math.sin(a)*L*.5,z:Math.cos(a)*L*.5},dotTex,0x9a40ff,L*.3,L*.6,.35,.6,true,.07);
         if(P.hp>0&&inFan(P.pos,O,a,H,L))hurtPct(C.sipe)})})})}}
 function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;
-  if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&mawDist()>=MAW_MELEE){e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
+  if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&e.dA.k!=='breath'&&mawDist()>=MAW_MELEE){/* v217: 브레스 중엔 멀어져도 취소·파동 없음 */e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
   if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?1.6:2.4;e.at=0;e.bt=0;if(wasPull&&e.hp>0)mawStart(e,'wave')/* v215: 흡입 직후 심연의 파동 세트 */}return}
   if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;mawSipe(e);return}
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
@@ -3480,7 +3480,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v216';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v217';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
