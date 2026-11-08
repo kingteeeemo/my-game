@@ -70,7 +70,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .stagechip.eg{border-color:rgba(90,224,208,.5)}.stagechip.eg b{background:#5ae0d0}.stagechip.fb b{background:#ff4a2a;color:#fff}.stagechip.town b{background:#ffd24a}
 .sbanner{position:absolute;left:50%;top:22%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;pointer-events:none;text-align:center;width:92%}
 .sbanner small{font:800 13px var(--en);font-stretch:87%;letter-spacing:.35em;color:var(--ember);text-transform:uppercase}.sbanner b{font:900 46px var(--ko);color:#f4e6d2;text-shadow:0 0 24px rgba(255,110,40,.6),0 3px 0 #000}.sbanner span{font:800 20px var(--ko);color:#ffd0a0;text-shadow:0 2px 8px #000}
-.sbanner.eg small{color:#5ae0d0}.sbanner.eg b{text-shadow:0 0 24px rgba(90,224,208,.6),0 3px 0 #000}
+.sbanner.min small,.sbanner.min span{display:none}.sbanner.eg small{color:#5ae0d0}.sbanner.eg b{text-shadow:0 0 24px rgba(90,224,208,.6),0 3px 0 #000}
 .sbanner.on{animation:sban 3s ease-out forwards}@keyframes sban{0%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
 @media (max-width:640px) and (orientation:portrait){#topStack{top:calc(env(safe-area-inset-top,0px) + 74px)}.hud{padding-top:calc(70px + env(safe-area-inset-top,0px))}.stagechip b{font-size:16px}.stagechip span{font-size:14px}.sbanner b{font-size:36px}}
 @media (orientation:landscape) and (max-height:520px){.stagechip{top:-6px;padding:3px 12px 3px 5px}.stagechip b{font-size:14px}.stagechip span{font-size:12px}.sbanner b{font-size:32px}}
@@ -1483,7 +1483,7 @@ function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,9
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML=`<span>${npcName(n.id)}</span><small>${NPCN[n.id][1]}</small>`;d.hidden=true;$('names').appendChild(d);return d});
-function collectAll(){for(const p of pickups){scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
+function collectAll(){for(const p of pickups){if(p.kind==='pouch')keepBeam(p);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
@@ -2312,7 +2312,7 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
 function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;e.pullCd=(e.pullCd||0)-dt;
   if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;e.wv=0;e.jaw=0;mawSipe(e);return}/* v220: 체력 50%가 되면 진행 중 패턴을 끊고 즉시 사이 페이즈 */
   if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&e.dA.k!=='breath'&&mawDist()>=MAW_MELEE){/* v217: 브레스 중엔 멀어져도 취소·파동 없음 */e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
-  if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?.96:1.44;/* v237: 패턴 간격 -40% (2.4/1.6 → 1.44/0.96) */e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?60:77;/* v237: -30% *//* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
+  if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?.96:1.44;/* v237: 패턴 간격 -40% (2.4/1.6 → 1.44/0.96) */e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?13:20;/* v240: 흡입 쿨타임 일반 20초·우버 13초 *//* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;toast('전방위 파동',`${e.name}에게 가까이 붙으세요`);donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)},true)}}
@@ -2388,7 +2388,7 @@ function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tie
       /* 이동 화면을 먼저 띄운 뒤 다음 프레임에 지역 생성 (생성 중 끊김을 화면 뒤로 숨김) */
       requestAnimationFrame(()=>setTimeout(()=>{setMap(true);applyTheme();resetWorld();P.inv=1.5;setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';stageBanner(true)},350)},30))}
     else stageBanner(true);return}
-  if(!inTown&&!auto)resetWorld();toast(auto?'위험도 상승':'위험도 이동',`위험도 ${t}`);stageBanner()}
+  if(!inTown&&!auto)resetWorld();stageBanner(true)}/* v240: 위험도 변경 알림은 '위험도 N'만 표시 (토스트 제거) */
 function warmRegion(m){setTimeout(()=>{try{groundSet('eg'+m,EGMAPS[m])}catch(e){}},400)}
 function regionFx(){const f=$('regionFade');if(!f)return;f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}
 function spawnGate(){const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*12,-B+3,B-3),z=clamp(P.pos.z+Math.sin(a)*12,-B+3,B-3);
@@ -2921,10 +2921,16 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
 const goldOf=e=>Math.max(1,Math.round(e.mhp*.12*goldAdj()*rand(.8,1.2)));
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=.0005,/* v235: 0.01% → 0.05% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
-const pouchAmt=t=>Math.round(300*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
+const pouchAmt=t=>Math.round(3000/* v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
 function dropPouch(p,amt){const q=scatter(p),g=new THREE.Group(),b=new THREE.Mesh(pouchGeo,pouchMat);b.scale.set(1,.9,1);g.add(b);const nk=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,.22,10),pouchMat);nk.position.y=.42;g.add(nk);const ti=new THREE.Mesh(new THREE.TorusGeometry(.16,.04,6,14),coinMat);ti.rotation.x=Math.PI/2;ti.position.y=.36;g.add(ti);
+  const bms=[],bm=new THREE.Group();/* v240: 흰 빛기둥 (획득 후에도 4초 유지) */
+  for(const [rt,rb,o] of [[.7,.9,.3],[.22,.26,.9]]){const mt=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:o,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});mt.userData.o=o;bms.push(mt);bm.add(new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,24,14,1,true),mt))}
+  const bmt=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending});bmt.userData.o=.55;bms.push(bmt);const bd=new THREE.Mesh(new THREE.CircleGeometry(1.9,24),bmt);bd.rotation.x=-Math.PI/2;bd.position.y=-11.4;bm.add(bd);
+  bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.45,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'pouch',amt});ringFx(q,2.6,0xffd24a,.8);flash(q,0xffd24a,2.5);feed('골드 주머니가 떨어졌습니다!','#ffd24a')}
+function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
+  fx.push({m:bm,t:0,dur:4,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
 function pouchFx(amt){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small>GOLD POUCH</small><b>골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
 const sellPrice=it=>Math.round((4+it.ilvl*2.5)*[1,2,5,12][it.rar]);
@@ -3607,7 +3613,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v239';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v240';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3694,7 +3700,7 @@ function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">En
     <p class="hint">엔드게임부터 심연의 냉기로 <b style="color:#ff8a6a">생명력이 초당 계속 감소</b>합니다. 위험도가 오를수록 감소량이 커집니다.</p>
     <p class="hint"><b style="color:var(--ink)">힘 스탯</b>이나 장비의 <b style="color:var(--ink)">생명력 재생 능력치</b>로 상쇄할 수 있습니다. 화면 위쪽의 환경 표시에서 감소량과 내 재생량을 확인하세요.</p>
     <button class="primary" id="noticeOk">확인</button>`;$('notice').hidden=false;releaseAll()}
-function stageBanner(){if(!S.cls)return;if(S.ch>=NCH&&!S.duel&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}/* v236: 환경 피해 안내는 엔드게임 첫 진입 때 */const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;el.className='sbanner '+i.c;void el.offsetWidth;el.className='sbanner on '+i.c}
+function stageBanner(min){if(!S.cls)return;if(S.ch>=NCH&&!S.duel&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}/* v236: 환경 피해 안내는 엔드게임 첫 진입 때 */const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;const mc=min===true?' min':'';el.className='sbanner '+i.c+mc;void el.offsetWidth;el.className='sbanner on '+i.c+mc}
 function labelButtons(){const c=C(),s1=SK[c.skills[0]];$('lAtk').textContent=c.bn;$('lS1').textContent=s1.n;$('cS1').textContent='MP '+mpCost(c.skills[0]);$('hL').textContent=s1.n;$('hR').textContent=c.bn;$('bS2').hidden=true;$('lMv').textContent='구르기';$('hM').textContent='구르기'}
 
 /* ================= class select ================= */
@@ -4810,7 +4816,8 @@ function update(dt){packTick();
       if(u.sp&&Math.random()<dt*14*QM())emit(PADD,{x:p.m.position.x+rnd(-.4,.4),y:.2,z:p.m.position.z+rnd(-.4,.4),vy:rnd(1.5,3.5),life:rnd(.6,1),s0:.4,s1:.05,c0:0xd0fff8,c1:0x2ac8b8,a:.9,tex:3});
       else if(u.rar>=3&&Math.random()<dt*10*QM())emit(PADD,{x:p.m.position.x+rnd(-.3,.3),y:.2,z:p.m.position.z+rnd(-.3,.3),vy:rnd(1,2.5),life:rnd(.5,.9),s0:.3,s1:.05,c0:0xffd090,c1:0xff5a10,a:.8,tex:1})}const dx=P.pos.x-p.m.position.x,dz=P.pos.z-p.m.position.z,dd=Math.hypot(dx,dz)||1;
     if(p.t>.35&&dd<14){const sp=dt*(10+(14-dd)*1.5+heroSpd()*1.2);/* v58: 끌어오는 범위 7→14m */p.m.position.x+=dx/dd*Math.min(dd,sp);p.m.position.z+=dz/dd*Math.min(dd,sp)}
-    if(p.t>.35&&dd<1.8){scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
+    if(p.kind==='pouch'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
+    if(p.t>.35&&dd<1.8){if(p.kind==='pouch')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
       if(p.kind==='item')addItem(p.item);
       else if(p.kind==='ess'){S.ess=(S.ess||0)+p.amt}
       else if(p.kind==='gold'){S.gold+=p.amt}
