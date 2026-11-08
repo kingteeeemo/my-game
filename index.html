@@ -2869,7 +2869,7 @@ const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m
 const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
-  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>({n:L>=7?4:L>=4?3:L>=1?2:1,m:1});/* v195: 다중 기둥은 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 기둥당 피해 감소 없음(×1.0) */
+  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const SK_NEW={
   wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
@@ -2882,7 +2882,7 @@ Object.assign(GEMS,{
   brad:{n:'대폭발',t:'boom',c:'#ff9a4a',d:L=>`폭발 반경 ${bmRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   bember:{n:'잔불',t:'boom',c:'#ff7a3a',d:L=>{const e=bmEmber(L);return `폭발 자리에 불바닥 ${e.dur.toFixed(1)}초 (초당 피해 ×${e.m.toFixed(2)})`}},
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
-  ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})${t.n<4?'\n1·4·7단계에 +1개':''}`}}});
+  ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})\n${L<10?([1,4,7].includes(L+1)?'다음 단계: 기둥 +1개':'다음 단계: 피해 +5%'):'최대'}`}}});
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'부채 검기',c:'#ffd090',d:L=>{const f=wvFan(L);return `검기 ${f.n}갈래를 부채꼴로 날림 (옆 검기 피해 ×${f.m.toFixed(2)})${f.n<5?'\n4단계에 5갈래':''}`}},
   wburst:{s:'wave',n:'검기 폭발',c:'#ffb060',max:3,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})`}},
@@ -3340,7 +3340,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v200';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v201';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
