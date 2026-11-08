@@ -1953,7 +1953,7 @@ function seedPacks(){const d=diff(),ci=chF(S.ch),goal=CH[Math.min(S.ch,LAST)].go
 function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3);e.dmg*=BOSS_DM}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
 /* 최종 보스: 5장 보스의 8배 체력 · 피해 1.3배 · 크기 1.35배. 체력 50% 이하 격노(빨라지고 패턴 간격 단축).
    일반 장판 공격 + 주기적으로 자기 주변 원형 충격파 */
-const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84,FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
+const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84*.8,FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
 /* 최종 보스 권장 DPS: 90초 안에 쓰러뜨리는 단일 대상 DPS */
 const FB_TIME=90,FB_AIR=26;/* v73: 제한 시간 90초 기준. 사이 페이즈 2회(약 26초)는 무적이라 실제 딜 시간은 64초 */
 const fbReq=()=>ETYPES.boss.hp*CH[LAST].hp*FB_HP/(FB_TIME-FB_AIR)*1.3;/* v58: +30% */
@@ -3343,7 +3343,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v203';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v204';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4483,7 +4483,7 @@ function update(dt){
     if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
     if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;if(e.patN%2)bossCharge(e);else bossSlam(e)}}
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
-    if(e.final&&!frz){if(!e.rage&&e.hp<e.mhp*.5){e.rage=true;e.spd*=1.3;toast('격노',`${e.name}이(가) 분노합니다`);ringFx(e.pos,6,0xff4a2a,.6);shake=.3}
+    if(e.final&&!frz){if(!e.rage&&e.hp<e.mhp*.3){e.rage=true;e.spd*=1.3;toast('격노',`${e.name}이(가) 분노합니다`);ringFx(e.pos,6,0xff4a2a,.6);shake=.3}
       e.nova-=dt;if(e.nova<=0){e.nova=(e.rage?4.5:7)*BOSS_CD;telegraph({x:e.pos.x,z:e.pos.z},6.5,e.dmg*1.2)}}
     if(e.flash>0){e.flash-=dt;e.mat.emissive.setHex(e.flash>0?0x886655:(frz?0x3a78b0:e.slowT>0?0x223a55:0))}
     else e.mat.emissive.setHex(frz?0x3a78b0:e.slowT>0?0x223a55:0);
