@@ -2219,9 +2219,9 @@ function mawSipe(e){const C=mawC(),U=!!(S.duel&&S.duel.uber),O={x:0,z:0},H=Math.
         groundFx({x:Math.sin(a)*L*.5,z:Math.cos(a)*L*.5},dotTex,0x9a40ff,L*.3,L*.6,.35,.6,true,.07);
         if(P.hp>0&&inFan(P.pos,O,a,H,L))hurtPct(C.sipe)})})})}}
 function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||0;e.pullCd=(e.pullCd||0)-dt;
+  if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;e.wv=0;e.jaw=0;mawSipe(e);return}/* v220: 체력 50%가 되면 진행 중 패턴을 끊고 즉시 사이 페이즈 */
   if(e.dA&&e.dA.k!=='sipe'&&e.dA.k!=='pull'&&e.dA.k!=='wave'&&e.dA.k!=='breath'&&mawDist()>=MAW_MELEE){/* v217: 브레스 중엔 멀어져도 취소·파동 없음 */e.dA=null;e.jaw=0;e.sink=0;e.grace=0;e.at=0;e.bt=0;e.pt=Math.max(e.pt,.5)}/* v213: 멀리 있으면 진행 중 패턴 취소 → 파동 */
   if(e.dA){const A=e.dA;A.t+=dt;if(A.upd)A.upd(dt);if(A.t>=A.dur){const wasPull=A.k==='pull';e.dA=null;e.jaw=0;e.sink=0;e.grace=2;e.pt=S.duel&&S.duel.uber?1.6:2.4;e.at=0;e.bt=0;if(wasPull&&e.hp>0){e.pullCd=S.duel&&S.duel.uber?85:110;/* v218: 측정 평균 간격(28/37초)의 3배 */mawStart(e,'wave')}}return}
-  if(!e.sipeDone&&e.hp>0&&e.hp<e.mhp*.5){e.sipeDone=1;mawSipe(e);return}
   const d=mawDist();e.grace-=dt;e.jaw=Math.max(0,e.jaw-dt*4);
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;toast('전방위 파동',`${e.name}에게 가까이 붙으세요`);donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)},true)}}
@@ -3482,7 +3482,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v219';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v220';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
