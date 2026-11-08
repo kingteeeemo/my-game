@@ -1136,7 +1136,7 @@ const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
 const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf))*(1-gear().mcr/100)))};
 const gemsFor=s=>SK[s].gems||Object.keys(GEMS).filter(g=>GEMS[g].t==='any'||GEMS[g].t===SK[s].tag);
 /* 레벨업: 먼저 강화할 스킬을 고르고, 그 스킬의 강화 3개 중 하나를 고름 */
-const openGems=s=>gemsFor(s).filter(g=>gl(s,g)<GMAX);
+const openGems=s=>gemsFor(s).filter(g=>gl(s,g)<GMAX);const done1=s=>openGems(s).length===0;/* v209: 2차 강화는 해당 스킬의 1차 강화(가속 포함)를 모두 채우면 해금 — 레벨 무관 */
 function makeOffer(s){return openGems(s).slice(0,4).map(g=>({s,g}))}/* 순서 고정: 스킬 창 목록과 같은 순서 */
 
 /* ================= three setup ================= */
@@ -1956,7 +1956,7 @@ function seedPacks(){packQ=[];const d=diff(),ci=chF(S.ch),goal=Math.round(CH[Mat
 function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3);e.dmg*=BOSS_DM}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
 /* 최종 보스: 5장 보스의 8배 체력 · 피해 1.3배 · 크기 1.35배. 체력 50% 이하 격노(빨라지고 패턴 간격 단축).
    일반 장판 공격 + 주기적으로 자기 주변 원형 충격파 */
-const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84,/* v204에서 ×.8 → v206 원복 */FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
+const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84*1.1,/* v204에서 ×.8 → v206 원복 → v209 +10% */FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
 /* 최종 보스 권장 DPS: 90초 안에 쓰러뜨리는 단일 대상 DPS */
 const FB_TIME=90,FB_AIR=26;/* v73: 제한 시간 90초 기준. 사이 페이즈 2회(약 26초)는 무적이라 실제 딜 시간은 64초 */
 const fbReq=()=>ETYPES.boss.hp*CH[LAST].hp*FB_HP/(FB_TIME-FB_AIR)*1.3;/* v58: +30% */
@@ -2684,7 +2684,7 @@ function dropGold(p,amt){const q=scatter(p),m=new THREE.Mesh(coinGeo,coinMat);m.
 /* 잿불 정수: 40레벨부터 떨어짐. 엔드게임 위험도가 높을수록 조금씩 더 잘 나옴 */
 const essGeo=new THREE.OctahedronGeometry(.2,0),essMat=new THREE.MeshBasicMaterial({color:0xff5a3a});
 function dropEssAt(p,amt){const q=scatter(p),m=new THREE.Mesh(essGeo,essMat);m.scale.set(1,1.5,1);m.position.set(q.x,.45,q.z);scene.add(m);pickups.push({m,t:0,kind:'ess',amt})}
-function dropEss(e){if(S.lv<ESS_LV)return;const tb=S.ch>=NCH?1+.03*Math.min(S.tier,30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
+function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(S.tier,30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
   const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=Math.floor(ex)+(Math.random()<ex%1?1:0);for(let i=0;i<n;i++)dropEssAt(e.pos,1)}
 const goldOf=e=>Math.max(1,Math.round(e.mhp*.12*goldAdj()*rand(.8,1.2)));
@@ -3347,7 +3347,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v208';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v209';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3381,7 +3381,7 @@ function placeEnv(){const e=$('qenv'),f=$('fbGo'),ts=$('topStack'),ls=document.q
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
 function hudMoney(){if(!S||!S.cls)return;const gt=fmtG(S.gold||0);if($('goldT').textContent!==gt)$('goldT').textContent=gt;
-  const es=S.lv>=ESS_LV||S.ess>0;$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
+  const es=S.ch>=NCH||S.ess>0;$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
   stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);
@@ -3451,7 +3451,7 @@ const GUIDES={
     {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#openStage'],d:`${GB}마을</b>에는 물약 상점, 장비 뽑기, 대장장이, 전승사가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`${GB}단계</b>에서 지금 위치와 위험도를, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다.`,k:'T 마을 · G 단계 · M 월드맵'},
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}설정(톱니바퀴)</b> → 「가이드 다시 보기」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
   lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`스탯 포인트도 ${STAT_PER_LV}점 받습니다. ${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수로 하는 ${GB}2차 강화</b>가 열립니다.`}]},
-  skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`${ESS_LV}레벨부터는 몬스터가 떨어뜨리는 ${GB}잿불 정수</b>와 골드로 이 창에서 ${GB}2차 강화</b>를 올립니다. 실패는 없습니다.`}]},
+  skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
   stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 5장부터는 생명력이 계속 줄어드는 지역이 나오니 힘(재생)도 챙기세요.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
   town:{n:'마을',steps:()=>[{t:'잿불 마을',d:`NPC에게 가까이 가면 대화 버튼이 뜹니다.`,d2:`${GB}${TOWN.shop}</b> 물약 상점 · ${GB}${TOWN.gear}</b> 장비 뽑기 · ${GB}${TOWN.smith}</b> 부위 강화 · ${GB}${TOWN.heir}</b> 특수 능력치 전승`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
@@ -3645,8 +3645,8 @@ $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='cfYes'){$('notic
 const bossFight=()=>!inTown&&(inArena()||enemies.some(e=>e.boss&&e.aggro&&e.hp>0));
 function townAsk(){if(!inTown&&bossFight())askConfirm('마을로 이동할까요?','정말 마을로 이동하시겠습니까? 진행 중인 보스 전투는 끝납니다.','마을로 이동',toggleTown);else toggleTown()}
 function showEnhDone(){$('noticeSheet').innerHTML=`<div><div class="chap">Level ${ESS_LV}</div><h2>모든 강화 완료</h2></div>
-    <p class="hint">1차 강화를 모두 마쳤습니다. 이제 몬스터가 <b style="color:#ff8a6a">잿불 정수</b>를 떨어뜨립니다.</p>
-    <p class="hint">정수와 골드를 모아 「스킬」 창에서 <b style="color:var(--ink)">2차 강화</b>를 할 수 있습니다.</p>
+    <p class="hint">1차 강화를 모두 마쳤습니다. 「스킬」 창에서 <b style="color:var(--ink)">2차 강화</b>가 열렸습니다.</p>
+    <p class="hint">2차 강화에 쓰는 <b style="color:#ff8a6a">잿불 정수</b>는 엔드게임(위험도 모드)의 몬스터가 떨어뜨립니다.</p>
     <button class="primary" id="noticeOk">확인</button>`;$('notice').hidden=false;releaseAll()}
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='noticeOk')$('notice').hidden=true});
 function showClear(){
@@ -3786,9 +3786,9 @@ function renderMenu(){
       <span class="lvp">${L}/${GMAX}</span>${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button></div>`}
     h+=`</div>`;
     const g2s=gems2For(id);
-    if(g2s.length){const open=S.lv>=ESS_LV;
+    if(g2s.length){const open=done1(id);
       h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span></div>
-      <p class="hint" style="margin:0">${open?'잿불 정수와 골드로 올립니다. 실패는 없습니다.':`1차 강화를 모두 채우는 ${ESS_LV}레벨에 해금됩니다. ${ESS_LV}레벨부터 몬스터가 잿불 정수를 떨어뜨립니다.`}</p><div class="gems">`;
+      <p class="hint" style="margin:0">${open?'잿불 정수와 골드로 올립니다. 실패는 없습니다.':`이 스킬의 1차 강화를 모두 채우면 해금됩니다. 잿불 정수는 엔드게임(위험도 모드)의 몬스터가 떨어뜨립니다.`}</p><div class="gems">`;
       for(const g of g2s){const L=g2(g),M=g2Max(g),c=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=c&&S.gold>=gc;
         h+=`<div class="grow${open?'':' off'}"><span class="gd" style="background:${GEMS2[g].c};border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">${GEMS2[g].n}<small>${L?GEMS2[g].d(L):'다음: '+GEMS2[g].d(1)}</small><span class="pips" style="--c:${GEMS2[g].c}">${Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
         <span class="lvp">${L}/${M}</span>${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button></div>`}
@@ -3813,13 +3813,13 @@ $('sheet').addEventListener('click',e=>{
   if(b.id==='tGod'){S.testGod=!S.testGod;renderMenu();return}
   if(b.dataset.d&&S.test){const [s_,g]=b.dataset.d.split(',');if(gl(s_,g)>0){S.sk[s_][g]--;S.skp[s_]=(S.skp[s_]||0)+1;refreshMax();renderMenu()}return}
   if(b.dataset.d2&&S.test){const g=b.dataset.d2,L=g2(g);if(L>0){S.sk2[g]=L-1;S.ess+=g2Cost(g,L-1);S.gold+=g2Gold(g,L-1);renderMenu()}return}
-  if(b.dataset.a2){const g=b.dataset.a2,L=g2(g),c=g2Cost(g,L);if(S.lv>=ESS_LV&&L<g2Max(g)&&(S.ess||0)>=c&&S.gold>=g2Gold(g,L)){S.ess-=c;S.gold-=g2Gold(g,L);S.sk2[g]=L+1;feed(`${GEMS2[g].n} Lv ${L+1}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
+  if(b.dataset.a2){const g=b.dataset.a2,L=g2(g),c=g2Cost(g,L);if(done1(GEMS2[g].s)&&L<g2Max(g)&&(S.ess||0)>=c&&S.gold>=g2Gold(g,L)){S.ess-=c;S.gold-=g2Gold(g,L);S.sk2[g]=L+1;feed(`${GEMS2[g].n} Lv ${L+1}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.ax){const [s,g]=b.dataset.ax.split(',');const n=Math.min(skp(s),GMAX-gl(s,g));if(n>0){S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+n;S.skp[s]-=n;refreshMax();feed(`${GEMS[g].n} Lv ${gl(s,g)}`,GEMS[g].c);save();renderMenu()}return}
   if(b.dataset.el){const c=elCost();if(b.dataset.el===arEl()||S.gold<c)return;S.gold-=c;S.arEl=b.dataset.el;feed(`폭발 속성: ${S.arEl==='fire'?'화염':'번개'} (−${fmtG(c)}G)`,S.arEl==='fire'?'#ff9a6a':'#c8b0ff');ringFx(P.pos,2.4,S.arEl==='fire'?0xff7a3a:0xa88aff,.5);save();renderMenu();return}
   if(b.dataset.inf||b.dataset.infx){const id=C().skills[0];if(!g2Done(id))return;let n=0;do{const c=infCost(S.sk2dmg||0);if((S.ess||0)<c.e||S.gold<c.g)break;S.ess-=c.e;S.gold-=c.g;S.sk2dmg=(S.sk2dmg||0)+1;n++}while(b.dataset.infx&&!(S.test&&n>=10));/* v134: 테스트(무한 재화)는 「전부」 10단계씩 */
     if(n){feed(`피해 증가 Lv ${S.sk2dmg}`,'#ff8a6a');ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.dinf&&S.test){const L=S.sk2dmg||0;if(L>0){S.sk2dmg=L-1;const c=infCost(L-1);S.ess+=c.e;S.gold+=c.g;renderMenu()}return}
-  if(b.dataset.ax2){const g=b.dataset.ax2;let L=g2(g),n=0;if(S.lv>=ESS_LV)while(L<g2Max(g)&&(S.ess||0)>=g2Cost(g,L)&&S.gold>=g2Gold(g,L)){S.ess-=g2Cost(g,L);S.gold-=g2Gold(g,L);L++;n++}if(n){S.sk2[g]=L;feed(`${GEMS2[g].n} Lv ${L}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
+  if(b.dataset.ax2){const g=b.dataset.ax2;let L=g2(g),n=0;if(done1(GEMS2[g].s))while(L<g2Max(g)&&(S.ess||0)>=g2Cost(g,L)&&S.gold>=g2Gold(g,L)){S.ess-=g2Cost(g,L);S.gold-=g2Gold(g,L);L++;n++}if(n){S.sk2[g]=L;feed(`${GEMS2[g].n} Lv ${L}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
   if(b.dataset.a){const [s,g]=b.dataset.a.split(',');if(skp(s)>0&&gl(s,g)<GMAX){S.sk[s]=S.sk[s]||{};S.sk[s][g]=gl(s,g)+1;S.skp[s]--;save();renderMenu()}}
 });
 $('menu').addEventListener('click',e=>{if(e.target.id==='menu')closeMenu()});
