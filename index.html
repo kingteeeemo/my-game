@@ -357,7 +357,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .slotmain .en{font-family:var(--en);font-stretch:87%;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
 .slotmain .badge{width:42px;height:42px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font:800 13px var(--en);font-stretch:87%;color:#111}
 .slotmain .badge.empty{background:#23232c;color:var(--muted);font-size:20px}
-#nickIn{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 17px var(--ko);box-sizing:border-box}#nickIn:focus{outline:none;border-color:var(--ember)}.nickrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;min-height:1.3em}.nickrow .bad{color:#ff8a70}.slotmain .st small.nk{color:var(--ink)}.slotmain .st small.nk.none{color:#ff9a6a}
+#nickIn{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 17px var(--ko);box-sizing:border-box}#nickIn:focus{outline:none;border-color:var(--ember)}.nickrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;min-height:1.3em}.nickrow .bad,#nickCnt.bad{color:#ff8a70}.slotmain .st small.nk{color:var(--ink)}.slotmain .st small.nk.none{color:#ff9a6a}
 .slotdel{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:0 12px;font:700 12px var(--ko);flex-shrink:0}
 .slotdel.arm{background:var(--hp);border-color:var(--hp);color:#fff}
 .act.mv{width:58px;height:58px;right:114px;bottom:85px;font-size:11px;color:#9ad0ff;border-color:rgba(154,208,255,.45)}
@@ -3303,7 +3303,7 @@ function castFire(slot,id){
     const oc=lc(0x9ad8ff,0x1e4a78),gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
     const cid=++orbSeq,BZ=bossOn('frost')&&n>1,biv=BZ?.35/(n-1):0,af=P.face,rof=Math.random()*Math.PI*2;/* v263 보스 모드: 사방 대신 정면으로 연달아 · v266: 0.35초 안에, 시전한 순간의 방향으로 고정 · v279: 일반 모드(n>=3)는 매 시전마다 꼭짓점 방향이 무작위로 돌아감 */
     for(let i=0;i<n;i++){const fire=()=>{const a=BZ?af:n>=3?rof+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
-      shoot(a,{rib:{helix:.555*st.orbScale,spin:12,n:12,w:.38*st.orbScale,c0:0x5aa8ff,c1:0xd8f0ff,cw:.3,fade:.42},/* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5),gcol:gc,coreM:cm,coreS:.45*(1-dk*.5),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};if(BZ&&i)later(i*biv,()=>{if(P.hp>0)fire()});else fire()}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
+      shoot(a,{rib:{helix:.555*st.orbScale,spin:12,n:12,w:.38*st.orbScale,c0:0x5aa8ff,c1:0xd8f0ff,cw:.3,fade:.42},/* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:2.3*(1-dk*.5),gcol:gc,/* v284: 보주 자체 광채 1.5 → 2.3 */coreM:cm,coreS:.55*(1-dk*.5),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};if(BZ&&i)later(i*biv,()=>{if(P.hp>0)fire()});else fire()}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
@@ -3644,7 +3644,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v283';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v284';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4675,14 +4675,19 @@ setInterval(()=>{if(curSlot!==null&&S.cls&&!S.demo&&!S.test&&$('nick').hidden)sa
 addEventListener('pagehide',()=>{if(curSlot!==null&&S.cls&&!S.demo)save()});
 function askNick(o){nickCb=o;
   $('nickSheet').innerHTML=`<div><div class="chap">Ember Sanctum · Nickname</div><h2>${o.title||'닉네임을 정하세요'}</h2></div><p class="hint">한글 최대 8자 · 영문/숫자 최대 16자 (섞어 쓰면 한글 2칸, 영문·숫자 1칸으로 합쳐 16칸). 특수문자·공백은 쓸 수 없습니다.</p>
-   <input id="nickIn" type="text" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="닉네임" value="${nickSafe(o.init||'')}"><div class="nickrow"><span id="nickMsg"></span><span id="nickCnt">0/16</span></div>
+   <input id="nickIn" type="text" maxlength="24" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="닉네임" value="${nickSafe(o.init||'')}"><div class="nickrow"><span id="nickMsg"></span><span id="nickCnt">0/16</span></div>
    <div class="btns"><button class="ghost" id="nickNo">${o.cancel||'취소'}</button><button class="primary" id="nickOk" disabled>확인</button></div>`;
   $('nick').hidden=false;releaseAll();nickUpd();setTimeout(()=>{try{$('nickIn').focus()}catch(e){}},50)}
-function nickUpd(){const i=$('nickIn');if(!i)return;const raw=i.value,w=nickW(nickClean(raw)),bad=raw!==nickClean(raw)&&raw.length>0;
-  $('nickCnt').textContent=`${w}/${NICK_MAX}`;$('nickMsg').innerHTML=bad?'<span class="bad">사용할 수 없는 글자는 입력되지 않습니다</span>':'';$('nickOk').disabled=w<1}
-function nickDone(ok){if(!nickCb)return;const cb=nickCb,v=nickClean($('nickIn').value);if(ok&&nickW(v)<1)return;nickCb=null;$('nick').hidden=true;if(ok)cb.ok(v);else if(cb.no)cb.no()}
-$('nickSheet').addEventListener('input',e=>{if(e.target.id!=='nickIn')return;if(!e.isComposing){const c=nickClean(e.target.value);if(c!==e.target.value){e.target.value=c;nickUpd();return}}nickUpd()});
-$('nickSheet').addEventListener('compositionend',e=>{if(e.target.id!=='nickIn')return;const c=nickClean(e.target.value);if(c!==e.target.value)e.target.value=c;nickUpd()});
+/* v284: 입력 중에는 값을 절대 고쳐 쓰지 않음 — 한글 자판(특히 모바일)은 'ㅎ'→'하'→'한'처럼 낱자를 거쳐 글자를 만드는데, 낱자를 바로 지우면 한글이 아예 입력되지 않던 버그. 검사·안내만 하고 확인 버튼에서 막음 */
+const nickBad=v=>[...v].some(c=>!/[가-힣A-Za-z0-9ㄱ-ㅎㅏ-ㅣ]/.test(c)),nickJamo=v=>/[ㄱ-ㅎㅏ-ㅣ]/.test(v),nickWRaw=v=>[...v].reduce((a,c)=>a+(/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(c)?2:1),0);
+function nickUpd(){const i=$('nickIn');if(!i)return;const raw=i.value,w=nickWRaw(raw),bad=nickBad(raw),over=w>NICK_MAX,jamo=nickJamo(raw);
+  $('nickCnt').textContent=`${w}/${NICK_MAX}`;$('nickCnt').className=over?'bad':'';
+  $('nickMsg').innerHTML=bad?'<span class="bad">특수문자·공백은 쓸 수 없습니다</span>':over?'<span class="bad">너무 깁니다 (한글 8자 · 영문 16자)</span>':'';
+  $('nickOk').disabled=!raw.length||bad||over;nickJ=jamo}
+let nickJ=false;
+function nickDone(ok){if(!nickCb)return;const cb=nickCb,raw=$('nickIn').value;if(ok){if(nickJamo(raw)){$('nickMsg').innerHTML='<span class="bad">완성되지 않은 글자(ㄱ, ㅏ 등)가 있습니다</span>';return}if(nickBad(raw)||nickWRaw(raw)>NICK_MAX||!raw.length)return}const v=nickClean(raw);if(ok&&nickW(v)<1)return;nickCb=null;$('nick').hidden=true;if(ok)cb.ok(v);else if(cb.no)cb.no()}
+$('nickSheet').addEventListener('input',e=>{if(e.target.id==='nickIn')nickUpd()});
+$('nickSheet').addEventListener('compositionend',e=>{if(e.target.id==='nickIn')nickUpd()});
 $('nickSheet').addEventListener('keydown',e=>{if(e.target.id==='nickIn'&&e.key==='Enter'&&!e.isComposing){e.preventDefault();nickDone(true)}else if(e.key==='Escape'){nickDone(false)}});
 $('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='nickOk')nickDone(true);else if(b.id==='nickNo')nickDone(false)});
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
