@@ -845,7 +845,9 @@ const GEMS2={
 const chpSt=L=>({n:L>0?3+Math.floor((L-1)*4/9):0,/* v139: 1단계 3발 → 10단계 7발 */m:.35+.04*L,p:Math.round(L*.4)});
 const lbSt=L=>({r:1.8*(1+.4*L),m:.6+.15*L});
 /* v66: 궁수 2차 폭발 속성 — 번개(기본) / 화염. 바꿀 때 골드 소모, 캐릭터 레벨이 높을수록 비쌈. 피해·범위는 같고 이펙트만 다름 */
-const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.35초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>{if(typeof S==='undefined'||!S)return false;if(S.duel)return true;for(const e of enemies)if((e.boss||e.duel||e.final)&&e.aggro&&e.hp>0)return true;return false}/* 아직 깨우지 않은 스토리 보스는 해당 없음 — 가까이 가서 전투가 시작(aggro)되면 적용 */,bossOn=id=>!!(typeof S!=='undefined'&&S&&!(S.bossOff&&S.bossOff[id])&&inBossFight());/* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
+let dpsRaw=0;/* v269: 스킬창·비교용 DPS 표기는 보스 모드·저주·보스 전용 배율을 빼고 계산 */
+const rawDps=f=>{dpsRaw++;try{return f()}finally{dpsRaw--}};
+const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 절반 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면으로 0.35초 안에 연달아 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>typeof S!=='undefined'&&!!S&&!!S.duel/* v269: 결투장(잿불 검귀·심연의 아귀)에 입장했을 때만 — 필드에서 만나는 보스·스토리 보스·최종 보스는 해당 없음 */,bossOn=id=>!!(!dpsRaw&&typeof S!=='undefined'&&S&&!(S.bossOff&&S.bossOff[id])&&inBossFight());/* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
@@ -1079,7 +1081,7 @@ const xpBand=l=>l<90?1:1+.6*(1+Math.max(0,Math.ceil((l-100)/10)));/* v268: 90~10
 const needXpAt=l=>Math.round((30+l*20)*xpMul(l)*(l<=20?.6:1)*xpStep(l)*xpBand(l)),needXp=()=>needXpAt(S.lv);
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*(lv<=70?Math.pow(1.01,lv-50):Math.pow(1.01,20)*(lv<=90?Math.pow(1.005,lv-70):Math.pow(1.005,20)*Math.pow(1.003,lv-90)));/* v68: 30lv 이후 레벨당 +2.3% 복리 · v260: 50lv 이후 +1% · 70lv 이후 +0.5% · 90lv 이후 +0.3% (복리) */
 const CURSE_FD=.8,curseOn=()=>!!(S.duel&&S.duel.uber&&!inTown),curseName=()=>S.duel&&S.duel.b==='maw'?'심연의 저주':'잿불의 저주';/* v227: 우버 결투 — 입장 시 저주 발동, 최종 피해 −20% */
-const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)*(curseOn()?CURSE_FD:1)};
+const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)*(curseOn()&&!dpsRaw?CURSE_FD:1)};
 const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear().hp);
 const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
@@ -1151,8 +1153,9 @@ const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
 const WHIRL_BM=3.26;/* v264: 회전 베기는 보스(결투·보스·최종 보스)를 벨 때만 ×3.26 — 필드 사냥 수치는 v262 그대로 */
 const SKM={whirl:1.1,quake:4.318,wave:1.1,pillar:.9,frost:1.688,chainl:1.492,volley:6.147,rain:2.498,boom:1};/* v263: 테스트 캐릭터(90Lv·무기 35강)·우버 아귀 허수아비·보스 모드 기준 검기·폭발 사격 외 전 스킬 클리어 29초(사술 폭발)로 맞춤 — v250 계수(회전·분쇄·검기 1.1, 사술 .9, 보주·연쇄 1.15)를 흡수 */
+const SKM_OLD={whirl:1.1,quake:1.1,wave:1.1,pillar:.9,frost:1.15,chainl:1.15};/* v269: DPS 표기용 — v262까지의 계수 */
 const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.337,0.444,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
-function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (SKM[id]||1)*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
+function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (dpsRaw?(SKM_OLD[id]||1):(SKM[id]||1))*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
 const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
@@ -3632,7 +3635,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v268';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v269';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3814,7 +3817,7 @@ function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,r
   const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H);for(let y=0;y<H;y++)im.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);g.putImageData(im,0,0);
   rt.dispose();return PORT[cls]=c.toDataURL()}catch(e){return ''}}
 function showClassSel(){
-  let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p><div class="cards">`;
+  let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 60에서 시작</p>`:''}<div class="cards">`;
   for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span><span class="en">${c.en}</span>${c.n}<small>${c.d}<br>주력 스킬: ${c.opts.map(s=>SK[s].n).join(' / ')} 중 택1</small></span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
@@ -3842,19 +3845,20 @@ $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
 /* v251 테스트 캐릭터 = 성능 비교용 고정 세팅: 90레벨(균형 자동 배분) · 1차·2차 강화 만렙 · 피해 증가(무한) 10 · 전 부위 90레벨 전설(옵션 고정, 특수 능력치 8%) +30 · 위험도 60.
    장비·지역은 고정 시드로 만들어 매번 같음. 레벨·강화 조절 등 기존 테스트 기능은 그대로 */
-const TEST_LV=90,TEST_ILV=90,TEST_ENH=30,TEST_WENH=35,/* v262: 무기만 +35 */TEST_TIER=60,TEST_SP=8,TEST_INF=10;
-function testItem(slot){const it={id:++uid,slot,ilvl:TEST_ILV,rar:3,name:'잿불 왕의 '+itemName(slot,4),base:Math.round(itemBase(slot,TEST_ILV)*RAR_M[3]),opts:[]};
+const TEST_TIER=60,TSPECS={90:{lv:90,ilvl:90,enh:30,wenh:35,sp:8,inf:10},110:{lv:110,ilvl:110,enh:35,wenh:45,sp:11,inf:30}};/* v269: 테스트 스펙 선택 — 90레벨(장비 90·30강·무기 35강·특수 8%·피해증가 10) / 110레벨(장비 110·방어구 35강·무기 45강·특수 11%(상급 각인)·피해증가 30) */
+let testSpec=90;const TS=()=>TSPECS[testSpec]||TSPECS[90];
+function testItem(slot){const it={id:++uid,slot,ilvl:TS().ilvl,rar:3,name:'잿불 왕의 '+itemName(slot,4),base:Math.round(itemBase(slot,TS().ilvl)*RAR_M[3]),opts:[]};
   const ok=Object.keys(OPT).filter(k=>OPT[k].slots.includes(slot)),sp=ok.find(k=>RARE_OPT.includes(k)),nm=ok.filter(k=>!RARE_OPT.includes(k));
-  if(sp)it.opts.push({k:sp,v:TEST_SP});const r0=Math.random;Math.random=()=>.5;/* 일반 옵션은 범위 가운데 값 */
-  try{for(const k of nm.slice(0,RAR[3].o[0]-(sp?1:0)))it.opts.push({k,v:Math.max(1,Math.round(OPT[k].roll(TEST_ILV)*RAR_M[3]))})}finally{Math.random=r0}return it}
-function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=false;S.testMp=false;/* v256: 테스트 캐릭터는 체력·마나 무한이 기본 꺼짐 — 재생·냉기·마나 소모를 그대로 시험(메뉴 창에서 켜고 끌 수 있음) */S.lv=TEST_LV;S.xp=0;S.pending=0;S.ess=1e30;S.gold=1e30;
-  S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.skp[sk]=0;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);S.sk2dmg=TEST_INF;
-  S.stats={str:0,agi:0,int:0};S.statPts=(TEST_LV-1)*STAT_PER_LV;S.autoStat='bal';spendAutoStat();
-  S.enh={};for(const k of EQS){S.eq[k]=testItem(k);S.enh[k]=k==='weapon'?TEST_WENH:TEST_ENH}S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;
+  if(sp)it.opts.push({k:sp,v:TS().sp});const r0=Math.random;Math.random=()=>.5;/* 일반 옵션은 범위 가운데 값 */
+  try{for(const k of nm.slice(0,RAR[3].o[0]-(sp?1:0)))it.opts.push({k,v:Math.max(1,Math.round(OPT[k].roll(TS().ilvl)*RAR_M[3]))})}finally{Math.random=r0}return it}
+function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=false;S.testMp=false;/* v256: 테스트 캐릭터는 체력·마나 무한이 기본 꺼짐 — 재생·냉기·마나 소모를 그대로 시험(메뉴 창에서 켜고 끌 수 있음) */S.lv=TS().lv;S.xp=0;S.pending=0;S.ess=1e30;S.gold=1e30;
+  S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.skp[sk]=0;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);S.sk2dmg=TS().inf;
+  S.stats={str:0,agi:0,int:0};S.statPts=(TS().lv-1)*STAT_PER_LV;S.autoStat='bal';spendAutoStat();
+  S.enh={};for(const k of EQS){S.eq[k]=testItem(k);S.enh[k]=k==='weapon'?TS().wenh:TS().enh}S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;
   S.gates=[];for(let t=GATE_EVERY;t<TEST_TIER;t+=GATE_EVERY)S.gates.push(t);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TEST_TIER+GATE_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
   S.tier=TEST_TIER;S.maxTier=TEST_TIER;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;if(S.testMp)P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
-$('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
+$('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
@@ -4027,7 +4031,8 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   parts.push(`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
-function skillDps(id){
+function skillDps(id){return rawDps(()=>skillDps0(id))}
+function skillDps0(id){
   const b=SK[id],st=skillStats(id),base=baseDmg(),crit=1+critCh()*.8,cd=Math.max(.05,st.cd);
   if(b.kind==='quake'){const hit=base*st.dmg*crit,aft=st.aft?st.aft.n*st.aft.m:0,mag=st.mag?st.mag.m*st.mag.dur:0;
     return {main:hit*(QSPK+aft+mag*QLAV)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit*QSPK)}${aft?` · 충격파 ×${st.aft.m.toFixed(1)}`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
@@ -4055,7 +4060,8 @@ function skillDps(id){
   }
   return {main:0,label:'',sub:''};
 }
-function basicDps(){const b=C().basic,crit=1+critCh()*.8,m=cdMul();
+function basicDps(){return rawDps(basicDps0)}
+function basicDps0(){const b=C().basic,crit=1+critCh()*.8,m=cdMul();
   return b==='melee'?baseDmg()*crit/(.42*m):b==='arrow'?baseDmg()*.9*crit/(.45*m):baseDmg()*crit/(.55*m)}
 /* 장별 적정 DPS (적 1명 기준)
    = 그 장에서 몬스터가 생겨나는 체력 총량(초당)을 따라잡는 데 필요한 DPS ÷ 4 (스킬이 평균 4명을 동시에 맞힌다고 가정)
@@ -4102,7 +4108,7 @@ function renderMenu(){
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
       if(BOSS_IDS.includes(id)){const on=!(S.bossOff&&S.bossOff[id]);
-        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>보스전에 입장하면 자동 적용 · ${BOSS_D[id]} · 필드에서는 항상 일반 · 보스 전투 시 스킬창에서 언제든 변경 가능합니다</small></span>
+        h+=`<div class="grow elsw"><span class="gd" style="background:${on?'#ff5a3a':'#556'};border-radius:50%;transform:none"></span><span class="t">보스 모드<small>결투장에 입장하면 자동 적용 · ${BOSS_D[id]} · 결투장 밖(필드·스토리 보스)에서는 항상 일반 · 보스 전투 시 스킬창에서 언제든 변경 가능합니다</small></span>
           <span class="elseg"><button class="pm wide${on?' on':''}" data-boss="${id},1" ${on?'disabled':''}>켜짐</button><button class="pm wide${on?'':' on'}" data-boss="${id},0" ${on?'':'disabled'}>꺼짐</button></span></div>`}
       {const L=S.sk2dmg||0,c=infCost(L),done=g2Done(id),can=done&&(S.ess||0)>=c.e&&S.gold>=c.g;
         h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span></span>
