@@ -1139,7 +1139,7 @@ const skillLv=s=>1+gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
 /* v41 직업 간 DPS 보정: 1차 강화 합계(0~30)와 2차 강화 합계(0~8)에 따라 선형 보간.
    세 직업의 스킬 창 DPS가 1레벨·1차 완료·2차 완료 시점마다 비슷해지도록 맞춘 배율 */
 const BAL={frost:[0.533,0.31,1.23],volley:[2.815,4.091,0.705],whirl:[1.283,4.055,0.578],quake:[0.337,0.444,0.253],rain:[0.248,0.198,0.897],chainl:[0.891,1.873,0.25],wave:[0.244,0.911,0.219],boom:[3.345,0.951,1.178],pillar:[0.907,0.455,1.704]};/* v207: 31레벨·1차 완료·스탯 균형·스토리 장비(아이템레벨 30 유니크) 기준 최종 보스 허수아비 60초 — 1레벨·1차 완료 계수를 같은 비율로 조정(성장 곡선 유지) *//* v172: 같은 직업 기존 스킬(대지 분쇄·다발 사격·연쇄 번개)과 1레벨·1차 완료·2차 완료 DPS가 같도록 *//* v82: 새 스킬은 같은 직업 기존 스킬과 DPS가 같도록 */
-function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (id==='whirl'||id==='quake'||id==='wave'?1.1:1)*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
+function clsBal(id){const b=BAL[id];if(!b)return 1;const n1=Math.min(30,skillLv(id)-1),n2=gems2For(id).reduce((a,g)=>a+g2(g),0);return (id==='whirl'||id==='quake'||id==='wave'?1.1:1)*(id==='pillar'?.9:id==='frost'||id==='chainl'?1.15:1)/* v250: 사술 폭발 -10% · 얼음 보주·연쇄 번개 +15% */*(b[0]+(b[1]-b[0])*n1/30)*(1+(b[2]-1)*n2/8)}
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
 const mpCost=s=>{const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf))*(1-gear().mcr/100)))};
@@ -3617,7 +3617,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v249';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v250';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
