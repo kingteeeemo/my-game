@@ -2041,13 +2041,14 @@ const FB_TIME=90,FB_AIR=26;/* v73: 제한 시간 90초 기준. 사이 페이즈 
 const fbReq=()=>ETYPES.boss.hp*CH[LAST].hp*FB_HP/(FB_TIME-FB_AIR)*1.3;/* v58: +30% */
 /* ===== v95 결투장: 엔드게임 이후 도전하는 거대 기사 보스 「잿불 검귀」 (캐릭터의 3배 크기). 패턴: 검기(긴 부채꼴) · 전방 휘두르기(넓은 부채꼴) · 점프 내려찍기(원) · 돌진(직사각형) ===== */
 const DUEL={n:'잿불 검귀',t:70},SCR_P=.3,scrP=m=>m==='u'?.3:SCR_P;/* v131: 우버 상급 각인의 서 20% → v245: 30% *//* v101: 각인의 서 드롭률 30% (v96: 10%) · 수치 8% 고정 */
-const DUEL_M={n:{tier:10,b:10,n:'일반',v:8},u:{tier:40,b:30,n:'우버',v:11}};/* v97: 난이도 고정 — 일반 위험도 10 · 우버 위험도 30 → v159: 우버 위험도 40(냉기 등 환경). b=체력·보상·필요 DPS 기준 위험도(우버는 옛 30 유지) */
+const DUEL_M={n:{tier:15,b:15,n:'일반',v:8},u:{tier:50,b:50,n:'우버',v:11}};/* v246: 잿불 검귀 위험도 일반 10→15 · 우버 40/30→50 (환경·체력·보상 기준 모두) *//* v97: 난이도 고정 — 일반 위험도 10 · 우버 위험도 30 → v159: 우버 위험도 40(냉기 등 환경). b=체력·보상·필요 DPS 기준 위험도(우버는 옛 30 유지) */
 const spKeyOf=slot=>RARE_OPT.find(k=>OPT[k].slots.includes(slot)),scrName=sc=>sc.v>=10?'상급 각인의 서':'각인의 서';/* t: 위험도 권장 DPS로 약 70초 */
-const DUEL_MAW={n:{tier:40,b:40},u:{tier:50,b:50}};/* v221: 심연의 아귀 위험도 — 일반 40 · 우버 50 */
+const DUEL_MAW={n:{tier:40,b:40},u:{tier:70,b:70}};/* v246: 아귀 우버 50→70 *//* v221: 심연의 아귀 위험도 — 일반 40 · 우버 50 */
 const duelCfg=(m,b)=>b==='maw'?{...DUEL_M[m],...DUEL_MAW[m]}:DUEL_M[m];
 const duelReq=(m)=>{const D=m?DUEL_M[m]:(S.duel&&duelCfg(S.duel.m||'n',S.duel.b))||DUEL_M.n;return stageReq(NCH,D.b)};
 const DUEL_HPX={n:3,u:10};/* v231: 보스 체력 배수 — 일반 ×3 · 우버 ×10 (검귀·아귀 공통) */
-const uberKnightHp=()=>Math.round(stageReq(NCH,DUEL_M.u.b)*DUEL.t*2.5*1.96);/* 우버 잿불 검귀 체력 — 아귀 체력 기준 */
+const uberKnightHp=()=>Math.round(stageReq(NCH,DUEL_M.u.b)*DUEL.t*2.5*1.96);/* 우버 잿불 검귀 체력 */
+const mawHpBase=U=>Math.round(stageReq(NCH,DUEL_MAW[U?'u':'n'].b)*DUEL.t*2.5*(U?1.96:1));/* v246: 아귀 체력도 자기 위험도(일반 40·우버 70) 기준 — 기존엔 우버 검귀 체력에 ×1.3/×8 */
 const dh=p=>hurtPct(p*(S.duel&&S.duel.uber?1.15:1));
 function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [...g.children])if(c.isMesh&&!c.userData.pv&&c!==u.body)g.remove(c);
   const mats=new Map();let armor=null;
@@ -2250,7 +2251,7 @@ function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){
   at(1,M.head.position);M.head.position.z+=.4;M.head.quaternion.setFromUnitVectors(_mz,_mt.set(Math.sin(ph*.7)*.06,-.32+Math.sin(ph*1.1)*.04,1).normalize());/* v214: 머리는 항상 플레이어 쪽을 내려다봄 */
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
-  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8:1.3)*(U?DUEL_HPX.u:DUEL_HPX.n));/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
+  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(mawHpBase(U)*(U?DUEL_HPX.u:DUEL_HPX.n));/* v246: 아귀 위험도 기준 체력 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
   e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
 function mawReset(e){e.dA=null;e.wv=0;e.pullCd=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
@@ -3616,7 +3617,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v246';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v247';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
