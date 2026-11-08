@@ -2104,37 +2104,76 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
    패턴 4 독 구체: 유도 독 구체 3개/5개(직격 20%/30%) — 옆으로 피하거나 구르기. 떨어진 자리에 독 웅덩이.
    패턴 5 심연의 파동: 웅덩이 가까이(안전 원 안)만 안전, 밖은 45%/70% — 가까이 붙기.
    사이 페이즈(체력 50%, 1회): 웅덩이로 잠수·무적. 맵 6등분 → 6칸을 시간차로 예고 → 예고 순서대로 6연타(50%/즉사). 3회 반복 후 종료. 미리 처치하면 생략. */
-const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=5.2,MAW_SAFE=7.5;
+const MAW={n:'심연의 아귀',t:70},MAW_BREATH_T={n:8,u:6}/* 브레스 1바퀴 시간(초) — 해보고 조정 */,MAW_MELEE=10.4,/* v211: 근접 범위 2배 */MAW_SAFE=7.5;
 const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:.55,stingN:9,pull:.6,pullV:4.4,orb:.3,orbN:5,puddle:.08,ring:.7,sipe:1,sipeInt:.6}:{melee:.05,wave:.3,breath:.25,rain:.12,sting:.35,stingN:5,pull:.4,pullV:3.6,orb:.2,orbN:3,puddle:.05,ring:.45,sipe:.5,sipeInt:.75};
 const duelDef=()=>S.duel&&S.duel.b==='maw'?MAW:DUEL;
 /* 구르기 무적을 무시하는 % 피해 (브레스) */
 function hurtPctRaw(pct){if(P.hp<=0||S.testGod)return;const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=Math.max(P.inv,.15);dmgNum(P.pos,d,'hurt');const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
-function mawModel(U){const root=new THREE.Group(),skin=SM({color:0x1a0c24,roughness:.55,metalness:.1}),belly=SM({color:0x2a1438,roughness:.7}),tooth=SM({color:0xe8e0d0,roughness:.5}),eye=new THREE.MeshBasicMaterial({color:U?0xff3a6a:0xb040ff});
-  const body=new THREE.Mesh(new THREE.CylinderGeometry(1.25,2.1,3.4,14,1),skin);body.position.y=1.5;root.add(body);
-  for(let i=0;i<4;i++){const seg=new THREE.Mesh(new THREE.TorusGeometry(1.55-i*.1,.14,8,20),belly);seg.rotation.x=Math.PI/2;seg.position.y=.6+i*.75;root.add(seg)}
-  const head=new THREE.Group();head.position.y=3.9;root.add(head);
-  const skull=new THREE.Mesh(new THREE.SphereGeometry(1.65,18,14,0,Math.PI*2,0,Math.PI*.62),skin);skull.rotation.x=-.25;head.add(skull);
-  const jaw=new THREE.Group();jaw.position.set(0,-.3,.5);head.add(jaw);const jawM=new THREE.Mesh(new THREE.SphereGeometry(1.45,16,10,0,Math.PI*2,Math.PI*.5,Math.PI*.42),skin);jawM.rotation.x=.3;jaw.add(jawM);
-  const inner=new THREE.Mesh(new THREE.CircleGeometry(1.3,20),new THREE.MeshBasicMaterial({color:U?0x6a0a2a:0x3a0a6a}));inner.position.set(0,-.1,.9);inner.rotation.x=-.9;head.add(inner);
-  for(let i=0;i<9;i++){const a=-1.1+i/8*2.2;const t=new THREE.Mesh(new THREE.ConeGeometry(.12,.5,6),tooth);t.position.set(Math.sin(a)*1.3,-.05,Math.cos(a)*1.3+.2);t.rotation.x=Math.PI;head.add(t);
-    const t2=new THREE.Mesh(new THREE.ConeGeometry(.1,.42,6),tooth);t2.position.set(Math.sin(a)*1.15,.1,Math.cos(a)*1.15+.1);jaw.add(t2)}
-  const eyes=[];for(const [x,y,z,s] of [[-.6,.75,1.2,.17],[.6,.75,1.2,.17],[-.95,1.05,.8,.1],[.95,1.05,.8,.1]]){const m=new THREE.Mesh(new THREE.SphereGeometry(s,8,6),eye);m.position.set(x,y,z);head.add(m);eyes.push(m)}
-  const tents=[];for(let i=0;i<6;i++){const a=i/6*Math.PI*2+.3,g=new THREE.Group();g.position.set(Math.cos(a)*2.9,0,Math.sin(a)*2.9);g.rotation.y=-a;
-    const m=new THREE.Mesh(new THREE.CylinderGeometry(.09,.3,2.8,8),skin);m.position.y=1.3;g.add(m);const tip=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),eye);tip.position.y=2.75;g.add(tip);g.rotation.z=-.55;root.add(g);tents.push(g)}
-  const pool=new THREE.Group();const pd=new THREE.Mesh(new THREE.CircleGeometry(3.7,48),new THREE.MeshStandardMaterial({color:0x08030c,roughness:.15,metalness:.4,emissive:U?0x3a0616:0x1a0630,emissiveIntensity:.8}));pd.rotation.x=-Math.PI/2;pd.position.y=.035;
-  const rim=flatMesh(ringGeo,U?0xff3a6a:0x8a3aff,.45);rim.scale.set(3.9,3.9,1);rim.position.y=.045;pool.add(pd,rim);
-  return {root,pool,legs:[],arms:[],h:6.6,maw:1,head,jaw,eyes,tents,body}}
+function mawModel(U){const root=new THREE.Group();
+  /* v211: 물속에서 솟아오른 기다란 뱀용 — 곡선을 따라 촘촘한 구체 몸통(매 프레임 물결침) + 등가시·지느러미·여러 턱의 머리 */
+  const skin=new THREE.MeshStandardMaterial({color:0x2c1e4a,roughness:.38,metalness:.22,emissive:0x0a0418,emissiveIntensity:.6}),belly=new THREE.MeshStandardMaterial({color:0x4a3868,roughness:.55,metalness:.05}),
+    fin=new THREE.MeshStandardMaterial({color:U?0x6a1030:0x2a1060,roughness:.5,metalness:.1,emissive:U?0xff2a5a:0x7a30ff,emissiveIntensity:.35,side:THREE.DoubleSide,transparent:true,opacity:.92}),
+    bone=new THREE.MeshStandardMaterial({color:0xcfc6b4,roughness:.45}),tooth=new THREE.MeshStandardMaterial({color:0xeae2d2,roughness:.4}),
+    eye=new THREE.MeshBasicMaterial({color:U?0xff3a6a:0xb860ff}),glow=new THREE.MeshBasicMaterial({color:U?0xff2a5a:0x8a40ff,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false});
+  const CP0=[[0,-1.2,-.3],[.7,.8,-.9],[-.9,2.6,-.2],[.3,4.2,.9],[0,5.5,1.9],[0,6.2,2.9]].map(p=>new THREE.Vector3(...p));
+  const CP=CP0.map(v=>v.clone()),curve=new THREE.CatmullRomCurve3(CP,false,'centripetal',.5);
+  const N=34,segs=[],spines=[],plates=[];const rad=t=>.42+1.25*Math.pow(1-t,.75)*(t<.1?.7+3*t:1);
+  for(let i=0;i<N;i++){const t=i/(N-1),r=rad(t);const m=new THREE.Mesh(new THREE.SphereGeometry(1,22,16),skin);m.scale.setScalar(r);root.add(m);segs.push({m,t,r});
+    if(i%2===0&&i>2&&i<N-2){const pl=new THREE.Mesh(new THREE.SphereGeometry(1,16,10),belly);pl.scale.set(r*.82,r*.45,r*.95);root.add(pl);plates.push({m:pl,t,r})}
+    if(i%3===1&&i>1&&i<N-1){const sp=new THREE.Mesh(new THREE.ConeGeometry(r*.22,r*1.5+.5,8),fin);root.add(sp);spines.push({m:sp,t,r});
+      const web=new THREE.Mesh(new THREE.PlaneGeometry(r*1.3,r*1.1),fin);root.add(web);spines.push({m:web,t,r,web:1})}}
+  /* 머리 */
+  const head=new THREE.Group();root.add(head);
+  const skull=new THREE.Mesh(new THREE.SphereGeometry(1,26,18),skin);skull.scale.set(1.0,.85,1.5);skull.position.z=.3;head.add(skull);
+  const brow=new THREE.Mesh(new THREE.SphereGeometry(1,20,12),skin);brow.scale.set(1.0,.5,1.1);brow.position.set(0,.55,.5);head.add(brow);
+  const snout=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),skin);snout.scale.set(.8,.55,1.0);snout.position.set(0,-.05,1.55);head.add(snout);
+  for(const sx of [-1,1]){const horn=new THREE.Mesh(new THREE.ConeGeometry(.22,1.9,10),bone);horn.position.set(sx*.75,.75,-.5);horn.rotation.set(-1.9,0,sx*.45);head.add(horn);
+    const horn2=new THREE.Mesh(new THREE.ConeGeometry(.14,1.2,8),bone);horn2.position.set(sx*1.05,.25,-.3);horn2.rotation.set(-2.1,0,sx*.9);head.add(horn2);
+    const frill=new THREE.Mesh(new THREE.ConeGeometry(.9,1.6,3,1,true),fin);frill.scale.set(.25,1,1);frill.position.set(sx*1.15,-.1,-.4);frill.rotation.set(.4,0,sx*1.35);head.add(frill)}
+  /* 위턱 이빨 · 아래턱 · 양옆 턱 */
+  for(let i=0;i<10;i++){const a=-1.05+i/9*2.1,t=new THREE.Mesh(new THREE.ConeGeometry(.09,.5,6),tooth);t.position.set(Math.sin(a)*.85,-.42,Math.cos(a)*.95+1.0);t.rotation.x=Math.PI;head.add(t)}
+  const jaw=new THREE.Group();jaw.position.set(0,-.45,.45);head.add(jaw);
+  const jawM=new THREE.Mesh(new THREE.SphereGeometry(1,20,12),skin);jawM.scale.set(.9,.4,1.5);jawM.position.set(0,-.15,.75);jaw.add(jawM);
+  const throat=new THREE.Mesh(new THREE.SphereGeometry(1,16,10),new THREE.MeshBasicMaterial({color:U?0x7a0a2a:0x3a0a7a}));throat.scale.set(.6,.3,.9);throat.position.set(0,.05,.7);jaw.add(throat);
+  for(let i=0;i<8;i++){const a=-.95+i/7*1.9,t=new THREE.Mesh(new THREE.ConeGeometry(.08,.42,6),tooth);t.position.set(Math.sin(a)*.7,.08,Math.cos(a)*.95+.9);jaw.add(t)}
+  const mands=[];for(const sx of [-1,1]){const g=new THREE.Group();g.position.set(sx*.95,-.25,.6);head.add(g);const m=new THREE.Mesh(new THREE.ConeGeometry(.18,1.5,8),skin);m.position.set(sx*.15,0,.7);m.rotation.x=Math.PI/2;g.add(m);
+    for(let i=0;i<3;i++){const t=new THREE.Mesh(new THREE.ConeGeometry(.06,.3,5),tooth);t.position.set(-sx*.05,0,.35+i*.35);t.rotation.z=sx*1.4;g.add(t)}mands.push({g,sx})}
+  const eyes=[];for(const [x,y,z,s] of [[-.5,.42,1.05,.15],[.5,.42,1.05,.15],[-.82,.6,.75,.1],[.82,.6,.75,.1],[-.35,.72,.55,.07],[.35,.72,.55,.07]]){const m=new THREE.Mesh(new THREE.SphereGeometry(s,10,8),eye);m.position.set(x,y,z);head.add(m);
+    const gl=new THREE.Mesh(new THREE.SphereGeometry(s*1.9,10,8),glow);gl.position.copy(m.position);head.add(gl);eyes.push(m)}
+  /* 발광 줄무늬(등줄기) */
+  const stripes=[];for(let i=4;i<N-3;i+=2){const st=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),glow);root.add(st);stripes.push({m:st,t:i/(N-1)})}
+  /* 웅덩이 */
+  const pool=new THREE.Group();const pd=new THREE.Mesh(new THREE.CircleGeometry(3.9,64),new THREE.MeshStandardMaterial({color:0x06030a,roughness:.1,metalness:.5,emissive:U?0x3a0616:0x180a30,emissiveIntensity:.9}));pd.rotation.x=-Math.PI/2;pd.position.y=.035;
+  const rim=flatMesh(ringGeo,U?0xff3a6a:0x8a3aff,.5);rim.scale.set(4.1,4.1,1);rim.position.y=.045;const rim2=flatMesh(ringGeo,0x2a1040,.9);rim2.scale.set(4.5,4.5,1);rim2.position.y=.04;pool.add(pd,rim2,rim);
+  const M={root,pool,legs:[],arms:[],h:7.4,maw:1,head,jaw,mands,eyes,segs,spines,plates,stripes,CP0,CP,curve,body:segs[0].m,up:new THREE.Vector3(0,1,0)};
+  mawPose(M,0,0);return M}
+/* 곡선을 따라 몸통 재배치 — ph: 물결 위상, open: 턱 벌림 */
+const _mp=new THREE.Vector3(),_mt=new THREE.Vector3(),_mq=new THREE.Quaternion(),_mz=new THREE.Vector3(0,0,1),_my=new THREE.Vector3(0,1,0);
+function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){const k=i/(CP.length-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.28*k,CP0[i].y+Math.sin(ph*.9+i)*.1*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.22*k)}curve.updateArcLengths();
+  const at=(t,out)=>curve.getPointAt(Math.min(1,Math.max(0,t)),out);
+  for(const s of M.segs){at(s.t,s.m.position)}
+  for(const s of M.plates){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);_mq.setFromUnitVectors(_my,_mt);s.m.quaternion.copy(_mq);s.m.position.addScaledVector(_mz.set(0,0,1).applyQuaternion(_mq),s.r*.35)}
+  for(const s of M.spines){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);const up=_mp.set(0,0,-1).applyQuaternion(_mq.setFromUnitVectors(_my,_mt));/* 등쪽(뒤) */
+    if(s.web){s.m.position.addScaledVector(up,s.r*.9);s.m.quaternion.copy(_mq);s.m.rotateX(Math.PI/2)}else{s.m.position.addScaledVector(up,s.r*.85+.2);s.m.quaternion.setFromUnitVectors(_my,up.clone().add(_mt.clone().multiplyScalar(-.35)).normalize())}}
+  for(const s of M.stripes){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);const up=_mp.set(0,0,-1).applyQuaternion(_mq.setFromUnitVectors(_my,_mt));const r=.42+1.25*Math.pow(1-s.t,.75);s.m.position.addScaledVector(up,r*.95);s.m.scale.set(r*.22,r*.12,r*.5);s.m.quaternion.copy(_mq)}
+  at(1,M.head.position);curve.getTangentAt(1,_mt);M.head.quaternion.setFromUnitVectors(_mz,_mt.clone().setY(_mt.y*.35).normalize());M.head.rotateX(-.15);
+  M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
-  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*MAW.t*2.5*(U?1.96:1));e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=0;e.bt=0;e.at=0;e.sipeDone=0;
+  e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*MAW.t*2.5*(U?1.96:1));e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
   e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
-function mawReset(e){e.dA=null;e.pt=3;e.grace=0;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
+function mawReset(e){e.dA=null;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
 function mawMouth(e){const v=new THREE.Vector3();e.M.head.getWorldPosition(v);v.y-=.2;return v}
 function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber),a0=Math.atan2(P.pos.x,P.pos.z),O={x:0,z:0},ok=()=>e.hp>0&&S.duel&&e.dA===A;let A;
   if(k==='breath'){const BT=MAW_BREATH_T[U?'u':'n'],dir=Math.random()<.5?-1:1,PRE=.8;A={k,t:0,a:a0,dur:PRE+BT+.3,tk:0,rk:.4,upd(dt){if(A.t<PRE){e.jaw=A.t/PRE;return}e.jaw=1;A.a=a0+dir*(A.t-PRE)/BT*Math.PI*2;
-      const m=mawMouth(e),dx=Math.sin(A.a),dz=Math.cos(A.a),n=Math.ceil(dt*220*QM());/* 입에서 뿜는 독 브레스 */
-      for(let i=0;i<n;i++){const d=rnd(0,ARENA_R+2),sp=rnd(.25,.45),off=rnd(-1,1)*d*.3,y=rnd(.2,1.4);emit(PADD,{x:m.x+dx*2,y:m.y-.6,z:m.z+dz*2,vx:(dx*d-dz*off-dx*2)/sp,vy:(y-(m.y-.6))/sp,vz:(dz*d+dx*off-dz*2)/sp,life:sp,s0:rnd(.9,1.5),s1:rnd(2,3.2),c0:0xc8ff70,c1:0x3a0a5a,a:.75,tex:1})}
-      if(Math.random()<dt*10)groundFx({x:dx*rnd(4,ARENA_R),z:dz*rnd(4,ARENA_R)},dotTex,0x8aff50,.6,3,.4,.45,true,.07);
+      const m=mawMouth(e),dx=Math.sin(A.a),dz=Math.cos(A.a),LB=ARENA_R+4,n=Math.ceil(dt*560*QM());/* v211: 더 진하고 길게 — 입자 2.5배·사거리 끝까지·굵게 + 반투명 원뿔 빔 */
+      if(!A.beam){const g=new THREE.Group();const c1=new THREE.Mesh(new THREE.ConeGeometry(LB*.3,LB,24,1,true),new THREE.MeshBasicMaterial({color:0x9aff50,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide})),c2=new THREE.Mesh(new THREE.ConeGeometry(LB*.12,LB*.98,16,1,true),new THREE.MeshBasicMaterial({color:0xe8ffb0,transparent:true,opacity:.3,blending:THREE.AdditiveBlending,depthWrite:false}));
+        for(const c of [c1,c2]){c.rotation.x=-Math.PI/2;c.position.z=LB/2;g.add(c)}scene.add(g);A.beam=g;fx.push({m:g,t:0,dur:A.dur-PRE,keep:1,upd(k){g.visible=!!e.dA&&e.dA===A;if(k>.97)g.visible=false}})}
+      A.beam.position.set(m.x,.9,m.z);A.beam.rotation.y=A.a;A.beam.scale.set(1,1+Math.sin(time*25)*.04,1);
+      for(let i=0;i<n;i++){const d=rnd(1,LB),sp=rnd(.3,.55),off=rnd(-1,1)*d*.3,y=rnd(.1,2.2);emit(PADD,{x:m.x+dx*1.5,y:m.y-.5,z:m.z+dz*1.5,vx:(dx*d-dz*off-dx*1.5)/sp,vy:(y-(m.y-.5))/sp,vz:(dz*d+dx*off-dz*1.5)/sp,life:sp,s0:rnd(1.4,2.4),s1:rnd(3,4.6),c0:0xd8ff80,c1:0x2a0a4a,a:.9,tex:1})}
+      for(let i=0;i<Math.ceil(dt*90*QM());i++){const d=rnd(3,LB),off=rnd(-1,1)*d*.3;emit(PNRM,{x:dx*d-dz*off,y:rnd(.1,.6),z:dz*d+dx*off,vy:rnd(.5,1.5),life:rnd(.8,1.4),s0:1.2,s1:3,c0:0x5a8a2a,c1:0x101a08,a:.5,drag:1.5,tex:2})}
+      if(Math.random()<dt*22){const d=rnd(4,LB);groundFx({x:dx*d-dz*rnd(-1,1)*d*.25,z:dz*d+dx*rnd(-1,1)*d*.25},dotTex,0x8aff50,.8,3.6,.5,.55,true,.07)}
+      if(Math.random()<dt*6){const d=rnd(5,LB);decalFx({x:dx*d,z:dz*d},crackTex,0x3a6a1a,2.2,3.5,.5,false)}
       A.tk-=dt;if(A.tk<=0){A.tk=.5;if(P.hp>0&&inFan(P.pos,O,A.a,.3,ARENA_R+2))hurtPctRaw(C.breath)}
       A.rk-=dt;if(A.rk<=0){A.rk=.35;const near=Math.random()<.6,q=near?{x:P.pos.x+rnd(-4,4),z:P.pos.z+rnd(-4,4)}:{x:rnd(-1,1)*ARENA_R,z:rnd(-1,1)*ARENA_R};const dd=Math.hypot(q.x,q.z),mx=ARENA_R-1;if(dd>mx){q.x*=mx/dd;q.z*=mx/dd}if(dd<4.2){q.x*=4.2/(dd||1);q.z*=4.2/(dd||1)}
         const drop=new THREE.Mesh(new THREE.SphereGeometry(.3,8,6),basicMat('mawdrop',{color:0x9aff5a,opacity:.95}));drop.position.set(q.x,14,q.z);scene.add(drop);
@@ -2146,10 +2185,11 @@ function mawStart(e,k){const C=mawC(),U=!!(S.duel&&S.duel.uber),a0=Math.atan2(P.
       const s=new THREE.Mesh(new THREE.ConeGeometry(.18,1.1,6),basicMat('mawsting',{color:0xd0ff80,opacity:1}));s.position.copy(m);scene.add(s);
       fx.push({m:s,t:0,dur:.3,upd(k){s.position.set(m.x+(q.x-m.x)*k,m.y+(0-m.y)*k+Math.sin(k*Math.PI)*2,m.z+(q.z-m.z)*k);s.lookAt(q.x,0,q.z);s.rotateX(Math.PI/2)},end(){mfree(s.material)}});
       circTele(q,2.2,.9,()=>{groundFx(q,dotTex,0xa0ff60,.6,3.4,.35,.7,true,.07);spray(PNRM,q,8,{sp:[1,3],up:[1,3],y:[.1,.4],life:[.4,.7],s0:[.4,.7],s1:[1,1.6],c0:0x6aaa3a,c1:0x1a2a10,a:.6,drag:2,tex:2});if(P.hp>0&&Math.hypot(P.pos.x-q.x,P.pos.z-q.z)<2.6)hurtPct(C.sting)})})}
-  else if(k==='pull'){const R=MAW_MELEE+1.6,PT=3;A={k,t:0,a:a0,dur:PT+.7,upd(dt){A.a=Math.atan2(P.pos.x,P.pos.z);e.jaw=A.t<PT?.6+.2*Math.sin(A.t*12):1;if(A.t<PT&&P.hp>0){const d=mawDist();if(d>1){P.pos.x-=P.pos.x/d*C.pullV*dt;P.pos.z-=P.pos.z/d*C.pullV*dt}
+  else if(k==='pull'){const R=6.8,PT=3;/* v211: 흡입은 맵 전체, 물기는 웅덩이 주변 6.8m */A={k,t:0,a:a0,dur:PT+.7,upd(dt){A.a=Math.atan2(P.pos.x,P.pos.z);e.jaw=A.t<PT?.6+.2*Math.sin(A.t*12):1;if(A.t<PT&&P.hp>0){const d=mawDist();if(d>1){P.pos.x-=P.pos.x/d*C.pullV*dt;P.pos.z-=P.pos.z/d*C.pullV*dt}
         const m=mawMouth(e);for(let i=0;i<Math.ceil(dt*60*QM());i++){const t=rnd(0,6.28),r=rnd(5,ARENA_R),x=Math.sin(t)*r,z=Math.cos(t)*r,sp=rnd(.4,.7);emit(PADD,{x,y:rnd(.2,2),z,vx:(m.x-x)/sp,vy:(m.y-1)/sp,vz:(m.z-z)/sp,life:sp,s0:.5,s1:.1,c0:0xc090ff,c1:0x3a0a5a,a:.6,tex:1})}}}};
+    for(let i=0;i<6;i++)later(i*.5,()=>{if(!ok())return;const ring=flatMesh(ringGeo,0xb070ff,.5);ring.position.set(0,.3,0);scene.add(ring);fx.push({m:ring,t:0,dur:.9,upd(k){const r=ARENA_R+1-(ARENA_R-3)*k;ring.scale.set(r,r,1);ring.material.opacity=.5*(1-k*k)}})});
     circTele(O,R,PT,()=>{if(!ok())return;shake=Math.max(shake,.4);ringFx(O,R,0xb050ff,.4);groundFx(O,shockTex,0xc080ff,1,R*1.1,.4,.8,true,.08);if(P.hp>0&&mawDist()<R+.3)hurtPct(C.pull)});
-    toast('흡입',`${e.name}이(가) 숨을 들이켭니다 — 웅덩이에서 멀리 달아나세요`)}
+    toast('흡입',`${e.name}이(가) 맵 전체를 빨아들입니다 — 웅덩이 반대쪽으로 계속 달리세요`)}
   else if(k==='orbs'){const n=C.orbN;A={k,t:0,a:a0,dur:.3+n*.45+4.6,upd(){e.jaw=Math.max(0,Math.sin(A.t*6))}};
     for(let i=0;i<n;i++)later(.3+i*.45,()=>{if(!ok())return;const m=mawMouth(e);A.a=Math.atan2(P.pos.x,P.pos.z);const dx0=P.pos.x-m.x,dz0=P.pos.z-m.z,l0=Math.hypot(dx0,dz0)||1;let vx=dx0/l0*9,vz=dz0/l0*9;
       const orb=new THREE.Mesh(new THREE.SphereGeometry(.55,10,8),basicMat('maworb',{color:0x9aff5a,opacity:.95}));orb.position.set(m.x,1,m.z);scene.add(orb);let done=false;
@@ -2183,11 +2223,10 @@ function mawStep(e,dt){const C=mawC(),O={x:0,z:0};e.jaw=e.jaw||0;e.sink=e.sink||
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{if(e.hp<=0||e.dA)return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)})}}
   e.pt-=dt;if(e.pt>0)return;const pool=['breath','sting','pull','orbs','wave'];let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
-function mawAnim(e,dt){const M=e.M,A=e.dA,t=time+e.ph;M.root.position.y=-(e.sink||0)*7.5;
-  M.body.scale.set(1+Math.sin(t*2.2)*.03,1,1+Math.cos(t*2.2)*.03);M.head.rotation.x=-.1+Math.sin(t*1.6)*.06+(e.jaw||0)*.25;M.head.position.y=3.9+Math.sin(t*1.6)*.08;
-  M.jaw.rotation.x=(e.jaw||0)*.95;for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
-  M.tents.forEach((g,i)=>{g.rotation.z=-.55+Math.sin(t*1.8+i*1.1)*.18;g.rotation.x=Math.cos(t*1.4+i)*.12});
-  if(Math.random()<dt*6*QM()){const a=rnd(0,6.28),r=rnd(0,3.4);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}}
+function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
+  mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
+  if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
+  if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
 function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&!S.test)return;closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=DUEL_M[m];S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(`결투장 · ${D.n} ${N}`,`위험도 ${D.tier} 추천`);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
@@ -3440,7 +3479,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v210';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v211';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
