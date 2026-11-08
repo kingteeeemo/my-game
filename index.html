@@ -1920,7 +1920,7 @@ function airStep(e,dt){const A=e.air,M=e.M;A.t+=dt;
     if(k>=1){A.st='tele';A.t=0;lineTele(A.s,A.a,A.L,A.w,1.05*TELE_S,()=>{})}}
   else if(A.st==='tele'){turn(A.a);if(A.t>=1.05*TELE_S){A.st='fly';A.t=0;A.hit=false;A.sc=0}}
   else if(A.st==='fly'){const k=Math.min(1,A.t/.95),d=A.L*k,dx=Math.sin(A.a),dz=Math.cos(A.a);e.pos.x=A.s.x+dx*d;e.pos.z=A.s.z+dz*d;e.g.rotation.y=A.a;
-    if(!A.hit&&inLine(P.pos,A.s,A.a,d,A.w)){A.hit=true;hurtPct(.8);shake=.35;hitSpark(P.pos,0xffd0a0,0xff4a20,6)}
+    if(!A.hit&&inLine(P.pos,A.s,A.a,d,A.w)){A.hit=true;hurtPct(.8*BOSS_DM);shake=.35;hitSpark(P.pos,0xffd0a0,0xff4a20,6)}
     M.mouth.getWorldPosition(_mv);const gx=e.pos.x+dx*2.2,gz=e.pos.z+dz*2.2,n=Math.ceil(dt*260*QM());
     for(let i=0;i<n;i++){const tx=gx+rnd(-1,1)*1.2,tz=gz+rnd(-1,1)*1.2,l=rnd(.22,.32);emit(PADD,{x:_mv.x,y:_mv.y,z:_mv.z,vx:(tx-_mv.x)/l,vy:(0-_mv.y)/l,vz:(tz-_mv.z)/l,life:l,s0:rnd(.9,1.4),s1:rnd(2.4,3.4),c0:0xfff4c0,c1:0xff5a10,a:.9,tex:1})}
     for(let i=0;i<n;i++){const o=rnd(-.5,.5)*A.w,q=rnd(-1,1);emit(PADD,{x:e.pos.x+dz*o+dx*q,y:.25,z:e.pos.z-dx*o+dz*q,vy:rnd(1,4),life:rnd(.5,1),s0:rnd(1.4,2.2),s1:.3,c0:0xffd080,c1:0xff3a08,a:.85,tex:1})}
@@ -1950,7 +1950,7 @@ function seedPacks(){const d=diff(),ci=chF(S.ch),goal=CH[Math.min(S.ch,LAST)].go
   while(left>0&&z>-STORY_L+24){const c=pathC(z),n=Math.min(left,2+(Math.random()*3|0));left-=n;z-=step*rand(.75,1.25);
   for(let i=0;i<n;i++){const q=Math.random(),type=q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute',q2=Math.random(),pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=q2<pu?2:q2<pu+pr?1:0;
     const w=L2W(c+rand(-.6,.6)*pathW(z),z+rand(-3,3));const e=spawnEnemy(type,w.x,w.z,rk);e.idle=true}}}
-function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3)}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
+function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3);e.dmg*=BOSS_DM}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
 /* 최종 보스: 5장 보스의 8배 체력 · 피해 1.3배 · 크기 1.35배. 체력 50% 이하 격노(빨라지고 패턴 간격 단축).
    일반 장판 공격 + 주기적으로 자기 주변 원형 충격파 */
 const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84,FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
@@ -2143,7 +2143,7 @@ function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('c
   <p class="hint">바닥의 빨간 경고 장판이 다 차기 전에 밖으로 피하세요. 점프 내려찍기는 원 밖으로, 검기는 부채꼴 옆으로 비켜서면 됩니다.</p>
   <button class="primary" id="duelAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
 function spawnFinalBoss(){if(enemies.some(e=>e.final))return;const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:FINAL.boss});
-  e.final=true;e.hp=e.mhp=e.mhp*FB_HP;e.dmg*=FB_DMG;e.xp*=3;e.g.scale.multiplyScalar(1.35);e.r*=1.35;e.mat.color.setHex(0x8a2a1e);e.nova=5;e.rage=false;e.ip=0;
+  e.final=true;e.hp=e.mhp=e.mhp*FB_HP;e.dmg*=FB_DMG*BOSS_DM;e.xp*=3;e.g.scale.multiplyScalar(1.35);e.r*=1.35;e.mat.color.setHex(0x8a2a1e);e.nova=5;e.rage=false;e.ip=0;
   e.g.remove(e.M.root);const M=dragonModel(e.mat);e.g.add(M.root);e.M=M;e.h=M.h*e.g.scale.x+.3;return e}
 /* 위험도 진행 (v29)
    - 위험도마다 200마리 처치 → 다음 위험도 해금. 「자동 상승」이 켜져 있으면 바로 다음 위험도로 이동
@@ -2212,7 +2212,7 @@ function burnField(p,r,dmg,dur=3){
       if(k<.75){if(Math.random()<dt*r*5*q){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:.1,z:p.z+Math.cos(a)*rr,vx:rnd(-.4,.4),vy:rnd(.8,2.2),vz:rnd(-.4,.4),life:rnd(.5,1.1),s0:rnd(.1,.18),s1:.03,c0:0xffd060,c1:0xff3a00,a:.9,drag:.8,grav:-1.5,tex:1})}
         if(Math.random()<dt*r*.9*q){const a=Math.random()*6.28,rr=r*Math.random()*.8;emit(PNRM,{x:p.x+Math.sin(a)*rr,y:.2,z:p.z+Math.cos(a)*rr,vy:rnd(.5,1),life:rnd(1,1.6),s0:.3,s1:1.1,c0:0x3a3028,c1:0x1a1512,a:.22,drag:1,rv:.6,tex:2})}}}});
 }
-const TELE_S=1.2;/* v202: 스토리 보스 예고 → 실제 타격 시간 20% 늦춤 (일반·격노 모두) */
+const TELE_S=1.44,BOSS_CD=1.3,BOSS_DM=.9;/* v202: 스토리 보스 예고→타격 20% 늦춤 → v203: 20% 더(×1.44) · 패턴 간격 +30% · 모든 공격 피해 -10% (일반·격노 모두) */
 function telegraph(p,r,dmg){
   const ring=flatMesh(ringGeo,0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
   const fill=flatMesh(discGeo,0xd04a3a,.25);fill.position.set(p.x,.06,p.z);
@@ -2248,13 +2248,13 @@ function bossCharge(e){const a=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),dx=Ma
 function chargeStep(e,dt){const c=e.chg;if(c.w>0){c.w-=dt;return}
   const st=Math.min(c.sp*dt,c.left),dx=Math.sin(c.a),dz=Math.cos(c.a);e.pos.x+=dx*st;e.pos.z+=dz*st;c.left-=st;
   if(Math.random()<.7)emit(PNRM,{x:e.pos.x+rnd(-.6,.6),y:.3,z:e.pos.z+rnd(-.6,.6),vy:rnd(.5,1.5),life:rnd(.4,.7),s0:1.2,s1:2.4,c0:0x4a3a30,c1:0x1c1a18,a:.45,drag:2,tex:2});
-  if(!c.hit&&Math.hypot(P.pos.x-e.pos.x,P.pos.z-e.pos.z)<e.r+.9){c.hit=true;hurtPct(.5);shake=.35;hitSpark(P.pos,0xffd0a0,0xff4a20,6)}
+  if(!c.hit&&Math.hypot(P.pos.x-e.pos.x,P.pos.z-e.pos.z)<e.r+.9){c.hit=true;hurtPct(.5*BOSS_DM);shake=.35;hitSpark(P.pos,0xffd0a0,0xff4a20,6)}
   if(c.left<=0){e.chg=null;e.acd=.6;ringFx(e.pos,3.2,0xff6a4a,.35);groundFx(e.pos,shockTex,0xffb070,1,3.6,.35,.7,true,.08);shake=Math.max(shake,.22)}}
 function bossSlam(e){const a0=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),p0={x:e.pos.x,z:e.pos.z},len=17,w=3.2,dur=(e.rage?.85:1.05)*TELE_S,dmg=e.dmg*1.5;let hit=false;
   for(const o of e.rage?[-.42,0,.42]:[0]){const a=a0+o;lineTele(p0,a,len,w,dur,()=>{
-    if(!hit&&P.hp>0&&inLine(P.pos,p0,a,len,w)){hit=true;hurtPct(.5)}shake=Math.max(shake,.35);
+    if(!hit&&P.hp>0&&inLine(P.pos,p0,a,len,w)){hit=true;hurtPct(.5*BOSS_DM)}shake=Math.max(shake,.35);
     for(let i=0;i<6;i++)later(i*.045,()=>{const d=e.r*.6+i*(len-e.r*.6)/5,q={x:p0.x+Math.sin(a)*d,z:p0.z+Math.cos(a)*d};blastFx(q,1.5);decalFx(q,crackTex,0xff7a2a,1.5,1.6,.8,true)})})}
-  ringFx(e.pos,e.r*1.8,0xff4a2a,dur)}
+  ringFx(e.pos,e.r*1.8,0xff4a2a,dur);e.holdT=dur+.45;e.holdA=a0}/* v203: 직선 불꽃(내려찍기) 동안 보스 정지 */
 
 /* ================= 이펙트 엔진 (v36) =================
    파티클: 화면 전체에서 2번의 그리기로 처리 (가산 혼합 풀 · 일반 혼합 풀).
@@ -3343,7 +3343,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v202';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v203';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4476,15 +4476,15 @@ function update(dt){
     const frz=e.frzT>0,spd=frz?0:e.spd*(e.slowT>0?.45:1);e.slowT-=dt;
     if(e.chg)chargeStep(e,dt);
     else if(e.kbT>0){e.pos.x+=e.kbx*dt;e.pos.z+=e.kbz*dt;e.kbT-=dt}
-    else if(!frz&&!e.dA&&dd>e.r+.75){e.pos.x+=dx/dd*spd*dt;e.pos.z+=dz/dd*spd*dt}
-    e.g.rotation.y=e.chg?e.chg.a:e.dA?e.dA.a:Math.atan2(dx,dz);
-    e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&dd>e.r+.75);
+    else if(!frz&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75){e.pos.x+=dx/dd*spd*dt;e.pos.z+=dz/dd*spd*dt}
+    if(e.holdT>0)e.holdT-=dt;e.g.rotation.y=e.chg?e.chg.a:e.dA?e.dA.a:e.holdT>0?e.holdA:Math.atan2(dx,dz);
+    e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75);
     if(!frz&&!e.chg&&!e.dA){e.acd-=dt;if(dd<e.r+1&&e.acd<=0){e.acd=e.boss?1.3:1.05;e.atk=.35;hurtPlayer(e.dmg)}}
-    if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1);telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
-    if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=e.rage?3.4:4.8;e.patN=(e.patN||0)+1;if(e.patN%2)bossCharge(e);else bossSlam(e)}}
+    if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
+    if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;if(e.patN%2)bossCharge(e);else bossSlam(e)}}
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
     if(e.final&&!frz){if(!e.rage&&e.hp<e.mhp*.5){e.rage=true;e.spd*=1.3;toast('격노',`${e.name}이(가) 분노합니다`);ringFx(e.pos,6,0xff4a2a,.6);shake=.3}
-      e.nova-=dt;if(e.nova<=0){e.nova=e.rage?4.5:7;telegraph({x:e.pos.x,z:e.pos.z},6.5,e.dmg*1.2)}}
+      e.nova-=dt;if(e.nova<=0){e.nova=(e.rage?4.5:7)*BOSS_CD;telegraph({x:e.pos.x,z:e.pos.z},6.5,e.dmg*1.2)}}
     if(e.flash>0){e.flash-=dt;e.mat.emissive.setHex(e.flash>0?0x886655:(frz?0x3a78b0:e.slowT>0?0x223a55:0))}
     else e.mat.emissive.setHex(frz?0x3a78b0:e.slowT>0?0x223a55:0);
   }
