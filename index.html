@@ -1104,7 +1104,7 @@ function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
 const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
-const CD_U=1.6,CD_F=.35,CD_T=162.9,cdCurve=(u,x)=>CD_F+Math.max(0,u-CD_F)*Math.exp(-Math.max(0,x)/CD_T);/* v274: 스킬 쿨타임 곡선 — u(가속 반영 기본) → 쿨감 x%에서 0.35+(u-0.35)e^(-x/162.9). u=.8일 때 91.7%→0.61초 · 358%→0.40초 · ∞→0.35초 */
+const CD_U=1.6,CD_F=.25,CD_T=123.2,/* v275: 110 스펙(358%) 0.28초 · 수렴 0.25초 */cdCurve=(u,x)=>CD_F+Math.max(0,u-CD_F)*Math.exp(-Math.max(0,x)/CD_T);/* v274: 스킬 쿨타임 곡선 — u(가속 반영 기본) → 쿨감 x%에서 0.35+(u-0.35)e^(-x/162.9). u=.8일 때 91.7%→0.51초 · 358%→0.28초 · ∞→0.25초 */
 const critCh=()=>.1+gear().crit/100+.008/3*stN('agi');
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
@@ -1138,7 +1138,7 @@ function skillStats(id){
   if(b.kind==='orb'){const r=barr(L('barrage'));st.rate=r.rate;st.burst=r.burst;st.cnt=r.cnt;st.ssz=r.sz;st.ssp=r.sp;st.sdm=r.dm;const go=gOrb(L('orbsize'));st.blast=go.ex;st.br=go.br;st.bm=go.bm}
   {const h=1-hasteP()*L('haste'),old=st.cd*h*cdMul();/* 기존 쿨타임(가속·장비 쿨감 포함) */
     if(b.kind==='whirl')st.cd=old;/* v272: 회전 베기에도 장비 쿨감 적용(화염 폭발 빈도 증가는 유지) — v274 통일 쿨타임 제외 */
-    else{const nc=cdCurve(CD_U*(st.cd/b.cd)*h,gear().cdr);st.dmg*=nc/old;st.cd=nc}}/* v274: 회전 베기 외 모든 스킬 쿨타임 통일(기본 1.6초 · 가속 10단계 0.8초 · 장비 쿨감 358%(110 테스트 스펙)에서 0.4초, 무한 강화 시 0.35초 수렴). 타격 횟수가 줄어든 만큼 피해를 올려 DPS는 기존과 동일 */
+    else{const nc=cdCurve(CD_U*(st.cd/b.cd)*h,gear().cdr);st.dmg*=nc/old;st.cd=nc}}/* v274: 회전 베기 외 모든 스킬 쿨타임 통일(기본 1.6초 · 가속 10단계 0.8초 · 장비 쿨감 358%(110 테스트 스펙)에서 0.28초, 무한 강화 시 0.25초 수렴 — v275). 타격 횟수가 줄어든 만큼 피해를 올려 DPS는 기존과 동일 */
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
   if(b.kind==='whirl'){st.cd=Math.max(st.cd,st.hits*WIV*(1+st.echo));/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
@@ -3643,7 +3643,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v274';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v275';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4444,7 +4444,7 @@ function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toa
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
   smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<440)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
-function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 쿨타임 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다(기본 공격·회전 베기). 그 외 스킬은 쿨타임 ${(s=>s.toFixed(2))(cdCurve(CD_U*(1-hasteP()*GMAX),x))}초(가속 10단계 기준, 0.35초에 수렴) — 쿨타임이 길어진 만큼 피해가 올라 DPS는 같습니다.</p>`}/* v149 */
+function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 쿨타임 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다(기본 공격·회전 베기). 그 외 스킬은 쿨타임 ${(s=>s.toFixed(2))(cdCurve(CD_U*(1-hasteP()*GMAX),x))}초(가속 10단계 기준, 0.25초에 수렴) — 쿨타임이 길어진 만큼 피해가 올라 DPS는 같습니다.</p>`}/* v149 */
 function renderSmith(){
   let h=`<div class="shead"><div><div class="chap">Blacksmith · ${TOWN.smith}</div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
   if(!smithSel){
