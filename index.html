@@ -2239,7 +2239,7 @@ function duelEnter(m='n',b){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
-  S.duelWins=(S.duelWins||0)+1;duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
+  S.duelWins=(S.duelWins||0)+1;if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 잿불 검귀를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 잿불 검귀는 각인의 서만, 심연의 아귀는 확정 강화 주문서만 굴림(v227 분리) */
 const TK_P=.1;let duelBonus=null;
@@ -3487,7 +3487,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v227';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v228';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3700,11 +3700,14 @@ function applyTest(){const sk=C().skills[0];S.test=true;S.testGod=true;S.lv=70;S
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 $('classSheet').addEventListener('click',e=>{if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
-function startGame(cls,main){
-  inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}save();
+const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
+function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.pending=0;S.sk={};S.sk[m]={};for(const g of gemsFor(m))S.sk[m][g]=GMAX;S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
+  for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=1;S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
+function startGame(cls,main,skip){
+  inTown=false;S=fresh();S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test)setTimeout(tutAsk,900);}
+  if(S.test)toast('테스트 캐릭터 · 위험도 10','체력·마나 무한 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 스텟 포인트 30점을 분배하세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -3731,13 +3734,14 @@ function renderSkillSel(){const c=CLS[demo.cls];
   $('skillSheet').innerHTML=`<div class="shead"><div><div class="chap">${c.en} · 주력 스킬</div><h2>${c.n}의 주력 스킬을 고르세요</h2></div></div>
    <p class="hint" style="margin:0">뒤 화면은 <b style="color:var(--ink)">1차·2차 강화를 모두 채운 최종 진화</b> 모습입니다. 시작한 뒤에는 바꿀 수 없습니다.</p>
    <div class="skcs">${c.opts.map(id=>skillCard(id,id===demo.sk)).join('')}</div>
-   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>`}
+   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>${skipOk()?`<button class="primary" id="skGoSkip" style="width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff">☆ 스토리 스킵 · 31레벨 엔드게임으로 시작<small style="display:block;font-weight:400;opacity:.85;margin-top:2px">1차 강화 완료 · 스토리 클리어 수준 장비</small></button>`:''}`}
 function openSkillSel(cls){document.body.classList.add('demo');demoSetup(cls,CLS[cls].opts[0]);renderSkillSel();$('skillSel').hidden=false;releaseAll()}
 function demoEnd(){S.demo=false;demo=null;for(const e of [...enemies])dropEnemy(e);fxReset();document.body.classList.remove('demo');$('skillSel').hidden=true}
 $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!demo)return;
   if(b.dataset.sk){if(b.dataset.sk!==demo.sk){demoSetup(demo.cls,b.dataset.sk);renderSkillSel()}return}
   if(b.id==='skBack'){demoEnd();S=fresh();showClassSel();return}
-  if(b.id==='skGo'){const c=demo.cls,m=demo.sk;demoEnd();startGame(c,m)}});
+  if(b.id==='skGo'){const c=demo.cls,m=demo.sk;demoEnd();startGame(c,m)}
+  if(b.id==='skGoSkip'){const c=demo.cls,m=demo.sk;demoEnd();startGame(c,m,true)}});
 
 /* ================= level-up choice ================= */
 let offer=null,lvlSkill=null;
