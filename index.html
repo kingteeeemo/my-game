@@ -234,7 +234,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 #slots,#classSel{background:#07060a}
 .sheet{width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:#17171d;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
-#smith .sheet>*{flex-shrink:0}
+#smith .sheet>*{flex-shrink:0}#smith .sheet,#shop .sheet{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .shead{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .sheet h2{margin:0;font-size:19px;font-weight:900;text-wrap:balance}
 .close{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;font:700 13px var(--ko)}
@@ -4103,7 +4103,7 @@ const gachaPrice=l=>Math.round(150+l*l*4);
 /* v41: 포션 상인(물약)과 무기상(랜덤 전설 장비) 분리. 보유 골드는 창 위쪽에 고정 표시, 구입 시 차감액이 떠오름 */
 let shopKind='pot',goldFx=null,shopSel=null;
 const LAND=()=>matchMedia('(orientation:landscape) and (max-height:520px)').matches;
-addEventListener('resize',()=>{try{if(!$('shop').hidden&&shopKind!=='pot'&&shopSel)renderShop();if(!$('smith').hidden&&smithSel)renderSmith()}catch(e){}});
+let _rsL=null;addEventListener('resize',()=>{try{const l=LAND();if(l===_rsL)return;_rsL=l;/* v230: 스크롤 중 주소창 크기 변화로 시트가 다시 그려져 스크롤이 끊기던 문제 → 가로/세로가 바뀔 때만 */if(!$('shop').hidden&&shopKind!=='pot'&&shopSel)renderShop();if(!$('smith').hidden&&smithSel)renderSmith()}catch(e){}});_rsL=LAND();
 const spLegend=`<p class="hint" style="margin:0"><span class="spleg spb">특수</span> 부위 전용 능력치 · <span class="spleg rg">범위</span> 이 레벨에서 붙을 수 있는 수치 · <span class="spleg pr">확률</span> 전설 장비에 붙을 확률</p>`;
 const goldBar=()=>`<div class="goldbar"><span>보유 골드</span><b id="shGold">${fmtG(S.gold)} G</b>${goldFx?`<i class="gdelta" key="${goldFx.t}">−${fmtG(goldFx.v)} G</i>`:''}</div>`;
 function renderShop(){
