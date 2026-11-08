@@ -821,8 +821,9 @@ const SHK_HALF0=.26,SHK_DEN=.7;/* v145: 충격파 수는 부채꼴 넓이에 비
 const shkCnt=(L,half)=>Math.max(1,Math.round(shkN(L)*SHK_DEN*half/SHK_HALF0));
 const rR=L=>2.6*(1+.12*L),rDur=L=>2+.1*L,rDen=L=>({rate:6*(1+.08*L),zones:L>=10?3:L>=5?2:1});
 const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:1+L,m:.5+.37*L,d:2*(1.6+.5*L)});/* v140: 파편 거리 2배 (3단계 6.2m) */
-const cBnc=L=>({n:Math.max(3,2+L),/* v140: 1단계 3명 → 10단계 12명 */k:1,/* v241: 튕길 때마다 피해 감소 없음 */jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
-const OV_R=6,/* v239: 과부하 반경 4 → 6m (×1.5) */csSt=L=>({r:(1.4+.25*L)*(1+.1*L)*1.2,/* v239: 번개 폭풍 반경 ×1.5 → v241: -20% (×1.2) */m:.3+.12*L}),ovSt=L=>({dur:1.5+.5*L,m:.25+.15*L});
+const CH_HIT=1.05;/* v249: 연쇄 번개 직격 피해 +5% */
+const cBnc=L=>({n:Math.max(3,Math.round(2+1.6*L)),/* v140: 1단계 3명 → 10단계 12명 → v249: 10단계 18명 */k:1,/* v241: 튕길 때마다 피해 감소 없음 */jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
+const OV_R=6,/* v239: 과부하 반경 4 → 6m (×1.5) */csSt=L=>({r:(1.4+.25*L)*(1+.1*L)*1.2,/* v239: 번개 폭풍 반경 ×1.5 → v241: -20% (×1.2) */m:(.3+.12*L)*1.3/* v249: 번개 폭풍 피해 +30% */}),ovSt=L=>({dur:1.5+.5*L,m:(.25+.15*L)*1.3/* v249: 과부하 피해 +30% */});
 const GEMS2={
   aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟는 구간 곳곳에서 작은 충격파(반경 ${shkR(L).toFixed(1)}m)가 무작위로 터짐 · 부채꼴이 넓을수록 더 많이\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
   qspread:{s:'quake',n:'가시 확산',c:'#ffb070',d:L=>{const f=qFork(L);return `부채꼴 ${QSP_DEG[Math.min(5,L)]}° (가장자리 피해 ×${f.m.toFixed(2)})`}},
@@ -3532,7 +3533,7 @@ function chainFrom(e0,from,dmg,st,hit,cid){const path=[e0];hit.add(e0);let cur=e
   for(let j=0;j<st.bn;j++){let nb=null,bd=st.jr;for(const e of enemies){if(hit.has(e)||e.air||e.hp<=0)continue;const d=Math.hypot(e.pos.x-cur.pos.x,e.pos.z-cur.pos.z);if(d<bd){bd=d;nb=e}}if(!nb)break;hit.add(nb);path.push(nb);cur=nb}
   let prev=from;path.forEach((e,j)=>{const to={x:e.pos.x,y:Math.min(1.6,e.h*.55),z:e.pos.z},fr=prev;prev=to;
     later(j*.0747,()=>{zapFx(fr,to,{first:j===0,tgt:e});/* v140: 0.112 → 0.0747 (튕기는 속도 +50%) */let vm=1;if(cid){if(e.cId===cid)e.cN++;else{e.cId=cid;e.cN=0}vm=Math.pow(VOL_K,e.cN)}/* v100: 갈래가 같은 적을 겹쳐 맞히면 다발 사격처럼 감소 */
-      if(e.hp>0){if(st.csl)e.slowT=Math.max(e.slowT,st.csl);hitKind='zap';hurt(e,dmg*Math.pow(st.bk,j)*vm);hitKind=null}
+      if(e.hp>0){if(st.csl)e.slowT=Math.max(e.slowT,st.csl);hitKind='zap';hurt(e,dmg*Math.pow(st.bk,j)*vm*CH_HIT);hitKind=null}
       if(st.cst)stormBurst({x:to.x,z:to.z},st.cst.r,dmg*Math.pow(st.bk,j)*st.cst.m);/* v244: 폭발 피해는 겹침 감소(vm) 없음 — 뭉친 적에게 폭발마다 전부 들어감 */
       if(st.ovl&&j===path.length-1)overloadOrb({x:to.x,z:to.z},dmg*st.ovl.m,st.ovl.dur)})})}
 /* v239 과부하 재작성: 하늘에서 번개가 내리꽂혀 구체가 생기는 순간(섬광·흔들림·방사 번개·바닥 균열) →
@@ -3616,7 +3617,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v248';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v249';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4006,7 +4007,7 @@ function skillDps(id){
     return {main:hit*(QSPK+aft+mag*QLAV)/cd,label:'균열에 맞은 적 1명당',sub:`균열 ${st.fork.n}갈래 · 길이 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit*QSPK)}${aft?` · 충격파 ×${st.aft.m.toFixed(1)}`:''}${mag?` · 용암 ${st.mag.dur.toFixed(1)}초`:''}`}}
   if(b.kind==='rain'){const tk=base*st.dmg*crit,per=tk*st.rate*st.dur,rel=st.rel?tk*st.rel.m*st.rel.rate*st.dur*.5:0,met=st.spl?tk*st.spl.m*st.rate*st.dur*.5:0;
     return {main:(per+rel+met)/cd,label:'화살비 안의 적 1명당',sub:`화살 세례 1회 ${fmtN(tk)} · 초당 ${st.rate.toFixed(1)}회 · ${st.dur.toFixed(1)}초${rel?` · 속성 폭발`:''}${met?` · 분열 파편`:''}`}}
-  if(b.kind==='chainl'){const hit=base*st.dmg*crit,stm=st.cst?hit*st.cst.m*1.5:0,ov=st.ovl?hit*st.ovl.m*(st.ovl.dur/.3)*.5:0;
+  if(b.kind==='chainl'){const h0=base*st.dmg*crit,hit=h0*CH_HIT,stm=st.cst?h0*st.cst.m*1.5:0,ov=st.ovl?h0*st.ovl.m*(st.ovl.dur/.3)*.5:0;
     return {main:(hit+stm+ov)/cd,label:'번개에 맞은 적 1명당',sub:`번개 ${st.forks}줄 · ${st.bn}번 튕김 · 1회 ${fmtN(hit)}${stm?' · 번개 폭풍':''}${ov?' · 과부하':''}`}}
   if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`검기 ${st.fan.n}갈래 · 사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
   if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit,em=st.ember?hit*st.ember.m*st.ember.dur*.6:0,sh=st.shrap?hit*st.shrap.m*1.2:0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 잔불':''}${sh?' · 파편':''}`}}
