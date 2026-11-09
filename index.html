@@ -2210,7 +2210,7 @@ function deathFx(e){const g=e.g,side=Math.random()<.5?-1:1;e.mat.transparent=tru
 /* v131 보스 쓰러짐: 비틀거림 → 옆으로 쓰러짐(쿵, 먼지·흔들림) → 잠시 누워 있다가 땅속으로 가라앉음 */
 function bossFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
   /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
-  const MW=!!(e.maw&&e.M&&e.M.root),tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
+  const MW=!!((e.maw||e.duel)&&e.M&&e.M.root),/* v383: 잿불 검귀도 몸통만 쓰러지고 바닥 원(등급 고리·그림자)은 그대로 */tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
   const lp=MW?{x:e.pos.x-side*Math.cos(ry)*H*.5,z:e.pos.z+side*Math.sin(ry)*H*.5}:e.pos;
   if(e.air)e.air=null;g.children.forEach(c=>c.visible=true);shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
   fx.push({m:g,t:0,dur:2.8,keep:1,upd(k){const T=k*2.8;if(!MW)g.rotation.y=ry;tg.rotation.order='YXZ';
@@ -3913,7 +3913,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v382';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v383';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
