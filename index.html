@@ -1882,8 +1882,7 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9);/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
       if(mn==='mage_eye'){/* v339: 두건 속 눈 — 푸른 점광 */o.material.emissiveIntensity=3;o.castShadow=false;const g=new THREE.Sprite(glowMat(0x8ad8ff));g.scale.setScalar(.055);o.add(g)}
       if(mn==='mage_gem'){o.material=o.material.clone();K.gemM=o.material}else if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone)){o.material=o.material.clone();K.swM=o.material;sw=o}}});
-    if(cls==='warrior'&&sw){/* v348: 대검 칼자루가 칼날 축에서 약 14° 꺾여 있던 것(손잡이 중심이 -y로 최대 .063) → 손잡이 구간을 칼날 축 위로 당겨 일직선으로. 손이 쥐는 자리(z≈-.05)는 제자리가 되게 전체를 되밀어 둠 */
-      let mm=null;sw.traverse(o=>{if(o.isMesh&&!mm)mm=o});if(mm){const pa=mm.geometry.attributes.position,gy=.063*.536,gx=.017*.536;for(let i=0;i<pa.count;i++){const z=pa.getZ(i),t=clamp((.1-z)/.28,0,1);pa.setX(i,pa.getX(i)-.017*t+gx);pa.setY(i,pa.getY(i)+.063*t-gy)}pa.needsUpdate=true;mm.geometry.computeBoundingBox();mm.geometry.computeBoundingSphere()}}
+    if(cls==='warrior'&&sw)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
     if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;/* v338: 지팡이가 몸통+보석 두 메시로 나뉘면 묶음(Group)을 지팡이로 */K.sw=sw;
     if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
       try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
@@ -1893,6 +1892,8 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
     if(cls==='mage'&&sw){K.hand=sw.parent;K.root=r;skmGrip(K,r)}
     if(cls==='archer'&&sw){K.hand=sw.parent;K.bowQ0=sw.quaternion.clone();K.bowP0=sw.position.clone();K.bowBk=r.getObjectByName('archer_bow_back');K.bowA=1}/* v380: 활 — 쏠 때 방향(손 기준) 기억, 등에 멜 자리 *//* v342: 지팡이를 주먹 안에 고정하고 손가락을 쥐게 함 */
     K.root=r;K.st=2;portOk[cls]=0;skwWarm(K);if(hero)skwAttach(hero);if(!$('classSel').hidden&&!portQ){portQ=1;requestAnimationFrame(portFill)}}catch(e){K.st=3}skwNext()},undefined,()=>{K.st=3;skwNext()})}
+/* v348: 대검 칼자루가 칼날 축에서 약 14° 꺾여 있던 것(손잡이 중심이 -y로 최대 .063) → 손잡이 구간을 칼날 축 위로 당겨 일직선으로. 손이 쥐는 자리(z≈-.05)는 제자리가 되게 전체를 되밀어 둠 */
+function swStraight(sw){let mm=null;sw.traverse(o=>{if(o.isMesh&&!mm)mm=o});if(mm){const pa=mm.geometry.attributes.position,gy=.063*.536,gx=.017*.536;for(let i=0;i<pa.count;i++){const z=pa.getZ(i),t=clamp((.1-z)/.28,0,1);pa.setX(i,pa.getX(i)-.017*t+gx);pa.setY(i,pa.getY(i)+.063*t-gy)}pa.needsUpdate=true;mm.geometry.computeBoundingBox();mm.geometry.computeBoundingSphere()}}
 /* v349: 시작 시 미리 불러오기 — 제목 화면이 뜬 뒤 저장 슬롯의 직업부터 하나씩 순서대로 GLB를 받고, 받은 직후 셰이더 컴파일·텍스처 업로드(skwWarm)를 끝내 둠 → 게임에 들어갈 때·직업 선택창에서 멈춤이 없음 */
 const skwQ=[];function skwNext(){while(skwQ.length){const c=skwQ.shift();const K=skMk(c);if(!K.st){skwLoad(c);return}}}
 function skwPreload(){const seen=new Set();try{for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&SKC[d.cls]&&!seen.has(d.cls)){seen.add(d.cls);skwQ.push(d.cls)}}}catch(e){}for(const c in SKC)if(!seen.has(c))skwQ.push(c);skwNext()}
@@ -2258,9 +2259,46 @@ function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [.
   for(const [m0,m] of mats)if(m0.metalness>.5&&m0!==u.trim&&!armor)armor=m;
   const eyes=new THREE.MeshBasicMaterial({color:0xff5a1a});for(const sx of [-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(.03,6,5),eyes);e.position.set(sx*.07,.02,.26);u.helm.add(e)}
   return {root:g,legs:[u.legL,u.legR],arms:[],h:2.3,duel:1,u,armor}}
+/* v396: 잿불 검귀 — 전사와 같은 3D 모델(warrior.glb)을 따로 한 벌 더 불러와 입힘(어두운 갑옷 + 잿불 빛). 불러오기 전·실패 시엔 기존 절차적 모델.
+   보이지 않는 절차적 몸(u.body)은 그대로 움직여 칼끝(u.weaponTip)·패턴 코드가 그대로 동작. 패턴마다 전사 동작(베기·내려찍기·회전·달리기)을 시간에 맞춰 재생 */
+const BKN={st:0,root:null,mx:null,acts:null,tip:null,sw:null,mats:[],cur:'idle',prev:null,fade:0,fadeT:0,tm:{}};
+function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=SKC.warrior;
+  new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(C.S);let sw=null;
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material=o.material.clone();K.mats.push(o.material);if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone))sw=o}});
+    if(sw)swStraight(sw);if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;K.sw=sw;
+    K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/C.S);(sw||r).add(K.tip);
+    K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
+    K.root=r;K.st=2;skwWarm(K);for(const e of enemies)if(e.duel&&!e.maw)bkAttach(e)}catch(_){K.st=3}},undefined,()=>{K.st=3})}
+function bkAttach(e){const K=BKN;if(!K.st)bkLoad();const M=e.M;if(K.st!==2||!M||!M.duel||M.sk||e.hp<=0)return;const r=K.root,u=M.u,U=!!(S.duel&&S.duel.uber);
+  if(r.parent)r.parent.remove(r);r.position.set(0,0,0);r.rotation.set(0,0,0);M.root.add(r);M.sk=r;u.body.visible=false;
+  for(const m of K.mats){let isw=false;if(K.sw)K.sw.traverse(o=>{if(o.material===m)isw=true});
+    m.userData.c0=new THREE.Color().setRGB(...(isw?[1.1,.78,.7]:U?[1.45,.95,1.4]:[1.6,1.05,.9]));m.userData.e0=new THREE.Color(isw?0xff4a14:U?0xe0308a:0xff6a1e);m.emissiveIntensity=isw?2.4:1.9;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}
+  e.mat=new THREE.MeshLambertMaterial();/* 피격 깜빡임 값만 받는 그릇 — 실제 색은 bkTick에서 더해 줌 */
+  K.cur='idle';K.prev=null;K.fadeT=0;K.tm={}}
+function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)return;const A=e.dA,e2=x=>1-Math.pow(1-clamp(x,0,1),2);
+  const slash=(x,h)=>x<h?.1+.42*e2(x/h):.52+.6*clamp((x-h)/.3,0,1);/* 들어 올림 → 휘두름 */
+  const cast=(x,h,T)=>x<h?.78*e2(x/h):x<h+.075?.78+.47*(x-h)/.075:x<h+.25?1.25+.35*(x-h-.075)/.175:1.6+.5*clamp((x-h-.25)/Math.max(.1,T-h-.25),0,1);/* 들기 → 내려꽂기 → 버팀 → 복귀 */
+  let st='idle',t=null,rate=1;
+  if(A){const x=A.t,h=A.hit||.5;
+    if(A.k==='wave'||A.k==='swing'){st='slash';t=slash(x,h)}
+    else if(A.k==='slam'||A.k==='star'||A.k==='donut'){st='cast';t=cast(x,A.k==='slam'?h:h*.7,A.dur)}
+    else if(A.k==='meteor'){st='cast';t=.78*e2(x/.35)}
+    else if(A.k==='charge'){st='run';rate=1.7}
+    else if(A.k==='whirl'){if(x<h){st='slash';t=.1+.3*e2(x/h)}else{st='spin';t=1.7}}
+    else if(A.k==='barrage'){st='slash';const ph=((x-.1)%.42)/.42;t=x<.1?.1+.3*(x/.1):ph<.6?.1+.42*ph/.6:.52+.58*(ph-.6)/.4}
+    else if(A.k==='sipe'){st='cast';const k=A.sw0===undefined?-1:x-A.sw0,D=A.swD||1.28;t=k<0?.3*e2(x/.5):k<D-.1?.3+.48*e2(k/(D*.6)):k<D?.78+.47*(k-D+.1)/.1:k<D+.4?1.25+.35*(k-D)/.4:1.6+.5*clamp((k-D-.4)/.35,0,1)}}
+  else if(moving){st='run';rate=clamp(e.spd/5.5,.6,1.7)}
+  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='slash'||st==='cast'||st==='spin')?.06:.14;K.cur=st}
+  const As=K.acts,dur=k=>As[k]._clip.duration;
+  if(t!==null)K.tm[st]=Math.min(t,dur(st)-.01);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
+  K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
+  for(const k in As){const a=As[k],w=k===K.cur?1-(K.prev&&K.prev!==k?f:0):(k===K.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=K.tm[k]||0}
+  K.mx.update(0);r.rotation.y=u.body.rotation.y;r.position.y=u.body.position.y;/* 회전베기·몸 비틀기·주저앉기는 절차적 몸 값 그대로 */
+  const fe=e.mat.emissive,rg=Math.max(fe.r,fe.g,fe.b);for(const m of K.mats){const d=m.userData;if(!d.c0)continue;m.emissive.copy(d.e0).add(fe).add(fe);m.color.copy(d.c0).addScalar(rg*.5)}
+  if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
-  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;return e}
+  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;bkAttach(e);return e}
 function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math.PI/2;
   const bg=new THREE.Mesh(new THREE.CircleGeometry(len,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false}));
   const fill=new THREE.Mesh(new THREE.CircleGeometry(1,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.5,depthWrite:false}));
@@ -2384,6 +2422,7 @@ function duelAnim(e,dt,moving){const M=e.M,u=M.u,A=e.dA;e.wk+=dt*(moving&&!A?e.s
       else if(k<D+.4){px=1.7;u.body.rotation.x=.55;u.body.position.y=-.32}
       else{const f=e2((k-D-.4)/.35);px=1.7-2.3*f;u.body.rotation.x=.55*(1-f);u.body.position.y=-.32*(1-f)}}}
   u.piv.rotation.x=px;u.piv.rotation.y=py;if(u.cape)u.cape.rotation.x=.12+(moving?.3:0)+(A&&A.k==='slam'&&A.t<A.hit?.6:0);
+  if(M.sk)bkTick(e,dt,moving);/* v396 */
   if(Math.random()<dt*10*QM()){const p=new THREE.Vector3();u.weaponTip.getWorldPosition(p);emit(PADD,{x:p.x,y:p.y,z:p.z,vy:rnd(.4,1.2),life:rnd(.3,.6),s0:.8,s1:.1,c0:0xffa040,c1:0xa01800,a:.8,tex:1})}}
 /* ===== v210 결투장 2번째 보스 「심연의 아귀」(테스트 모드 전용) =====
    맵 중앙 웅덩이에서 솟아 있는 고정형 보스. 모든 피해는 캐릭터 최대 생명력의 %.
@@ -2520,7 +2559,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(m==='u'?`☠ ${curseName()} 발동`:`결투장 · ${D.n} ${N}`,m==='u'?`우버 ${N}의 힘이 도전자를 짓누릅니다 — 최종 피해 −20% · 위험도 ${D.tier} 추천`:`위험도 ${D.tier} 추천`,m==='u'?'#c890ff':undefined);stageBanner()})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast(m==='u'?`☠ ${curseName()} 발동`:`결투장 · ${D.n} ${N}`,m==='u'?`우버 ${N}의 힘이 도전자를 짓누릅니다 — 최종 피해 −20% · 위험도 ${D.tier} 추천`:`위험도 ${D.tier} 추천`,m==='u'?'#c890ff':undefined);stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
@@ -3914,7 +3953,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v395';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v396';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
