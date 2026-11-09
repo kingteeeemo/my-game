@@ -1218,7 +1218,7 @@ function ppSize(){const v=renderer.getDrawingBufferSize(new THREE.Vector2()),w=M
     const o2=Object.assign({depthBuffer:false},o);PP.a=new THREE.WebGLRenderTarget(1,1,o2);PP.b=new THREE.WebGLRenderTarget(1,1,o2);PP.c=new THREE.WebGLRenderTarget(1,1,o2);PP.d=new THREE.WebGLRenderTarget(1,1,o2)}
   PP.rt.setSize(w,h);PP.bw=Math.max(1,w>>1);PP.bh=Math.max(1,h>>1);PP.a.setSize(PP.bw,PP.bh);PP.b.setSize(PP.bw,PP.bh);PP.cw=Math.max(1,w>>2);PP.ch=Math.max(1,h>>2);PP.c.setSize(PP.cw,PP.ch);PP.d.setSize(PP.cw,PP.ch);PP.comp.uniforms.res.value.set(w,h)}
 function ppPass(mat,target){PP.quad.material=mat;renderer.setRenderTarget(target);renderer.render(PP.sc,PP.cam)}
-function renderFrame(t){
+function renderFrame(t){ipFlush();
   if(!GQS[GUQ].post){renderer.setRenderTarget(null);renderer.render(scene,camera);return}
   if(!PP.rt)ppSize();
   renderer.setRenderTarget(PP.rt);renderer.render(scene,camera);
@@ -2577,11 +2577,27 @@ function spray(P,p,n,o){n=Math.max(1,Math.round(n*QM()));for(let i=0;i<n;i++){co
 
 /* 바닥에 깔리는 평면 이펙트 (충격파 고리 · 그을음) */
 const fxPlane=new THREE.PlaneGeometry(2,2);
+/* v314: 인스턴스 풀 — 같은 지오메트리·텍스처·혼합 방식의 바닥 자국(decalFx/groundFx)과 파편(debris)을 그리기 호출 1번으로. 그림은 동일(위치·크기·회전·색·투명도 전부 인스턴스 속성) */
+const IPOOLS={},FXD=new THREE.Object3D(),IPO=new THREE.Object3D(),IPC=new THREE.Color(),IP_ZERO=new THREE.Matrix4().makeScale(0,0,0);
+function ipool(key,geo,mkMat,cap,emis){let P=IPOOLS[key];if(P)return P;
+  const g=geo.clone(),al=new THREE.InstancedBufferAttribute(new Float32Array(cap),1);al.setUsage(THREE.DynamicDrawUsage);g.setAttribute('iA',al);
+  const mat=mkMat();mat.customProgramCacheKey=()=>'ip:'+key;
+  mat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float iA;varying float vIA;').replace('#include <begin_vertex>','#include <begin_vertex>\nvIA=iA;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vIA;').replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.a*=vIA;');
+    if(emis)sh.fragmentShader=sh.fragmentShader.replace('vec3 totalEmissiveRadiance = emissive;','vec3 totalEmissiveRadiance = emissive + vColor*0.3;')};
+  const im=new THREE.InstancedMesh(g,mat,cap);im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(cap*3),3);im.instanceColor.setUsage(THREE.DynamicDrawUsage);im.frustumCulled=false;im.count=0;if(mat.blending===THREE.AdditiveBlending)im.renderOrder=1;/* 가산(빛 더하기) 자국은 항상 일반 자국 위에 — 이전엔 깊이 정렬에 따라 순서가 제각각이었음 */scene.add(im);
+  for(let i=0;i<cap;i++)im.setMatrixAt(i,IP_ZERO);
+  P=IPOOLS[key]={im,al,cap,free:[],used:new Uint8Array(cap),top:0,dirty:true};for(let i=cap-1;i>=0;i--)P.free.push(i);return P}
+function ipAlloc(P,color){if(!P.free.length)return -1;const i=P.free.pop();P.used[i]=1;if(i>=P.top){P.top=i+1;P.im.count=P.top}IPC.setHex(color);P.im.setColorAt(i,IPC);P.dirty=true;return i}
+function ipFree(P,i){if(i<0||!P.used[i])return;P.used[i]=0;P.im.setMatrixAt(i,IP_ZERO);P.al.array[i]=0;P.free.push(i);while(P.top>0&&!P.used[P.top-1])P.top--;P.im.count=P.top;P.dirty=true}
+function ipSet(P,i,x,y,z,rx,ry,rz,sx,sy,sz,a){IPO.position.set(x,y,z);IPO.rotation.set(rx,ry,rz);IPO.scale.set(sx,sy,sz);IPO.updateMatrix();P.im.setMatrixAt(i,IPO.matrix);P.al.array[i]=a;P.dirty=true}
+function ipFlush(){for(const k in IPOOLS){const P=IPOOLS[k];if(!P.dirty)continue;P.dirty=false;P.im.instanceMatrix.needsUpdate=true;P.al.needsUpdate=true;P.im.instanceColor.needsUpdate=true}}
+function ipWipe(){for(const k in IPOOLS){const P=IPOOLS[k];for(let i=0;i<P.top;i++)if(P.used[i])ipFree(P,i)}}
+const gdPool=(tex,add)=>ipool('gd'+(add?1:0)+tex.id,fxPlane,()=>new THREE.MeshBasicMaterial({map:tex,color:0xffffff,transparent:true,opacity:1,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}),1024,false);
 
 const shockTex=(()=>{const c=mkCv(128),g=c.getContext('2d'),q=g.createRadialGradient(64,64,0,64,64,64);q.addColorStop(0,'rgba(255,255,255,0)');q.addColorStop(.62,'rgba(255,255,255,0)');q.addColorStop(.86,'rgba(255,255,255,.9)');q.addColorStop(.93,'rgba(255,255,255,.5)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)})();
-function groundFx(p,tex,color,r0,r1,dur,op,add,y){const m=new THREE.Mesh(fxPlane,basicMat('gd'+(add?1:0)+tex.id,{map:tex,color,opacity:op,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
-  m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,y||.06,p.z);m.scale.setScalar(Math.max(.01,r0));scene.add(m);
-  fx.push({cos:1,m,t:0,dur,upd(k){const e=1-(1-k)*(1-k)*(1-k);m.scale.setScalar(Math.max(.01,r0+(r1-r0)*e));m.material.opacity=op*(1-k)}});return m}
+function groundFx(p,tex,color,r0,r1,dur,op,add,y){const P=gdPool(tex,add),i=ipAlloc(P,color);if(i<0)return;const rz=Math.random()*6.28,x=p.x,yy=y||.06,z=p.z;let s=Math.max(.01,r0);ipSet(P,i,x,yy,z,-Math.PI/2,0,rz,s,s,s,op);
+  fx.push({cos:1,m:FXD,t:0,dur,upd(k){const e=1-(1-k)*(1-k)*(1-k);s=Math.max(.01,r0+(r1-r0)*e);ipSet(P,i,x,yy,z,-Math.PI/2,0,rz,s,s,s,op*(1-k))},end(){ipFree(P,i)}})}/* v314: 인스턴스 풀 */
 
 /* 칼 궤적: 호 모양 띠 + 셰이더 (머리는 밝고 꼬리로 갈수록 사라짐, 바깥 가장자리에 날 선 하이라이트) */
 const SLASH_VS=`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
@@ -2645,14 +2661,14 @@ function iceSpikes(p,r,n){const mat=mtake('ice',()=>new THREE.MeshLambertMateria
 /* 파편 이펙트 (v33): 작은 조각이 튀어 오르고 떨어지며 사라짐. 화질에 따라 동시 조각 수 제한 */
 const tetraGeo=new THREE.TetrahedronGeometry(1,0),octaGeo=new THREE.OctahedronGeometry(1,0),sparkGeo=new THREE.OctahedronGeometry(1,0);let debrisN=0;
 function debris(p,o){const n=o.n;if(n<=0)return;/* v50: 파편 개수 제한 해제 */debrisN+=n;
-  const grp=new THREE.Group(),mat=o.add?basicMat('dba',{color:o.color,opacity:1,blending:THREE.AdditiveBlending}):mtake('dbl',()=>new THREE.MeshLambertMaterial({color:o.color,transparent:true,opacity:1,flatShading:true}),q=>{q.color.setHex(o.color);q.emissive.setHex(o.color).multiplyScalar(.3);q.opacity=1});
-  const ps=[];for(let i=0;i<n;i++){const m=new THREE.Mesh(o.geo||tetraGeo,mat),a=rand(0,Math.PI*2),sp=rand(o.sp[0],o.sp[1]),sz=rand(o.sz[0],o.sz[1]);
-    m.scale.set(sz,sz*rand(.7,1.6),sz);m.position.set(p.x+Math.sin(a)*(o.r0||0)*Math.random(),rand(o.y[0],o.y[1]),p.z+Math.cos(a)*(o.r0||0)*Math.random());m.rotation.set(rand(0,6),rand(0,6),rand(0,6));grp.add(m);
-    ps.push({m,vx:Math.sin(a)*sp,vz:Math.cos(a)*sp,vy:rand(o.up[0],o.up[1]),rx:rand(-12,12),ry:rand(-12,12)})}
-  scene.add(grp);
-  fx.push({m:grp,t:0,dur:o.dur,upd(k,dt){for(const q of ps){q.vy-=(o.g||18)*dt;q.m.position.x+=q.vx*dt;q.m.position.y+=q.vy*dt;q.m.position.z+=q.vz*dt;
-      if(q.m.position.y<.05){q.m.position.y=.05;q.vy*=-.3;q.vx*=.6;q.vz*=.6;q.rx*=.5;q.ry*=.5}q.m.rotation.x+=q.rx*dt;q.m.rotation.y+=q.ry*dt}
-    mat.opacity=k<.55?1:1-(k-.55)/.45},end(){debrisN-=n}})}
+  /* v314: 조각마다 메시 대신 인스턴스 풀(지오메트리·혼합별 1 draw call). 색은 인스턴스 색, 자체 발광(색×.3)은 셰이더 패치, 투명도는 인스턴스 속성 */
+  const geo=o.geo||tetraGeo,P=o.add?ipool('dba:'+geo.uuid,geo,()=>new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending}),2048,false)
+    :ipool('dbl:'+geo.uuid,geo,()=>new THREE.MeshLambertMaterial({color:0xffffff,emissive:0x000000,transparent:true,opacity:1,flatShading:true}),2048,true);
+  const ps=[];for(let i=0;i<n;i++){const id=ipAlloc(P,o.color);if(id<0)break;const a=rand(0,Math.PI*2),sp=rand(o.sp[0],o.sp[1]),sz=rand(o.sz[0],o.sz[1]),sy=sz*rand(.7,1.6),x=p.x+Math.sin(a)*(o.r0||0)*Math.random(),y=rand(o.y[0],o.y[1]),z=p.z+Math.cos(a)*(o.r0||0)*Math.random(),ex=rand(0,6),ey=rand(0,6),ez=rand(0,6);/* 난수 소비 순서는 이전 코드와 동일 */
+    ps.push({id,x,y,z,ex,ey,ez,sx:sz,sy,vx:Math.sin(a)*sp,vz:Math.cos(a)*sp,vy:rand(o.up[0],o.up[1]),rx:rand(-12,12),ry:rand(-12,12)})}
+  for(const q of ps)ipSet(P,q.id,q.x,q.y,q.z,q.ex,q.ey,q.ez,q.sx,q.sy,q.sx,1);
+  fx.push({m:FXD,t:0,dur:o.dur,upd(k,dt){const al=k<.55?1:1-(k-.55)/.45;for(const q of ps){q.vy-=(o.g||18)*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt;
+      if(q.y<.05){q.y=.05;q.vy*=-.3;q.vx*=.6;q.vz*=.6;q.rx*=.5;q.ry*=.5}q.ex+=q.rx*dt;q.ey+=q.ry*dt;ipSet(P,q.id,q.x,q.y,q.z,q.ex,q.ey,q.ez,q.sx,q.sy,q.sx,al)}},end(){debrisN-=n;for(const q of ps)ipFree(P,q.id)}})}
 /* 폭발 (v36): 섬광 → 불덩이가 부풀며 흩어짐 → 불티 → 연기가 피어오름 · 충격파 고리 · 그을음 · 화면 흔들림
    얼음: 섬광 → 얼음 가시가 솟음 → 서리 안개 · 눈꽃 결정 · 얼음 조각 */
 /* v65 번개 줄기: 6갈래 × 5마디 = 30개 막대를 한 번에 그림. 0.2초 동안 깜빡이며 사라짐 */
@@ -3095,8 +3111,8 @@ const frostTex=(()=>{const c=mkCv(256),g=c.getContext('2d');g.lineCap='round';g.
   const fern=(x,y,a,len,w,d)=>{g.lineWidth=w;g.beginPath();g.moveTo(x,y);const ex=x+Math.cos(a)*len,ey=y+Math.sin(a)*len;g.lineTo(ex,ey);g.stroke();if(d<3)for(let t=.3;t<1;t+=.22){const bx=x+Math.cos(a)*len*t,by=y+Math.sin(a)*len*t;fern(bx,by,a+.7,len*.35*(1.1-t),w*.6,d+1);fern(bx,by,a-.7,len*.35*(1.1-t),w*.6,d+1)}};
   for(let i=0;i<8;i++)fern(128,128,i/8*6.28,rand(80,110),3,0);
   const q=g.createRadialGradient(128,128,0,128,128,128);q.addColorStop(0,'rgba(255,255,255,.55)');q.addColorStop(.5,'rgba(255,255,255,.15)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,256,256);return new THREE.CanvasTexture(c)})();
-function decalFx(p,tex,color,r,dur,op,add){const m=new THREE.Mesh(fxPlane,basicMat('gd'+(add?1:0)+tex.id,{map:tex,color,opacity:op,blending:add?THREE.AdditiveBlending:THREE.NormalBlending}));
-  m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.05,p.z);m.scale.setScalar(r);scene.add(m);fx.push({cos:1,m,t:0,dur,upd(k){m.material.opacity=op*(k<.15?k/.15:1-(k-.15)/.85)}})}
+function decalFx(p,tex,color,r,dur,op,add){const P=gdPool(tex,add),i=ipAlloc(P,color);if(i<0)return;const rz=Math.random()*6.28,x=p.x,z=p.z;ipSet(P,i,x,.05,z,-Math.PI/2,0,rz,r,r,r,0);
+  fx.push({cos:1,m:FXD,t:0,dur,upd(k){P.al.array[i]=op*(k<.15?k/.15:1-(k-.15)/.85);P.dirty=true},end(){ipFree(P,i)}})}/* v314: 인스턴스 풀 */
 /* 회전 베기 바람벽: 몸 주위를 감싸며 도는 원통형 바람 줄기 */
 const WIND_FS=`uniform float uT,uOp;uniform vec3 uCol;varying vec2 vUv;
 void main(){float s1=sin(vUv.x*6.2832*9.+vUv.y*5.-uT*28.),s2=sin(vUv.x*6.2832*4.-vUv.y*3.-uT*19.);
@@ -3660,7 +3676,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v313';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v314';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3899,7 +3915,7 @@ function startGame(cls,main,skip){
 let demo=null;
 /* v83: 시연을 바꿀 때 남아 있는 모든 이펙트·입자·예약된 효과를 지움 */
 /* v171: 모든 이펙트·투사체(리본 꼬리 포함)·입자·예약 타이머를 한 번에 정리. 시연 전환뿐 아니라 맵 이동·마을·사망 부활·위험도 이동 등 resetWorld/goTown에서도 호출 */
-function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose()}fx.length=0;
+function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose()}fx.length=0;ipWipe();
   timers.length=0;for(const p of projs){scene.remove(p.m);if(p.rib&&p.rib.m){scene.remove(p.rib.m);p.rib.m.geometry.dispose();mfree(p.rib.mat)}if(p.rbm){scene.remove(p.rbm);p.rbm.geometry.dispose();mfree(p.rbm.material)}}projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;fbT.length=0;novaN.length=0;flashL.intensity=0;
   for(const d of dnPool){d.live=false;d.el.hidden=true}
   Object.assign(P,{spin:0,vortex:null,dashT:0,swing:0,spinFire:false,hasteT:0,wFx:null})}
