@@ -3091,7 +3091,7 @@ function kill(e){
   if(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
   const MD=S.ch<4?2:1,M3=S.ch<NCH?3:1;/* v115: 1~4장 마나 물약 드롭 ×2 / v124: 1~7장은 추가로 ×3 */
-  const PD=S.ch>=NCH?.054:.3;/* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
+  const PD=S.ch>=NCH?0:.3;/* v358: 엔드게임은 등급별 물약 판정 폐지 → 아래 고정 0.7% *//* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
   if(e.final){for(let i=0;i<3;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2)}
   else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2*MD*M3)potDrop(e.pos,'mp')}
   else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp');if(MD>1&&Math.random()<PD*.5)potDrop(e.pos,'mp');if(M3>1&&Math.random()<(PD*.5+(MD>1?PD*.5:0))*(M3-1))potDrop(e.pos,'mp')}
@@ -3100,7 +3100,8 @@ function kill(e){
     if(q<ic)dropItem(e.pos,false);
     else if(q<ic+(S.ch===0?.035:.025)*PD)potDrop(e.pos,'hp');
     else if(q<ic+((S.ch===0?.035:.025)+.02*MD*M3)*PD)potDrop(e.pos,'mp')}
-  if(Math.random()<[.0008,.004,.012,.06][e.rank])dropSpd(e.pos);
+  /* v358: 신속 물약 드랍 폐지(상점 구매만) · 엔드게임 체력·마나 물약은 등급 무관 각각 0.7% */
+  if(S.ch>=NCH&&!e.final){if(Math.random()<POT_DROP)dropPot(e.pos,'hp');if(Math.random()<POT_DROP)dropPot(e.pos,'mp')}
   gainXp(e.xp);progress(e);
 }
 /* v75: 최종 보스 직선 장판·돌진·브레스는 방어력과 무관하게 최대 체력의 일정 비율 */
@@ -3164,7 +3165,7 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
 const goldOf=e=>Math.max(1,Math.round(e.mhp*.12*goldAdj()*rand(.8,1.2)));
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=.00018,/* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
-const POUCH_L=POUCH_P/10,POUCH_LX=40,TKD_P=.0004;
+const POT_DROP=.007,POUCH_L=POUCH_P/10,POUCH_LX=40,TKD_P=.0004;
 const pouchAmt=t=>Math.round(3000/* v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
 const pouchMatL=new THREE.MeshStandardMaterial({color:0x9a4ad8,emissive:0x44106e,roughness:.4,metalness:.5});
@@ -3869,7 +3870,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v357';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v358';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
