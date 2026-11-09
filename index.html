@@ -3722,7 +3722,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v327';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v328';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3988,8 +3988,9 @@ function demoEnd(){S.demo=false;demo=null;for(const e of [...enemies])dropEnemy(
 $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!demo)return;
   if(b.dataset.sk){if(b.dataset.sk!==demo.sk){demoSetup(demo.cls,b.dataset.sk);renderSkillSel()}return}
   if(b.id==='skBack'){demoEnd();S=fresh();showClassSel();return}
-  if(b.id==='skGo'){const c=demo.cls,m=demo.sk;demoEnd();startGame(c,m)}
-  if(b.id==='skGoSkip'){const c=demo.cls,m=demo.sk;demoEnd();startGame(c,m,true)}});
+  if(b.id==='skGo'||b.id==='skGoSkip'){const c=demo.cls,m=demo.sk,sk=b.id==='skGoSkip';demoEnd();
+    if(testPick){startGame(c,m,sk);return}
+    askNick({title:'닉네임을 정하세요',init:'',cancel:'직업 다시 고르기',ok:n=>{pendNick=n;startGame(c,m,sk)},no:()=>{S=fresh();showClassSel()}})}});
 
 /* ================= level-up choice ================= */
 let offer=null,lvlSkill=null;
@@ -4805,7 +4806,7 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
   if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();const go=()=>{curSlot=i;S=d;$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
-  if(b.dataset.new!==undefined){const i=+b.dataset.new;askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel()}});return}
+  if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
     else slotArm={i,t:Date.now()};
