@@ -852,7 +852,7 @@ const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
-const novaSt=L=>({iv:(.56-.06*L)/1.3,r:(2.6+.4*L)*1.26,m:.5+.2*L});/* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
+let NOVA_DM=.5;const novaSt=L=>({iv:(.56-.06*L)/1.3/2,r:(2.6+.4*L)*1.26,m:(.5+.2*L)*NOVA_DM});/* v305: 서리 폭발 빈도 2배(iv/2), 1회 피해는 NOVA_DM으로 보정해 허수아비 아귀 클리어 시간 유지 *//* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
 const flameSt=L=>{const f5=2/(.42-.15),f1=2/(.42-.03)/2,f=f1+(f5-f1)*Math.pow((L-1)/4,1.5);return{iv:1/f,rm:1.5+.2*L,m:.9+.3*L}};/* v71: 1단계=기존 1/2(초당 2.6회), 5단계 동일(7.4회), 지수 1.5 곡선 *//* v65: 초당 횟수 2배(1회 피해 그대로) *//* 5단계: 0.27초 · 250% · ×2.4 */
 const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
@@ -3660,7 +3660,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v304';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v305';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
