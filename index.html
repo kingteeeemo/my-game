@@ -236,7 +236,8 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .sheet{width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:#17171d;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
 #smith .sheet>*{flex-shrink:0}#smith .sheet,#shop .sheet{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.shead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:10px}.hdbtns{display:flex;gap:6px;align-items:center;flex:none}.hdbtns .hauto{padding:8px 12px;font-size:13px;color:#ffd24a;border-color:rgba(255,210,74,.5);white-space:nowrap}.hdbtns .hauto:disabled{opacity:.4}
+.aulist{display:flex;flex-direction:column;gap:6px}.aurow{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid #5ae0d0;border-radius:12px;background:rgba(90,224,208,.06)}.aurow.skip{border-color:var(--line);background:none;opacity:.55}.aus{font:700 14px var(--ko);color:var(--muted)}.aum{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;min-width:0}.aul{font:800 20px var(--en);font-stretch:87%}.ausp{font:800 15px var(--en);font-style:normal;color:#5ae0d0}.auar{font-size:18px;color:var(--muted)}.auold{font:700 12px var(--en);font-style:normal;color:var(--muted);text-decoration:line-through}.aur{font:700 13px var(--en);color:#ffd24a;text-align:right}.aurow.skip .aur{font:600 12px var(--ko);color:var(--muted)}.aurow.skip .aum{font:600 13px var(--en);color:var(--muted)}
 .sheet h2{margin:0;font-size:19px;font-weight:900;text-wrap:balance}
 .close{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;font:700 13px var(--ko)}
 .hint{font-size:12px;color:var(--muted);line-height:1.55;margin:0}
@@ -535,6 +536,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   #shop .gems:not(.gsl) .potbtns{grid-template-columns:repeat(2,1fr);flex:1 1 100%}
   #shop .gems:not(.gsl) .pm.wide{padding:0 4px;height:26px;font-size:10px}
 }
+/* v345 가로 화면: 무기상(장비 뽑기)·대장간 글자 ×1.3(.936→1.217) — 높이가 모자라면 창이 위로 더 올라와 화면을 더 가리고, 그래도 넘치면 창 안에서 스크롤 */
+@media (orientation:landscape) and (max-height:520px){#shop.gearK .sheet,#smith .sheet{zoom:1.217;max-width:calc((100vw - 16px)/1.217);max-height:calc((100vh - 8px)/1.217)}}
 .elseg{display:flex;gap:4px;flex:none}.elseg .pm.on{background:var(--ember);border-color:var(--ember);color:#1a1008;opacity:1}
 /* v48 모바일 UI 정리 */
 .autopop{max-height:calc(100vh - 266px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow-y:auto}
@@ -3848,7 +3851,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v344';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v345';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4498,7 +4501,7 @@ const LAND=()=>matchMedia('(orientation:landscape) and (max-height:520px)').matc
 let _rsL=null;addEventListener('resize',()=>{try{const l=LAND();if(l===_rsL)return;_rsL=l;/* v230: 스크롤 중 주소창 크기 변화로 시트가 다시 그려져 스크롤이 끊기던 문제 → 가로/세로가 바뀔 때만 */if(!$('shop').hidden&&shopKind!=='pot'&&shopSel)renderShop();if(!$('smith').hidden&&smithSel)renderSmith()}catch(e){}});_rsL=LAND();
 const spLegend=`<p class="hint" style="margin:0"><span class="spleg spb">특수</span> 부위 전용 능력치 · <span class="spleg rg">범위</span> 이 레벨에서 붙을 수 있는 수치 · <span class="spleg pr">확률</span> 전설 장비에 붙을 확률</p>`;
 const goldBar=()=>`<div class="goldbar"><span>보유 골드</span><b id="shGold">${fmtG(S.gold)} G</b>${goldFx?`<i class="gdelta" key="${goldFx.t}">−${fmtG(goldFx.v)} G</i>`:''}</div>`;
-function renderShop(){
+function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
   const g=S.gold,l=gachaLv(),gp=gachaPrice(l),pot=shopKind==='pot';
   let h=`<div class="shead"><div><div class="chap">${pot?'Potions · '+TOWN.shop:'Armory · '+TOWN.gear}</div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
   if(pot){h+=`<div class="gems">`;
@@ -4788,24 +4791,22 @@ function heirCard(it,attr,note,ref){const sp=spOf(it),eq=S.eq[it.slot]===it;
     <span class="hstat"><span><small>아이템 레벨</small><b>iLv ${it.ilvl}</b>${ref?hDiff(it.ilvl,ref.ilvl):''}</span><span><small>${baseName(it.slot)}</small><b>${Math.round(it.base)}</b>${ref?hDiff(it.base,ref.base):''}</span></span>
     ${sp?`<span class="hsp">★ ${OPT[sp.k].n} ${OPT[sp.k].f(sp.v)}</span>`:'<span class="hsp off">특수 능력치 없음</span>'}${note||''}</button>`}
 function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
-  const head=(en,t)=>`<div class="shead"><div><div class="chap">${en} · ${TOWN.heir}</div><h2>${t}</h2></div><button class="close" id="hrClose">닫기</button></div>${goldBar()}`;
+  const head=(en,t,x)=>`<div class="shead"><div><div class="chap">${en} · ${TOWN.heir}</div><h2>${t}</h2></div><div class="hdbtns">${x||''}<button class="close" id="hrClose">닫기</button></div></div>${goldBar()}`;
   const msg=heirMsg?`<p class="hint" style="color:#5ae0d0;margin:0">${heirMsg}</p>`:'';
   let h;
   if(!heirMode){const nsp=allItems().filter(spOf).length,nadv=scr.filter(x=>x.v>=10).length;
     h=head('Heir','무엇을 할까요?')+`<div class="hmenu">
       <button class="smslot hbig" data-hm="eng" ${scr.length?'':'disabled'}><span class="k">ENGRAVE</span><b style="color:#c890ff">★ 각인의 서 사용</b><small>보유 ${scr.length}장${nadv?` (상급 ${nadv}장)`:''} · 전설 장비에 부위별 특수 능력치를 새깁니다</small></button>
-      <button class="smslot hbig" data-hm="inh" ${nsp?'':'disabled'}><span class="k">INHERIT</span><b style="color:#5ae0d0">⇄ 특수 능력치 전승</b><small>★ 장비 ${nsp}개 · 특수 능력치를 같은 부위의 다른 전설 장비로 옮깁니다</small></button>
-      <button class="smslot hbig" data-hm="auto" ${heirPlan().some(p=>p.src)?'':'disabled'}><span class="k">AUTO</span><b style="color:#ffd24a">⚡ 전 부위 최적 전승</b><small>부위마다 가장 좋은 전설 장비에 가장 높은 ★ 수치를 한 번에 옮깁니다</small></button></div>
+      <button class="smslot hbig" data-hm="inh" ${nsp?'':'disabled'}><span class="k">INHERIT</span><b style="color:#5ae0d0">⇄ 특수 능력치 전승</b><small>★ 장비 ${nsp}개 · 특수 능력치를 같은 부위의 다른 전설 장비로 옮깁니다</small></button></div>
       ${scr.length?'':'<p class="hint" style="margin:0">각인의 서는 결투장 잿불 검귀 처치 추가 보상으로 얻습니다.</p>'}
       <button class="ghost" id="hrExit">← 돌아가기</button>`+msg}
   else if(heirMode==='auto'){const plan=heirPlan(),go=plan.filter(p=>p.src),tot=go.reduce((a,p)=>a+p.c,0),ok=go.length&&S.gold>=tot;
-    const row=p=>{if(!p.src)return `<div class="gslot" style="opacity:.6"><div class="gslhd"><span class="k">${SLOTEN[p.k]} · ${SLOTN[p.k]}</span><b style="color:var(--muted)">건너뜀 · ${p.skip}</b>${p.tg&&spOf(p.tg)?`<small class="wrap">${p.tg.name} · ★ ${OPT[spOf(p.tg).k].n} ${OPT[spOf(p.tg).k].f(spOf(p.tg).v)}</small>`:''}</div></div>`;
-      const sp=spOf(p.src),o=spOf(p.tg),se=S.eq[p.k]===p.src,te=S.eq[p.k]===p.tg;
-      return `<div class="gslot" style="border-color:#5ae0d0"><div class="gslhd"><span class="k">${SLOTEN[p.k]} · ${SLOTN[p.k]}</span><b style="color:#5ae0d0">★ ${OPT[sp.k].n} ${o?`${OPT[o.k].f(o.v)} → `:''}${OPT[sp.k].f(sp.v)}</b>
-        <small class="wrap">받는 장비: <b style="color:${RAR[p.tg.rar].c}">${p.tg.name}</b> · iLv ${p.tg.ilvl} · ${baseName(p.k)} ${Math.round(p.tg.base)}${te?' · 장착 중':se?' · 전승 후 장착':' · 가방(착용은 그대로)'}</small>
-        <small class="wrap" style="color:#ff8a6a">사라지는 재료: ${p.src.name} · iLv ${p.src.ilvl}${se?' · 장착 중':''}</small><small style="color:#ffd24a">${fmtG(p.c)}G</small></div></div>`};
-    h=head('Auto','전 부위 최적 전승')+`<p class="hint" style="margin:0">부위마다 <b style="color:var(--ink)">가장 좋은 전설 장비</b>(아이템 레벨 → 기본 수치 순)에 그 부위에서 <b style="color:var(--ink)">가장 높은 ★ 수치</b>를 옮깁니다. <b style="color:#ff8a6a">재료 장비는 사라지고</b>, 잠금(🔒) 장비는 재료로 쓰지 않습니다.</p>${plan.map(row).join('')||'<p class="hint">전승할 부위가 없습니다.</p>'}
-      ${go.length?`<button class="primary" id="hrAuto" ${ok?'':'disabled'}>${go.length}개 부위 한 번에 전승 · ${fmtG(tot)}G</button>${ok?'':`<p class="hint" style="margin:0;color:#ff7a6a">골드가 부족합니다 (필요 ${fmtG(tot)}G)</p>`}`:''}<button class="ghost" id="hrMenu">← 돌아가기</button>`+msg}
+    /* v345: 부위마다 「iLv 재료 ★N% → iLv 받는 장비」만 크게 · 부가 설명 생략 */
+    const row=p=>{const tsp=p.tg&&spOf(p.tg);if(!p.src)return `<div class="aurow skip"><span class="aus">${SLOTN[p.k]}</span><span class="aum">${p.tg?`iLv ${p.tg.ilvl}${tsp?` · ★ ${OPT[tsp.k].f(tsp.v)}`:''}`:''}</span><span class="aur">${p.skip}</span></div>`;
+      const sp=spOf(p.src);
+      return `<div class="aurow"><span class="aus">${SLOTN[p.k]}</span><span class="aum"><b class="aul">iLv ${p.src.ilvl}</b><i class="ausp">★ ${OPT[sp.k].f(sp.v)}</i><span class="auar">→</span><b class="aul" style="color:${RAR[p.tg.rar].c}">iLv ${p.tg.ilvl}</b>${tsp?`<i class="auold">${OPT[tsp.k].f(tsp.v)}</i>`:''}</span><span class="aur">${fmtG(p.c)}G</span></div>`};
+    h=head('Auto','전 부위 최적 전승')+`<div class="aulist">${plan.map(row).join('')||'<p class="hint">전승할 부위가 없습니다.</p>'}</div>
+      ${go.length?`<button class="primary" id="hrAuto" ${ok?'':'disabled'}>${go.length}개 부위 전승 · ${fmtG(tot)}G</button>`:''}<button class="ghost" id="hrInh">← 특수 능력치 전승</button>`+msg}
   else if(heirMode==='eng'){
     if(heirScr<0){h=head('Engrave','각인의 서 고르기')+`<p class="hint" style="margin:0">사용할 서를 고르세요. 다음에 각인할 <b style="color:var(--ink)">부위</b>를 고릅니다.</p><div class="smgrid">${scr.map((sc,i)=>`<button class="smslot" data-scr="${i}"><b style="color:${sc.v>=10?'#c890ff':'#5ae0d0'}">★ ${scrName(sc)}</b><small>특수 능력치 ${sc.v}%</small></button>`).join('')||'<p class="hint">각인의 서가 없습니다.</p>'}</div><button class="ghost" id="hrMenu">← 돌아가기</button>`+msg}
     else{const sc=scr[heirScr],leg=allItems().filter(x=>x.rar===3),scC=sc.v>=10?'#c890ff':'#5ae0d0';
@@ -4818,7 +4819,7 @@ function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
           return heirCard(it,`data-etg="${it.id}"`,chg)}).join('')}</div>`:`<p class="hint">이 부위의 전설 장비가 없습니다.</p>`)+`<button class="ghost" id="hrESlot">← 부위 다시 고르기</button>`+msg}}}
   else{const src=heirSrc&&itemById(heirSrc);
     if(!src){heirSrc=null;const all=allItems().filter(spOf);
-      h=head('Inherit',heirSlot?`${SLOTN[heirSlot]} · 옮길 장비 고르기`:'특수 능력치 전승')+`<p class="hint" style="margin:0">먼저 <b style="color:var(--ink)">계승할 부위</b>를 고르세요. 능력치를 <b style="color:var(--ink)">같은 부위의 다른 전설 장비</b>로 옮기며, 수치는 그대로이고 <b style="color:#ff8a6a">원래 장비는 사라집니다.</b></p>`;
+      h=head('Inherit',heirSlot?`${SLOTN[heirSlot]} · 옮길 장비 고르기`:'특수 능력치 전승',`<button class="ghost hauto" id="hrAutoGo" ${heirPlan().some(p=>p.src)?'':'disabled'}>⚡ 최적 전승</button>`)+`<p class="hint" style="margin:0">먼저 <b style="color:var(--ink)">계승할 부위</b>를 고르세요. 능력치를 <b style="color:var(--ink)">같은 부위의 다른 전설 장비</b>로 옮기며, 수치는 그대로이고 <b style="color:#ff8a6a">원래 장비는 사라집니다.</b></p>`;
       if(heirSlot&&!all.some(x=>x.slot===heirSlot))heirSlot=null;
       if(!heirSlot)h+=(all.length?`<div class="smgrid">${EQS.filter(k=>all.some(x=>x.slot===k)).map(k=>`<button class="smslot" data-hslot="${k}"><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small>★ 장비 ${all.filter(x=>x.slot===k).length}개</small></button>`).join('')}</div>`:`<p class="hint">특수 능력치가 붙은 장비가 없습니다.</p>`)+`<button class="ghost" id="hrMenu">← 돌아가기</button>`;
       else{const list=all.filter(x=>x.slot===heirSlot).sort((a,b)=>b.ilvl-a.ilvl);h+=`<div class="smgrid">${list.map(it=>heirCard(it,`data-hsrc="${it.id}"`)).join('')}</div><button class="ghost" id="hrSlot">← 부위 다시 고르기</button>`}}
@@ -4856,12 +4857,14 @@ function heirPlan(){const all=allItems(),out=[];
   return out}
 function heirAuto(){const plan=heirPlan().filter(p=>p.src),tot=plan.reduce((a,p)=>a+p.c,0);if(!plan.length||S.gold<tot)return;let n=0,eqN=0;
   for(const p of plan){const r=heirMove(p.src,p.tg);if(r){n++;if(r.srcEq)eqN++}}
-  goldFx={v:tot,t:Date.now()};refreshMax();save();refreshUpBtn();heirMsg=`${n}개 부위 최적 전승 완료${eqN?` · ${eqN}개는 받은 장비를 바로 장착했습니다`:''}`;heirMode=null;
+  goldFx={v:tot,t:Date.now()};refreshMax();save();refreshUpBtn();heirMsg=`${n}개 부위 최적 전승 완료${eqN?` · ${eqN}개는 받은 장비를 바로 장착했습니다`:''}`;heirMode='inh';heirSrc=null;heirSlot=null;
   toast('전 부위 최적 전승',`${n}개 부위 완료 · ${fmtG(tot)}G`,'#5ae0d0');buyFx(true);renderHeir()}
 $('heirSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='hrClose')return closeHeir();
   if(b.id==='hrExit')return closeHeir();
   if(b.id==='hrAuto')return heirAuto();
+  if(b.id==='hrAutoGo'){heirMode='auto';heirMsg='';return renderHeir()}
+  if(b.id==='hrInh'){heirMode='inh';heirSrc=null;heirSlot=null;heirMsg='';return renderHeir()}
   if(b.dataset.hm){heirMode=b.dataset.hm;heirSrc=null;heirSlot=null;heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
   if(b.id==='hrMenu'){heirMode=null;heirSrc=null;heirSlot=null;heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
   if(b.id==='hrScr'){heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
