@@ -648,6 +648,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .ivrow{display:flex;gap:10px;min-height:0;flex:1}.ivrow.top{flex:none;align-items:stretch}.ivrow.top>.ivc{flex:1}
 .ivcol{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0;overflow-y:auto}.ivcol.side{flex:0 0 230px;overflow:visible}
 .sheet.inv-pc .ivcol.side .btns{flex-direction:column}
+/* v361: PC 장비창 — 좌(현재 장착+착용 장비)·우(선택 아이템+가방) 두 칼럼을 격자로 맞춤, 카드는 선택이 없어도 같은 크기 */
+.sheet.inv-pc .pcgrid{display:grid;grid-template-columns:36% minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px;flex:1;min-height:0}.sheet.inv-pc .pcgrid>.ivc{min-height:216px}.sheet.inv-pc .pcgrid .ivrow.top>.ivc{min-height:216px}.sheet.inv-pc .pcgrid .iveq.paper{grid-template-rows:repeat(3,minmax(0,1fr));min-height:0}.sheet.inv-pc .pcgrid .iveq.paper .ivq{justify-content:center}.sheet.inv-pc .pcbag{scrollbar-width:none}.sheet.inv-pc .pcbag::-webkit-scrollbar{display:none}
 /* v82 주력 스킬 선택 */
 body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skillsel{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;justify-content:center;pointer-events:none}
@@ -3870,7 +3872,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v360';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v361';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4507,7 +4509,7 @@ function renderInv(){
   let h;
   if(mode==='p')h=head+cmp+act+ivEq('strip')+foot+bag;/* v79: 세로는 요약 줄 생략 */
   else if(mode==='l')h=head+`<div class="ivrow"><div class="ivcol" style="flex:0 0 50%">${cmp}${act}</div><div class="ivcol" style="flex:1"><span class="tag" style="color:var(--muted)">장착 중인 장비</span>${ivEq('grid3')}${foot}${bag}</div></div>`;
-  else h=head+`<div class="ivrow top">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}<div class="ivcol side">${act||'<p class="hint" style="margin:0">가방에서 아이템을 누르면 장착 시 DPS 변화와 장착·판매 버튼이 나옵니다. ▲는 지금 장비보다 좋은 아이템, ★는 특수 능력치입니다.</p>'}</div></div><div class="ivrow"><div class="ivcol" style="flex:0 0 38%">${ivEq('paper')}</div><div class="ivcol" style="flex:1">${foot}${bag}</div></div>`;
+  else h=head+`<div class="pcgrid">${ivCard(cur,'cur')}<div class="ivrow top">${ivCard(sel,'sel',cur)}<div class="ivcol side">${act||'<p class="hint" style="margin:0">가방에서 아이템을 누르면 장착 시 DPS 변화와 장착·판매 버튼이 나옵니다. ▲는 지금 장비보다 좋은 아이템, ★는 특수 능력치입니다.</p>'}</div></div>${ivEq('paper')}<div class="ivcol pcbag">${foot}${bag}</div></div>`;
   const keep=[...sh.querySelectorAll('.ivcol')].map(c=>c.scrollTop),top=sh.scrollTop;
   sh.innerHTML=h;sh.scrollTop=top;sh.querySelectorAll('.ivcol').forEach((c,i)=>{if(keep[i])c.scrollTop=keep[i]});
 }
