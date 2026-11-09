@@ -197,7 +197,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .smbar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px}.smbar i{display:block;height:100%;background:#7fe07a}
 .smbig{position:relative;display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-top:3px solid var(--rc);border-radius:14px;padding:14px;background:var(--card);overflow:hidden}
 .smlv{display:flex;align-items:baseline;gap:10px}.smlv small{font-size:11px;color:var(--muted)}.smlv .enh{font-size:30px}.smlv .nx{font:800 22px var(--en);font-stretch:87%;color:#ffd24a}.arr{color:var(--muted)}
-.primary.smboost{width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff;color:#fff;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25}.primary.smboost small{font-size:10.5px;opacity:.9}.primary.smboost:disabled{opacity:.45}
+.smpity{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:2px 0 4px;color:var(--muted)}.smpity b{color:#f0d040;font-size:15px}.primary.smboost:disabled{opacity:.45}
 .testlv{display:flex;align-items:center;gap:6px;font-size:12px;color:#ffb070;background:rgba(255,160,80,.08);border:1px dashed rgba(255,160,80,.45);border-radius:10px;padding:6px 8px}.testlv span{flex:1}.testlv b{min-width:34px;text-align:center;color:var(--ink);font-size:15px}
 .streset{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px}.streset>div{flex:1;display:flex;flex-direction:column;gap:2px}.streset small{font-size:11px;color:var(--muted)}
 .smauto{width:100%;margin-top:6px}.smauto.on{border-color:#7fe07a;color:#7fe07a;box-shadow:0 0 12px rgba(127,224,122,.35)}.tknote{display:block;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.4}
@@ -994,7 +994,9 @@ const enhCost=(L,k)=>Math.round(200*Math.pow(1.418,L)*(k==='weapon'?1.3:1));/* v
 const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
 const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
-const BOOST_G=10,BOOST_R=4,boostOk=L=>enhRate(L)<=.0701;/* v135: 확률 7% 이하 구간 — 골드 10배로 확률 3배 → v146: 4배 *//* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
+/* v350: 강화 천장 — 같은 단계에서 기대 시도 횟수(1/확률)의 2배만큼 실패가 쌓이면 그 시도는 반드시 성공 (10% → 20번째, 5% → 40번째) · 10배 골드 강화 폐지 */
+const pityCap=L=>{const r=enhRate(L);return r>=1?1:Math.round(2/r)},pityN=k=>{const o=(S.pity&&S.pity[k])||null,L=enhL(k);return o&&o.L===L?o.n:0};
+/* v99: 확률이 낮을수록 상승량이 더 가파르게 커짐 */
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
 const W30=30,W35=35,W40=40,W45=45,esum=(L,sl)=>{if(sl!=='weapon'||L<=W30)return enhSum(L);const a=enhSum(W30),m=Math.min(L,W35);let v=a+(enhSum(m)-a)*.85;if(L>W35)v+=(enhSum(Math.min(L,W40))-enhSum(W35))*.65;if(L>W40)v+=(enhSum(Math.min(L,W45))-enhSum(W40))*.55;if(L>W45)v+=(enhSum(L)-enhSum(W45))*.4;return v};/* v262: 35~40강 65% · 40~45강 55% · 45강 이후 40% *//* v259: 무기 35강 이후 단계별 상승량 절반 → v260: 30→35강 70% · 35강 이후 40% → v261: 30→35강 85% · 35강 이후(40강 이후 포함 전 구간) 65% */
@@ -3860,7 +3862,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v349';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v350';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4722,7 +4724,7 @@ const tkNeed=(L,k)=>k==='weapon'?(L>=30?2+Math.floor((L-30)/5):1):(L>=35?2+Math.
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=24&&Date.now()-enhCineEnd<440)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=29&&Date.now()-enhCineEnd<220)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=ENH_MAX)return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 쿨타임 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다(기본 공격·회전 베기). 그 외 스킬은 쿨타임 ${(s=>s.toFixed(2))(cdCurve(CD_U*(1-hasteP()*GMAX),x))}초(가속 10단계 기준, 0.25초에 수렴) — 쿨타임이 길어진 만큼 피해가 올라 DPS는 같습니다.</p>`}/* v149 */
 function renderSmith(){
@@ -4742,9 +4744,9 @@ function renderSmith(){
       info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
       bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring','amulet'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':k==='ring'?'마나 소모 감소':'마나 재생'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':k==='ring'?'mcr':'mreg',k)-1)*100)}%)</small>`:''} <small>(생명력·마나 +${Math.round((enhMO(L,undefined,k)-1)*ENH_HM*100)}%)</small></span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b>${tk}</b>개 · 이번 강화에 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${need}개</b> 필요</span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:`<small>${tk?'주문서가 부족합니다':'우버 결투장 추가 보상'}</small>`}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
-      rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div>${tkUI}`,
+      rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div><div class="smpity"><small>천장</small><b>${Math.min(pityN(k)+1,pityCap(L))} / ${pityCap(L)}</b><small>번째 시도${pityN(k)+1>=pityCap(L)?' · 이번 강화 확정 성공':''}</small></div>${tkUI}`,
       hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
-      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`${boostOk(L)&&!tkOn?'일반 강화 ':'강화 '}${fmtG(cc)}G`}</button></div>${!max&&boostOk(L)&&!tkOn?`<button class="primary smboost" id="smGo20" ${S.gold>=c*BOOST_G&&!smAuto?'':'disabled'}>골드 ${BOOST_G}배 강화 · 확률 ${BOOST_R}배 (${+(Math.min(1,rt*BOOST_R)*100).toFixed(1)}%) <small>${fmtG(c*BOOST_G)}G</small></button>`:''}${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
+      btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`강화 ${fmtG(cc)}G`}</button></div>${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
       <div class="spR"><div class="smbig smact" style="--rc:${rc}">${res}${lv}${rateBig}<div class="smstats">${rate}</div>${hint}</div>${btns}</div></div>`;
@@ -4758,7 +4760,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(S.test&&smithSel){if(b.dataset.tenh){testSetEnh(smithSel,enhL(smithSel)+ +b.dataset.tenh);return}if(b.id==='tSpSet'){testSetSp(smithSel,$('tSpIn').value);return}if(b.id==='tSpDel'){testSetSp(smithSel,null);return}}
   if(b.id==='smAuto'){smAuto?smAutoStop():smAutoStart();return}
   if(b.id==='smGo'){if(!smAuto)smithTry(false)}
-  if(b.id==='smGo20'){if(!smAuto)smithTry(false,true)}});
+  });
 /* v229: 테스트 캐릭터 — 강화 단계·특수 능력치 직접 설정 */
 function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k)),cur=it&&spOf(it);
   return `<div class="ttool" style="display:flex;flex-direction:column;gap:6px;background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:8px 10px;font-size:12px">
@@ -4767,15 +4769,15 @@ function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OP
     ${it&&spk?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>'}</div>`}
 function testSetEnh(k,n){S.enh[k]=Math.max(0,Math.round(n)||0);smithRes=null;refreshMax();renderSmith()}
 function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k));it.opts=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));if(v!==null&&spk)it.opts.unshift({k:spk,v:Math.max(0,+v||0)});refreshMax();renderSmith()}
-function smithTry(auto,boost){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;boost=!!boost&&!auto&&!tkUse&&boostOk(L);const c=enhCost(L,k)*(tkUse?TK_GOLD:boost?BOOST_G:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};smBoost=boost?1:0;if(auto)smLastTry=Date.now();
+function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=enhCost(L,k)*(tkUse?TK_GOLD:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
-    if(auto)smAutoN++;const big=L>=24;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
-    if(tkUse||Math.random()<Math.min(1,enhRate(L)*(boost?BOOST_R:1))){S.enh[k]=L+1;smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
-    else{smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
+    if(auto)smAutoN++;const big=L>=29;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
+    const pn=pityN(k),pHit=pn+1>=pityCap(L);if(tkUse||pHit||Math.random()<enhRate(L)){S.enh[k]=L+1;if(S.pity)delete S.pity[k];smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
+    else{(S.pity=S.pity||{})[k]={L,n:pn+1};smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
-let enhCineOn=0,enhCineEnd=0,smBoost=0,smLastTry=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
+let enhCineOn=0,enhCineEnd=0,smLastTry=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
 function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
   const base=L>=26?'200,120,255':'255,150,50';el.style.setProperty('--ec',base);
   let sp='';for(let i=0;i<16;i++){sp+=`<i class="in" style="left:${10+Math.random()*80}%;top:${66+Math.random()*24}%;--x:${((Math.random()-.5)*8).toFixed(1)}vmin;--y:-${(28+Math.random()*26).toFixed(1)}vmin;animation-delay:${(Math.random()*1).toFixed(2)}s;width:${2+Math.random()*3|0}px;height:${2+Math.random()*3|0}px"></i>`}
@@ -4785,8 +4787,6 @@ function enhCine(k,L,ok,done,auto){enhCineOn=1;let over=0,revealed=0,canClose=0,
   const fin=()=>{if(over)return;over=1;enhCineOn=0;enhCineEnd=Date.now();el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
   const born=Date.now();el.addEventListener('click',ev=>{/* v229: 리스너를 바로 붙임(기기가 바쁠 때 0.15초 타이머가 늦어져 연타가 씹히던 문제) — 일반 클릭만 0.15초 보호 */
-    /* v225: 10배 골드·4배 확률 강화 버튼 위치를 계속 누르면 컷신 즉시 스킵 → 다음 강화가 이어서 진행 */
-    if(!auto&&smBoost&&smithOpen){const bt=document.getElementById('smGo20');if(bt&&!bt.disabled){const r=bt.getBoundingClientRect();if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){if(!revealed&&rv)rv();fin();setTimeout(()=>smithTry(false,true),0);return}}}
     if(Date.now()-born<150)return;if(!revealed&&rv)rv();else if(canClose)fin()});
   const T=auto?.4*.7:1.14;/* 슈유육… 모이는 시간 (자동 강화는 빠르게) */
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
