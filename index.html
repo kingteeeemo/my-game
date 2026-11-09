@@ -836,7 +836,7 @@ const GEMS2={
   overl:{s:'chainl',n:'과부하',c:'#e0d0ff',max:3,d:L=>{const o=ovSt(L);return `연쇄가 끝난 자리에 번개 구체가 ${o.dur.toFixed(1)}초 남아 반경 ${OV_R}m를 0.3초마다 감전 (피해 ×${o.m.toFixed(2)})`}},
   cstorm:{s:'chainl',n:'번개 폭풍',c:'#b8a0ff',d:L=>{const x=csSt(L);return `번개가 맞힐 때마다 반경 ${x.r.toFixed(1)}m 번개 폭발 (피해 ×${x.m.toFixed(2)})`}},
   tri:{s:'frost',n:'오중 보주',c:'#bfe8ff',max:3,d:L=>`보주 ${TRI_N[L]}개 발사${TRI_N[L]>=3?` (사방 ${TRI_N[L]}방향${TRI_N[L]===5?' · 정오각형':''})`:''} · 보주 속도 +${Math.round(TRI_SP[L]*100)}%`},
-  fnova:{s:'frost',n:'서리 폭발',c:'#7fd0ff',d:L=>{const v=novaSt(L);return `보주마다 ${v.iv.toFixed(2)}초마다 그 자리에 얼음 폭발\n초당 ${(1/v.iv).toFixed(1)}회 · 반경 ${v.r.toFixed(1)}m · 파편 피해 ×${v.m.toFixed(2)}`}},
+  fnova:{s:'frost',n:'서리 폭발',c:'#7fd0ff',d:L=>{const v=novaSt(L);return `보주마다 ${v.iv.toFixed(2)}초마다 그 자리에 얼음 폭발\n초당 ${(1/v.iv).toFixed(1)}회 · 반경 ${v.r.toFixed(1)}m · 파편 피해 ×${v.m.toFixed(2)}\n파편 난사 빈도 -${Math.min(100,L*20)}%${L>=5?' (파편 없음)':''}`}},
   dash:{s:'whirl',n:'질주',c:'#a0e0a0',max:3,d:L=>`회전 베기 시전하는 동안 이동 속도 +${20*L}%`},
   flame:{s:'whirl',n:'화염 폭발',c:'#ff8a3a',d:L=>{const f=flameSt(L);return `회전하는 동안 ${f.iv.toFixed(2)}초마다 내 자리에 화염 폭발\n초당 ${(1/f.iv).toFixed(1)}회 · 회전 범위의 ${Math.round(f.rm*100)}% · 피해 ×${f.m.toFixed(2)}`}},
   boomer:{s:'volley',n:'회귀 화살',c:'#d8f07a',max:3,d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 한꺼번에 되돌아옴 (돌아올 때 피해 ×${r.m.toFixed(2)})\n화살 속도 +${Math.round((r.sp-1)*100)}%`}},
@@ -852,7 +852,7 @@ const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round((2000+S.lv*S.lv*8)*10);/* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
-let NOVA_DM=.9;const novaSt=L=>({iv:(.56-.06*L)/1.3/1.4,r:(2.6+.4*L)*1.26,m:(.5+.2*L)*NOVA_DM});/* v306: 5단계 초당 7회(iv/1.4) · v305: 서리 폭발 빈도 2배(iv/2), 1회 피해는 NOVA_DM으로 보정해 허수아비 아귀 클리어 시간 유지 *//* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
+let NOVA_DM=3.0,NOVA_DK=2.2;/* NOVA_DK: 표기 DPS용 서리 폭발 배율 (실제 클리어 시간이 같은 만큼 표기도 이전 총합에 맞춤) */const novaSt=L=>({iv:(.56-.06*L)/1.3/1.4,r:(2.6+.4*L)*1.26,m:(.5+.2*L)*NOVA_DM});/* v306: 5단계 초당 7회(iv/1.4) · v305: 서리 폭발 빈도 2배(iv/2), 1회 피해는 NOVA_DM으로 보정해 허수아비 아귀 클리어 시간 유지 *//* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
 const flameSt=L=>{const f5=2/(.42-.15),f1=2/(.42-.03)/2,f=f1+(f5-f1)*Math.pow((L-1)/4,1.5);return{iv:1/f,rm:1.5+.2*L,m:.9+.3*L}};/* v71: 1단계=기존 1/2(초당 2.6회), 5단계 동일(7.4회), 지수 1.5 곡선 *//* v65: 초당 횟수 2배(1회 피해 그대로) *//* 5단계: 0.27초 · 250% · ×2.4 */
 const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
@@ -1140,7 +1140,7 @@ function skillStats(id){
     if(b.kind==='whirl')st.cd=old;/* v272: 회전 베기에도 장비 쿨감 적용(화염 폭발 빈도 증가는 유지) — v274 통일 쿨타임 제외 */
     else{const nc=cdCurve(CD_U*(st.cd/b.cd)*h,gear().cdr);st.dmg*=nc/old;st.cd=nc}}/* v274: 회전 베기 외 모든 스킬 쿨타임 통일(기본 1.6초 · 가속 10단계 0.8초 · 장비 쿨감 358%(110 테스트 스펙)에서 0.28초, 무한 강화 시 0.25초 수렴 — v275). 타격 횟수가 줄어든 만큼 피해를 올려 DPS는 기존과 동일 */
   /* 2차 강화 */
-  if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null}/* v59: 오중 보주 */
+  if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null;st.shf=Math.max(0,1-n/5)}/* v312: 서리 폭발이 파편 난사를 대체 — 단계마다 파편 빈도 -20%, 5단계면 파편 없음 *//* v59: 오중 보주 */
   if(b.kind==='whirl'){const sp_=st.hits*WIV*(1+st.echo),r_=sp_/Math.max(.01,st.cd);st.bossK=WHIRL_BM*Math.max(1,Math.pow(r_/WH_R0,WH_K));/* v276: 쿨감이 회전 시간 하한에 막혀 버려지는 만큼 보스 피해로 일부 보정 — 90 테스트 스펙(r≈2.25)까지 ×2.43, 이후 (r/2.25)^0.46 */st.cd=Math.max(st.cd,sp_);/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
   if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null;if(bossOn('quake')){st.half*=.2;st.dmg*=5}/* v263 보스 모드 */}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
@@ -3319,7 +3319,7 @@ function castFire(slot,id){
     const oc=0xd6f0ff/* v285: 구체 자체만 밝게 — 어둡게 하기(dk) 적용 안 함, 광채·심지·고리는 그대로 */,gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
     const cid=++orbSeq,BZ=bossOn('frost')&&n>1,biv=BZ?.35/(n-1):0,af=P.face,rof=Math.random()*Math.PI*2;/* v263 보스 모드: 사방 대신 정면으로 연달아 · v266: 0.35초 안에, 시전한 순간의 방향으로 고정 · v279: 일반 모드(n>=3)는 매 시전마다 꼭짓점 방향이 무작위로 돌아감 */
     for(let i=0;i<n;i++){const fire=()=>{const a=BZ?af+(i-(n-1)/2)*.11:n>=3?rof+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
-      shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.2*(1-dk*.5)*ORBD(),/* v302: 광채 1.5→1.2 (-20%) */gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life*.7/* v309: 사거리 -30% */,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};fire()}/* v311: 보스 모드도 한꺼번에 — 다발 사격 보스 모드처럼 좁은 부채꼴(간격 .11rad, 5발 전체 약 25°) *//* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
+      shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.2*(1-dk*.5)*ORBD(),/* v302: 광채 1.5→1.2 (-20%) */gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life*.7/* v309: 사거리 -30% */,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,shf:st.shf,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};fire()}/* v311: 보스 모드도 한꺼번에 — 다발 사격 보스 모드처럼 좁은 부채꼴(간격 .11rad, 5발 전체 약 25°) *//* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
@@ -3660,7 +3660,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v311';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v312';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4082,8 +4082,8 @@ function skillDps0(id){
   }
   if(b.kind==='orb'){
     const full=base*st.dmg*crit,shard=full*st.sdm,touch=full*1.6,end=st.blast?touch*st.bm:0,sn=3*st.rate*Math.sqrt(st.cnt||1)*Math.min(1.5,st.ssz||1);
-    const nv=st.nova?shard*st.nova.m*(.714/NOVA_DM)*Math.max(1,b.life/st.nova.iv*.35):0,one=touch+shard*sn+end+nv;/* v310: 끝 폭발은 없앴지만 그 몫을 서리 폭발(NOVA_DM .714→.9)로 옮겨 실제 클리어 시간이 같으므로, 표기 DPS도 이전 계산 그대로 유지 */
-    return {main:one/cd,label:`적 1명 기준 (보주 접촉 + 파편 ${sn.toFixed(1)}개)`,sub:`보주 ${st.proj}개 · 접촉 ${fmtN(touch)} · 파편 ${fmtN(shard)}`};
+    const shf=st.shf==null?1:st.shf,nv=st.nova?shard*st.nova.m*(NOVA_DK/NOVA_DM)*Math.max(1,b.life/st.nova.iv*.35):0,one=touch+shard*sn*shf+end+nv;/* v310: 끝 폭발은 없앴지만 그 몫을 서리 폭발(NOVA_DM .714→.9)로 옮겨 실제 클리어 시간이 같으므로, 표기 DPS도 이전 계산 그대로 유지 */
+    return {main:one/cd,label:shf>0?`적 1명 기준 (보주 접촉 + 파편 ${(sn*shf).toFixed(1)}개${st.nova?' + 서리 폭발':''})`:'적 1명 기준 (보주 접촉 + 서리 폭발)',sub:`보주 ${st.proj}개 · 접촉 ${fmtN(touch)}${shf>0?` · 파편 ${fmtN(shard)}`:''}`};
   }
   return {main:0,label:'',sub:''};
 }
@@ -4895,7 +4895,7 @@ function update(dt){packTick();
     if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;NOVA_CID=p.orb.cid||0;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova');NOVA_CID=0}}
     if(p.orb&&!dead){const S2=p.m.scale.x;for(const c of p.m.children)if(c.userData.ring){c.rotation.x+=dt*5*c.userData.ring;c.rotation.y+=dt*3.3}
       if(Math.random()<dt*14*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vx:-p.vx*.15,vz:-p.vz*.15,life:.35,s0:S2*.7,s1:S2*.3,c0:0x7fc0ef,c1:0x10305a,a:.2*(1-p.dim),drag:3,tex:1})}
-    if(p.orb&&!dead){p.et-=dt;if(p.et<=0){p.et=.11/(p.orb.rate||1);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
+    if(p.orb&&!dead&&p.orb.shf>0){p.et-=dt;if(p.et<=0){p.et=.11/((p.orb.rate||1)*p.orb.shf);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
     if(!dead&&!p.orb&&!p.back&&!p.ghost&&!p.thru)for(const c of colliders)if((pp.x-c.x)*(pp.x-c.x)+(pp.z-c.z)*(pp.z-c.z)<c.r*c.r){dead=true;if(p.blast)explode(pp,p.dmg*p.bm,null,p.br,p.bolt?'bolt':undefined);break}
     if(!dead&&!p.ghost)for(const e of hgNear(pp.x,pp.z,p.hr).slice()){if(e._rm||p.hit.has(e))continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+p.hr){
       p.hit.add(e);if(p.onHit)p.onHit(e,pp);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid)vm=ovlK(e,'vc',p.vid);/* v263: 시전별로 따로 셈 (다른 시전이 끼어들어도 초기화되지 않음) */hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
