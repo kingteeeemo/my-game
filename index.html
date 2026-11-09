@@ -1839,7 +1839,7 @@ const NM=(()=>{
 function makeHero(cls){return NM.hero(cls)}
 /* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
    기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
-const SKW={st:0,root:null,mx:null,acts:null,tip:null,swM:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,lastHp:0,pp:null,S:1.68,_v:new THREE.Vector3()};
+const SKW={st:0,root:null,mx:null,acts:null,tip:null,swM:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,lastHp:0,pp:null,S:1.764,_v:new THREE.Vector3()};
 function skwLoad(){if(SKW.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)SKW.st=3;return}SKW.st=1;
   new THREE.GLTFLoader().load('models/warrior.glb?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(SKW.S);let sw=null;
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=1.6;if(/sword/i.test(o.name)){o.material=o.material.clone();SKW.swM=o.material;sw=o}}});
@@ -3767,7 +3767,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v334';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v335';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
