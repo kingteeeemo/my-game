@@ -1549,7 +1549,7 @@ function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,9
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML=`<span>${npcName(n.id)}</span><small>${NPCN[n.id][1]}</small>`;d.hidden=true;$('names').appendChild(d);return d});
-function collectAll(){for(const p of pickups){if(p.kind==='pouch')keepBeam(p);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
+function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='pouch'){keepBeam(p);const a=p.amt,l=p.leg;setTimeout(()=>pouchFx(a,l),fxN++*700)}if(p.kind==='tk')setTimeout(()=>tkFx(S.tickets||0),fxN++*700);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
@@ -3203,6 +3203,7 @@ function dropTicket(p){const q=scatter(p),g=new THREE.Group(),m=new THREE.Mesh(t
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'tk'});ringFx(q,1.8,0x60f0e0,.6);feed('확정 강화 주문서가 떨어졌습니다!','#7fe8d8')}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
   fx.push({m:bm,t:0,dur:4,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
+function tkFx(n){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small style="color:#7fe8d8">ENHANCE SCROLL</small><b style="background:linear-gradient(180deg,#e8fff9,#7fe8d8 55%,#1a8c7c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(90,224,208,.6))">확정 강화 주문서 획득!</b><span style="color:#7fe8d8">보유 ${n}개</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.15)}
 function pouchFx(amt,leg){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>일반 골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
 const sellPrice=it=>Math.round((4+it.ilvl*2.5)*[1,2,5,12][it.rar]);
@@ -3892,7 +3893,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v374';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v375';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5264,7 +5265,7 @@ function update(dt){packTick();
       else if(p.kind==='ess'){S.ess=(S.ess||0)+p.amt}
       else if(p.kind==='gold'){S.gold+=p.amt}
       else if(p.kind==='pouch'){S.gold+=p.amt;pouchFx(p.amt,p.leg);save()}
-      else if(p.kind==='tk'){S.tickets=(S.tickets||0)+1;toast('확정 강화 주문서 획득',`보유 ${S.tickets}개`,'#7fe8d8');save()}
+      else if(p.kind==='tk'){S.tickets=(S.tickets||0)+1;tkFx(S.tickets);save()}
       else if(p.kind==='spd'){S.spdPot=(S.spdPot||0)+1;save()}
       else{const z=p.size||'s';S.pots[p.kind][z]++;save()}}}
 
