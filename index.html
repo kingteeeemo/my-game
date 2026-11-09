@@ -3719,7 +3719,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v320';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v321';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4478,9 +4478,7 @@ function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
     const rw=isMaw?`<span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br><small>(3개 50% · 4개 30% · 5개 20%)</small>':''}`:`<span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(bs.m)*100)}% <small>(수치 ${D.v}%)</small>`;
     const dis=!eg||S.duel||(isMaw&&mawOff);
     info=`<div class="cmp2 binfo${U?' uber':''}"><div class="chap">Reward</div><h3>${U?'우버 ':'일반 '}${nm}</h3>
-      <p class="hint" style="margin:4px 0">환경 위험도 ${D.tier} · 보스 기준 위험도 ${D.b}</p>
       <p class="brw">보상: ${rw}</p>${U?'<p class="hint" style="color:#c890ff;margin:4px 0">☠ 입장 시 저주 — 최종 피해 −20%</p>':''}
-      <p class="hint" style="margin:4px 0">${isMaw?'처치할 때마다 위 확률로 보상이 나옵니다.':'처치할 때마다 위 확률로 서가 떨어집니다.'}</p>
       ${isMaw&&mawOff?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}${!eg?'<small class="hint" style="color:#ff8a6a">엔드게임에서 입장할 수 있습니다</small>':''}
       <button class="primary" data-enter="1" ${dis?'disabled':''}>${S.duel&&S.duel.m===bs.m&&((S.duel.b==='maw')===isMaw)?'도전 중':'입장'}</button></div>`}
   else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
