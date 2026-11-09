@@ -3862,7 +3862,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v351';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v352';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4742,10 +4742,10 @@ function renderSmith(){
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
       info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
-      bonus=`<span>기본 수치 <b>+${Math.round((enhMB(L,k)-1)*100)}%</b></span><span>모든 옵션 <b>+${Math.round((enhMO(L,undefined,k)-1)*100)}%</b>${['weapon','boots','ring','amulet'].includes(k)?` <small>(${k==='weapon'?'최종 피해':k==='boots'?'이동 속도':k==='ring'?'마나 소모 감소':'마나 재생'} +${Math.round((enhMO(L,k==='weapon'?'fdmg':k==='boots'?'spd':k==='ring'?'mcr':'mreg',k)-1)*100)}%)</small>`:''} <small>(생명력·마나 +${Math.round((enhMO(L,undefined,k)-1)*ENH_HM*100)}%)</small></span><span>이번 단계 상승량 <b>×${(ENH_RET*Math.pow(1/enhRate(L),ENH_PW)).toFixed(1)}</b></span>`,
-      tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:''}</div><small class="tknote">주문서를 쓰면 골드가 ${TK_GOLD}배 듭니다 · 무기 +30부터 2개 · +35부터 3개 · +40부터 4개 / 방어구 +35부터 2개 · +40부터 3개</small>`,
+      bonus='',
+      tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:''}</div>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div><div class="smpity${pityN(k)+1>=pityCap(L)?' full':''}"><small>천장</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pityN(k)+1>=pityCap(L)?'<small class="pnote">이번 강화 확정 성공</small>':''}${tkUI}`,
-      hint=`<p class="hint" style="margin:0">실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.</p>`+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
+      hint=''+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
       btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`강화 ${fmtG(cc)}G`}</button></div>${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
     /* v52: 가로 화면은 좌측 능력치 · 우측 강화 UI */
     if(LAND())h+=`<div class="split"><div class="spL"><div class="smbig" style="--rc:${rc}">${nm}${info}<div class="smstats">${bonus}</div></div></div>
