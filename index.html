@@ -3862,7 +3862,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v352';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v353';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4842,14 +4842,14 @@ function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
       ${go.length?`<button class="primary" id="hrAuto" ${ok?'':'disabled'}>${go.length}개 부위 전승 · ${fmtG(tot)}G</button>`:''}<button class="ghost" id="hrInh">← 특수 능력치 전승</button>`+msg}
   else if(heirMode==='eng'){
     if(heirScr<0){h=head('Engrave','각인의 서 고르기')+`<p class="hint" style="margin:0">사용할 서를 고르세요. 다음에 각인할 <b style="color:var(--ink)">부위</b>를 고릅니다.</p><div class="smgrid">${scr.map((sc,i)=>`<button class="smslot" data-scr="${i}"><b style="color:${sc.v>=10?'#c890ff':'#5ae0d0'}">★ ${scrName(sc)}</b><small>특수 능력치 ${sc.v}%</small></button>`).join('')||'<p class="hint">각인의 서가 없습니다.</p>'}</div><button class="ghost" id="hrMenu">← 돌아가기</button>`+msg}
-    else{const sc=scr[heirScr],leg=allItems().filter(x=>x.rar===3),scC=sc.v>=10?'#c890ff':'#5ae0d0';
+    else{const sc=scr[heirScr],leg=EQS.map(k=>S.eq[k]).filter(x=>x&&x.rar===3),scC=sc.v>=10?'#c890ff':'#5ae0d0';
       const scBox=`<div class="gslot"><div class="gslhd"><span class="k">${scrName(sc)}</span><b style="color:${scC}">★ 특수 능력치 ${sc.v}%</b><small>고른 장비의 기존 ★는 사라지고 새 수치로 바뀝니다 · 서는 사라집니다</small></div></div>`;
       if(!heirESlot){h=head('Engrave','어느 부위에 각인할까요?')+scBox+`<div class="smgrid">${EQS.map(k=>{const n=leg.filter(x=>x.slot===k).length,kk=spKeyOf(k);const ce=S.eq[k],co=ce&&spOf(ce),cd=co?(co.k===kk?sc.v-co.v:null):null;/* v343: 지금 착용 중인 장비의 ★ 수치 */
-          return `<button class="smslot" data-eslot="${k}" ${n?'':'disabled'}><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small class="wrap">★ ${OPT[kk].n} ${OPT[kk].f(sc.v)}</small><small class="wrap" style="color:${co?'#5ae0d0':'var(--muted)'}">착용 중: ${!ce?'없음':co?`★ ${OPT[co.k].n} ${OPT[co.k].f(co.v)}${cd!==null?` <i class="hd ${cd>0?'up':cd<0?'dn':'eq'}">${cd>0?'▲':cd<0?'▼':'='}${cd?Math.abs(cd)+'%p':''}</i>`:''}`:'특수 능력치 없음'}</small><small>전설 ${n}개</small></button>`}).join('')}</div><button class="ghost" id="hrScr">← 서 다시 고르기</button>`+msg}
+          return `<button class="smslot" data-eslot="${k}" ${n?'':'disabled'}><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small class="wrap">★ ${OPT[kk].n} ${OPT[kk].f(sc.v)}</small><small class="wrap" style="color:${co?'#5ae0d0':'var(--muted)'}">착용 중: ${!ce?'없음':co?`★ ${OPT[co.k].n} ${OPT[co.k].f(co.v)}${cd!==null?` <i class="hd ${cd>0?'up':cd<0?'dn':'eq'}">${cd>0?'▲':cd<0?'▼':'='}${cd?Math.abs(cd)+'%p':''}</i>`:''}`:'특수 능력치 없음'}</small><small>${n?'착용 중인 전설 장비':'착용한 전설 장비 없음'}</small></button>`}).join('')}</div><button class="ghost" id="hrScr">← 서 다시 고르기</button>`+msg}
       else{const k=spKeyOf(heirESlot),list=leg.filter(x=>x.slot===heirESlot).sort((a,b)=>(S.eq[b.slot]===b)-(S.eq[a.slot]===a)||b.ilvl-a.ilvl);
         h=head('Engrave',`${SLOTN[heirESlot]}에 각인`)+scBox+(list.length?`<div class="smgrid">${list.map(it=>{const o=spOf(it),ov=o&&o.k===k?o.v:null,d=ov===null?1:sc.v-ov;
           const chg=`<span class="hchg"><span class="old">${o?`${OPT[o.k].n} ${OPT[o.k].f(o.v)}`:'없음'}</span><span class="ar">→</span><span class="new" style="color:${d>0?'#7fe07a':d<0?'#ff7a6a':'var(--ink)'}">${OPT[k].n} ${OPT[k].f(sc.v)}</span>${ov!==null?`<i class="hd ${d>0?'up':d<0?'dn':'eq'}">${d>0?'▲':d<0?'▼':'='}${d?Math.abs(d)+'%p':''}</i>`:''}</span>${d<0?'<small class="warn">지금보다 낮아집니다</small>':''}`;
-          return heirCard(it,`data-etg="${it.id}"`,chg)}).join('')}</div>`:`<p class="hint">이 부위의 전설 장비가 없습니다.</p>`)+`<button class="ghost" id="hrESlot">← 부위 다시 고르기</button>`+msg}}}
+          return heirCard(it,`data-etg="${it.id}"`,chg)}).join('')}</div>`:`<p class="hint">이 부위에 착용 중인 전설 장비가 없습니다.</p>`)+`<button class="ghost" id="hrESlot">← 부위 다시 고르기</button>`+msg}}}
   else{const src=heirSrc&&itemById(heirSrc);
     if(!src){heirSrc=null;const all=allItems().filter(spOf);
       h=head('Inherit',heirSlot?`${SLOTN[heirSlot]} · 옮길 장비 고르기`:'특수 능력치 전승',`<button class="ghost hauto" id="hrAutoGo" ${heirPlan().some(p=>p.src)?'':'disabled'}>⚡ 최적 전승</button>`)+`<p class="hint" style="margin:0">먼저 <b style="color:var(--ink)">계승할 부위</b>를 고르세요. 능력치를 <b style="color:var(--ink)">같은 부위의 다른 전설 장비</b>로 옮기며, 수치는 그대로이고 <b style="color:#ff8a6a">원래 장비는 사라집니다.</b></p>`;
