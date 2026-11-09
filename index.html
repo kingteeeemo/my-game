@@ -3878,7 +3878,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v364';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v365';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4621,10 +4621,9 @@ function renderStage(){
   const me=skillDps(C().skills[0]).main,tone=r=>r>=1?['여유','#7fe07a']:r>=.7?['빠듯','#f0d040']:['부족','#ff7a6a'];
   const eg=S.ch>=NCH,cur=eg?stageReq(NCH,S.tier):S.ch===LAST&&S.phase>=3?fbReq():stageReq(Math.min(S.ch,LAST)),r=me/cur,[tt,tc]=tone(r);
   const row=(n,v,o={})=>`<tr class="${o.cur?'cur':''}"><td>${n}${o.note?`<small class="tnote">${o.note}</small>`:''}</td><td>${o.btn||''}</td></tr>`;
-  let rows=CH.map((c,i)=>row(`${i+1}장 ${c.n}`,stageReq(i),{cur:!eg&&S.ch===i&&!(S.phase>=3&&S.phase<5)}));
-  rows.push(row(`최종 보스 ${FINAL.boss}`,fbReq(),{cur:S.ch===LAST&&(S.phase===3||S.phase===4),note:'단일 대상 · 90초 처치 기준'}));
+  let rows=[];/* v365: 스토리 장·최종 보스 행 삭제 — 위험도 1부터 */
   const top=Math.max(5,(S.maxTier||0)+1);
-  for(let t=Math.max(1,Math.min(S.tier||1,(S.maxTier||0)-3));t<=top;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
+  for(let t=1;t<=top;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
     const legend=Math.round(((2+5)*.15+.04*t)/((2+5)*.15+.04*t+4)*100),il=Math.round(20+t*2+2.5);
     const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn,note:`${EGMAPS[egMapFor(t)].n} · iLv ~${il} · 전설 ${legend}%`}))}
@@ -4648,7 +4647,7 @@ function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
-function openStage(){closeAllSheets();stageOpen=true;renderStage();$('stage').hidden=false;releaseAll();guide('stage')}
+function openStage(){closeAllSheets();stageOpen=true;renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
 function closeStage(){stageOpen=false;$('stage').hidden=true}
 $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 /* v318: 「보스」 창 — 왼쪽 잿불 검귀 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
