@@ -1326,7 +1326,8 @@ const EGMAPS=[
   {n:'용암 분지',ground:[58,36,28],fog:0x1c0e08,sty:{s:'flag',glow:0xff5a10,gl:.36},pt:'ember',crys:'void',set:{rock:4,pillar:2,brazier:1.4,bones:1.2},st:'lava'},
   {n:'공허 신전',ground:[42,34,58],fog:0x110c1c,sty:{s:'flag',glow:0x9a4aff,gl:.3},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
 /* 지역 순서: 한 사이클(5개) 안에서는 겹치지 않게 무작위, 사이클이 끝나면 다시 무작위 (이전 지역 바로 반복 금지). 첫 지역은 1번 */
-function egMapFor(t){if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/GATE_EVERY));
+const MAP_EVERY=10;
+function egMapFor(t){if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/MAP_EVERY));/* v392: 지역(맵)은 위험도 10단계마다 바뀜 */
   while(S.egMaps.length<=blk){const i=S.egMaps.length,cs=i-i%5,used=S.egMaps.slice(cs,i);let pool=[0,1,2,3,4].filter(x=>!used.includes(x));if(i%5===0)pool=pool.filter(x=>x!==S.egMaps[i-1]);S.egMaps.push(pool[Math.random()*pool.length|0])}
   return S.egMaps[blk]}
 const GSTY=[{s:'dirt',st:.22},{s:'dirt',st:.42},{s:'dirt',st:.5,rough:.7},{s:'flag',rough:.62},{s:'flag',glow:0xff5a1a,gl:.3},{s:'dirt',st:.35},{s:'flag',glow:0x8a3aff,gl:.32}],GPT=['ash','ash','ash','snow','ember','ash','void'];
@@ -3913,7 +3914,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v391';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v392';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4149,7 +4150,7 @@ function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=false;S
   S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.skp[sk]=0;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);S.sk2dmg=TS().inf;
   S.stats={str:0,agi:0,int:0};S.statPts=(TS().lv-1)*STAT_PER_LV;S.autoStat='bal';spendAutoStat();
   S.enh={};for(const k of EQS){S.eq[k]=testItem(k);S.enh[k]=k==='weapon'?TS().wenh:TS().enh}S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;
-  S.gates=[];for(let t=GATE_EVERY;t<TS().tier;t+=GATE_EVERY)S.gates.push(t);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TS().tier+GATE_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
+  S.gates=[];for(let t=GATE_EVERY;t<TS().tier;t+=GATE_EVERY)S.gates.push(t);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TS().tier+MAP_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
   S.tier=TS().tier;S.maxTier=TS().tier;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;if(S.testMp)P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 /* v346: 직업 선택 초상화를 좌우로 드래그하면 캐릭터가 돌아감(세로 스크롤은 그대로) · 드래그한 뒤에는 카드 선택 클릭을 무시 */
@@ -4670,12 +4671,11 @@ function renderStage(){
   let rows=[];/* v365: 스토리 장·최종 보스 행 삭제 — 위험도 1부터 */
   const top=Math.max(5,(S.maxTier||0)+1);
   for(let g0=0;g0*10<top;g0++){const lo=g0*10+1,hi=Math.min(g0*10+10,top),ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
-    rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi}${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
+    rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n}</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
     if(!ex)continue;
   for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
-    const legend=Math.round(((2+5)*.15+.04*t)/((2+5)*.15+.04*t+4)*100),il=Math.round(20+t*2+2.5);
     const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
-    const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn,note:`${EGMAPS[egMapFor(t)].n} · iLv ~${il} · 전설 ${legend}%`}))}}
+    const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:100},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
