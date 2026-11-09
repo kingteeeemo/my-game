@@ -1081,7 +1081,17 @@ function reconcile(s){if(s&&s.noMaw&&s.lv<=LV_MAX)delete s.noMaw;/* v246: 만렙
 }
 function parseSave(raw){try{const s=JSON.parse(raw);if(s&&(Array.isArray(s.picks)||s.sk)&&s.cls){migrate(s);reconcile(s);if(!s.inv)s.inv=[];if(!s.eq)s.eq={};/* 없어진 옵션(적중 시 생명력 등)은 아이템에서 제거 */for(const it of [...s.inv,...Object.values(s.eq)])if(it&&it.opts)it.opts=it.opts.filter(o=>OPT[o.k]&&(!OPT[o.k].slots||OPT[o.k].slots.includes(it.slot)));for(const k of EQS)if(!(k in s.eq))s.eq[k]=null;if(!s.pots){const o=s.pot||{hp:3,mp:3};s.pots={hp:{s:0,m:o.hp||0,l:0},mp:{s:0,m:o.mp||0,l:0}};delete s.pot}if(!s.gold)s.gold=0;return s}}catch(e){}return null}
 function readSlot(i){try{return parseSave(localStorage.getItem(slotKey(i)))}catch(e){return null}}
-function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
+/* v344: 계정 공유 — 골드·위험도 해금(maxTier·관문 gates)은 모든 슬롯이 같이 씀. localStorage 'ember-sanctum-acct'에 저장하고, 슬롯을 열 때 불러와 덮어쓰고 저장할 때마다 되돌려 씀.
+   처음 한 번은 기존 슬롯들에서 합침(골드=전 슬롯 합계, 해금=최대값·관문 합집합). 테스트 캐릭터·시연은 건드리지 않음 */
+const ACCT_KEY='ember-sanctum-acct';
+function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}catch(e){}
+  if(!a||typeof a!=='object'||!(a.gold>=0)){a={v:1,gold:0,maxTier:0,gates:[]};
+    for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(!d||d.test)continue;a.gold+=Math.max(0,d.gold||0);a.maxTier=Math.max(a.maxTier,d.maxTier||0);for(const g of d.gates||[])if(!a.gates.includes(g))a.gates.push(g)}
+    a.gates.sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
+  if(!Array.isArray(a.gates))a.gates=[];return a}
+function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();s.gold=a.gold;s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y)}
+function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
+function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
 try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0))&&parseSave(old))localStorage.setItem(slotKey(0),old);localStorage.removeItem(KEY)}catch(e){}
 
@@ -3838,7 +3848,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v343';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v344';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4067,9 +4077,9 @@ $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
-  for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=1;S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
+  for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 function startGame(cls,main,skip){
-  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
+  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
@@ -4952,7 +4962,7 @@ $('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
-  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();const go=()=>{curSlot=i;S=d;$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
+  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();const go=()=>{curSlot=i;S=d;acctApply(S);$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
   if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
@@ -5165,7 +5175,7 @@ function update(dt){packTick();
     if(p.kind==='item'){const u=p.m.userData;if(u.inner)u.inner.position.y=.45+Math.sin(time*3+p.ph)*.08;if(u.beam)u.beam.material.opacity=.3+.2*Math.sin(time*4+p.ph);
       if(u.sp&&Math.random()<dt*14*QM())emit(PADD,{x:p.m.position.x+rnd(-.4,.4),y:.2,z:p.m.position.z+rnd(-.4,.4),vy:rnd(1.5,3.5),life:rnd(.6,1),s0:.4,s1:.05,c0:0xd0fff8,c1:0x2ac8b8,a:.9,tex:3});
       else if(u.rar>=3&&Math.random()<dt*10*QM())emit(PADD,{x:p.m.position.x+rnd(-.3,.3),y:.2,z:p.m.position.z+rnd(-.3,.3),vy:rnd(1,2.5),life:rnd(.5,.9),s0:.3,s1:.05,c0:0xffd090,c1:0xff5a10,a:.8,tex:1})}const dx=P.pos.x-p.m.position.x,dz=P.pos.z-p.m.position.z,dd=Math.hypot(dx,dz)||1;
-    if(p.t>.35&&dd<14){const sp=dt*(10+(14-dd)*1.5+heroSpd()*1.2);/* v58: 끌어오는 범위 7→14m */p.m.position.x+=dx/dd*Math.min(dd,sp);p.m.position.z+=dz/dd*Math.min(dd,sp)}
+    if(p.t>.35){/* v344: 몬스터가 죽으면 거리와 관계없이 캐릭터에게 날아와 자동 획득(살짝 튀어 오른 뒤 점점 빨라짐) */const sp=dt*(12+(p.t-.35)*34+heroSpd()*1.2);p.m.position.x+=dx/dd*Math.min(dd,sp);p.m.position.z+=dz/dd*Math.min(dd,sp)}
     if(p.kind==='pouch'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
     if(p.t>.35&&dd<1.8){if(p.kind==='pouch')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
       if(p.kind==='item')addItem(p.item);
