@@ -258,6 +258,9 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .bcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bcard{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px 10px;border-radius:14px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);color:var(--ink);font:inherit;cursor:pointer}.bcard.on{border-color:var(--ember);background:rgba(255,138,58,.1)}.bcard .bimg{width:100%;height:min(240px,38vh);border-radius:10px;background:radial-gradient(circle at 50% 40%,#2a2030,#0e0c10);display:flex;align-items:center;justify-content:center;overflow:hidden}.bcard .bimg img{width:100%;height:100%;object-fit:contain}.bcard b{font:800 15px var(--ko);margin-top:4px}.bcard small{color:#a8a0b4;font-size:11px}
 .bdiff{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bdiff button{padding:12px;border-radius:12px;font:800 15px var(--ko);background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);color:var(--ink);cursor:pointer}.bdiff button.on{border-color:#5ae0d0;background:rgba(90,224,208,.14)}.bdiff button.uber{color:#d8b0ff}.bdiff button.uber.on{border-color:#c890ff;background:rgba(200,144,255,.16)}
 .binfo.uber{border-color:rgba(200,144,255,.55)}.binfo h3{margin:2px 0;font:800 17px var(--ko)}.binfo .brw{margin:6px 0;font:700 14px var(--ko)}.binfo button.primary{width:100%;padding:12px;margin-top:8px}
+
+.bwrap,.bleft,.bright{display:flex;flex-direction:column;gap:10px}
+@media (orientation:landscape) and (max-height:520px){#bossSheet{width:min(94vw,820px);max-width:none;max-height:calc(100vh - 16px);padding-top:8px;padding-bottom:8px;gap:6px}#bossSheet .shead h2{font-size:18px}#bossSheet .shead .chap{display:none}.bwrap{flex-direction:row;align-items:stretch;gap:12px}.bleft{flex:1.25 1 0;min-width:0;gap:6px}.bright{flex:1 1 0;min-width:0;justify-content:center;gap:6px}.bcard{padding:5px 5px 6px}.bcard .bimg{height:min(170px,40vh)}.bcard b{font-size:13px;margin-top:2px}.bcard small{display:none}.bdiff button{padding:8px;font-size:14px}.binfo{padding:10px 12px}.binfo h3{font-size:15px}.binfo .brw{margin:3px 0;font-size:13px}.binfo .hint{font-size:11px;margin:2px 0!important}.binfo button.primary{padding:9px;margin-top:4px}.bright .duelc{flex-direction:row;padding:6px 10px;gap:8px}.bright .duelc small{display:none}.bright .duelc button{padding:6px 12px;width:auto}}
 .duelc{display:flex;align-items:center;gap:12px}.duelc .dt{flex:1}.duelc b{font:800 15px var(--ko)}.duelc small{display:block;color:#a8a0b4;font-size:12px;margin-top:2px}
 .ecine{position:fixed;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),rgba(6,4,8,.93) 62%);animation:ecIn .25s ease-out}
 .ecine.auto{pointer-events:none;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.1),rgba(6,4,8,.5) 62%)}.ecine.auto .rays{display:none}.ecine.auto .core{transform:scale(.62)}.ecine .autostop{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);pointer-events:auto;padding:12px 26px;border-radius:12px;border:1px solid #ff8a70;background:rgba(120,20,10,.88);color:#fff;font:800 15px var(--ko);box-shadow:0 0 14px rgba(255,80,40,.4);cursor:pointer}
@@ -3716,7 +3719,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v318';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v319';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4483,8 +4486,8 @@ function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
   const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div>`:'';
   $('bossSheet').innerHTML=`<div class="shead"><div><div class="chap">Boss</div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
-  <div class="bcards">${card('knight',DUEL.n,'결투장')}${card('maw',MAW.n,'결투장')}</div>
-  <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div>${info}${test}`}
+  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'결투장')}${card('maw',MAW.n,'결투장')}</div>
+  <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div></div><div class="bright">${info}${test}</div></div>`}
 function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
 function closeBoss(){bossOpen=false;$('bossP').hidden=true}
 $('bossSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
