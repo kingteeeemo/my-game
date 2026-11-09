@@ -2723,13 +2723,13 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float bd=sqrt(f2)-sqrt(f1);float crack=1.-smoothstep(0.,.07,bd);float ch=hsh(id1+seed*7.);/* 금 간 성에판: 셀 경계=금(밝음), 셀마다 밝기 다름 */
     float plate=(.35+.4*ch)*smoothstep(.08,.22,dd);
     float streak=pow(rs,1.6)*1.3*(.6+.4*rs2);/* 방사형 줄기 */
-    float frost=min(1.,inside*(plate*.8+streak*.45+crack*.45))*(.75+.25*smoothstep(0.,1.,dd/max(fr,.06)));
+    float frost=min(1.,inside*(plate*1.15+streak*.6+crack*.6))*(.75+.25*smoothstep(0.,1.,dd/max(fr,.06)));
     float sp=0.;for(int L=0;L<3;L++){float K=L==0?110.:L==1?170.:260.;float ofs=float(L)*.37+seed;float h=hsh(vec2(floor(an*K+ofs),float(L)+seed));float c=abs(fract(an*K+ofs)-.5)*2.;
       float len=.03+.13*h*h;float t=(sr+.06)/(len+.06);float w=(1.-t)*.9;sp+=step(0.,t)*step(t,1.)*(1.-smoothstep(w*.6,w,c))*(.6+.4*h);}
     sp=min(sp,1.)*(.25+.75*smoothstep(.1,.5,k));/* 바깥으로 뻗는 얼음 가시 (초반 어둡게) */
     float ringG=exp(-max(0.,-sr)/.14)*inside*.18*(1.-k*.5);
-    vec3 c=vec3(.84,.9,.96)*frost*.72+vec3(.72,.86,1.)*(ringG+sp*.38);
-    float al=min(1.,frost*.95);/* v297: 색/알파 비 .93→.68 — 여러 장 겹쳐도 흰색이 아니라 회백색으로 수렴 */float m=fade*ff*.85*(.55+.45*smoothstep(.08,.4,k));gl_FragColor=vec4(c*m,clamp(al*m,0.,1.));}`;
+    vec3 c=vec3(.92,.95,.98)*frost*.9+vec3(.72,.86,1.)*(ringG+sp*.38);
+    float al=min(1.,frost);/* v303: 더 진한 흰색(색/알파 비 .68→.9) — 겹친 이전 바닥은 녹아 사라지므로(v301) 쌓임 걱정 없음 */float m=fade*ff*(.72+.28*smoothstep(.08,.4,k));/* v303: 전체 ×.85 제거, 초반 55%→72% */gl_FragColor=vec4(c*m,clamp(al*m,0.,1.));}`;
   return()=>mtake('nova',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:0},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:null}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1})})();
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
@@ -3660,7 +3660,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v302';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v303';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
