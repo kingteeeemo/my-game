@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.ecine{touch-action:manipulation}/* v229: 컷신 연타가 더블탭 확대 방지에 막히지 않게 */
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>
+.grpb{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin:4px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:inherit;font:inherit;font-weight:700;cursor:pointer}.grpb.on{background:rgba(255,160,60,.12);border-color:rgba(255,160,60,.4)}
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.ecine{touch-action:manipulation}/* v229: 컷신 연타가 더블탭 확대 방지에 막히지 않게 */
 </style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -3878,7 +3880,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v365';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v366';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4615,7 +4617,7 @@ $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
 /* ================= 단계 창 (v29): 장·최종 보스·위험도별 적정 DPS와 위험도 선택 ================= */
-let stageOpen=false,dpsC=0,dpsCT=0;
+let stageOpen=false,dpsC=0,dpsCT=0,stageExp=new Set();/* v366: 10단위 묶음 펼침 상태 */
 function skillDpsCache(){if(time-dpsCT>1||!dpsCT){dpsC=skillDps(C().skills[0]).main;dpsCT=time||.001}return dpsC}
 function renderStage(){
   const me=skillDps(C().skills[0]).main,tone=r=>r>=1?['여유','#7fe07a']:r>=.7?['빠듯','#f0d040']:['부족','#ff7a6a'];
@@ -4623,10 +4625,13 @@ function renderStage(){
   const row=(n,v,o={})=>`<tr class="${o.cur?'cur':''}"><td>${n}${o.note?`<small class="tnote">${o.note}</small>`:''}</td><td>${o.btn||''}</td></tr>`;
   let rows=[];/* v365: 스토리 장·최종 보스 행 삭제 — 위험도 1부터 */
   const top=Math.max(5,(S.maxTier||0)+1);
-  for(let t=1;t<=top;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
+  for(let g0=0;g0*10<top;g0++){const lo=g0*10+1,hi=Math.min(g0*10+10,top),ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
+    rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi}${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
+    if(!ex)continue;
+  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
     const legend=Math.round(((2+5)*.15+.04*t)/((2+5)*.15+.04*t+4)*100),il=Math.round(20+t*2+2.5);
     const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
-    rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn,note:`${EGMAPS[egMapFor(t)].n} · iLv ~${il} · 전설 ${legend}%`}))}
+    rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn,note:`${EGMAPS[egMapFor(t)].n} · iLv ~${il} · 전설 ${legend}%`}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:100},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
@@ -4637,6 +4642,7 @@ function renderStage(){
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
+  if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&t<=S.maxTier){if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
@@ -4647,7 +4653,7 @@ function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
-function openStage(){closeAllSheets();stageOpen=true;renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
+function openStage(){closeAllSheets();stageOpen=true;stageExp=new Set([Math.floor((Math.max(1,S.ch>=NCH?S.tier:1)-1)/10)]);renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
 function closeStage(){stageOpen=false;$('stage').hidden=true}
 $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 /* v318: 「보스」 창 — 왼쪽 잿불 검귀 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
