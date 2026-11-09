@@ -2751,7 +2751,7 @@ function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*
   if(heavy&&pal.ember)for(let i=0;i<Math.round(3*q);i++){const a=Math.random()*6.28,d=R*rnd(.3,.9);later(rnd(.05,.25),()=>decalFx({x:p.x+Math.sin(a)*d,z:p.z+Math.cos(a)*d},dotTex,pal.ember,rnd(.35,.6),rnd(.8,1.4),.7*FK,true))}
 }
 const ORBD=()=>{let c=0;for(const q of projs)if(q.orb)c++;return 1/Math.sqrt(Math.max(1,c/5))};/* v297: 살아 있는 보주 수가 5개를 넘으면(꾹 누르기 연속 시전 → 최대 ~28개) 보주 광채·서리 폭발 밝기를 √비례로 낮춤 */
-const NOVA_L=[];let NOVA_CAP=4,NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
+const NOVA_L=[];let NOVA_CAP=1e9,/* v298: 겹침 상한 해제 */NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
 function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* 서리 폭발 (v40): 범위가 한눈에 보이도록 서리 원판 + 밝은 테두리 + 충격파 + 얼음 가시. 초당 여러 번 터지므로 부하 제한과 별도로 가볍게 */
   /* v65 번개 폭발(궁수): 보라·흰 섬광 + 사방으로 갈라지는 번개 줄기(InstancedMesh) + 전기 불꽃 + 짧은 충격파 + 그을린 금 */
@@ -2780,7 +2780,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
       emit(PADD,{x:p.x,y:.8,z:p.z,life:.12,s0:R*.9,s1:R*1.3,c0:0xe8f6ff,c1:0x7fc8ff,a:.55*fk,tex:1});}
     /* v188: 얼음판이 퍼지며 땅이 갈라지고(흰 서리 금 → 어두운 균열이 남음) 돌조각·얼음 조각이 마루를 따라 바깥으로 튐 */
     if(!heavy){decalFx(p,crackTex,0xeaf6ff,R*.55,.5,.25*ka*DK,true);later(.07,()=>decalFx(p,crackTex,0xdff4ff,R*1.02,.7,.22*ka*DK,true));/* v293: 흰 서리 금 .8/.7 → .25/.22 (초반 중앙이 하얗게 타던 주범) */later(.1,()=>decalFx(p,crackTex,0x1e2a38,R*rnd(.9,1.1),2.8,.55*ka,false));
-      for(let w=0;w<3;w++)later(w*.07,()=>{const rr=R*(.25+.3*w);debris(p,{n:Math.max(2,Math.round(4*q)),color:0x3a3e46,geo:octaGeo,sp:[R*1.4,R*2.4],up:[3,6.5],y:[.1,.3],sz:[.08,.18],r0:rr,dur:.8,g:24});
+      for(let w=0;w<3;w++)later(w*.07,()=>{const rr=R*(.25+.3*w);debris(p,{n:Math.max(1,Math.round(1.6*q)),color:0x3a3e46,/* v298: 튀는 돌 -60% */geo:octaGeo,sp:[R*1.4,R*2.4],up:[3,6.5],y:[.1,.3],sz:[.08,.18],r0:rr,dur:.8,g:24});
         debris(p,{n:Math.max(2,Math.round(3*q)),color:0xdff4ff,geo:octaGeo,sp:[R*1.2,R*2],up:[2.5,5.5],y:[.1,.3],sz:[.06,.14],r0:rr,dur:.7,g:24});
         const n=Math.max(3,Math.round(5*q));for(let i=0;i<n;i++){const a=Math.random()*6.28;emit(PNRM,{x:p.x+Math.sin(a)*rr,y:.15,z:p.z+Math.cos(a)*rr,vx:Math.sin(a)*R*1.2,vy:rnd(.6,1.4),vz:Math.cos(a)*R*1.2,life:rnd(.4,.7),s0:R*.12,s1:R*.35,c0:0xc8d4dc,c1:0x6a7480,a:.4*ka*FK,drag:2.5,rv:1,tex:2})}})}
     /* v183: 마루를 따라 공간을 채우며 퍼지는 흰 얼음 안개 — 3단계로 바깥으로 밀려나며 부풀고, 천천히 흩어짐 */
@@ -2788,7 +2788,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
       emit(PNRM,{x:p.x+Math.sin(a)*rr,y:rnd(.15,.5),z:p.z+Math.cos(a)*rr,vx:Math.sin(a)*sp,vy:rnd(.3,.9),vz:Math.cos(a)*sp,life:rnd(.6,1),s0:R*.28,s1:R*.75,c0:0xf4fbff,c1:0x9ac8ff,a:.16*ka*FK,drag:2.2,rv:.8,tex:2})}});
     fireBurst(p,R*.5,ka*.12*FK,false,PAL_ICE);/* v166: 서리 구름 *//* v184: 얼음 가시 제거 — 얼음판이 대신 깔림 */
     if(!heavy)streaks(p,Math.round(16*q),{sp:[R*2,R*3.2],up:[.3,1.2],y:[.15,.4],life:[.18,.3],w:.06,len:.6,c0:0xffffff,c1:0x6ab8ff,drag:3});
-    {const cs=[0x5ad8ff,0x8a9aff,0x5affe0,0xb08aff,0x6ab8ff],c=cs[Math.random()*cs.length|0];decalFx(p,frostTex,0xdff4ff,R,3.3,.3*ka*DK,false);decalFx(p,frostTex,c,R*1.02,3.5,.3*ka*DK,true);}/* v186: 눈꽃 자국은 퍼질 때부터 *//* v183: 안개가 걷힌 뒤 눈꽃 결정 바닥이 더 진하게·오래 남음 *//* v98: 눈꽃 자국을 더 진하고 색색으로 · 더 오래 */
+    /* v298: 눈꽃 자국(frostTex 데칼) 제거 *//* v186: 눈꽃 자국은 퍼질 때부터 *//* v183: 안개가 걷힌 뒤 눈꽃 결정 바닥이 더 진하게·오래 남음 *//* v98: 눈꽃 자국을 더 진하고 색색으로 · 더 오래 */
     if(DK)flash(p,0x9ad8ff,Math.min(1.6,.5+R*.2)*Math.max(.6,FK));return}/* v296: 보주 끝 폭발과 같은 플래시 세기 */
   blastLoad+=1;
   /* 폭발이 몰리면(초당 8회 이상 누적) 바닥 메시·연기·파편을 빼고 가벼운 입자만 */
@@ -3653,7 +3653,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v297';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v298';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
