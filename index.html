@@ -1053,7 +1053,7 @@ function reconcile(s){if(s&&s.noMaw&&s.lv<=LV_MAX)delete s.noMaw;/* v246: 만렙
   for(const k of v)for(const g in (s.sk[k]||{}))if(s.sk[k][g]>GMAX){s.skp[k]=(s.skp[k]||0)+s.sk[k][g]-GMAX;s.sk[k][g]=GMAX}
   if(s.egK===undefined)s.egK=0;
   if(s.maxTier===undefined){s.maxTier=s.tier||0;s.gates=[];for(let t=5;t<(s.tier||0);t+=5)s.gates.push(t)}
-  if(s.pots)for(const k of ['hp','mp']){if(!s.pots[k])s.pots[k]={};for(const z of ['s','m','l','x','h'])if(!(s.pots[k][z]>=0))s.pots[k][z]=0}/* v131 물약 크기 추가 */
+  if(s.pots)for(const k of ['hp','mp']){if(!s.pots[k])s.pots[k]={};for(const z of ['s','m','l','x'])if(!(s.pots[k][z]>=0))s.pots[k][z]=0}/* v131 물약 크기 추가 */
   if(s.autoTier===undefined)s.autoTier=true;if(s.autoGem==='g:burn')s.autoGem='g:vortex';if(!s.sk2)s.sk2={};if(!(s.ess>=0))s.ess=0;if(!s.gates)s.gates=[];if(!s.enh)s.enh={};if(s.autoGem===undefined||s.autoGem==='seq')s.autoGem=s.autoGem?'bal':null;
   /* v40: 1차 강화 3종으로 축소(관통·폭발(법사)·소용돌이 삭제 → 위에서 포인트 반환), 2차 강화 단계 축소 → 넘친 정수 반환 */
   /* v60: 오중 보주는 다시 3단계(옛 3단계 비용표). v59(5단계)에서 4·5단계를 찍었으면 그 비용을 돌려주고 3단계로, v59에서 받은 차액 반환분은 회수 */
@@ -1094,7 +1094,7 @@ function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}
     for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(!d||d.test)continue;a.gold+=Math.max(0,d.gold||0);a.maxTier=Math.max(a.maxTier,d.maxTier||0);for(const g of d.gates||[])if(!a.gates.includes(g))a.gates.push(g)}
     a.gates.sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
   if(!Array.isArray(a.gates))a.gates=[];return a}
-function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();s.gold=a.gold;s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y)}
+function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*3000;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y)}
 function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
 function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
@@ -3101,7 +3101,7 @@ function kill(e){
     else if(q<ic+(S.ch===0?.035:.025)*PD)potDrop(e.pos,'hp');
     else if(q<ic+((S.ch===0?.035:.025)+.02*MD*M3)*PD)potDrop(e.pos,'mp')}
   /* v358: 신속 물약 드랍 폐지(상점 구매만) · 엔드게임 체력·마나 물약은 등급 무관 각각 0.7% */
-  if(S.ch>=NCH&&!e.final){if(Math.random()<POT_DROP)dropPot(e.pos,'hp');if(Math.random()<POT_DROP)dropPot(e.pos,'mp')}
+  if(S.ch>=NCH&&!e.final){const pd=S.tier>=31?POT_DROP_X:POT_DROP;if(Math.random()<pd)dropPot(e.pos,'hp');if(Math.random()<pd)dropPot(e.pos,'mp')}
   gainXp(e.xp);progress(e);
 }
 /* v75: 최종 보스 직선 장판·돌진·브레스는 방어력과 무관하게 최대 체력의 일정 비율 */
@@ -3165,7 +3165,7 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
 const goldOf=e=>Math.max(1,Math.round(e.mhp*.12*goldAdj()*rand(.8,1.2)));
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=.00018,/* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
-const POT_DROP=.007,POUCH_L=POUCH_P/10,POUCH_LX=40,TKD_P=.0004;
+const POT_DROP=.007,POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=POUCH_P/10,POUCH_LX=40,TKD_P=.0004;
 const pouchAmt=t=>Math.round(3000/* v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
 const pouchMatL=new THREE.MeshStandardMaterial({color:0x9a4ad8,emissive:0x44106e,roughness:.4,metalness:.5});
@@ -3235,8 +3235,8 @@ const feedEl=$('feed');
 function feed(t,c){const d=document.createElement('div');d.textContent=t;d.style.color=c;feedEl.prepend(d);while(feedEl.children.length>4)feedEl.lastChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)},3500)}
 /* 물약: 소형 50 · 중형 120 · 대형 300 회복. 누르면 부족한 양에 가장 알맞은 크기를 자동으로 사용 */
 /* v131 물약: 소형 50/20G · 중형 220/90G · 대형 700/500G · 초대형 2000/1900G · 50% 회복(최대치의 절반) 10000G */
-const POT={s:{n:'소형',amt:50,price:20},m:{n:'중형',amt:220,price:90},l:{n:'대형',amt:900,price:1000},x:{n:'초대형',amt:3000,price:6500},h:{n:'50%',pct:.5,price:10000}},PSZ=['s','m','l','x','h'];
-const potAmt=(z,k)=>POT[z].pct?Math.round((k==='mp'?P.mmp:P.mhp)*POT[z].pct):POT[z].amt;
+const POT={s:{n:'소형',amt:50,price:20},m:{n:'중형',amt:220,price:90},l:{n:'대형',amt:900,price:1000},x:{n:'초대형',amt:3000,price:6500}},PSZ=['s','m','l','x'];
+const potAmt=(z,k)=>POT[z].amt;
 const potSell=z=>Math.round(POT[z].price*.3);
 const potN=k=>PSZ.reduce((a,z)=>a+(S.pots[k][z]||0),0);
 /* v43 신속 물약: 4초간 이동 속도 +60% (다시 마시면 4초로 갱신) */
@@ -3249,7 +3249,7 @@ function usePot(k,sz){
   const miss=k==='hp'?P.mhp-P.hp:P.mmp-P.mp;if(miss<=0)return;
   /* 알맞게: 50% 물약(비쌈)은 다른 크기가 없을 때만 */
   const fit=['s','m','l','x'].filter(z=>(S.pots[k][z]||0)>0);
-  let z=sz&&sz!=='a'&&S.pots[k][sz]>0?sz:fit.find(z=>potAmt(z,k)>=miss);if(!z)z=fit[fit.length-1]||((S.pots[k].h||0)>0?'h':null);if(!z)return;
+  let z=sz&&sz!=='a'&&S.pots[k][sz]>0?sz:fit.find(z=>potAmt(z,k)>=miss);if(!z)z=fit[fit.length-1]||null;if(!z)return;
   S.pots[k][z]--;P.cd.pot=.8;const amt=potAmt(z,k);
   if(k==='hp'){P.hp=Math.min(P.mhp,P.hp+amt);dmgNum(P.pos,'+'+amt,'heal')}
   else{P.mp=Math.min(P.mmp,P.mp+amt);ringFx(P.pos,1.6,0x6a9aff,.35)}
@@ -3870,7 +3870,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v358';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v359';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4550,7 +4550,7 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
   let h=`<div class="shead"><div><div class="chap">${pot?'Potions · '+TOWN.shop:'Armory · '+TOWN.gear}</div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
   if(pot){h+=`<div class="gems">`;
     for(const k of ['hp','mp'])for(const z of PSZ){const p=POT[z],have=S.pots[k][z];
-      h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.pct?`최대치의 ${p.pct*100}%`:p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
+      h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-buy="${k},${z},1" ${g>=p.price?'':'disabled'}>구매 ${p.price}G</button><button class="pm wide" data-buy="${k},${z},5" ${g>=p.price*5?'':'disabled'}>5개 ${p.price*5}G</button><button class="pm wide sell" data-psell="${k},${z},1" ${have?'':'disabled'}>판매 ${potSell(z)}G</button><button class="pm wide sell" data-psell="${k},${z},all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
     {const have=S.spdPot||0,pr=SPD_POT.price;h+=`<div class="grow"><span class="gd" style="background:#4ad06a;border-radius:50%;transform:none"></span><span class="t">${SPD_POT.n}<small>${SPD_POT.dur}초간 이동 속도 +60% · 단축키 3 · 보유 <b style="color:var(--ink)">${have}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-sbuy="1" ${g>=pr?'':'disabled'}>구매 ${pr}G</button><button class="pm wide" data-sbuy="5" ${g>=pr*5?'':'disabled'}>5개 ${pr*5}G</button><button class="pm wide sell" data-ssell="1" ${have?'':'disabled'}>판매 ${Math.round(pr*.3)}G</button><button class="pm wide sell" data-ssell="all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
@@ -5275,7 +5275,7 @@ function autoRender(){let h=`<div class="aphd"><b>물약 자동 복용</b><butto
   for(const k of ['hp','mp']){const [on,pc,sz,nm]=AUTOK[k],v=S[pc]||30,z=S[sz]||'a';
     h+=`<div class="apblk ${k}${S[on]?'':' off'}"><div class="amph"><b>${nm} 물약</b><button class="seg1" data-aon="${k}" aria-checked="${!!S[on]}">${S[on]?'켬':'끔'}</button></div>
       <div class="ampr"><input type="range" data-apc="${k}" min="5" max="95" step="5" value="${v}" aria-label="${nm} 자동 사용 기준"><output>${v}%</output></div>
-      <div class="apsz">${[['a','알맞게'],['s','소형'],['m','중형'],['l','대형'],['x','초대형'],['h','50%']].map(([q,t])=>`<button data-asz="${k},${q}" class="${z===q?'on':''}">${t}${q!=='a'?` <i>${S.pots[k][q]||0}</i>`:''}</button>`).join('')}</div>
+      <div class="apsz">${[['a','알맞게'],['s','소형'],['m','중형'],['l','대형'],['x','초대형']].map(([q,t])=>`<button data-asz="${k},${q}" class="${z===q?'on':''}">${t}${q!=='a'?` <i>${S.pots[k][q]||0}</i>`:''}</button>`).join('')}</div>
       <small>${nm}이 ${v}% 이하가 되면 ${z==='a'?'부족한 양에 알맞은 크기':POT[z].n+' 물약(없으면 다른 크기)'}을 마십니다</small></div>`}
   $('autoPop').innerHTML=h;$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn)}
 $('autoBtn').addEventListener('click',e=>{e.stopPropagation();const p=$('autoPop');if(p.hidden){autoRender();p.hidden=false}else p.hidden=true});
