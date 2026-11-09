@@ -1861,7 +1861,7 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
         const t=new THREE.CanvasTexture(cv);t.flipY=em.flipY;t.encoding=em.encoding;K.swLift=t}catch(e){}}
     K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/K.S);(sw||r).add(K.tip);
     K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
-    if(cls==='mage'&&sw){/* 지팡이 기준 자세(대기 1초)에서의 세계 회전 V0 = 손 회전 × 지팡이 로컬 회전 — 매 프레임 손 회전을 상쇄하고 원하는 방향으로 돌릴 때 씀 */K.hand=sw.parent;K.acts.idle.setEffectiveWeight(1);K.acts.idle.time=1;K.mx.update(0);r.updateMatrixWorld(true);K.V0=K.hand.getWorldQuaternion(new THREE.Quaternion()).multiply(sw.quaternion);K.acts.idle.setEffectiveWeight(0)}
+    if(cls==='mage'&&sw){K.hand=sw.parent;K.root=r;skmGrip(K,r)}/* v342: 지팡이를 주먹 안에 고정하고 손가락을 쥐게 함 */
     K.root=r;K.st=2;delete PORT[cls];if(hero)skwAttach(hero);if(!$('classSel').hidden)showClassSel()}catch(e){K.st=3}},undefined,()=>{K.st=3})}
 function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
 function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
@@ -1876,11 +1876,38 @@ function skwBack(r){const sw=SKW.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r
   const sg=Math.sign(pS.x-pN.x)||-1,g=new THREE.Vector3(pN.x+sg*L*SKB.gx,pN.y+L*SKB.up,pN.z-L*SKB.bk),z=new THREE.Vector3(-sg*SKB.dx,-1,SKB.dz).normalize(),y=new THREE.Vector3(z.y,-z.x,0).normalize(),x=new THREE.Vector3().crossVectors(y,z);
   const Wm=new THREE.Matrix4().makeBasis(x,y,z).scale(ws).setPosition(g),Lm=new THREE.Matrix4().copy(sp.matrixWorld).invert().multiply(Wm);sp.add(sw);Lm.decompose(sw.position,sw.quaternion,sw.scale);
   return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q);sw.scale.copy(sv.s)}}
-/* v337: 마법사 지팡이 방향 — 손 회전과 무관하게 세계 기준으로 세움. 평소·이동: 수직(땅에 짚음), 시전: 앞으로 겨눔(수정이 앞) */
-function skmStaff(K,aim,dt){const sw=K.sw,hand=K.hand;if(!sw||!hand)return;hand.updateWorldMatrix(true,false);
-  const fwd=new THREE.Vector3(Math.sin(P.face),0,Math.cos(P.face)),up=new THREE.Vector3(0,1,0),ax=aim>0?up.clone().lerp(fwd.clone().multiplyScalar(1).add(new THREE.Vector3(0,.25,0)).normalize(),aim).normalize():up;
-  const tq=new THREE.Quaternion().setFromUnitVectors(up,ax);if(!K.stQ)K.stQ=tq.clone();else K.stQ.slerp(tq,1-Math.exp(-dt*(aim>0?14:7)));
-  const hq=hand.getWorldQuaternion(K._q).invert();sw.quaternion.copy(hq).multiply(K.stQ).multiply(K.V0)}
+/* v342: 마법사 지팡이 잡기 — 바인드 자세의 손 뼈 위치로 주먹 중심을 구해 지팡이를 손에 '고정'(모든 동작에서 같이 움직임), 오른손 손가락은 매 프레임 쥔 자세로 덮어씀.
+   지팡이 방향은 손목 뼈를 세계 기준으로 살짝 돌려 맞춤(평소 수직·시전 시 앞으로) — 회전량 상한(maxDeg)으로 손목이 꺾이지 않게 */
+const SKG={pn:1,R:.034,cu:1.7,cn:1.3,wy:1,ang:{Thumb:[30,35,30],Index:[62,54,46],Middle:[62,56,46],Ring:[64,58,48],Pinky:[66,60,48]},ground:.02,twF:1,twO:.6};/* R: 지팡이 막대 반지름(모델 단위) — 주먹 중심 = 손가락 뿌리 + 손가락 방향×R×cu + 손바닥 방향×R×cn */
+function skmGrip(K,r){const hand=K.hand,sw=K.sw;let sk=null;r.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o});if(!sk)return;const bones=sk.skeleton.bones,inv=sk.skeleton.boneInverses;
+  const bindW=b=>{const i=bones.indexOf(b);return i<0?null:inv[i].clone().invert()},V=()=>new THREE.Vector3();
+  const bindQ=b=>{const W=bindW(b),Wp=b.parent&&bindW(b.parent);if(!W)return b.quaternion.clone();return new THREE.Quaternion().setFromRotationMatrix(Wp?Wp.invert().multiply(W):W)};
+  const WH=bindW(hand);if(!WH)return;const WHi=WH.clone().invert(),lp=n=>{const b=r.getObjectByName(n),W=b&&bindW(b);return W?V().setFromMatrixPosition(W).applyMatrix4(WHi):null};
+  const I1=lp('mixamorigRightHandIndex1'),M1=lp('mixamorigRightHandMiddle1'),R1=lp('mixamorigRightHandRing1')||lp('mixamorigRightHandPinky1'),I2=lp('mixamorigRightHandIndex2');if(!I1||!M1||!R1||!I2)return;
+  const u=M1.clone().normalize(),w=I1.clone().sub(R1);w.addScaledVector(u,-w.dot(u)).normalize();const n=V().crossVectors(w,u).normalize().multiplyScalar(SKG.pn);
+  const rad=SKG.R,c=I1.clone().add(M1).add(R1).multiplyScalar(1/3).addScaledVector(u,rad*SKG.cu).addScaledVector(n,rad*SKG.cn);
+  const Y=w.clone().multiplyScalar(SKG.wy),Z=n.clone(),X=V().crossVectors(Y,Z).normalize();Z.crossVectors(X,Y).normalize();
+  sw.position.copy(c);sw.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X,Y,Z));sw.scale.setScalar(1);K.gripY=Y;K.swQ0=sw.quaternion.clone();
+  K.fing=[];for(const f of ['Thumb','Index','Middle','Ring','Pinky'])for(let i=1;i<=3;i++){const j=r.getObjectByName('mixamorigRightHand'+f+i);if(!j)continue;const Wj=bindW(j);if(!Wj)continue;const ch=j.children.find(x=>x.isBone);
+    const pj=V().setFromMatrixPosition(Wj).applyMatrix4(WHi);let d;if(ch){d=V().setFromMatrixPosition(bindW(ch)).applyMatrix4(WHi).sub(pj)}else d=pj.clone().sub(V().setFromMatrixPosition(bindW(j.parent)).applyMatrix4(WHi));d.normalize();
+    let a=V().crossVectors(d,n).normalize();if(f==='Thumb'){/* 엄지: 손바닥 쪽으로 접으며 검지 쪽으로 감쌈 */a.lerp(u.clone().negate(),.35).normalize()}
+    const Rj=new THREE.Quaternion().setFromRotationMatrix(WHi.clone().multiply(Wj));a.applyQuaternion(Rj.invert());K.fing.push({j,a,rest:bindQ(j),f,i})}
+  if(SKG.ground){/* 대기 자세에서 지팡이 바닥이 땅에 닿도록 손잡이 위치를 지팡이 축 방향으로 보정 */const A=K.acts.idle;if(A){A.setEffectiveWeight(1);A.time=1;K.mx.update(0);r.updateMatrixWorld(true);const f0=P?P.face:0;if(P)P.face=0;K.stQ=null;skmStaff(K,0,1,70);if(P)P.face=f0;r.updateMatrixWorld(true);
+    let y0=Infinity;sw.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();y0=Math.min(y0,o.geometry.boundingBox.min.y)}});const bw=sw.localToWorld(V().set(0,y0,0)),ry=V().setFromMatrixPosition(r.matrixWorld).y,dy=clamp((bw.y-ry)/K.S,-SKG.ground,SKG.ground);
+    sw.position.addScaledVector(Y,-dy);A.setEffectiveWeight(0);K.handQa=null;K.stQ=null}}}
+function skmFist(K){if(!K.fing)return;const q=K._q;for(const f of K.fing){const g=SKG.ang[f.f],ang=g?g[f.i-1]||0:0;f.j.quaternion.copy(f.rest).multiply(q.setFromAxisAngle(f.a,ang*Math.PI/180))}}
+function skmPre(K){if(K.hand&&K.handQa)K.hand.quaternion.copy(K.handQa)}/* 믹서가 손목을 다시 쓰지 않는 프레임에도 보정이 누적되지 않게 — 애니메이션 값으로 되돌림 */
+function skmStaff(K,aim,dt,maxDeg=70,full=true,twist=110){const sw=K.sw,hand=K.hand;if(!sw||!hand)return;if(!K.handQa)K.handQa=new THREE.Quaternion();K.handQa.copy(hand.quaternion);skmFist(K);sw.quaternion.copy(K.swQ0);
+  hand.updateWorldMatrix(true,false);const hq=hand.getWorldQuaternion(new THREE.Quaternion()),cur=new THREE.Vector3(0,1,0).applyQuaternion(hq.clone().multiply(sw.quaternion)).normalize();
+  const fwd=new THREE.Vector3(Math.sin(P.face),0,Math.cos(P.face)),up=new THREE.Vector3(0,1,0),tgt=aim>0?up.clone().lerp(fwd.clone().add(new THREE.Vector3(0,.25,0)).normalize(),aim).normalize():up;
+  const q=new THREE.Quaternion().setFromUnitVectors(cur,tgt);if(!K.stQ)K.stQ=q.clone();else K.stQ.slerp(q,1-Math.exp(-dt*(aim>0?14:8)));
+  /* 손목이 맡는 몫(상한 maxDeg) + 나머지는 지팡이가 주먹 안에서 돌아감(full) */const Q=K.stQ,ang=2*Math.acos(clamp(Math.abs(Q.w),0,1)),mx=maxDeg*Math.PI/180,qH=Q.clone();if(ang>mx&&ang>1e-4)qH.slerp(new THREE.Quaternion(),1-mx/ang);
+  /* 평소(aim 0): 주먹이 몸 앞이 아니라 몸 옆·앞쪽으로 오도록 손목을 지팡이 축(수직) 둘레로 비틀기 — 지팡이는 그대로 수직 */let tw=0;
+  if(aim<=0&&twist>0){const hq2=qH.clone().multiply(hq),off=sw.position.clone().applyQuaternion(hq2);off.y=0;if(off.lengthSq()>1e-6){const hp=hand.getWorldPosition(K._v),rp=new THREE.Vector3().setFromMatrixPosition(K.root.matrixWorld),out=hp.sub(rp);out.y=0;out.normalize();
+    const want=fwd.clone().multiplyScalar(SKG.twF).addScaledVector(out,SKG.twO).normalize();tw=clamp(Math.atan2(off.z*want.x-off.x*want.z,off.x*want.x+off.z*want.z),-twist*Math.PI/180,twist*Math.PI/180)}}
+  if(K.twA==null)K.twA=tw;else K.twA+=(tw-K.twA)*(1-Math.exp(-dt*8));const qT=new THREE.Quaternion().setFromAxisAngle(up,K.twA);
+  const hW=qT.clone().multiply(qH).multiply(hq),pq=hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert();hand.quaternion.copy(pq).multiply(hW);
+  if(full){const sW=qT.clone().multiply(Q).multiply(hq).multiply(K.swQ0);sw.quaternion.copy(hW.invert()).multiply(sW)}}
 /* v338: 마법사 지팡이 끝 보석 — 무기 강화 단계에 비례해 밝아짐(색은 무기 등급), 끝에 은은한 광채 */
 const GEMC=[0x7ad8ff,0x5a86ff,0xffc83a,0xff7a2a];
 function gemLv(){const L=typeof enhL==='function'?enhL('weapon'):0;return Math.min(1,Math.sqrt(Math.max(0,L)/40))}
@@ -1889,6 +1916,7 @@ function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.
   if(K.gemG.parent!==K.tip)K.tip.add(K.gemG);K.gemG.material.color.setHex(c);K.gemG.material.opacity=.35+.5*k;K.gemG.scale.setScalar((.25+1.1*k)*pl*(1+.6*boost))}
 function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
   if(K.cls==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
+  if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
 function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;const mage=K.cls==='mage';
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
@@ -1913,8 +1941,8 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
   K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
   for(const k in A){const a=A[k],w=k===K.cur?1-(K.prev&&K.prev!==k?f:0):(k===K.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=K.tm[k]||0}
-  K.mx.update(0);
-  if(mage)skmStaff(K,aim,dt);
+  if(mage)skmPre(K);K.mx.update(0);
+  if(mage){const free=st==='roll'||st==='hit'||st==='die';skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
   if(K.swM){const on=!mage&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}
@@ -3807,7 +3835,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v341';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v342';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3984,7 +4012,7 @@ const PORT={};
 function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=240,H=306,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
   sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.75));const d=new THREE.DirectionalLight(0xb8c8e8,.8);d.position.set(-3,5,4);sc.add(d);const w=new THREE.PointLight(0xffa25a,1.4,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(cls==='mage'?1.42:1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
-    for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,W/H,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);renderer.setRenderTarget(rt);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);renderer.setClearColor(cc,ca);
   const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(prev);
