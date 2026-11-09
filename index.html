@@ -3150,8 +3150,8 @@ function potDrop(p,k){if(k==='hp'){if(Math.random()<.5)dropPot(p,k)}else{dropPot
 /* 신속 물약 드롭: 기본 0.4% · 레어 2% · 유니크 6% · 고유 30% */
 const spdGeo=new THREE.CylinderGeometry(.13,.17,.32,8),spdMat=new THREE.MeshBasicMaterial({color:0x4ad06a});
 function dropSpd(p){const q=scatter(p),m=new THREE.Mesh(spdGeo,spdMat);m.position.set(q.x,.4,q.z);scene.add(m);pickups.push({m,t:0,kind:'spd'})}
-function dropPot(p,k){const q=scatter(p),c=chE(),r=Math.random(),z=c<=1?(r<.85?'s':'m'):c<=3?(r<.3?'s':r<.9?'m':'l'):(r<.4?'m':'l');
-  const m=new THREE.Mesh(potGeo,potMat[k]);m.scale.setScalar(z==='s'?.8:z==='m'?1:1.3);m.position.set(q.x,.4,q.z);scene.add(m);pickups.push({m,t:0,kind:k,size:z})}
+function dropPot(p,k){const q=scatter(p),c=chE(),r=Math.random(),z=S.ch>=NCH?(S.tier>=31?'x':'l')/* v357: 위험도 1~30 대형만 · 31~ 초대형만 */:c<=1?(r<.85?'s':'m'):c<=3?(r<.3?'s':r<.9?'m':'l'):(r<.4?'m':'l');
+  const m=new THREE.Mesh(potGeo,potMat[k]);m.scale.setScalar(z==='s'?.8:z==='m'?1:z==='x'?1.6:1.3);m.position.set(q.x,.4,q.z);scene.add(m);pickups.push({m,t:0,kind:k,size:z})}
 /* 골드: 몬스터 최대 체력에 비례해서 떨어짐 (자동 습득) */
 const coinGeo=new THREE.CylinderGeometry(.2,.2,.06,12),coinMat=new THREE.MeshBasicMaterial({color:0xffd24a});
 function dropGold(p,amt){const q=scatter(p),m=new THREE.Mesh(coinGeo,coinMat);m.rotation.x=Math.PI/2;m.scale.setScalar(amt>=50?1.6:amt>=15?1.2:1);m.position.set(q.x,.35,q.z);scene.add(m);pickups.push({m,t:0,kind:'gold',amt})}
@@ -3234,7 +3234,7 @@ const feedEl=$('feed');
 function feed(t,c){const d=document.createElement('div');d.textContent=t;d.style.color=c;feedEl.prepend(d);while(feedEl.children.length>4)feedEl.lastChild.remove();setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),600)},3500)}
 /* 물약: 소형 50 · 중형 120 · 대형 300 회복. 누르면 부족한 양에 가장 알맞은 크기를 자동으로 사용 */
 /* v131 물약: 소형 50/20G · 중형 220/90G · 대형 700/500G · 초대형 2000/1900G · 50% 회복(최대치의 절반) 10000G */
-const POT={s:{n:'소형',amt:50,price:20},m:{n:'중형',amt:220,price:90},l:{n:'대형',amt:700,price:500},x:{n:'초대형',amt:2000,price:1900},h:{n:'50%',pct:.5,price:10000}},PSZ=['s','m','l','x','h'];
+const POT={s:{n:'소형',amt:50,price:20},m:{n:'중형',amt:220,price:90},l:{n:'대형',amt:900,price:1000},x:{n:'초대형',amt:3000,price:6500},h:{n:'50%',pct:.5,price:10000}},PSZ=['s','m','l','x','h'];
 const potAmt=(z,k)=>POT[z].pct?Math.round((k==='mp'?P.mmp:P.mhp)*POT[z].pct):POT[z].amt;
 const potSell=z=>Math.round(POT[z].price*.3);
 const potN=k=>PSZ.reduce((a,z)=>a+(S.pots[k][z]||0),0);
@@ -3869,7 +3869,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v356';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v357';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
