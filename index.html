@@ -261,7 +261,6 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 
 .bwrap,.bleft,.bright{display:flex;flex-direction:column;gap:10px}
 @media (orientation:landscape) and (max-height:520px){#bossP{align-items:center;padding-bottom:0}#bossSheet{border-radius:16px;border:1px solid var(--line);width:min(94vw,820px);max-width:none;max-height:calc(100vh - 20px);padding-top:8px;padding-bottom:8px;gap:6px}#bossSheet .shead h2{font-size:18px}#bossSheet .shead .chap{display:none}.bwrap{flex-direction:row;align-items:stretch;gap:12px}.bleft{flex:1.25 1 0;min-width:0;gap:6px}.bright{flex:1 1 0;min-width:0;justify-content:center;gap:6px}.bcard{padding:5px 5px 6px}.bcard .bimg{height:min(160px,36vh)}.bcard b{font-size:13px;margin-top:2px}.bcard small{display:none}.bdiff button{padding:8px;font-size:14px}.binfo{padding:10px 12px}.binfo h3{font-size:15px}.binfo .brw{margin:3px 0;font-size:13px}.binfo .hint{font-size:11px;margin:2px 0!important}.binfo button.primary{padding:9px;margin-top:4px}.bright .duelc{flex-direction:row;padding:6px 10px;gap:8px}.bright .duelc small{display:none}.bright .duelc button{padding:6px 12px;width:auto}}
-.slotside{display:flex;flex-direction:column;gap:4px}.slotclone{padding:8px 4px}.slotclone small{display:block;color:#a8a0b4;margin-bottom:6px}.slotclone>div{display:flex;flex-wrap:wrap;gap:6px}.slotclone button{padding:8px 12px}
 .duelc{display:flex;align-items:center;gap:12px}.duelc .dt{flex:1}.duelc b{font:800 15px var(--ko)}.duelc small{display:block;color:#a8a0b4;font-size:12px;margin-top:2px}
 .ecine{position:fixed;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),rgba(6,4,8,.93) 62%);animation:ecIn .25s ease-out}
 .ecine.auto{pointer-events:none;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.1),rgba(6,4,8,.5) 62%)}.ecine.auto .rays{display:none}.ecine.auto .core{transform:scale(.62)}.ecine .autostop{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);pointer-events:auto;padding:12px 26px;border-radius:12px;border:1px solid #ff8a70;background:rgba(120,20,10,.88);color:#fff;font:800 15px var(--ko);box-shadow:0 0 14px rgba(255,80,40,.4);cursor:pointer}
@@ -366,7 +365,6 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .slotmain .badge.empty{background:#23232c;color:var(--muted);font-size:20px}
 #nickIn{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 17px var(--ko);box-sizing:border-box}#nickIn:focus{outline:none;border-color:var(--ember)}.nickrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;min-height:1.3em}.nickrow .bad,#nickCnt.bad{color:#ff8a70}.slotmain .st small.nk{color:var(--ink)}.slotmain .st small.nk.none{color:#ff9a6a}
 .slotdel{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:0 12px;font:700 12px var(--ko);flex-shrink:0}
-.slotside .slotdel{flex:1}
 .slotdel.arm{background:var(--hp);border-color:var(--hp);color:#fff}
 .act.mv{width:58px;height:58px;right:114px;bottom:85px;font-size:11px;color:#9ad0ff;border-color:rgba(154,208,255,.45)}
 .act.mv small{font-size:8px}
@@ -3380,7 +3378,7 @@ function castFire(slot,id){
     const oc=0xd6f0ff/* v285: 구체 자체만 밝게 — 어둡게 하기(dk) 적용 안 함, 광채·심지·고리는 그대로 */,gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
     const cid=++orbSeq,BZ=bossOn('frost')&&n>1,biv=BZ?.35/(n-1):0,af=P.face,rof=Math.random()*Math.PI*2;/* v263 보스 모드: 사방 대신 정면으로 연달아 · v266: 0.35초 안에, 시전한 순간의 방향으로 고정 · v279: 일반 모드(n>=3)는 매 시전마다 꼭짓점 방향이 무작위로 돌아감 */
     for(let i=0;i<n;i++){const fire=()=>{const a=BZ?af+(i-(n-1)/2)*.11:n>=3?rof+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
-      shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.2*(1-dk*.5)*ORBD(),/* v302: 광채 1.5→1.2 (-20%) */gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life*.7/* v309: 사거리 -30% */,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,shf:st.shf,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};fire()}/* v311: 보스 모드도 한꺼번에 — 다발 사격 보스 모드처럼 좁은 부채꼴(간격 .11rad, 5발 전체 약 25°) *//* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
+      shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.2*(1-dk*.5)*ORBD(),/* v302: 광채 1.5→1.2 (-20%) */gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life*.7/* v309: 사거리 -30% */,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,shf:st.shf,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,edge:BZ&&(i===0||i===n-1),/* v322: 보스 모드 양끝 보주의 서리 폭발 자국은 겹쳐도 녹지 않음 */cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};fire()}/* v311: 보스 모드도 한꺼번에 — 다발 사격 보스 모드처럼 좁은 부채꼴(간격 .11rad, 5발 전체 약 25°) *//* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
@@ -4757,20 +4755,12 @@ let slotArm={i:-1,t:0};
 const nickSafe=n=>String(n).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,16),fmtPlay=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h}시간 ${m}분`:`${m}분`};
 function fmtTime(t){if(!t)return '';const d=new Date(t),p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`}
 function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 잿불 왕좌':'최종 보스 처치 완료'):s.ch>=5?`끝없는 심연 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
-/* v322: 슬롯 복제 — 빈 슬롯에 캐릭터를 그대로 복사, 주력 스킬을 바꾸면 1차·2차 강화 단계를 같은 순서로 옮김 */
-let slotClone=-1;const emptySlot=()=>{for(let i=0;i<SLOTS;i++)if(!readSlot(i))return i;return -1},mainOf2=d=>d.main&&CLS[d.cls].opts.includes(d.main)?d.main:CLS[d.cls].opts[0];
-function cloneSlot(i,to){const j=emptySlot(),src=readSlot(i);if(j<0||!src)return;const d=JSON.parse(JSON.stringify(src)),from=mainOf2(d);
-  if(to!==from){const a=gemsFor(from),b=gemsFor(to);d.sk=d.sk||{};const old=d.sk[from]||{};d.sk[to]={};a.forEach((g,k)=>{d.sk[to][b[k]]=old[g]||0});
-    d.skp=d.skp||{};d.skp[to]=d.skp[from]||0;d.skp[from]=0;
-    const m=g=>GEMS2[g].max||G2MAX,fa=gems2For(from).sort((x,y)=>m(y)-m(x)),fb=gems2For(to).sort((x,y)=>m(y)-m(x));d.sk2=d.sk2||{};const o2={...d.sk2};fa.forEach(g=>delete d.sk2[g]);fb.forEach((g,k)=>{d.sk2[g]=Math.min(m(g),o2[fa[k]]||0)});d.main=to;if(d.autoGem&&d.autoGem.startsWith('g:'))d.autoGem=null}
-  d.nick=nickClean((d.nick||'')+'2');d.savedAt=Date.now();try{localStorage.setItem(slotKey(j),JSON.stringify(d))}catch(e){toast('복제 실패','저장 공간을 확인하세요');return}
-  toast('복제 완료',`슬롯 ${j+1} · ${SK[to].n}`)}
 function showSlots(){
   if(curSlot!==null&&S.cls)save();/* v265: 플레이 시간이 최신으로 보이도록 */
   const canClose=curSlot!==null&&!!S.cls;
   let h=`<div class="shead"><div><div class="chap">Ember Sanctum · Save Slots</div><h2>저장 슬롯</h2></div>${canClose?'<button class="close" id="slClose">닫기</button>':'<button class="close" id="slTitle">처음 화면</button>'}</div><p class="hint">플레이할 슬롯을 고르세요. 빈 슬롯은 직업 선택부터 새로 시작하고, 진행 내용은 그 슬롯에 자동 저장됩니다.</p><div class="slots">`;
   for(let i=0;i<SLOTS;i++){const d=readSlot(i),arm=slotArm.i===i&&Date.now()-slotArm.t<3000;
-    if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${d.nick?nickSafe(d.nick):'닉네임 미설정'}</b><small class="nk${d.nick?'':' none'}">${c.n} · Lv ${d.lv} · ⏱ ${fmtPlay(d.playSec)}</small><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><div class="slotside">${emptySlot()>=0?`<button class="slotdel" data-clone="${i}">복제</button>`:''}<button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div></div>${slotClone===i?`<div class="slotclone"><small>복제할 주력 스킬 (스펙·장비·강화 단계는 그대로 옮깁니다)</small><div>${CLS[d.cls].opts.map(o=>`<button class="primary" data-cl="${i}:${o}">${SK[o].n}${o===mainOf2(d)?' (같은 스킬)':''}</button>`).join('')}<button class="ghost" data-clx="1">취소</button></div></div>`:''}`}
+    if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${d.nick?nickSafe(d.nick):'닉네임 미설정'}</b><small class="nk${d.nick?'':' none'}">${c.n} · Lv ${d.lv} · ⏱ ${fmtPlay(d.playSec)}</small><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div>`}
     else h+=`<div class="slotrow"><button class="slotmain empty" data-new="${i}"><span class="badge empty">+</span><span class="st"><span class="en">Slot ${i+1}</span><b>빈 슬롯</b><small>새로 시작하기</small></span></button></div>`}
   h+=`</div>`;
   $('slotSheet').innerHTML=h;$('slots').hidden=false;releaseAll();
@@ -4813,9 +4803,6 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
   if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots();const go=()=>{curSlot=i;S=d;$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
   if(b.dataset.new!==undefined){const i=+b.dataset.new;askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel()}});return}
-  if(b.dataset.clone!==undefined){slotClone=+b.dataset.clone;showSlots();return}
-  if(b.dataset.clx){slotClone=-1;showSlots();return}
-  if(b.dataset.cl){const [i,o]=b.dataset.cl.split(':');slotClone=-1;cloneSlot(+i,o);showSlots();return}
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
     else slotArm={i,t:Date.now()};
@@ -4997,7 +4984,7 @@ function update(dt){packTick();
     if(p.home){const t=nearestEnemy(pp,7,p.hit);if(t){const ax=t.pos.x-pp.x,az=t.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx+=(ax/l*p.speed-p.vx)*Math.min(1,dt*5);p.vz+=(az/l*p.speed-p.vz)*Math.min(1,dt*5)}}
     if(p.col===0xb8f07a&&Math.random()<dt*8*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vy:rnd(0,.6),life:rnd(.25,.4),s0:.35,s1:.05,c0:0xeaffb0,c1:0x4a9a20,a:.8,tex:1});
     pp.x+=p.vx*dt;pp.z+=p.vz*dt;p.m.rotation.y=Math.atan2(p.vx,p.vz);p.life-=dt;let dead=p.life<=0;if(p.rib)ribStep(p,dt);if(p.upd)p.upd(dt);/* v172 */
-    if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;NOVA_CID=p.orb.cid||0;NOVA_KEEP=p.life<=v.iv;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova');NOVA_CID=0;NOVA_KEEP=false}}/* v317: 보주 수명이 다음 폭발 전에 끝나면 이번이 마지막 폭발 */
+    if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;NOVA_CID=p.orb.cid||0;NOVA_KEEP=p.life<=v.iv||!!p.orb.edge;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova');NOVA_CID=0;NOVA_KEEP=false}}/* v317: 보주 수명이 다음 폭발 전에 끝나면 이번이 마지막 폭발 */
     if(p.orb&&!dead){const S2=p.m.scale.x;for(const c of p.m.children)if(c.userData.ring){c.rotation.x+=dt*5*c.userData.ring;c.rotation.y+=dt*3.3}
       if(Math.random()<dt*14*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vx:-p.vx*.15,vz:-p.vz*.15,life:.35,s0:S2*.7,s1:S2*.3,c0:0x7fc0ef,c1:0x10305a,a:.2*(1-p.dim),drag:3,tex:1})}
     if(p.orb&&!dead&&p.orb.shf>0){p.et-=dt;if(p.et<=0){p.et=.11/((p.orb.rate||1)*p.orb.shf);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
