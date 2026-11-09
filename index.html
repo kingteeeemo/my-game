@@ -2774,6 +2774,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*FS*DK;u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
       m.renderOrder=2;fx.push({m,t:0,dur:1.4,upd(k){u.k.value=k}})}/* v294: 1.4초 (빨리 퍼지고 오래 남음) */
     popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.06*ka*FK);
+    groundFx(p,shockTex,0x9ad8ff,R*.12,R*1.05,.32,.5*ka*FK,true,.08);/* v295: 얼음 보주가 끝에서 터질 때의 파동(충격파 고리)을 서리 폭발에도 — 피해 반경까지 퍼짐 */
     /* v188: 얼음판이 퍼지며 땅이 갈라지고(흰 서리 금 → 어두운 균열이 남음) 돌조각·얼음 조각이 마루를 따라 바깥으로 튐 */
     if(!heavy){decalFx(p,crackTex,0xeaf6ff,R*.55,.5,.25*ka*DK,true);later(.07,()=>decalFx(p,crackTex,0xdff4ff,R*1.02,.7,.22*ka*DK,true));/* v293: 흰 서리 금 .8/.7 → .25/.22 (초반 중앙이 하얗게 타던 주범) */later(.1,()=>decalFx(p,crackTex,0x1e2a38,R*rnd(.9,1.1),2.8,.55*ka,false));
       for(let w=0;w<3;w++)later(w*.07,()=>{const rr=R*(.25+.3*w);debris(p,{n:Math.max(2,Math.round(4*q)),color:0x3a3e46,geo:octaGeo,sp:[R*1.4,R*2.4],up:[3,6.5],y:[.1,.3],sz:[.08,.18],r0:rr,dur:.8,g:24});
@@ -3649,7 +3650,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v294';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v295';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
