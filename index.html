@@ -2713,11 +2713,11 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
   fs=`precision highp float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col,core;uniform sampler2D tex;${FIRE_NOISE}
   void main(){vec2 q=vUv;float d=length(q);if(d>1.)discard;float a=atan(q.y,q.x),an=a/6.28318+.5;
     /* v294: 참고 영상 — 아주 빠르게 촥 퍼지는 회백색 성에. 가장자리는 선이 아니라 바깥으로 흩날리는 결·줄기, 바닥엔 금 간 성에 질감이 남음 */
-    float e=1.-pow(1.-min(1.,k*3.6),2.5);float fr=.05+.71*e;/* 28% 시점에 피해 반경까지 */
+    float kr=min(1.,k*5.);float e=1.-(1.-kr)*(1.-kr);float fr=.21+.55*e;/* v301: 충격파 고리(R×.25→1.1, .28초, 같은 완화)와 정확히 같은 반지름으로 펴짐 (메시 R×1.32 기준) */
     float fade=1.-smoothstep(.5,1.,k);
     float rs=fbm(vec2(a*16.+seed*3.,d*2.2-k*.6));float rs2=fbm(vec2(a*40.+seed*5.,d*4.));/* 방사형 결(각도 고주파·반경 저주파) */
     float dd=d+(rs-.5)*.22+(rs2-.5)*.08;float sr=dd-fr;/* 결을 따라 너덜너덜한 가장자리 */
-    float inside=1.-smoothstep(-.18,.02,sr);
+    float inside=1.-smoothstep(-.1,.03,sr);/* v301: 안쪽 흐림 폭 .18→.1 — 고리보다 뒤처져 보이지 않게 */
     vec2 g=q*9.+seed*3.;vec2 gi=floor(g),gf=fract(g);float f1=8.,f2=8.;vec2 id1=gi;
     for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 o=vec2(float(x),float(y));vec2 r=o+vec2(hsh(gi+o),hsh(gi+o+17.))-gf;float l=dot(r,r);if(l<f1){f2=f1;f1=l;id1=gi+o;}else if(l<f2)f2=l;}
     float bd=sqrt(f2)-sqrt(f1);float crack=1.-smoothstep(0.,.07,bd);float ch=hsh(id1+seed*7.);/* 금 간 성에판: 셀 경계=금(밝음), 셀마다 밝기 다름 */
@@ -2754,10 +2754,10 @@ function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*
 const HGRID=new Map();let HGmax=1;const HGC=4;
 function hgBuild(){HGRID.clear();HGmax=1;for(let i=0;i<enemies.length;i++){const e=enemies[i];e._gi=i;if(e.r>HGmax)HGmax=e.r;const k=Math.floor(e.pos.x/HGC)*4096+Math.floor(e.pos.z/HGC);let a=HGRID.get(k);if(!a)HGRID.set(k,a=[]);a.push(e)}}
 const _hgc=[];function hgNear(x,z,r){_hgc.length=0;const R=r+HGmax,x0=Math.floor((x-R)/HGC),x1=Math.floor((x+R)/HGC),z0=Math.floor((z-R)/HGC),z1=Math.floor((z+R)/HGC);for(let a=x0;a<=x1;a++)for(let b=z0;b<=z1;b++){const g=HGRID.get(a*4096+b);if(g)for(let i=0;i<g.length;i++)_hgc.push(g[i])}if(_hgc.length>1)_hgc.sort((p,q)=>p._gi-q._gi);return _hgc}
-const FX_CAP=420;
+const FX_CAP=1e9;/* v301: 동시 이펙트 상한 해제 */
 const rrnd=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 const ORBD=()=>{let c=0;for(const q of projs)if(q.orb)c++;return 1/Math.sqrt(Math.max(1,c/5))};/* v297: 살아 있는 보주 수가 5개를 넘으면(꾹 누르기 연속 시전 → 최대 ~28개) 보주 광채·서리 폭발 밝기를 √비례로 낮춤 */
-const NOVA_L=[];let NOVA_CAP=1e9,/* v298: 겹침 상한 해제 */NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
+const NOVA_SH=[];const NOVA_L=[];let NOVA_CAP=1e9,/* v298: 겹침 상한 해제 */NOVA_RK=1,NOVA_CID=0,orbSeq=0;function novaCap(p,R){while(NOVA_L.length&&(NOVA_L[0].t<time-3||NOVA_L[0].t>time))NOVA_L.shift();let n=0;const R2=(R*NOVA_RK)*(R*NOVA_RK);for(const q of NOVA_L){if(!q.d)continue;const dx=q.x-p.x,dz=q.z-p.z;if(dx*dx+dz*dz<R2)n++}const ok=n<NOVA_CAP;NOVA_L.push({x:p.x,z:p.z,t:time,d:ok});if(NOVA_L.length>500)NOVA_L.shift();return ok?1:0}/* v283: 밝기 상한 — 최근 3초 안 이 폭발 반경 안에 바닥 자국이 이미 8장(NOVA_CAP) 깔려 있으면 새 바닥 자국·서리 판을 더 깔지 않음(밝기는 그대로, 겹침만 상한) */
 function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   /* 서리 폭발 (v40): 범위가 한눈에 보이도록 서리 원판 + 밝은 테두리 + 충격파 + 얼음 가시. 초당 여러 번 터지므로 부하 제한과 별도로 가볍게 */
   /* v65 번개 폭발(궁수): 보라·흰 섬광 + 사방으로 갈라지는 번개 줄기(InstancedMesh) + 전기 불꽃 + 짧은 충격파 + 그을린 금 */
@@ -2778,8 +2778,9 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     /* v190: 얼음판 감쇠는 실제로 자리가 겹치는 폭발만 셈 — 보주가 퍼져 서로 떨어지면 다시 원래 진하기 */
     const FS=.85;/* v193: 개수와 무관하게 항상 5개 겹칠 때 밝기(.3)로 고정 — 1개일 때도 · v287: .85 — 눈처럼 거의 불투명한 흰 바닥 */
     /* v182: 바닥에 촥 펼쳐지는 서리 파동(셰이더) — 들쭉날쭉한 결정 마루가 피해 반경까지 번져 나가고, 그 뒤로 중심에서 뻗는 얼음 결 무늬와 반짝임이 남았다가 녹아 사라짐 */
+    for(let i=NOVA_SH.length-1;i>=0;i--){const o=NOVA_SH[i];if(o.t>=o.dur){NOVA_SH.splice(i,1);continue}const dx=o.m.position.x-p.x,dz=o.m.position.z-p.z;if(dx*dx+dz*dz<(R+o.R)*(R+o.R)*.49){o.t=o.dur;NOVA_SH.splice(i,1)}}/* v301: 새 바닥이 겹쳐 깔리면(중심 거리 < 반지름 합의 70%) 그 전 바닥은 즉시 제거 */
     {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*FS*DK;u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
-      m.renderOrder=2;fx.push({cos:1,m,t:0,dur:1.4,upd(k){u.k.value=k}})}/* v294: 1.4초 (빨리 퍼지고 오래 남음) */
+      m.renderOrder=2;const sh={cos:1,m,R,t:0,dur:1.4,upd(k){u.k.value=k}};fx.push(sh);NOVA_SH.push(sh)}/* v294: 1.4초 (빨리 퍼지고 오래 남음) */
     popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.06*ka*FK);
     if(DK){const fk=Math.max(.6,FK);/* v296: 얼음 보주 끝 폭발과 똑같은 충격파 — 고리(.7, 0xaee0ff) + 팍 터지는 섬광 원 + 중앙 플래시. 연속 시전 감쇠는 .6까지만 */
       groundFx(p,shockTex,0xaee0ff,R*.25,R*1.1,.28,.7*fk,true,.08);
@@ -3318,7 +3319,7 @@ function castFire(slot,id){
     const oc=0xd6f0ff/* v285: 구체 자체만 밝게 — 어둡게 하기(dk) 적용 안 함, 광채·심지·고리는 그대로 */,gc=lc(0x2a6aa8,0x081828),cm=coreMats[Math.round(dk*20)]||(coreMats[Math.round(dk*20)]=new THREE.MeshBasicMaterial({color:lc(0xfff6d0,0x5a86b0)}));
     const cid=++orbSeq,BZ=bossOn('frost')&&n>1,biv=BZ?.35/(n-1):0,af=P.face,rof=Math.random()*Math.PI*2;/* v263 보스 모드: 사방 대신 정면으로 연달아 · v266: 0.35초 안에, 시전한 순간의 방향으로 고정 · v279: 일반 모드(n>=3)는 매 시전마다 꼭짓점 방향이 무작위로 돌아감 */
     for(let i=0;i<n;i++){const fire=()=>{const a=BZ?af:n>=3?rof+i*Math.PI*2/n:P.face+(i-(n-1)/2)*spr;/* v59: 3개 이상이면 바라보는 방향부터 사방 균등(5개 = 정오각형 꼭짓점) */
-      shoot(a,{rib:{helix:.555*st.orbScale,spin:12,n:12,w:.38*st.orbScale,c0:0x5aa8ff,c1:0xd8f0ff,cw:.3,fade:.42},/* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5)*ORBD(),gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};if(BZ&&i)later(i*biv,()=>{if(P.hp>0)fire()});else fire()}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
+      shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.5*(1-dk*.5)*ORBD(),gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};if(BZ&&i)later(i*biv,()=>{if(P.hp>0)fire()});else fire()}/* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
@@ -3659,7 +3660,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v300';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v301';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
