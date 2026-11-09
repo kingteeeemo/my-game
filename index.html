@@ -2268,11 +2268,12 @@ function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=S
     if(sw)swStraight(sw);if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;K.sw=sw;
     K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/C.S);(sw||r).add(K.tip);
     K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
-    K.root=r;K.st=2;skwWarm(K);for(const e of enemies)if(e.duel&&!e.maw)bkAttach(e)}catch(_){K.st=3}},undefined,()=>{K.st=3})}
+    K.root=r;K.st=2;skwWarm(K);for(const e of enemies)if(e.duel&&!e.maw)bkAttach(e);delete BOSS_IMG.knightn;delete BOSS_IMG.knightu;try{if(bossOpen)renderBoss()}catch(_){}}catch(_){K.st=3}},undefined,()=>{K.st=3})}
+function bkColor(U){for(const m of BKN.mats){let isw=false;if(BKN.sw)BKN.sw.traverse(o=>{if(o.material===m)isw=true});
+    m.userData.c0=new THREE.Color().setRGB(...(isw?[1.1,.78,.7]:U?[1.45,.95,1.4]:[1.6,1.05,.9]));m.userData.e0=new THREE.Color(isw?0xff4a14:U?0xe0308a:0xff6a1e);m.emissiveIntensity=isw?2.4:1.9;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}}
 function bkAttach(e){const K=BKN;if(!K.st)bkLoad();const M=e.M;if(K.st!==2||!M||!M.duel||M.sk||e.hp<=0)return;const r=K.root,u=M.u,U=!!(S.duel&&S.duel.uber);
   if(r.parent)r.parent.remove(r);r.position.set(0,0,0);r.rotation.set(0,0,0);M.root.add(r);M.sk=r;u.body.visible=false;
-  for(const m of K.mats){let isw=false;if(K.sw)K.sw.traverse(o=>{if(o.material===m)isw=true});
-    m.userData.c0=new THREE.Color().setRGB(...(isw?[1.1,.78,.7]:U?[1.45,.95,1.4]:[1.6,1.05,.9]));m.userData.e0=new THREE.Color(isw?0xff4a14:U?0xe0308a:0xff6a1e);m.emissiveIntensity=isw?2.4:1.9;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}
+  bkColor(U);
   e.mat=new THREE.MeshLambertMaterial();/* 피격 깜빡임 값만 받는 그릇 — 실제 색은 bkTick에서 더해 줌 */
   K.cur='idle';K.prev=null;K.fadeT=0;K.tm={}}
 function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)return;const A=e.dA,e2=x=>1-Math.pow(1-clamp(x,0,1),2);
@@ -3953,7 +3954,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v396';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v397';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4748,12 +4749,16 @@ $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 let bossOpen=false,bossSel={b:'knight',m:null};const BOSS_IMG={};
 function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return BOSS_IMG[key];let url='';
   try{const W=300,H=340,rd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rd.setSize(W,H,false);rd.setPixelRatio(1);rd.setClearColor(0,0);
-    const sc=new THREE.Scene(),M=kind==='maw'?mawModel(U):knightModel(),g=new THREE.Group();g.add(M.root);if(kind==='knight'&&U)M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)});sc.add(g);
+    const sc=new THREE.Scene(),skin=kind==='knight'&&BKN.st===2&&BKN.root,M=kind==='maw'?mawModel(U):skin?{root:BKN.root}:knightModel(),g=new THREE.Group();let sv=null;
+    if(skin){/* v397: 보스 창 그림도 전사 3D 모델 — 전투 중인 보스가 쓰는 모델을 잠깐 빌려 대기 자세로 찍고 되돌림 */const r=BKN.root;sv={par:r.parent,ry:r.rotation.y,py:r.position.y};r.rotation.y=0;r.position.y=0;bkColor(U);for(const k in BKN.acts){const a=BKN.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}BKN.mx.update(0)}
+    g.add(M.root);if(kind==='knight'&&U&&!skin)M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)});sc.add(g);
     sc.add(new THREE.AmbientLight(0xffffff,.85));const d1=new THREE.DirectionalLight(0xffe0c0,1.1);d1.position.set(3,6,5);sc.add(d1);const d2=new THREE.DirectionalLight(kind==='maw'?0x8a50ff:0xff6a30,.8);d2.position.set(-5,2,-3);sc.add(d2);
     g.updateMatrixWorld(true);const bx=new THREE.Box3().setFromObject(g),sz=bx.getSize(new THREE.Vector3()),ct=bx.getCenter(new THREE.Vector3());
     const cam=new THREE.PerspectiveCamera(28,W/H,.1,200),R=Math.max(sz.y/1.0,sz.x/(1.0*W/H),sz.z*.6)*.5/Math.tan(14*Math.PI/180)*1.12;
     g.rotation.y=kind==='maw'?-.5:-.35;g.updateMatrixWorld(true);cam.position.set(ct.x,ct.y+sz.y*.05,ct.z+R);cam.lookAt(ct.x,ct.y,ct.z);
-    rd.render(sc,cam);url=rd.domElement.toDataURL('image/png');rd.dispose();try{rd.forceContextLoss()}catch(e){}}catch(e){url=''}
+    rd.render(sc,cam);url=rd.domElement.toDataURL('image/png');rd.dispose();try{rd.forceContextLoss()}catch(e){}
+    if(sv){const r=BKN.root;g.remove(r);if(sv.par)sv.par.add(r);r.rotation.y=sv.ry;r.position.y=sv.py;bkColor(!!(S.duel&&S.duel.uber))}}catch(e){url=''}
+  if(kind==='knight'&&BKN.st!==2){bkLoad();return url}/* 모델이 아직이면 캐시하지 않고, 받는 대로 다시 그림 */
   return BOSS_IMG[key]=url}
 function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   const card=(k,name,sub)=>{const U=bs.b===k&&bs.m==='u',img=bossPortrait(k,U);return `<button class="bcard${bs.b===k?' on':''}" data-bs="${k}"><div class="bimg">${img?`<img src="${img}" alt="">`:''}</div><b>${name}</b><small>${sub}</small></button>`};
