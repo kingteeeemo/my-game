@@ -1839,18 +1839,22 @@ const NM=(()=>{
 function makeHero(cls){return NM.hero(cls)}
 /* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
    기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
-const SKW={st:0,root:null,mx:null,acts:null,tip:null,swM:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,lastHp:0,pp:null,S:1.68,_v:new THREE.Vector3()};
+const SKW={st:0,root:null,mx:null,acts:null,tip:null,swM:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,lastHp:0,pp:null,S:1.85,_v:new THREE.Vector3()};
 function skwLoad(){if(SKW.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)SKW.st=3;return}SKW.st=1;
   new THREE.GLTFLoader().load('models/warrior.glb?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(SKW.S);let sw=null;
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=1.6;if(/sword/i.test(o.name)){o.material=o.material.clone();SKW.swM=o.material;sw=o}}});
+    if(SKW.swM&&SKW.swM.emissiveMap){/* v332: 무기 등급 빛 — 칼 전체가 은은하게(균열은 더 밝게) */const em=SKW.swM.emissiveMap,im=em.image;SKW.swCrack=em;
+      try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle='rgb(100,100,100)';g2.fillRect(0,0,cv.width,cv.height);
+        const t=new THREE.CanvasTexture(cv);t.flipY=em.flipY;t.encoding=em.encoding;SKW.swLift=t}catch(e){}}
     SKW.tip=new THREE.Object3D();SKW.tip.position.set(0,0,1.13);SKW.tip.scale.setScalar(1/SKW.S);(sw||r).add(SKW.tip);
     SKW.mx=new THREE.AnimationMixer(r);SKW.acts={};for(const c of g.animations){const a=SKW.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);SKW.acts[c.name]=a}
-    SKW.root=r;SKW.st=2;if(hero)skwAttach(hero)}catch(e){SKW.st=3}},undefined,()=>{SKW.st=3})}
+    SKW.root=r;SKW.st=2;delete PORT.warrior;if(hero)skwAttach(hero);if(!$('classSel').hidden)showClassSel()}catch(e){SKW.st=3}},undefined,()=>{SKW.st=3})}
 function skwAttach(g){const u=g&&g.userData;if(!u||u.cls!=='warrior')return;if(!SKW.st){SKW.st=.5;setTimeout(()=>{SKW.st=0;skwLoad()},0)}if(SKW.st!==2)return;
   const r=SKW.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
-  for(const c of [...SKW.tip.children])SKW.tip.remove(c);if(u.wGlow){if(u.wGlow.parent)u.wGlow.parent.remove(u.wGlow);SKW.tip.add(u.wGlow)}
+  for(const c of [...SKW.tip.children])SKW.tip.remove(c);
   SKW.cur='idle';SKW.prev=null;SKW.fadeT=0;SKW.tm={};SKW.hitT=0;SKW.lastHp=P.hp;SKW.pp=null;skwGear()}
-function skwGear(){if(!SKW.swM||!hero||!hero.userData.sk)return;const wr=hero.userData.wRar||0;SKW.swM.emissive.setHex([0xffffff,0x8ab0ff,0xffe07a,0xff9a4a][wr])}
+function skwGear(){if(!SKW.swM||!hero||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=SKW.swM;
+  if(wr>=1&&SKW.swLift){m.emissiveMap=SKW.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,.9,.85,.9][wr])}else{m.emissiveMap=SKW.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
 function skwTick(dt){const u=hero&&hero.userData;if(!u||!u.sk||SKW.st!==2)return;
   const spd=SKW.pp&&dt>0?Math.hypot(P.pos.x-SKW.pp.x,P.pos.z-SKW.pp.z)/dt:0;SKW.pp={x:P.pos.x,z:P.pos.z};
   if(P.hp<SKW.lastHp-.5&&P.hp>0)SKW.hitT=.35;SKW.lastHp=P.hp;SKW.hitT-=dt;
@@ -3761,7 +3765,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v331';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v332';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3937,13 +3941,14 @@ function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gol
 const PORT={};
 function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
   sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.75));const d=new THREE.DirectionalLight(0xb8c8e8,.8);d.position.set(-3,5,4);sc.add(d);const w=new THREE.PointLight(0xffa25a,1.4,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
-  const m=makeHero(cls);m.rotation.y=.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+  let m,skB=null;if(cls==='warrior'&&SKW.st===2){/* v332: 전사 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 */const r=SKW.root;skB={par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
+    for(const k in SKW.acts){const a=SKW.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}SKW.mx.update(0)}else m=makeHero(cls);m.rotation.y=.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,W/H,.1,50);cam.position.set(1.3,1.8,5.1);cam.lookAt(0,1.14,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);renderer.setRenderTarget(rt);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);renderer.setClearColor(cc,ca);
   const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(prev);
   const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H);for(let y=0;y<H;y++)im.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);g.putImageData(im,0,0);
-  rt.dispose();return PORT[cls]=c.toDataURL()}catch(e){return ''}}
-function showClassSel(){
+  rt.dispose();if(skB){const r=SKW.root;m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}return PORT[cls]=c.toDataURL()}catch(e){return ''}}
+function showClassSel(){if(!SKW.st)skwLoad();
   let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards">`;
   for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span><span class="en">${c.en}</span>${c.n}<small>${c.d}<br>주력 스킬: ${c.opts.map(s=>SK[s].n).join(' / ')} 중 택1</small></span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
