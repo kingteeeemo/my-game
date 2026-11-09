@@ -1840,12 +1840,13 @@ function makeHero(cls){return NM.hero(cls)}
 /* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
    기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
 /* ===== v330~v337 스킨 3D 캐릭터(전사·마법사) — AI 생성 모델 + Mixamo 뼈대. 절차적 몸(u.body)은 숨기고 애니메이션만 유지해 기존 코드가 그대로 돌아가게 함 ===== */
-const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,1.11,0],lift:90}};
+const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90}};
 const SKN={};function skMk(cls){return SKN[cls]||(SKN[cls]={cls,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:SKC[cls].S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null})}
 const SKW=skMk('warrior');skMk('mage');/* SKW: 전사 상태(기존 이름 유지) */
 function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
   new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(K.S);let sw=null;
-    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=cls==='mage'?2.4:1.6;if(C.wp.test(o.name)){o.material=o.material.clone();K.swM=o.material;sw=o;K.sw=o}}});
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=cls==='mage'?2.4:1.6;if(o.material.name==='mage_gem'){o.material=o.material.clone();K.gemM=o.material}else if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone)){o.material=o.material.clone();K.swM=o.material;sw=o}}});
+    if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;/* v338: 지팡이가 몸통+보석 두 메시로 나뉘면 묶음(Group)을 지팡이로 */K.sw=sw;
     if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
       try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
         const t=new THREE.CanvasTexture(cv);t.flipY=em.flipY;t.encoding=em.encoding;K.swLift=t}catch(e){}}
@@ -1871,7 +1872,13 @@ function skmStaff(K,aim,dt){const sw=K.sw,hand=K.hand;if(!sw||!hand)return;hand.
   const fwd=new THREE.Vector3(Math.sin(P.face),0,Math.cos(P.face)),up=new THREE.Vector3(0,1,0),ax=aim>0?up.clone().lerp(fwd.clone().multiplyScalar(1).add(new THREE.Vector3(0,.25,0)).normalize(),aim).normalize():up;
   const tq=new THREE.Quaternion().setFromUnitVectors(up,ax);if(!K.stQ)K.stQ=tq.clone();else K.stQ.slerp(tq,1-Math.exp(-dt*(aim>0?14:7)));
   const hq=hand.getWorldQuaternion(K._q).invert();sw.quaternion.copy(hq).multiply(K.stQ).multiply(K.V0)}
-function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;
+/* v338: 마법사 지팡이 끝 보석 — 무기 강화 단계에 비례해 밝아짐(색은 무기 등급), 끝에 은은한 광채 */
+const GEMC=[0x7ad8ff,0x5a86ff,0xffc83a,0xff7a2a];
+function gemLv(){const L=typeof enhL==='function'?enhL('weapon'):0;return Math.min(1,Math.sqrt(Math.max(0,L)/40))}
+function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.12*Math.sin(time*3.2);K.gemM.emissive.setHex(c);K.gemM.emissiveIntensity=(.3+1.3*k)*pl*(1+boost);
+  if(!K.gemG){K.gemG=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:c,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}))}
+  if(K.gemG.parent!==K.tip)K.tip.add(K.gemG);K.gemG.material.color.setHex(c);K.gemG.material.opacity=.35+.5*k;K.gemG.scale.setScalar((.25+1.1*k)*pl*(1+.6*boost))}
+function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
 function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;const mage=K.cls==='mage';
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
@@ -1900,7 +1907,8 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(mage)skmStaff(K,aim,dt);
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
-  if(K.swM){const on=!mage&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}}
+  if(K.swM){const on=!mage&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}
+  if(mage&&K.gemM)skwGem(K,u.wRar||0,gemLv(),aim*.6)}
 /* 착용 장비 → 외형: 갑옷 등급 = 금속 테두리 색, 투구 = 투구/두건 표시, 무기 등급 = 날·수정 빛, 신발 = 신발 색 */
 function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar=eq.armor?eq.armor.rar:0,wr=eq.weapon?eq.weapon.rar:0;
   u.trim.color.setHex(RARC[ar]);u.trim.emissive.setHex(ar>=2?RARC[ar]:0);u.trim.emissiveIntensity=ar>=3?.55:ar>=2?.25:0;
@@ -3789,7 +3797,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v337';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v338';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3966,7 +3974,7 @@ const PORT={};
 function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
   sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.75));const d=new THREE.DirectionalLight(0xb8c8e8,.8);d.position.set(-3,5,4);sc.add(d);const w=new THREE.PointLight(0xffa25a,1.4,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(cls==='mage'?1.42:1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
-    for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1);P.face=f0}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,W/H,.1,50);cam.position.set(1.3,1.8,5.1);cam.lookAt(0,1.14,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);renderer.setRenderTarget(rt);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);renderer.setClearColor(cc,ca);
   const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(prev);
