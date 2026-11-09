@@ -3880,7 +3880,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v366';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v367';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4501,6 +4501,12 @@ function ivAct(it,cur){if(!it)return '';const a=dpsWith(it),b=cur?dpsWith(cur):s
 function ivEq(kind){return `<div class="iveq ${kind}">${EQS.map(k=>{const it=S.eq[k],L=enhL(k),c=it?RAR[it.rar].c:'#555',sp=spOf(it);
   return `<button class="ivq${eqSel===k?' on':''}" data-eq="${k}" style="--rc:${c}"><span class="k">${kind==='list'?SLOTN[k]:SLOTEN[k]+(kind==='paper'?' · '+SLOTN[k]:'')}${L?` <b class="enh">+${L}</b>`:''}</span><b style="color:${c}">${it?it.name:'비어 있음'}</b><small>${it?`${kind==='paper'?RAR[it.rar].n+' · ':''}iLv ${it.ilvl}`:''}${sp?' <i class="spt">★</i>':''}</small></button>`}).join('')}</div>`}
 let invFilter='all',lockMode=false;/* v131 가방 종류별 보기 */
+/* v367: 기타 — 각인의 서 · 상급 각인의 서 · 확정 강화 주문서 · 물약 (보유 수량 표시) */
+function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=sc.length-a;
+  if(a)o.push({n:'각인의 서',k:a,c:'#5ae0d0'});if(b)o.push({n:'상급 각인의 서',k:b,c:'#c890ff'});
+  if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffd24a'});
+  for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c})}
+  return o}
 function renderInv(){
   const g=gear(),mode=invMode(),sh=$('invSheet');sh.className='sheet inv-'+mode;$('inv').classList.toggle('center',mode!=='p');
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null;
@@ -4508,10 +4514,11 @@ function renderInv(){
   const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):(mode==='l'?'<div class="ivact ph"></div>':'');
   const foot=`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
-  const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
-  const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금 ${lockMode?'ON':'OFF'}</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
-  let bag=filt+`<div class="bag${lockMode?' lkmode':''}">`;const shown=invFilter==='all'?S.inv:S.inv.filter(ifOk);
-  for(let i=0;i<(invFilter==='all'?BAG:Math.max(shown.length,1));i++){const it=shown[i];if(!it){bag+=`<div class="tile none"></div>`;continue}
+  const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구'],['etc','기타']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
+  const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:k==='etc'?etcList().length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
+  let bag=filt+`<div class="bag${lockMode?' lkmode':''}">`;const shown=invFilter==='all'?S.inv:invFilter==='etc'?[]:S.inv.filter(ifOk);
+  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=`<div class="tile etc" style="border-color:${e.c}"><span style="color:${e.c}">${e.n}</span><small>×${e.k}</small></div>`;if(!L.length)bag+=`<div class="tile none"></div>`}
+  else for(let i=0;i<(invFilter==='all'?BAG:Math.max(shown.length,1));i++){const it=shown[i];if(!it){bag+=`<div class="tile none"></div>`;continue}
     const up=isBetter(it,S.eq[it.slot]);bag+=`<button class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" data-i="${it.id}" style="border-color:${RAR[it.rar].c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">🔒</span>':''}${SLOTN[it.slot]}<small>iLv ${it.ilvl}</small></button>`}
   bag+=`</div>`;
   let h;
