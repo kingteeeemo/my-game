@@ -136,6 +136,7 @@ table.stage .pm.wide{padding:4px 8px;font-size:11px}
 .tile{aspect-ratio:1;max-width:100%;border-radius:8px;border:1.5px solid var(--line);background:#202028;color:var(--ink);font:800 10px var(--ko);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;padding:0}
 .tile small{font:500 9px var(--en);font-stretch:87%;color:var(--muted)}
 .tile .up{position:absolute;top:2px;right:4px;color:#7fe07a;font-size:10px}.tile .lk{position:absolute;bottom:1px;right:2px;font-size:9px}.tile.locked{box-shadow:inset 0 0 0 1px rgba(255,210,74,.5)}
+.footr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.hideup{padding:4px 9px;border-radius:14px;border:1px solid var(--line);background:#202028;color:var(--muted);font:700 11px var(--ko)}.hideup.on{color:var(--ember);border-color:var(--ember)}
 .ifilt{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}.ifilt button{padding:4px 8px;border-radius:14px;border:1px solid var(--line);background:#202028;color:var(--ink);font:700 11px var(--ko)}.ifilt button.on{border-color:var(--ember);color:var(--ember);background:rgba(255,138,58,.12)}.ifilt button:disabled{opacity:.35}.ifilt i{font-style:normal;color:var(--muted);margin-left:3px;font-size:10px}.lockon{border-color:#ffd24a!important;color:#ffd24a!important}
 .tile.sel{outline:2px solid var(--gem);outline-offset:1px}
 .tile.none{border-style:dashed;opacity:.35}
@@ -2271,9 +2272,9 @@ function duelStart(e,k){const a=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),p0={
         for(let j=1;j<5;j++)later(j*.04,()=>{const d=j*4.5,q={x:p0.x+Math.sin(b)*d,z:p0.z+Math.cos(b)*d};blastFx(q,1.3)})})}};
     wave(0,W);if(R)later(W+.1,()=>wave(Math.PI/8,.7*sp))}
   else if(k==='donut'){/* 화염 고리: 보스 주변만 안전. 반경 5~18 바깥 고리 전체가 불탐 → 보스에게 붙어야 함 */
-    const W=1.35*sp;e.dA={k,t:0,a,dur:W+.5,hit:W};donutTele(p0,5,ARENA_R+1,W,()=>{shake=Math.max(shake,.4);
-      for(let i=0;i<24;i++){const t=i/24*6.28,r=rand(6,ARENA_R);blastFx({x:p0.x+Math.cos(t)*r,z:p0.z+Math.sin(t)*r},1.6)}
-      const d=Math.hypot(P.pos.x-p0.x,P.pos.z-p0.z);if(P.hp>0&&d>5)dh(.5)})}
+    const W=1.35*sp;e.dA={k,t:0,a,dur:W+.5,hit:W};donutTele(p0,DONUT_SAFE,ARENA_R+1,W,()=>{shake=Math.max(shake,.4);
+      for(let i=0;i<24;i++){const t=i/24*6.28,r=rand(DONUT_SAFE+1,ARENA_R);blastFx({x:p0.x+Math.cos(t)*r,z:p0.z+Math.sin(t)*r},1.6)}
+      const d=Math.hypot(P.pos.x-p0.x,P.pos.z-p0.z);if(P.hp>0&&d>DONUT_SAFE)dh(.5)})}
   else if(k==='meteor'){/* 불꽃 낙하: 검을 하늘로 치켜들면 내 위치와 주변에 불덩이 7~10개가 차례로 떨어짐 */
     const n=R?10:7,W=.8*sp;e.dA={k,t:0,a,dur:1.1+n*.14,hit:.4};
     for(let i=0;i<n;i++)later(.35+i*.14,()=>{const t=rand(0,6.28),r=i===0?0:rand(2.5,8),q={x:P.pos.x+Math.cos(t)*r,z:P.pos.z+Math.sin(t)*r},dd=Math.hypot(q.x,q.z);if(dd>ARENA_R-1.5){q.x*=(ARENA_R-1.5)/dd;q.z*=(ARENA_R-1.5)/dd}
@@ -2282,6 +2283,7 @@ function duelStart(e,k){const a=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),p0={
     const back={x:e.pos.x-Math.sin(a)*8,z:e.pos.z-Math.cos(a)*8},dd=Math.hypot(back.x,back.z);if(dd>ARENA_R-3){back.x*=(ARENA_R-3)/dd;back.z*=(ARENA_R-3)/dd}
     e.dA={k:'slam',t:0,a,dur:.7,hit:.55,from:p0,to:back,lp:1};later(.75,()=>{if(e.hp>0&&!e.dA)duelStart(e,'wave')})}
   e.lastK=k}
+const DONUT_SAFE=10;/* v364: 잿불 검귀 화염 고리 안전 구역(초록 원) 반경 5 → 10 */
 function donutTele(p,r0,r1,dur,end,noSafe){const g=new THREE.Group(),bg=new THREE.Mesh(new THREE.RingGeometry(r0,r1,64),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false})),
     fill=new THREE.Mesh(new THREE.RingGeometry(r0,r1,64),new THREE.MeshBasicMaterial({color:0xff5a2a,transparent:true,opacity:0,depthWrite:false})),safe=flatMesh(ringGeo,0x7fe07a,.9);
   for(const m of [bg,fill])m.rotation.x=-Math.PI/2;safe.scale.set(r0,r0,1);g.add(bg,fill);if(!noSafe)g.add(safe);g.position.set(p.x,.07,p.z);scene.add(g);
@@ -3234,7 +3236,7 @@ function upgrades(){const out=[];for(const k of EQS){let best=null;for(const it 
 function equipBest(){const ups=upgrades();for(const it of ups){const i=S.inv.indexOf(it),old=S.eq[it.slot];S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1)}
   if(ups.length){refreshMax();save();feed(`장비 ${ups.length}개 자동 장착`,'#7fe07a')}refreshUpBtn();return ups.length}/* v81: 화면 중앙 알림 없음 */
 let upSig='',upUntil=0,upTm=0;/* v126: 자동 장착 알림은 4초 후 사라짐 (장비창의 「자동 장착」으로 계속 가능) */
-function refreshUpBtn(){const ups=upgrades(),n=ups.length,b=$('autoEq');if(!n){upSig='';b.hidden=true;return}
+function refreshUpBtn(){const ups=upgrades(),n=ups.length,b=$('autoEq');if(!n||S.hideUp){upSig='';b.hidden=true;return}/* v364: 장비창에서 숨김 */
   const sig=ups.map(x=>x.id).join(',');if(sig!==upSig){upSig=sig;upUntil=Date.now()+4000;clearTimeout(upTm);upTm=setTimeout(refreshUpBtn,4050)}
   b.hidden=Date.now()>upUntil;if(!b.hidden)b.innerHTML=`<span class="up">▲</span> <span class="l2">더 좋은 장비 ${n}개</span><span class="l2"><b>자동 장착</b></span>`}
 const feedEl=$('feed');
@@ -3876,7 +3878,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v363';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v364';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4502,7 +4504,7 @@ function renderInv(){
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null;
   const head=`<div class="shead"><div><div class="chap">Equipment · Bag</div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
   const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):(mode==='l'?'<div class="ivact ph"></div>':'');
-  const foot=`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span>${upgrades().length?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}</div>
+  const foot=`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
   const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금 ${lockMode?'ON':'OFF'}</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
@@ -4532,6 +4534,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.id==='iSellLow'){const g=S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0);S.inv=S.inv.filter(x=>x.rar>=2||x.lock);S.gold+=g;invSel=null;save();renderInv();refreshUpBtn();if(g)toast('판매 완료',`+${fmtG(g)} 골드`);return}
   if(b.id==='iSellAll'){if(clearArm&&Date.now()-clearArm<3000){const g=S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0);S.inv=S.inv.filter(x=>x.lock);S.gold+=g;clearArm=0;invSel=null;save();renderInv();refreshUpBtn();if(g)toast('모두 판매',`+${fmtG(g)} 골드`);return}clearArm=Date.now();renderInv();return}
   if(b.id==='iAuto'){equipBest();invSel=null;renderInv();return}
+  if(b.id==='iHideUp'){S.hideUp=!S.hideUp;save();refreshUpBtn();renderInv();return}
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
