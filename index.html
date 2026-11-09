@@ -3384,7 +3384,7 @@ function castSkill(slot){
   if(b.kind==='pillar'&&!pillarTargets(pcMode?mouseW:P.pos).length){if(P.mpWarn<=0){toast('사거리 안에 적이 없습니다','사술 폭발은 적이 있어야 발동합니다');P.mpWarn=1.5}return}/* v180: 사거리 안에 적이 없으면 발동하지 않음(마나·대기시간 소모 없음) */
   P.mp-=cost;P.cd[slot]=st.cd;
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
-  const ct=b.kind==='whirl'?0:castTime(id,st)*(b.kind==='quake'?.6:1);/* v333: 대지 분쇄는 칼 들고 있는 시간 -40% *//* 회전 베기는 시전시간 없음 */
+  const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
   if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
   castFire(slot,id)}
 const CAST_K=.25,CAST_MAX=.6;
@@ -3767,7 +3767,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v333';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v334';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
