@@ -252,6 +252,13 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .card small{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
 .card .en{font-family:var(--en);font-stretch:87%;font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:2px}
 .cls{padding:16px}
+/* v340: 직업 선택 — 설명 없이 초상화+이름만, 가로 배치(세로 화면: 2개씩, 마지막 홀수는 가운데 / 가로 화면·PC: 한 줄) */
+#classSheet .cards.cg{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:10px}
+#classSheet .card.cls{flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:8px;padding:10px 8px 12px;flex:0 0 calc(50% - 5px);min-width:0}
+#classSheet .card.cls .cport{width:100%;height:auto;aspect-ratio:180/230;max-height:46vh;border-radius:12px}
+#classSheet .card.cls .cnm{font:800 17px var(--ko)}#classSheet .card.cls .cnm .en{font-size:10px;margin-bottom:3px}
+@media (orientation:landscape),(min-width:760px){#classSheet{max-width:min(860px,calc(100% - 32px))}#classSheet .card.cls{flex:0 0 calc(33.333% - 7px)}#classSheet .card.cls .cport{width:auto;max-width:100%;height:calc(100vh - 250px);max-height:340px;min-height:130px}}
+@media (orientation:landscape) and (max-height:520px){#classSheet .hint{display:none}}
 .guide{position:fixed;inset:0;z-index:45}
 .dlist{display:grid;gap:6px;margin:4px 0 10px}.dlist div{background:#26232e;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}.dlist small{color:#a8a0b4;font-size:12px}
 .duelrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.duelrow .duelc{flex-direction:column;align-items:stretch;justify-content:space-between}.duelrow .duelc.uber{border-color:rgba(200,144,255,.55)}.duelrow .duelc .rw{margin-top:6px;line-height:1.5}.duelrow .duelc button{width:100%;padding:10px}/* v131 결투장 좌(일반)·우(우버) */
@@ -3800,7 +3807,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v339';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v340';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3974,7 +3981,7 @@ function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gol
   setMap(true);applyTheme();resetWorld();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('tdone'),900)}
 /* v92 직업 선택 카드에 들어갈 캐릭터 초상(실제 모델을 작은 화면에 한 번 그려 이미지로 저장) */
 const PORT={};
-function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
+function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=240,H=306,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
   sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.75));const d=new THREE.DirectionalLight(0xb8c8e8,.8);d.position.set(-3,5,4);sc.add(d);const w=new THREE.PointLight(0xffa25a,1.4,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(cls==='mage'?1.42:1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
     for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
@@ -3984,8 +3991,8 @@ function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,r
   const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H);for(let y=0;y<H;y++)im.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);g.putImageData(im,0,0);
   rt.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}return PORT[cls]=c.toDataURL()}catch(e){return ''}}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st)skwLoad(c);
-  let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards">`;
-  for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span><span class="en">${c.en}</span>${c.n}<small>${c.d}<br>주력 스킬: ${c.opts.map(s=>SK[s].n).join(' / ')} 중 택1</small></span></button>`}
+  let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg">`;
+  for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
 }
