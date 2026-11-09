@@ -1218,7 +1218,7 @@ function ppSize(){const v=renderer.getDrawingBufferSize(new THREE.Vector2()),w=M
     const o2=Object.assign({depthBuffer:false},o);PP.a=new THREE.WebGLRenderTarget(1,1,o2);PP.b=new THREE.WebGLRenderTarget(1,1,o2);PP.c=new THREE.WebGLRenderTarget(1,1,o2);PP.d=new THREE.WebGLRenderTarget(1,1,o2)}
   PP.rt.setSize(w,h);PP.bw=Math.max(1,w>>1);PP.bh=Math.max(1,h>>1);PP.a.setSize(PP.bw,PP.bh);PP.b.setSize(PP.bw,PP.bh);PP.cw=Math.max(1,w>>2);PP.ch=Math.max(1,h>>2);PP.c.setSize(PP.cw,PP.ch);PP.d.setSize(PP.cw,PP.ch);PP.comp.uniforms.res.value.set(w,h)}
 function ppPass(mat,target){PP.quad.material=mat;renderer.setRenderTarget(target);renderer.render(PP.sc,PP.cam)}
-function renderFrame(t){ipFlush();
+function renderFrame(t){ipFlush();novaFlush();
   if(!GQS[GUQ].post){renderer.setRenderTarget(null);renderer.render(scene,camera);return}
   if(!PP.rt)ppSize();
   renderer.setRenderTarget(PP.rt);renderer.render(scene,camera);
@@ -2725,9 +2725,10 @@ const PAL_FIRE={c:[0xfff4d0,0xff8a20,0x521408],core:[0xffffff,0xffd080,0xff6a10]
   PAL_BOLT={c:[0xf4f0ff,0xa070ff,0x1a0a40],core:[0xffffff,0xe0d0ff,0x8a5aff],ring:0xc0a8ff,fl:0xb8a0ff,st:[0xffffff,0x9a7aff],sp:[0xffffff,0xb08aff],smoke:0,ember:0xb090ff,fast:1,noring:1,soft:1.7},
   PAL_ICE={c:[0xffffff,0x9ae0ff,0x0c2a58],core:[0xffffff,0xdff6ff,0x6ab8ff],ring:0xbfe8ff,fl:0x9ad8ff,st:[0xffffff,0x4a9aff],sp:[0xffffff,0x9ad8ff],smoke:0,ember:0,fast:1,noring:1,soft:1.7},
   PAL_DUST={c:[0xcdb9a0,0x8a7258,0x2a1e16],core:[0xffe8c0,0xb09070,0x6a4a30],ring:0xd8c0a0,fl:0xc8a070,st:[0xd8c8b0,0x6a4a30],sp:[0xc8b090,0x4a3a2a],smoke:0x4a3c34,ember:0,fast:1,dim:1};
-const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fs=`precision highp float;varying vec2 vUv;uniform float k,seed,ff;uniform vec3 col,core;uniform sampler2D tex;${FIRE_NOISE}
-  void main(){vec2 q=vUv;float d=length(q);if(d>1.)discard;float a=atan(q.y,q.x),an=a/6.28318+.5;
+const NOVA_GL2=renderer.capabilities.isWebGL2;/* v315: WebGL2면 인스턴스(판마다 k·seed·ff를 flat varying으로 — 보간 오차 없이 uniform과 동일), WebGL1이면 이전처럼 판마다 메시+uniform */
+const NOVA_MAT=(()=>{const vs=NOVA_GL2?`attribute vec3 iP;varying vec2 vUv;flat varying vec3 vP;void main(){vUv=uv*2.-1.;vP=iP;gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.);}`:`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fs=`precision highp float;varying vec2 vUv;${NOVA_GL2?'flat varying vec3 vP;out vec4 fragColor;\n#define gl_FragColor fragColor\n':'uniform float k,seed,ff;'}uniform vec3 col,core;uniform sampler2D tex;${FIRE_NOISE}
+  void main(){${NOVA_GL2?'float k=vP.x,seed=vP.y,ff=vP.z;':''}vec2 q=vUv;float d=length(q);if(d>1.)discard;float a=atan(q.y,q.x),an=a/6.28318+.5;
     /* v294: 참고 영상 — 아주 빠르게 촥 퍼지는 회백색 성에. 가장자리는 선이 아니라 바깥으로 흩날리는 결·줄기, 바닥엔 금 간 성에 질감이 남음 */
     float kr=min(1.,k*5.);float e=1.-(1.-kr)*(1.-kr);float fr=.21+.55*e;/* v301: 충격파 고리(R×.25→1.1, .28초, 같은 완화)와 정확히 같은 반지름으로 펴짐 (메시 R×1.32 기준) */
     float fade=1.-smoothstep(.5,1.,k);
@@ -2746,7 +2747,21 @@ const NOVA_MAT=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Posi
     float ringG=exp(-max(0.,-sr)/.14)*inside*.18*(1.-k*.5);
     vec3 c=vec3(.92,.95,.98)*frost*.9+vec3(.72,.86,1.)*(ringG+sp*.38);
     float al=min(1.,frost);/* v303: 더 진한 흰색(색/알파 비 .68→.9) — 겹친 이전 바닥은 녹아 사라지므로(v301) 쌓임 걱정 없음 */float m=fade*ff*(.72+.28*smoothstep(.08,.4,k));/* v303: 전체 ×.85 제거, 초반 55%→72% */gl_FragColor=vec4(c*m,clamp(al*m,0.,1.));}`;
-  return()=>mtake('nova',()=>new THREE.ShaderMaterial({vertexShader:vs,fragmentShader:fs,uniforms:{k:{value:0},seed:{value:0},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:null}},transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide}),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1})})();
+  const base=()=>({vertexShader:vs,fragmentShader:fs,transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,side:THREE.DoubleSide});
+  if(!NOVA_GL2)return()=>mtake('nova',()=>new THREE.ShaderMaterial(Object.assign(base(),{uniforms:{k:{value:0},seed:{value:0},ff:{value:1},col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:frostTex}}})),m=>{const u=m.uniforms;u.k.value=0;u.seed.value=Math.random()*10;u.ff.value=1});
+  let M=null;return()=>M||(M=new THREE.ShaderMaterial(Object.assign(base(),{glslVersion:THREE.GLSL3,uniforms:{col:{value:new THREE.Color(0x7fc8ff)},core:{value:new THREE.Color(0xffffff)},tex:{value:frostTex}}})))})();
+/* v315: 서리 폭발 바닥 판 인스턴스 — 판 전부를 InstancedMesh 1개(그리기 1번)로. 셰이더 계산은 동일, 판마다 k·seed·ff만 속성으로 전달. 그리는 순서는 three의 투명체 정렬과 똑같이(카메라에서 먼 것부터) 매 프레임 정렬 */
+const NOVA_CAP_I=256;let NOVA_IM=null;const NOVA_V=new THREE.Vector3(),NOVA_PM=new THREE.Matrix4();
+/* 안개 판(mists, renderOrder 2)과의 그리기 순서도 이전과 같게: 이전엔 판마다 카메라 거리로 안개보다 앞/뒤가 정해졌으므로, 안개 2장의 깊이를 기준으로 판을 3묶음(뒤·사이·앞)으로 나눠 묶음마다 InstancedMesh 1개를 그 묶음 깊이에 놓음 */
+function novaIM(){if(!NOVA_GL2)return null;if(NOVA_IM)return NOVA_IM;NOVA_IM=[];for(let b=0;b<3;b++){const g=fxPlane.clone(),ip=new THREE.InstancedBufferAttribute(new Float32Array(NOVA_CAP_I*3),3);ip.setUsage(THREE.DynamicDrawUsage);g.setAttribute('iP',ip);
+  const im=new THREE.InstancedMesh(g,NOVA_MAT(),NOVA_CAP_I);im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);im.frustumCulled=false;im.count=0;im.renderOrder=2;im.userData.ip=ip;scene.add(im);NOVA_IM.push(im)}return NOVA_IM}
+function novaFlush(){if(!NOVA_IM)return;const L=NOVA_SH;if(!L.length&&!NOVA_IM[0].count&&!NOVA_IM[1].count&&!NOVA_IM[2].count)return;
+  camera.updateMatrixWorld();NOVA_PM.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);const pz=p=>{NOVA_V.setFromMatrixPosition(p.matrixWorld).applyMatrix4(NOVA_PM);return NOVA_V.z};
+  let z0=-Infinity,z1=-Infinity;if(typeof mists!=='undefined'&&mists[0].visible){const a=pz(mists[0]),b=pz(mists[1]);z0=Math.max(a,b);z1=Math.min(a,b)}/* z0: 더 먼 안개, z1: 더 가까운 안개 (클립 z 클수록 멂) */
+  for(const o of L){NOVA_V.set(o.px,.07,o.pz).applyMatrix4(NOVA_PM);o.vz=NOVA_V.z}L.sort((a,b)=>b.vz-a.vz);/* 먼 것부터 (three reversePainterSortStable과 동일) */
+  const cnt=[0,0,0];for(const o of L){const b=o.vz>z0?0:o.vz>z1?1:2,im=NOVA_IM[b],n=cnt[b];if(n>=NOVA_CAP_I)continue;if(n===0)im.position.set(o.px,.07,o.pz);/* 묶음 메시의 정렬 기준점 = 묶음에서 가장 먼 판 */
+    IPO.position.set(o.px-im.position.x,.07-im.position.y,o.pz-im.position.z);IPO.rotation.set(-Math.PI/2,0,o.rz);IPO.scale.setScalar(o.s);IPO.updateMatrix();im.setMatrixAt(n,IPO.matrix);const ip=im.userData.ip;ip.array[n*3]=o.k;ip.array[n*3+1]=o.seed;ip.array[n*3+2]=o.ffv;cnt[b]++}
+  for(let b=0;b<3;b++){const im=NOVA_IM[b];im.count=cnt[b];im.instanceMatrix.needsUpdate=true;im.userData.ip.needsUpdate=true;im.updateMatrixWorld()}}
 function fireBurst(p,R,FK,heavy,pal=PAL_FIRE){const q=QM(),FA=pal.fast?.75:1;FK*=1.25;/* v168: 폭발 밝기 +25% */
   /* 불덩이 2겹: 큰 몸체(느리게 식음) + 작은 심지(빠르게 하얗게 터졌다가 사라짐) */
   const RV=Math.min(R,4);/* 그림 크기는 4m까지만(피해 반경이 커도 화면을 덮지 않게) */
@@ -2794,9 +2809,11 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
     /* v190: 얼음판 감쇠는 실제로 자리가 겹치는 폭발만 셈 — 보주가 퍼져 서로 떨어지면 다시 원래 진하기 */
     const FS=.85;/* v193: 개수와 무관하게 항상 5개 겹칠 때 밝기(.3)로 고정 — 1개일 때도 · v287: .85 — 눈처럼 거의 불투명한 흰 바닥 */
     /* v182: 바닥에 촥 펼쳐지는 서리 파동(셰이더) — 들쭉날쭉한 결정 마루가 피해 반경까지 번져 나가고, 그 뒤로 중심에서 뻗는 얼음 결 무늬와 반짝임이 남았다가 녹아 사라짐 */
-    for(let i=NOVA_SH.length-1;i>=0;i--){const o=NOVA_SH[i];if(o.t>=o.dur){NOVA_SH.splice(i,1);continue}const dx=o.m.position.x-p.x,dz=o.m.position.z-p.z;if(circOv(Math.hypot(dx,dz),R,o.R)>=.6){if(!o.melt){o.melt=time;o.m0=o.ff}NOVA_SH.splice(i,1)}}/* v301·v304: 이전 바닥 면적의 60% 이상이 새 바닥에 덮일 때만 이전 바닥이 녹아 사라짐 (그 이하 겹침은 그대로 둠) */
-    {const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*FS*DK;u.tex.value=frostTex;frostTex.wrapS=frostTex.wrapT=THREE.RepeatWrapping;frostTex.needsUpdate=true;/* v187: 타일링 */
-      m.renderOrder=2;const sh={cos:1,m,R,ff:u.ff.value,t:0,dur:1.4,upd(k){u.k.value=k;if(sh.melt){const f=1-(time-sh.melt)/.2;if(f<=0){sh.t=sh.dur;u.ff.value=0}else u.ff.value=sh.m0*f}}};fx.push(sh);NOVA_SH.push(sh)}/* v302: 겹쳐 깔리면 이전 바닥은 0.2초에 걸쳐 녹아 사라짐 *//* v294: 1.4초 (빨리 퍼지고 오래 남음) */
+    for(let i=NOVA_SH.length-1;i>=0;i--){const o=NOVA_SH[i];if(o.t>=o.dur){NOVA_SH.splice(i,1);continue}if(o.melt)continue;const dx=o.px-p.x,dz=o.pz-p.z;if(circOv(Math.hypot(dx,dz),R,o.R)>=.6){o.melt=time;o.m0=o.ffv}}/* v301·v304: 이전 바닥 면적의 60% 이상이 새 바닥에 덮일 때만 이전 바닥이 녹아 사라짐 (그 이하 겹침은 그대로 둠) */
+    if(NOVA_GL2){novaIM();const seed=Math.random()*10,rz=Math.random()*6.28;/* 난수 소비 순서: 이전엔 재질 꺼낼 때 seed, 그다음 회전 */
+      const sh={cos:1,m:FXD,R,px:p.x,pz:p.z,rz,s:R*1.32,seed,k:0,ffv:ka*FS*DK,vz:0,t:0,dur:1.4,upd(k){sh.k=k;if(sh.melt){const f=1-(time-sh.melt)/.2;if(f<=0){sh.t=sh.dur;sh.ffv=0}else sh.ffv=sh.m0*f}},end(){const i=NOVA_SH.indexOf(sh);if(i>=0)NOVA_SH.splice(i,1)}};fx.push(sh);NOVA_SH.push(sh)}
+    else{const m=new THREE.Mesh(fxPlane,NOVA_MAT());m.rotation.x=-Math.PI/2;m.rotation.z=Math.random()*6.28;m.position.set(p.x,.07,p.z);m.scale.setScalar(R*1.32);scene.add(m);const u=m.material.uniforms;u.ff.value=ka*FS*DK;
+      m.renderOrder=2;const sh={cos:1,m,R,px:p.x,pz:p.z,ffv:u.ff.value,t:0,dur:1.4,upd(k){u.k.value=k;if(sh.melt){const f=1-(time-sh.melt)/.2;if(f<=0){sh.t=sh.dur;u.ff.value=0}else u.ff.value=sh.m0*f}},end(){const i=NOVA_SH.indexOf(sh);if(i>=0)NOVA_SH.splice(i,1)}};fx.push(sh);NOVA_SH.push(sh)}/* WebGL1 폴백: 이전 방식 *//* v302: 겹쳐 깔리면 이전 바닥은 0.2초에 걸쳐 녹아 사라짐 *//* v294: 1.4초 (빨리 퍼지고 오래 남음) */
     popFx(p.x,.8,p.z,R*.3,R*.7,.1,0xffffff,.06*ka*FK);
     if(DK){const fk=Math.max(.6,FK);/* v296: 얼음 보주 끝 폭발과 똑같은 충격파 — 고리(.7, 0xaee0ff) + 팍 터지는 섬광 원 + 중앙 플래시. 연속 시전 감쇠는 .6까지만 */
       groundFx(p,shockTex,0xaee0ff,R*.25,R*1.1,.28,.7*fk,true,.08);
@@ -3676,7 +3693,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v314';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v315';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3915,7 +3932,7 @@ function startGame(cls,main,skip){
 let demo=null;
 /* v83: 시연을 바꿀 때 남아 있는 모든 이펙트·입자·예약된 효과를 지움 */
 /* v171: 모든 이펙트·투사체(리본 꼬리 포함)·입자·예약 타이머를 한 번에 정리. 시연 전환뿐 아니라 맵 이동·마을·사망 부활·위험도 이동 등 resetWorld/goTown에서도 호출 */
-function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose()}fx.length=0;ipWipe();
+function wipeFx(){for(const f of fx){try{if(f.end)f.end()}catch(e){}scene.remove(f.m);/* v169: end()도 호출 — 리본 꼬리·칼끝 띠처럼 fx 밖에 붙인 메시가 남지 않게 */if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose()}fx.length=0;ipWipe();NOVA_SH.length=0;novaFlush();
   timers.length=0;for(const p of projs){scene.remove(p.m);if(p.rib&&p.rib.m){scene.remove(p.rib.m);p.rib.m.geometry.dispose();mfree(p.rib.mat)}if(p.rbm){scene.remove(p.rbm);p.rbm.geometry.dispose();mfree(p.rbm.material)}}projs.length=0;PADD.n=0;PNRM.n=0;STK.n=0;debrisN=0;scorchN=0;blastLoad=0;novaLoad=0;shake=0;fbT.length=0;novaN.length=0;flashL.intensity=0;
   for(const d of dnPool){d.live=false;d.el.hidden=true}
   Object.assign(P,{spin:0,vortex:null,dashT:0,swing:0,spinFire:false,hasteT:0,wFx:null})}
@@ -5020,7 +5037,7 @@ let fxWarm=0;function prewarmFx(){fxWarm=1;const g=new THREE.Group(),ms=[],tk=[]
   for(let i=0;i<16;i++)for(const t of [dotTex,shockTex,crackTex,frostTex,scorchTex])for(const a of [0,1])tk.push(basicMat('gd'+a+t.id,{map:t,color:0xffffff,opacity:.5,blending:a?THREE.AdditiveBlending:THREE.NormalBlending}));
   for(let i=0;i<24;i++)tk.push(mtake('pop',()=>new THREE.SpriteMaterial({map:dotTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}),q=>{}));
   for(let i=0;i<8;i++)tk.push(basicMat('dba',{color:0xffffff,opacity:1,blending:THREE.AdditiveBlending}),mtake('dbl',()=>new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:1,flatShading:true}),q=>{}));
-  for(let i=0;i<16;i++)tk.push(NOVA_MAT());for(let i=0;i<6;i++)tk.push(mtake('ice',()=>new THREE.MeshLambertMaterial({color:0xcfefff,emissive:0x3a86c8,transparent:true,opacity:.92,flatShading:true}),q=>{}));
+  novaIM();for(let i=0;i<6;i++)tk.push(mtake('ice',()=>new THREE.MeshLambertMaterial({color:0xcfefff,emissive:0x3a86c8,transparent:true,opacity:.92,flatShading:true}),q=>{}));
   for(const m of tk)add(m,m.isSpriteMaterial?'spr':m.isMeshLambertMaterial?octaGeo:null);
   for(const m of [EMBER_MAT(),DOME_MAT(0xff9a40),pillarMat(0x4a0a9a,0xa030ff),waveMat(0xff9a30,0xffffff),slashMat(0xffffff,0xffffff,1)])add(m);
   scene.add(g);try{if(GQS[GUQ].post){if(!PP.rt)ppSize();renderer.setRenderTarget(PP.rt)}renderer.compile(scene,camera);for(const m of [PP.bright,PP.blur,PP.comp]){PP.quad.material=m;renderer.compile(PP.sc,PP.cam)}}catch(e){}
