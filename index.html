@@ -3273,7 +3273,8 @@ const RIFT={gap:[180,300],first:[90,150],wait:40,R:11,lim:60,S:30,A:45,hpX:2.5,g
   gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
 let RZ=null,riftT=rand(...RIFT.first);
-const riftOk=()=>S&&S.ch>=NCH&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
+const RIFT_ON=false;/* v399: 밸런스 조정 전까지 일반 캐릭터는 끔 — 테스트 캐릭터(S.test)에서만 열림 */
+const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
 function riftHud(h){const el=$('riftHud');if(!el)return;if(h==null){el.hidden=true;return}el.hidden=false;if(el._h!==h){el._h=h;el.innerHTML=h}}
 function riftOpen(){const a=rand(0,Math.PI*2),r=rand(9,13),L=B-RIFT.R-1,c={x:clamp(P.pos.x+Math.cos(a)*r,-L,L),z:clamp(P.pos.z+Math.sin(a)*r,-L,L)};
   const g=new THREE.Group(),add=m=>(g.add(m),m),AB={transparent:true,depthWrite:false,blending:THREE.AdditiveBlending};
@@ -4017,7 +4018,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v398';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v399';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
