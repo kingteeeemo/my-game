@@ -63,7 +63,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
 #bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
-.stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:none;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:auto;cursor:pointer;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .stagechip{flex-direction:column;gap:2px;padding:6px 16px 6px 8px;border-radius:16px}.scrow{display:flex;align-items:center;gap:10px}
 .stagechip em{font:800 12px var(--en);font-stretch:87%;font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted)}.stagechip em i{font-style:normal}
 .stagechip b{font:900 18px var(--ko);color:#1a1008;background:var(--ember);border-radius:16px;padding:3px 11px;line-height:1.2}.stagechip span{font:800 15px var(--ko);color:#f4e6d2}
@@ -255,6 +255,9 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .guide{position:fixed;inset:0;z-index:45}
 .dlist{display:grid;gap:6px;margin:4px 0 10px}.dlist div{background:#26232e;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}.dlist small{color:#a8a0b4;font-size:12px}
 .duelrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.duelrow .duelc{flex-direction:column;align-items:stretch;justify-content:space-between}.duelrow .duelc.uber{border-color:rgba(200,144,255,.55)}.duelrow .duelc .rw{margin-top:6px;line-height:1.5}.duelrow .duelc button{width:100%;padding:10px}/* v131 결투장 좌(일반)·우(우버) */
+.bcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bcard{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px 10px;border-radius:14px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);color:var(--ink);font:inherit;cursor:pointer}.bcard.on{border-color:var(--ember);background:rgba(255,138,58,.1)}.bcard .bimg{width:100%;height:min(240px,38vh);border-radius:10px;background:radial-gradient(circle at 50% 40%,#2a2030,#0e0c10);display:flex;align-items:center;justify-content:center;overflow:hidden}.bcard .bimg img{width:100%;height:100%;object-fit:contain}.bcard b{font:800 15px var(--ko);margin-top:4px}.bcard small{color:#a8a0b4;font-size:11px}
+.bdiff{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bdiff button{padding:12px;border-radius:12px;font:800 15px var(--ko);background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);color:var(--ink);cursor:pointer}.bdiff button.on{border-color:#5ae0d0;background:rgba(90,224,208,.14)}.bdiff button.uber{color:#d8b0ff}.bdiff button.uber.on{border-color:#c890ff;background:rgba(200,144,255,.16)}
+.binfo.uber{border-color:rgba(200,144,255,.55)}.binfo h3{margin:2px 0;font:800 17px var(--ko)}.binfo .brw{margin:6px 0;font:700 14px var(--ko)}.binfo button.primary{width:100%;padding:12px;margin-top:8px}
 .duelc{display:flex;align-items:center;gap:12px}.duelc .dt{flex:1}.duelc b{font:800 15px var(--ko)}.duelc small{display:block;color:#a8a0b4;font-size:12px;margin-top:2px}
 .ecine{position:fixed;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),rgba(6,4,8,.93) 62%);animation:ecIn .25s ease-out}
 .ecine.auto{pointer-events:none;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.1),rgba(6,4,8,.5) 62%)}.ecine.auto .rays{display:none}.ecine.auto .core{transform:scale(.62)}.ecine .autostop{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);pointer-events:auto;padding:12px 26px;border-radius:12px;border:1px solid #ff8a70;background:rgba(120,20,10,.88);color:#fff;font:800 15px var(--ko);box-shadow:0 0 14px rgba(255,80,40,.4);cursor:pointer}
@@ -575,7 +578,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .rcol>.mini{grid-column:4;grid-row:1;width:76px;height:76px;justify-self:end}
   /* 좌측 세로 버튼 5개 */
   .tbtn{width:44px;height:42px;font-size:10px}
-  #openInv{grid-column:1;grid-row:2}#openTown{grid-column:1;grid-row:3}#openMenu{grid-column:1;grid-row:4}#openStage{grid-column:1;grid-row:5}#openStat{grid-column:1;grid-row:6}
+  #openInv{grid-column:1;grid-row:2}#openTown{grid-column:1;grid-row:3}#openMenu{grid-column:1;grid-row:4}#openBoss{grid-column:1;grid-row:5}#openStat{grid-column:1;grid-row:6}
   /* 가운데: 퀘스트 등 */
   .quest{grid-column:2/4;grid-row:2;min-width:0}
   .bossbar{grid-column:2/4;grid-row:3/5}
@@ -690,7 +693,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="goldline essline" id="essLine" hidden><i></i><span id="essT">0</span></div>
       <div class="rail v">
         <button class="tbtn" id="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span style="color:var(--ink)">스킬</span><b class="pts" id="lvBadge" hidden></b></button>
-        <button class="tbtn" id="openStage" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4v-5h4v-5h4V5h4"/></svg><span style="color:var(--ink)">단계</span></button>
+        <button class="tbtn" id="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg><span style="color:var(--ink)">보스</span></button>
         <button class="tbtn" id="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-9"/></svg><span style="color:var(--ink)">스탯</span><b class="pts" id="ptsBadge" hidden></b></button>
       </div>
       <div class="rail">
@@ -702,7 +705,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   </div>
   <div class="lsstrip" id="lsStrip">
     <button class="tbtn" data-px="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg>스킬</button>
-    <button class="tbtn" data-px="openStage" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4v-5h4v-5h4V5h4"/></svg>단계</button>
+    <button class="tbtn" data-px="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg>보스</button>
     <button class="tbtn" data-px="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-9"/></svg>스탯</button>
     <button class="tbtn" data-px="openInv" style="color:#f0d040"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>장비</button>
     <button class="tbtn" data-px="openTown" style="color:#ffb070"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>마을</button>
@@ -730,6 +733,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim" id="inv" hidden><div class="sheet" id="invSheet"></div></div>
 <div class="scrim" id="shop" hidden><div class="sheet" id="shopSheet"></div></div>
 <div class="scrim" id="stage" hidden><div class="sheet" id="stageSheet"></div></div>
+<div class="scrim" id="bossP" hidden><div class="sheet" id="bossSheet"></div></div>
 <div class="scrim" id="smith" hidden><div class="sheet" id="smithSheet"></div></div>
 <div class="scrim" id="heir" hidden><div class="sheet" id="heirSheet"></div></div>
 <div class="title" id="title"><div class="emb" id="emb" aria-hidden="true"></div><div><h1>잿불 성역</h1><div class="sub">Ember Sanctum</div></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div>
@@ -755,7 +759,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <button class="primary" id="pResume" style="width:100%">계속하기</button>
 </div></div>
 <div class="scrim" id="stat" hidden><div class="sheet" id="statSheet"></div></div>
-<div class="pchint" id="pchint">이동 WASD · 좌클릭 <b id="hL"></b> · 우클릭·Space <b id="hR"></b> · <b id="hM"></b> Shift·E · 물약 1 2 · 신속 3 · 스킬 I · 장비 B · 스탯 C · 단계 G · 마을 T · 전체화면 F</div>
+<div class="pchint" id="pchint">이동 WASD · 좌클릭 <b id="hL"></b> · 우클릭·Space <b id="hR"></b> · <b id="hM"></b> Shift·E · 물약 1 2 · 신속 3 · 스킬 I · 장비 B · 스탯 C · 위험도 G · 보스 H · 마을 T · 전체화면 F</div>
 <div class="scrim center" id="lvl" hidden><div class="sheet modal" id="lvlSheet"></div></div>
 <div class="cine" id="cine" hidden><div class="cineBar"></div><div class="cineBody" id="cineBody"></div><button class="close cineSkip" id="cineSkip">건너뛰기</button><div class="cineBar b"></div></div>
 <div class="scrim center" id="clear" hidden><div class="sheet modal" id="clearSheet"></div></div>
@@ -3690,7 +3694,7 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
-addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(e.code==='KeyH'&&S.cls)bossOpen?closeBoss():openBoss();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
 /* ================= v128~v130: 새 버전 자동 감지 =================
    v130: ntfy.sh 로 '새 버전 나옴' 신호를 실시간으로 받습니다(연결만 열어 두고 신호가 올 때만 동작, 주기 확인 없음).
@@ -3712,7 +3716,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v317';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v318';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3814,7 +3818,7 @@ const GUIDES={
     {t:'공격과 주력 스킬',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다.`,d2:`${GB}기본 공격</b>은 마나 없이 쓸 수 있어 마나가 떨어졌을 때 씁니다. 버튼을 누르고 있으면 계속 공격합니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
     {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 몬스터가 떨어뜨리고, 마을 물약 상점에서도 삽니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
     {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 포인트 분배 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
-    {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#openStage'],d:`${GB}마을</b>에는 물약 상점, 장비 뽑기, 대장장이, 전승사가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`${GB}단계</b>에서 지금 위치와 위험도를, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다.`,k:'T 마을 · G 단계 · M 월드맵'},
+    {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 장비 뽑기, 대장장이, 전승사가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}설정(톱니바퀴)</b> → 「가이드 다시 보기」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
   lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`스탯 포인트도 ${STAT_PER_LV}점 받습니다. ${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수로 하는 ${GB}2차 강화</b>가 열립니다.`}]},
   skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
@@ -4260,7 +4264,7 @@ $('stat').addEventListener('click',e=>{if(e.target.id==='stat')closeStat()});
 function openStat(){closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
-function closeAllSheets(){if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeof stageOpen!=='undefined'&&stageOpen)closeStage();if(typeof smithOpen!=='undefined'&&smithOpen)closeSmith();if(menuOpen)closeMenu();if(invOpen)closeInv();if(statOpen)closeStat();if(typeof shopOpen!=='undefined'&&shopOpen)closeShop();if(typeof restartOpen!=='undefined'&&restartOpen)closeRestart()}
+function closeAllSheets(){if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeof stageOpen!=='undefined'&&stageOpen)closeStage();if(typeof bossOpen!=='undefined'&&bossOpen)closeBoss();if(typeof smithOpen!=='undefined'&&smithOpen)closeSmith();if(menuOpen)closeMenu();if(invOpen)closeInv();if(statOpen)closeStat();if(typeof shopOpen!=='undefined'&&shopOpen)closeShop();if(typeof restartOpen!=='undefined'&&restartOpen)closeRestart()}
 
 /* ================= equipment & bag ================= */
 let invOpen=false,invSel=null,clearArm=0;
@@ -4431,17 +4435,15 @@ function renderStage(){
     const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn,note:`${EGMAPS[egMapFor(t)].n} · iLv ~${il} · 전설 ${legend}%`}))}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:100},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
-  $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>단계</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
+  $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(기본 300마리 · 50부터 400 · 70부터 700 · 80부터 900)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
-  ${eg?`<div class="duelrow">${['n','u'].map(m=>{const D=DUEL_M[m],U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${DUEL.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(m)*100)}% (★ ${D.v}%)</small></div><button class="primary" data-duel="${m}" ${S.duel?'disabled':''}>${S.duel&&S.duel.m===m&&S.duel.b!=='maw'?'도전 중':'도전'}</button></div>`}).join('')}</div>${`<div class="duelrow">${['n','u'].map(m=>{const D=duelCfg(m,'maw'),U=m==='u';return `<div class="cmp2 duelc${U?' uber':''}"><div class="dt"><b>결투장 · ${D.n}</b><small>${MAW.n}</small><small class="rw">${U?'<span style="color:#c890ff">☠ 입장 시 저주 — 최종 피해 −20%</span><br>':''}보상: <span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br>(3개 50% · 4개 30% · 5개 20%)':''}</small></div><button class="primary" data-duel="${m}" data-boss="maw" ${S.duel||S.noMaw?'disabled':''}>${S.noMaw?'도전 불가':S.duel&&S.duel.m===m&&S.duel.b==='maw'?'도전 중':'도전'}</button>${S.noMaw?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}</div>`}).join('')}</div>`}`:''}${S.test?`<div class="duelrow"><div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>결투장 · 허수아비 (테스트)</b><small>우버 ${MAW.n} · 가만히 있음</small><small class="rw">체력 우버의 5배 · 패턴·사이페 없음 · 우버 저주 적용 · 처치 시간 표시 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div></div>`:''}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
-  if(b.dataset.duel){closeStage();duelEnter(b.dataset.duel,b.dataset.boss,!!b.dataset.dummy);return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&t<=S.maxTier){if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
@@ -4454,7 +4456,44 @@ function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
 function openStage(){closeAllSheets();stageOpen=true;renderStage();$('stage').hidden=false;releaseAll();guide('stage')}
 function closeStage(){stageOpen=false;$('stage').hidden=true}
-$('openStage').onclick=openStage;
+$('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
+/* v318: 「보스」 창 — 왼쪽 잿불 검귀 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
+let bossOpen=false,bossSel={b:'knight',m:null};const BOSS_IMG={};
+function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return BOSS_IMG[key];let url='';
+  try{const W=300,H=340,rd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rd.setSize(W,H,false);rd.setPixelRatio(1);rd.setClearColor(0,0);
+    const sc=new THREE.Scene(),M=kind==='maw'?mawModel(U):knightModel(),g=new THREE.Group();g.add(M.root);if(kind==='knight'&&U)M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)});sc.add(g);
+    sc.add(new THREE.AmbientLight(0xffffff,.85));const d1=new THREE.DirectionalLight(0xffe0c0,1.1);d1.position.set(3,6,5);sc.add(d1);const d2=new THREE.DirectionalLight(kind==='maw'?0x8a50ff:0xff6a30,.8);d2.position.set(-5,2,-3);sc.add(d2);
+    g.updateMatrixWorld(true);const bx=new THREE.Box3().setFromObject(g),sz=bx.getSize(new THREE.Vector3()),ct=bx.getCenter(new THREE.Vector3());
+    const cam=new THREE.PerspectiveCamera(28,W/H,.1,200),R=Math.max(sz.y/1.0,sz.x/(1.0*W/H),sz.z*.6)*.5/Math.tan(14*Math.PI/180)*1.12;
+    g.rotation.y=kind==='maw'?-.5:-.35;g.updateMatrixWorld(true);cam.position.set(ct.x,ct.y+sz.y*.05,ct.z+R);cam.lookAt(ct.x,ct.y,ct.z);
+    rd.render(sc,cam);url=rd.domElement.toDataURL('image/png');rd.dispose();try{rd.forceContextLoss()}catch(e){}}catch(e){url=''}
+  return BOSS_IMG[key]=url}
+function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
+  const card=(k,name,sub)=>{const U=bs.b===k&&bs.m==='u',img=bossPortrait(k,U);return `<button class="bcard${bs.b===k?' on':''}" data-bs="${k}"><div class="bimg">${img?`<img src="${img}" alt="">`:''}</div><b>${name}</b><small>${sub}</small></button>`};
+  let info='';
+  if(bs.m){const U=bs.m==='u',isMaw=bs.b==='maw',D=duelCfg(bs.m,isMaw?'maw':undefined),nm=(isMaw?MAW:DUEL).n;
+    const rw=isMaw?`<span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br><small>(3개 50% · 4개 30% · 5개 20%)</small>':''}`:`<span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(bs.m)*100)}% <small>(수치 ${D.v}%)</small>`;
+    const dis=!eg||S.duel||(isMaw&&mawOff);
+    info=`<div class="cmp2 binfo${U?' uber':''}"><div class="chap">Reward</div><h3>${U?'우버 ':'일반 '}${nm}</h3>
+      <p class="hint" style="margin:4px 0">환경 위험도 ${D.tier} · 보스 기준 위험도 ${D.b}</p>
+      <p class="brw">보상: ${rw}</p>${U?'<p class="hint" style="color:#c890ff;margin:4px 0">☠ 입장 시 저주 — 최종 피해 −20%</p>':''}
+      <p class="hint" style="margin:4px 0">${isMaw?'처치할 때마다 위 확률로 보상이 나옵니다.':'처치할 때마다 위 확률로 서가 떨어집니다.'}</p>
+      ${isMaw&&mawOff?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}${!eg?'<small class="hint" style="color:#ff8a6a">엔드게임에서 입장할 수 있습니다</small>':''}
+      <button class="primary" data-enter="1" ${dis?'disabled':''}>${S.duel&&S.duel.m===bs.m&&((S.duel.b==='maw')===isMaw)?'도전 중':'입장'}</button></div>`}
+  else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
+  const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div>`:'';
+  $('bossSheet').innerHTML=`<div class="shead"><div><div class="chap">Boss</div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
+  <div class="bcards">${card('knight',DUEL.n,'결투장')}${card('maw',MAW.n,'결투장')}</div>
+  <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div>${info}${test}`}
+function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
+function closeBoss(){bossOpen=false;$('bossP').hidden=true}
+$('bossSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+  if(b.id==='bsClose'){closeBoss();return}
+  if(b.dataset.bs){bossSel.b=b.dataset.bs;renderBoss();return}
+  if(b.dataset.bm){bossSel.m=b.dataset.bm;renderBoss();return}
+  if(b.dataset.enter){closeBoss();duelEnter(bossSel.m,bossSel.b==='maw'?'maw':undefined,false);return}
+  if(b.dataset.duel){closeBoss();duelEnter(b.dataset.duel,b.dataset.boss,!!b.dataset.dummy);return}});
+$('bossP').addEventListener('click',e=>{if(e.target.id==='bossP')closeBoss()});
 /* ================= 월드맵 (v70): 1~7장 루트 → 엔드게임 영역 ================= */
 const WM=[[132,548],[252,486],[132,414],[252,344],[132,274],[252,204],[132,134]],WM_EG=[236,56];
 const wmLeg=i=>{const a=WM[i],b=i+1<WM.length?WM[i+1]:WM_EG,ym=(a[1]+b[1])/2;return `M${a[0]},${a[1]} C${a[0]},${ym} ${b[0]},${ym} ${b[0]},${b[1]}`};
@@ -5044,7 +5083,7 @@ function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
-const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
