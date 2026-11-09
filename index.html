@@ -3914,7 +3914,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v393';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v394';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4099,12 +4099,14 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
     if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
-  renderer.setRenderTarget(null);renderer.setScissorTest(true);renderer.setViewport(0,0,W,H);renderer.setScissor(0,0,W,H);renderer.setClearColor(0x15141a,1);renderer.clear();renderer.render(sc,cam);
-  const g=cv.getContext('2d');g.clearRect(0,0,Wd,Hd);g.drawImage(renderer.domElement,0,ch-Hd,Wd,Hd,0,0,Wd,Hd);
-  renderer.setScissorTest(false);renderer.setViewport(0,0,cw/pr,ch/pr);renderer.setClearColor(cc,ca);renderer.setRenderTarget(prev);
+  /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
+  if(!portRT||portRT.width!==Wd||portRT.height!==Hd){if(portRT)portRT.dispose();const o={format:THREE.RGBAFormat,depthBuffer:true};portRT=renderer.capabilities.isWebGL2&&THREE.WebGLMultisampleRenderTarget?new THREE.WebGLMultisampleRenderTarget(Wd,Hd,o):new THREE.WebGLRenderTarget(Wd,Hd,o);if(portRT.isWebGLMultisampleRenderTarget)portRT.samples=4;portPx=new Uint8Array(Wd*Hd*4)}
+  renderer.setRenderTarget(portRT);renderer.setClearColor(0x15141a,1);renderer.clear();renderer.render(sc,cam);renderer.readRenderTargetPixels(portRT,0,0,Wd,Hd,portPx);
+  const g=cv.getContext('2d'),im=g.createImageData(Wd,Hd),row=Wd*4;for(let y=0;y<Hd;y++)im.data.set(portPx.subarray((Hd-1-y)*row,(Hd-y)*row),y*row);g.putImageData(im,0,0);
+  renderer.setClearColor(cc,ca);renderer.setRenderTarget(prev);
   bgm.dispose();gd.geometry.dispose();gd.material.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}if(ry===undefined)portOk[cls]=K&&K.st===2?2:1;return cv}catch(e){return null}}
 /* v349: 직업 선택 — 초상화는 한 프레임에 하나씩 그려 끼워 넣음(한 번에 셋을 그리면 폰에서 멈춤) */
-let portQ=0;
+let portQ=0,portRT=null,portPx=null;
 function portFill(){const cards=[...document.querySelectorAll('#classSheet .card.cls')];if($('classSel').hidden||!cards.length){portQ=0;return}
   for(const b of cards){const k=b.dataset.c,K=SKN[k],want=K&&K.st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
     if(cur&&have===want)continue;if(!cur||have!==want){const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}requestAnimationFrame(portFill);return}
