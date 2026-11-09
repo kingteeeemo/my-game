@@ -3894,7 +3894,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v378';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v379';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4767,7 +4767,7 @@ let smithOpen=false,smithMsg='',smithSel=null,smithRes=null;
 /* v41: 6부위 중 하나를 먼저 고르고, 고른 부위의 강화 상태만 크게 보여 줌 (돌아가기로 목록 복귀) */
 let useTk=false;
 /* v131 확정 강화 주문서 필요 개수: 무기 +30~ 2개 · +35~ 3개 · +40~ 4개 / 방어구·장신구 +35~ 2개 · +40~ 3개 (현재 강화 단계 기준). 주문서 사용 시 골드 5배 */
-const tkNeed=(L,k)=>L>=50?10+(L-50):L>=45?7:L>=40?5:L>=35?3:L>=30?2:1,/* v378: 40강 5개 · 45강 7개 · 50강 10개 이후 1강당 +1 *//* v372: 확정 강화 주문서 필요량도 전 부위 무기 기준(30강부터 2개, 5강마다 +1) */TK_GOLD=5;/* v222: +40 이후에도 5단계마다 1개씩 증가 */
+const tkNeed=(L,k)=>L>=50?10+(L-50):L>=45?7:L>=40?5:L>=35?3:L>=30?2:1,/* v378: 40강 5개 · 45강 7개 · 50강 10개 이후 1강당 +1 *//* v372: 확정 강화 주문서 필요량도 전 부위 무기 기준(30강부터 2개, 5강마다 +1) */tkGold=(L,k)=>Math.round(enhCost(L,k)*pityCap(L)*.3);/* v379: 주문서 사용 골드 = 천장까지 가는 총 비용의 30% (표기 없음) *//* v222: +40 이후에도 5단계마다 1개씩 증가 */
 /* v131 자동 강화: 켜면 골드가 모자라거나 끌 때까지 0.35초마다 강화(주문서는 쓰지 않음, 컷신 없이 결과만) */
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
@@ -4785,13 +4785,13 @@ function renderSmith(){
   else{const k=smithSel,L=enhL(k),it=S.eq[k],c=enhCost(L,k),rt=enhRate(L),max=L>=ENH_MAX;
     /* v118: 컷신이 결과를 보여 주는 구간(+24→25 이상)에서는 강화 창에 성공/실패 문구를 띄우지 않고 수치만 갱신(컷신에서 결과가 나오는 순간 renderSmith 호출) */
     const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
-    const tk=S.tickets||0,need=tkNeed(L,k);if(tk<need)useTk=false;const tkOn=useTk&&tk>=need,cc=c*(tkOn?TK_GOLD:1);
+    const tk=S.tickets||0,need=tkNeed(L,k);if(tk<need)useTk=false;const tkOn=useTk&&tk>=need,cc=tkOn?tkGold(L,k):c;
     const rc=it?RAR[it.rar].c:'#555',
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
       info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
       bonus='',
-      tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정 (골드 ×${TK_GOLD})`:'사용 안 함'}</button>`:''}</div>`,
+      tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정`:'사용 안 함'}</button>`:''}</div>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':''}</div><div class="smpity${pityN(k)+1>=pityCap(L)?' full':''}"><small>천장</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pityN(k)+1>=pityCap(L)?'<small class="pnote">이번 강화 확정 성공</small>':''}${tkUI}`,
       hint=''+(k==='helm'?cdrCapNote():'')+(k==='boots'?spdCapNote():'')+(S.test?testSmithPanel(k,L,it):''),
       btns=`<div class="btns"><button class="ghost" id="smBack">← 돌아가기</button><button class="primary" id="smGo" ${!max&&S.gold>=cc&&!smAuto?'':'disabled'}>${max?'최대 단계':`강화 ${fmtG(cc)}G`}</button></div>${max?'':`<button class="ghost smauto${smAuto?' on':''}" id="smAuto">${smAuto?`자동 강화 <b>ON</b> · ${smAutoN}회 시도 — 눌러서 끄기`:'자동 강화 <b>OFF</b> · 눌러서 켜기'}</button>`}`;
@@ -4817,7 +4817,7 @@ function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OP
     ${it&&spk?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>'}</div>`}
 function testSetEnh(k,n){S.enh[k]=Math.max(0,Math.round(n)||0);smithRes=null;refreshMax();renderSmith()}
 function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k));it.opts=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));if(v!==null&&spk)it.opts.unshift({k:spk,v:Math.max(0,+v||0)});refreshMax();renderSmith()}
-function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=enhCost(L,k)*(tkUse?TK_GOLD:1);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
+function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=tkUse?tkGold(L,k):enhCost(L,k);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=29;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
     const pn=pityN(k),pHit=pn+1>=pityCap(L);if(tkUse||pHit||Math.random()<enhRate(L)){S.enh[k]=L+1;if(S.pity)delete S.pity[k];smithRes={ok:true,L:L+1,t:Date.now(),cine:big};refreshMax();if(big){cine=1;enhCine(k,L+1,true,()=>renderSmith(),auto)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${L+1} 강화 성공 · 자동`,'#7fe07a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
