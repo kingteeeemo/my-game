@@ -1153,7 +1153,7 @@ const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
   const t=S.duel?S.duel.tier:S.tier,last=CH[LAST];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
-  return {...last,n:'끝없는 심연',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:last.xp+.3*t,drain:Math.min(.015,last.drain+.001*t)};
+  return {...last,n:'끝없는 심연',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:(last.xp+.3*t)*(t>=100?.85:1)/* v380: 위험도 100~ 경험치 -15% */,drain:Math.min(.015,last.drain+.001*t)};
 }
 /* 엔드게임 위험도별 배율 (v29): 체력은 단계마다 약 12%씩 복리 + 선형 4% → 위험도 10 ≈ 5장의 4.4배, 20 ≈ 17배, 30 ≈ 66배
    피해는 단계마다 7% 복리. 높은 단계로 갈수록 요구 DPS가 가파르게 올라 장비·강화가 필요 */
@@ -1163,7 +1163,7 @@ const egUp=t=>1.2+.01*t;
 const egHp0=t=>CH[LAST].hp*Math.pow(1.12,t)*(1+.04*t)*egUp(t);
 const goldAdjT=t=>{let f=t>=40?1/1.3:1;if(t>=50){const r=egHp0(t)/egHp0(50);f*=(1+.5*(r-1))/r}return f};
 const goldAdj=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?goldAdjT(S.tier):1;
-const egHp=t=>egHp0(t)*(t>=40?1.3:1),egDmg=t=>CH[LAST].dmg*Math.pow(1.07,t)*egUp(t);
+const egHp=t=>egHp0(t)*(t>=40?1.3:1)*(t>=100?1.15:1),/* v380: 위험도 100~ 몬스터 체력 +15% */egDmg=t=>CH[LAST].dmg*Math.pow(1.07,t)*egUp(t);
 const GATE_EVERY=5;/* 위험도 5·10·15…를 넘어가려면 관문 보스를 쓰러뜨려야 함 */
 
 function skillStats(id){
@@ -3913,7 +3913,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v380';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v381';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
