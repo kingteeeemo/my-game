@@ -3283,7 +3283,8 @@ function castSkill(slot){
   castFire(slot,id)}
 const CAST_K=.25,CAST_MAX=.6;
 /* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
-function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(.05,1-hp*L),old10=1-hp*GMAX,f=1-(L/GMAX)*(1-.5*old10);return Math.min(CAST_MAX,CAST_K*base*f)}
+const CT_MIN=.15;/* v307: 시전 최소 0.15초 — 쿨타임이 아주 짧아져도(110 스펙 0.28초) 쓰는 순간 잠깐 멈춤. 단 쿨타임의 60%를 넘지 않음(연속 시전 DPS 유지) */
+function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(.05,1-hp*L),old10=1-hp*GMAX,f=1-(L/GMAX)*(1-.5*old10);const ct=Math.min(CAST_MAX,CAST_K*base*f);return Math.max(ct,Math.min(CT_MIN,st.cd*.6))}
 function castFire(slot,id){
   const b=SK[id],st=skillStats(id),base=baseDmg();P.skSwing=true;
   if(b.kind==='proj'){
@@ -3660,7 +3661,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v306';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v307';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
