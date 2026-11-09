@@ -944,7 +944,7 @@ const RANK=[
   {n:'고유',c:'#ff8a3a',hex:0xff8a3a,hp:1,dmg:1,xp:1,sc:1}
 ];
 const RARE_PRE=['광폭한','교활한','단단한','재빠른','굶주린'],UNI_PRE=['피에 굶주린','저주받은','불멸의','잔혹한','고대의'];
-const tkFor=t=>t>=80?900:t>=70?700:t>=50?400:300,/* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=50;/* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+const tkFor=t=>t>=80?900:t>=70?700:t>=50?400:300,/* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70;/* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이']};
@@ -3892,7 +3892,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v372';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v373';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
