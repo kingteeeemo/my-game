@@ -3290,10 +3290,21 @@ function riftOpen(){const a=rand(0,Math.PI*2),r=rand(9,13),L=B-RIFT.R-1,c={x:cla
 function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.g.remove(Z.bm);
   const ring=flatMesh(ringGeo,0xff6a1e,.9);ring.scale.set(RIFT.R,RIFT.R,1);ring.position.set(Z.c.x,.07,Z.c.z);const fl=flatMesh(discGeo,0xff4a10,.07);fl.scale.set(RIFT.R,RIFT.R,1);fl.position.set(Z.c.x,.055,Z.c.z);scene.add(ring,fl);Z.ring=ring;Z.fl=fl;
   ringFx(Z.c,RIFT.R,0xff7a30,.7);shake=Math.max(shake,.4);toast('균열 진입',`정예 웨이브 3개를 ${RIFT.lim}초 안에 처치하세요 — 빠를수록 보상 등급이 올라갑니다`,'#ff9a4a');riftWave(1)}
+/* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
+const RBM={horn:new THREE.MeshStandardMaterial({color:0x2a0806,roughness:.5,metalness:.2}),ember:new THREE.MeshBasicMaterial({color:0xff4a14}),eye:new THREE.MeshBasicMaterial({color:0xffd040})};
+function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST));e.mat.color.setHex(G?0x6a0c0a:e.rank===2?0x8a1410:0xa8241a);
+  const gs=e.g.scale.x,want=G?3.4:e.rank===2?1.75:1.45;/* 세계 기준 크기 */M.root.scale.setScalar(want/gs);
+  const hd=M.head,bd=M.body;
+  if(hd){for(const sx of [-1,1]){const h=new THREE.Mesh(new THREE.ConeGeometry(.05,G?.42:.3,6),RBM.horn);h.position.set(sx*.1,.16,-.02);h.rotation.set(-.7,0,-sx*.45);hd.add(h);
+      const ey=new THREE.Mesh(new THREE.SphereGeometry(.034,8,6),RBM.eye);ey.position.set(sx*.08,.045,.15);hd.add(ey)}}
+  if(bd){const n=G?7:5;for(let i=0;i<n;i++){const k=new THREE.Mesh(new THREE.OctahedronGeometry(G?.09:.07,0),RBM.ember);k.position.set((i%2?.05:-.05),.3,.3-i*(.65/n));k.scale.set(.7,1.8,.7);k.rotation.x=-.5;bd.add(k)}}
+  if(G){const gl=new THREE.Sprite(glowMat(0xff3a10));gl.scale.setScalar(2.4);gl.position.y=.9;gl.material.opacity=.4;M.root.add(gl)}
+  M.root.traverse(o=>{if(o.isMesh)o.castShadow=o.parent===bd});
+  e.g.remove(e.M.root);e.g.add(M.root);e.M=M;e.h=1.25*want+.35;e.quad=1}
 function riftWave(n){const Z=RZ;Z.wave=n;Z.mobs=[];const c=Z.c,list=n===1?Array(8).fill(1):n===2?[...Array(6).fill(1),2,2]:['G',1,1,1,1];
   list.forEach((rk,i)=>{const a=i/list.length*Math.PI*2+rand(-.2,.2),r=rk==='G'?0:RIFT.R*.72,x=c.x+Math.cos(a)*r,z=c.z+Math.sin(a)*r;
     const G=rk==='G',q=Math.random(),type=G?'brute':q<.3?'runner':q<.8?'grunt':'brute',e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 수호자'}:{});
-    e.rift=1;e.aggro=true;e.hp=e.mhp=e.mhp*(G?RIFT.guardX:RIFT.hpX);if(G){e.g.scale.multiplyScalar(1.45);e.h*=1.45;e.r*=1.3}else{e.name='균열의 '+e.name;e.lab.firstChild.textContent=e.name}
+    e.rift=1;e.aggro=true;e.hp=e.mhp=e.mhp*(G?RIFT.guardX:RIFT.hpX);riftBeast(e,G);if(G){e.r*=1.3}else{e.name=rk===2?'균열 포식자':'균열 짐승';e.lab.firstChild.textContent=e.name}
     ringFx({x,z},G?3.5:1.6,G?0xff5a20:0xc060ff,.5);Z.mobs.push(e)});
   if(n>1)toast(n===3?'균열 수호자 등장':`웨이브 ${n}`,n===3?'수호자를 쓰러뜨리면 균열이 정화됩니다':'더 강한 정예가 몰려옵니다','#ff9a4a');flash(c,0xff7a30,2.5)}
 function riftClear(){const Z=RZ;if(!Z)return;RZ=null;riftHud(null);for(const o of [Z.g,Z.ring,Z.fl])if(o)scene.remove(o)}
@@ -3325,6 +3336,7 @@ function riftTick(dt){
   if(d>RIFT.R-.7){const k=(RIFT.R-.7)/d;P.pos.x=c.x+dx*k;P.pos.z=c.z+dz*k}
   Z.ring.material.opacity=.7+.25*Math.sin(time*6);
   Z.mobs=Z.mobs.filter(e=>e.hp>0&&enemies.includes(e));const left=RIFT.lim-Z.t;
+  for(const e of Z.mobs)if(Math.random()<dt*3*QM())emit(PADD,{x:e.pos.x+rnd(-.4,.4),y:e.h*.6,z:e.pos.z+rnd(-.4,.4),vy:rnd(.8,1.8),life:rnd(.4,.8),s0:.5,s1:.1,c0:0xff7a30,c1:0x8a1000,a:.7,tex:1});
   riftHud(`<b>🔥 잿불 균열</b> <span>웨이브 ${Z.wave}/3 · 남은 적 ${Z.mobs.length}</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
   if(!Z.mobs.length){if(Z.wave<3)riftWave(Z.wave+1);else riftEnd(true);return}
   if(left<=0)riftEnd(false)}
@@ -4018,7 +4030,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v399';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v400';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
