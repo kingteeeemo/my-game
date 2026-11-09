@@ -256,7 +256,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 /* v340: 직업 선택 — 설명 없이 초상화+이름만, 가로 배치(세로 화면: 2개씩, 마지막 홀수는 가운데 / 가로 화면·PC: 한 줄) */
 #classSheet .cards.cg{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:10px}
 #classSheet .card.cls{flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:8px;padding:10px 8px 12px;flex:0 0 calc(50% - 5px);min-width:0}
-#classSheet .card.cls .cport{touch-action:pan-y;cursor:grab;-webkit-user-drag:none;user-select:none;width:100%;height:auto;aspect-ratio:180/230;max-height:46vh;border-radius:12px}
+#classSheet .card.cls .cport{display:block;touch-action:pan-y;cursor:grab;-webkit-user-drag:none;user-select:none;width:100%;height:auto;aspect-ratio:180/230;max-height:46vh;border-radius:12px}
 #classSheet .card.cls .cnm{font:800 17px var(--ko)}#classSheet .card.cls .cnm .en{font-size:10px;margin-bottom:3px}
 @media (orientation:landscape),(min-width:760px){#classSheet{max-width:min(860px,calc(100% - 32px))}#classSheet .card.cls{flex:0 0 calc(33.333% - 7px)}#classSheet .card.cls .cport{width:auto;max-width:100%;height:calc(100vh - 250px);max-height:340px;min-height:130px}}
 @media (orientation:landscape) and (max-height:520px){#classSheet .hint{display:none}}
@@ -1877,7 +1877,14 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
     K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/K.S);(sw||r).add(K.tip);
     K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
     if(cls==='mage'&&sw){K.hand=sw.parent;K.root=r;skmGrip(K,r)}/* v342: 지팡이를 주먹 안에 고정하고 손가락을 쥐게 함 */
-    K.root=r;K.st=2;delete PORT[cls];delete PORTR[cls];if(hero)skwAttach(hero);if(!$('classSel').hidden)showClassSel()}catch(e){K.st=3}},undefined,()=>{K.st=3})}
+    K.root=r;K.st=2;portOk[cls]=0;skwWarm(K);if(hero)skwAttach(hero);if(!$('classSel').hidden&&!portQ){portQ=1;requestAnimationFrame(portFill)}}catch(e){K.st=3}skwNext()},undefined,()=>{K.st=3;skwNext()})}
+/* v349: 시작 시 미리 불러오기 — 제목 화면이 뜬 뒤 저장 슬롯의 직업부터 하나씩 순서대로 GLB를 받고, 받은 직후 셰이더 컴파일·텍스처 업로드(skwWarm)를 끝내 둠 → 게임에 들어갈 때·직업 선택창에서 멈춤이 없음 */
+const skwQ=[];function skwNext(){while(skwQ.length){const c=skwQ.shift();const K=skMk(c);if(!K.st){skwLoad(c);return}}}
+function skwPreload(){const seen=new Set();try{for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&SKC[d.cls]&&!seen.has(d.cls)){seen.add(d.cls);skwQ.push(d.cls)}}}catch(e){}for(const c in SKC)if(!seen.has(c))skwQ.push(c);skwNext()}
+function skwWarm(K){if(K.warm||!K.root||K.root.parent)return;K.warm=1;try{const r=K.root,g=new THREE.Group();g.position.set(camT.x,0,camT.z);g.add(r);scene.add(g);
+  const rt=new THREE.WebGLRenderTarget(4,4),prev=renderer.getRenderTarget();renderer.compile(scene,camera);renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(prev);rt.dispose();
+  scene.remove(g);g.remove(r)}catch(e){}}
+
 function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
 function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
   const r=K.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
@@ -3853,7 +3860,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v348';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v349';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4026,25 +4033,35 @@ function showTutClear(){$('clearSheet').innerHTML=`<div><div class="chap">Tutori
 function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gold||0)+300;S.pots.hp.s+=3;S.pots.mp.s+=3;$('clear').hidden=true;tutHi(null);
   setMap(true);applyTheme();resetWorld();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('tdone'),900)}
 /* v92 직업 선택 카드에 들어갈 캐릭터 초상(실제 모델을 작은 화면에 한 번 그려 이미지로 저장) */
-const PORT={},PORTR={};
+const portCv={},portOk={};
 const portRy0=cls=>(SKN[cls]&&SKN[cls].st===2)?(cls==='mage'?.3:.2):.45;
-/* v346: ry를 주면 그 각도로 그림(드래그 회전용, 8° 단위로 캐시) */
-function heroPortrait(cls,ry){const rk=ry===undefined?null:Math.round(((ry%(Math.PI*2))+Math.PI*2)%(Math.PI*2)/(Math.PI/22.5));if(rk===null){if(PORT[cls])return PORT[cls]}else{const c=PORTR[cls]||(PORTR[cls]={});if(c[rk])return c[rk];ry=rk*Math.PI/22.5}try{/* v348: 초상화 화질 — 2배 해상도(480×612) + MSAA 4(WebGL2) + 림 라이트 + 그림자 받는 바닥 */const W=480,H=612,ms=renderer.capabilities.isWebGL2&&THREE.WebGLMultisampleRenderTarget;let rt=ms?new THREE.WebGLMultisampleRenderTarget(W,H):new THREE.WebGLRenderTarget(W,H);if(ms)rt.samples=4;const sc=new THREE.Scene();
-  sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.7));const d=new THREE.DirectionalLight(0xb8c8e8,.7);d.position.set(-3,5,4);d.castShadow=true;d.shadow.mapSize.set(1024,1024);d.shadow.camera.left=d.shadow.camera.bottom=-2.2;d.shadow.camera.right=d.shadow.camera.top=2.6;d.shadow.camera.near=.5;d.shadow.camera.far=14;d.shadow.bias=-.0008;d.shadow.radius=3;sc.add(d);const w=new THREE.PointLight(0xffa25a,1.3,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
+/* v349: 초상화를 메인 캔버스 구석에 그린 뒤 2D 캔버스로 복사(drawImage) — readPixels·PNG 인코딩 없음 → 폰에서 멈춤이 크게 줄어듦. 회전(ry)도 같은 캔버스에 다시 그림. 배경 그라데이션은 3D 장면 안에서(불투명 캔버스) */
+function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.domElement.width,ch=renderer.domElement.height;const Wd=Math.min(480,cw),Hd=Math.min(Math.round(Wd*1.275),ch),W=Wd/pr,H=Hd/pr;
+  const cv=portCv[cls]||(portCv[cls]=document.createElement('canvas'));if(cv.width!==Wd||cv.height!==Hd){cv.width=Wd;cv.height=Hd}cv.className='cport';cv.style.setProperty('--cc',CLS[cls].c);
+  const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.7));const d=new THREE.DirectionalLight(0xb8c8e8,.7);d.position.set(-3,5,4);d.castShadow=true;d.shadow.mapSize.set(1024,1024);d.shadow.camera.left=d.shadow.camera.bottom=-2.2;d.shadow.camera.right=d.shadow.camera.top=2.6;d.shadow.camera.near=.5;d.shadow.camera.far=14;d.shadow.bias=-.0008;d.shadow.radius=3;sc.add(d);const w=new THREE.PointLight(0xffa25a,1.3,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
+  const bgm=new THREE.SpriteMaterial({map:dotTex,color:CLS[cls].c,transparent:true,opacity:.38,depthWrite:false});const bg=new THREE.Sprite(bgm);bg.scale.set(7.5,7.5,1);bg.position.set(0,.9,-2.5);sc.add(bg);
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(cls==='mage'?1.42:1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
-    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?(skB?(cls==='mage'?.3:.2):.45):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
-  const cam=new THREE.PerspectiveCamera(30,W/H,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
-  const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);const draw=()=>{renderer.setRenderTarget(rt);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam)};
-  try{draw()}catch(e){rt.dispose();rt=new THREE.WebGLRenderTarget(W,H);draw()}renderer.setClearColor(cc,ca);
-  const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(prev);
-  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H);for(let y=0;y<H;y++)im.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);g.putImageData(im,0,0);
-  rt.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}const url=c.toDataURL();if(rk===null)return PORT[cls]=url;if(K&&K.st===2&&!skB)return url;return PORTR[cls][rk]=url}catch(e){return ''}}
+    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+  const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
+  const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
+  renderer.setRenderTarget(null);renderer.setScissorTest(true);renderer.setViewport(0,0,W,H);renderer.setScissor(0,0,W,H);renderer.setClearColor(0x15141a,1);renderer.clear();renderer.render(sc,cam);
+  const g=cv.getContext('2d');g.clearRect(0,0,Wd,Hd);g.drawImage(renderer.domElement,0,ch-Hd,Wd,Hd,0,0,Wd,Hd);
+  renderer.setScissorTest(false);renderer.setViewport(0,0,cw/pr,ch/pr);renderer.setClearColor(cc,ca);renderer.setRenderTarget(prev);
+  bgm.dispose();gd.geometry.dispose();gd.material.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}if(ry===undefined)portOk[cls]=K&&K.st===2?2:1;return cv}catch(e){return null}}
+/* v349: 직업 선택 — 초상화는 한 프레임에 하나씩 그려 끼워 넣음(한 번에 셋을 그리면 폰에서 멈춤) */
+let portQ=0;
+function portFill(){const cards=[...document.querySelectorAll('#classSheet .card.cls')];if($('classSel').hidden||!cards.length){portQ=0;return}
+  for(const b of cards){const k=b.dataset.c,K=SKN[k],want=K&&K.st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
+    if(cur&&have===want)continue;if(!cur||have!==want){const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}requestAnimationFrame(portFill);return}
+  portQ=0}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st)skwLoad(c);
   let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg">`;
-  for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" draggable="false" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
+  for(const k in CLS){const c=CLS[k];h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
+  for(const b of document.querySelectorAll('#classSheet .card.cls')){const k=b.dataset.c,cv=portCv[k];if(cv&&portOk[k])b.querySelector('.badge').replaceWith(cv)}/* 이미 그려 둔 초상화는 바로 끼움 */
+  if(!portQ){portQ=1;requestAnimationFrame(portFill)}
 }
 let testPick=false;
 /* v157: 테스트 캐릭터 — 슬롯 화면 버튼 삭제. 제목의 「잿불 성역」 로고를 3초 안에 5번 누르면(처음 한 번은 암호 입력) 바로 테스트 캐릭터 직업 선택으로 들어감.
@@ -4084,11 +4101,11 @@ function applyTest(){const sk=C().skills[0];S.test=true;S.n5=1;S.testGod=false;S
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;if(S.testMp)P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 /* v346: 직업 선택 초상화를 좌우로 드래그하면 캐릭터가 돌아감(세로 스크롤은 그대로) · 드래그한 뒤에는 카드 선택 클릭을 무시 */
 let pDrag=null,pDragEnd=0;
-$('classSheet').addEventListener('pointerdown',e=>{const im=e.target.closest('img.cport');if(!im)return;const b=im.closest('[data-c]');if(!b)return;const c=b.dataset.c;
+$('classSheet').addEventListener('pointerdown',e=>{const im=e.target.closest('.cport');if(!im)return;const b=im.closest('[data-c]');if(!b)return;const c=b.dataset.c;
   pDrag={im,c,x:e.clientX,y:e.clientY,a0:+(im.dataset.ry||portRy0(c)),on:false,id:e.pointerId,raf:0,a:null}});
 $('classSheet').addEventListener('pointermove',e=>{const d=pDrag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;
   if(!d.on){if(Math.abs(dx)<6||Math.abs(dx)<Math.abs(dy))return;d.on=true;try{d.im.setPointerCapture(d.id)}catch(err){}}
-  e.preventDefault();d.a=d.a0+dx*.014;if(!d.raf)d.raf=requestAnimationFrame(()=>{d.raf=0;const u=heroPortrait(d.c,d.a);if(u)d.im.src=u;d.im.dataset.ry=d.a})});
+  e.preventDefault();d.a=d.a0+dx*.014;if(!d.raf)d.raf=requestAnimationFrame(()=>{d.raf=0;heroPortrait(d.c,d.a);d.im.dataset.ry=d.a})});
 const pUp=e=>{const d=pDrag;if(!d||e.pointerId!==d.id)return;if(d.on)pDragEnd=Date.now();pDrag=null};
 $('classSheet').addEventListener('pointerup',pUp);$('classSheet').addEventListener('pointercancel',pUp);
 $('classSheet').addEventListener('click',e=>{if(Date.now()-pDragEnd<350&&e.target.closest('[data-c]')){e.stopPropagation();return}},true);
@@ -5302,6 +5319,7 @@ document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click
 {const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%'};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
 (function(){const e=$('emb');for(let i=0;i<26;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 $('goStart').onclick=()=>{$('title').hidden=true;showSlots()};
+setTimeout(skwPreload,600);
 hud();
 requestAnimationFrame(loop);
 </script>
