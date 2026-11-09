@@ -1002,7 +1002,7 @@ const ENH_MAX=Infinity,ENH_B=.06,ENH_O=.05;/* v44: 강화 단계 제한 없음 *
 const enhL=k=>(S.enh&&S.enh[k])||0;
 const enhCost=(L,k)=>Math.round(200*Math.pow(1.418,L)*1.3);/* v372: 전 부위 강화 비용 동일 — 무기 기준(+30%)에 방어구·장신구를 맞춤 *//* v126: 무기 강화 비용 전 구간 +30% · v150: 단계당 상승률 38% → 41.8%(10% 상향) · v151에서 25강 이후 +5%를 시도했다가 v152에서 되돌림 */
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
-const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:.05;/* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
+const enhRate=L=>L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:L<35?.05:L<40?.04:.03;/* v378: 35강~ 4% · 40강~ 3% *//* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
 /* v58: 단계별 상승량 = 기본 상승량 × 그 단계 평균 시도 횟수(1/확률). 누적값 캐시 */
 const ENH_PW=1.6,ENH_RET=.7;/* v134: 단계별 상승량 전체 0.7배 */
 /* v350: 강화 천장 — 같은 단계에서 기대 시도 횟수(1/확률)의 2배만큼 실패가 쌓이면 그 시도는 반드시 성공 (10% → 20번째, 5% → 40번째) · 10배 골드 강화 폐지 */
@@ -3894,7 +3894,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v377';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v378';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4767,7 +4767,7 @@ let smithOpen=false,smithMsg='',smithSel=null,smithRes=null;
 /* v41: 6부위 중 하나를 먼저 고르고, 고른 부위의 강화 상태만 크게 보여 줌 (돌아가기로 목록 복귀) */
 let useTk=false;
 /* v131 확정 강화 주문서 필요 개수: 무기 +30~ 2개 · +35~ 3개 · +40~ 4개 / 방어구·장신구 +35~ 2개 · +40~ 3개 (현재 강화 단계 기준). 주문서 사용 시 골드 5배 */
-const tkNeed=(L,k)=>L>=30?2+Math.floor((L-30)/5):1,/* v372: 확정 강화 주문서 필요량도 전 부위 무기 기준(30강부터 2개, 5강마다 +1) */TK_GOLD=5;/* v222: +40 이후에도 5단계마다 1개씩 증가 */
+const tkNeed=(L,k)=>L>=50?10+(L-50):L>=45?7:L>=40?5:L>=35?3:L>=30?2:1,/* v378: 40강 5개 · 45강 7개 · 50강 10개 이후 1강당 +1 *//* v372: 확정 강화 주문서 필요량도 전 부위 무기 기준(30강부터 2개, 5강마다 +1) */TK_GOLD=5;/* v222: +40 이후에도 5단계마다 1개씩 증가 */
 /* v131 자동 강화: 켜면 골드가 모자라거나 끌 때까지 0.35초마다 강화(주문서는 쓰지 않음, 컷신 없이 결과만) */
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
