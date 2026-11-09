@@ -1839,20 +1839,25 @@ const NM=(()=>{
 function makeHero(cls){return NM.hero(cls)}
 /* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
    기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
-const SKW={st:0,root:null,mx:null,acts:null,tip:null,swM:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,lastHp:0,pp:null,S:1.764,_v:new THREE.Vector3()};
-function skwLoad(){if(SKW.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)SKW.st=3;return}SKW.st=1;
-  new THREE.GLTFLoader().load('models/warrior.glb?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(SKW.S);let sw=null;
-    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=1.6;if(/sword/i.test(o.name)){o.material=o.material.clone();SKW.swM=o.material;sw=o;SKW.sw=o}}});
-    if(SKW.swM&&SKW.swM.emissiveMap){/* v332: 무기 등급 빛 — 칼 전체가 은은하게(균열은 더 밝게) */const em=SKW.swM.emissiveMap,im=em.image;SKW.swCrack=em;
-      try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle='rgb(135,135,135)';g2.fillRect(0,0,cv.width,cv.height);
-        const t=new THREE.CanvasTexture(cv);t.flipY=em.flipY;t.encoding=em.encoding;SKW.swLift=t}catch(e){}}
-    SKW.tip=new THREE.Object3D();SKW.tip.position.set(0,0,1.13);SKW.tip.scale.setScalar(1/SKW.S);(sw||r).add(SKW.tip);
-    SKW.mx=new THREE.AnimationMixer(r);SKW.acts={};for(const c of g.animations){const a=SKW.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);SKW.acts[c.name]=a}
-    SKW.root=r;SKW.st=2;delete PORT.warrior;if(hero)skwAttach(hero);if(!$('classSel').hidden)showClassSel()}catch(e){SKW.st=3}},undefined,()=>{SKW.st=3})}
-function skwAttach(g){const u=g&&g.userData;if(!u||u.cls!=='warrior')return;if(!SKW.st){SKW.st=.5;setTimeout(()=>{SKW.st=0;skwLoad()},0)}if(SKW.st!==2)return;
-  const r=SKW.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
-  for(const c of [...SKW.tip.children])SKW.tip.remove(c);
-  SKW.cur='idle';SKW.prev=null;SKW.fadeT=0;SKW.tm={};SKW.hitT=0;SKW.lastHp=P.hp;SKW.pp=null;P.flinch=false;skwGear()}
+/* ===== v330~v337 스킨 3D 캐릭터(전사·마법사) — AI 생성 모델 + Mixamo 뼈대. 절차적 몸(u.body)은 숨기고 애니메이션만 유지해 기존 코드가 그대로 돌아가게 함 ===== */
+const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,1.11,0],lift:90}};
+const SKN={};function skMk(cls){return SKN[cls]||(SKN[cls]={cls,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:SKC[cls].S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null})}
+const SKW=skMk('warrior');skMk('mage');/* SKW: 전사 상태(기존 이름 유지) */
+function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
+  new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(K.S);let sw=null;
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material.color.setScalar(1.9);o.material.emissiveIntensity=cls==='mage'?2.4:1.6;if(C.wp.test(o.name)){o.material=o.material.clone();K.swM=o.material;sw=o;K.sw=o}}});
+    if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
+      try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
+        const t=new THREE.CanvasTexture(cv);t.flipY=em.flipY;t.encoding=em.encoding;K.swLift=t}catch(e){}}
+    K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/K.S);(sw||r).add(K.tip);
+    K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
+    if(cls==='mage'&&sw){/* 지팡이 기준 자세(대기 1초)에서의 세계 회전 V0 = 손 회전 × 지팡이 로컬 회전 — 매 프레임 손 회전을 상쇄하고 원하는 방향으로 돌릴 때 씀 */K.hand=sw.parent;K.acts.idle.setEffectiveWeight(1);K.acts.idle.time=1;K.mx.update(0);r.updateMatrixWorld(true);K.V0=K.hand.getWorldQuaternion(new THREE.Quaternion()).multiply(sw.quaternion);K.acts.idle.setEffectiveWeight(0)}
+    K.root=r;K.st=2;delete PORT[cls];if(hero)skwAttach(hero);if(!$('classSel').hidden)showClassSel()}catch(e){K.st=3}},undefined,()=>{K.st=3})}
+function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
+function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
+  const r=K.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
+  for(const c of [...K.tip.children])K.tip.remove(c);
+  K.cur='idle';K.prev=null;K.fadeT=0;K.tm={};K.hitT=0;K.pp=null;K.stQ=null;P.flinch=false;skwGear()}
 /* v336: 초상화 — 대검을 손에서 떼어 등 뒤에 비스듬히 멘 모습(손잡이는 오른 어깨 위, 칼끝은 왼쪽 엉덩이 쪽). 되돌리는 함수를 반환 */
 const SKB={gx:.42,up:.24,bk:.3,dx:.5,dz:0};
 function skwBack(r){const sw=SKW.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r.getObjectByName('mixamorigNeck'),sh=r.getObjectByName('mixamorigRightShoulder'),hp=r.getObjectByName('mixamorigHips');if(!sw||!sp||!nk||!sh||!hp)return null;
@@ -1861,32 +1866,41 @@ function skwBack(r){const sw=SKW.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r
   const sg=Math.sign(pS.x-pN.x)||-1,g=new THREE.Vector3(pN.x+sg*L*SKB.gx,pN.y+L*SKB.up,pN.z-L*SKB.bk),z=new THREE.Vector3(-sg*SKB.dx,-1,SKB.dz).normalize(),y=new THREE.Vector3(z.y,-z.x,0).normalize(),x=new THREE.Vector3().crossVectors(y,z);
   const Wm=new THREE.Matrix4().makeBasis(x,y,z).scale(ws).setPosition(g),Lm=new THREE.Matrix4().copy(sp.matrixWorld).invert().multiply(Wm);sp.add(sw);Lm.decompose(sw.position,sw.quaternion,sw.scale);
   return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q);sw.scale.copy(sv.s)}}
-function skwGear(){if(!SKW.swM||!hero||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=SKW.swM;
-  if(wr>=1&&SKW.swLift){m.emissiveMap=SKW.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=SKW.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
-function skwTick(dt){const u=hero&&hero.userData;if(!u||!u.sk||SKW.st!==2)return;
-  const spd=SKW.pp&&dt>0?Math.hypot(P.pos.x-SKW.pp.x,P.pos.z-SKW.pp.z)/dt:0;SKW.pp={x:P.pos.x,z:P.pos.z};
-  if(P.flinch){if(P.hp>0)SKW.hitT=.35;P.flinch=false}SKW.lastHp=P.hp;/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */SKW.hitT-=dt;
-  let st,t=null,rate=1;
+/* v337: 마법사 지팡이 방향 — 손 회전과 무관하게 세계 기준으로 세움. 평소·이동: 수직(땅에 짚음), 시전: 앞으로 겨눔(수정이 앞) */
+function skmStaff(K,aim,dt){const sw=K.sw,hand=K.hand;if(!sw||!hand)return;hand.updateWorldMatrix(true,false);
+  const fwd=new THREE.Vector3(Math.sin(P.face),0,Math.cos(P.face)),up=new THREE.Vector3(0,1,0),ax=aim>0?up.clone().lerp(fwd.clone().multiplyScalar(1).add(new THREE.Vector3(0,.25,0)).normalize(),aim).normalize():up;
+  const tq=new THREE.Quaternion().setFromUnitVectors(up,ax);if(!K.stQ)K.stQ=tq.clone();else K.stQ.slerp(tq,1-Math.exp(-dt*(aim>0?14:7)));
+  const hq=hand.getWorldQuaternion(K._q).invert();sw.quaternion.copy(hq).multiply(K.stQ).multiply(K.V0)}
+function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;
+  if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
+function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;const mage=K.cls==='mage';
+  const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
+  if(P.flinch){if(P.hp>0)K.hitT=.35;P.flinch=false}/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */K.hitT-=dt;
+  let st,t=null,rate=1,aim=0;
   if(P.hp<=0)st='die';
   else if(P.mv){st='roll';t=.4+1.15*Math.min(1,P.mv.go/MV_GO)}
-  else if(P.spin>0){st='spin';t=1.7}
-  else if(P.slam>0){/* v333 대지 분쇄: Great Sword Casting — 들기 → 내려꽂기(적중 순간=임팩트) → 버팀 → 복귀 */const T=P.slamT||.42,el=T-P.slam,h=P.slamK>0?.075:.27,ws=Math.max(0,h-.075);st='cast';
+  else if(!mage&&P.spin>0){st='spin';t=1.7}
+  else if(!mage&&P.slam>0){/* v333 대지 분쇄: Great Sword Casting — 들기 → 내려꽂기(적중 순간=임팩트) → 버팀 → 복귀 */const T=P.slamT||.42,el=T-P.slam,h=P.slamK>0?.075:.27,ws=Math.max(0,h-.075);st='cast';
     t=el<ws?.78*sm(el/ws):el<h?.78+.47*(el-ws)/.075:el<h+.16?1.25+.35*(el-h)/.16:1.6+.5*clamp((el-h-.16)/Math.max(.01,T-h-.16),0,1)}
-  else if(P.cast&&P.cast.id==='quake'){st='cast';t=.78*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
-  else if(P.cast){st='slash';t=.1+.42*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
-  else if(P.pose&&!P.pose.relax&&P.pose.T){st='slash';t=.3+.8*clamp(1-P.pose.t/P.pose.T,0,1)}
-  else if(SKW.hitT>0){st='hit';t=.45*(1-SKW.hitT/.35)}
-  else if(spd>.6){st='run';rate=clamp(spd/5.5,.6,1.7)}
+  else if(!mage&&P.cast&&P.cast.id==='quake'){st='cast';t=.78*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
+  else if(mage&&P.cast){/* v337 마법사 시전(예비): 얼음 보주=두 손 모으기(orb 0→.8) · 연쇄 번개/마력탄=한 손 들기(chain 0→.75) */const k=sm(clamp(1-P.cast.t/P.cast.T,0,1));aim=k;if(P.cast.id==='frost'){st='orb';t=.8*k}else{st='chain';t=.75*k}}
+  else if(mage&&P.pose&&!P.pose.relax&&P.pose.T){/* v337 마법사 발사: 보주=내밀고 버티다 거둠(orb .8→1.3, 2.7→3.3) · 번개/마력탄=찌르고 거둠(chain .75→1.3→1.7) */const k=clamp(1-P.pose.t/P.pose.T,0,1),id=P.pose.id;aim=1-sm(Math.max(0,(k-.6)/.4));
+    if(id==='orb'){st='orb';t=k<.55?.8+.5*(k/.55):2.7+.6*((k-.55)/.45)}else{st='chain';t=k<.45?.75+.55*(k/.45):1.3+.4*((k-.45)/.55)}}
+  else if(!mage&&P.cast){st='slash';t=.1+.42*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
+  else if(!mage&&P.pose&&!P.pose.relax&&P.pose.T){st='slash';t=.3+.8*clamp(1-P.pose.t/P.pose.T,0,1)}
+  else if(K.hitT>0){st='hit';t=.45*(1-K.hitT/.35)}
+  else if(spd>.6){st='run';rate=clamp(spd/5.5,.6,1.7)*(mage?1.15:1)}
   else st='idle';
-  if(st!==SKW.cur){SKW.prev=SKW.cur;SKW.fade=SKW.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='cast')?.06:.14;SKW.cur=st;if(st==='die')SKW.tm.die=0}
-  const A=SKW.acts,dur=k=>A[k]._clip.duration;
-  if(t!==null)SKW.tm[st]=t;else if(st==='die')SKW.tm.die=Math.min(dur('die')-.01,(SKW.tm.die||0)+dt);else SKW.tm[st]=((SKW.tm[st]||0)+dt*rate)%dur(st);
-  SKW.fadeT=Math.max(0,SKW.fadeT-dt);const f=SKW.fade>0?SKW.fadeT/SKW.fade:0;
-  for(const k in A){const a=A[k],w=k===SKW.cur?1-(SKW.prev&&SKW.prev!==k?f:0):(k===SKW.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=SKW.tm[k]||0}
-  SKW.mx.update(0);
-  /* 칼끝: 기존 이펙트가 쓰는 u.weaponTip을 새 칼끝 위치로 */
-  if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);SKW.tip.getWorldPosition(SKW._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(SKW._v))}
-  if(SKW.swM){const on=P.spin>0||P.swing>0;if(on)SKW.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}}
+  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='cast'||st==='orb'||st==='chain')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
+  const A=K.acts,dur=k=>A[k]._clip.duration;
+  if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
+  K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
+  for(const k in A){const a=A[k],w=k===K.cur?1-(K.prev&&K.prev!==k?f:0):(k===K.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=K.tm[k]||0}
+  K.mx.update(0);
+  if(mage)skmStaff(K,aim,dt);
+  /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
+  if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
+  if(K.swM){const on=!mage&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}}
 /* 착용 장비 → 외형: 갑옷 등급 = 금속 테두리 색, 투구 = 투구/두건 표시, 무기 등급 = 날·수정 빛, 신발 = 신발 색 */
 function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar=eq.armor?eq.armor.rar:0,wr=eq.weapon?eq.weapon.rar:0;
   u.trim.color.setHex(RARC[ar]);u.trim.emissive.setHex(ar>=2?RARC[ar]:0);u.trim.emissiveIntensity=ar>=3?.55:ar>=2?.25:0;
@@ -1915,7 +1929,7 @@ function heroAnim(dt,moving){const u=hero.userData;if(!u.body)return;u.walk+=dt*
   if(u.arrowM)u.arrowM.visible=false;if(u.strPull)u.strPull(0);if(u.gemGlow){u.gemGlow.scale.setScalar(.9);u.gem.material.emissiveIntensity=.9}
   if(u.cape){u.cape.rotation.x=.12+(moving?.35+Math.sin(u.walk*2)*.08:.03*br)}
   if(u.robe){u.robe.rotation.z=moving?w*.05:0}
-  if(u.cls==='mage'&&u.gem){u.gem.rotation.y+=dt*2;if(Math.random()<dt*(4+u.wRar*3)*QM()){const p=new THREE.Vector3();u.gem.getWorldPosition(p);emit(PADD,{x:p.x+rnd(-.15,.15),y:p.y,z:p.z+rnd(-.15,.15),vy:rnd(.3,.8),life:rnd(.4,.7),s0:.3,s1:.05,c0:[0xb8d0ff,0xa0c0ff,0xffe8a0,0xffb060][u.wRar],c1:0x2a4aa0,a:.7,tex:1})}}
+  if(u.cls==='mage'&&u.gem){u.gem.rotation.y+=dt*2;if(Math.random()<dt*(4+u.wRar*3)*QM()){const p=new THREE.Vector3();(u.sk?u.weaponTip:u.gem).getWorldPosition(p);emit(PADD,{x:p.x+rnd(-.15,.15),y:p.y,z:p.z+rnd(-.15,.15),vy:rnd(.3,.8),life:rnd(.4,.7),s0:.3,s1:.05,c0:[0xb8d0ff,0xa0c0ff,0xffe8a0,0xffb060][u.wRar],c1:0x2a4aa0,a:.7,tex:1})}}
   if(u.wRar>=3&&u.cls!=='mage'&&Math.random()<dt*6*QM()){const p=new THREE.Vector3();u.weaponTip.getWorldPosition(p);emit(PADD,{x:p.x,y:p.y,z:p.z,vy:rnd(.4,1),life:rnd(.3,.5),s0:.35,s1:.05,c0:0xffc070,c1:0xa02000,a:.7,tex:1})}}
 /* ===== v234 동작(포즈) 시스템 — 키프레임 상태를 섞어 팔·몸통·머리·다리를 함께 움직임 =====
    상태 필드: px/py/pz 어깨 피벗 회전x·y / 위치z, ax/ay/az 윗팔 회전, fx 아래팔, lx/ly/lz 왼팔, bx/by/bz 몸통 회전, bh 몸통 높이(가산),
@@ -3775,7 +3789,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v336';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v337';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -3951,14 +3965,14 @@ function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gol
 const PORT={};
 function heroPortrait(cls){if(PORT[cls])return PORT[cls];try{const W=180,H=230,rt=new THREE.WebGLRenderTarget(W,H),sc=new THREE.Scene();
   sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.75));const d=new THREE.DirectionalLight(0xb8c8e8,.8);d.position.set(-3,5,4);sc.add(d);const w=new THREE.PointLight(0xffa25a,1.4,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
-  let m,skB=null;if(cls==='warrior'&&SKW.st===2){/* v332: 전사 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 */const r=SKW.root;skB={par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
-    for(const k in SKW.acts){const a=SKW.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}SKW.mx.update(0);skB.back=skwBack(r)}else m=makeHero(cls);m.rotation.y=skB?.2:.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+  let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(cls==='mage'?1.42:1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.5);fl.position.set(1.5,2.5,5);sc.add(fl);
+    for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1);P.face=f0}}else m=makeHero(cls);m.rotation.y=skB?(cls==='mage'?.3:.2):.45;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,W/H,.1,50);cam.position.set(1.3,1.8,5.1);cam.lookAt(0,1.14,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);renderer.setRenderTarget(rt);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);renderer.setClearColor(cc,ca);
   const px=new Uint8Array(W*H*4);renderer.readRenderTargetPixels(rt,0,0,W,H,px);renderer.setRenderTarget(prev);
   const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),im=g.createImageData(W,H);for(let y=0;y<H;y++)im.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);g.putImageData(im,0,0);
-  rt.dispose();if(skB){const r=SKW.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}return PORT[cls]=c.toDataURL()}catch(e){return ''}}
-function showClassSel(){if(!SKW.st)skwLoad();
+  rt.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}return PORT[cls]=c.toDataURL()}catch(e){return ''}}
+function showClassSel(){for(const c in SKC)if(!SKN[c].st)skwLoad(c);
   let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards">`;
   for(const k in CLS){const c=CLS[k];const pi=heroPortrait(k);h+=`<button class="card cls" data-c="${k}">${pi?`<img class="cport" src="${pi}" alt="" style="--cc:${c.c}">`:`<span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span>`}<span><span class="en">${c.en}</span>${c.n}<small>${c.d}<br>주력 스킬: ${c.opts.map(s=>SK[s].n).join(' / ')} 중 택1</small></span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
