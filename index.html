@@ -62,7 +62,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
-#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
+#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape){#topStack .bossbar{width:90%}}/* v343: 가로 화면 보스 체력바 좌우 -10% */@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
 .stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:auto;cursor:pointer;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .stagechip{flex-direction:column;gap:2px;padding:6px 16px 6px 8px;border-radius:16px}.scrow{display:flex;align-items:center;gap:10px}
 .stagechip em{font:800 12px var(--en);font-stretch:87%;font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted)}.stagechip em i{font-style:normal}
@@ -1925,7 +1925,7 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(P.hp<=0)st='die';
   else if(P.mv){st='roll';t=.4+1.15*Math.min(1,P.mv.go/MV_GO)}
   else if(!mage&&P.spin>0){st='spin';t=1.7}
-  else if(!mage&&P.slam>0){/* v333 대지 분쇄: Great Sword Casting — 들기 → 내려꽂기(적중 순간=임팩트) → 버팀 → 복귀 */const T=P.slamT||.42,el=T-P.slam,h=P.slamK>0?.075:.27,ws=Math.max(0,h-.075);st='cast';
+  else if(!mage&&P.slam>0){/* v333 대지 분쇄: Great Sword Casting — 들기 → 내려꽂기(적중 순간=임팩트) → 버팀 → 복귀 */const T=P.slamT||.42,el=T-P.slam,h=P.slamK>0?.075:Math.min(.27,T*.45),ws=Math.max(0,h-.075);st='cast';
     t=el<ws?.78*sm(el/ws):el<h?.78+.47*(el-ws)/.075:el<h+.16?1.25+.35*(el-h)/.16:1.6+.5*clamp((el-h-.16)/Math.max(.01,T-h-.16),0,1)}
   else if(!mage&&P.cast&&P.cast.id==='quake'){st='cast';t=.78*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
   else if(mage&&P.cast){/* v337 마법사 시전(예비): 얼음 보주=두 손 모으기(orb 0→.8) · 연쇄 번개/마력탄=한 손 들기(chain 0→.75) */const k=sm(clamp(1-P.cast.t/P.cast.T,0,1));aim=k;if(P.cast.id==='frost'){st='orb';t=.8*k}else{st='chain';t=.75*k}}
@@ -2024,7 +2024,7 @@ const PZ={
 const WIND={atk:cls=>cls==='warrior'?PZ.slash(cls,{d:-P.swingDir}).keys[0][1]:cls==='archer'?PZ.drawSt(cls):PZ.bolt(cls,{}).keys[0][1],
   crush:cls=>PZ.crush(cls,{}).keys[0][1],volley:cls=>PZ.drawSt(cls),snipe:cls=>PZ.drawSt(cls),frost:cls=>PZ.orb(cls,{}).keys[0][1],
   chainl:cls=>PZ.chain(cls,{}).keys[0][1],meteor:cls=>PZ.meteor(cls,{}).keys[0][1],pillar:cls=>PZ.pillar(cls,{}).keys[0][1],boom:cls=>PZ.sweep(cls,{}).keys[0][1],wave:cls=>PZ.sweep(cls,{}).keys[0][1]};
-function poseStart(id,T,o){const f=PZ[id];if(!f)return;const p=Object.assign({id,T,t:T},o||{}),def=f(S.cls,p);if(!def)return;Object.assign(p,def);if(p.pre)p.tp0=p.tp;else p.tp0=0;P.pose=p}
+function poseStart(id,T,o){const f=PZ[id];if(!f)return;if(id!=='whirl')T*=P.castF||1;/* v343: 시전시간이 줄어든 만큼 발사 동작도 짧게 */const p=Object.assign({id,T,t:T},o||{}),def=f(S.cls,p);if(!def)return;Object.assign(p,def);if(p.pre)p.tp0=p.tp;else p.tp0=0;P.pose=p}
 function poseState(p,k){const ks=p.keys;let i=0;while(i<ks.length-1&&ks[i+1][0]<=k)i++;if(i>=ks.length-1)return ks[ks.length-1][1];
   const [k0,a]=ks[i],[k1,b,ez]=ks[i+1],f=(EZ[ez||'lin'])(clamp((k-k0)/Math.max(1e-4,k1-k0),0,1));return lerpSt(a,b,f)}
 function applyState(u,s,w){if(w<=0)return;const L=(o,k,v)=>{o[k]+=(v-o[k])*w};
@@ -3298,10 +3298,12 @@ function retStart(p){const pp=p.m.position,dx=P.pos.x-pp.x,dz=P.pos.z-pp.z,l=Mat
 /* v128: 기본 공격도 스킬과 같은 방식 — 쿨타임의 25%(최대 0.3초) 시전 후 발동, 누를 때마다 한 번만 */
 function basicAttack(){
   if(P.cast||P.mv)return;
-  const b=C().basic,cd=(b==='melee'?.42:b==='arrow'?.45:.55)*cdMul(),ct=Math.min(.3,CAST_K*cd);
+  const b=C().basic,cd0=b==='melee'?.42:b==='arrow'?.45:.55,cd=cd0*cdMul(),ct=Math.min(.3,CAST_K*cd),ct0=Math.min(.3,CAST_K*cd0);
   P.cd.atk=cd;
-  if(ct>=.04){aim(b==='melee'?4:16);P.cast={slot:'atk',id:'atk',t:ct,T:ct};P.skSwing=false;return}
-  basicFire()}
+  if(ct>=.04){aim(b==='melee'?4:16);P.cast={slot:'atk',id:'atk',t:ct,T:ct,T0:ct0};P.skSwing=false;return}
+  P.castF=castF(ct,ct0);try{basicFire()}finally{P.castF=1}}
+/* v343: 발사 동작 배율 = 지금 시전시간 / 강화 전 기본 시전시간 (0.3~1) */
+const castF=(ct,ct0)=>ct0>0?clamp(ct/ct0,.3,1):1;
 function basicFire(){
   const b=C().basic;P.skSwing=false;const setCd=v=>{if(!P.castPre)P.cd.atk=v};
   if(b==='melee'){
@@ -3453,8 +3455,9 @@ function castSkill(slot){
   P.mp-=cost;P.cd[slot]=st.cd;
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
   const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
-  if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
-  castFire(slot,id)}
+  const ct0=b.kind==='whirl'?0:Math.max(Math.min(CAST_MAX,CAST_K*b.cd),Math.min(CT_MIN,b.cd*.6));
+  if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct,T0:ct0};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
+  P.castF=castF(ct,ct0);try{castFire(slot,id)}finally{P.castF=1}}
 const CAST_K=.25,CAST_MAX=.6;
 /* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
 const CT_MIN=.15;/* v307: 시전 최소 0.15초 — 쿨타임이 아주 짧아져도(110 스펙 0.28초) 쓰는 순간 잠깐 멈춤. 단 쿨타임의 60%를 넘지 않음(연속 시전 DPS 유지) */
@@ -3498,7 +3501,7 @@ function castFire(slot,id){
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
   if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
-    const pre=P.castPre,SLAM=pre?.42:.6,HIT=pre?.075:.27;P.slam=SLAM;P.slamT=SLAM;P.swing=Math.min(SLAM,.2);P.slamK=pre?1:0;/* v131: 검을 거꾸로 들어 수직으로 내려꽂음 — 꽂는 순간 가시 *//* v89: 검을 머리 위로 들었다가 바닥을 내려찍는 모션, 찍는 순간 가시 */
+    const pre=P.castPre,SLAM=Math.max(.2,(pre?.42:.6)*(P.castF||1)),HIT=pre?.075:Math.min(.27,SLAM*.45);P.slam=SLAM;P.slamT=SLAM;P.swing=Math.min(SLAM,.2);P.slamK=pre?1:0;/* v131: 검을 거꾸로 들어 수직으로 내려꽂음 — 꽂는 순간 가시 *//* v89: 검을 머리 위로 들었다가 바닥을 내려찍는 모션, 찍는 순간 가시 */
     later(HIT,()=>{const q={x:p0.x+Math.sin(a)*1.3,z:p0.z+Math.cos(a)*1.3};shake=Math.max(shake,.32);fireBurst(q,1.6,1,true,PAL_DUST);/* v166: 흙먼지 구름 */
       groundFx(q,shockTex,0x9a8070,.3,2.2,.28,.7,false,.07);groundFx(q,dotTex,0xffd8a0,.2,1.2,.12,.6,true,.08);
       spray(PNRM,q,10,{sp:[2,5],up:[3,7],y:[.1,.3],life:[.4,.8],s0:[.3,.6],s1:[.1,.2],c0:0x5a4a48,c1:0x1a1418,a:.9,drag:1.5,tex:2});
@@ -3835,7 +3838,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v342';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v343';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4781,14 +4784,24 @@ function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
   if(!heirMode){const nsp=allItems().filter(spOf).length,nadv=scr.filter(x=>x.v>=10).length;
     h=head('Heir','무엇을 할까요?')+`<div class="hmenu">
       <button class="smslot hbig" data-hm="eng" ${scr.length?'':'disabled'}><span class="k">ENGRAVE</span><b style="color:#c890ff">★ 각인의 서 사용</b><small>보유 ${scr.length}장${nadv?` (상급 ${nadv}장)`:''} · 전설 장비에 부위별 특수 능력치를 새깁니다</small></button>
-      <button class="smslot hbig" data-hm="inh" ${nsp?'':'disabled'}><span class="k">INHERIT</span><b style="color:#5ae0d0">⇄ 특수 능력치 전승</b><small>★ 장비 ${nsp}개 · 특수 능력치를 같은 부위의 다른 전설 장비로 옮깁니다</small></button></div>
+      <button class="smslot hbig" data-hm="inh" ${nsp?'':'disabled'}><span class="k">INHERIT</span><b style="color:#5ae0d0">⇄ 특수 능력치 전승</b><small>★ 장비 ${nsp}개 · 특수 능력치를 같은 부위의 다른 전설 장비로 옮깁니다</small></button>
+      <button class="smslot hbig" data-hm="auto" ${heirPlan().some(p=>p.src)?'':'disabled'}><span class="k">AUTO</span><b style="color:#ffd24a">⚡ 전 부위 최적 전승</b><small>부위마다 가장 좋은 전설 장비에 가장 높은 ★ 수치를 한 번에 옮깁니다</small></button></div>
       ${scr.length?'':'<p class="hint" style="margin:0">각인의 서는 결투장 잿불 검귀 처치 추가 보상으로 얻습니다.</p>'}
       <button class="ghost" id="hrExit">← 돌아가기</button>`+msg}
+  else if(heirMode==='auto'){const plan=heirPlan(),go=plan.filter(p=>p.src),tot=go.reduce((a,p)=>a+p.c,0),ok=go.length&&S.gold>=tot;
+    const row=p=>{if(!p.src)return `<div class="gslot" style="opacity:.6"><div class="gslhd"><span class="k">${SLOTEN[p.k]} · ${SLOTN[p.k]}</span><b style="color:var(--muted)">건너뜀 · ${p.skip}</b>${p.tg&&spOf(p.tg)?`<small class="wrap">${p.tg.name} · ★ ${OPT[spOf(p.tg).k].n} ${OPT[spOf(p.tg).k].f(spOf(p.tg).v)}</small>`:''}</div></div>`;
+      const sp=spOf(p.src),o=spOf(p.tg),se=S.eq[p.k]===p.src,te=S.eq[p.k]===p.tg;
+      return `<div class="gslot" style="border-color:#5ae0d0"><div class="gslhd"><span class="k">${SLOTEN[p.k]} · ${SLOTN[p.k]}</span><b style="color:#5ae0d0">★ ${OPT[sp.k].n} ${o?`${OPT[o.k].f(o.v)} → `:''}${OPT[sp.k].f(sp.v)}</b>
+        <small class="wrap">받는 장비: <b style="color:${RAR[p.tg.rar].c}">${p.tg.name}</b> · iLv ${p.tg.ilvl} · ${baseName(p.k)} ${Math.round(p.tg.base)}${te?' · 장착 중':se?' · 전승 후 장착':' · 가방(착용은 그대로)'}</small>
+        <small class="wrap" style="color:#ff8a6a">사라지는 재료: ${p.src.name} · iLv ${p.src.ilvl}${se?' · 장착 중':''}</small><small style="color:#ffd24a">${fmtG(p.c)}G</small></div></div>`};
+    h=head('Auto','전 부위 최적 전승')+`<p class="hint" style="margin:0">부위마다 <b style="color:var(--ink)">가장 좋은 전설 장비</b>(아이템 레벨 → 기본 수치 순)에 그 부위에서 <b style="color:var(--ink)">가장 높은 ★ 수치</b>를 옮깁니다. <b style="color:#ff8a6a">재료 장비는 사라지고</b>, 잠금(🔒) 장비는 재료로 쓰지 않습니다.</p>${plan.map(row).join('')||'<p class="hint">전승할 부위가 없습니다.</p>'}
+      ${go.length?`<button class="primary" id="hrAuto" ${ok?'':'disabled'}>${go.length}개 부위 한 번에 전승 · ${fmtG(tot)}G</button>${ok?'':`<p class="hint" style="margin:0;color:#ff7a6a">골드가 부족합니다 (필요 ${fmtG(tot)}G)</p>`}`:''}<button class="ghost" id="hrMenu">← 돌아가기</button>`+msg}
   else if(heirMode==='eng'){
     if(heirScr<0){h=head('Engrave','각인의 서 고르기')+`<p class="hint" style="margin:0">사용할 서를 고르세요. 다음에 각인할 <b style="color:var(--ink)">부위</b>를 고릅니다.</p><div class="smgrid">${scr.map((sc,i)=>`<button class="smslot" data-scr="${i}"><b style="color:${sc.v>=10?'#c890ff':'#5ae0d0'}">★ ${scrName(sc)}</b><small>특수 능력치 ${sc.v}%</small></button>`).join('')||'<p class="hint">각인의 서가 없습니다.</p>'}</div><button class="ghost" id="hrMenu">← 돌아가기</button>`+msg}
     else{const sc=scr[heirScr],leg=allItems().filter(x=>x.rar===3),scC=sc.v>=10?'#c890ff':'#5ae0d0';
       const scBox=`<div class="gslot"><div class="gslhd"><span class="k">${scrName(sc)}</span><b style="color:${scC}">★ 특수 능력치 ${sc.v}%</b><small>고른 장비의 기존 ★는 사라지고 새 수치로 바뀝니다 · 서는 사라집니다</small></div></div>`;
-      if(!heirESlot){h=head('Engrave','어느 부위에 각인할까요?')+scBox+`<div class="smgrid">${EQS.map(k=>{const n=leg.filter(x=>x.slot===k).length,kk=spKeyOf(k);return `<button class="smslot" data-eslot="${k}" ${n?'':'disabled'}><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small class="wrap">★ ${OPT[kk].n} ${OPT[kk].f(sc.v)}</small><small>전설 ${n}개</small></button>`}).join('')}</div><button class="ghost" id="hrScr">← 서 다시 고르기</button>`+msg}
+      if(!heirESlot){h=head('Engrave','어느 부위에 각인할까요?')+scBox+`<div class="smgrid">${EQS.map(k=>{const n=leg.filter(x=>x.slot===k).length,kk=spKeyOf(k);const ce=S.eq[k],co=ce&&spOf(ce),cd=co?(co.k===kk?sc.v-co.v:null):null;/* v343: 지금 착용 중인 장비의 ★ 수치 */
+          return `<button class="smslot" data-eslot="${k}" ${n?'':'disabled'}><span class="k">${SLOTEN[k]}</span><b>${SLOTN[k]}</b><small class="wrap">★ ${OPT[kk].n} ${OPT[kk].f(sc.v)}</small><small class="wrap" style="color:${co?'#5ae0d0':'var(--muted)'}">착용 중: ${!ce?'없음':co?`★ ${OPT[co.k].n} ${OPT[co.k].f(co.v)}${cd!==null?` <i class="hd ${cd>0?'up':cd<0?'dn':'eq'}">${cd>0?'▲':cd<0?'▼':'='}${cd?Math.abs(cd)+'%p':''}</i>`:''}`:'특수 능력치 없음'}</small><small>전설 ${n}개</small></button>`}).join('')}</div><button class="ghost" id="hrScr">← 서 다시 고르기</button>`+msg}
       else{const k=spKeyOf(heirESlot),list=leg.filter(x=>x.slot===heirESlot).sort((a,b)=>(S.eq[b.slot]===b)-(S.eq[a.slot]===a)||b.ilvl-a.ilvl);
         h=head('Engrave',`${SLOTN[heirESlot]}에 각인`)+scBox+(list.length?`<div class="smgrid">${list.map(it=>{const o=spOf(it),ov=o&&o.k===k?o.v:null,d=ov===null?1:sc.v-ov;
           const chg=`<span class="hchg"><span class="old">${o?`${OPT[o.k].n} ${OPT[o.k].f(o.v)}`:'없음'}</span><span class="ar">→</span><span class="new" style="color:${d>0?'#7fe07a':d<0?'#ff7a6a':'var(--ink)'}">${OPT[k].n} ${OPT[k].f(sc.v)}</span>${ov!==null?`<i class="hd ${d>0?'up':d<0?'dn':'eq'}">${d>0?'▲':d<0?'▼':'='}${d?Math.abs(d)+'%p':''}</i>`:''}</span>${d<0?'<small class="warn">지금보다 낮아집니다</small>':''}`;
@@ -4813,16 +4826,32 @@ function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
 function engrave(i,tg){const scr=S.scrolls||[],sc=scr[i];if(!sc||tg.rar!==3)return;const k=spKeyOf(tg.slot);if(!k)return;const o=spOf(tg);
   tg.opts=tg.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));tg.opts.unshift({k,v:sc.v});scr.splice(i,1);heirScr=-1;heirESlot=null;if(!scr.length)heirMode=null;refreshMax();save();refreshUpBtn();
   heirMsg=`${tg.name}: ★ ${OPT[k].n} ${o?`${OPT[o.k].f(o.v)} → `:''}${OPT[k].f(sc.v)} 각인 완료`;toast('각인 완료',`${tg.name} · ★ ${OPT[k].n} ${OPT[k].f(sc.v)}`,'#5ae0d0');buyFx(true);renderHeir()}
-function heirDo(src,tg){const sp=spOf(src),c=heirCost(tg);if(!sp||S.gold<c||src.slot!==tg.slot||tg.rar!==3)return;
-  S.gold-=c;goldFx={v:c,t:Date.now()};
-  tg.opts=tg.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));tg.opts.unshift({k:sp.k,v:sp.v});
+function heirMove(src,tg){/* v343: 전승 핵심(비용·옮기기·장착 교체) — 단일·일괄 전승 공용 */const sp=spOf(src),c=heirCost(tg);if(!sp||S.gold<c||src.slot!==tg.slot||tg.rar!==3||src===tg)return null;
+  S.gold-=c;tg.opts=tg.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));tg.opts.unshift({k:sp.k,v:sp.v});
   const k=src.slot,srcEq=S.eq[k]===src;
   if(srcEq){const i=S.inv.indexOf(tg);if(i>=0)S.inv.splice(i,1);S.eq[k]=tg}else{const i=S.inv.indexOf(src);if(i>=0)S.inv.splice(i,1)}
-  refreshMax();save();refreshUpBtn();heirSrc=null;heirMsg=`${tg.name}에 ★ ${OPT[sp.k].n} ${OPT[sp.k].f(sp.v)} 전승 완료${srcEq?' · 바로 장착했습니다':''}`;heirSlot=null;
+  return {sp,c,srcEq}}
+function heirDo(src,tg){const r=heirMove(src,tg);if(!r)return;const sp=r.sp;goldFx={v:r.c,t:Date.now()};
+  refreshMax();save();refreshUpBtn();heirSrc=null;heirMsg=`${tg.name}에 ★ ${OPT[sp.k].n} ${OPT[sp.k].f(sp.v)} 전승 완료${r.srcEq?' · 바로 장착했습니다':''}`;heirSlot=null;
   toast('전승 완료',`${tg.name} · ★ ${OPT[sp.k].n}`,'#5ae0d0');buyFx(true);renderHeir()}
+/* v343 전 부위 최적 전승: 부위마다 「가장 좋은 전설 장비(아이템 레벨 → 기본 수치, 같으면 장착 중 우선)」에 「그 부위에서 가장 높은 ★ 수치」를 옮김.
+   받는 장비의 ★가 이미 같거나 더 높으면 건너뜀 · 잠금(🔒) 장비는 재료로 쓰지 않음 · 재료 장비는 사라짐(장착 중이던 재료였으면 받은 장비를 바로 장착) */
+function heirPlan(){const all=allItems(),out=[];
+  for(const k of EQS){const leg=all.filter(x=>x.slot===k&&x.rar===3).sort((a,b)=>b.ilvl-a.ilvl||b.base-a.base||(S.eq[k]===b)-(S.eq[k]===a));
+    const srcs=all.filter(x=>x.slot===k&&spOf(x));if(!srcs.length)continue;
+    if(!leg.length){out.push({k,skip:'전설 장비 없음'});continue}
+    const tg=leg[0],cand=srcs.filter(x=>x!==tg&&!x.lock).sort((a,b)=>spOf(b).v-spOf(a).v),src=cand[0],own=spOf(tg);
+    if(!src||own&&own.v>=spOf(src).v){const lk=srcs.some(x=>x!==tg&&x.lock&&spOf(x).v>(own?own.v:0));out.push({k,tg,skip:lk?'더 높은 ★는 잠금(🔒) 장비':own?'이미 가장 높은 ★':'옮길 장비 없음'});continue}
+    out.push({k,tg,src,c:heirCost(tg)})}
+  return out}
+function heirAuto(){const plan=heirPlan().filter(p=>p.src),tot=plan.reduce((a,p)=>a+p.c,0);if(!plan.length||S.gold<tot)return;let n=0,eqN=0;
+  for(const p of plan){const r=heirMove(p.src,p.tg);if(r){n++;if(r.srcEq)eqN++}}
+  goldFx={v:tot,t:Date.now()};refreshMax();save();refreshUpBtn();heirMsg=`${n}개 부위 최적 전승 완료${eqN?` · ${eqN}개는 받은 장비를 바로 장착했습니다`:''}`;heirMode=null;
+  toast('전 부위 최적 전승',`${n}개 부위 완료 · ${fmtG(tot)}G`,'#5ae0d0');buyFx(true);renderHeir()}
 $('heirSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='hrClose')return closeHeir();
   if(b.id==='hrExit')return closeHeir();
+  if(b.id==='hrAuto')return heirAuto();
   if(b.dataset.hm){heirMode=b.dataset.hm;heirSrc=null;heirSlot=null;heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
   if(b.id==='hrMenu'){heirMode=null;heirSrc=null;heirSlot=null;heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
   if(b.id==='hrScr'){heirScr=-1;heirESlot=null;heirMsg='';return renderHeir()}
@@ -5007,8 +5036,9 @@ function update(dt){packTick();
   const ml=Math.hypot(mx,mz);
   mvStep(dt);
   if(P.hp<=0)P.cast=null;
-  if(P.cast){P.cast.t-=dt;if(P.cast.t<=0){const c=P.cast;P.cast=null;P.castPre=true;try{if(c.id==='atk')basicFire();else castFire(c.slot,c.id)}finally{P.castPre=false}}}
+  if(P.cast){P.cast.t-=dt;if(P.cast.t<=0){const c=P.cast;P.cast=null;P.castPre=true;P.castF=castF(c.T,c.T0);try{if(c.id==='atk')basicFire();else castFire(c.slot,c.id)}finally{P.castPre=false;P.castF=1}}}
   if(ml>.05&&!P.mv&&!P.cast){const k=Math.min(1,ml)/ml;const spd=heroSpd()*(P.dashT>0?P.dashM:1)*(P.spin>0?.5+.05*gl('whirl','swift'):P.swing>0&&!P.skSwing?.55:1);P.pos.x+=mx*k*spd*dt;P.pos.z+=mz*k*spd*dt;if(P.swing<=0&&P.spin<=0)P.face=Math.atan2(mx,mz)}
+  if(ml>.05&&P.pose&&!P.pose.relax&&P.pose.id!=='whirl'&&!P.cast&&!P.mv)P.pose.t-=dt*3;/* v343: 발사 동작 중 이동하면 남은 동작을 빠르게 마무리(미끄러지듯 이동 방지) */
   pushOut(P.pos,.45);
   for(const k in P.cd)P.cd[k]=Math.max(0,P.cd[k]-dt);
   if(P.spin>0&&P.vortex){const V=P.vortex;for(const e of enemies){if(e.boss||e.rank>=3)continue;const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,d=Math.hypot(dx,dz);
