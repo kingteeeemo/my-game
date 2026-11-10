@@ -2637,7 +2637,8 @@ const gatePending=()=>S.ch>=NCH&&S.tier===S.maxTier&&gateNeed(S.tier)&&S.tierKil
 function tierCheck(){if(S.ch<NCH||S.tierKills<tkFor(S.tier))return;S.tierKills=tkFor(S.tier);
   if(S.tier===S.maxTier){if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}if(lockNeed(S.tier)){lockAsk(S.tier);return}S.maxTier++;tele('tier');toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
   if(S.autoTier&&S.tier<S.maxTier)setTier(S.tier+1,true)}
-function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tierKills=0;S.egK=0;save();
+const TEST_TOP=140;/* v403: 테스트 캐릭터는 해금 없이 위험도 140까지 이동 가능 */
+function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tierKills=0;S.egK=0;save();if(S.test){riftClear();riftNow=1}/* v403: 테스트 캐릭터는 위험도에 들어가면 바로 균열 시작 */
   if(m0!==m1){if(!inTown){const f=$('regionFade');f.innerHTML=`<div><small>다음 지역으로 이동합니다</small><b>${EGMAPS[m1].n}</b><span>위험도 ${t}</span></div>`;f.className='rfade hold';P.inv=99;
       /* 이동 화면을 먼저 띄운 뒤 다음 프레임에 지역 생성 (생성 중 끊김을 화면 뒤로 숨김) */
       requestAnimationFrame(()=>setTimeout(()=>{setMap(true);applyTheme();resetWorld();P.inv=1.5;setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';stageBanner(true)},350)},30))}
@@ -3277,7 +3278,7 @@ const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[10,1
   hit:[1.5,2.5,4,10],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 */
   gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
-let RZ=null,riftT=rand(...RIFT.first);
+let RZ=null,riftT=rand(...RIFT.first),riftNow=0;
 const RIFT_ON=false;/* v399: 밸런스 조정 전까지 일반 캐릭터는 끔 — 테스트 캐릭터(S.test)에서만 열림 */
 const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
 const riftBusy=()=>!!(RZ&&(RZ.st==='count'||RZ.st==='on'));/* 필드 생성 제한 */
@@ -3294,13 +3295,13 @@ function riftObj(){const g=new THREE.Group(),stone=new THREE.MeshStandardMateria
   const gl=new THREE.Sprite(glowMat(0xff7a20).clone());gl.scale.setScalar(5);gl.position.y=2.4;gl.material.opacity=.55;
   for(const c of [base,b2,cr])c.castShadow=true;g.add(base,b2,cr,gl);const ring=flatMesh(ringGeo,0xffb050,.6);ring.scale.set(2.2,2.2,1);ring.position.y=.07;g.add(ring);
   const {bm,bms}=mkBeam(0xff5a00);bm.position.y=11.5;g.add(bm);g.userData={cr,cm,gl,bm,bms};return g}
-function riftOpen(){const ang=rand(0,Math.PI*2),r=rand(10,14),L=B-RIFT.dist[1]-2,c={x:clamp(P.pos.x+Math.cos(ang)*r,-L,L),z:clamp(P.pos.z+Math.sin(ang)*r,-L,L)};
+function riftOpen(near){const ang=rand(0,Math.PI*2),r=near?2.5:rand(10,14),L=B-RIFT.dist[1]-2,c={x:clamp(P.pos.x+Math.cos(ang)*r,-L,L),z:clamp(P.pos.z+Math.sin(ang)*r,-L,L)};
   const obj=riftObj();obj.position.set(c.x,0,c.z);scene.add(obj);
   const a0=rand(0,Math.PI*2),gates=[];for(let i=0;i<RIFT.N;i++){const a=a0+i/RIFT.N*Math.PI*2+rand(-.35,.35),d=rand(...RIFT.dist),q={x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)},pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
   const lab=document.createElement('div');lab.className='nm r3';lab.innerHTML='<span style="color:#ffb070">잿불 성화</span><i style="width:60px;height:5px"><b style="background:#ff9a3a"></b></i>';namesEl.appendChild(lab);
   RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false};
   ringFx(c,3.4,0xff7a30,.8);flash(c,0xff7a30,3.5);shake=Math.max(shake,.25);
-  feed('잿불 균열이 열렸습니다!','#ff9a4a');toast('🔥 잿불 균열',`${RIFT.wait}초 안에 잿불 성화로 가면 균열이 시작됩니다`,'#ff9a4a')}
+  feed('잿불 균열이 열렸습니다!','#ff9a4a');if(!near)toast('🔥 잿불 균열',`${RIFT.wait}초 안에 잿불 성화로 가면 균열이 시작됩니다`,'#ff9a4a')}
 function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){ringFx(q,2.4,0xc060ff,.6)}
   const el=riftBig('<small>EMBER RIFT</small><b>균열이 시작됩니다</b><span>3</span>',3.05);let n=3;const sp=el.querySelector('span');
   const tick=()=>{n--;if(n>0&&sp){sp.textContent=n;sp.style.animation='none';void sp.offsetWidth;sp.style.animation=''}};later(1,tick);later(2,tick);shake=Math.max(shake,.2)}
@@ -3331,6 +3332,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S
   feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);
   riftBig(`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b>균열 정화!</b><span style="color:${RGC[gr]};text-shadow:0 0 14px ${RGC[gr]},0 2px 4px #000">등급 ${gr} · ${T.toFixed(1)}초</span><p>${L.join('')}</p>`,3)}
 function riftTick(dt){
+  if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
   if(!riftOk()){riftClear();return}
   const Z=RZ,c=Z.c,u=Z.obj.userData;Z.t+=dt;
@@ -4053,7 +4055,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v402';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v403';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4813,14 +4815,14 @@ function renderStage(){
   const eg=S.ch>=NCH,cur=eg?stageReq(NCH,S.tier):S.ch===LAST&&S.phase>=3?fbReq():stageReq(Math.min(S.ch,LAST)),r=me/cur,[tt,tc]=tone(r);
   const row=(n,v,o={})=>`<tr class="${o.cur?'cur':''}"><td>${n}${o.note?`<small class="tnote">${o.note}</small>`:''}</td><td>${o.btn||''}</td></tr>`;
   let rows=[];/* v365: 스토리 장·최종 보스 행 삭제 — 위험도 1부터 */
-  const top=Math.max(5,(S.maxTier||0)+1);
+  const top=Math.max(5,(S.maxTier||0)+1,S.test?TEST_TOP:0);/* v403: 테스트 캐릭터는 140까지 */
   for(let g0=0;g0*10<top;g0++){const lo=g0*10+1,hi=Math.min(g0*10+10,top),ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
     rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n}</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
     if(!ex)continue;
-  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
+  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
     const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
-  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:100},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
+  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
@@ -4832,12 +4834,12 @@ $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
-  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&t<=S.maxTier){if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
+  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&(t<=S.maxTier||S.test&&t<=TEST_TOP)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
 function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
-  else if(k[0]==='t'){const t=+k.slice(1);S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0}
+  else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0}
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
