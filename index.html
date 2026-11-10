@@ -3171,10 +3171,11 @@ function kill(e){
   if(hitKind==='ice')shatterFx(e);else if(hitKind==='rock')rockShatter(e);else if(hitKind==='zap')zapDeath(e)}
   ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);
   if(S.demo)return;
-  dropEss(e);
-  if(!e.duel)dropGold(e.pos,goldOf(e));
-  if(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(S.tier));
-  if(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
+  const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
+  if(rz)riftAcc(e);else{dropEss(e);
+  if(!e.duel)dropGold(e.pos,goldOf(e))}
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(S.tier));
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
   const MD=S.ch<4?2:1,M3=S.ch<NCH?3:1;/* v115: 1~4장 마나 물약 드롭 ×2 / v124: 1~7장은 추가로 ×3 */
   const PD=S.ch>=NCH?(S.tier>=31?0:.054):.3;/* v358: 엔드게임은 등급별 물약 판정 폐지 → 아래 고정 0.7% *//* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
@@ -3273,14 +3274,14 @@ function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(
    0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
    몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
    실패: 80초 안에 성화 파괴 / 80초까지 다 못 잡음. 성공 등급: 64초 이내 S · 72초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
-const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:4/* v402: 수호자와 동일 → v404: ×4 */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
+const RIFT={gap:[120,180],first:[120,180]/* v406: 2~3분마다 */,minTier:10/* v406: 위험도 10부터 */,mul:{F:.6,B:.8,A:1,S:1.3}/* v406: 정산 배수(실패·B·A·S) — 처치한 균열 몹 골드·정수에 곱함 */,wait:40,lim:80,S:64,A:72,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:4/* v402: 수호자와 동일 → v404: ×4 */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
   wave:[{n0:40,n1:0,n2:0,hp:1},{n0:40,n1:12,n2:0,hp:1.25},{n0:24,n1:24,n2:0,hp:1.5},{n0:0,n1:40,n2:4,hp:1.8},{n0:0,n1:32,n2:12,hp:2.2},{n0:0,n1:40,n2:20,hp:2.6}],/* v404: 생성량 ×4 */
   hit:[.75,1.25,2,5],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 — v405: 절반 */
-  gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
+  items:{S:4,A:3,B:2}/* v406: 등급 고정 골드·정수·주문서 확률·전설 주머니 확률 보너스 폐지 → 정산 배수·S등급 주문서로 */};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
 let RZ=null,riftT=rand(...RIFT.first),riftNow=0;
 const RIFT_ON=false;/* v399: 밸런스 조정 전까지 일반 캐릭터는 끔 — 테스트 캐릭터(S.test)에서만 열림 */
-const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
+const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&S.tier>=RIFT.minTier&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
 const riftBusy=()=>!!(RZ&&(RZ.st==='count'||RZ.st==='on'));/* 필드 생성 제한 */
 function riftHud(h){const el=$('riftHud');if(!el)return;if(h==null){el.hidden=true;return}el.hidden=false;if(el._h!==h){el._h=h;el.innerHTML=h}}
 function riftBig(html,dur=3){const el=document.createElement('div');el.className='riftbig';el.innerHTML=html;el.style.animationDuration=dur+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),dur*1000);return el}
@@ -3299,7 +3300,7 @@ function riftOpen(near){const ang=rand(0,Math.PI*2),r=near?2.5:rand(10,14),L=B-R
   const obj=riftObj();obj.position.set(c.x,0,c.z);scene.add(obj);
   const a0=rand(0,Math.PI*2),gates=[];for(let i=0;i<RIFT.N;i++){const a=a0+i/RIFT.N*Math.PI*2+rand(-.35,.35),d=rand(...RIFT.dist),q={x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)},pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
   const lab=document.createElement('div');lab.className='nm r3';lab.innerHTML='<span style="color:#ffb070">잿불 성화</span><i style="width:60px;height:5px"><b style="background:#ff9a3a"></b></i>';namesEl.appendChild(lab);
-  RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false};
+  RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false,acc:{k:0,g:0,e:0,pn:0,pg:0,ln:0,lg:0}};
   ringFx(c,3.4,0xff7a30,.8);flash(c,0xff7a30,3.5);shake=Math.max(shake,.25);
   feed('잿불 균열이 열렸습니다!','#ff9a4a');if(!near)toast('🔥 잿불 균열',`${RIFT.wait}초 안에 잿불 성화로 가면 균열이 시작됩니다`,'#ff9a4a')}
 function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){ringFx(q,2.4,0xc060ff,.6)}
@@ -3314,6 +3315,10 @@ function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W
   list.forEach((rk,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(Z.gates[i%Z.gates.length],rk,W.hp)}));Z.fT=RIFT.fillEvery;Z.fList=list;
   for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
+function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e);A.e+=Math.floor(ex)+(Math.random()<ex%1?1:0);
+  if(Math.random()<POUCH_P){A.pn++;A.pg+=pouchAmt(S.tier);feed('골드 주머니 획득! (균열 정산에 포함)','#ffd24a');flash(e.pos,0xffd24a,2.5)}
+  if(Math.random()<POUCH_L){A.ln++;A.lg+=pouchAmt(S.tier)*POUCH_LX;feed('전설 골드 주머니 획득!! (균열 정산에 포함)','#d09aff');flash(e.pos,0xc080ff,4)}
+  emit(PADD,{x:e.pos.x,y:1,z:e.pos.z,vy:2.5,life:.5,s0:.6,s1:.15,c0:0xffe080,c1:0xffa020,a:.9,tex:1})}/* 처치 시 금빛 불티만 — 실제 지급은 끝날 때 한 번에 */
 function riftEcho(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0],W=RIFT.wave[Math.max(0,Z.wave-1)],e=riftMob(q,2,W.hp*3);e.name='균열 우두머리';e.lab.firstChild.textContent=e.name;e.M.root.scale.multiplyScalar(1.3);e.h*=1.3;e.r*=1.3;ringFx(q,3,0xff5a20,.6);toast('균열 우두머리 출현','균열에서 우두머리가 나타났습니다','#ff9a4a')}
 function riftBossSpawn(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0];Z.bossOut=true;q.g.scale.setScalar(1.7);Z.boss=riftMob(q,2,1,true);ringFx(q,5,0xff3a10,.8);flash(q,0xff3a10,4);shake=Math.max(shake,.5);
   riftBig('<small style="color:#ff6a4a">RIFT LORD</small><b style="background:linear-gradient(180deg,#ffe0d0,#ff5a3a 55%,#8a1008);-webkit-background-clip:text;background-clip:text;color:transparent">균열 군주 등장</b>',2)}
@@ -3324,18 +3329,21 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S
   for(const e of [...Z.mobs])if(e.hp>0&&enemies.includes(e)){ringFx(e.pos,1.5,0x8a4aff,.4);dropEnemy(e,true)}/* 남은 균열 몬스터는 균열로 사라짐 */
   if(!win)for(let i=0;i<20;i++)emit(PADD,{x:c.x+rnd(-.6,.6),y:rnd(1,3),z:c.z+rnd(-.6,.6),vx:rnd(-4,4),vy:rnd(1,5),vz:rnd(-4,4),life:rnd(.5,.9),s0:.6,s1:.1,c0:0xffa060,c1:0x401010,a:.9,tex:1});
   riftClear();riftT=rand(...RIFT.gap);if(S.ch>=NCH)later(3.3,()=>{if(!riftBusy()&&mapKind==='field')tierCheck()});tele('rift',{win:win?1:0,g:win?gr:'-',t:Math.round(T),tier:S.tier});
-  if(!win){shake=Math.max(shake,.4);feed('균열 실패','#c8a0ff');riftBig(`<small style="color:#c8a0ff">RIFT FAILED</small><b style="background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent">균열 실패</b><span style="font-size:clamp(15px,3.6vmin,22px);color:#e0d0ff">${why||''}</span>`,3);return}
-  /* 보상: 골드·정수·주문서는 바로 지급, 장비는 성화 자리에 떨어짐 */
-  const gold=Math.round(pouchAmt(S.tier)*RIFT.gold[gr]),ess=RIFT.ess[gr],items=RIFT.items[gr],tk=Math.random()<RIFT.tk[gr],leg=Math.random()<RIFT.leg[gr]?pouchAmt(S.tier)*POUCH_LX:0;
-  S.gold+=gold+leg;S.ess=(S.ess||0)+ess;if(tk)S.tickets=(S.tickets||0)+1;for(let i=0;i<items;i++)dropItem(c,true);save();
+  /* v406 정산: 처치한 균열 몹의 골드·정수 × 등급 배수(실패 .6 · B .8 · A 1 · S 1.3) + 그동안 나온 골드 주머니(그대로) + S등급 확정 강화 주문서(위험도/10개) */
+  const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tk=win&&gr==='S'?Math.max(1,Math.floor(S.tier/10)):0,items=win?RIFT.items[gr]:0;
+  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;if(tk)S.tickets=(S.tickets||0)+tk;for(let i=0;i<items;i++)dropItem(c,true);save();
+  const L=[`<em style="color:#ffd24a">몬스터 골드 +${fmtG(kg)} G <small>×${m}</small></em>`,`<em style="color:#ff8a6a">잿불 정수 ${ke} <small>×${m}</small></em>`];
+  if(A.pn)L.push(`<em style="color:#ffd24a">골드 주머니 ${A.pn}개 +${fmtG(A.pg)} G</em>`);if(A.ln)L.push(`<em style="color:#d09aff">전설 골드 주머니 ${A.ln}개 +${fmtG(A.lg)} G</em>`);
+  if(tk)L.push(`<em style="color:#7fe8d8">확정 강화 주문서 ${tk}장</em>`);if(items)L.push(`<em>장비 ${items}</em>`);
+  const tot=`<p style="margin-top:4px"><em style="color:#fff2c0">처치 ${A.k} · 총 골드 +${fmtG(kg+A.pg+A.lg)} G</em></p>`;
+  if(!win){shake=Math.max(shake,.4);feed('균열 실패 · 정산 ×0.6','#c8a0ff');riftBig(`<small style="color:#c8a0ff">RIFT FAILED</small><b style="background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent">균열 실패</b><span style="font-size:clamp(15px,3.6vmin,22px);color:#e0d0ff">${why||''}</span><p>${L.join('')}</p>${tot}`,3.5);return}
   flash(c,0xffd24a,4);ringFx(c,4,0xffd24a,.6);shake=Math.max(shake,.35);spray(PADD,c,40,{sp:[3,8],up:[4,9],y:[1,2],life:[.6,1.1],s0:[.5,.9],s1:[.1,.2],c0:0xfff0a0,c1:0xff7a20,drag:1.5,grav:-12,tex:1});
-  const L=[`<em style="color:#ffd24a">+${fmtG(gold)} G</em>`,`<em style="color:#ff8a6a">잿불 정수 ${ess}</em>`,`<em>장비 ${items}</em>`];if(tk)L.push('<em style="color:#7fe8d8">확정 강화 주문서 1</em>');if(leg)L.push(`<em style="color:#d09aff">전설 골드 주머니 +${fmtG(leg)} G</em>`);
   feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);
-  riftBig(`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b>균열 정화!</b><span style="color:${RGC[gr]};text-shadow:0 0 14px ${RGC[gr]},0 2px 4px #000">등급 ${gr} · ${T.toFixed(1)}초</span><p>${L.join('')}</p>`,3)}
+  riftBig(`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b>균열 정화!</b><span style="color:${RGC[gr]};text-shadow:0 0 14px ${RGC[gr]},0 2px 4px #000">등급 ${gr} · ${T.toFixed(1)}초</span><p>${L.join('')}</p>${tot}`,3.5)}
 function riftTick(dt){
   if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
-  if(!riftOk()){riftClear();return}
+  if(!riftOk()){if(RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();return}
   const Z=RZ,c=Z.c,u=Z.obj.userData;Z.t+=dt;
   u.cr.rotation.y+=dt*.8;u.cr.position.y=2.4+Math.sin(time*2)*.12;u.gl.material.opacity=.45+.15*Math.sin(time*4);if(u.hitT>0){u.hitT-=dt;if(u.hitT<=0)u.cm.emissive.setHex(0xff5a10)}
   for(const q of Z.gates){const k=q.g.userData;if(Z.st!=='open'&&!q.bump){q.bump=1;q.g.scale.setScalar(1)}else if(Z.st==='open'){q.g.scale.setScalar(.35+.05*Math.sin(time*3))}k.t1.rotation.z+=dt*1.6;k.t2.rotation.z-=dt*2.6;k.core.rotation.z+=dt*3;
@@ -3353,7 +3361,7 @@ function riftTick(dt){
   {const end=RIFT.fill[Z.wave];if(end&&Z.t<end&&!Z.bossOut){Z.fT-=dt;if(Z.fT<=0){Z.fT+=RIFT.fillEvery;const W=RIFT.wave[Z.wave-1];Z.gates.forEach((q,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(q,Z.fList[Math.random()*Z.fList.length|0],W.hp)}))}}}/* v405: 1·2웨이브 계속 생성 */
   if(!Z.bossOut&&Z.t>=55)riftBossSpawn();
   const left=RIFT.lim-Z.t;
-  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
+  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <span style="color:#ffd24a">+${fmtG(Z.acc.g+Z.acc.pg+Z.acc.lg)}</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
   if(Z.bossOut&&!Z.mobs.length){riftEnd(true);return}
   if(left<=0)riftEnd(false,'제한 시간 안에 균열을 정화하지 못했습니다')}
 /* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
@@ -4057,7 +4065,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v405';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v406';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5241,7 +5249,7 @@ function enterGame(){
 }
 
 let storyProg=0;
-function resetWorld(){clearPools();riftClear();wipeFx();packQ=[];
+function resetWorld(){clearPools();if(RZ&&RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();wipeFx();packQ=[];
   for(const e of [...enemies])dropEnemy(e);
   for(const p of pickups)scene.remove(p.m);pickups.length=0;
   timers.length=0;P.cd={atk:0,s1:0,s2:0,pot:0,mv:0};
