@@ -3273,8 +3273,8 @@ function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(
    0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
    몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
    실패: 80초 안에 성화 파괴 / 80초까지 다 못 잡음. 성공 등급: 64초 이내 S · 72초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
-const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[10,14],objR:1.1,objHp:100,hpX:2,guardX:15,bossX:1/* v402: 군주 체력 = 수호자와 동일(유니크 ×15) */,
-  wave:[{n0:10,n1:0,n2:0,hp:1},{n0:10,n1:3,n2:0,hp:1.25},{n0:6,n1:6,n2:0,hp:1.5},{n0:0,n1:10,n2:1,hp:1.8},{n0:0,n1:8,n2:3,hp:2.2},{n0:0,n1:10,n2:5,hp:2.6}],
+const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:4/* v402: 수호자와 동일 → v404: ×4 */,spdX:.4/* v404: 균열 몹 이동속도 40% */,
+  wave:[{n0:40,n1:0,n2:0,hp:1},{n0:40,n1:12,n2:0,hp:1.25},{n0:24,n1:24,n2:0,hp:1.5},{n0:0,n1:40,n2:4,hp:1.8},{n0:0,n1:32,n2:12,hp:2.2},{n0:0,n1:40,n2:20,hp:2.6}],/* v404: 생성량 ×4 */
   hit:[1.5,2.5,4,10],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 */
   gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
@@ -3307,11 +3307,11 @@ function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.b
   const tick=()=>{n--;if(n>0&&sp){sp.textContent=n;sp.style.animation='none';void sp.offsetWidth;sp.style.animation=''}};later(1,tick);later(2,tick);shake=Math.max(shake,.2)}
 function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.next=0;flash(Z.c,0xff7a30,3);shake=Math.max(shake,.35)}
 function riftMob(q,rk,hpm,G){const c=RZ.c,a=Math.atan2(c.z-q.z,c.x-q.x)+rand(-.5,.5),x=q.x+Math.cos(a)*1.2,z=q.z+Math.sin(a)*1.2,r=Math.random(),type=G||rk===2?'brute':r<.35?'runner':'grunt';
-  const e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 군주'}:{});e.rift=1;e.aggro=true;e.rk=G?3:rk;e.hp=e.mhp=e.mhp*RIFT.hpX*hpm*(G?RIFT.guardX*RIFT.bossX/RIFT.hpX:1);riftBeast(e,G);
-  if(!G){e.name=rk===2?'균열 포식자':rk===1?'균열 사냥꾼':'균열 짐승';e.lab.firstChild.textContent=e.name}else e.r*=1.3;
+  const e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 군주'}:{});e.rift=1;e.aggro=true;e.rk=G?3:rk;e.hp=e.mhp=e.mhp*RIFT.hpX*hpm*(G?RIFT.guardX*RIFT.bossX/RIFT.hpX:1);e.spd*=RIFT.spdX;riftBeast(e,G);
+  if(!G){e.name=rk===2?'균열 포식자':rk===1?'균열 사냥꾼':'균열 짐승';e.lab.firstChild.textContent=e.name}else e.r*=2.6;
   emit(PADD,{x,y:1,z,vy:2,life:.5,s0:2,s1:.2,c0:0xffa040,c1:0x6a10a0,a:.9,tex:1});RZ.mobs.push(e);return e}
 function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W.n0).fill(0),...Array(W.n1).fill(1),...Array(W.n2).fill(2)].sort(()=>Math.random()-.5);
-  list.forEach((rk,i)=>later(i*.12,()=>{if(RZ===Z&&Z.st==='on')riftMob(Z.gates[i%Z.gates.length],rk,W.hp)}));
+  list.forEach((rk,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(Z.gates[i%Z.gates.length],rk,W.hp)}));
   for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
 function riftBossSpawn(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0];Z.bossOut=true;q.g.scale.setScalar(1.7);Z.boss=riftMob(q,2,1,true);ringFx(q,5,0xff3a10,.8);flash(q,0xff3a10,4);shake=Math.max(shake,.5);
@@ -3357,7 +3357,7 @@ function riftTick(dt){
 /* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
 const RBM={horn:new THREE.MeshStandardMaterial({color:0x2a0806,roughness:.5,metalness:.2}),ember:new THREE.MeshBasicMaterial({color:0xff4a14}),eye:new THREE.MeshBasicMaterial({color:0xffd040})};
 function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST));e.mat.color.setHex(G?0x6a0c0a:e.rank===2?0x8a1410:0xa8241a);
-  const gs=e.g.scale.x,want=G?3.4:e.rank===2?1.75:1.45;/* 세계 기준 크기 */M.root.scale.setScalar(want/gs);
+  const gs=e.g.scale.x,want=G?6.8/* v404: 군주 크기 ×2 */:e.rank===2?1.75:1.45;/* 세계 기준 크기 */M.root.scale.setScalar(want/gs);
   const hd=M.head,bd=M.body;
   if(hd){for(const sx of [-1,1]){const h=new THREE.Mesh(new THREE.ConeGeometry(.05,G?.42:.3,6),RBM.horn);h.position.set(sx*.1,.16,-.02);h.rotation.set(-.7,0,-sx*.45);hd.add(h);
       const ey=new THREE.Mesh(new THREE.SphereGeometry(.034,8,6),RBM.eye);ey.position.set(sx*.08,.045,.15);hd.add(ey)}}
@@ -4055,7 +4055,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v403';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v404';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4118,7 +4118,7 @@ function hud(){placeEnv();
   if(inTown){$('qtag').textContent='Town';$('qtitle').textContent=`${TOWN.n} · 정비`;$('qprog').textContent=''}
   {const fg=$('fbGo');const sh=!inTown&&S.ch===LAST&&S.phase===5;if(fg.hidden===sh)fg.hidden=!sh}
   {const tb=$('openTown');const t=inTown?'사냥터':'마을';if(tb.lastChild.textContent!==t){tb.lastChild.textContent=t;townIcon(tb)}const pb=$('lsStrip').querySelector('[data-px=openTown]');if(pb){const tn=[...pb.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());if(tn&&tn.textContent!==t){tn.textContent=t;townIcon(pb)}}$('acts').classList.toggle('town',inTown)}
-  const boss=enemies.find(e=>e.boss&&e.aggro);$('bossbar').hidden=!boss;
+  const boss=enemies.find(e=>e.boss&&e.aggro)||(RZ&&RZ.boss&&RZ.boss.hp>0&&enemies.includes(RZ.boss)?RZ.boss:null);/* v404: 균열 군주도 상단 체력바 */$('bossbar').hidden=!boss;
   if(boss){$('bossname').textContent=`${boss.name} · ${Math.ceil(boss.hp/boss.mhp*100)}%`;$('bossb').style.width=(boss.hp/boss.mhp*100)+'%'}
   $('ptsBadge').hidden=!S.statPts;$('ptsBadge').textContent=S.statPts;
   const sk=C().skills;
