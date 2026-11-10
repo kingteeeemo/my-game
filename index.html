@@ -66,6 +66,8 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
+.riftbig{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:46;pointer-events:none;text-align:center;animation:riftIn 3s ease-out forwards}.riftbig small{display:block;font:800 13px var(--en);letter-spacing:.3em;color:#ff9a4a}.riftbig b{display:block;font:900 clamp(28px,7.5vmin,54px)/1.15 var(--ko);background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,40,.6))}.riftbig span{display:block;margin-top:4px;font:900 clamp(26px,7vmin,52px) var(--en);color:#ffe0b0;text-shadow:0 0 12px rgba(255,120,40,.8),0 2px 4px #000;animation:riftNum .9s ease-out}.riftbig p{margin:8px 0 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font:800 clamp(13px,3.2vmin,18px) var(--ko);color:#f2e6d0;text-shadow:0 1px 3px #000}.riftbig p em{font-style:normal}
+@keyframes riftIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}14%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}@keyframes riftNum{0%{transform:scale(1.8);opacity:0}30%{transform:scale(1);opacity:1}}
 #riftHud{font:700 13px var(--ko);color:#ffd9b0;background:rgba(40,12,6,.82);border:1px solid rgba(255,110,40,.75);border-radius:12px;padding:6px 12px;text-align:center;white-space:nowrap;box-shadow:0 0 16px rgba(255,90,20,.35)}#riftHud b{color:#ffb070;margin-right:4px}#riftHud small{margin-left:6px;color:#ffcf9a;font-weight:800}
 #bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape){#topStack .bossbar{width:90%}}/* v343: 가로 화면 보스 체력바 좌우 -10% */@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
 .stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:auto;cursor:pointer;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
@@ -3196,7 +3198,7 @@ function hurtPlayer(d){
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);
   if(P.hp<=0)die();
 }
-function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false);
+function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
   if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z)}}later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
@@ -3265,31 +3267,91 @@ function dropTicket(p){const q=scatter(p),g=new THREE.Group(),m=new THREE.Mesh(t
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'tk'});ringFx(q,1.8,0x60f0e0,.6);feed('확정 강화 주문서가 떨어졌습니다!','#7fe8d8')}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
   fx.push({m:bm,t:0,dur:5,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
-/* ===== v398 잿불 균열 — 엔드게임 필드 돌발 이벤트 =====
-   필드 사냥 중 RIFT.gap초(랜덤)마다 근처에 균열이 열림 → RIFT.wait초 안에 들어가면 시작: 불꽃 원(반지름 R) 안에 갇히고 새 몬스터 생성 멈춤
-   웨이브 1 희귀 8 → 웨이브 2 희귀 6 + 유니크 2 → 웨이브 3 균열 수호자 + 희귀 4. 제한 시간 안에 모두 처치하면 걸린 시간으로 등급(S/A/B) → 보상 상자
-   보상: 균열 보상 주머니(일반 골드 주머니의 등급 배수) · 잿불 정수 · 장비 · 확률로 확정 강화 주문서 · 아주 낮은 확률로 전설 골드 주머니 */
-const RIFT={gap:[180,300],first:[90,150],wait:40,R:11,lim:60,S:30,A:45,hpX:2.5,guardX:15,
+/* ===== v398 잿불 균열 — 엔드게임 필드 돌발 이벤트 · v401: 성화 방어 방식으로 재구성 =====
+   필드 사냥 중 RIFT.gap초(랜덤)마다 근처에 「잿불 성화」(오브젝트)와 그 주위 균열 5곳이 생김 → RIFT.wait초 안에 성화에 다가가면 "균열이 시작됩니다" 3초 카운트 후 시작
+   0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
+   몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
+   실패: 80초 안에 성화 파괴 / 80초까지 다 못 잡음. 성공 등급: 64초 이내 S · 72초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
+const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[10,14],objR:1.1,objHp:100,hpX:2,guardX:15,bossX:3,
+  wave:[{n0:10,n1:0,n2:0,hp:1},{n0:10,n1:3,n2:0,hp:1.25},{n0:6,n1:6,n2:0,hp:1.5},{n0:0,n1:10,n2:1,hp:1.8},{n0:0,n1:8,n2:3,hp:2.2},{n0:0,n1:10,n2:5,hp:2.6}],
+  hit:[1.5,2.5,4,10],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 */
   gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
 let RZ=null,riftT=rand(...RIFT.first);
 const RIFT_ON=false;/* v399: 밸런스 조정 전까지 일반 캐릭터는 끔 — 테스트 캐릭터(S.test)에서만 열림 */
 const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
+const riftBusy=()=>!!(RZ&&(RZ.st==='count'||RZ.st==='on'));/* 필드 생성 제한 */
 function riftHud(h){const el=$('riftHud');if(!el)return;if(h==null){el.hidden=true;return}el.hidden=false;if(el._h!==h){el._h=h;el.innerHTML=h}}
-function riftOpen(){const a=rand(0,Math.PI*2),r=rand(9,13),L=B-RIFT.R-1,c={x:clamp(P.pos.x+Math.cos(a)*r,-L,L),z:clamp(P.pos.z+Math.sin(a)*r,-L,L)};
-  const g=new THREE.Group(),add=m=>(g.add(m),m),AB={transparent:true,depthWrite:false,blending:THREE.AdditiveBlending};
-  const core=add(new THREE.Mesh(new THREE.CircleGeometry(1.55,40),new THREE.MeshBasicMaterial({color:0x2a0636,transparent:true,opacity:.9,side:THREE.DoubleSide})));core.position.y=2.3;
-  const t1=add(new THREE.Mesh(new THREE.TorusGeometry(1.7,.16,8,48),new THREE.MeshBasicMaterial({color:0xff7a2a,...AB})));t1.position.y=2.3;
-  const t2=add(new THREE.Mesh(new THREE.TorusGeometry(1.25,.08,6,40),new THREE.MeshBasicMaterial({color:0xc050ff,...AB,opacity:.9})));t2.position.y=2.3;
-  const gl=add(new THREE.Sprite(glowMat(0xff6a20).clone()));gl.scale.setScalar(6);gl.position.y=2.3;gl.material.opacity=.55;
-  const gd=add(flatMesh(discGeo,0xff5a1a,.3));gd.scale.set(2.6,2.6,1);gd.position.y=.06;
-  const {bm,bms}=mkBeam(0xff5a00);bm.position.y=11.5;g.add(bm);
-  g.position.set(c.x,0,c.z);scene.add(g);RZ={st:'open',c,g,t:0,t1,t2,core,gl,bm,bms,mobs:[],wave:0};
+function riftBig(html,dur=3){const el=document.createElement('div');el.className='riftbig';el.innerHTML=html;el.style.animationDuration=dur+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),dur*1000);return el}
+function riftPortal(sz){const g=new THREE.Group(),AB={transparent:true,depthWrite:false,blending:THREE.AdditiveBlending},y=2*sz;
+  const core=new THREE.Mesh(new THREE.CircleGeometry(1.4*sz,32),new THREE.MeshBasicMaterial({color:0x2a0636,transparent:true,opacity:.9,side:THREE.DoubleSide}));core.position.y=y;
+  const t1=new THREE.Mesh(new THREE.TorusGeometry(1.5*sz,.14*sz,8,40),new THREE.MeshBasicMaterial({color:0xff6a20,...AB}));t1.position.y=y;
+  const t2=new THREE.Mesh(new THREE.TorusGeometry(1.1*sz,.07*sz,6,32),new THREE.MeshBasicMaterial({color:0xc050ff,...AB,opacity:.9}));t2.position.y=y;
+  const gd=flatMesh(discGeo,0xff4a10,.28);gd.scale.set(2.3*sz,2.3*sz,1);gd.position.y=.06;g.add(core,t1,t2,gd);g.userData={core,t1,t2,y};return g}
+function riftObj(){const g=new THREE.Group(),stone=new THREE.MeshStandardMaterial({color:0x2a2420,roughness:.85}),cm=new THREE.MeshStandardMaterial({color:0xffa060,emissive:0xff5a10,emissiveIntensity:1.4,roughness:.3,metalness:.1});
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.35,.6,8),stone);base.position.y=.3;const b2=new THREE.Mesh(new THREE.CylinderGeometry(.75,.95,.5,8),stone);b2.position.y=.85;
+  const cr=new THREE.Mesh(new THREE.OctahedronGeometry(.6,0),cm);cr.scale.set(.8,2.1,.8);cr.position.y=2.4;
+  const gl=new THREE.Sprite(glowMat(0xff7a20).clone());gl.scale.setScalar(5);gl.position.y=2.4;gl.material.opacity=.55;
+  for(const c of [base,b2,cr])c.castShadow=true;g.add(base,b2,cr,gl);const ring=flatMesh(ringGeo,0xffb050,.6);ring.scale.set(2.2,2.2,1);ring.position.y=.07;g.add(ring);
+  const {bm,bms}=mkBeam(0xff5a00);bm.position.y=11.5;g.add(bm);g.userData={cr,cm,gl,bm,bms};return g}
+function riftOpen(){const ang=rand(0,Math.PI*2),r=rand(10,14),L=B-RIFT.dist[1]-2,c={x:clamp(P.pos.x+Math.cos(ang)*r,-L,L),z:clamp(P.pos.z+Math.sin(ang)*r,-L,L)};
+  const obj=riftObj();obj.position.set(c.x,0,c.z);scene.add(obj);
+  const a0=rand(0,Math.PI*2),gates=[];for(let i=0;i<RIFT.N;i++){const a=a0+i/RIFT.N*Math.PI*2+rand(-.35,.35),d=rand(...RIFT.dist),q={x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)},pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
+  const lab=document.createElement('div');lab.className='nm r3';lab.innerHTML='<span style="color:#ffb070">잿불 성화</span><i style="width:60px;height:5px"><b style="background:#ff9a3a"></b></i>';namesEl.appendChild(lab);
+  RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false};
   ringFx(c,3.4,0xff7a30,.8);flash(c,0xff7a30,3.5);shake=Math.max(shake,.25);
-  feed('잿불 균열이 열렸습니다!','#ff9a4a');toast('🔥 잿불 균열',`${RIFT.wait}초 안에 균열로 들어가면 정예 웨이브가 시작됩니다`,'#ff9a4a')}
-function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.g.remove(Z.bm);
-  const ring=flatMesh(ringGeo,0xff6a1e,.9);ring.scale.set(RIFT.R,RIFT.R,1);ring.position.set(Z.c.x,.07,Z.c.z);const fl=flatMesh(discGeo,0xff4a10,.07);fl.scale.set(RIFT.R,RIFT.R,1);fl.position.set(Z.c.x,.055,Z.c.z);scene.add(ring,fl);Z.ring=ring;Z.fl=fl;
-  ringFx(Z.c,RIFT.R,0xff7a30,.7);shake=Math.max(shake,.4);toast('균열 진입',`정예 웨이브 3개를 ${RIFT.lim}초 안에 처치하세요 — 빠를수록 보상 등급이 올라갑니다`,'#ff9a4a');riftWave(1)}
+  feed('잿불 균열이 열렸습니다!','#ff9a4a');toast('🔥 잿불 균열',`${RIFT.wait}초 안에 잿불 성화로 가면 균열이 시작됩니다`,'#ff9a4a')}
+function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){ringFx(q,2.4,0xc060ff,.6)}
+  const el=riftBig('<small>EMBER RIFT</small><b>균열이 시작됩니다</b><span>3</span>',3.05);let n=3;const sp=el.querySelector('span');
+  const tick=()=>{n--;if(n>0&&sp){sp.textContent=n;sp.style.animation='none';void sp.offsetWidth;sp.style.animation=''}};later(1,tick);later(2,tick);shake=Math.max(shake,.2)}
+function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.next=0;flash(Z.c,0xff7a30,3);shake=Math.max(shake,.35)}
+function riftMob(q,rk,hpm,G){const c=RZ.c,a=Math.atan2(c.z-q.z,c.x-q.x)+rand(-.5,.5),x=q.x+Math.cos(a)*1.2,z=q.z+Math.sin(a)*1.2,r=Math.random(),type=G||rk===2?'brute':r<.35?'runner':'grunt';
+  const e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 군주'}:{});e.rift=1;e.aggro=true;e.rk=G?3:rk;e.hp=e.mhp=e.mhp*RIFT.hpX*hpm*(G?RIFT.guardX*RIFT.bossX/RIFT.hpX:1);riftBeast(e,G);
+  if(!G){e.name=rk===2?'균열 포식자':rk===1?'균열 사냥꾼':'균열 짐승';e.lab.firstChild.textContent=e.name}else e.r*=1.3;
+  emit(PADD,{x,y:1,z,vy:2,life:.5,s0:2,s1:.2,c0:0xffa040,c1:0x6a10a0,a:.9,tex:1});RZ.mobs.push(e);return e}
+function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W.n0).fill(0),...Array(W.n1).fill(1),...Array(W.n2).fill(2)].sort(()=>Math.random()-.5);
+  list.forEach((rk,i)=>later(i*.12,()=>{if(RZ===Z&&Z.st==='on')riftMob(Z.gates[i%Z.gates.length],rk,W.hp)}));
+  for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
+  riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
+function riftBossSpawn(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0];Z.bossOut=true;q.g.scale.setScalar(1.7);Z.boss=riftMob(q,2,1,true);ringFx(q,5,0xff3a10,.8);flash(q,0xff3a10,4);shake=Math.max(shake,.5);
+  riftBig('<small style="color:#ff6a4a">RIFT LORD</small><b style="background:linear-gradient(180deg,#ffe0d0,#ff5a3a 55%,#8a1008);-webkit-background-clip:text;background-clip:text;color:transparent">균열 군주 등장</b>',2)}
+function riftHit(e){const Z=RZ;if(!Z||Z.st!=='on')return;Z.hp-=RIFT.hit[e.rk||0];e.atk=.35;const u=Z.obj.userData;u.cm.emissive.setHex(0xff1a10);u.hitT=.12;
+  emit(PADD,{x:Z.c.x+rnd(-.5,.5),y:2+rnd(0,1),z:Z.c.z+rnd(-.5,.5),vy:rnd(1,2.5),life:.4,s0:.7,s1:.1,c0:0xffd0a0,c1:0xff3010,a:.9,tex:1});if(Z.hp<=0){Z.hp=0;riftEnd(false,'잿불 성화가 파괴되었습니다')}}
+function riftClear(){const Z=RZ;if(!Z)return;RZ=null;riftHud(null);scene.remove(Z.obj);for(const q of Z.gates)scene.remove(q.g);Z.lab.remove()}
+function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S?'S':T<=RIFT.A?'A':'B';
+  for(const e of [...Z.mobs])if(e.hp>0&&enemies.includes(e)){ringFx(e.pos,1.5,0x8a4aff,.4);dropEnemy(e,true)}/* 남은 균열 몬스터는 균열로 사라짐 */
+  if(!win)for(let i=0;i<20;i++)emit(PADD,{x:c.x+rnd(-.6,.6),y:rnd(1,3),z:c.z+rnd(-.6,.6),vx:rnd(-4,4),vy:rnd(1,5),vz:rnd(-4,4),life:rnd(.5,.9),s0:.6,s1:.1,c0:0xffa060,c1:0x401010,a:.9,tex:1});
+  riftClear();riftT=rand(...RIFT.gap);tele('rift',{win:win?1:0,g:win?gr:'-',t:Math.round(T),tier:S.tier});
+  if(!win){shake=Math.max(shake,.4);feed('균열 실패','#c8a0ff');riftBig(`<small style="color:#c8a0ff">RIFT FAILED</small><b style="background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent">균열 실패</b><span style="font-size:clamp(15px,3.6vmin,22px);color:#e0d0ff">${why||''}</span>`,3);return}
+  /* 보상: 골드·정수·주문서는 바로 지급, 장비는 성화 자리에 떨어짐 */
+  const gold=Math.round(pouchAmt(S.tier)*RIFT.gold[gr]),ess=RIFT.ess[gr],items=RIFT.items[gr],tk=Math.random()<RIFT.tk[gr],leg=Math.random()<RIFT.leg[gr]?pouchAmt(S.tier)*POUCH_LX:0;
+  S.gold+=gold+leg;S.ess=(S.ess||0)+ess;if(tk)S.tickets=(S.tickets||0)+1;for(let i=0;i<items;i++)dropItem(c,true);save();
+  flash(c,0xffd24a,4);ringFx(c,4,0xffd24a,.6);shake=Math.max(shake,.35);spray(PADD,c,40,{sp:[3,8],up:[4,9],y:[1,2],life:[.6,1.1],s0:[.5,.9],s1:[.1,.2],c0:0xfff0a0,c1:0xff7a20,drag:1.5,grav:-12,tex:1});
+  const L=[`<em style="color:#ffd24a">+${fmtG(gold)} G</em>`,`<em style="color:#ff8a6a">잿불 정수 ${ess}</em>`,`<em>장비 ${items}</em>`];if(tk)L.push('<em style="color:#7fe8d8">확정 강화 주문서 1</em>');if(leg)L.push(`<em style="color:#d09aff">전설 골드 주머니 +${fmtG(leg)} G</em>`);
+  feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);
+  riftBig(`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b>균열 정화!</b><span style="color:${RGC[gr]};text-shadow:0 0 14px ${RGC[gr]},0 2px 4px #000">등급 ${gr} · ${T.toFixed(1)}초</span><p>${L.join('')}</p>`,3)}
+function riftTick(dt){
+  if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
+  if(!riftOk()){riftClear();return}
+  const Z=RZ,c=Z.c,u=Z.obj.userData;Z.t+=dt;
+  u.cr.rotation.y+=dt*.8;u.cr.position.y=2.4+Math.sin(time*2)*.12;u.gl.material.opacity=.45+.15*Math.sin(time*4);if(u.hitT>0){u.hitT-=dt;if(u.hitT<=0)u.cm.emissive.setHex(0xff5a10)}
+  for(const q of Z.gates){const k=q.g.userData;if(Z.st!=='open'&&!q.bump){q.bump=1;q.g.scale.setScalar(1)}else if(Z.st==='open'){q.g.scale.setScalar(.35+.05*Math.sin(time*3))}k.t1.rotation.z+=dt*1.6;k.t2.rotation.z-=dt*2.6;k.core.rotation.z+=dt*3;
+    if(Z.st!=='open'&&Math.random()<dt*6*QM()){const a=rand(0,6.28),s=q.g.scale.x;emit(PADD,{x:q.x+Math.cos(a)*.9*s,y:k.y*s+Math.sin(a)*.9*s,z:q.z,vy:rnd(.5,1.5),life:rnd(.4,.8),s0:.5,s1:.1,c0:a<3?0xffa040:0xc060ff,c1:0x501070,a:.8,tex:1})}}
+  /* 성화 체력 표시 */{const v=new THREE.Vector3(c.x,4.3,c.z).project(camera),off=v.z>1||Math.abs(v.x)>1.1||Math.abs(v.y)>1.1;Z.lab.hidden=off;if(!off){Z.lab.style.transform=`translate(${(v.x+1)/2*innerWidth}px,${(1-v.y)/2*innerHeight}px) translate(-50%,-100%)`;Z.labBar.style.width=Z.hp/RIFT.objHp*100+'%'}}
+  const dx=P.pos.x-c.x,dz=P.pos.z-c.z,d=Math.hypot(dx,dz);
+  if(Z.st==='open'){const left=RIFT.wait-Z.t;for(const m of u.bms)m.opacity=m.userData.o*(.85+.15*Math.sin(time*6));
+    const ar='↑↗→↘↓↙←↖'[((Math.round(Math.atan2(-dx,dz)/(Math.PI/4))%8)+8)%8];
+    riftHud(`<b>🔥 잿불 균열</b> <span>${d<4?'성화 도착':'성화 '+ar+' '+Math.round(d)+'m'}</span> <small>${Math.ceil(left)}초 후 닫힘</small>`);
+    if(d<3.5&&P.hp>0)riftCount();else if(left<=0){riftClear();feed('잿불 균열이 닫혔습니다','#a89888')}return}
+  if(Z.st==='count'){riftHud('<b>🔥 잿불 균열</b> <span>곧 시작</span>');if(Z.t>=3)riftStart();return}
+  Z.mobs=Z.mobs.filter(e=>e.hp>0&&enemies.includes(e));
+  for(const e of Z.mobs)if(Math.random()<dt*2*QM())emit(PADD,{x:e.pos.x+rnd(-.4,.4),y:e.h*.6,z:e.pos.z+rnd(-.4,.4),vy:rnd(.8,1.8),life:rnd(.4,.8),s0:.5,s1:.1,c0:0xff7a30,c1:0x8a1000,a:.7,tex:1});
+  while(Z.next<6&&Z.t>=Z.next*10){Z.next++;riftWave(Z.next)}
+  if(!Z.bossOut&&Z.t>=55)riftBossSpawn();
+  const left=RIFT.lim-Z.t;
+  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
+  if(Z.bossOut&&!Z.mobs.length){riftEnd(true);return}
+  if(left<=0)riftEnd(false,'제한 시간 안에 균열을 정화하지 못했습니다')}
 /* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
 const RBM={horn:new THREE.MeshStandardMaterial({color:0x2a0806,roughness:.5,metalness:.2}),ember:new THREE.MeshBasicMaterial({color:0xff4a14}),eye:new THREE.MeshBasicMaterial({color:0xffd040})};
 function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST));e.mat.color.setHex(G?0x6a0c0a:e.rank===2?0x8a1410:0xa8241a);
@@ -3301,45 +3363,6 @@ function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST)
   if(G){const gl=new THREE.Sprite(glowMat(0xff3a10));gl.scale.setScalar(2.4);gl.position.y=.9;gl.material.opacity=.4;M.root.add(gl)}
   M.root.traverse(o=>{if(o.isMesh)o.castShadow=o.parent===bd});
   e.g.remove(e.M.root);e.g.add(M.root);e.M=M;e.h=1.25*want+.35;e.quad=1}
-function riftWave(n){const Z=RZ;Z.wave=n;Z.mobs=[];const c=Z.c,list=n===1?Array(8).fill(1):n===2?[...Array(6).fill(1),2,2]:['G',1,1,1,1];
-  list.forEach((rk,i)=>{const a=i/list.length*Math.PI*2+rand(-.2,.2),r=rk==='G'?0:RIFT.R*.72,x=c.x+Math.cos(a)*r,z=c.z+Math.sin(a)*r;
-    const G=rk==='G',q=Math.random(),type=G?'brute':q<.3?'runner':q<.8?'grunt':'brute',e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 수호자'}:{});
-    e.rift=1;e.aggro=true;e.hp=e.mhp=e.mhp*(G?RIFT.guardX:RIFT.hpX);riftBeast(e,G);if(G){e.r*=1.3}else{e.name=rk===2?'균열 포식자':'균열 짐승';e.lab.firstChild.textContent=e.name}
-    ringFx({x,z},G?3.5:1.6,G?0xff5a20:0xc060ff,.5);Z.mobs.push(e)});
-  if(n>1)toast(n===3?'균열 수호자 등장':`웨이브 ${n}`,n===3?'수호자를 쓰러뜨리면 균열이 정화됩니다':'더 강한 정예가 몰려옵니다','#ff9a4a');flash(c,0xff7a30,2.5)}
-function riftClear(){const Z=RZ;if(!Z)return;RZ=null;riftHud(null);for(const o of [Z.g,Z.ring,Z.fl])if(o)scene.remove(o)}
-function riftEnd(win){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S?'S':T<=RIFT.A?'A':'B';riftClear();riftT=rand(...RIFT.gap);
-  tele('rift',{win:win?1:0,g:win?gr:'-',t:Math.round(T),tier:S.tier});
-  if(!win){ringFx(c,RIFT.R,0x8a4aff,.6);feed('균열이 붕괴했습니다','#c8a0ff');toast('균열 붕괴','시간 안에 정화하지 못했습니다','#c8a0ff');dropEssAt(c,1);return}
-  /* 보상 상자: 떨어져서 열림 → 보상이 쏟아짐 */
-  const ch=new THREE.Group(),bx=new THREE.Mesh(new THREE.BoxGeometry(1.4,.8,.95),new THREE.MeshStandardMaterial({color:0x5a2a12,emissive:0x3a1206,roughness:.6})),lid=new THREE.Mesh(new THREE.BoxGeometry(1.45,.32,1),new THREE.MeshStandardMaterial({color:0xc8862a,emissive:0x6a3a08,metalness:.5,roughness:.4}));
-  bx.position.y=.4;lid.position.set(0,.96,0);ch.add(bx,lid);const bd=new THREE.Mesh(new THREE.BoxGeometry(1.5,.12,1.02),coinMat);bd.position.y=.55;ch.add(bd);ch.position.set(c.x,6,c.z);scene.add(ch);
-  fx.push({m:ch,t:0,dur:2.2,upd(k){const T2=k*2.2;if(T2<.45){ch.position.y=6*(1-Math.pow(T2/.45,2))}else{ch.position.y=0;if(!ch.userData.land){ch.userData.land=1;shake=Math.max(shake,.35);ringFx(c,3,0xffd24a,.5)}
-      if(T2>.9){lid.rotation.x=-Math.min(1,(T2-.9)/.2)*1.9;lid.position.z=-.35*Math.min(1,(T2-.9)/.2);if(!ch.userData.open){ch.userData.open=1;riftLoot(c,gr);flash(c,0xffd24a,4)}}}}});
-  riftFx(gr,T)}
-function riftLoot(c,g){dropPouch(c,Math.round(pouchAmt(S.tier)*RIFT.gold[g]),false,1);for(let i=0;i<RIFT.ess[g];i++)dropEssAt(c,1);for(let i=0;i<RIFT.items[g];i++)dropItem(c,true);
-  if(Math.random()<RIFT.tk[g])dropTicket(c);if(Math.random()<RIFT.leg[g])dropPouch(c,pouchAmt(S.tier)*POUCH_LX,true);
-  spray(PADD,c,40,{sp:[3,8],up:[4,9],y:[.6,1],life:[.6,1.1],s0:[.5,.9],s1:[.1,.2],c0:0xfff0a0,c1:0xff7a20,drag:1.5,grav:-12,tex:1})}
-function riftFx(g,T){const el=document.createElement('div');el.className='pouchfx';el.style.top='38%';const col=RGC[g];
-  el.innerHTML=`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b style="background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,40,.6))">균열 정화!</b><span style="color:${col};text-shadow:0 0 14px ${col},0 2px 4px #000">등급 ${g} · ${T.toFixed(1)}초</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
-function riftTick(dt){
-  if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
-  if(!riftOk()){riftClear();return}
-  const Z=RZ,c=Z.c;Z.t+=dt;Z.t1.rotation.z+=dt*1.6;Z.t2.rotation.z-=dt*2.6;Z.core.rotation.z+=dt*3;const pl=1+.08*Math.sin(time*5);Z.t1.scale.setScalar(pl);Z.gl.material.opacity=.45+.15*Math.sin(time*4);
-  if(Math.random()<dt*14*QM()){const a=rand(0,6.28);emit(PADD,{x:c.x+Math.cos(a)*1.6,y:2.3+Math.sin(a)*1.6,z:c.z,vy:rnd(.5,1.5),life:rnd(.4,.8),s0:.6,s1:.1,c0:a<3?0xffa040:0xc060ff,c1:0x501070,a:.8,tex:1})}
-  const dx=P.pos.x-c.x,dz=P.pos.z-c.z,d=Math.hypot(dx,dz);
-  if(Z.st==='open'){const left=RIFT.wait-Z.t;for(const m of Z.bms)m.opacity=m.userData.o*(.85+.15*Math.sin(time*6));
-    const ar='↑↗→↘↓↙←↖'[((Math.round(Math.atan2(-dx,dz)/(Math.PI/4))%8)+8)%8];
-    riftHud(`<b>🔥 잿불 균열</b> <span>${d<3?'진입 중…':ar+' '+Math.round(d)+'m'}</span> <small>${Math.ceil(left)}초 후 닫힘</small>`);
-    if(d<2.4&&P.hp>0)riftStart();else if(left<=0){scene.remove(Z.g);RZ=null;riftHud(null);feed('잿불 균열이 닫혔습니다','#a89888')}return}
-  /* 진행 중: 원 밖으로 못 나감 */
-  if(d>RIFT.R-.7){const k=(RIFT.R-.7)/d;P.pos.x=c.x+dx*k;P.pos.z=c.z+dz*k}
-  Z.ring.material.opacity=.7+.25*Math.sin(time*6);
-  Z.mobs=Z.mobs.filter(e=>e.hp>0&&enemies.includes(e));const left=RIFT.lim-Z.t;
-  for(const e of Z.mobs)if(Math.random()<dt*3*QM())emit(PADD,{x:e.pos.x+rnd(-.4,.4),y:e.h*.6,z:e.pos.z+rnd(-.4,.4),vy:rnd(.8,1.8),life:rnd(.4,.8),s0:.5,s1:.1,c0:0xff7a30,c1:0x8a1000,a:.7,tex:1});
-  riftHud(`<b>🔥 잿불 균열</b> <span>웨이브 ${Z.wave}/3 · 남은 적 ${Z.mobs.length}</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
-  if(!Z.mobs.length){if(Z.wave<3)riftWave(Z.wave+1);else riftEnd(true);return}
-  if(left<=0)riftEnd(false)}
 function tkFx(n){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small style="color:#7fe8d8">ENHANCE SCROLL</small><b style="background:linear-gradient(180deg,#e8fff9,#7fe8d8 55%,#1a8c7c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(90,224,208,.6))">확정 강화 주문서 획득!</b><span style="color:#7fe8d8">보유 ${n}개</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.15)}
 function pouchFx(amt,leg,rift){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=rift?`<small style="color:#ff9a4a">EMBER RIFT REWARD</small><b>균열 보상 주머니 획득!</b><span>+${fmtG(amt)} G</span>`:leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>일반 골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
@@ -4030,7 +4053,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v400';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v401';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5334,7 +5357,7 @@ function update(dt){packTick();
   /* spawner: 장마다 수와 속도가 일정하게 증가 */
   const d=diff();
   spawnT-=dt;demoTick(dt);riftTick(dt);/* v398 잿불 균열 */
-  if(!(RZ&&RZ.st==='on')&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<d.cap*EGM()*egR()&&!(egLim()&&egRoom()<=0)){
+  if(!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<d.cap*EGM()*egR()&&!(egLim()&&egRoom()<=0)){
     spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&S.tier<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
     let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-(Math.random()<.85?rand(14,26):-rand(12,18)),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
@@ -5348,17 +5371,18 @@ function update(dt){packTick();
 
   for(const e of enemies){
     if(e.air){airStep(e,dt);continue}
-    const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,dd=Math.hypot(dx,dz)||1;
+    let tx=P.pos.x,tz=P.pos.z,ob=0;if(e.rift&&RZ&&RZ.st==='on'&&Math.hypot(P.pos.x-e.pos.x,P.pos.z-e.pos.z)>3.5){tx=RZ.c.x;tz=RZ.c.z;ob=RIFT.objR}/* v401: 균열 몬스터는 성화로 — 플레이어가 가까이 붙으면 플레이어와 싸움 */
+    const dx=tx-e.pos.x,dz=tz-e.pos.z,dd=Math.hypot(dx,dz)||1;
     if(e.boss&&!e.aggro){if(dd<13)e.aggro=true;else{e.g.rotation.y+=dt*.3;continue}}
     if(e.idle){if(dd<15||e.hp<e.mhp)e.idle=false;else continue}
     if(e.frzT>0){e.frzT-=dt;if(e.frzT<=0)e.frzI=1}else if(e.frzI>0)e.frzI-=dt;
     const frz=e.frzT>0,spd=frz?0:e.spd*(e.slowT>0?.45:1);e.slowT-=dt;
     if(e.chg)chargeStep(e,dt);
     else if(e.kbT>0){e.pos.x+=e.kbx*dt;e.pos.z+=e.kbz*dt;e.kbT-=dt}
-    else if(!frz&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75){e.pos.x+=dx/dd*spd*dt;e.pos.z+=dz/dd*spd*dt}
+    else if(!frz&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75+ob){e.pos.x+=dx/dd*spd*dt;e.pos.z+=dz/dd*spd*dt}
     if(e.holdT>0)e.holdT-=dt;e.g.rotation.y=e.chg?e.chg.a:e.dA?e.dA.a:e.holdT>0?e.holdA:Math.atan2(dx,dz);
-    e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75);
-    if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1&&e.acd<=0){e.acd=e.boss?1.3:1.05;e.atk=.35;hurtPlayer(e.dmg)}}
+    e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>e.r+.75+ob);
+    if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=e.boss?1.3:1.05;e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
     if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
     if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;if(e.patN%2)bossCharge(e);else bossSlam(e)}}
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
