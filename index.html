@@ -3859,7 +3859,7 @@ function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=
   later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,shp))}
 function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
     SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
-  const js=[],gap=.85/Math.sqrt(QM());/* v420: 굵어진 만큼 성기게(.46→.85) */for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
+  const js=[],gap=1.02/Math.sqrt(QM());/* v420: 굵어진 만큼 성기게(.46→.85) · v422: 밀도 -30%(.85→1.02, 개수∝1/gap²) */for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
       if(rr>shp.R(th))continue;const tp=shp.tp(th,rr);if(Math.random()>.3+.7*tp)continue;const tq=.3+.7*tp;
       const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
@@ -4070,7 +4070,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v421';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v422';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
