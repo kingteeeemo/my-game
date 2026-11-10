@@ -3857,20 +3857,27 @@ function spikeFan(p0,a,half,len,core,dmg,sideM,delay,first,shk){const NS=3,done=
     for(let k=0;k<1+j;k++)decalFx(band(),crackTex,0x120a08,rnd(1.6,2.4),1.6,.9,false);
     for(let k=0;k<sn;k++){const q=band();later(rnd(.02,.12),()=>miniShock(q,SR,dmg*pb/QSPK))}})}
   later(delay,()=>spikeBurst(p0,a,half,len,first?1:.75,shp))}
-function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,5);SPK_GEO.translate(0,.5,0);
-    SPK_MAT=new THREE.MeshLambertMaterial({color:0x121014,emissive:0x0c0306})}
+/* v423: 쪼개기(Sunder) 느낌 — 가시 대신 각진 바위 판·덩어리가 비스듬히 솟음. 4개 면 피라미드를 한쪽으로 납작하게 눌러(판) 축 주위로 무작위 회전.
+   30%는 낮고 뭉툭한 덩어리. 버틴 뒤 가라앉지 않고 그 자리에서 산산조각(돌 파편 + 먼지)이 나며 사라짐. 범위·판정·단계 타이밍은 그대로 */
+function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GEO){SPK_GEO=new THREE.ConeGeometry(.17,1,4);SPK_GEO.translate(0,.5,0);
+    SPK_MAT=new THREE.MeshLambertMaterial({color:0x3a3029,emissive:0x0c0604,flatShading:true})}
   const js=[],gap=1.02/Math.sqrt(QM());/* v420: 굵어진 만큼 성기게(.46→.85) · v422: 밀도 -30%(.85→1.02, 개수∝1/gap²) */for(let r=.7;r<=len;r+=gap*.9){const k=Math.max(2,Math.round(2*half*r/gap));
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
       if(rr>shp.R(th))continue;const tp=shp.tp(th,rr);if(Math.random()>.3+.7*tp)continue;const tq=.3+.7*tp;
-      const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
-      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:3*hs*(Math.random()<.22?rnd(1.25,1.8):rnd(.4,1.15))*(.35+3.2*f*f)*tq,w:3*rnd(.6,1.4)*(.55+1.15*f)*(.6+.4*tp)/* v420: 굵기·길이 ×3(v421) · 크기는 뒤로 갈수록 커지는 경향만 두고 들쑥날쑥 */,dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
+      const chunk=Math.random()<.3,E=(chunk?rnd(55,80):SPK_ELEV+rnd(-10,12))*Math.PI/180,ah=a+rnd(-.25,.25),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);
+      const w=3*rnd(.6,1.4)*(.55+1.15*f)*(.6+.4*tp)*(chunk?1.5:1),h=chunk?w*.17*rnd(1.6,2.6):3*hs*(Math.random()<.22?rnd(1.25,1.8):rnd(.4,1.15))*(.35+3.2*f*f)*tq;/* v420~422 굵기·길이·들쑥날쑥 유지 */
+      const q=new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz)).multiply(new THREE.Quaternion().setFromAxisAngle(SPK_UP,rnd(0,6.28)));
+      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.03),h,w,fl:chunk?rnd(.7,1):rnd(.35,.6),hold:rnd(.3,.5),dx,dy,dz,q,br:false})}}
   const n=js.length,im=new THREE.InstancedMesh(SPK_GEO,SPK_MAT,n);im.position.set(p0.x,0,p0.z);im.frustumCulled=false;scene.add(im);
-  const HOLD=.42,SINK=.22,dur=QST[2]+.02+.09+HOLD+SINK;
+  const dur=QST[2]+.03+.08+.5+.05,cols=[0x4a3e34,0x2e2620,0x5c5046];
+  const brk=j=>{j.br=true;const L=j.h,m=.45*L,x=p0.x+j.x+j.dx*m,z=p0.z+j.z+j.dz*m,y=Math.max(.1,j.dy*m),s=.17*j.w;/* 산산조각: 몸통 크기에 맞춘 돌 파편이 사방으로 */
+    debris({x,z},{n:Math.max(2,Math.round((3+Math.min(5,L*.6))*QM())),color:cols[(Math.random()*3)|0],geo:Math.random()<.5?tetraGeo:octaGeo,sp:[1.5,4.5],up:[2,6],y:[y*.4,y*1.2],sz:[s*.25,s*.55],r0:Math.min(1,s),dur:1,g:24});
+    if(Math.random()<.5*QM())spray(PNRM,{x,z},2,{sp:[.6,1.8],up:[.6,1.6],y:[.2,Math.max(.4,y)],life:[.6,1],s0:[.6,1],s1:[1.6,2.4],c0:0x8a7660,c1:0x2e261e,a:.5,drag:2,tex:2})};
   const set=t=>{for(let i=0;i<n;i++){const j=js[i],lt=t-j.d;let g;
-      if(lt<=0)g=0;else if(lt<.09){const u=lt/.09;g=u*(1+.35*Math.sin(u*Math.PI))}else if(lt<.09+HOLD)g=1;else g=Math.max(0,1-(lt-.09-HOLD)/SINK);
-      const L=j.h*Math.max(g,0),bk=.14*L;/* 길이의 14%는 땅속에 묻히도록 뒤로 당김(솟는 방향 -d) */
-      spkO.position.set(j.x-j.dx*bk,g>0?-.05-(1-Math.min(1,g))*.3-j.dy*bk:-2,j.z-j.dz*bk);spkO.quaternion.copy(j.q);
-      const w=Math.max(.001,j.w*(.5+.5*Math.min(1,g)));spkO.scale.set(w,Math.max(.001,j.h*g),w);spkO.updateMatrix();im.setMatrixAt(i,spkO.matrix)}
+      if(lt<=0)g=0;else if(lt<.08){const u=lt/.08;g=u*(1+.3*Math.sin(u*Math.PI))}else if(lt<.08+j.hold)g=1;else{if(!j.br)brk(j);g=0}
+      const L=j.h*g,bk=.2*L;/* 길이의 20%는 땅속에 묻힘 */
+      spkO.position.set(j.x-j.dx*bk,g>0?-.05-j.dy*bk:-50,j.z-j.dz*bk);spkO.quaternion.copy(j.q);
+      const w=Math.max(.001,j.w*(.6+.4*Math.min(1,g)));spkO.scale.set(w,Math.max(.001,L),w*j.fl);spkO.updateMatrix();im.setMatrixAt(i,spkO.matrix)}
     im.instanceMatrix.needsUpdate=true};
   set(0);fx.push({m:im,t:0,dur,keep:1,upd(k){set(k*dur)},end(){im.dispose&&im.dispose()}})}
 function lavaFan(p0,a,half,len,dur,dps){const m=new THREE.Group();scene.add(m);let tick=0,tt=0;const shp=qShp&&qShp.a===a&&qShp.len===len?qShp:qShape(a,half,len);/* v140: 가시 자리마다 빛나는 용암 균열 + 붉은 웅덩이 빛 + 불씨·연기 */
@@ -4070,7 +4077,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v422';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v423';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
