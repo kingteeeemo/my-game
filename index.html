@@ -3366,7 +3366,7 @@ function riftTick(dt){
   {const end=RIFT.fill[Z.wave];if(end&&Z.t<end&&!Z.bossOut){Z.fT-=dt;if(Z.fT<=0){Z.fT+=RIFT.fillEvery;const W=RIFT.wave[Z.wave-1];Z.gates.forEach((q,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(q,Z.fList[Math.random()*Z.fList.length|0],W.hp)}))}}}/* v405: 1·2웨이브 계속 생성 */
   if(!Z.bossOut&&Z.t>=55)riftBossSpawn();
   const left=RIFT.lim-Z.t;
-  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <span style="color:#ffd24a">+${fmtG(Z.acc.g+Z.acc.pg+Z.acc.lg)}</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
+  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
   if(Z.bossOut&&!Z.mobs.length){riftEnd(true);return}
   if(left<=0)riftEnd(false,'제한 시간 안에 균열을 정화하지 못했습니다')}
 /* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
@@ -4070,7 +4070,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v412';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v414';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
