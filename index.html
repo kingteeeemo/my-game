@@ -3863,7 +3863,7 @@ function spikeBurst(p0,a,half,len,hs,shp){shp=shp||qShape(a,half,len);if(!SPK_GE
     for(let i=0;i<k;i++){const th=a-half+2*half*(i+.5+rnd(-.35,.35))/k,rr=r+rnd(-.15,.15),f=rr/len;
       if(rr>shp.R(th))continue;const tp=shp.tp(th,rr);if(Math.random()>.3+.7*tp)continue;const tq=.3+.7*tp;
       const E=(SPK_ELEV+rnd(-5,5))*Math.PI/180,ah=a+rnd(-.08,.08),dx=Math.sin(ah)*Math.cos(E),dy=Math.sin(E),dz=Math.cos(ah)*Math.cos(E);/* 모든 가시가 캐릭터가 바라보는 방향(a)을 향해 기울어짐 */
-      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:hs*(Math.random()<.22?rnd(1.25,1.8):rnd(.4,1.15))*(.35+3.2*f*f)*tq,w:3*rnd(.6,1.4)*(.55+1.15*f)*(.6+.4*tp)/* v420: 굵기 ×3 · 크기는 뒤로 갈수록 커지는 경향만 두고 들쑥날쑥 */,dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
+      js.push({x:Math.sin(th)*rr,z:Math.cos(th)*rr,th,d:QST[Math.min(2,Math.floor(f*3))]+rnd(0,.02),h:3*hs*(Math.random()<.22?rnd(1.25,1.8):rnd(.4,1.15))*(.35+3.2*f*f)*tq,w:3*rnd(.6,1.4)*(.55+1.15*f)*(.6+.4*tp)/* v420: 굵기·길이 ×3(v421) · 크기는 뒤로 갈수록 커지는 경향만 두고 들쑥날쑥 */,dx,dy,dz,q:new THREE.Quaternion().setFromUnitVectors(SPK_UP,new THREE.Vector3(dx,dy,dz))})}}
   const n=js.length,im=new THREE.InstancedMesh(SPK_GEO,SPK_MAT,n);im.position.set(p0.x,0,p0.z);im.frustumCulled=false;scene.add(im);
   const HOLD=.42,SINK=.22,dur=QST[2]+.02+.09+HOLD+SINK;
   const set=t=>{for(let i=0;i<n;i++){const j=js[i],lt=t-j.d;let g;
@@ -4070,7 +4070,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v420';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v421';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
