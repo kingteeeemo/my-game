@@ -2634,7 +2634,9 @@ function lockWin(b,m){S.bclr=S.bclr||{};S.bclr[bkKey(b,m)]=1;
   for(const t of Object.keys(BLK).map(Number))if(!lockNeed(t)&&S.maxTier===t&&(S.gates||[]).includes(t)){S.maxTier=t+1;later(4,()=>toast('봉인 해제',`위험도 ${t+1}이(가) 열렸습니다`,'#7fe07a'))}
   acctSave()}
 const gatePending=()=>S.ch>=NCH&&S.tier===S.maxTier&&gateNeed(S.tier)&&S.tierKills>=tkFor(S.tier);
-function tierCheck(){if(S.ch<NCH||S.tierKills<tkFor(S.tier))return;S.tierKills=tkFor(S.tier);
+/* v409: 캐릭터별 클리어 최대 위험도(S.clr) — 클리어 이후엔 clr-3 미만으로 내려갈 수 없음(위로는 자유). 미클리어 캐릭터·테스트는 제한 없음 */
+const tierMin=()=>S.test||!(S.clr>0)?1:Math.max(1,S.clr-3),tierMovable=t=>(t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP))&&t>=tierMin();
+function tierCheck(){if(S.ch<NCH||S.tierKills<tkFor(S.tier))return;S.tierKills=tkFor(S.tier);if(!S.test&&S.tier>(S.clr||0))S.clr=S.tier;
   if(S.tier===S.maxTier){if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}if(lockNeed(S.tier)){lockAsk(S.tier);return}S.maxTier++;tele('tier');toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
   if(S.autoTier&&S.tier<S.maxTier)setTier(S.tier+1,true)}
 const TEST_TOP=140;/* v403: 테스트 캐릭터는 해금 없이 위험도 140까지 이동 가능 */
@@ -3225,7 +3227,7 @@ function progress(e){if(S.tutor){tutKill(e);save();return}if(e.duel){duelWin(e);
     if(S.phase===3){if(e.final){S.phase=4;later(2.3,()=>victory('격파!',`${FINAL.boss} 처치`,'255,206,74',showFinalClear))}}
     else if(S.phase===0){S.kills++;if(S.kills>=CH[S.ch].goal){S.phase=1;toast('메인 퀘스트 갱신',`길 끝 제단에 ${CH[S.ch].boss}가 나타났다`);spawnBoss()}}
     else if(S.phase===1&&e.chBoss){S.phase=2;later(2.1,()=>victory('격파!',`${CH[S.ch].boss} 처치 · ${S.ch+1}장 완료`,'255,206,74',showClear))}
-  }else{if(e.gate){gateClear(e);return save()}if(!e.boss&&++S.egK>=EG_BOSS_KILLS&&!enemies.some(x=>x.boss)){S.egK=0;spawnEchoBoss()}S.tierKills++;if(!riftBusy())tierCheck()}/* v405: 균열 중엔 위험도 상승·관문 판정을 미룸 */
+  }else{if(e.gate){gateClear(e);return save()}if(e.rift){/* v409: 균열 몬스터는 위험도 상승·에코 보스 카운트에 포함하지 않음 */}else{if(!e.boss&&++S.egK>=EG_BOSS_KILLS&&!enemies.some(x=>x.boss)){S.egK=0;spawnEchoBoss()}S.tierKills++;if(!riftBusy())tierCheck()}}/* v405: 균열 중엔 위험도 상승·관문 판정을 미룸 */
   save();
 }
 const orbGeo=new THREE.SphereGeometry(.24,10,8);
@@ -4067,7 +4069,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v408';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v409';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4831,8 +4833,8 @@ function renderStage(){
   for(let g0=0;g0*10<top;g0++){const lo=g0*10+1,hi=Math.min(g0*10+10,top),ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
     rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n}</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
     if(!ex)continue;
-  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
-    const btn=!eg||!open?`<span class="lock">${open?'':'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
+  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),low=open&&t<tierMin(),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
+    const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
@@ -4840,13 +4842,13 @@ function renderStage(){
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(기본 300마리 · 50부터 400 · 70부터 700 · 80부터 900)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
-  <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.<br>위험도 20·40·50·70은 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 위험도가 열립니다.</small></div>`}
+  <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.<br>위험도 20·40·50·70은 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 위험도가 열립니다.${!S.test&&S.clr>0?`<br>이 캐릭터가 클리어한 최고 위험도는 ${S.clr} — 위험도 ${tierMin()} 미만으로는 내려갈 수 없습니다(위로는 자유).`:''}</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
-  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&(t<=S.maxTier||S.test&&t<=TEST_TOP)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
+  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
 function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;
