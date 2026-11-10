@@ -3272,7 +3272,7 @@ function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(
    0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
    몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
    실패: 80초 안에 성화 파괴 / 80초까지 다 못 잡음. 성공 등급: 64초 이내 S · 72초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
-const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[10,14],objR:1.1,objHp:100,hpX:2,guardX:15,bossX:3,
+const RIFT={gap:[180,300],first:[90,150],wait:40,lim:80,S:64,A:72,N:5,dist:[10,14],objR:1.1,objHp:100,hpX:2,guardX:15,bossX:1/* v402: 군주 체력 = 수호자와 동일(유니크 ×15) */,
   wave:[{n0:10,n1:0,n2:0,hp:1},{n0:10,n1:3,n2:0,hp:1.25},{n0:6,n1:6,n2:0,hp:1.5},{n0:0,n1:10,n2:1,hp:1.8},{n0:0,n1:8,n2:3,hp:2.2},{n0:0,n1:10,n2:5,hp:2.6}],
   hit:[1.5,2.5,4,10],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 */
   gold:{S:.4,A:.25,B:.15},ess:{S:8,A:5,B:3},items:{S:4,A:3,B:2},tk:{S:.12,A:.08,B:.05},leg:{S:.02,A:.01,B:.005}};
@@ -4053,7 +4053,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v401';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v402';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
