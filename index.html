@@ -3337,10 +3337,9 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
   const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tk=win&&gr==='S'?Math.max(1,Math.floor(S.tier/10)):0,items=win?RIFT.items[gr]:0;
   S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;if(tk)S.tickets=(S.tickets||0)+tk;for(let i=0;i<items;i++)dropItem(c,true);save();
-  const L=[`<em style="color:#ffd24a">몬스터 골드 +${fmtG(kg)} G <small>×${m}</small></em>`,`<em style="color:#ff8a6a">잿불 정수 ${ke} <small>×${m}</small></em>`];
-  if(A.pn)L.push(`<em style="color:#ffd24a">골드 주머니 ${A.pn}개 +${fmtG(A.pg)} G</em>`);if(A.ln)L.push(`<em style="color:#d09aff">전설 골드 주머니 ${A.ln}개 +${fmtG(A.lg)} G</em>`);
+  const L=[`<em style="color:#ff8a6a">잿불 정수 ${ke} <small>×${m}</small></em>`];/* v413: 정산 골드는 표시하지 않음(창이 길어져서) — 지급은 그대로 */
   if(tk)L.push(`<em style="color:#7fe8d8">확정 강화 주문서 ${tk}장</em>`);if(items)L.push(`<em>장비 ${items}</em>`);
-  const tot=`<p style="margin-top:4px"><em style="color:#fff2c0">처치 ${A.k} · 총 골드 +${fmtG(kg+A.pg+A.lg)} G</em></p>`;
+  const tot=`<p style="margin-top:4px"><em style="color:#fff2c0">처치 ${A.k}</em></p>`;
   if(!win){shake=Math.max(shake,.4);feed('균열 실패 · 정산 ×0.6','#c8a0ff');riftBig(`<small style="color:#c8a0ff">RIFT FAILED</small><b style="background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent">균열 실패</b><span style="font-size:clamp(15px,3.6vmin,22px);color:#e0d0ff">${why||''}</span><p>${L.join('')}</p>${tot}`,3.5);return}
   flash(c,0xffd24a,4);ringFx(c,4,0xffd24a,.6);shake=Math.max(shake,.35);spray(PADD,c,40,{sp:[3,8],up:[4,9],y:[1,2],life:[.6,1.1],s0:[.5,.9],s1:[.1,.2],c0:0xfff0a0,c1:0xff7a20,drag:1.5,grav:-12,tex:1});
   feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);
@@ -4070,7 +4069,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v412';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v413';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
