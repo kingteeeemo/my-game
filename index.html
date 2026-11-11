@@ -1041,7 +1041,9 @@ const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>k==='crit'?critMO(
 /* v469: 장신구 치명타 확률 강화 곡선 — 옵션 21% 기준 강화 1회 증가폭 1+49×(L/40)^3.5 (저단 +1에서 고르게 올라 40강 +50), 40강 이후 +50 고정. 옵션 수치에 비례(배율) */
 /* v470: 40강 증가폭 +40, 이후 +40 고정 (1+39×(L/40)^3.5). critMO50 = v469 곡선(+50) — 레벨 보정 계산용으로만 유지(이번 하향분은 보정하지 않음) */
 const critCurve=top=>{const a=[0];for(let L=1;L<=40;L++)a.push(a[L-1]+1+(top-1)*Math.pow(L/40,3.5));return L=>{L=Math.max(0,L);const i=Math.min(40,Math.floor(L)),f=L-i;const s=L>40?a[40]+top*(L-40):a[i]+(i<40?(a[i+1]-a[i])*f:0);return 1+s/21}};
-const critMO=critCurve(40),critMO50=critCurve(50);/* v471: 마나 재생 옵션 강화 — 증가폭을 강화 성공률 구간에 묶음(기본 11% 기준 %p): 성공률 5% 구간 +3 · 4% 구간 +4 · 3% 구간 +5, 그 위는 1+2×((100-성공률)/95)^5 로 +1에서 부드럽게 상승. 실제 값은 옵션 수치에 비례(배율 1+누적/11) */
+const critMO50=critCurve(50);/* v471: critMO50 = v469 곡선 — 레벨 보정(critComp) 기준으로만 유지, 보정값은 변경하지 않음 */
+/* v472: 장신구 치명타 강화 — 증가폭을 강화 성공률 구간에 묶음(옵션 21% 기준 %p): 성공률 5% 구간 +23 · 4% 구간 +26 · 3% 구간 +29, 그 위는 1+22×((100-성공률)/95)^5 로 +1에서 부드럽게 상승. 실제 값은 옵션 수치에 비례(배율 1+누적/21) */
+const critCum=[0],critInc=L=>{const r=enhRate(L-1)*100;return r<=3.01?29:r<=4.01?26:r<=5.01?23:Math.round((1+22*Math.pow((100-r)/95,5))*10)/10},critMO=L=>{L=Math.max(0,L);const i=Math.floor(L);while(critCum.length<=i)critCum.push(critCum[critCum.length-1]+critInc(critCum.length));const f=L-i;return 1+(critCum[i]+(f?critInc(i+1)*f:0))/21};/* v471: 마나 재생 옵션 강화 — 증가폭을 강화 성공률 구간에 묶음(기본 11% 기준 %p): 성공률 5% 구간 +3 · 4% 구간 +4 · 3% 구간 +5, 그 위는 1+2×((100-성공률)/95)^5 로 +1에서 부드럽게 상승. 실제 값은 옵션 수치에 비례(배율 1+누적/11) */
 const mregCum=[0],mregInc=L=>{const r=enhRate(L-1)*100;return r<=3.01?5:r<=4.01?4:r<=5.01?3:Math.round((1+2*Math.pow((100-r)/95,5))*10)/10},mregMO=L=>{L=Math.max(0,L);const i=Math.floor(L);while(mregCum.length<=i)mregCum.push(mregCum[mregCum.length-1]+mregInc(mregCum.length));const f=L-i;return 1+(mregCum[i]+(f?mregInc(i+1)*f:0))/11};const critEM=L=>1-.65*Math.max(0,Math.min(1,(L-25)/15));/* v455: 장신구 치명타 확률 강화 상승분 — 25강부터 줄어 40강 이상 ×0.35 (하향분은 레벨 보정이 DPS −4.5%까지 메움) */const ENH_HALF={fdmg:.5,spd:.32/* v457: 이동 속도 강화 상승치 v456보다 추가 −20% (원래 .5의 64%) */,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
@@ -4179,7 +4181,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v471';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v472';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
