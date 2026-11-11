@@ -3568,7 +3568,7 @@ function shoot(a,o){
    if(o.trail){const t=new THREE.Mesh(fxPlane,trailMat(o.tcol||o.color));t.rotation.x=-Math.PI/2;t.scale.set((o.tw||.12)/sx,o.trail/2/sz,1);t.position.z=-(o.trail/2)/sz;m.add(t)}
    if(o.glow){const g=new THREE.Sprite(glowMat(o.gcol||o.color));g.scale.setScalar(o.glow);m.add(g)}
    if(o.rings){for(let i=0;i<1;i++){const r=new THREE.Mesh(ringTorus,ringMat);r.scale.setScalar(1.25);r.rotation.set(i?1.1:-.5,i?.4:1.2,0);r.userData.ring=i?1:-1;m.add(r)}}}
-  projs.push({rib:o.rib?ribStart(o.rib,m.position):null,vid:o.vid||0,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,ghost:!!o.ghost,thru:!!o.thru,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
+  projs.push({rib:o.rib?ribStart(o.rib,m.position):null,vid:o.vid||0,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,hrg:o.hrg||0,ox:m.position.x,oz:m.position.z,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,ghost:!!o.ghost,thru:!!o.thru,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
 }
 function orbShard(p,a){const z=p.orb.ssz||1;shoot(a,{from:p.m.position,color:0xd8f4ff,size:.32*z,hr:.35*z,trail:.75*z,tw:.09*z,tcol:0x9ad8ff,speed:15*(p.orb.ssp||1),life:.45,dmg:p.orb.sd,pierce:p.orb.sp,chain:p.orb.sc,slow:true,frz:p.orb.frz,nofx:true})}
 function orbEnd(p){}/* v310: 보주 끝 폭발(파편·충격파·섬광·얼음 가시 폭발) 전부 제거 */
@@ -3745,11 +3745,11 @@ function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(
 function castFire(slot,id){
   const b=SK[id],st=skillStats(id),base=baseDmg();P.skSwing=true;
   if(b.kind==='proj'){
-    aim(16);{const fx_=P.pos.x+Math.sin(P.face)*.9,fz=P.pos.z+Math.cos(P.face)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xdaff9a,c1:0x6ac030,a:.9,tex:1});streaks({x:fx_,z:fz},6,{dir:P.face,cone:.45,sp:[8,14],up:[0,1.5],y:[1.1,1.3],life:[.12,.22],w:.06,len:.8,c0:0xeaffc0,c1:0x4a9a20,drag:4})}const spr=Math.min(b.spread,1.4/Math.max(1,st.proj-1))*(bossOn('volley')?.4:1.2);/* v263 보스 모드: 절반 각도 → v271: 일반 ×1.2(20% 넓게) · 보스 모드 ×0.4(기존 절반에서 20% 더 좁게) */
+    aim(16);{const fx_=P.pos.x+Math.sin(P.face)*.9,fz=P.pos.z+Math.cos(P.face)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xdaff9a,c1:0x6ac030,a:.9,tex:1});streaks({x:fx_,z:fz},6,{dir:P.face,cone:.45,sp:[8,14],up:[0,1.5],y:[1.1,1.3],life:[.12,.22],w:.06,len:.8,c0:0xeaffc0,c1:0x4a9a20,drag:4})}const spr=Math.min(b.spread,1.4/Math.max(1,st.proj-1))*(bossOn('volley')?.36:1.2);/* v263 보스 모드: 절반 각도 → v271: 일반 ×1.2(20% 넓게) · 보스 모드 ×0.4(기존 절반에서 20% 더 좁게) → v441: 보스 모드 ×0.36(10% 더 좁게) */
     /* 회귀 화살 (v40): 화살 속도가 빨라져도 사거리는 같음. 회귀하는 화살은 모두 같은 순간(사거리 끝 시점)에 한꺼번에 돌아옴 */
     const rt=st.ret,sm=rt?rt.sp:1,life=b.life/sm,retAt=time+life;
     const vid=id==='volley'?++volSeq:0;for(let i=0;i<st.proj;i++){const a=P.face+(i-(st.proj-1)/2)*spr;
-      shoot(a,{rib:id==='volley'?{n:9,w:.2,c0:0x8ad040,c1:0xf4ffd8,cw:.2}:null,vid,color:b.color,size:b.size,long:id==='volley',trail:2.6,tw:.16,glow:1.6,gcol:0x8ad040,speed:b.speed*sm,life,dmg:base*st.dmg,pierce:st.pierce,chain:st.chain,blast:st.blast,bolt:st.bolt,br:st.br,bm:st.bm,ret:rt&&Math.random()<rt.p?rt.m:0,retAt,rng:b.speed*b.life,split:st.split})}
+      shoot(a,{rib:id==='volley'?{n:9,w:.2,c0:0x8ad040,c1:0xf4ffd8,cw:.2}:null,vid,color:b.color,size:b.size,long:id==='volley',trail:2.6,tw:.16,glow:1.6,gcol:0x8ad040,hrg:id==='volley'?spr/2:0,/* v441: 다발 사격 — 날아갈수록 벌어지는 투사체 사이 틈을 타격 범위가 메움 */speed:b.speed*sm,life,dmg:base*st.dmg,pierce:st.pierce,chain:st.chain,blast:st.blast,bolt:st.bolt,br:st.br,bm:st.bm,ret:rt&&Math.random()<rt.p?rt.m:0,retAt,rng:b.speed*b.life,split:st.split})}
     P.swing=.15;poseStart('shot',.5,{pre:P.castPre,big:1});return;
   }
   if(b.kind==='whirl'){
@@ -4129,7 +4129,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v440';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v441';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5493,7 +5493,7 @@ function update(dt){packTick();
       if(Math.random()<dt*14*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vx:-p.vx*.15,vz:-p.vz*.15,life:.35,s0:S2*.7,s1:S2*.3,c0:0x7fc0ef,c1:0x10305a,a:.2*(1-p.dim),drag:3,tex:1})}
     if(p.orb&&!dead&&p.orb.shf>0){p.et-=dt;if(p.et<=0){p.et=.11/((p.orb.rate||1)*p.orb.shf);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
     if(!dead&&!p.orb&&!p.back&&!p.ghost&&!p.thru)for(const c of colliders)if((pp.x-c.x)*(pp.x-c.x)+(pp.z-c.z)*(pp.z-c.z)<c.r*c.r){dead=true;if(p.blast)explode(pp,p.dmg*p.bm,null,p.br,p.bolt?'bolt':undefined);break}
-    if(!dead&&!p.ghost)for(const e of hgNear(pp.x,pp.z,p.hr).slice()){if(e._rm||p.hit.has(e))continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+p.hr){
+    if(!dead&&!p.ghost){const hrE=p.hrg?Math.max(p.hr,p.hrg*Math.hypot(pp.x-p.ox,pp.z-p.oz)-.4):p.hr;/* v441 */for(const e of hgNear(pp.x,pp.z,hrE).slice()){if(e._rm||p.hit.has(e))continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+hrE){
       p.hit.add(e);if(p.onHit)p.onHit(e,pp);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid)vm=ovlK(e,'vc',p.vid);/* v263: 시전별로 따로 셈 (다른 시전이 끼어들어도 초기화되지 않음) */hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
       if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined);
       if(p.split&&!p.back){const sp=p.split,h=Math.atan2(p.vx,p.vz),hs=new Set(p.hit);p.split=null;
@@ -5502,7 +5502,7 @@ function update(dt){packTick();
         for(let j=0;j<sp.n;j++){const a=h+j*Math.PI*2/sp.n;shoot(a,{vid:p.vid,from:pp,color:0xb070ff,tcol:0x9a50ff,glow:1,gcol:0xa060ff,size:.42,long:true,trail:1.5,tw:.12,speed:p.speed,life:.8,dmg:p.dmg*sp.m,blast:false,bolt:false,br:p.br*.8,bm:p.bm,child:true,split:dp<1?sp:null});const c=projs[projs.length-1];c.hit=new Set(hs);c.depth=dp+1}}
       if(p.chain>0){const n=nearestEnemy(pp,9,p.hit);if(n){p.chain--;const ax=n.pos.x-pp.x,az=n.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx=ax/l*p.speed;p.vz=az/l*p.speed;p.life=.8;break}}
       if(p.pierce>0){p.pierce--;continue}
-      dead=true;break}}
+      dead=true;break}}}
     if(dead&&p.ret&&!p.back){dead=false;if(p.life<=0||time>=p.retAt)retStart(p);else{p.park=true;p.vx=p.vz=0}}
     if(dead){if(p.orb)orbEnd(p);if(p.rib)ribEnd(p);if(p.onEnd){try{p.onEnd()}catch(e){}}scene.remove(p.m);projs.splice(i,1)}}
 
