@@ -274,6 +274,11 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 @media (orientation:landscape),(min-width:760px){#classSheet{max-width:min(860px,calc(100% - 32px))}#classSheet .card.cls{flex:0 0 calc(33.333% - 7px)}#classSheet .card.cls .cport{width:auto;max-width:100%;height:calc(100vh - 250px);max-height:340px;min-height:130px}}
 @media (orientation:landscape) and (max-height:520px){#classSheet .hint{display:none}}
 .guide{position:fixed;inset:0;z-index:45}
+#resume{position:fixed;inset:0;z-index:46;background:rgba(8,4,2,.55);display:flex;align-items:center;justify-content:center;text-align:center;color:#ffe0b0;cursor:pointer}
+#resume[hidden]{display:none}
+#resume b{display:block;font-size:clamp(22px,6vmin,36px);margin-bottom:8px;text-shadow:0 2px 12px #000}
+#resume span{font-size:clamp(14px,3.6vmin,20px);animation:rsm 1.2s ease-in-out infinite alternate}
+@keyframes rsm{from{opacity:.4}to{opacity:1}}
 .dlist{display:grid;gap:6px;margin:4px 0 10px}.dlist div{background:#26232e;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}.dlist small{color:#a8a0b4;font-size:12px}
 .duelrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.duelrow .duelc{flex-direction:column;align-items:stretch;justify-content:space-between}.duelrow .duelc.uber{border-color:rgba(200,144,255,.55)}.duelrow .duelc .rw{margin-top:6px;line-height:1.5}.duelrow .duelc button{width:100%;padding:10px}/* v131 결투장 좌(일반)·우(우버) */
 .bcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bcard{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px 10px;border-radius:14px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);color:var(--ink);font:inherit;cursor:pointer}.bcard.on{border-color:var(--ember);background:rgba(255,138,58,.1)}.bcard .bimg{width:100%;height:min(240px,38vh);border-radius:10px;background:radial-gradient(circle at 50% 40%,#2a2030,#0e0c10);display:flex;align-items:center;justify-content:center;overflow:hidden}.bcard .bimg img{width:100%;height:100%;object-fit:contain}.bcard b{font:800 15px var(--ko);margin-top:4px}.bcard small{color:#a8a0b4;font-size:11px}
@@ -808,6 +813,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim center" id="lvl" hidden><div class="sheet modal" id="lvlSheet"></div></div>
 <div class="cine" id="cine" hidden><div class="cineBar"></div><div class="cineBody" id="cineBody"></div><button class="close cineSkip" id="cineSkip">건너뛰기</button><div class="cineBar b"></div></div>
 <div class="scrim center" id="clear" hidden><div class="sheet modal" id="clearSheet"></div></div>
+<div id="resume" hidden><div><b>⚔ 전투 일시정지</b><span>화면을 눌러 보스 전투를 이어갑니다</span></div></div>
 <div class="guide" id="guide" hidden><div class="gspot" id="gSpot"></div><div class="gcard" id="gCard"></div></div>
 <div class="scrim center" id="riftRes" hidden><div class="sheet modal" id="riftResSheet"></div></div>
 <div class="scrim center" id="notice" hidden><div class="sheet modal" id="noticeSheet"></div></div>
@@ -1130,7 +1136,7 @@ function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}
   if(!Array.isArray(a.gates))a.gates=[];if(!a.bclr||typeof a.bclr!=='object'){a.bclr={};const g={20:'kn',40:'mn',50:'ku',60:'mu'};for(const t in g)if((a.maxTier||0)>+t)a.bclr[g[t]]=1;/* v369: 이미 넘어선 봉인은 처치한 것으로 */try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}if((a.maxTier||0)>60&&!a.bclr.mu){a.bclr.mu=1;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v374: 우버 아귀 봉인 70→60 — 이미 61 이상이면 해제 처리 */return a}
 function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&s.lvConv.rs){delete s.lvConv.rs;const t0=s.lvConv.tier[0];if((a.maxTier||0)<t0)a.maxTier=t0;const G=new Set(a.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);a.gates=[...G].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v438 */if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
 function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);a.bclr={...a.bclr,...(S.bclr||{})};try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
-function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
+function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if(!fldHold&&!inTown)try{S.fld=fldSnap()}catch(e){}/* v452 */S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
 try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0))&&parseSave(old))localStorage.setItem(slotKey(0),old);localStorage.removeItem(KEY)}catch(e){}
 
@@ -1610,13 +1616,39 @@ function mapLoad(title,sub,fn,after){
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
-function goTown(){if(inTown||!S.cls)return;if(S.duel){collectAll();S.duel=null}clearPools();if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}setTimeout(()=>guide('town'),900);collectAll();inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>guide('town'),900);collectAll();inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'))}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls)return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
-  collectAll();S.duel=null;inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;
-  toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요');save();return true}
-function leaveTown(){if(!inTown)return;inTown=false;$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
+  const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;S.fld=keep;fldHold=false;save()},()=>toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'));return true}
+/* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
+let fldHold=false;
+const fldKind=e=>e.duel?'d':e.final?'f':e.chBoss?'c':e.gate?'g':null;
+function fldSnap(){if(S.tutor||S.test||S.demo||inTown||ldBusy||!(P.hp>0)||(S.ch<NCH&&S.phase===2)||(S.ch===LAST&&S.phase>=4))return null;
+  const f={x:+P.pos.x.toFixed(1),z:+P.pos.z.toFixed(1)};
+  if(S.duel||bossCtx()){f.bf=1;f.hp=Math.round(P.hp);f.mp=Math.round(P.mp)}
+  const b=[];for(const e of enemies)if(e.boss&&e.hp>0&&!e.rift&&fldKind(e))b.push({k:fldKind(e),r:+(e.hp/e.mhp).toFixed(4),x:+e.pos.x.toFixed(1),z:+e.pos.z.toFixed(1),a:e.aggro?1:0});
+  if(b.length)f.b=b;
+  const Z=RZ;if(Z&&mapKind==='field'){f.rz={st:Z.st,c:Z.c,g:Z.gates.map(q=>[+q.x.toFixed(1),+q.z.toFixed(1)]),t:+Z.t.toFixed(1),hp:Z.hp,wave:Z.wave,next:Z.next,bo:Z.bossOut?1:0,fT:Z.fT,acc:Z.acc,fl:Z.fList||[],
+    m:Z.mobs.filter(e=>e.hp>0).slice(0,150).map(e=>[e.rk||0,e===Z.boss?1:0,+e.pos.x.toFixed(1),+e.pos.z.toFixed(1),Math.round(e.hp),Math.round(e.mhp)])}}
+  return f}
+function riftRestore(z){riftClear();riftOpen(true);const Z=RZ;Z.c={x:z.c.x,z:z.c.z};Z.obj.position.set(Z.c.x,0,Z.c.z);
+  Z.gates.forEach((q,i)=>{const p=z.g[i]||z.g[0];q.x=p[0];q.z=p[1];q.g.position.set(p[0],0,p[1])});
+  if(z.st==='open'){Z.t=z.t;return}
+  Z.st='on';Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){q.bump=1;q.g.scale.setScalar(1)}
+  Z.t=z.t;Z.hp=z.hp;Z.wave=z.wave;Z.next=z.next;Z.bossOut=!!z.bo;Z.fT=z.fT;Z.acc=z.acc||Z.acc;Z.fList=z.fl||[];
+  for(const m of z.m||[]){const e=riftMob(Z.gates[0],m[0],1,!!m[1]);e.pos.x=m[2];e.pos.z=m[3];e.mhp=m[5];e.hp=Math.min(m[4],m[5]);if(m[1])Z.boss=e}
+  if(z.bo&&!Z.boss)Z.bossOut=true}
+function applyFld(f,full){if(!f)return;
+  if(!inArena()){P.pos.set(clamp(f.x,-B+1,B-1),0,clamp(f.z,-B+1,B-1));camT.copy(P.pos)}
+  P.mv=null;if(full&&f.hp){P.hp=Math.min(P.mhp,Math.max(1,f.hp));P.mp=Math.min(P.mmp,f.mp||0)}
+  const used=new Set();for(const b of f.b||[]){const e=enemies.find(q=>q.boss&&!q.rift&&!used.has(q)&&fldKind(q)===b.k);if(!e)continue;used.add(e);e.hp=Math.max(1,e.mhp*b.r);if(b.a)e.aggro=true;if(b.k!=='d'&&!inArena()){e.pos.x=b.x;e.pos.z=b.z}}
+  if(f.rz&&mapKind==='field'&&riftOk())riftRestore(f.rz)}
+/* 접속 직후 보스전 — 로딩 후 일시정지 상태로 시작, 화면을 누르면 이어서 전투 */
+function showResume(){const el=$('resume');el.hidden=false;P.mv=null}
+function hideResume(){const el=$('resume');if(el.hidden)return;el.hidden=true;P.inv=Math.max(P.inv,2)}
+function leaveTown(){if(!inTown)return;inTown=false;$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=S.fld;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
   toast(S.ch>=NCH?`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:S.ch===LAST&&S.phase===3?'최종 결전':`${S.ch+1}장 · ${CH[S.ch].n}`,'사냥터로 돌아왔습니다');stageBanner()})}
 function toggleTown(){inTown?leaveTown():goTown()}
 /* v131: 마을에서는 아이콘·글자를 「사냥터」(검)로 — PC 상단 버튼 포함 */
@@ -4138,7 +4170,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v451';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v452';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5307,7 +5339,7 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
     showSlots()}
 });
 function enterGame(){
-  tele('start');
+  tele('start');const FLD=S.fld;fldHold=true;
   riftT=(S.riftT>0&&S.riftT<=RIFT.gap[1])?S.riftT:rand(...RIFT.first);/* v419: 균열 쿨타임 유지(새로고침·재접속) */
   if(S.ch>=NCH)egMapFor(S.tier);
   inTown=false;$('npcAct').hidden=true;npcNear=null;
@@ -5316,7 +5348,8 @@ function enterGame(){
   offer=null;lvlSkill=null;$('lvl').hidden=true;$('clear').hidden=true;
   setMap(true);applyTheme();labelButtons();resetWorld();refreshUpBtn();
   if(!S.tutor&&!S.noGuide&&otherChars())S.noGuide=1;/* v451: 다른 슬롯에 캐릭터가 있으면 안내 없음 */
-  if(townStart())return;
+  if(FLD&&FLD.bf&&!S.tutor&&!S.test&&!S.demo){S.fld=FLD;mapLoad(mapTitle(),'전투를 불러옵니다',()=>{applyFld(FLD,true);fldHold=false;showResume()},null);return}
+  if(townStart())return;fldHold=false;
   if(S.ch<NCH&&S.phase===2)showClear();
   else if(S.ch===LAST&&S.phase===4)showFinalClear();
   else if(S.ch===LAST&&S.phase===3)toast('최종 결전',`${FINAL.n} · ${FINAL.boss}를 쓰러뜨려라`);
@@ -5601,7 +5634,8 @@ function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
-const paused=()=>!$('guide').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+$('resume').addEventListener('pointerdown',e=>{e.preventDefault();hideResume()});
+const paused=()=>!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
