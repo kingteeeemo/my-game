@@ -62,7 +62,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.s1 small{font-size:10px}
 .act.atk{width:60px;height:60px;right:132px;bottom:22px;font-size:12px;border-color:rgba(255,255,255,.2)}
 .act.atk small{display:none}
-.act.atk{color:#c9b9b0}.act.atk.autoon{color:#ff8a5a;border-color:rgba(255,110,60,.75);box-shadow:0 0 14px rgba(255,90,50,.45),inset 0 0 12px rgba(255,90,50,.25)}.act.atk.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ff6a3a;border-right-color:rgba(255,106,58,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}.act.atk.nob{opacity:.4}/* v439: 보스 모드 토글 — 켜지면 물약 자동처럼 도는 테두리 */
+.act.atk{color:#c9b9b0}.act.atk.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}.act.atk.nob{opacity:.4}/* v439: 보스 모드 토글 — 켜지면 물약 자동과 같은 도는 테두리(v440 색 통일) */
 .act.pot{width:56px;height:56px;font-size:11px;gap:0}
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
@@ -899,7 +899,7 @@ const lbSt=L=>({r:1.8*(1+.4*L),m:.6+.15*L});
 /* v66: 궁수 2차 폭발 속성 — 번개(기본) / 화염. 바꿀 때 골드 소모, 캐릭터 레벨이 높을수록 비쌈. 피해·범위는 같고 이펙트만 다름 */
 let dpsRaw=0;/* v269: 스킬창·비교용 DPS 표기는 보스 모드·저주·보스 전용 배율을 빼고 계산 */
 const rawDps=f=>{dpsRaw++;try{return f()}finally{dpsRaw--}};
-const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 일반의 1/3 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면 좁은 부채꼴로 한꺼번에 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>typeof S!=='undefined'&&!!S&&!!S.duel/* v269: 결투장(잿불 검귀·심연의 아귀)에 입장했을 때만 — 필드에서 만나는 보스·스토리 보스·최종 보스는 해당 없음 */,bossOn=id=>!!(!dpsRaw&&typeof S!=='undefined'&&S&&S.bossM&&BOSS_IDS.includes(id));/* v439: 보스 모드는 공격 버튼 자리 토글 하나로 — 결투장·필드 어디서나 켜고 끔(기본 꺼짐) *//* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
+const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 일반의 1/3 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면 좁은 부채꼴로 한꺼번에 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>typeof S!=='undefined'&&!!S&&!!S.duel/* v269: 결투장(잿불 검귀·심연의 아귀)에 입장했을 때만 — 필드에서 만나는 보스·스토리 보스·최종 보스는 해당 없음 */,bossOn=id=>!!(!dpsRaw&&typeof S!=='undefined'&&S&&S.bossM&&BOSS_IDS.includes(id)&&g2Done(id));/* v440: 2차 강화(피해 증가 제외)를 모두 끝낸 뒤에만 *//* v439: 보스 모드는 공격 버튼 자리 토글 하나로 — 결투장·필드 어디서나 켜고 끔(기본 꺼짐) *//* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round(2000+S.lv*S.lv*8);/* v411: 골드 1/10 *//* v67: 10배 */
 const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
 const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
@@ -3729,7 +3729,7 @@ function pillarCast(c,o,hit,depth){const after=()=>{
 function castSkill(slot){
   const id=C().skills[slot==='s1'?0:1],b=SK[id],st=skillStats(id),base=baseDmg();
   const cost=mpCost(id);
-  if(!(S.test&&S.testMp)&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','기본 공격으로 싸웁니다 · MP 물약을 쓰거나 잠시 기다리세요');P.mpWarn=4}if(!P.cast&&!P.mv&&P.cd.atk<=0&&P.spin<=0&&!inTown)basicAttack();return}/* v439: 마나가 없으면 스킬 버튼으로 기본 공격 */
+  if(!(S.test&&S.testMp)&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','기본 공격으로 싸웁니다');P.mpWarn=4}if(!P.cast&&!P.mv&&P.cd.atk<=0&&P.spin<=0&&!inTown)basicAttack();return}/* v439: 마나가 없으면 스킬 버튼으로 기본 공격 */
   if(P.cast||P.mv)return;
   if(b.kind==='pillar'&&!pillarTargets(pcMode?mouseW:P.pos).length){if(P.mpWarn<=0){toast('사거리 안에 적이 없습니다','사술 폭발은 적이 있어야 발동합니다');P.mpWarn=1.5}return}/* v180: 사거리 안에 적이 없으면 발동하지 않음(마나·대기시간 소모 없음) */
   P.mp-=cost;P.cd[slot]=st.cd;
@@ -4088,8 +4088,10 @@ function mouseBtn(e,down){
   if(down&&e.button===0)fireNow('s1');if(down&&e.button===2)fireNow('atk');
 }
 function fireNow(k){if(paused()||!S.cls||(P.hp<=0&&k!=='boss'))return;if(k==='s1'&&P.cd.s1<=0&&!inTown)castSkill('s1');else if(k==='atk'&&P.cd.atk<=0&&P.spin<=0&&!inTown)basicAttack();else if(k==='mv'){input.held.mv=false;startMove()}else if(k==='boss'){input.held.boss=false;bossToggle()}}
-function bossToggle(){const id=C().skills[0];if(!BOSS_IDS.includes(id)){toast('보스 모드 없음',`「${SK[id].n}」은(는) 보스 모드가 없는 스킬입니다`);return}S.bossM=!S.bossM;feed(`${SK[id].n}: ${S.bossM?'보스 모드 켜짐':'보스 모드 꺼짐'}`,S.bossM?'#ff9a6a':'#9ab');bossBtn();save()}
-function bossBtn(){const b=$('bAtk');if(!b||!S||!S.cls)return;const ok=BOSS_IDS.includes(C().skills[0]);b.classList.toggle('autoon',!!(ok&&S.bossM));b.classList.toggle('nob',!ok)}
+function bossToggle(){const id=C().skills[0];if(!BOSS_IDS.includes(id)){toast('보스 모드 없음',`「${SK[id].n}」은(는) 보스 모드가 없는 스킬입니다`);return}
+  if(!g2Done(id)){toast('보스 모드 잠김','2차 강화를 모두 끝내면 쓸 수 있습니다 (피해 증가 제외)');return}
+  S.bossM=!S.bossM;feed(`${SK[id].n}: ${S.bossM?'보스 모드 켜짐':'보스 모드 꺼짐'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(S.bossM)guide('bossm');save()}
+function bossBtn(){const b=$('bAtk');if(!b||!S||!S.cls)return;const id=C().skills[0],ok=BOSS_IDS.includes(id)&&g2Done(id);b.classList.toggle('autoon',!!(ok&&S.bossM));b.classList.toggle('nob',!ok)}
 ['mousedown'].forEach(ev=>{canvas.addEventListener(ev,e=>mouseBtn(e,true));stick.addEventListener(ev,e=>mouseBtn(e,true))});
 addEventListener('mouseup',e=>mouseBtn(e,false));
 addEventListener('mousemove',e=>{if(Date.now()-lastTouch<900)return;mNdc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
@@ -4127,7 +4129,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v439';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v440';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4249,6 +4251,7 @@ Object.assign(GUIDES,{
   t2:{n:'튜토리얼 · 스킬',steps:()=>[{t:'스킬 창을 열어 보세요',tgt:['#openMenu'],d:`방금 고른 강화는 ${GB}「스킬」</b> 창에서 확인합니다. 강화 단계와 효과, 지금 DPS가 나옵니다. 레벨업 강화를 미뤄 두었다면 여기서 「지금 고르기」로 고릅니다. 열어 본 뒤 닫으면 다음으로 넘어갑니다.`}]},
   t3:{n:'튜토리얼 · 물약',steps:()=>[{t:'물약을 써 보세요',tgt:['#bHp','#bMp','#autoBtn'],d:`앞의 무리는 조금 더 강합니다. 생명력이 줄면 ${GB}빨간 물약</b>, 마나가 부족하면 ${GB}파란 물약</b>을 누르세요.`,d2:`「자동」을 켜 두면 알아서 마십니다.`,k:'1 생명력 · 2 마나'}]},
   t4:{n:'튜토리얼 · 보스',steps:()=>[{t:'훈련 교관을 쓰러뜨리세요',d:`길 끝 제단에 ${GB}훈련 교관</b>이 기다립니다. 바닥에 빨간 장판이 깔리면 그 밖으로 피하세요.`,d2:`보스를 쓰러뜨리면 튜토리얼이 끝나고 ${GB}1장</b>이 시작됩니다.`}]},
+  bossm:{n:'보스 모드',steps:()=>[{t:'보스 모드를 켰습니다',tgt:['#bAtk'],d:`${GB}「보스」</b> 버튼이 켜졌습니다. 주력 스킬이 넓게 퍼지는 대신 ${GB}한 대상에 몰아치는 모양</b>으로 바뀝니다.`,d2:`보스처럼 단단한 한 마리를 상대할 때 켜 두세요. 같은 버튼을 다시 누르면 꺼집니다. 피해 배율은 그대로이고 모양만 바뀝니다.`}]},
   tdone:{n:'튜토리얼 완료',steps:()=>GUIDES.intro.steps().slice(4)}
 });
 let GDQ=[],GCUR=null;
