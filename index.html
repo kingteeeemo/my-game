@@ -69,7 +69,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
 .rrs{text-align:center;padding:18px 16px 16px;gap:10px;align-items:stretch;max-width:360px}.rrs .rh{display:flex;flex-direction:column;align-items:center;gap:2px}.rrs .rh small{font:800 11px var(--en);letter-spacing:.3em}.rrs .rh b{font:900 28px/1.15 var(--ko)}.rrs .rh span{font:700 14px var(--ko)}
 .rrs.win .rh small{color:#ff9a4a}.rrs.win .rh b{background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent}.rrs.fail .rh small{color:#c8a0ff}.rrs.fail .rh b{background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent}
-.rrs .rwhy{font-size:12px;color:#e0d0ff;margin:0}.rrs .rl{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;text-align:left}.rrs .rr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}.rrs .rr i{font-style:normal;color:var(--muted)}.rrs .rr i small{opacity:.7;margin-left:4px}.rrs .rr b{font-weight:800;white-space:nowrap}
+.rrs .rwhy{font-size:12px;color:#e0d0ff;margin:0}.rrs .rl{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;text-align:left}.rrs .rr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14.7px}.rrs .rkill{font:700 14px var(--ko);font-style:normal;color:#e8d8c0;margin-top:4px}.rrs .rr i{font-style:normal;color:var(--muted)}.rrs .rr i small{opacity:.7;margin-left:4px}.rrs .rr b{font-weight:800;white-space:nowrap}
 .rrs .rt{display:flex;justify-content:space-between;align-items:baseline;padding:2px 2px 0}.rrs .rt span{font-size:12px;color:var(--muted)}.rrs .rt b{font:900 22px var(--en);color:#ffd24a}.rrs .rk{font-size:11.5px;color:var(--muted);margin:0}
 .riftbig{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:46;pointer-events:none;text-align:center;animation:riftIn 3s ease-out forwards}.riftbig small{display:block;font:800 13px var(--en);letter-spacing:.3em;color:#ff9a4a}.riftbig b{display:block;font:900 clamp(28px,7.5vmin,54px)/1.15 var(--ko);background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,40,.6))}.riftbig span{display:block;margin-top:4px;font:900 clamp(26px,7vmin,52px) var(--en);color:#ffe0b0;text-shadow:0 0 12px rgba(255,120,40,.8),0 2px 4px #000;animation:riftNum .9s ease-out}.riftbig p{margin:8px 0 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font:800 clamp(13px,3.2vmin,18px) var(--ko);color:#f2e6d0;text-shadow:0 1px 3px #000}.riftbig p em{font-style:normal}
 @keyframes riftIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}14%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}@keyframes riftNum{0%{transform:scale(1.8);opacity:0}30%{transform:scale(1);opacity:1}}
@@ -916,7 +916,7 @@ const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 const STAT_PER_LV=1;
 const STATS={
   str:{n:'힘',en:'STR',c:'#ff6a6a',d:['최대 생명력 +2.7%','생명력 재생 +0.15%/초']},
-  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 합 +1.4% (많이 쌓일수록 덜 오름)','치명타 확률 합 +2.3% (기본 7%에 곱해짐)']},
+  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4%','치명타 확률 +2.3%']},
   int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.15%/초']}
 };
 /* 스킬 1 = 다수 공격용, 스킬 2 = 보스(단일 대상) 공격용 */
@@ -1186,8 +1186,7 @@ const hpRegen=()=>P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>1.4*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
 const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1);
-function spdCapNote(){const r=spdRaw();if(r<=0)return '';
-  return `<p class="hint" style="margin:6px 0 0">이동 속도 상승(민첩+신발 합계 +${r.toFixed(1)}%)은 많이 쌓일수록 덜 오릅니다. 실제 이동 속도 <b>+${spdEff(r).toFixed(1)}%</b> (최대 +${SPD_CAP}%에 가까워짐).</p>`}
+function spdCapNote(){return ''}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
 const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
@@ -3389,9 +3388,8 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S
   if(tk)R.push(['확정 강화 주문서',`${tk}장`,'#7fe8d8']);
   const gtot=kg+A.pg+A.lg;
   const showRes=()=>{releaseAll();$('riftResSheet').className='sheet modal rrs '+(win?'win':'fail');
-    $('riftResSheet').innerHTML=`<div class="rh"><small>${win?'EMBER RIFT CLEARED':'RIFT FAILED'}</small><b>${win?'균열 정화 성공':'균열 실패'}</b>${win?`<span style="color:${RGC[gr]};text-shadow:0 0 12px ${RGC[gr]}">등급 ${gr} · ${T.toFixed(1)}초</span>`:`<p class="rwhy">${why||'제한 시간 초과'}</p>`}</div>
+    $('riftResSheet').innerHTML=`<div class="rh"><small>${win?'EMBER RIFT CLEARED':'RIFT FAILED'}</small><b>${win?'균열 정화 성공':'균열 실패'}</b>${win?`<span style="color:${RGC[gr]};text-shadow:0 0 12px ${RGC[gr]}">등급 ${gr} · ${T.toFixed(1)}초</span>`:`<p class="rwhy">${why||'제한 시간 초과'}</p>`}<em class="rkill">몬스터 ${A.k}마리 처치</em></div>
       <div class="rl">${R.map(r=>`<div class="rr"><i>${r[0]}${r[3]?`<small>${r[3]}</small>`:''}</i><b style="color:${r[2]}">${r[1]}</b></div>`).join('')}</div>
-      <div class="rt"><span>처치 ${A.k}마리 · 총 획득 골드</span><b>+${fmtG(gtot)} G</b></div>
       <div class="btns"><button class="primary" id="riftResOk">닫기</button></div>`;
     $('riftRes').hidden=false};
   if(!win){shake=Math.max(shake,.4);feed('균열 실패 · 정산 ×0.6','#c8a0ff');setTimeout(showRes,500);return}
@@ -3473,7 +3471,7 @@ function addItem(it){
   if(!makeRoom()){S.gold+=sellPrice(it);feed(`가방이 잠근 아이템으로 가득 차 ${it.name}을(를) 판매했습니다`,'#ffb070');return}
   S.inv.push(it);
   const cur=S.eq[it.slot],better=isBetter(it,cur);
-  if(it.rar>=3)feed(`${it.name}${better?' ▲':''}`,it.opts.some(o=>OPT[o.k]&&OPT[o.k].sp)?'#5ae0d0':RAR[it.rar].c);/* v70: 피드는 전설 습득만 */
+  /* v450: 습득 장비 이름 피드 제거 */
   /* v96: 획득 시 화면 중앙 문구 없음 */
   save();refreshUpBtn();
 }
@@ -4135,7 +4133,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v449';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v450';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4688,7 +4686,7 @@ function renderStat(){
   for(const k in STATS){const v=stN(k);
     h+=`<div class="grow"><span class="gd" style="background:${STATS[k].c}"></span><span class="t">${STATS[k].n} <span style="font:500 10px var(--en);font-stretch:87%;letter-spacing:.12em;color:var(--muted)">${STATS[k].en}</span><small class="lines">${STATS[k].d.map(x=>`<span>${x}</span>`).join('')}</small></span>
     <span class="lvp">${v}</span><button class="pm" data-sa="${k}" ${pts?'':'disabled'} aria-label="${STATS[k].n} 올리기">+</button><button class="pm wide" data-sx="${k}" ${pts?'':'disabled'}>전부</button></div>`}
-  h+=`</div><div class="kv"><span>피해</span><b>${Math.round(baseDmg())}</b><span>최대 생명력</span><b>${heroMax()}</b><span>생명력 재생</span><b>${hpRegen().toFixed(1)}/초</b>${envDrain()>0?`<span>${envName()}</span><b style="color:${envDrain()>hpRegen()?'#ff7a6a':'var(--ink)'}">-${envDrain().toFixed(1)}/초</b>`:''}<span>최대 마나</span><b>${heroMp()}</b><span>마나 재생</span><b>${mpRegen().toFixed(1)}/초</b><span>이동 속도</span><b>${heroSpd().toFixed(1)}</b><span>치명타 확률</span><b>${+(Math.min(1,critCh())*100).toFixed(1)}%<small style="display:block;font-size:10px;color:var(--muted);font-weight:500">기본 7% × (1 + 치명타 ${Math.round(critX()*100)}%)</small></b></div>${spdCapNote()}
+  h+=`</div><div class="kv"><span>피해</span><b>${Math.round(baseDmg())}</b><span>최대 생명력</span><b>${heroMax()}</b><span>생명력 재생</span><b>${hpRegen().toFixed(1)}/초</b>${envDrain()>0?`<span>${envName()}</span><b style="color:${envDrain()>hpRegen()?'#ff7a6a':'var(--ink)'}">-${envDrain().toFixed(1)}/초</b>`:''}<span>최대 마나</span><b>${heroMp()}</b><span>마나 재생</span><b>${mpRegen().toFixed(1)}/초</b><span>이동 속도</span><b>${heroSpd().toFixed(1)}</b><span>치명타 확률</span><b>${+(Math.min(1,critCh())*100).toFixed(1)}%</b></div>${spdCapNote()}
   <div><div class="tag" style="margin-bottom:8px">레벨업 시 자동 배분</div><div class="seg"><button data-auto="" class="${auto?'':'on'}">끄기</button>${Object.keys(STATS).map(k=>`<button data-auto="${k}" class="${auto===k?'on':''}">${STATS[k].n}</button>`).join('')}<button data-auto="bal" class="${auto==='bal'?'on':''}">균형</button></div>
   <p class="hint" style="margin-top:6px">${auto==='bal'?'앞으로 레벨업할 때마다 힘·민첩·지능 중 가장 낮은 스탯부터 1점씩 고르게 들어갑니다.':auto?`앞으로 레벨업할 때마다 포인트가 ${autoStatName(auto)}에 자동으로 들어갑니다.`:'끄면 포인트가 쌓이고, 직접 찍습니다.'}</p></div>
 `;
