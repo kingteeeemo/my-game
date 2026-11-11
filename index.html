@@ -1631,15 +1631,15 @@ function fldSnap(){if(S.tutor||S.test||S.demo||inTown||ldBusy||!(P.hp>0)||(S.ch<
   if(S.duel||bossCtx()){f.bf=1;f.hp=Math.round(P.hp);f.mp=Math.round(P.mp)}
   const b=[];for(const e of enemies)if(e.boss&&e.hp>0&&!e.rift&&fldKind(e))b.push({k:fldKind(e),r:+(e.hp/e.mhp).toFixed(4),x:+e.pos.x.toFixed(1),z:+e.pos.z.toFixed(1),a:e.aggro?1:0});
   if(b.length)f.b=b;
-  const Z=RZ;if(Z&&mapKind==='field'){f.rz={st:Z.st,c:Z.c,g:Z.gates.map(q=>[+q.x.toFixed(1),+q.z.toFixed(1)]),t:+Z.t.toFixed(1),hp:Z.hp,wave:Z.wave,next:Z.next,bo:Z.bossOut?1:0,fT:Z.fT,acc:Z.acc,fl:Z.fList||[],
+  const Z=RZ;if(Z&&mapKind==='field'){f.rz={st:Z.st,c:Z.c,g:Z.gates.map(q=>[+q.x.toFixed(1),+q.z.toFixed(1)]),t:+Z.t.toFixed(1),hp:Z.hp,wave:Z.wave,wT:+(Z.wT||0).toFixed(1),bt:+(Z.bt||0).toFixed(1),bo:Z.bossOut?1:0,acc:Z.acc,
     m:Z.mobs.filter(e=>e.hp>0).slice(0,150).map(e=>[e.rk||0,e===Z.boss?1:0,+e.pos.x.toFixed(1),+e.pos.z.toFixed(1),Math.round(e.hp),Math.round(e.mhp)])}}
   return f}
 function riftRestore(z){riftClear();riftOpen(true);const Z=RZ;Z.c={x:z.c.x,z:z.c.z};Z.obj.position.set(Z.c.x,0,Z.c.z);
   Z.gates.forEach((q,i)=>{const p=z.g[i]||z.g[0];q.x=p[0];q.z=p[1];q.g.position.set(p[0],0,p[1])});
   if(z.st==='open'){Z.t=z.t;return}
   Z.st='on';Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){q.bump=1;q.g.scale.setScalar(1)}
-  Z.t=z.t;Z.hp=z.hp;Z.wave=z.wave;Z.next=z.next;Z.bossOut=!!z.bo;Z.fT=z.fT;Z.acc=z.acc||Z.acc;Z.fList=z.fl||[];
-  for(const m of z.m||[]){const e=riftMob(Z.gates[0],m[0],1,!!m[1]);e.pos.x=m[2];e.pos.z=m[3];e.mhp=m[5];e.hp=Math.min(m[4],m[5]);if(m[1])Z.boss=e}
+  Z.t=z.t;Z.hp=z.hp;Z.wave=z.wave;Z.wT=z.wT||0;Z.bt=z.bt||0;Z.sp=0;Z.bossOut=!!z.bo;Z.acc=z.acc||Z.acc;
+  for(const m of z.m||[]){const e=riftMob(Z.gates[0],m[0],1,!!m[1]);e.pos.x=m[2];e.pos.z=m[3];e.rw=z.wave;e.mhp=m[5];e.hp=Math.min(m[4],m[5]);if(m[1])Z.boss=e}
   if(z.bo&&!Z.boss)Z.bossOut=true}
 function applyFld(f,full){if(!f)return;
   if(!inArena()){P.pos.set(clamp(f.x,-B+1,B-1),0,clamp(f.z,-B+1,B-1));camT.copy(P.pos)}
@@ -3359,8 +3359,8 @@ function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(
    필드 사냥 중 RIFT.gap초(랜덤)마다 근처에 「잿불 성화」(오브젝트)와 그 주위 균열 5곳이 생김 → RIFT.wait초 안에 성화에 다가가면 "균열이 시작됩니다" 3초 카운트 후 시작
    0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
    몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
-   실패: 80초 안에 성화 파괴 / 80초까지 다 못 잡음. 성공 등급: 64초 이내 S · 72초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
-const RIFT={gap:[90,180],first:[90,180]/* v406: 2~3분마다 */,minTier:10/* v406: 위험도 10부터 */,goldK:.9/* v408: 균열 몬스터 골드 보존값 — 체력 비례 골드를 10% 너프(정수·주머니엔 미적용) */,mul:{F:.6,B:.8,A:1,S:1.3}/* v406: 정산 배수(실패·B·A·S) — 처치한 균열 몹 골드·정수에 곱함 */,wait:40,lim:80,S:64,A:72,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:2.128/* v442: -5% (2.24) */ /* v402: 수호자와 동일 → v404: ×4 → v425: -30% (2.8) → v427: 추가 -20% (2.24) */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
+   실패: 성화 파괴 / 군주 등장 후 25초 안에 못 잡음. 성공 등급(군주 등장 후 처치 시간): 9초 이내 S · 17초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
+const RIFT={gap:[90,180],first:[90,180]/* v406: 2~3분마다 */,minTier:10/* v406: 위험도 10부터 */,goldK:.9/* v408: 균열 몬스터 골드 보존값 — 체력 비례 골드를 10% 너프(정수·주머니엔 미적용) */,mul:{F:.6,B:.8,A:1,S:1.3}/* v406: 정산 배수(실패·B·A·S) — 처치한 균열 몹 골드·정수에 곱함 */,wait:40,lim:25/* v459: 균열 군주 등장 후 제한 시간 */,S:9,A:17,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:2.128/* v442: -5% (2.24) */ /* v402: 수호자와 동일 → v404: ×4 → v425: -30% (2.8) → v427: 추가 -20% (2.24) */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
   wave:[{n0:40,n1:0,n2:0,hp:1},{n0:40,n1:12,n2:0,hp:1.12},{n0:24,n1:24,n2:0,hp:1.26},{n0:0,n1:40,n2:4,hp:1.48/* v442: 4단계 +5% (1.41) */},{n0:0,n1:32,n2:12,hp:1.74/* v442: 5단계 +10% (1.58) */ /* v428: 단계적 상승 1→1.12→1.26→1.41→1.58→1.77 (v425 1.76→) */},{n0:0,n1:40,n2:20,hp:2.12/* v442: 6단계 +20% (1.77) */ /* v425: 6단계 몹 -20% (2.6→2.08) → v427: 추가 -15% (→1.77) */}],/* v404: 생성량 ×4 */
   hit:[.75,1.25,2,5],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 — v405: 절반 */
   /* v428: 균열 장비 지급 폐지 */};
@@ -3392,13 +3392,13 @@ function riftOpen(near){const ang=rand(0,Math.PI*2),r=near?2.5:rand(10,14),L=B-R
 function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){ringFx(q,2.4,0xc060ff,.6)}
   const el=riftBig('<small>EMBER RIFT</small><b>균열이 시작됩니다</b><span>3</span>',3.05);let n=3;const sp=el.querySelector('span');
   const tick=()=>{n--;if(n>0&&sp){sp.textContent=n;sp.style.animation='none';void sp.offsetWidth;sp.style.animation=''}};later(1,tick);later(2,tick);shake=Math.max(shake,.2)}
-function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.next=0;flash(Z.c,0xff7a30,3);shake=Math.max(shake,.35)}
+function riftStart(){const Z=RZ;Z.st='on';Z.t=0;Z.wave=0;Z.wT=0;Z.sp=0;Z.bt=0;flash(Z.c,0xff7a30,3);shake=Math.max(shake,.35)}
 function riftMob(q,rk,hpm,G){const c=RZ.c,a=Math.atan2(c.z-q.z,c.x-q.x)+rand(-.5,.5),x=q.x+Math.cos(a)*1.2,z=q.z+Math.sin(a)*1.2,r=Math.random(),type=G||rk===2?'brute':r<.35?'runner':'grunt';
   const e=spawnEnemy(type,x,z,G?2:rk,G?{name:'균열 군주'}:{});e.rift=1;e.aggro=true;e.rk=G?3:rk;e.hp=e.mhp=e.mhp*RIFT.hpX*hpm*(G?RIFT.guardX*RIFT.bossX/RIFT.hpX:1);e.spd*=RIFT.spdX;riftBeast(e,G);
   if(!G){e.name=rk===2?'균열 포식자':rk===1?'균열 사냥꾼':'균열 짐승';e.lab.firstChild.textContent=e.name}else e.r*=2.6;
   emit(PADD,{x,y:1,z,vy:2,life:.5,s0:2,s1:.2,c0:0xffa040,c1:0x6a10a0,a:.9,tex:1});RZ.mobs.push(e);return e}
 function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W.n0).fill(0),...Array(W.n1).fill(1),...Array(W.n2).fill(2)].sort(()=>Math.random()-.5);
-  list.forEach((rk,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(Z.gates[i%Z.gates.length],rk,W.hp)}));Z.fT=RIFT.fillEvery;Z.fList=list;
+  Z.wT=0;Z.sp=list.length;list.forEach((rk,i)=>later(i/list.length*4,()=>{Z.sp--;if(RZ===Z&&Z.st==='on'){const e=riftMob(Z.gates[i%Z.gates.length],rk,W.hp);e.rw=n}}));/* v459: 모든 웨이브 몹은 4초에 걸쳐 등장 */
   for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
 function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;A.e+=Math.floor(ex)+(Math.random()<ex%1?1:0);
@@ -3407,12 +3407,12 @@ function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,
   emit(PADD,{x:e.pos.x,y:1,z:e.pos.z,vy:2.5,life:.5,s0:.6,s1:.15,c0:0xffe080,c1:0xffa020,a:.9,tex:1})}/* 처치 시 금빛 불티만 — 실제 지급은 끝날 때 한 번에 */
 function riftPouch(p){const A=RZ.acc;if(p.leg){A.ln++;A.lg+=p.amt}else{A.pn++;A.pg+=p.amt}}/* 먹은 주머니를 정산에 합산 */
 function riftEcho(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0],W=RIFT.wave[Math.max(0,Z.wave-1)],e=riftMob(q,2,W.hp*3);e.name='균열 우두머리';e.lab.firstChild.textContent=e.name;e.M.root.scale.multiplyScalar(1.3);e.h*=1.3;e.r*=1.3;ringFx(q,3,0xff5a20,.6);toast('균열 우두머리 출현','균열에서 우두머리가 나타났습니다','#ff9a4a')}
-function riftBossSpawn(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0];Z.bossOut=true;q.g.scale.setScalar(1.7);Z.boss=riftMob(q,2,1,true);ringFx(q,5,0xff3a10,.8);flash(q,0xff3a10,4);shake=Math.max(shake,.5);
+function riftBossSpawn(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0];Z.bossOut=true;Z.bt=0;q.g.scale.setScalar(1.7);Z.boss=riftMob(q,2,1,true);ringFx(q,5,0xff3a10,.8);flash(q,0xff3a10,4);shake=Math.max(shake,.5);
   riftBig('<small style="color:#ff6a4a">RIFT LORD</small><b style="background:linear-gradient(180deg,#ffe0d0,#ff5a3a 55%,#8a1008);-webkit-background-clip:text;background-clip:text;color:transparent">균열 군주 등장</b>',2)}
 function riftHit(e){const Z=RZ;if(!Z||Z.st!=='on')return;Z.hp-=RIFT.hit[e.rk||0];e.atk=.35;const u=Z.obj.userData;u.cm.emissive.setHex(0xff1a10);u.hitT=.12;
   emit(PADD,{x:Z.c.x+rnd(-.5,.5),y:2+rnd(0,1),z:Z.c.z+rnd(-.5,.5),vy:rnd(1,2.5),life:.4,s0:.7,s1:.1,c0:0xffd0a0,c1:0xff3010,a:.9,tex:1});if(Z.hp<=0){Z.hp=0;riftEnd(false,'잿불 성화가 파괴되었습니다')}}
 function riftClear(){const Z=RZ;if(!Z)return;RZ=null;riftHud(null);scene.remove(Z.obj);for(const q of Z.gates)scene.remove(q.g);Z.lab.remove()}
-function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S?'S':T<=RIFT.A?'A':'B';
+function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RIFT.S?'S':T<=RIFT.A?'A':'B';
   for(const e of [...Z.mobs])if(e.hp>0&&enemies.includes(e)){ringFx(e.pos,1.5,0x8a4aff,.4);dropEnemy(e,true)}/* 남은 균열 몬스터는 균열로 사라짐 */
   if(!win)for(let i=0;i<20;i++)emit(PADD,{x:c.x+rnd(-.6,.6),y:rnd(1,3),z:c.z+rnd(-.6,.6),vx:rnd(-4,4),vy:rnd(1,5),vz:rnd(-4,4),life:rnd(.5,.9),s0:.6,s1:.1,c0:0xffa060,c1:0x401010,a:.9,tex:1});
   riftClear();riftT=rand(...RIFT.gap);if(S.ch>=NCH)later(3.3,()=>{if(!riftBusy()&&mapKind==='field')tierCheck()});tele('rift',{win:win?1:0,g:win?gr:'-',t:Math.round(T),tier:S.tier});
@@ -3452,13 +3452,13 @@ function riftTick(dt){
   if(Z.st==='count'){riftHud('<b>🔥 잿불 균열</b> <span>곧 시작</span>');if(Z.t>=3)riftStart();return}
   Z.mobs=Z.mobs.filter(e=>e.hp>0&&enemies.includes(e));
   for(const e of Z.mobs)if(Math.random()<dt*2*QM())emit(PADD,{x:e.pos.x+rnd(-.4,.4),y:e.h*.6,z:e.pos.z+rnd(-.4,.4),vy:rnd(.8,1.8),life:rnd(.4,.8),s0:.5,s1:.1,c0:0xff7a30,c1:0x8a1000,a:.7,tex:1});
-  while(Z.next<6&&Z.t>=Z.next*10){Z.next++;riftWave(Z.next)}
-  {const end=RIFT.fill[Z.wave];if(end&&Z.t<end&&!Z.bossOut){Z.fT-=dt;if(Z.fT<=0){Z.fT+=RIFT.fillEvery;const W=RIFT.wave[Z.wave-1];Z.gates.forEach((q,i)=>later(i*.05,()=>{if(RZ===Z&&Z.st==='on')riftMob(q,Z.fList[Math.random()*Z.fList.length|0],W.hp)}))}}}/* v405: 1·2웨이브 계속 생성 */
-  if(!Z.bossOut&&Z.t>=55)riftBossSpawn();
-  const left=RIFT.lim-Z.t;
-  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <small style="color:${left<10?'#ff6a4a':''}">${Math.ceil(Math.max(0,left))}초</small>`);
-  if(Z.bossOut&&!Z.mobs.length){riftEnd(true);return}
-  if(left<=0)riftEnd(false,'제한 시간 안에 균열을 정화하지 못했습니다')}
+  Z.wT+=dt;/* v459: 웨이브를 다 처치하면 바로 다음 웨이브, 못 잡아도 10초 지나면 다음 웨이브 → 6웨이브 뒤 군주 */
+  if(!Z.bossOut){if(Z.wave===0)riftWave(1);else if(Z.wT>=10||(Z.sp<=0&&Z.wT>.5&&!Z.mobs.some(e=>e.rw===Z.wave))){if(Z.wave<6)riftWave(Z.wave+1);else riftBossSpawn()}}
+  else Z.bt+=dt;
+  const left=RIFT.lim-Z.bt;
+  riftHud(`<b>🔥 잿불 균열</b> <span>${Z.bossOut?'균열 군주':'웨이브 '+Z.wave+'/6'} · 남은 적 ${Z.mobs.length} · 성화 ${Math.ceil(Z.hp)}%</span> <small style="color:${Z.bossOut&&left<8?'#ff6a4a':''}">${Z.bossOut?Math.ceil(Math.max(0,left))+'초':'다음 '+Math.ceil(Math.max(0,10-Z.wT))+'초'}</small>`);
+  if(Z.bossOut&&(Z.boss?!(Z.boss.hp>0&&enemies.includes(Z.boss)):!Z.mobs.length)){riftEnd(true);return}
+  if(Z.bossOut&&left<=0)riftEnd(false,'제한 시간 안에 균열 군주를 처치하지 못했습니다')}
 /* v400: 균열 몬스터 외형 — 붉은 네발 괴물(사냥개 골격) + 뿔·등의 잿불 결정·붉게 빛나는 눈. 능력치는 원래 종류 그대로, 모습만 바꿈 */
 const RBM={horn:new THREE.MeshStandardMaterial({color:0x2a0806,roughness:.5,metalness:.2}),ember:new THREE.MeshBasicMaterial({color:0xff4a14}),eye:new THREE.MeshBasicMaterial({color:0xffd040})};
 function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST));e.mat.color.setHex(G?0x6a0c0a:e.rank===2?0x8a1410:0xa8241a);
@@ -4171,7 +4171,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v458';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v459';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
