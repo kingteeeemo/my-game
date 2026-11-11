@@ -111,7 +111,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.s2{width:62px;height:62px;right:18px;bottom:96px;color:#e8c07a}
 .act.down{background:rgba(60,56,64,.9)}
 .act.nomp{opacity:.45}
-.act.pot.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}/* v126: 자동 복용이 켜진 물약 버튼 */
+.act.s1.autoon::after,.act.pot.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}/* v126: 자동 복용이 켜진 물약 버튼 */
 @keyframes apSpin{to{transform:rotate(360deg)}}
 .act.pot b{font:800 13px var(--en);font-stretch:87%;color:var(--ink);line-height:1;margin-top:-5px;text-shadow:0 1px 2px #000}
 .flask{width:36px;height:36px;margin-top:-4px;flex:none;filter:drop-shadow(0 0 5px var(--glow))}
@@ -804,6 +804,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <p class="hint" style="width:100%;text-align:left">+는 확대(가깝게), −는 축소(멀리 넓게) 봅니다.</p>
   <div class="gfx"><span style="white-space:nowrap">몬스터 생성</span><div class="ampr" style="flex:1"><input type="range" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량"><output id="egRateO">100%</output></div></div>
   <p class="hint" style="width:100%;text-align:left">엔드게임 사냥터의 몬스터 생성량입니다. 높이면 몬스터가 더 많이 나와 다음 위험도로 빨리 넘어가고, 낮추면 천천히 넘어갑니다.</p>
+  <div class="gfx"><span style="white-space:nowrap">스킬 자동 사용</span><div class="seg" id="askSeg"><button data-a="0">끄기</button><button data-a="1">켜기</button></div></div>
+  <p class="hint" style="width:100%;text-align:left" id="askHint"></p>
   <button class="ghost" id="pGuide" style="width:100%">가이드 다시 보기</button>
   <button class="ghost" id="pSlots" style="width:100%">슬롯 · 처음부터</button>
   <button class="primary" id="pResume" style="width:100%">계속하기</button>
@@ -4156,10 +4158,12 @@ stick.addEventListener('pointermove',e=>{if(!sp||e.pointerId!==sp.id)return;let 
 const endStick=e=>{if(!sp||e.pointerId!==sp.id)return;sp=null;input.x=input.z=0;knob.hidden=true};
 stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercancel',endStick);
 document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
-  b.addEventListener('pointerdown',e=>{e.preventDefault();input.held[k]=true;b.classList.add('down');fireNow(k)});
+  b.addEventListener('pointerdown',e=>{e.preventDefault();input.held[k]=true;b.classList.add('down');if(k==='s1'&&S&&S.autoSkSet&&!paused()&&!inTown){S.autoSkOn=!S.autoSkOn;skAutoUi();feed(S.autoSkOn?'스킬 자동 사용 켜짐':'스킬 자동 사용 꺼짐',S.autoSkOn?'#ffd24a':'#9ab');if(!S.autoSkOn)input.held[k]=false}fireNow(k)});
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{input.held[k]=false;b.classList.remove('down')}));
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
+/* v476: 스킬 자동 사용 — 설정에서 켜면 스킬 버튼을 눌러 자동 발동을 켜고 끔(켜진 동안 링 표시). 쿨타임·마나가 되고 적이 있으면 계속 발동 */
+function skAutoUi(){const on=!!(S&&S.autoSkSet);$('bS1').classList.toggle('autoon',on&&!!S.autoSkOn);document.querySelectorAll('#askSeg button').forEach(b=>b.classList.toggle('on',(+b.dataset.a===1)===on));const h=$('askHint');if(h)h.textContent=on?'스킬 버튼을 한 번 누르면 자동 사용이 켜지고(테두리가 돕니다), 다시 누르면 꺼집니다. 켜진 동안 적이 있으면 쿨타임마다 스킬을 계속 씁니다.':'꺼짐: 스킬 버튼을 누를 때마다 한 번씩 직접 씁니다.'}
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
 addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('riftRes').hidden){riftResClose();return}if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(e.code==='KeyH'&&S.cls)bossOpen?closeBoss():openBoss();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
@@ -4183,7 +4187,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v475';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v476';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4220,7 +4224,7 @@ function hudMoney(){if(!S||!S.cls)return;const gt=fmtG(S.gold||0);if($('goldT').
   const es=S.ch>=NCH||S.ess>0;$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
-  stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
+  skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`;
@@ -5463,7 +5467,8 @@ function update(dt){packTick();
   P.inv-=dt;P.swing-=dt;P.spin-=dt;P.dashT=(P.dashT||0)-dt;
   if(!inTown){
   /* v127: 스킬은 누를 때마다 한 번만 발동(꾹 눌러도 연발 없음) — 눌렀을 때 fireNow('s1')에서 처리 */
-  if(input.held.s1&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');/* v278: 모든 스킬이 꾹 누르고 있으면 쿨타임마다 계속 발동(v273에서 회전 베기 한정 → 전체로 확대) */
+  if(input.held.s1&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');
+  if(S.autoSkSet&&S.autoSkOn&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&P.spin<=0&&P.hp>0&&!paused()){const t=nearestEnemy(P.pos,15);if(t){if(pcMode){mouseW.x=t.pos.x;mouseW.z=t.pos.z}castSkill('s1')}}/* v278: 모든 스킬이 꾹 누르고 있으면 쿨타임마다 계속 발동(v273에서 회전 베기 한정 → 전체로 확대) */
   if(input.held.php){input.held.php=false;usePot('hp')}
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
   if(S.autoHpOn&&P.cd.pot<=0&&P.hp/P.mhp*100<=(S.autoHpPct||30)&&potN('hp')>0)usePot('hp',S.autoHpSz);
@@ -5648,9 +5653,10 @@ $('autoPop').addEventListener('click',e=>{const b=e.target.closest('button');if(
 document.addEventListener('pointerdown',e=>{const p=$('autoPop');if(p.hidden)return;if(p.contains(e.target)||$('autoBtn').contains(e.target))return;p.hidden=true},true);/* v138: 바깥을 누르면 닫힘 */
 $('autoPop').addEventListener('input',e=>{const k=e.target.dataset.apc;if(!k)return;S[AUTOK[k][1]]=+e.target.value;e.target.nextElementSibling.textContent=e.target.value+'%'});
 $('autoPop').addEventListener('change',e=>{if(e.target.dataset.apc){save();autoRender()}});
+document.querySelectorAll('#askSeg button').forEach(b=>b.addEventListener('click',()=>{S.autoSkSet=b.dataset.a==='1';if(!S.autoSkSet)S.autoSkOn=false;skAutoUi();save()}));
 $('pGuide').onclick=()=>{closePause();guideBook()};
 $('pSlots').onclick=()=>{save();closePause();closeAllSheets();showSlots()};/* v71: 슬롯 버튼은 설정 창 안으로 */
-function openPause(){if(!S.cls)return;releaseAll();$('pause').hidden=false}
+function openPause(){if(!S.cls)return;releaseAll();skAutoUi();$('pause').hidden=false}
 function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
