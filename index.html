@@ -4171,7 +4171,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v460';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v461';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5099,7 +5099,7 @@ function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OP
     ${it&&spk?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>'}</div>`}
 function testSetEnh(k,n){S.enh[k]=Math.max(0,Math.round(n)||0);smithRes=null;refreshMax();renderSmith()}
 function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k));it.opts=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));if(v!==null&&spk)it.opts.unshift({k:spk,v:Math.max(0,+v||0)});refreshMax();renderSmith()}
-const GREAT_P=.3;/* v429 강화 대성공 확률 → v443: 10% → 30% */
+const GREAT_P=.2;/* v429 강화 대성공 확률 → v443: 10% → 30% → v461: 20% */
 function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=tkUse?tkGold(L,k):enhCost(L,k);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=29;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
