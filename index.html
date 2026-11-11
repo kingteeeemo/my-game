@@ -66,6 +66,10 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
+.rrs{text-align:center;padding:18px 16px 16px;gap:10px;align-items:stretch;max-width:360px}.rrs .rh{display:flex;flex-direction:column;align-items:center;gap:2px}.rrs .rh small{font:800 11px var(--en);letter-spacing:.3em}.rrs .rh b{font:900 28px/1.15 var(--ko)}.rrs .rh span{font:700 14px var(--ko)}
+.rrs.win .rh small{color:#ff9a4a}.rrs.win .rh b{background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent}.rrs.fail .rh small{color:#c8a0ff}.rrs.fail .rh b{background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rrs .rwhy{font-size:12px;color:#e0d0ff;margin:0}.rrs .rl{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;text-align:left}.rrs .rr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}.rrs .rr i{font-style:normal;color:var(--muted)}.rrs .rr i small{opacity:.7;margin-left:4px}.rrs .rr b{font-weight:800;white-space:nowrap}
+.rrs .rt{display:flex;justify-content:space-between;align-items:baseline;padding:2px 2px 0}.rrs .rt span{font-size:12px;color:var(--muted)}.rrs .rt b{font:900 22px var(--en);color:#ffd24a}.rrs .rk{font-size:11.5px;color:var(--muted);margin:0}
 .riftbig{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:46;pointer-events:none;text-align:center;animation:riftIn 3s ease-out forwards}.riftbig small{display:block;font:800 13px var(--en);letter-spacing:.3em;color:#ff9a4a}.riftbig b{display:block;font:900 clamp(28px,7.5vmin,54px)/1.15 var(--ko);background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,40,.6))}.riftbig span{display:block;margin-top:4px;font:900 clamp(26px,7vmin,52px) var(--en);color:#ffe0b0;text-shadow:0 0 12px rgba(255,120,40,.8),0 2px 4px #000;animation:riftNum .9s ease-out}.riftbig p{margin:8px 0 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font:800 clamp(13px,3.2vmin,18px) var(--ko);color:#f2e6d0;text-shadow:0 1px 3px #000}.riftbig p em{font-style:normal}
 @keyframes riftIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}14%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}@keyframes riftNum{0%{transform:scale(1.8);opacity:0}30%{transform:scale(1);opacity:1}}
 #riftHud{font:700 13px var(--ko);color:#ffd9b0;background:rgba(40,12,6,.82);border:1px solid rgba(255,110,40,.75);border-radius:12px;padding:6px 12px;text-align:center;white-space:nowrap;box-shadow:0 0 16px rgba(255,90,20,.35)}#riftHud b{color:#ffb070;margin-right:4px}#riftHud small{margin-left:6px;color:#ffcf9a;font-weight:800}
@@ -793,6 +797,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="cine" id="cine" hidden><div class="cineBar"></div><div class="cineBody" id="cineBody"></div><button class="close cineSkip" id="cineSkip">건너뛰기</button><div class="cineBar b"></div></div>
 <div class="scrim center" id="clear" hidden><div class="sheet modal" id="clearSheet"></div></div>
 <div class="guide" id="guide" hidden><div class="gspot" id="gSpot"></div><div class="gcard" id="gCard"></div></div>
+<div class="scrim center" id="riftRes" hidden><div class="sheet modal" id="riftResSheet"></div></div>
 <div class="scrim center" id="notice" hidden><div class="sheet modal" id="noticeSheet"></div></div>
 <div class="scrim" id="wmap" hidden><div class="sheet" id="wmapSheet"></div></div>
 <div class="skillsel" id="skillSel" hidden><div class="sheet" id="skillSheet"></div></div>
@@ -3277,8 +3282,8 @@ function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(
    0초 1웨이브 → 10초마다 다음 웨이브(점점 강해짐) → 50초 6웨이브 → 55초 5곳 중 한 곳에서 균열 보스(수호자 체력의 3배)
    몬스터는 균열에서 나와 성화로 걸어가 공격(플레이어가 가까이 붙으면 플레이어와 싸움). 진행 중 새 필드 몬스터 생성 멈춤(이미 있는 몹은 그대로)
    실패: 90초 안에 성화 파괴 / 90초까지 다 못 잡음. 성공 등급: 76초 이내 S · 84초 이내 A · 그 외 B. 끝나면 3초간 결과(성공 시 보상 포함) */
-const RIFT={gap:[90,180],first:[90,180]/* v406: 2~3분마다 */,minTier:10/* v406: 위험도 10부터 */,goldK:.9/* v408: 균열 몬스터 골드 보존값 — 체력 비례 골드를 10% 너프(정수·주머니엔 미적용) */,mul:{F:.6,B:.8,A:1,S:1.3}/* v406: 정산 배수(실패·B·A·S) — 처치한 균열 몹 골드·정수에 곱함 */,wait:40,lim:90,S:76,A:84,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:2.8/* v402: 수호자와 동일 → v404: ×4 → v425: 균열 보스 체력 -30% (4→2.8) */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
-  wave:[{n0:40,n1:0,n2:0,hp:1},{n0:40,n1:12,n2:0,hp:1.25},{n0:24,n1:24,n2:0,hp:1.5},{n0:0,n1:40,n2:4,hp:1.8},{n0:0,n1:32,n2:12,hp:1.76/* v425: 5단계 몹 체력 -20% (2.2→1.76) */},{n0:0,n1:40,n2:20,hp:2.08/* v425: 6단계 몹 체력 -20% (2.6→2.08) */}],/* v404: 생성량 ×4 */
+const RIFT={gap:[90,180],first:[90,180]/* v406: 2~3분마다 */,minTier:10/* v406: 위험도 10부터 */,goldK:.9/* v408: 균열 몬스터 골드 보존값 — 체력 비례 골드를 10% 너프(정수·주머니엔 미적용) */,mul:{F:.6,B:.8,A:1,S:1.3}/* v406: 정산 배수(실패·B·A·S) — 처치한 균열 몹 골드·정수에 곱함 */,wait:40,lim:90,S:76,A:84,N:5,dist:[15,21]/* v404: ×1.5 */,objR:1.1,objHp:100,hpX:4/* v404: 웨이브 몹 체력 ×2 */,guardX:15,bossX:2.24/* v402: 수호자와 동일 → v404: ×4 → v425: -30% (2.8) → v427: 추가 -20% (2.24) */,spdX:.28/* v404: 40% → v405: 28%(30% 더 느리게) */,fill:{1:8,2:18},fillEvery:1.5,/* v405: 1·2웨이브는 8초·18초까지 같은 구성의 몹을 1.5초마다 균열마다 1마리씩 계속 생성 */
+  wave:[{n0:40,n1:0,n2:0,hp:1},{n0:40,n1:12,n2:0,hp:1.25},{n0:24,n1:24,n2:0,hp:1.5},{n0:0,n1:40,n2:4,hp:1.8},{n0:0,n1:32,n2:12,hp:1.76/* v425: 5단계 몹 체력 -20% (2.2→1.76) */},{n0:0,n1:40,n2:20,hp:1.77/* v425: 6단계 몹 -20% (2.6→2.08) → v427: 추가 -15% (→1.77) */}],/* v404: 생성량 ×4 */
   hit:[.75,1.25,2,5],/* 성화가 받는 피해(%): 일반·희귀·유니크·보스 — v405: 절반 */
   items:{S:4,A:3,B:2}/* v406: 등급 고정 골드·정수·주문서 확률·전설 주머니 확률 보너스 폐지 → 정산 배수·S등급 주문서로 */};
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
@@ -3337,14 +3342,22 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.t,gr=T<=RIFT.S
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
   const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(S.tier/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */,items=win?RIFT.items[gr]:0;
   S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;if(tk)S.tickets=(S.tickets||0)+tk;for(let i=0;i<items;i++)dropItem(c,true);save();
-  const L=[`<em style="color:#ffd24a">몬스터 골드 +${fmtG(kg)} G <small>×${m}</small></em>`,`<em style="color:#ff8a6a">잿불 정수 ${ke} <small>×${m}</small></em>`];
-  if(A.pn)L.push(`<em style="color:#ffd24a">골드 주머니 ${A.pn}개 +${fmtG(A.pg)} G</em>`);if(A.ln)L.push(`<em style="color:#d09aff">전설 골드 주머니 ${A.ln}개 +${fmtG(A.lg)} G</em>`);
-  if(tk)L.push(`<em style="color:#7fe8d8">확정 강화 주문서 ${tk}장</em>`);if(items)L.push(`<em>장비 ${items}</em>`);
-  const tot=`<p style="margin-top:4px"><em style="color:#fff2c0">처치 ${A.k} · 총 골드 +${fmtG(kg+A.pg+A.lg)} G</em></p>`;
-  if(!win){shake=Math.max(shake,.4);feed('균열 실패 · 정산 ×0.6','#c8a0ff');riftBig(`<small style="color:#c8a0ff">RIFT FAILED</small><b style="background:linear-gradient(180deg,#f0e0ff,#a070ff 55%,#4a1a8a);-webkit-background-clip:text;background-clip:text;color:transparent">균열 실패</b><span style="font-size:clamp(15px,3.6vmin,22px);color:#e0d0ff">${why||''}</span><p>${L.join('')}</p>${tot}`,3.5);return}
+  /* v427: 정산 창(일시정지) — 글자만 뜨던 팝업을 별도 창으로: 성공/실패·시간·항목별 보상·총 골드 */
+  const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];
+  if(A.pn)R.push([`골드 주머니 ${A.pn}개`,`+${fmtG(A.pg)} G`,'#ffd24a']);if(A.ln)R.push([`전설 골드 주머니 ${A.ln}개`,`+${fmtG(A.lg)} G`,'#d09aff']);
+  if(tk)R.push(['확정 강화 주문서',`${tk}장`,'#7fe8d8']);if(items)R.push(['장비',`${items}개`,'#fff']);
+  const gtot=kg+A.pg+A.lg;
+  const showRes=()=>{releaseAll();$('riftResSheet').className='sheet modal rrs '+(win?'win':'fail');
+    $('riftResSheet').innerHTML=`<div class="rh"><small>${win?'EMBER RIFT CLEARED':'RIFT FAILED'}</small><b>${win?'균열 정화 성공':'균열 실패'}</b>${win?`<span style="color:${RGC[gr]};text-shadow:0 0 12px ${RGC[gr]}">등급 ${gr} · ${T.toFixed(1)}초</span>`:`<p class="rwhy">${why||'제한 시간 초과'}</p>`}</div>
+      <div class="rl">${R.map(r=>`<div class="rr"><i>${r[0]}${r[3]?`<small>${r[3]}</small>`:''}</i><b style="color:${r[2]}">${r[1]}</b></div>`).join('')}</div>
+      <div class="rt"><span>처치 ${A.k}마리 · 총 획득 골드</span><b>+${fmtG(gtot)} G</b></div>
+      <div class="btns"><button class="primary" id="riftResOk">닫기</button></div>`;
+    $('riftRes').hidden=false};
+  if(!win){shake=Math.max(shake,.4);feed('균열 실패 · 정산 ×0.6','#c8a0ff');setTimeout(showRes,500);return}
   flash(c,0xffd24a,4);ringFx(c,4,0xffd24a,.6);shake=Math.max(shake,.35);spray(PADD,c,40,{sp:[3,8],up:[4,9],y:[1,2],life:[.6,1.1],s0:[.5,.9],s1:[.1,.2],c0:0xfff0a0,c1:0xff7a20,drag:1.5,grav:-12,tex:1});
-  feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);
-  riftBig(`<small style="color:#ff9a4a">EMBER RIFT CLEARED</small><b>균열 정화!</b><span style="color:${RGC[gr]};text-shadow:0 0 14px ${RGC[gr]},0 2px 4px #000">등급 ${gr} · ${T.toFixed(1)}초</span><p>${L.join('')}</p>${tot}`,3.5)}
+  feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);setTimeout(showRes,900)}
+function riftResClose(){if($('riftRes').hidden)return;$('riftRes').hidden=true;last=performance.now()}
+$('riftRes').addEventListener('click',e=>{if(e.target.id==='riftResOk'||e.target.id==='riftRes')riftResClose()});
 function riftTick(dt){
   if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
@@ -4055,7 +4068,7 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('contextmenu',e=>e.preventDefault());
 });
 const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
-addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(e.code==='KeyH'&&S.cls)bossOpen?closeBoss():openBoss();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('riftRes').hidden){riftResClose();return}if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(e.code==='KeyH'&&S.cls)bossOpen?closeBoss():openBoss();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
 /* ================= v128~v130: 새 버전 자동 감지 =================
    v130: ntfy.sh 로 '새 버전 나옴' 신호를 실시간으로 받습니다(연결만 열어 두고 신호가 올 때만 동작, 주기 확인 없음).
@@ -4077,7 +4090,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v426';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v427';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5525,7 +5538,7 @@ function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
-const paused=()=>!$('guide').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>!$('guide').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
