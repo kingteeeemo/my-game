@@ -4183,7 +4183,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v474';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v475';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4772,9 +4772,12 @@ function closeAllSheets(){if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeo
 
 /* ================= equipment & bag ================= */
 let invOpen=false,invSel=null,clearArm=0;
-const optLine=(o,L=0,sl)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,enhMO(L,o.k,sl)))}${OPT[o.k].sp&&L>0&&ev(o.v,enhMO(L,o.k,sl))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
+/* v475: 표기도 gear()가 실제 적용하는 값(체력·마나는 강화 증가분 ENH_HM만 반영)과 동일하게 */
+const eMO=(L,k,sl)=>(k==='hp'||k==='mp')?1+(enhMO(L,undefined,sl)-1)*ENH_HM:enhMO(L,k,sl);
+const eMB=(L,sl)=>{const m=enhMB(L,sl);return(sl==='ring'||sl==='amulet')?1+(m-1)*ENH_HM:m};
+const optLine=(o,L=0,sl)=>`${OPT[o.k].n} ${OPT[o.k].f(ev(o.v,eMO(L,o.k,sl)))}${OPT[o.k].sp&&L>0&&ev(o.v,eMO(L,o.k,sl))!==o.v?` <small class="obase">(기본 ${OPT[o.k].f(o.v)})</small>`:''}`;/* v131: 강화로 오른 특수 능력치 옆에 처음 수치 */
 const baseName=sl=>sl==='weapon'?'무기 피해':sl==='amulet'?'최대 마나':sl==='ring'?'최대 생명력':'방어력';
-const baseLine=(it,L=0)=>`${baseName(it.slot)} +${Math.round(it.base*enhMB(L,it.slot))}`;
+const baseLine=(it,L=0)=>`${baseName(it.slot)} +${Math.round(it.base*eMB(L,it.slot))}`;
 /* 특수 능력치(부위 전용: 투구 재사용 대기시간 · 신발 이동 속도 · 목걸이 마나 재생 · 반지 마나 소모)는 첫 줄에 강조 */
 function itemList(it,L=0,fresh){const sp=it.opts.filter(o=>OPT[o.k]&&OPT[o.k].sp),rest=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));
   return `<ul>${sp.map(o=>`<li class="spopt${fresh?' fresh':''}"><span>특수</span>${optLine(o,L,it.slot)}</li>`).join('')}<li>${baseLine(it,L)}</li>${rest.map(o=>`<li>${optLine(o,L,it.slot)}</li>`).join('')}</ul>`}
@@ -4788,7 +4791,7 @@ function cmpLine(it){const cur=S.eq[it.slot];if(!cur)return '<span class="p">빈
 /* v78 장비 화면: 세로 = 위 비교(현재 장착 | 선택) + 장착 6칸 + 가방 / 가로 = 왼쪽 비교 + 장착 목록 · 오른쪽 가방 / PC = 위 비교 + 아래 장착 · 가방 */
 let eqSel=null;
 const invMode=()=>innerWidth<innerHeight?'p':(matchMedia('(pointer:coarse)').matches||innerHeight<=520)?'l':'pc';
-function ivVals(it){const L=enhL(it.slot),m={};m._b=it.base*enhMB(L,it.slot);for(const o of it.opts)if(OPT[o.k]&&!OPT[o.k].sp)m[o.k]=(m[o.k]||0)+ev(o.v,enhMO(L,o.k,it.slot));return m}
+function ivVals(it){const L=enhL(it.slot),m={};m._b=it.base*eMB(L,it.slot);for(const o of it.opts)if(OPT[o.k]&&!OPT[o.k].sp)m[o.k]=(m[o.k]||0)+ev(o.v,eMO(L,o.k,it.slot));return m}
 const ivFmt=(k,v)=>k==='_b'?`+${Math.round(v)}`:OPT[k].f(v);
 const ivName=(k,sl)=>k==='_b'?baseName(sl):OPT[k].n;
 /* v368: 다크 판타지 아이콘 (SVG) — 장비·기타 */
@@ -4808,7 +4811,7 @@ function ivCard(it,role,other){
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
     <b class="ivn" style="color:${RAR[it.rar].c}">${it.name}</b><span class="ivs">${RAR[it.rar].n} · iLv ${it.ilvl}</span>${spl}${keys.map(row).join('')}</div>`}
 function ivAct(it,cur){if(!it)return '';const a=dpsWith(it),b=cur?dpsWith(cur):skillDps(C().skills[0]).main,p=b?(a-b)/b*100:0;
-  const hv=x=>x?(x.slot==='ring'?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
+  const hv=x=>x?(x.slot==='ring'?x.base*eMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
   const dh=Math.round(hv(it)-hv(cur)),da=Math.round(av(it)-av(cur)),c=Math.abs(p)<.05?'same':p>0?'good':'bad';
   return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 DPS</span><b>${c==='same'?'변화 없음':`${p>0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%`}</b><small>${dh?`생명력 ${dh>0?'+':''}${dh}`:''}${dh&&da?' · ':''}${da?`방어력 ${da>0?'+':''}${da}`:''}</small></div>
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
@@ -5088,7 +5091,7 @@ function renderSmith(){
     const rc=it?RAR[it.rar].c:'#555',
       lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
-      info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*enhMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*enhMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
+      info=it?`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*eMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*eMB(L+1,k))}</b>`}</div>${itemList(it,L)}`:'',
       bonus='',
       tkUI=max?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정`:'사용 안 함'}</button>`:''}</div>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1||pityN(k)>=pityCap(L)?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn||pityN(k)>=pityCap(L)?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':pityN(k)>=pityCap(L)?'<small>(천장)</small>':''}</div>${L>=29?`<div class="smgreat"><small>${tkOn||pityN(k)>=pityCap(L)?'천장·주문서 성공은 대성공 제외':`성공 시 ${Math.round(GREAT_P*100)}% 확률로 <b>대성공</b> (+2단계)`}</small></div>`:''}<div class="smpity${pityN(k)>=pityCap(L)?' full':''}"><small>천장</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pityN(k)>=pityCap(L)?'<small class="pnote">이번 강화 확정 성공</small>':''}${tkUI}`,
