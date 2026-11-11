@@ -4077,7 +4077,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v425';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v426';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5344,9 +5344,8 @@ function update(dt){packTick();
   if(P.hasteT>0){P.hasteT-=dt;if(ml>.05&&Math.random()<dt*30*QM())streak({x:P.pos.x+rnd(-.3,.3),y:rnd(.2,1.2),z:P.pos.z+rnd(-.3,.3),vx:-mx*rnd(3,6),vy:rnd(0,.5),vz:-mz*rnd(3,6),life:.25,w:.06,len:.7,c0:0xc0ffc8,c1:0x2a9a3a,drag:2});if(P.hasteT<=0)feed('신속 물약 효과 종료','#8ae08a')}
   P.mpWarn-=dt;
   P.mp=Math.min(P.mmp,P.mp+dt*mpRegen());
-  P.regen+=dt;if(P.regen>1){P.regen=0;P.hp=Math.min(P.mhp,P.hp+hpRegen())}
-  /* 지역 환경 피해: 최대 생명력의 일정 비율이 초당 감소 (환경만으로는 1 이하로 떨어지지 않음) */
-  {const dr_=envDrain();if(dr_>0&&P.hp>1)P.hp=Math.max(1,P.hp-dr_*dt)}
+  /* v426: 생명력 재생과 환경 피해(심연의 냉기)를 매 프레임 순증감(재생-냉기)으로 합쳐 부드럽게 적용 — 재생력 ≥ 냉기면 생명력이 줄지 않는 것처럼 보임. 환경만으로는 1 이하로 떨어지지 않음 */
+  {const dr_=envDrain();let h_=P.hp+(hpRegen()-dr_)*dt;if(dr_>0)h_=Math.max(h_,Math.min(P.hp,1));P.hp=Math.min(P.mhp,h_)}
   hero.position.copy(P.pos);
   hero.rotation.order='YXZ';/* v122: 구르기 — 진행 방향으로 앞구르기(몸 중심을 축으로 한 바퀴) */
   if(P.mv&&!hero.userData.sk){const a=Math.PI*2*Math.min(1,P.mv.go/MV_GO),f=P.face,o=-.9*Math.sin(a);hero.rotation.x=a;hero.position.set(P.pos.x+Math.sin(f)*o,.9-.9*Math.cos(a),P.pos.z+Math.cos(f)*o)}else hero.rotation.x=0;
