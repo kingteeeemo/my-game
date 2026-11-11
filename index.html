@@ -1192,7 +1192,13 @@ function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
 const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
 const CD_U=1.6,CD_F=.25,CD_T=275.8,CD_T0=123.2,/* v370: 쿨타임 곡선 시정수 123.2→275.8 — 투구 35강(특수 11%, 쿨감 358%) 0.4초 · 40강 0.315초. 피해 보정(nc/old)은 이전 곡선(CD_T0) 기준으로 유지해 피해량은 그대로, 쿨타임만 변경 *//* v275: 110 스펙(358%) 0.28초 · 수렴 0.25초 */cdCurve=(u,x,T=CD_T)=>CD_F+Math.max(0,u-CD_F)*Math.exp(-Math.max(0,x)/T);/* v274: 스킬 쿨타임 곡선 — u(가속 반영 기본) → 쿨감 x%에서 0.35+(u-0.35)e^(-x/162.9). u=.8일 때 91.7%→0.51초 · 358%→0.28초 · ∞→0.25초 */
-const critCh=()=>.1+gear().crit/100+.008/3*stN('agi');
+const critNew=()=>!!(typeof S!=='undefined'&&S&&S.test&&S.critNew);/* v445 시험용(테스트 캐릭터만): 새 치명타 공식 — 기본 7% × (1 + 치명타 확률 합) + 레벨별 피해 보정 */
+const critX=()=>gear().crit/100+.008/3*stN('agi');
+const critCh=()=>critNew()?.07*(1+critX()):.1+critX();
+const CC_PATH=[[31,0],[45,10],[60,20],[75,25],[90,30],[105,33],[120,35],[135,38],[150,40]],CC_MEMO={};
+function critComp(l){if(CC_MEMO[l])return CC_MEMO[l];const P=CC_PATH;let e=0;if(l>31){e=40;for(let i=1;i<P.length;i++)if(l<=P[i][0]){const[a,b]=P[i-1],[c,d]=P[i];e=b+(d-b)*(l-a)/(c-a);break}}
+  const a=Math.floor(e),f=e-a,mo=enhMO(a,'crit','ring')*(1-f)+enhMO(a+1,'crit','ring')*f,x=2*(3.5+l*.1)*RAR_M[3]*mo/100+l/3*.008/3;
+  const fo=1+.8*Math.min(1,.1+x),fn=1+.8*Math.min(1,.07*(1+x));return CC_MEMO[l]=fo/fn}/* 기준: 전설 목걸이·반지 둘 다 치명타 옵션(평균값) · 기준 강화 경로 · 균형 스탯 */
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
@@ -3196,7 +3202,7 @@ function hurt(e,amt,quiet,so){
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
   const crit=(!quiet||quiet>=2)&&Math.random()<critCh()+(so?so.crit:0);
-  const v=Math.max(1,Math.round(amt*(crit?1.8:1)*rand(.9,1.1)));
+  const v=Math.max(1,Math.round(amt*(crit?1.8:1)*((!quiet||quiet>=2)&&critNew()?critComp(S.lv):1)*rand(.9,1.1)));/* v445 시험: 레벨 보정은 치명타 판정을 받는 타격에만(치명타 없는 지속·장판 피해는 원래도 손실이 없으므로 제외) */
   e.hp-=v;e.flash=.08;
   if(!quiet||quiet===2||Math.random()<.35)dmgNum(/* v200: quiet 2=치명타O·숫자 항상, 3=치명타O·숫자 35% */e.pos,v,crit?'crit':'',e.h);
   if(e.boss)e.aggro=true;
@@ -4129,7 +4135,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v444';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v445';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4615,7 +4621,7 @@ function dpsHtml(id){const d=skillDps(id);
 function renderMenu(){
   const c=C();
   let h=`<div class="shead"><div><div class="chap">${c.en} · Lv ${S.lv}</div><h2>${c.n} 스킬</h2></div><button class="close" id="mClose">닫기</button></div>
-  ${S.test?`<div class="ptsline" style="background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">테스트 캐릭터 · 강화를 − 로 내리면 포인트·정수가 돌아옵니다 · 저장 안 됨</span><button class="ghost" id="tGod" style="padding:6px 10px;font-size:12px">체력 무한 ${S.testGod?'끄기':'켜기'}</button><button class="ghost" id="tMp" style="padding:6px 10px;font-size:12px">마나 무한 ${S.testMp?'끄기':'켜기'}</button></div>`:''}
+  ${S.test?`<div class="ptsline" style="background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">테스트 캐릭터 · 강화를 − 로 내리면 포인트·정수가 돌아옵니다 · 저장 안 됨</span><button class="ghost" id="tGod" style="padding:6px 10px;font-size:12px">체력 무한 ${S.testGod?'끄기':'켜기'}</button><button class="ghost" id="tMp" style="padding:6px 10px;font-size:12px">마나 무한 ${S.testMp?'끄기':'켜기'}</button><button class="ghost" id="tCrit" style="padding:6px 10px;font-size:12px">새 치명타 공식 ${S.critNew?'끄기':'켜기'}</button></div>`:''}
   ${S.pending?`<div class="ptsline" style="background:#2a2118;border:1px solid var(--ember);border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">고르지 않은 레벨업 강화 <b>${S.pending}</b>회</span><button class="primary" id="mLvNow" style="padding:8px 12px;font-size:13px">지금 고르기</button></div>`:''}
 
   <div><div class="tag" style="margin-bottom:8px">레벨업 시 자동 강화</div><div class="seg"><button data-ag="" class="${S.autoGem?'':'on'}">끄기</button><button data-ag="bal" class="${S.autoGem==='bal'?'on':''}">균형</button>${gemsFor(c.skills[0]).map(g=>`<button data-ag="g:${g}" class="${S.autoGem==='g:'+g?'on':''}">${GEMS[g].n}</button>`).join('')}</div>
@@ -4655,6 +4661,7 @@ $('sheet').addEventListener('click',e=>{
   if(b.dataset.gostage){closeMenu();openStage();return}
   if(b.id==='tGod'){S.testGod=!S.testGod;renderMenu();return}
   if(b.id==='tMp'){S.testMp=!S.testMp;renderMenu();return}
+  if(b.id==='tCrit'){S.critNew=!S.critNew;refreshMax();toast('새 치명타 공식',S.critNew?`켜짐 · 치명타 확률 ${Math.round(critCh()*100)}% · 레벨 보정 ×${critComp(S.lv).toFixed(3)}`:'꺼짐 (기존 공식)');renderMenu();return}
   if(b.dataset.d&&S.test){const [s_,g]=b.dataset.d.split(',');if(gl(s_,g)>0){S.sk[s_][g]--;S.skp[s_]=(S.skp[s_]||0)+1;refreshMax();renderMenu()}return}
   if(b.dataset.d2&&S.test){const g=b.dataset.d2,L=g2(g);if(L>0){S.sk2[g]=L-1;S.ess+=g2Cost(g,L-1);S.gold+=g2Gold(g,L-1);renderMenu()}return}
   if(b.dataset.a2){const g=b.dataset.a2,L=g2(g),c=g2Cost(g,L);if(done1(GEMS2[g].s)&&L<g2Max(g)&&(S.ess||0)>=c&&S.gold>=g2Gold(g,L)){S.ess-=c;S.gold-=g2Gold(g,L);S.sk2[g]=L+1;feed(`${GEMS2[g].n} Lv ${L+1}`,GEMS2[g].c);ringFx(P.pos,2.4,0xff5a3a,.5);save();renderMenu()}return}
