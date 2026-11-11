@@ -916,7 +916,7 @@ const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 const STAT_PER_LV=1;
 const STATS={
   str:{n:'힘',en:'STR',c:'#ff6a6a',d:['최대 생명력 +2.7%','생명력 재생 +0.15%/초']},
-  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4% (신발 포함 상한 +150%)','치명타 확률 합 +0.27% (기본 7%에 곱해짐)']},
+  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4% (신발 포함 상한 +150%)','치명타 확률 합 +2.3% (기본 7%에 곱해짐)']},
   int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.15%/초']}
 };
 /* 스킬 1 = 다수 공격용, 스킬 2 = 보스(단일 대상) 공격용 */
@@ -1193,12 +1193,12 @@ function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
 const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
 const CD_U=1.6,CD_F=.25,CD_T=275.8,CD_T0=123.2,/* v370: 쿨타임 곡선 시정수 123.2→275.8 — 투구 35강(특수 11%, 쿨감 358%) 0.4초 · 40강 0.315초. 피해 보정(nc/old)은 이전 곡선(CD_T0) 기준으로 유지해 피해량은 그대로, 쿨타임만 변경 *//* v275: 110 스펙(358%) 0.28초 · 수렴 0.25초 */cdCurve=(u,x,T=CD_T)=>CD_F+Math.max(0,u-CD_F)*Math.exp(-Math.max(0,x)/T);/* v274: 스킬 쿨타임 곡선 — u(가속 반영 기본) → 쿨감 x%에서 0.35+(u-0.35)e^(-x/162.9). u=.8일 때 91.7%→0.51초 · 358%→0.28초 · ∞→0.25초 */
 const critNew=()=>true;/* v445 시험 → v446 전체 적용: 치명타 확률 = 기본 7% × (1 + 치명타 확률 합) + 치명타 판정 타격에 레벨별 피해 보정 */
-const critX=()=>gear().crit/100+.008/3*stN('agi');
+const AGI_CRIT=.023;/* v448: 민첩 1당 치명타 확률 합 +2.3% (기존 0.267%) */const critX=()=>gear().crit/100+AGI_CRIT*stN('agi');
 const critCh=()=>critNew()?.07*(1+critX()):.1+critX();
 const CC_PATH=[[31,0],[45,10],[60,20],[75,25],[90,30],[105,33],[120,35],[135,38],[150,40]],CC_MEMO={};
 function critComp(l){if(CC_MEMO[l])return CC_MEMO[l];const P=CC_PATH;let e=0;if(l>31){e=40;for(let i=1;i<P.length;i++)if(l<=P[i][0]){const[a,b]=P[i-1],[c,d]=P[i];e=b+(d-b)*(l-a)/(c-a);break}}
-  const a=Math.floor(e),f=e-a,mo=enhMO(a,'crit','ring')*(1-f)+enhMO(a+1,'crit','ring')*f,x=2*(3.5+l*.1)*RAR_M[3]*mo/100+l/3*.008/3;
-  const fo=1+.8*Math.min(1,.1+x),fn=1+.8*Math.min(1,.07*(1+x));return CC_MEMO[l]=fo/fn}/* 기준: 전설 목걸이·반지 둘 다 치명타 옵션(평균값) · 기준 강화 경로 · 균형 스탯 */
+  const a=Math.floor(e),f=e-a,mo=enhMO(a,'crit','ring')*(1-f)+enhMO(a+1,'crit','ring')*f,g=2*(3.5+l*.1)*RAR_M[3]*mo/100,xo=g+l/3*.008/3,x=g+l/3*.008/3;/* 보정 기준은 기존 민첩 계수(0.267%) — v448 민첩 상향분은 보정에 흡수하지 않고 그대로 이득 */
+  const fo=1+.8*Math.min(1,.1+xo),fn=1+.8*Math.min(1,.07*(1+x));return CC_MEMO[l]=fo/fn}/* 기준: 전설 목걸이·반지 둘 다 치명타 옵션(평균값) · 기준 강화 경로 · 균형 스탯 */
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
@@ -4135,7 +4135,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v447';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v448';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
