@@ -1037,7 +1037,7 @@ const pityCap=L=>{const r=enhRate(L);return r>=1?1:Math.round(2/r)},pityN=k=>{co
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
 const W30=30,W35=35,W40=40,W45=45,esum=(L,sl)=>{if(sl!=='weapon'||L<=W30)return enhSum(L);const a=enhSum(W30),m=Math.min(L,W35);let v=a+(enhSum(m)-a)*.85;if(L>W35)v+=(enhSum(Math.min(L,W40))-enhSum(W35))*.65;if(L>W40)v+=(enhSum(Math.min(L,W45))-enhSum(W40))*.55;if(L>W45)v+=(enhSum(L)-enhSum(W45))*.4;return v};/* v262: 35~40강 65% · 40~45강 55% · 45강 이후 40% *//* v259: 무기 35강 이후 단계별 상승량 절반 → v260: 30→35강 70% · 35강 이후 40% → v261: 30→35강 85% · 35강 이후(40강 이후 포함 전 구간) 65% */
-const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*esum(L,sl)*(ENH_HALF[k]||1)*wk(sl);const ENH_HALF={fdmg:.5,spd:.5,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
+const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>1+ENH_O*esum(L,sl)*(ENH_HALF[k]||1)*wk(sl);const ENH_HALF={fdmg:.5,spd:.5,mcr:.25,mreg:.25,crit:.8/* v453: 장신구 치명타 확률 강화 상승치 −20% */};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
   for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L,k),mo=enhMO(L,undefined,k),b=it.base*mb,bh=it.base*(1+(mb-1)*ENH_HM),moh=1+(mo-1)*ENH_HM;
@@ -1203,7 +1203,7 @@ const AGI_CRIT=.023;/* v448: 민첩 1당 치명타 확률 합 +2.3% (기존 0.26
 const critCh=()=>critNew()?.07*(1+critX()):.1+critX();
 const CC_PATH=[[31,0],[45,10],[60,20],[75,25],[90,30],[105,33],[120,35],[135,38],[150,40]],CC_MEMO={};
 function critComp(l){if(CC_MEMO[l])return CC_MEMO[l];const P=CC_PATH;let e=0;if(l>31){e=40;for(let i=1;i<P.length;i++)if(l<=P[i][0]){const[a,b]=P[i-1],[c,d]=P[i];e=b+(d-b)*(l-a)/(c-a);break}}
-  const a=Math.floor(e),f=e-a,mo=enhMO(a,'crit','ring')*(1-f)+enhMO(a+1,'crit','ring')*f,g=2*(3.5+l*.1)*RAR_M[3]*mo/100,xo=g+l/3*.008/3,x=g+l/3*.008/3;/* 보정 기준은 기존 민첩 계수(0.267%) — v448 민첩 상향분은 보정에 흡수하지 않고 그대로 이득 */
+  const a=Math.floor(e),f=e-a,mo=enhMO(a,'ccref','ring')*(1-f)+enhMO(a+1,'ccref','ring')*f/* v453: 보정 기준은 하향 전 상승치 그대로(하향분이 보정으로 되돌아오지 않게) */,g=2*(3.5+l*.1)*RAR_M[3]*mo/100,xo=g+l/3*.008/3,x=g+l/3*.008/3;/* 보정 기준은 기존 민첩 계수(0.267%) — v448 민첩 상향분은 보정에 흡수하지 않고 그대로 이득 */
   const fo=1+.8*Math.min(1,.1+xo),fn=1+.8*Math.min(1,.07*(1+x));return CC_MEMO[l]=fo/fn}/* 기준: 전설 목걸이·반지 둘 다 치명타 옵션(평균값) · 기준 강화 경로 · 균형 스탯 */
 const dr=()=>{const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
@@ -4170,7 +4170,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v452';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v453';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
