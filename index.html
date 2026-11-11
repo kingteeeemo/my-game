@@ -1067,7 +1067,7 @@ function migrate(s){
   for(const p of s.picks||[]){if(p.k==='gem'){s.sk[p.s]=s.sk[p.s]||{};s.sk[p.s][p.g]=Math.min(GMAX,(s.sk[p.s][p.g]||0)+1)}else if(sk0)s.skp[sk0]=(s.skp[sk0]||0)+1}
   delete s.picks;
 }
-function reconcile(s){if(s&&s.lvConv&&s.lvConv.tier&&!s.lvConv.v438){/* v438: v437에서 낮췄던 해금(최고 위험도·관문)을 환산 전 값으로 되돌림 — 계정 쪽은 acctApply에서 */const t0=s.lvConv.tier[0];s.lvConv.v438=1;s.lvConv.rs=1;s.clr=0;if((s.maxTier||0)<t0)s.maxTier=t0;const G=new Set(s.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);s.gates=[...G].sort((x,y)=>x-y)}/* v435: 만렙 150을 넘긴 세이브(만렙 제한이 없던 v108~v133에서 205레벨 등)는 그 버전 곡선으로 쌓은 누적 경험치를 지금 곡선으로 환산한 레벨로 조정(205 → 113).
+function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;s.lvConv.told2=0}/* v447: 레벨 환산된 세이브(205→113)는 위험도 귀속을 한 번 더 해제 — 해금 범위 안에서 자유 이동, 다시 클리어하면 귀속 */if(s&&s.lvConv&&s.lvConv.tier&&!s.lvConv.v438){/* v438: v437에서 낮췄던 해금(최고 위험도·관문)을 환산 전 값으로 되돌림 — 계정 쪽은 acctApply에서 */const t0=s.lvConv.tier[0];s.lvConv.v438=1;s.lvConv.rs=1;s.clr=0;if((s.maxTier||0)<t0)s.maxTier=t0;const G=new Set(s.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);s.gates=[...G].sort((x,y)=>x-y)}/* v435: 만렙 150을 넘긴 세이브(만렙 제한이 없던 v108~v133에서 205레벨 등)는 그 버전 곡선으로 쌓은 누적 경험치를 지금 곡선으로 환산한 레벨로 조정(205 → 113).
    초과분만큼 스탯·레벨업 강화 선택 회수 · 부위 강화 단계는 레벨-강화 기준 경로 비율로 · 아이템 레벨·수치는 새 레벨로 · 골드는 레벨 비율로(계정 골드, acctApply에서 1회) */if(s&&s.lv>LV_MAX){try{lvConvert(s)}catch(e){s.lv=LV_MAX;s.xp=0}}if(s&&s.noMaw&&s.lv<=LV_MAX)delete s.noMaw;/* v246: 만렙 150 확장 — 예전에 120을 넘겨 막혔던 세이브도 150 이하면 심연의 아귀 도전 가능 */if(s&&s.lv>LV_MAX)s.noMaw=1;if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=11;/* v105: 상급 각인의 서 10% → 11% */if(s&&!s.tut)s.tut=s.lv>=2?{intro:1}:{};/* v93: 기존 세이브는 첫 안내 생략 */if(s&&s.lv>=ESS_LV)s.n31=1;if(s&&s.ch>=4)s.n5=1;/* v70: 이미 31레벨 이상인 세이브는 안내 창 생략 */
   if(!s.cls)return;
   /* v118: 불러오는 세이브 자신의 주력 스킬(s.main)로 판정. 전에는 전역 S.main(불러오기 전엔 비어 있음)을 써서 두 번째 주력 스킬(대지 분쇄·화살비·연쇄 번개)의 강화가 재접속 때마다 지워졌음 */
@@ -4135,7 +4135,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v446';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v447';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5318,6 +5318,7 @@ function enterGame(){
   else if(S.ch===LAST&&S.phase===5)toast(`${NCH}장 · 최종 결전 준비`,'성장한 뒤 「최종 결전 재도전」을 누르세요');
   else toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?`길 끝 제단의 ${CH[S.ch].boss}를 처치하라`:`위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}`);
   stageBanner();
+  if(S.lvConv&&S.lvConv.told&&S.lvConv.told2===0){S.lvConv.told2=1;save();later(1.6,()=>toast('위험도 이동 제한 해제','해금된 위험도 안에서 자유롭게 이동할 수 있습니다 · 다시 클리어하면 그 단계에 귀속됩니다','#ffb070'))}/* v447 */
   if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 위험도는 해금 범위 안에서 자유 이동(다시 클리어하면 귀속) · 강화 단계·장비·골드·잿불 정수 강화도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
 }
 
