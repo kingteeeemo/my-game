@@ -915,7 +915,7 @@ const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
 /* v131 2차 강화 후 피해 증가(정수): 단계별 증가량이 정수 요구량에 따라 커짐 — 처음 +1%, (요구 정수/첫 요구량)^0.6 배. 마나는 피해 1%당 +0.5. 골드 전 구간 ×1.3 */
 /* v134: v131 변경 원복 — 단계당 +4% 고정, 마나 단계당 +2, 골드 30000+15000×단계 */
-const INF_D=.04,INF_GR=Math.pow(2e10/3e4,1/60),infDmg=L=>INF_D*L,infMpAdd=L=>2*L,infCost=L=>({e:Math.max(1,Math.round((30+10*L)/4)),g:Math.max(1,Math.round(3000*Math.pow(INF_GR,L)))/* v387: 0단계 30,000G → 60단계(61단계로 올리는 비용) 200억G 지수 곡선 */}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
+const INF_D=.04,INF_GR=Math.pow(2e10/3e4,1/60),infDmg=L=>INF_D*L,infMpAdd=L=>2*L,infCost=L=>({e:Math.max(1,Math.round((30+10*L)/4)),g:Math.max(1,Math.round(3000*.6/* v460: 골드 −40% */*Math.pow(INF_GR,L)))/* v387: 0단계 30,000G → 60단계(61단계로 올리는 비용) 200억G 지수 곡선 */}),g2Done=s=>gems2For(s).every(g=>g2(g)>=g2Max(g));
 const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 /* 스탯: 레벨업마다 3포인트, 언제든 되돌리기 가능 */
 /* 스탯: 레벨업마다 1포인트, 되돌리기 없음 */
@@ -4171,7 +4171,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v459';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v460';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
