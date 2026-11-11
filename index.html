@@ -1037,11 +1037,12 @@ const pityCap=L=>{const r=enhRate(L);return r>=1?1:Math.round(2/r)},pityN=k=>{co
 const ENH_SUM=[0];const enhSum=L=>{while(ENH_SUM.length<=L){const i=ENH_SUM.length-1;ENH_SUM.push(ENH_SUM[i]+ENH_RET*Math.pow(1/enhRate(i),ENH_PW))}return ENH_SUM[L]};
 let ENH_WK=.57;/* v226: 무기 강화 상승량 배율 — 무기 +30 DPS를 약 절반으로 */const wk=sl=>sl==='weapon'?ENH_WK:1;
 const W30=30,W35=35,W40=40,W45=45,esum=(L,sl)=>{if(sl!=='weapon'||L<=W30)return enhSum(L);const a=enhSum(W30),m=Math.min(L,W35);let v=a+(enhSum(m)-a)*.85;if(L>W35)v+=(enhSum(Math.min(L,W40))-enhSum(W35))*.65;if(L>W40)v+=(enhSum(Math.min(L,W45))-enhSum(W40))*.55;if(L>W45)v+=(enhSum(L)-enhSum(W45))*.4;return v};/* v262: 35~40강 65% · 40~45강 55% · 45강 이후 40% *//* v259: 무기 35강 이후 단계별 상승량 절반 → v260: 30→35강 70% · 35강 이후 40% → v261: 30→35강 85% · 35강 이후(40강 이후 포함 전 구간) 65% */
-const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>k==='crit'?critMO(L):1+ENH_O*esum(L,sl)*(ENH_HALF[k]||1)*wk(sl)*(k==='mreg'?mregEM(L):1);
+const enhMB=(L,sl)=>1+ENH_B*esum(L,sl)*wk(sl),enhMO=(L,k,sl)=>k==='crit'?critMO(L):k==='mreg'?mregMO(L):1+ENH_O*esum(L,sl)*(ENH_HALF[k]||1)*wk(sl);
 /* v469: 장신구 치명타 확률 강화 곡선 — 옵션 21% 기준 강화 1회 증가폭 1+49×(L/40)^3.5 (저단 +1에서 고르게 올라 40강 +50), 40강 이후 +50 고정. 옵션 수치에 비례(배율) */
 /* v470: 40강 증가폭 +40, 이후 +40 고정 (1+39×(L/40)^3.5). critMO50 = v469 곡선(+50) — 레벨 보정 계산용으로만 유지(이번 하향분은 보정하지 않음) */
 const critCurve=top=>{const a=[0];for(let L=1;L<=40;L++)a.push(a[L-1]+1+(top-1)*Math.pow(L/40,3.5));return L=>{L=Math.max(0,L);const i=Math.min(40,Math.floor(L)),f=L-i;const s=L>40?a[40]+top*(L-40):a[i]+(i<40?(a[i+1]-a[i])*f:0);return 1+s/21}};
-const critMO=critCurve(40),critMO50=critCurve(50);const mregEM=L=>1-.696*Math.max(0,Math.min(1,(L-25)/17));/* v468: 마나 재생 옵션 강화 상승분 — 25강부터 줄어 42강 상승분 ×0.304(합계 약 1/3) */const critEM=L=>1-.65*Math.max(0,Math.min(1,(L-25)/15));/* v455: 장신구 치명타 확률 강화 상승분 — 25강부터 줄어 40강 이상 ×0.35 (하향분은 레벨 보정이 DPS −4.5%까지 메움) */const ENH_HALF={fdmg:.5,spd:.32/* v457: 이동 속도 강화 상승치 v456보다 추가 −20% (원래 .5의 64%) */,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
+const critMO=critCurve(40),critMO50=critCurve(50);/* v471: 마나 재생 옵션 강화 — 증가폭을 강화 성공률 구간에 묶음(기본 11% 기준 %p): 성공률 5% 구간 +3 · 4% 구간 +4 · 3% 구간 +5, 그 위는 1+2×((100-성공률)/95)^5 로 +1에서 부드럽게 상승. 실제 값은 옵션 수치에 비례(배율 1+누적/11) */
+const mregCum=[0],mregInc=L=>{const r=enhRate(L-1)*100;return r<=3.01?5:r<=4.01?4:r<=5.01?3:Math.round((1+2*Math.pow((100-r)/95,5))*10)/10},mregMO=L=>{L=Math.max(0,L);const i=Math.floor(L);while(mregCum.length<=i)mregCum.push(mregCum[mregCum.length-1]+mregInc(mregCum.length));const f=L-i;return 1+(mregCum[i]+(f?mregInc(i+1)*f:0))/11};const critEM=L=>1-.65*Math.max(0,Math.min(1,(L-25)/15));/* v455: 장신구 치명타 확률 강화 상승분 — 25강부터 줄어 40강 이상 ×0.35 (하향분은 레벨 보정이 DPS −4.5%까지 메움) */const ENH_HALF={fdmg:.5,spd:.32/* v457: 이동 속도 강화 상승치 v456보다 추가 −20% (원래 .5의 64%) */,mcr:.25,mreg:.25};/* v254: 반지 마나 소모 감소·목걸이 마나 재생은 강화 상승치 1/4 (재생·소모가 최대 마나 비례가 되어 두 옵션의 배율이 곧 마나 유지율 — 지나치게 빨리 무한 마나가 되지 않도록) *//* v202: 최종 피해·이동 속도·스킬 마나 소모 감소는 강화 상승치 절반 */
 const ev=(v,m)=>{const x=v*m;return Math.abs(x)>=10?Math.round(x):Math.round(x*10)/10};
 function gear(){const g={wdmg:0,armor:0,dmgPct:0,crit:0,cdr:0,leech:0,spd:0,regen:0,hp:0,mp:0,mreg:0,mcr:0,fdmg:0};
   for(const k of EQS){const it=S.eq&&S.eq[k];if(!it)continue;const L=enhL(k),mb=enhMB(L,k),mo=enhMO(L,undefined,k),b=it.base*mb,bh=it.base*(1+(mb-1)*ENH_HM),moh=1+(mo-1)*ENH_HM;
@@ -1188,7 +1189,7 @@ const heroMax=()=>Math.round((100+(S.lv-1)*14)*C().hp*(1+.08/3*stN('str'))+gear(
 const heroMp=()=>Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·지능)으로 얻는 초당 재생량 +5~30% */
-const mpRegen=()=>P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(1+gear().mreg/100);
+const mpRegen=()=>P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(.4+gear().mreg/100)/* v471: 1+ → 0.4+ */;
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
 /* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
 const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65+(t>90?.1*(t-90):0)))};/* v385: 위험도 90부터 냉기 증가량 ×1.1 (90 이후 증가분만 10% 가파르게, 90에서는 연속) */
@@ -4178,7 +4179,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v470';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v471';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
