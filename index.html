@@ -1159,7 +1159,10 @@ function lvConvert(s){const o=s.lv;let tot=Math.max(0,s.xp||0);for(let l=1;l<o;l
   for(const it of [...(s.inv||[]),...Object.values(s.eq||{})]){if(!it||!(it.ilvl>n))continue;const L0=it.ilvl;
     it.base=Math.max(1,Math.round(it.base*itemBase(it.slot,n)/itemBase(it.slot,L0)));
     for(const q of it.opts||[]){const op=OPT[q.k];if(!op||op.sp)continue;q.v=Math.max(1,Math.round(q.v*optMean(q.k,n)/optMean(q.k,L0)))}it.ilvl=n}
-  s.lvConv={from:o,to:n,gr:n/o,er,eb,ea:{...s.enh},st:ex*STAT_PER_LV}}
+  /* v436: 잿불 정수 스킬 강화 — 무한 피해 증가는 지금까지 넣은 정수 누적을 골드와 같은 레벨 비율(n/o)로 줄여 그만큼 다시 올린 단계로, 보유 정수도 같은 비율 */
+  const gr=n/o,d0=s.sk2dmg||0;let eTot=0;for(let l=0;l<d0;l++)eTot+=infCost(l).e;let eB=eTot*gr,d1=0;while(d1<d0&&eB>=infCost(d1).e){eB-=infCost(d1).e;d1++}s.sk2dmg=d1;
+  const es0=s.ess||0;s.ess=Math.floor(es0*gr);
+  s.lvConv={from:o,to:n,gr,er,eb,ea:{...s.enh},st:ex*STAT_PER_LV,dmg:[d0,d1],ess:[es0,s.ess]}}
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*(lv<=70?Math.pow(1.01,lv-50):Math.pow(1.01,20)*(lv<=90?Math.pow(1.005,lv-70):Math.pow(1.005,20)*Math.pow(1.003,lv-90)));/* v68: 30lv 이후 레벨당 +2.3% 복리 · v260: 50lv 이후 +1% · 70lv 이후 +0.5% · 90lv 이후 +0.3% (복리) */
 const CURSE_FD=.8,curseOn=()=>!!(S.duel&&S.duel.uber&&!inTown),curseName=()=>S.duel&&S.duel.b==='maw'?'심연의 저주':'잿불의 저주';/* v227: 우버 결투 — 입장 시 저주 발동, 최종 피해 −20% */
 const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)*(curseOn()&&!dpsRaw?CURSE_FD:1)};
@@ -4118,7 +4121,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v435';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v436';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5304,7 +5307,7 @@ function enterGame(){
   else if(S.ch===LAST&&S.phase===5)toast(`${NCH}장 · 최종 결전 준비`,'성장한 뒤 「최종 결전 재도전」을 누르세요');
   else toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?`길 끝 제단의 ${CH[S.ch].boss}를 처치하라`:`위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}`);
   stageBanner();
-  if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 강화 단계·장비·골드도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
+  if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 강화 단계·장비·골드·잿불 정수 강화도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
 }
 
 let storyProg=0;
