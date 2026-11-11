@@ -1066,7 +1066,7 @@ function migrate(s){
   for(const p of s.picks||[]){if(p.k==='gem'){s.sk[p.s]=s.sk[p.s]||{};s.sk[p.s][p.g]=Math.min(GMAX,(s.sk[p.s][p.g]||0)+1)}else if(sk0)s.skp[sk0]=(s.skp[sk0]||0)+1}
   delete s.picks;
 }
-function reconcile(s){/* v435: 만렙 150을 넘긴 세이브(만렙 제한이 없던 v108~v133에서 205레벨 등)는 그 버전 곡선으로 쌓은 누적 경험치를 지금 곡선으로 환산한 레벨로 조정(205 → 113).
+function reconcile(s){if(s&&s.lvConv&&s.lvConv.tier&&!s.lvConv.v438){/* v438: v437에서 낮췄던 해금(최고 위험도·관문)을 환산 전 값으로 되돌림 — 계정 쪽은 acctApply에서 */const t0=s.lvConv.tier[0];s.lvConv.v438=1;s.lvConv.rs=1;s.clr=0;if((s.maxTier||0)<t0)s.maxTier=t0;const G=new Set(s.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);s.gates=[...G].sort((x,y)=>x-y)}/* v435: 만렙 150을 넘긴 세이브(만렙 제한이 없던 v108~v133에서 205레벨 등)는 그 버전 곡선으로 쌓은 누적 경험치를 지금 곡선으로 환산한 레벨로 조정(205 → 113).
    초과분만큼 스탯·레벨업 강화 선택 회수 · 부위 강화 단계는 레벨-강화 기준 경로 비율로 · 아이템 레벨·수치는 새 레벨로 · 골드는 레벨 비율로(계정 골드, acctApply에서 1회) */if(s&&s.lv>LV_MAX){try{lvConvert(s)}catch(e){s.lv=LV_MAX;s.xp=0}}if(s&&s.noMaw&&s.lv<=LV_MAX)delete s.noMaw;/* v246: 만렙 150 확장 — 예전에 120을 넘겨 막혔던 세이브도 150 이하면 심연의 아귀 도전 가능 */if(s&&s.lv>LV_MAX)s.noMaw=1;if(s&&s.scrolls)for(const x of s.scrolls)if(x.v===10)x.v=11;/* v105: 상급 각인의 서 10% → 11% */if(s&&!s.tut)s.tut=s.lv>=2?{intro:1}:{};/* v93: 기존 세이브는 첫 안내 생략 */if(s&&s.lv>=ESS_LV)s.n31=1;if(s&&s.ch>=4)s.n5=1;/* v70: 이미 31레벨 이상인 세이브는 안내 창 생략 */
   if(!s.cls)return;
   /* v118: 불러오는 세이브 자신의 주력 스킬(s.main)로 판정. 전에는 전역 S.main(불러오기 전엔 비어 있음)을 써서 두 번째 주력 스킬(대지 분쇄·화살비·연쇄 번개)의 강화가 재접속 때마다 지워졌음 */
@@ -1126,7 +1126,7 @@ function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}
     a.gates.sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
   if(!a.g10){a.g10=1;a.gold=Math.round((a.gold||0)/10);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v411: 기존 계정 골드 1/10 (새로 만든 계정도 같은 표식) */
   if(!Array.isArray(a.gates))a.gates=[];if(!a.bclr||typeof a.bclr!=='object'){a.bclr={};const g={20:'kn',40:'mn',50:'ku',60:'mu'};for(const t in g)if((a.maxTier||0)>+t)a.bclr[g[t]]=1;/* v369: 이미 넘어선 봉인은 처치한 것으로 */try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}if((a.maxTier||0)>60&&!a.bclr.mu){a.bclr.mu=1;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v374: 우버 아귀 봉인 70→60 — 이미 61 이상이면 해제 처리 */return a}
-function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;const T=s.lvConv.tier&&s.lvConv.tier[1];if(T){if((a.maxTier||0)>T)a.maxTier=T;a.gates=(a.gates||[]).filter(g=>g<=T)}try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
+function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&s.lvConv.rs){delete s.lvConv.rs;const t0=s.lvConv.tier[0];if((a.maxTier||0)<t0)a.maxTier=t0;const G=new Set(a.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);a.gates=[...G].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v438 */if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
 function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);a.bclr={...a.bclr,...(S.bclr||{})};try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
 function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
@@ -1162,10 +1162,10 @@ function lvConvert(s){const o=s.lv;let tot=Math.max(0,s.xp||0);for(let l=1;l<o;l
   /* v436: 잿불 정수 스킬 강화 — 무한 피해 증가는 지금까지 넣은 정수 누적을 골드와 같은 레벨 비율(n/o)로 줄여 그만큼 다시 올린 단계로, 보유 정수도 같은 비율 */
   const gr=n/o,d0=s.sk2dmg||0;let eTot=0;for(let l=0;l<d0;l++)eTot+=infCost(l).e;let eB=eTot*gr,d1=0;while(d1<d0&&eB>=infCost(d1).e){eB-=infCost(d1).e;d1++}s.sk2dmg=d1;
   const es0=s.ess||0;s.ess=Math.floor(es0*gr);
-  /* v437: 위험도 — 이 캐릭터가 클리어한/있던 최고 위험도에 같은 레벨 비율(n/o)을 곱한 값으로 클리어 기록·현재 위험도·해금을 낮춤(클리어 기록이 clr-3 아래로 못 내려가게 묶어서 기존 스펙으로는 진행 불가였음) */
+  /* v438: 위험도 — 해금(최고 위험도·관문)은 그대로 두고, 클리어 귀속(clr-3 하한)만 1회 해제해 해금 범위 안에서 자유롭게 이동. 다시 클리어하면 그 단계에 귀속(기존 규칙). 시작 위치는 레벨 비율(n/o)로 낮춘 위험도 */
   const t0=Math.max(s.clr||0,s.tier||0,s.maxTier||0),T=Math.max(1,Math.floor(t0*gr));
-  if(s.clr>0)s.clr=0;/* 클리어 귀속(clr-3 하한)도 풀어 해금 범위 안에서 스펙에 맞는 위험도를 직접 고르게 — 다음 클리어부터 다시 기록 */if((s.tier||0)>T){s.tier=T;s.tierKills=0}if((s.maxTier||0)>T)s.maxTier=T;if(Array.isArray(s.gates))s.gates=s.gates.filter(g=>g<=T);
-  s.lvConv={from:o,to:n,gr,er,eb,ea:{...s.enh},st:ex*STAT_PER_LV,dmg:[d0,d1],ess:[es0,s.ess],tier:[t0,T]}}
+  if(s.clr>0)s.clr=0;if((s.tier||0)>T){s.tier=T;s.tierKills=0}
+  s.lvConv={from:o,to:n,gr,er,eb,ea:{...s.enh},st:ex*STAT_PER_LV,dmg:[d0,d1],ess:[es0,s.ess],tier:[t0,T],v438:1}}
 const lvBase=lv=>lv<=30?10+3*lv:lv<=50?100*Math.pow(1.023,lv-30):100*Math.pow(1.023,20)*(lv<=70?Math.pow(1.01,lv-50):Math.pow(1.01,20)*(lv<=90?Math.pow(1.005,lv-70):Math.pow(1.005,20)*Math.pow(1.003,lv-90)));/* v68: 30lv 이후 레벨당 +2.3% 복리 · v260: 50lv 이후 +1% · 70lv 이후 +0.5% · 90lv 이후 +0.3% (복리) */
 const CURSE_FD=.8,curseOn=()=>!!(S.duel&&S.duel.uber&&!inTown),curseName=()=>S.duel&&S.duel.b==='maw'?'심연의 저주':'잿불의 저주';/* v227: 우버 결투 — 입장 시 저주 발동, 최종 피해 −20% */
 const baseDmg=()=>{const g=gear();return (lvBase(S.lv)+g.wdmg)*C().dmg*(1+g.dmgPct/100)*(1+g.fdmg/100)*(curseOn()&&!dpsRaw?CURSE_FD:1)};
@@ -4124,7 +4124,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v437';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v438';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5310,7 +5310,7 @@ function enterGame(){
   else if(S.ch===LAST&&S.phase===5)toast(`${NCH}장 · 최종 결전 준비`,'성장한 뒤 「최종 결전 재도전」을 누르세요');
   else toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?`길 끝 제단의 ${CH[S.ch].boss}를 처치하라`:`위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}`);
   stageBanner();
-  if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 위험도 ${c.tier?c.tier[1]:''} · 강화 단계·장비·골드·잿불 정수 강화도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
+  if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 위험도는 해금 범위 안에서 자유 이동(다시 클리어하면 귀속) · 강화 단계·장비·골드·잿불 정수 강화도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
 }
 
 let storyProg=0;
