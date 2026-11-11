@@ -916,7 +916,7 @@ const gems2For=s=>Object.keys(GEMS2).filter(g=>GEMS2[g].s===s);
 const STAT_PER_LV=1;
 const STATS={
   str:{n:'힘',en:'STR',c:'#ff6a6a',d:['최대 생명력 +2.7%','생명력 재생 +0.15%/초']},
-  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 +1.4% (신발 포함 상한 +150%)','치명타 확률 합 +2.3% (기본 7%에 곱해짐)']},
+  agi:{n:'민첩',en:'AGI',c:'#9ad0ff',d:['이동 속도 합 +1.4% (많이 쌓일수록 덜 오름)','치명타 확률 합 +2.3% (기본 7%에 곱해짐)']},
   int:{n:'지능',en:'INT',c:'#8a9aff',d:['최대 마나 +2.7%','마나 재생 최대 마나의 +0.15%/초']}
 };
 /* 스킬 1 = 다수 공격용, 스킬 2 = 보스(단일 대상) 공격용 */
@@ -1183,11 +1183,11 @@ const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)retur
 const envDrain=()=>{if(inTown||S.ch<NCH)return 0;const tt=S.duel?S.duel.tier:S.tier;return coldRaw(Math.max(1,tt)-COLD_SH)*COLD_K};/* v58: 심연의 냉기 2배 */
 const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
-/* v131: 기본 이동 속도 -20%, 민첩+장비(신발) 이동 속도 상승 합계 상한 +150% (신속 물약은 별도) */
-const SPD_CAP=150,spdRaw=()=>1.4*stN('agi')+gear().spd;
-const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+Math.min(SPD_CAP,spdRaw())/100)*(P.hasteT>0?1.6:1);
-function spdCapNote(){const r=spdRaw();if(r<=0)return '';const cap=r>=SPD_CAP;
-  return `<p class="hint" style="margin:6px 0 0;${cap?'color:#ffb070':''}">이동 속도 상승(민첩+신발)은 합계 <b>+${SPD_CAP}%</b>가 상한입니다. 현재 +${Math.min(SPD_CAP,r).toFixed(1)}%${cap?` — 상한에 도달해 민첩을 더 찍거나 신발을 강화해도 이동 속도는 늘지 않습니다.${r>SPD_CAP?` (초과분 +${(r-SPD_CAP).toFixed(1)}%)`:''}`:'.'}</p>`}
+/* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
+const SPD_CAP=180,SPD_K=150,spdRaw=()=>1.4*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
+const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1);
+function spdCapNote(){const r=spdRaw();if(r<=0)return '';
+  return `<p class="hint" style="margin:6px 0 0">이동 속도 상승(민첩+신발 합계 +${r.toFixed(1)}%)은 많이 쌓일수록 덜 오릅니다. 실제 이동 속도 <b>+${spdEff(r).toFixed(1)}%</b> (최대 +${SPD_CAP}%에 가까워짐).</p>`}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
 const cdEff=x=>.2+.8*Math.pow(.5,Math.max(0,x)/40),cdMul=()=>Math.max(.2,cdEff(gear().cdr));
@@ -4135,7 +4135,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v448';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v449';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4705,8 +4705,8 @@ $('statSheet').addEventListener('click',e=>{
   if(b.dataset.tlv&&S.test){testSetLv(S.lv+ +b.dataset.tlv);renderStat();return}
   if(b.id==='sReset'){const spent=Object.values(S.stats).reduce((a,c)=>a+c,0);if(!spent)return;
     askConfirm('스탯 초기화',`${S.test?'':`골드 ${fmtG(RESET_G)}을 써서 `}찍은 포인트 ${spent}점을 모두 돌려받습니다. 레벨업 자동 배분은 꺼집니다.`,'초기화',()=>{if(!S.test&&S.gold<RESET_G)return;if(!S.test)S.gold-=RESET_G;S.statPts+=spent;S.stats={str:0,agi:0,int:0};S.autoStat=null;refreshMax();P.hp=Math.min(P.hp,P.mhp);P.mp=Math.min(P.mp,P.mmp);save();renderStat();toast('스탯 초기화',`포인트 ${spent}점을 돌려받았습니다`)});return}
-  if(b.dataset.sa&&S.statPts>0){S.stats[b.dataset.sa]++;S.statPts--;if(b.dataset.sa==='agi'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다 · 민첩은 치명타 확률만 오릅니다`)}
-  else if(b.dataset.sx&&S.statPts>0){S.stats[b.dataset.sx]+=S.statPts;S.statPts=0;if(b.dataset.sx==='agi'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다 · 민첩은 치명타 확률만 오릅니다`)}
+  if(b.dataset.sa&&S.statPts>0){S.stats[b.dataset.sa]++;S.statPts--;}
+  else if(b.dataset.sx&&S.statPts>0){S.stats[b.dataset.sx]+=S.statPts;S.statPts=0;}
   else if(b.dataset.auto!==undefined){S.autoStat=b.dataset.auto||null;spendAutoStat()}
   else return;
   refreshMax();save();renderStat();
@@ -5067,7 +5067,7 @@ const GREAT_P=.3;/* v429 강화 대성공 확률 → v443: 10% → 30% */
 function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=tkUse?tkGold(L,k):enhCost(L,k);if(L>=ENH_MAX||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
     if(auto)smAutoN++;const big=L>=29;/* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
-    const pn=pityN(k),pHit=pn+1>=pityCap(L);const nat=!tkUse&&!pHit&&Math.random()<enhRate(L);if(tkUse||pHit||nat){const great=big&&nat&&Math.random()<GREAT_P,nl=L+(great?2:1);/* v429: 강화 대성공 — 컷신 구간(29→30~)에서 성공 시 +2단계 · v443: 확률 30%, 확정 강화 주문서·천장 성공은 제외(일반 확률로 성공했을 때만) */S.enh[k]=nl;if(S.pity)delete S.pity[k];smithRes={ok:true,L:nl,t:Date.now(),cine:big,great};refreshMax();if(big){cine=1;enhCine(k,nl,true,()=>renderSmith(),auto,great)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${nl} ${great?'대성공 ✦ +2단계':'강화 성공'} · 자동`,great?'#ffd24a':'#7fe07a');if(great)feed(`✦ 강화 대성공! ${SLOTN[k]} +${L} → +${nl}`,'#ffd24a');if(k==='boots'&&spdRaw()>=SPD_CAP)toast('이동 속도 상한 도달',`이동 속도 상승은 +${SPD_CAP}%까지입니다`)}
+    const pn=pityN(k),pHit=pn+1>=pityCap(L);const nat=!tkUse&&!pHit&&Math.random()<enhRate(L);if(tkUse||pHit||nat){const great=big&&nat&&Math.random()<GREAT_P,nl=L+(great?2:1);/* v429: 강화 대성공 — 컷신 구간(29→30~)에서 성공 시 +2단계 · v443: 확률 30%, 확정 강화 주문서·천장 성공은 제외(일반 확률로 성공했을 때만) */S.enh[k]=nl;if(S.pity)delete S.pity[k];smithRes={ok:true,L:nl,t:Date.now(),cine:big,great};refreshMax();if(big){cine=1;enhCine(k,nl,true,()=>renderSmith(),auto,great)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${nl} ${great?'대성공 ✦ +2단계':'강화 성공'} · 자동`,great?'#ffd24a':'#7fe07a');if(great)feed(`✦ 강화 대성공! ${SLOTN[k]} +${L} → +${nl}`,'#ffd24a');}
     else{(S.pity=S.pity||{})[k]={L,n:pn+1};smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0,gr:smithRes.great?1:0});save();if(!cine)renderSmith()}
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
