@@ -305,15 +305,15 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .ecine .wait em{display:block;margin-top:10px;font:600 11px var(--ko);font-style:normal;color:#8a8090}
 .ecine .wait span{display:block;margin-top:4px;font:700 16px var(--ko);color:#e8dcd0}
 .ecine i.in{animation:ecSuck .9s ease-in infinite}
-.ecine.great{background:radial-gradient(circle at 50% 46%,rgba(255,214,120,.3),rgba(40,22,6,.7) 38%,rgba(6,4,8,.95) 64%)}/* v432: 대성공 — 기존 성공보다 한 단계 위, 번잡하지 않게: 금빛 빛줄기·고리 2겹·큰 후광·숫자 위 빛 한 번 훑기·천천히 떠오르는 금빛 불씨 */
-.ecine.great .rays{display:block;opacity:1;background:repeating-conic-gradient(from 0deg,rgba(255,222,140,.34) 0deg 5deg,transparent 5deg 15deg);animation:ecSpin 9s linear infinite}
-.ecine.great .ring{border-color:rgba(255,226,150,.75);box-shadow:0 0 26px rgba(255,210,120,.5);animation-duration:1.6s}.ecine.great .ring.r2{animation-delay:.8s}
-.ecine.great .halo{position:absolute;left:50%;top:46%;width:96vmin;height:96vmin;margin:-48vmin 0 0 -48vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,226,150,.32),rgba(255,190,90,.08) 45%,transparent 66%);animation:gsBreath 2.2s ease-in-out infinite alternate}
-.ecine.great .core small{color:#ffe08a;letter-spacing:.42em;font-size:14px;text-shadow:0 0 10px rgba(255,200,90,.6)}
-.ecine.great .core b{position:relative;font-size:clamp(72px,25vmin,168px);background:linear-gradient(105deg,#fff6d8 0%,#ffd86a 38%,#fffdf4 50%,#ffd86a 62%,#9a6418 100%);background-size:260% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(255,205,100,.65));animation:ecPop .7s cubic-bezier(.2,1.6,.4,1) both,gsSweep 1.3s .45s ease-in-out forwards}
-.ecine.great .core span{color:#fff1cc;font-size:24px;text-shadow:0 0 12px rgba(255,190,70,.7)}
-.ecine.great.auto .core{transform:scale(.72)}.ecine.great i{background:#ffe6a8;box-shadow:0 0 8px rgba(255,200,110,.8)}
-.ecine.great .mote{position:absolute;bottom:-4vmin;width:5px;height:5px;border-radius:50%;background:#ffe9b0;box-shadow:0 0 8px #ffc860;opacity:0;animation:gsMote var(--d) linear var(--w) infinite}
+.ecine.great{background:radial-gradient(circle at 50% 46%,rgba(90,255,190,.3),rgba(6,40,28,.7) 38%,rgba(6,4,8,.95) 64%)}/* v433: 에메랄드(일반 성공 금·보라, 실패 빨강과 구분) · v432: 대성공 — 기존 성공보다 한 단계 위, 번잡하지 않게: 금빛 빛줄기·고리 2겹·큰 후광·숫자 위 빛 한 번 훑기·천천히 떠오르는 금빛 불씨 */
+.ecine.great .rays{display:block;opacity:1;background:repeating-conic-gradient(from 0deg,rgba(90,255,190,.34) 0deg 5deg,transparent 5deg 15deg);animation:ecSpin 9s linear infinite}
+.ecine.great .ring{border-color:rgba(90,255,190,.75);box-shadow:0 0 26px rgba(80,240,170,.5);animation-duration:1.6s}.ecine.great .ring.r2{animation-delay:.8s}
+.ecine.great .halo{position:absolute;left:50%;top:46%;width:96vmin;height:96vmin;margin:-48vmin 0 0 -48vmin;border-radius:50%;background:radial-gradient(circle,rgba(90,255,190,.32),rgba(60,220,160,.08) 45%,transparent 66%);animation:gsBreath 2.2s ease-in-out infinite alternate}
+.ecine.great .core small{color:#9ff5d0;letter-spacing:.42em;font-size:14px;text-shadow:0 0 10px rgba(80,240,170,.6)}
+.ecine.great .core b{position:relative;font-size:clamp(72px,25vmin,168px);background:linear-gradient(105deg,#f0fff8 0%,#5fe8b0 38%,#ffffff 50%,#5fe8b0 62%,#0f6a4a 100%);background-size:260% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(80,240,170,.65));animation:ecPop .7s cubic-bezier(.2,1.6,.4,1) both,gsSweep 1.3s .45s ease-in-out forwards}
+.ecine.great .core span{color:#eafff5;font-size:24px;text-shadow:0 0 12px rgba(80,240,170,.7)}
+.ecine.great.auto .core{transform:scale(.72)}.ecine.great i{background:#9ff5d0;box-shadow:0 0 8px rgba(80,240,170,.8)}
+.ecine.great .mote{position:absolute;bottom:-4vmin;width:5px;height:5px;border-radius:50%;background:#b8ffe0;box-shadow:0 0 8px #40e0a0;opacity:0;animation:gsMote var(--d) linear var(--w) infinite}
 @keyframes gsBreath{from{opacity:.7;transform:scale(.95)}to{opacity:1;transform:scale(1.05)}}@keyframes gsSweep{from{background-position:100% 0}to{background-position:0 0}}
 @keyframes gsMote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.9}85%{opacity:.6}100%{opacity:0;transform:translate(var(--x),-80vh)}}
 .ecine.lose{background:radial-gradient(circle at 50% 46%,rgba(120,20,10,.45),rgba(6,3,4,.94) 62%)}
@@ -4101,7 +4101,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v432';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v433';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -5056,7 +5056,7 @@ function enhCine(k,L,ok,done,auto,great){enhCineOn=1;let over=0,revealed=0,canCl
   setTimeout(()=>{shake=Math.max(shake,.25)},T*1000-450);
   rv=()=>{
     if(over||revealed)return;revealed=1;clearTimeout(tm);setTimeout(()=>{canClose=1},250);if(auto)setTimeout(fin,great?3000:850*.7);/* v429: 대성공은 자동 강화에서도 약 3초 유지 · v137: 자동 강화는 모으기 0.4초 + 결과 0.85초로 빠르게, 화면 클릭은 통과 */done&&done();/* v103: 결과가 나오는 순간 강화 창도 같이 갱신 */el.classList.remove('charge');el.classList.add(ok?'win':'lose');
-    const col=great?'255,220,140':ok?(L>=25?'200,120,255':'255,206,74'):'255,50,40';el.style.setProperty('--ec',col);if(great)el.classList.add('great');
+    const col=great?'90,255,190':ok?(L>=25?'200,120,255':'255,206,74'):'255,50,40';el.style.setProperty('--ec',col);if(great)el.classList.add('great');
     el.querySelectorAll('.wait,.cring,.orb,i.in').forEach(n=>n.remove());
     const fl=el.querySelector('.flashw');if(ok)fl.style.animation='ecFlash .6s ease-out forwards';else fl.remove();
     let b='';for(let i=0;i<(ok?12:0);i++){const a=Math.random()*6.28,d=14+Math.random()*16;b+=`<i style="--x:${(Math.cos(a)*d).toFixed(1)}vmin;--y:${(Math.sin(a)*d).toFixed(1)}vmin;animation-delay:${(Math.random()*.15).toFixed(2)}s;width:${3+Math.random()*7|0}px;height:${3+Math.random()*7|0}px${ok?'':';background:#ff8a50;box-shadow:0 0 10px #ff4020'}"></i>`}
@@ -5064,9 +5064,9 @@ function enhCine(k,L,ok,done,auto,great){enhCineOn=1;let over=0,revealed=0,canCl
     core.innerHTML=great?`<small>GREAT SUCCESS</small><b>+${L}</b><span>${SLOTN[k]} 강화 대성공!</span><em>화면을 누르면 닫힙니다</em>`:ok?`<small>${L>=25?'MYTHIC':'LEGENDARY'} ENHANCE</small><b>+${L}</b><span>${SLOTN[k]} 강화 성공!</span><em>화면을 누르면 닫힙니다</em>`:`<small>ENHANCE FAILED</small><b class="bad">실패</b><span>${SLOTN[k]} 강화 실패 · +${L-1} 유지</span><em>화면을 누르면 닫힙니다</em>`;
     el.insertAdjacentHTML('beforeend',b);el.appendChild(core);
     if(ok)el.insertAdjacentHTML('afterbegin','<div class="ring"></div>');
-    if(great){let mo='';for(let n=0;n<14;n++)mo+=`<i class="mote" style="left:${8+Math.random()*84}%;--d:${(3+Math.random()*2.5).toFixed(1)}s;--w:${(Math.random()*2).toFixed(2)}s;--x:${((Math.random()-.5)*12).toFixed(1)}vmin"></i>`;
+    if(great){let mo='';for(let n=0;n<28;n++)mo+=`<i class="mote" style="left:${8+Math.random()*84}%;--d:${(3+Math.random()*2.5).toFixed(1)}s;--w:${(Math.random()*2).toFixed(2)}s;--x:${((Math.random()-.5)*12).toFixed(1)}vmin"></i>`;
       el.insertAdjacentHTML('afterbegin','<div class="halo"></div><div class="ring r2"></div>'+mo);let g2='';for(let n=0;n<10;n++){const a=Math.random()*6.28,d=22+Math.random()*16;g2+=`<i style="--x:${(Math.cos(a)*d).toFixed(1)}vmin;--y:${(Math.sin(a)*d).toFixed(1)}vmin;animation-delay:${(.1+Math.random()*.25).toFixed(2)}s;width:${4+Math.random()*5|0}px;height:${4+Math.random()*5|0}px"></i>`}el.insertAdjacentHTML('beforeend',g2);
-      for(let n=0;n<2;n++)later(n*.3,()=>ringFx(P.pos,2.8+n*1.6,0xffd88a,.55));shake=Math.max(shake,.42)}/* v432: 금빛 불씨가 천천히 떠오름 + 고리 2겹 + 불티 10개 추가 */
+      for(let n=0;n<2;n++)later(n*.3,()=>ringFx(P.pos,2.8+n*1.6,0x5fe8b0,.55));shake=Math.max(shake,.42)}/* v432: 금빛 불씨가 천천히 떠오름 + 고리 2겹 + 불티 10개 추가 */
     shake=Math.max(shake,ok?.3:.6);enhFx(ok);
     const a={x:5,z:-1.6};if(ok)for(let i=0;i<1;i++)later(i*.18,()=>{ringFx(a,3+i*1.5,0xffd24a,.5);spray(PADD,{x:a.x,z:a.z},12,{sp:[3,9],up:[5,12],y:[.8,1.2],life:[.6,1.1],s0:[.35,.6],s1:[.05,.1],c0:0xffffff,c1:ok?(L>=25?0xb060ff:0xff7020):0xff2010,drag:1.2,grav:-10,tex:1})});
   };tm=setTimeout(rv,T*1000)}
