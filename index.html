@@ -1117,6 +1117,7 @@ function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;
   if(s.autoStat==='vit')s.autoStat='str';s.statV=3;
 }
 function parseSave(raw){try{const s=JSON.parse(raw);if(s&&(Array.isArray(s.picks)||s.sk)&&s.cls){migrate(s);reconcile(s);if(!s.inv)s.inv=[];if(!s.eq)s.eq={};/* 없어진 옵션(적중 시 생명력 등)은 아이템에서 제거 */for(const it of [...s.inv,...Object.values(s.eq)])if(it&&it.opts)it.opts=it.opts.filter(o=>OPT[o.k]&&(!OPT[o.k].slots||OPT[o.k].slots.includes(it.slot)));for(const k of EQS)if(!(k in s.eq))s.eq[k]=null;if(!s.pots){const o=s.pot||{hp:3,mp:3};s.pots={hp:{s:0,m:o.hp||0,l:0},mp:{s:0,m:o.mp||0,l:0}};delete s.pot}if(!s.gold)s.gold=0;return s}}catch(e){}return null}
+function otherChars(){for(let i=0;i<SLOTS;i++){if(i===curSlot)continue;try{const d=parseSave(localStorage.getItem(slotKey(i)));if(d&&d.cls&&!d.test)return true}catch(e){}}return false}/* v451: 다른 슬롯에 캐릭터가 있으면 튜토리얼·가이드 없음 */
 function readSlot(i){try{return parseSave(localStorage.getItem(slotKey(i)))}catch(e){return null}}
 /* v344: 계정 공유 — 골드·위험도 해금(maxTier·관문 gates)은 모든 슬롯이 같이 씀. localStorage 'ember-sanctum-acct'에 저장하고, 슬롯을 열 때 불러와 덮어쓰고 저장할 때마다 되돌려 씀.
    처음 한 번은 기존 슬롯들에서 합침(골드=전 슬롯 합계, 해금=최대값·관문 합집합). 테스트 캐릭터·시연은 건드리지 않음 */
@@ -1611,6 +1612,10 @@ function mapLoad(title,sub,fn,after){
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 function goTown(){if(inTown||!S.cls)return;if(S.duel){collectAll();S.duel=null}clearPools();if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}setTimeout(()=>guide('town'),900);collectAll();inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'))}
+/* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
+function townStart(){if(S.tutor||S.test||S.demo||!S.cls)return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
+  collectAll();S.duel=null;inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;
+  toast(TOWN.n,'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요');save();return true}
 function leaveTown(){if(!inTown)return;inTown=false;$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
   toast(S.ch>=NCH?`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:S.ch===LAST&&S.phase===3?'최종 결전':`${S.ch+1}장 · ${CH[S.ch].n}`,'사냥터로 돌아왔습니다');stageBanner()})}
 function toggleTown(){inTown?leaveTown():goTown()}
@@ -4133,7 +4138,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v450';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v451';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 const NTFY_TOPIC='ashsanct-upd-c28d97c28f3c741e';
 (function(){if(location.protocol==='file:')return;let busy=false,es=null,rt=null;
   const base=location.href.split('#')[0].split('?')[0];
@@ -4259,7 +4264,7 @@ Object.assign(GUIDES,{
   tdone:{n:'튜토리얼 완료',steps:()=>GUIDES.intro.steps().slice(4)}
 });
 let GDQ=[],GCUR=null;
-function guide(key,force){if(!S||!S.cls||S.demo||S.test)return;S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
+function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
 function guideRect(sel){if(sel==='@left'){const w=innerWidth,h=innerHeight;return {left:12,top:h*.5,right:w*.45,bottom:h-12}}
   const el=document.querySelector(sel);if(!el||el.hidden||!el.offsetParent)return null;const r=el.getBoundingClientRect();return r.width>0?r:null}
@@ -4392,10 +4397,10 @@ const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 function startGame(cls,main,skip){
-  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();save();
+  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart)setTimeout(tutAsk,900);}
+  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide)setTimeout(tutAsk,900);}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -5310,6 +5315,8 @@ function enterGame(){
   if(!S.eq.weapon)S.eq.weapon=makeItem('weapon',1,0);if(!S.eq.armor)S.eq.armor=makeItem('armor',1,0);
   offer=null;lvlSkill=null;$('lvl').hidden=true;$('clear').hidden=true;
   setMap(true);applyTheme();labelButtons();resetWorld();refreshUpBtn();
+  if(!S.tutor&&!S.noGuide&&otherChars())S.noGuide=1;/* v451: 다른 슬롯에 캐릭터가 있으면 안내 없음 */
+  if(townStart())return;
   if(S.ch<NCH&&S.phase===2)showClear();
   else if(S.ch===LAST&&S.phase===4)showFinalClear();
   else if(S.ch===LAST&&S.phase===3)toast('최종 결전',`${FINAL.n} · ${FINAL.boss}를 쓰러뜨려라`);
