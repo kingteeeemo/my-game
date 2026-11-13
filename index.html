@@ -2284,7 +2284,7 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       /* 화염: 바깥 광채가 빠르게 일렁이고 끝 쪽이 붉게 식음 */if(uFl>0.){float fk=vn(vec2(t*14.-uT*7.+sd*13.,s*2.5-uT*2.));c*=mix(1.,.55+.9*fk,uFl);c=mix(c,c*vec3(1.,.4,.25),uFl*smoothstep(.3,1.,t)*.85);c*=1.+uFl*.25;}
       gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v484 외형: 용암 날개 — 마디에서 각지게 꺾이는 검은 가시(거미 다리형) + 용암빛 막(표면을 타고 번지는 불줄기) + 이동 시 불 잔상 */
-const LWC={S:1.45,y:2.1,z:-.26,dy:-.15,dz:-.22,mem:.7,notch:.5,
+const LWC={S:1.45,y:2.1,z:-.26,dy:-.15,dz:-.22,fw:.4,mem:.7,notch:.5,
   /* 가시: [뻗는 각도°, 첫 마디 길이, 꺾이는 각도°, 둘째 마디 길이] — 위쪽은 거의 곧고, 아래로 갈수록 마디에서 크게 꺾여 내려옴 */
   sp:[[66,1.05,-38,1.25],[48,1.3,-42,1.55],[30,1.5,-46,1.65],[12,1.55,-46,1.55],[-8,1.3,-66,1.3],[-28,.95,-60,1.05],[-50,.68,-46,.85],[-74,.48,-26,.6]]};
 const LW_NOISE=`float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
@@ -2321,12 +2321,12 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[0,.5,.9,1,1
   const hub=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),bm);hub.scale.set(1.5,1.2,.8);g.add(hub);
   /* 가시 한 줄: s∈[0,1]=첫 마디(곧게), s∈[1,3]=둘째 마디(마디에서 각지게 꺾인 뒤 낫처럼 살짝 휨). 반환 f(s)→[x,y,z] */
   function mkSpine(sx,i,t,o){const fl=o.flap??1,back=o.back??0,fold=o.fold??0,[a0,L1,bd,L2]=C.sp[i],ph=sx>0?0:.4,br=Math.sin(t*1.25+ph);
-    let th=a0*D+(i-3.5)*-.03*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22;
-    const be=bd*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25,zb=-.1-(i%2)*.07,zs=-(.3+back*.9)-.04*Math.sin(t*1.9+i)*fl;
+    let th=a0*D+(i-3.5)*-.03*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22-(o.bob||0)*(.55+.45*Math.cos(th));/* 몸이 들썩이면 가시가 늦게 따라옴 */
+    const twz=(o.tw||0)*sx,be=bd*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25-(o.bob||0)*.7,zb=-.1-(i%2)*.07,zs=-(.3+back*.9)-.04*Math.sin(t*1.9+i)*fl;
     const kx=.17+Math.cos(th)*L1,ky=Math.sin(th)*L1,T=L1+L2,th2=th+be;
     const zf=d=>zb+zs*(d/T)*(d/T)*T/3+zs*.25*d/T;
-    return s=>{if(s<=1){const d=L1*s;return [(.17+Math.cos(th)*d)*sx,Math.sin(th)*d+.05*Math.sin(Math.PI*s)*L1*(i<4?1:-1)*.4,zf(d)]}
-      const r=(s-1)/2,d=L2*r,a=th2-.3*r*r;/* 끝으로 갈수록 살짝 더 안으로 */return [(kx+Math.cos(th2-.12*r)*d)*sx,ky+Math.sin(a)*d,zf(L1+d)]}}
+    return s=>{if(s<=1){const d=L1*s;return [(.17+Math.cos(th)*d)*sx,Math.sin(th)*d+.05*Math.sin(Math.PI*s)*L1*(i<4?1:-1)*.4,zf(d)+twz*d*d/T]}
+      const r=(s-1)/2,d=L2*r,a=th2-.3*r*r;/* 끝으로 갈수록 살짝 더 안으로 */return [(kx+Math.cos(th2-.12*r)*d)*sx,ky+Math.sin(a)*d,zf(L1+d)+twz*(L1+d)*(L1+d)/T]}}
   const LAST=[null,null],RAD0=i=>.064-.003*i;
   function update(t,o={}){let so=0,mo=0;
     for(const sx of [1,-1]){const sps=[];for(let i=0;i<N;i++)sps.push(mkSpine(sx,i,t,o));LAST[sx>0?0:1]=sps;
@@ -2402,21 +2402,30 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
     WG._v.set(lx,ly,lz);hero.localToWorld(WG._v);emit(PADD,{x:WG._v.x,y:WG._v.y,z:WG._v.z,vy:rnd(1,2.4),life:rnd(.6,1.1),s0:.32,s1:.05,c0:0xffd070,c1:0x801800,a:1,tex:1})}
   U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
 /* v484 용암 날개 착용 처리 — 등 뼈를 따라 붙이고, 이동 속도로 젖힘·접힘·잔상, 불씨. 잔상 메시는 세계 좌표라 scene에 붙임 */
-const LV={g:null,a:0,bk:0,spd:0,pp:null,T:0,ec:0,_v:new THREE.Vector3()};
+const LV={g:null,a:0,bk:0,spd:0,pp:null,T:0,ec:0,_v:new THREE.Vector3(),q:new THREE.Quaternion(),_q:new THREE.Quaternion(),_q2:new THREE.Quaternion(),_o:new THREE.Vector3(),yl:null,bob:0,yawL:null,tw:0};
 function lavaTick(dt){const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.lava)&&hero&&!S.demo&&P.hp>0;let g=LV.g;
   if(!on&&!(g&&g.parent))return;
   if(!g){g=LV.g=lwBuild();g.traverse(o=>{if(o.isMesh&&!o.material.isShaderMaterial)o.castShadow=true})}
   const tr=g.userData.trail;
-  if(on&&g.parent!==hero){if(g.parent)g.parent.remove(g);hero.add(g);g.position.set(0,LWC.y,LWC.z);if(tr.parent!==scene)scene.add(tr);LV.a=0;LV.bk=0;LV.spd=0;LV.pp=null}
+  if(on&&g.parent!==hero){if(g.parent)g.parent.remove(g);hero.add(g);g.position.set(0,LWC.y,LWC.z);if(tr.parent!==scene)scene.add(tr);LV.a=0;LV.bk=0;LV.spd=0;LV.pp=null;LV.q.identity();LV.yl=null;LV.yawL=null;LV.bob=0;LV.tw=0}
   LV.a=clamp(LV.a+(on?dt*2.2:-dt*4),0,1);const a=LV.a*LV.a*(3-2*LV.a),post=GQS[GUQ].post;g.scale.setScalar(LWC.S*(.25+.75*a));
   g.userData.mem.material.uniforms.uK.value=a*(post?1:1.1);tr.material.uniforms.uK.value=a*(post?1.1:1.3);
   if(!on){if(LV.a<=0){g.parent.remove(g);if(tr.parent)tr.parent.remove(tr)}return}
   let tx=0,ty=LWC.y,tz=LWC.z;const u=hero.userData,K=skOf(hero),v=LV._v;
-  if(u.sk&&K&&K.st===2){const b=K.spB||(K.spB=u.sk.getObjectByName('mixamorigSpine2'));if(b){b.getWorldPosition(v);hero.worldToLocal(v);tx=v.x;ty=v.y+LWC.dy;tz=v.z+LWC.dz}}
-  const k=dt>0?1-Math.exp(-dt*12):0;g.position.x+=(tx-g.position.x)*k;g.position.y+=(ty-g.position.y)*k;g.position.z+=(tz-g.position.z)*k;g.rotation.x=-hero.rotation.x;
+  /* v487: 등 뼈의 위치뿐 아니라 기울기·비틀림까지 따라감(달리기 숙임, 베기 회전, 구르기) — 기준은 뼈의 바인드 자세 */
+  const D=LV._q.identity();let by=ty;
+  if(u.sk&&K&&K.st===2){const b=K.spB||(K.spB=u.sk.getObjectByName('mixamorigSpine2'));if(b){
+    if(K.spQ0===undefined){K.spQ0=null;let sk=null;u.sk.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o});const i=sk?sk.skeleton.bones.indexOf(b):-1;
+      if(i>=0){const m=sk.skeleton.boneInverses[i].clone().invert();K.spQ0=new THREE.Quaternion();m.decompose(new THREE.Vector3(),K.spQ0,new THREE.Vector3())}}
+    b.getWorldPosition(v);hero.worldToLocal(v);tx=v.x;by=ty=v.y;tz=v.z;
+    if(K.spQ0){const hq=hero.getWorldQuaternion(LV._q2);b.getWorldQuaternion(D);const rq=u.sk.getWorldQuaternion(new THREE.Quaternion()).multiply(K.spQ0);D.multiply(rq.invert());/* 세계 기준 회전 변화 */D.premultiply(hq.clone().invert()).multiply(hq);/* 전부 따라가면 달릴 때 날개가 눕는다 → 일부만(LWC.fw) */D.slerp(LV._q2.identity(),1-LWC.fw)}}}
+  LV.q.slerp(D,dt>0?1-Math.exp(-dt*22):1);g.quaternion.copy(LV.q);
+  const of=LV._o.set(0,LWC.dy,LWC.dz).applyQuaternion(LV.q);g.position.set(tx+of.x,ty+of.y,tz+of.z);
+  if(dt>0){/* 들썩임: 몸 높이를 늦게 따라가는 점과의 차이 → 가시 끝이 늦게 따라옴 */if(LV.yl===null)LV.yl=by;LV.yl+=(by-LV.yl)*(1-Math.exp(-dt*9));LV.bob+=(clamp((by-LV.yl)*2.6,-.3,.3)-LV.bob)*(1-Math.exp(-dt*18));
+    /* 회전: 몸(방향+상체 비틀림)이 돌면 날개 끝이 늦게 따라옴 */const f=LV._o.set(0,0,1).applyQuaternion(LV.q),yaw=hero.rotation.y+Math.atan2(f.x,f.z);if(LV.yawL===null)LV.yawL=yaw;let d=yaw-LV.yawL;d=Math.atan2(Math.sin(d),Math.cos(d));LV.yawL+=d*(1-Math.exp(-dt*7));LV.tw+=(clamp(d*.7,-.5,.5)-LV.tw)*(1-Math.exp(-dt*14))}
   if(dt>0){if(LV.pp){const s=Math.hypot(P.pos.x-LV.pp.x,P.pos.z-LV.pp.z)/dt;LV.spd+=(s-LV.spd)*(1-Math.exp(-dt*10))}LV.pp={x:P.pos.x,z:P.pos.z};
     LV.bk+=(Math.min(1,LV.spd/5)-LV.bk)*(1-Math.exp(-dt*5));LV.T+=dt}
-  hero.updateMatrixWorld(true);g.userData.update(LV.T,{back:LV.bk*.4,fold:P.mv?1:LV.bk*.6,mv:LV.bk});
+  hero.updateMatrixWorld(true);g.userData.update(LV.T,{back:LV.bk*.4,fold:P.mv?1:LV.bk*.6,mv:LV.bk,bob:LV.bob,tw:LV.tw});
   if(dt>0){g.userData.trailTick(dt,LV.T,LV.spd,camera.position);
     LV.ec=Math.min(20,LV.ec+dt*(26+40*LV.bk)*QM());while(LV.ec>=1){LV.ec--;const p=g.userData.pt(Math.random()<.5?0:1,Math.floor(Math.random()*7),rnd(.2,.95),Math.random());v.set(p[0],p[1],p[2]);g.localToWorld(v);
       emit(PADD,{x:v.x,y:v.y,z:v.z,vy:rnd(1.2,3),life:rnd(.6,1.2),s0:.3,s1:.04,c0:0xffc050,c1:0x901c00,a:1,tex:1})}}}
@@ -4711,7 +4720,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v486';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v487';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
