@@ -204,6 +204,9 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .flask .cork{fill:#9a7448}.flask .shine{fill:rgba(255,255,255,.6)}
 .act.pot.empty .flask{filter:none}.act.pot.empty .liq{opacity:0}
 .act.pot.empty{opacity:.4}
+.pseg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;fill:none;stroke-width:2.8;stroke-linecap:round}.pseg path{stroke:rgba(255,255,255,.16)}.pseg path.on{stroke:var(--liq);filter:drop-shadow(0 0 2px var(--glow))}
+.act.pot.nsp b{display:none}.act.pot.nsp .flask{margin-top:0}.act.pot.nsp.empty{opacity:.6}
+.tile.etc .pot2{position:relative;width:70%;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.tile.etc .pot2 .flask{width:62%;height:62%;margin:0}.tile.etc .pot2 .pseg path{stroke-width:3.2}
 .autoeq{pointer-events:auto;margin-top:8px;display:flex;align-items:center;gap:6px;background:rgba(30,46,26,.92);border:1px solid #7fe07a;color:var(--ink);border-radius:10px;padding:8px 11px;font:500 12px var(--ko);max-width:min(240px,62vw);text-align:left}
 .autoeq b{color:#7fe07a}.autoeq .up{color:#7fe07a}
 .autoeq.fbgo{background:rgba(60,22,16,.92);border-color:var(--ember)}.autoeq.fbgo b{color:var(--ember)}
@@ -4278,7 +4281,11 @@ function nsPotTick(dt){if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k
 const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(),P.pch[k]+n)};
 function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=e.rank>=2?10:e.rank===1?3:1;while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
 function nsPotBoss(e,amt){if(!e.duel||e.dummy)return;e.potAcc=(e.potAcc||0)+amt/e.mhp;while(e.potAcc>=.2){e.potAcc-=.2;nsPotAdd(1)}}
-function nsPotHud(){nsPotInit();const m=potMaxN();for(const [k,b,n] of [['hp','bHp','nHp'],['mp','bMp','nMp']]){const c=P.pch[k];$(n).textContent=c;$(b).classList.toggle('empty',!c);const l=$(b).querySelector('.liq');if(l)l.style.clipPath=`inset(${(1-c/m)*100}% 0 0 0)`}}
+/* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
+const potFlask=f=>`<svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" style="clip-path:inset(${(1-f)*100}% 0 0 0)" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg>`;
+function potSeg(c,m){const r=17.2,g=m>1?16:0;let h='';for(let i=0;i<m;i++){const a0=(-90+i*360/m+g/2)*Math.PI/180,a1=(-90+(i+1)*360/m-g/2)*Math.PI/180,x0=20+r*Math.cos(a0),y0=20+r*Math.sin(a0),x1=20+r*Math.cos(a1),y1=20+r*Math.sin(a1);
+  h+=`<path class="${i<c?'on':''}" d="M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${(360/m-g)>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}"/>`}return `<svg class="pseg" viewBox="0 0 40 40" aria-hidden="true">${h}</svg>`}
+function nsPotHud(){nsPotInit();const m=potMaxN();for(const [k,b,n] of [['hp','bHp','nHp'],['mp','bMp','nMp']]){const c=P.pch[k],B=$(b);$(n).textContent=c;B.classList.toggle('empty',!c);B.classList.add('nsp');const key=c+'/'+m;if(B.dataset.seg!==key){B.dataset.seg=key;const o=B.querySelector('.pseg');if(o)o.remove();B.insertAdjacentHTML('beforeend',potSeg(c,m))}const l=$(b).querySelector('.liq');if(l)l.style.clipPath=`inset(${(1-c/m)*100}% 0 0 0)`}}
 /* 창고: 장비 이동용, 모든 캐릭터 공유. 30칸 시작, 5칸씩 확장 — 1억부터 ×2 (테스트 캐릭터는 테스트 전용 창고) */
 const STASH_KEY=()=>NS()?'ember-sanctum-stash-test':'ember-sanctum-stash';
 let stashOpen=false,stashD=null,stashSel=null,stashSrc=null;
@@ -4735,7 +4742,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v493';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v494';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -4757,7 +4764,7 @@ function hud(){placeEnv();
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`+(P.esMax>0?` · 쉴드 ${Math.ceil(P.es)}`:'');
   $('xpb').style.width=(S.lv>=LV_MAX?100:Math.min(100,S.xp/needXp()*100))+'%';
   $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';$('mpt').textContent=`${Math.floor(P.mp)} / ${P.mmp}`+(NS()&&nsReserve()>0?` · 점유 ${nsReserve().toFixed(0)}%`:'');
-  if(NS())nsPotHud();else{const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);
+  if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);
    hudMoney()}
   {const n=S.spdPot||0;$('nSp').textContent=n;$('bSp').classList.toggle('empty',!n);$('bSp').style.setProperty('--p',P.hasteT>0?1-P.hasteT/SPD_POT.dur:0)}$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
   {const c1=mpCost(C().skills[0]);$('bS1').classList.toggle('nomp',P.mp<c1);const t='MP '+c1;if($('cS1').textContent!==t)$('cS1').textContent=t}
@@ -5367,7 +5374,7 @@ let invFilter='weapon',lockMode=false,invSub=null,ddOpen=null;/* v131 가방 종
 function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=sc.length-a;
   if(a)o.push({n:'각인의 서',k:a,c:'#5ae0d0',i:'scr'});if(b)o.push({n:'상급 각인의 서',k:b,c:'#c890ff',i:'scrU'});
   if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffb070',i:'tk'});
-  for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
+  if(NS()){nsPotInit();for(const [kk,nm,c] of [['hp','생명력','#ff7a6a'],['mp','마나','#6aa8ff']])o.push({n:`${nm} 물약`,c,pot:kk})}else for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
   return o}
 function renderInv(){if(!NS())return renderInvOld();
   /* v484 장비창 개편 — 세로: 위 캐릭터·장착 칸 / 아래 가방, 가로·PC: 왼쪽 캐릭터·장착 칸 / 오른쪽 가방 */
@@ -5392,7 +5399,7 @@ function renderInv(){if(!NS())return renderInvOld();
       ${ddOpen===k?`<div class="iv2menu">${[[null,'전체'],...FG[k].map(s=>[s,SLOTN[s]])].map(([s,nm])=>`<button data-sub="${k},${s||''}" class="${on&&(invSub||null)===s?'on':''}">${nm}<i>${s?S.inv.filter(x=>x.slot===s).length:cnt(k)}</i></button>`).join('')}</div>`:''}</div>`};
   const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>${lockMode?'<p class="hint lkhint" style="margin:0">잠금 모드 · 아이템을 누르면 잠금/해제됩니다</p>':''}`;
   let bag=`<div class="bag${lockMode?' lkmode':''}">`;
-  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
+  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=e.pot?`<div class="iv2it"><div class="tile etc ${e.pot==='hp'?'ph':'mpot'}" style="border-color:${e.c}"><span class="pot2">${potFlask(P.pch[e.pot]/potMaxN())}${potSeg(P.pch[e.pot],potMaxN())}</span><small style="color:${e.c}">${P.pch[e.pot]}/${potMaxN()}</small></div><span class="inm">${e.n}</span></div>`:`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
   else{const shown=S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x));
     for(const it of shown){const up=isBetter(it,S.eq[it.slot]),c=it.ns?NT_C[it.tier]:RAR[it.rar].c;
       bag+=`<button class="iv2it" data-i="${it.id}"><span class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" style="border-color:${c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">'+LKI()+'</span>':''}<span class="lv">${it.ns?it.tier+'T':it.ilvl}</span>${ico(icoSlot(it.slot))}</span><span class="inm" style="color:${c}">${it.name}</span></button>`}
