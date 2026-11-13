@@ -11,7 +11,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2{position:absolute;inset:0;display:grid;font:inherit}
 .iv2.p{grid-template-rows:minmax(0,46fr) minmax(0,54fr)}
 .iv2.l{grid-template-columns:minmax(0,1fr) min(44vw,520px)}
-.iv2stage{position:relative;min-height:0;background:radial-gradient(ellipse at 50% 62%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 38%,rgba(8,8,12,.55) 80%);padding:calc(env(safe-area-inset-top,0px) + 54px) max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px))}
+.iv2stage{position:relative;min-height:0;touch-action:none;cursor:grab;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 55%,rgba(8,8,12,.28) 100%);padding:calc(env(safe-area-inset-top,0px) + 54px) max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px))}
 .iv2.l .iv2stage{padding-top:calc(env(safe-area-inset-top,0px) + 56px)}
 .iv2top{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px));pointer-events:none}
 .iv2top>*{pointer-events:auto}
@@ -65,14 +65,21 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2foot .r{margin-left:auto;display:flex;gap:6px}
 .iv2foot .gp{color:#ffd24a}
 .iv2empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:24px 0}
-.iv2pop{position:absolute;z-index:6;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 50px);max-height:calc(46% - 56px);overflow-y:auto;background:rgba(18,18,24,.97);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
-.iv2.p .iv2pop{max-height:calc(46vh + 40px)}
-.iv2.l .iv2pop{right:auto;width:calc(100% - min(44vw,520px) - 24px);max-height:calc(100% - 64px)}
-.iv2pop .ivcmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.iv2pop .ivcmp.one{grid-template-columns:1fr}
-.iv2pop .pclose{position:absolute;right:8px;top:6px;border:0;background:transparent;color:var(--muted);font-size:20px;z-index:1}
-.iv2pop .ivact .btns{display:grid;grid-template-columns:1.2fr 1fr 1.3fr;gap:6px;margin:0}
-.iv2.p .iv2pop .ivc{min-width:0}
+.iv2dim{position:absolute;inset:0;z-index:6;background:rgba(6,6,10,.62);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14px) max(14px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(14px,env(safe-area-inset-left,0px))}
+.iv2pop{position:relative;width:min(360px,100%);max-height:100%;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:8px}
+.iv2pop::-webkit-scrollbar{display:none}
+.iv2pop .ivcmp{display:block}
+.iv2pop .ivc{background:rgba(22,22,29,.98);border:1.5px solid rgba(255,255,255,.2);box-shadow:0 14px 44px rgba(0,0,0,.65);border-radius:16px;padding:14px 15px;gap:5px}
+.iv2pop .ivc.sel .ivlab{display:none}
+.iv2pop .ivc .ivn{font-size:17px;padding-right:66px}.iv2pop .ivc .k,.iv2pop .ivc .ivs{padding-right:66px}
+.iv2pop .ivl{font-size:13.5px}.iv2pop .ivl .d{font-size:13px}
+.iv2pop .pico{position:absolute;right:14px;top:14px;width:58px;height:58px;border-radius:12px;border:2px solid var(--rc,#3a3a44);background:rgba(10,10,14,.7);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1}
+.iv2pop .pico .ico{width:78%;height:78%;object-fit:contain}
+.iv2pop .pclose{position:absolute;right:-4px;top:-34px;border:0;background:transparent;color:#fff;font-size:24px;z-index:2}
+.iv2pop .ivact{display:flex;flex-direction:column;gap:8px}
+.iv2pop .ivact .btns{display:grid;grid-template-columns:1fr 1.3fr 1.2fr;gap:6px;margin:0}
+.iv2pop .ivact .btns button{min-height:42px}
+.iv2pop .ivdps{background:rgba(22,22,29,.98)}
 </style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -4720,7 +4727,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v488';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v489';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5385,8 +5392,9 @@ function renderInv(){if(!NS())return renderInvOld();
   const panel=`<div class="iv2panel">${tabs}<div class="iv2bag">${bag}${look}</div>${foot}</div>`;
   /* 선택 팝업: 가방 아이템 = 현재 장착과 비교 + 장착·잠금·판매 / 장착 칸 = 장착 장비 정보 */
   let pop='';
-  if(sel)pop=`<div class="iv2pop"><button class="pclose" id="iPopX">✕</button><div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur)}</div>`;
-  else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2pop"><button class="pclose" id="iPopX">✕</button><div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div><p class="hint" style="margin:0">가방의 ${SLOTN[eqSel]}을(를) 누르면 이 장비와 비교합니다.</p></div>`;
+  const pico=it=>`<span class="pico" style="--rc:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot))}</span>`;
+  if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>')}</div></div>`;
+  else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(S.eq[eqSel])}<div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div></div></div>`;
   const keep=sh.querySelector('.iv2bag'),st=keep?keep.scrollTop:0;
   sh.innerHTML=`<div class="iv2 ${port?'p':'l'}">${stage}${panel}${top}${pop}</div>`;
   const nb=sh.querySelector('.iv2bag');if(nb)nb.scrollTop=st;
@@ -5414,6 +5422,8 @@ function renderInvOld(){
 }
 addEventListener('resize',()=>{if(invOpen)renderInv()});
 $('invSheet').addEventListener('click',e=>{
+  if(e.target.classList.contains('iv2dim')){invSel=null;eqSel=null;renderInv();return}
+  if(Date.now()-IVS.dragEnd<250)return;
   const b=e.target.closest('button');if(!b)return;
   if(b.id==='iClose'){closeInv();return}
   if(b.dataset.dd){ddOpen=ddOpen===b.dataset.dd?null:b.dataset.dd;renderInv();return}
@@ -5436,7 +5446,7 @@ $('invSheet').addEventListener('click',e=>{
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
-function openInv(){closeAllSheets();invOpen=true;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
+function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
 function closeInv(){invOpen=false;$('inv').hidden=true;document.body.classList.remove('invmode');$('inv').classList.remove('iv2on');refreshUpBtn()}
 $('openInv').onclick=openInv;
 $('autoEq').onclick=()=>equipBest();
@@ -6182,13 +6192,35 @@ const camT=new THREE.Vector3();
 const _dt=new THREE.Vector3();
 /* v484 장비창: 카메라를 캐릭터 정면으로 — 세로는 위쪽, 가로·PC는 왼쪽(가방 반대편) 가운데에 캐릭터가 오도록 */
 const _icp=new THREE.Vector3(),_icl=new THREE.Vector3();
-function invCam(){const f=P.face||0,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh,D=port?6.6:6.4;
+/* v489 장비창 전용 공간 — 월드(마을·사냥터)는 그리지 않고, 밝은 스튜디오 + 전용 조명 안에 내 캐릭터만. 레이어 1만 그리는 방식 */
+const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0};
+function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
+  const bg=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
+    vertexShader:`varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec3 vP;void main(){float h=normalize(vP).y;vec3 c=mix(vec3(.47,.50,.57),vec3(.24,.26,.32),smoothstep(0.,.55,h));gl_FragColor=vec4(c,1.);}`}));bg.renderOrder=-10;g.add(bg);
+  const fl=new THREE.Mesh(new THREE.CircleGeometry(58,48),new THREE.ShaderMaterial({fog:false,
+    vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 vP;void main(){float r=length(vP);vec3 c=mix(vec3(.66,.68,.73),vec3(.47,.50,.57),smoothstep(.5,16.,r));c*=1.-.42*exp(-r*r*1.6);gl_FragColor=vec4(c,1.);}`}));
+  fl.rotation.x=-Math.PI/2;fl.position.y=.005;g.add(fl);
+  const hm=new THREE.HemisphereLight(0xffffff,0x9a9fae,.95),key=new THREE.DirectionalLight(0xfff4e6,.9),rim=new THREE.DirectionalLight(0xbfd4ff,.7);
+  g.add(hm,key,key.target,rim,rim.target);g.userData={key,rim};g.traverse(o=>o.layers.set(1));scene.add(g);return g}
+function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0)}
+function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh,D=port?7.8:7.4;
+  const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
+  g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
+  /* 조명은 카메라를 따라 돎 — 어느 쪽으로 돌려도 앞에서 비춤 */
+  const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
   const halfH=D*Math.tan(camera.fov*Math.PI/360),halfW=halfH*camera.aspect;
-  const side=port?0:Math.min(.44*W,520)/W*halfW,down=port?.5*halfH:-.04*halfH;
-  _icp.set(P.pos.x+dx*D,1.55,P.pos.z+dz*D);camera.position.lerp(_icp,.3);
+  const side=port?0:Math.min(.44*W,520)/W*halfW,down=port?.38*halfH:-.2*halfH;
+  _icp.set(P.pos.x+dx*D,1.55,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
   _icl.set(P.pos.x+dz*side,1.05-down,P.pos.z-dx*side);camera.lookAt(_icl)}
+/* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
+$('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.drag={id:e.pointerId,x:e.clientX,r:IVS.rot,mv:false}});
+addEventListener('pointermove',e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x;if(Math.abs(dx)>5)d.mv=true;if(d.mv)IVS.rot=d.r-dx*.012});
+const ivsUp=e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;if(d.mv)IVS.dragEnd=Date.now();IVS.drag=null};addEventListener('pointerup',ivsUp);addEventListener('pointercancel',ivsUp);
 function frameCam(dt,target=P.pos){
   if(invOpen&&!S.demo&&NS()){invCam();return}
+  if(IVS.on)invStudioOff();
   if(S.demo&&target===P.pos){const port=innerWidth<innerHeight;target=_dt.set(P.pos.x+(port?0:4.5),0,P.pos.z+(port?6:0))}/* v82: 시연 중에는 선택 창에 가리지 않게 캐릭터를 위(세로)·왼쪽(가로)으로 */
   else if(S.duel&&target===P.pos){const b=enemies.find(e=>e.duel);if(b){const w=b.maw?.5:.3;target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*w,0,P.pos.z+(b.pos.z-P.pos.z)*w-1.5)}}/* v210: 고정형 아귀는 더 가운데로 *//* v95: 결투장은 거대 보스가 화면에 들어오게 */
   camT.lerp(target,Math.min(1,dt*6));
