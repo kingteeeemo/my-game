@@ -2415,7 +2415,7 @@ const lookOk=()=>!!S;/* v511: 외형은 일반 모드에도 적용 */
 function lookRow(){if(!lookOk()||!Object.keys(LOOKS).some(lookOwn))return '';return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).filter(lookOwn).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
 function lookSet(id){if(!lookOk())return;S.look=id&&LOOKS[id]?id:null;save()}
 /* v508: 외형 구매 재화 「광휘의 파편」 — 재단사 세라에게서 외형 장비를 삼. 획득처(드롭·보상)는 추후, 테스트 캐릭터는 무한 */
-const LCUR='광휘의 파편';LOOKS.wings.pr=400;LOOKS.wings_gold.pr=400;LOOKS.wings_fire.pr=400;LOOKS.wings_lava.pr=400;
+const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.wings_fire.pr=700;LOOKS.wings_lava.pr=700;
 const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k));/* 이미 착용 중이던 외형은 보유로 인정 */
 const lookCoin=()=>S.test?Infinity:(S.lumi||0);
 function lookBuy(k){const L=LOOKS[k];if(!L||lookOwn(k))return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
@@ -4829,7 +4829,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v512';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v513';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
