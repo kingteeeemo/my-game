@@ -2005,19 +2005,19 @@ function skwWarm(K){if(K.warm||!K.root||K.root.parent)return;K.warm=1;try{const 
 
 /*WING<*/
 /* 외형: 빛의 날개 — 빛줄기(리본)마다 곡선을 따라 카메라를 향하는 띠를 만들고, 셰이더에서 줄기별 위상으로 살랑임 */
-const WGC={seg:44,col:[.36,.36,1],hot:[.8,.85,1],y:2.1,z:-.26,dy:-.2,dz:-.25,S:1.45,sw:.22};
+const WGC={seg:44,col:[.3,.56,1],hot:[.93,.97,1],y:2.1,z:-.26,dy:-.2,dz:-.25,S:1.45,sw:.22};
 function wingFeathers(){const F=[],V=(x,y,z)=>new THREE.Vector3(x,y,z),L=(a,b,k)=>a+(b-a)*k;
   /* 큰 깃: 뿌리 → 머리 위 '손목'까지 솟음 → 바깥으로 길게. [손목 x,y, 끝 x,y, 굵기, 아치] — 위는 수평으로 길고 아래로 갈수록 가파르게 처짐 */
-  const M=[[.9,1.28,3.0,.55,.14,.3],[.78,.98,2.8,.44,.1,.03],[.86,.9,2.55,-.2,.125,.2],[.82,.6,2.25,-.72,.115,.17],[.74,.3,1.95,-1.3,.1,.14],[.62,.04,1.55,-1.42,.086,.1],[.48,-.16,1.12,-1.4,.07,.07]];
+  const M=[[.9,1.28,3.0,.55,.14,.3],[.86,.9,2.55,-.2,.125,.2],[.82,.6,2.25,-.72,.115,.17],[.74,.3,1.95,-1.3,.1,.14],[.62,.04,1.55,-1.42,.086,.1],[.48,-.16,1.12,-1.4,.07,.07]];
   M.forEach((m,i)=>{const [wx,wy,tx,ty,w,ar]=m,zz=-.035*i,dx=tx-wx,dy=ty-wy,ln=Math.hypot(dx,dy),nx=-dy/ln,ny=dx/ln;
-    const zk=1-.5*i/6,at=(k,h,z)=>V(L(wx,tx,k)+nx*h*ln,L(wy,ty,k)+ny*h*ln,z*zk+zz);
+    const zk=1-.5*i/5,at=(k,h,z)=>V(L(wx,tx,k)+nx*h*ln,L(wy,ty,k)+ny*h*ln,z*zk+zz);
     F.push({pts:[V(.1,0,0),V(.14+wx*.2,wy*.3,-.06+zz),V(wx*.62,wy*.76,-.13+zz),V(wx,wy,-.18+zz),at(.3,ar*.55,-.26),at(.62,ar*.5,-.36),at(.86,ar*.22,-.42),V(tx,ty,-.46*zk+zz)],w,hol:1,amp:1,seed:.13+i*.117})});
   /* 안쪽 고리 2줄: 머리 옆으로 솟았다가 감겨 내려와 바깥 아래로 */
   for(let i=0;i<2;i++){const k=i;
     F.push({pts:[V(.09,0,0),V(.2+.04*k,.42-.1*k,-.08),V(.42+.08*k,.86-.2*k,-.16),V(.74+.1*k,.98-.3*k,-.22),V(.86+.12*k,.8-.3*k,-.27),V(.98+.14*k,.3-.26*k,-.31),V(1.2+.18*k,-.2-.2*k,-.36),V(1.58+.2*k,-.52-.2*k,-.42)],w:.078-.012*k,hol:1,amp:1.15,seed:.61+i*.093})}
   /* 가는 빛실 3줄: 큰 깃 사이를 채움 */
-  [[.8,1.12,2.2,.72],[.74,.9,1.95,-.2],[.58,.56,1.36,-.72]].forEach((m,i)=>{const [wx,wy,tx,ty]=m;
-    F.push({pts:[V(.1,0,0),V(.2,wy*.36,-.1),V(wx,wy,-.22),V(L(wx,tx,.4),L(wy,ty,.4)+.14,-.3),V(L(wx,tx,.78),L(wy,ty,.78)+.06,-.38),V(tx,ty,-.42)],w:.03,hol:0,amp:1.5,seed:.37+i*.171})});
+  [[.8,1.12,2.3,.5],[.6,.6,1.5,-.75]].forEach((m,i)=>{const [wx,wy,tx,ty]=m;
+    F.push({pts:[V(.1,0,0),V(.2,wy*.36,-.1),V(wx,wy,-.22),V(L(wx,tx,.4),L(wy,ty,.4)+.14,-.3),V(L(wx,tx,.78),L(wy,ty,.78)+.06,-.38),V(tx,ty,-.42)],w:.05,hol:0,amp:1.3,seed:.37+i*.171})});
   return F}
 function wingGeo(){const F=wingFeathers(),SEG=WGC.seg,pos=[],nxt=[],prm=[],aux=[],idx=[];let v0=0;
   for(const sx of [1,-1])for(const f of F){const c=new THREE.CatmullRomCurve3(f.pts.map(p=>new THREE.Vector3(p.x*sx,p.y,p.z)),false,'centripetal'),P=c.getSpacedPoints(SEG+1),sd=f.seed+(sx<0?.29:0);
@@ -2027,28 +2027,35 @@ function wingGeo(){const F=wingFeathers(),SEG=WGC.seg,pos=[],nxt=[],prm=[],aux=[
   g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.3,-.2),4);return g}
 function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
   uniforms:{uT:{value:0},uA:{value:1},uDrag:{value:new THREE.Vector3()},uOpen:{value:1},uTw:{value:0},uSw:{value:WGC.sw},uS:{value:WGC.S},uCol:{value:new THREE.Vector3(...WGC.col)},uHot:{value:new THREE.Vector3(...WGC.hot)}},
-  vertexShader:`attribute vec3 nxt;attribute vec4 prm;attribute vec3 aux;uniform float uT,uOpen,uS,uTw,uSw;uniform vec3 uDrag;varying vec3 vP;varying float vH;
-    vec3 sway(vec3 p,float t,float sd,float amp,float sx){
-      float k=pow(t,1.5)*amp,a=uT*(1.05+.6*fract(sd*7.31))+sd*41.;
-      float w1=sin(a-t*3.4),w2=sin(a*1.71+1.3-t*5.6+sd*11.),w3=sin(a*.43+sd*5.);
-      /* 뒤로 젖힘(위에서 보면 V자) — 옆에서도 날개가 보이게 */float sa=uSw*sx,sc=cos(sa),ss=sin(sa);p.xz=vec2(p.x*sc+p.z*ss,p.z*sc-p.x*ss);
-      /* 접기: 뿌리를 축으로 아래·뒤로 모음 */float fo=(1.-uOpen)*.9,cs=cos(fo*sx),sn=sin(fo*sx);p.xy=vec2(p.x*cs+p.y*sn,-p.x*sn+p.y*cs);
-      /* 날개 전체의 느린 숨 */float br=sin(uT*.9+sx*.4)*.035*t;p.y+=br*abs(p.x);
-      p.y+=k*(.11*w1+.05*w2);p.z+=k*(.13*sin(a*.83-t*2.7+2.)+.055*w2);p.x+=k*.045*w3;
+  vertexShader:`attribute vec3 nxt;attribute vec4 prm;attribute vec3 aux;uniform float uT,uOpen,uS,uTw,uSw;uniform vec3 uDrag;varying vec3 vP;varying float vW;
+    vec3 sway(vec3 p,vec2 n,float t,float sd,float amp,float sx){
+      /* 펄럭임: 뿌리→끝으로 흘러가는 물결(깃발처럼). 줄기마다 박자·위상이 다르고 끝으로 갈수록 커짐 */
+      float a=uT*(2.5+1.1*fract(sd*7.31))+sd*41.,env=t*(.3+.7*t)*amp;
+      float w1=sin(a-t*5.6),w2=sin(a*1.6+1.3-t*9.+sd*11.),w3=sin(a*.45+sd*5.-t*2.4);
+      p.xy+=n*env*(.15*w1+.028*w2+.08*w3);p.z+=env*(.12*sin(a*.8-t*4.6+2.)+.03*w2);
+      /* 뒤로 젖힘(위에서 보면 V자) */float sa=uSw*sx,sc=cos(sa),ss=sin(sa);p.xz=vec2(p.x*sc+p.z*ss,p.z*sc-p.x*ss);
+      /* 접기 */float fo=(1.-uOpen)*.9,cs=cos(fo*sx),sn=sin(fo*sx);p.xy=vec2(p.x*cs+p.y*sn,-p.x*sn+p.y*cs);
+      /* 날개 전체의 느린 숨 */p.y+=sin(uT*.9+sx*.4)*.04*t*abs(p.x);
       float lg=t*t*(1.+.5*fract(sd*3.7));p+=uDrag*lg;p.z+=uTw*p.x*lg;return p;}
-    void main(){float t=prm.x,dt=1./${WGC.seg}.;vec3 a=sway(position,t,prm.z,aux.x,aux.z),b=sway(nxt,t+dt,prm.z,aux.x,aux.z);
+    void main(){float t=prm.x,dt=1./${WGC.seg}.;vec2 n=normalize(vec2(position.y-nxt.y,nxt.x-position.x)+1e-5);
+      vec3 a=sway(position,n,t,prm.z,aux.x,aux.z),b=sway(nxt,n,t+dt,prm.z,aux.x,aux.z);
       vec4 va=modelViewMatrix*vec4(a,1.),vb=modelViewMatrix*vec4(b,1.);vec3 T=normalize(vb.xyz-va.xyz),N=normalize(cross(T,normalize(va.xyz)));
-      float w=prm.w*(.25+.75*smoothstep(0.,.2,t))*pow(max(1.-t,0.),.75)*(1.+.08*sin(uT*1.7+prm.z*30.));
-      va.xyz+=N*prm.y*w*3.3*uS;vP=vec3(t,prm.y,prm.z);vH=aux.y;gl_Position=projectionMatrix*va;}`,
-  fragmentShader:`uniform float uT,uA;uniform vec3 uCol,uHot;varying vec3 vP;varying float vH;
-    void main(){float t=vP.x,r=abs(vP.y)/.34;
-      float body=smoothstep(1.03,.9,r),rim=exp(-pow((r-.9)/.1,2.)),core=exp(-r*r*3.),d=max(r-.9,0.),halo=exp(-d*1.9)*smoothstep(2.95,1.6,r);
-      float fl=.5+.5*sin(t*26.-uT*2.6+vP.z*50.),fl2=.5+.5*sin(t*9.-uT*1.3+vP.z*23.);
-      float tube=body*(.3+.14*fl*fl2)+rim*.84,line=core*.95;
-      float hot=mix(line,tube,vH);
-      float fade=smoothstep(.02,.16,t)*mix(.42,1.,smoothstep(.08,.5,t))*smoothstep(1.,.88,t)*(.88+.12*sin(uT*2.1+vP.z*70.));
-      vec3 c=mix(uCol,uHot,clamp(mix(core,rim*1.1+body*.12,vH),0.,1.))*hot+uCol*halo*mix(.24,.2,vH);
-      gl_FragColor=vec4(c*fade*uA,1.);}`})}
+      /* 굵기: 뿌리 쪽이 굵고 끝은 채찍처럼 가늘게 + 흘러가는 굵기 맥동 */
+      float w=prm.w*(.3+.7*smoothstep(0.,.14,t))*(.1+.9*pow(max(1.-t,0.),1.15))*(1.+.16*sin(t*11.-uT*3.4+prm.z*30.));
+      va.xyz+=N*prm.y*w*3.8*uS;vP=vec3(t,prm.y,prm.z);vW=w;gl_Position=projectionMatrix*va;}`,
+  fragmentShader:`uniform float uT,uA;uniform vec3 uCol,uHot;varying vec3 vP;varying float vW;
+    float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1,0)),f.x),mix(h1(i+vec2(0,1)),h1(i+vec2(1,1)),f.x),f.y);}
+    void main(){float t=vP.x,sd=vP.z,s=vP.y;
+      /* 빛줄기 안에서 일렁이는 결: 끝 쪽으로 흘러가는 무늬 */
+      float n1=vn(vec2(t*9.-uT*1.9+sd*17.,s*1.6+sd*5.)),n2=vn(vec2(t*24.-uT*3.3+sd*9.,s*3.+uT*.4));
+      /* 심지가 띠 안에서 좌우로 흔들림 */float c0=(.2*sin(t*12.-uT*4.2+sd*23.)+.08*sin(t*25.-uT*6.+sd*7.))*smoothstep(.05,.4,t);
+      float r=abs(s-c0),core=exp(-r*r*(26.-12.*n1)),glow=exp(-r*3.4)*(.45+.75*n1),mist=exp(-abs(s)*2.3)*(.25+.75*n2*n1);
+      float edge=smoothstep(1.,.55,abs(s));
+      float fade=smoothstep(.0,.12,t)*mix(.3,1.,smoothstep(.05,.5,t))*smoothstep(1.,.93,t)*(.82+.18*sin(uT*5.3+sd*70.+t*6.));
+      /* 반짝임 */vec2 sq=vec2(t*70.,s*4.+2.),sf=fract(sq)-.5;float sp=step(.988,h1(floor(sq)+floor(uT*8.+sd*9.)*vec2(3.1,1.7)+sd))*exp(-dot(sf,sf)*22.)*exp(-abs(s)*1.5);
+      vec3 c=uHot*(core*.9+glow*.22)+uCol*(glow*.5+mist*.36)+vec3(.8,.95,1.)*sp*1.2;
+      gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v479 외형 아이템(능력치 없음) — S.look = 착용 중인 외형 id. 가방 창의 '외형' 줄에서 켜고 끔 */
 const LOOKS={wings:{n:'빛의 날개'}};
 function lookRow(){return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
@@ -4284,7 +4291,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v479';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v480';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
