@@ -2301,11 +2301,11 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       /* 화염: 바깥 광채가 빠르게 일렁이고 끝 쪽이 붉게 식음 */if(uFl>0.){float fk=vn(vec2(t*14.-uT*7.+sd*13.,s*2.5-uT*2.));c*=mix(1.,.55+.9*fk,uFl);c=mix(c,c*vec3(1.,.4,.25),uFl*smoothstep(.3,1.,t)*.85);c*=1.+uFl*.25;}
       gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v484 외형: 용암 날개 — 마디에서 각지게 꺾이는 검은 가시(거미 다리형) + 용암빛 막(표면을 타고 번지는 불줄기) + 이동 시 불 잔상 */
-const LWC={S:2.2,y:2.1,z:-.26,dy:.17,dz:-.15,fw:.4,rx:.04,ry:0,rz:.1,hx:.04,hy:0,bul:0,cp:1.3,
-  /* v504 가시: [뻗는 각도°, 길이, 휘는 각도°(끝으로 갈수록 더 휨), 겹(0=큰 바깥 날개,1=그 속의 안쪽 날개,2=맨 발톱), 1] — 전부 등 위쪽 한 점에서 나옴 */
-  sp:[[86,1.45,-20,0,1],[71,1.3,-22,0,1],[24,1.85,-110,0,1],[18,1.15,-112,0,1],
-      [50,1.28,-25,1,1],[34,1.2,-25,1,1],[21,1.04,-25,1,1],
-      [-10,.62,-60,2,1],[-45,.4,-50,2,1]],
+const LWC={S:2.2,y:2.1,z:-.26,dy:.17,dz:-.15,fw:.4,rx:.04,ry:0,rz:.1,hx:.2,hy:.5,bul:.13,cp:1.3,
+  /* v505 등 위쪽에서 나온 팔이 바깥으로 휘며 머리 옆 마디(hx,hy)까지 올라가고, 가시는 그 마디에서 퍼짐. 가시: [뻗는 각도°, 길이, 휘는 각도°(끝으로 갈수록 더 휨), 겹(0=큰 바깥 날개,1=그 속의 안쪽 날개,2=맨 발톱), 1] — 전부 등 위쪽 한 점에서 나옴 */
+  sp:[[73,1.0,-20,0,1],[55,.82,-22,0,1],[-12,1.35,-75,0,1],[-28,.75,-60,0,1],
+      [38,1.0,-25,1,1],[15,1.07,-25,1,1],[4,.92,-25,1,1],
+      [-15,.62,-50,2,.2],[-30,.4,-50,2,.55]],
   /* 막: [가시 a, 가시 b, 덮는 길이, 가장자리 파임] */
   pn:[[0,1,.9,.35],[1,2,.9,.45],[2,3,.9,.3],[4,5,.88,.45],[5,6,.88,.45]]};
 const LW_NOISE=`float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
@@ -2345,7 +2345,7 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.8,-.6,
     let th=a0*D+(a0-10)*D*.05*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22-(o.bob||0)*(.55+.45*Math.cos(th));/* 몸이 들썩이면 가시가 늦게 따라옴 */
     const twz=(o.tw||0)*sx,cu=cud*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25-(o.bob||0)*.7,zl=(ly===1?-.1:0)-(i%2)*.02,zs=-(.2+back*.9)-.04*Math.sin(t*1.9+i)*fl;
     /* 팔: 등 속에서 나와 바깥으로 불룩하게 휘며 어깨 높이 마디까지 올라감 */
-    const arm=k=>[(C.rx+(C.hx-C.rx)*k+C.bul*Math.sin(Math.PI*k))*sx,C.ry*(1-k)+C.hy*k,C.rz+(-.05-C.rz)*(k*(2-k))],O=arm(kc);
+    const arm=k=>[(C.rx+(C.hx-C.rx)*k+C.bul*Math.sin(Math.PI*k))*sx,C.ry*(1-k)+C.hy*k,C.rz+(-.12-C.rz)*(k*(2-k))],O=arm(kc);
     const zf=d=>zl*Math.min(1,d/.3)+zs*(d/L)*(d/L)*L/3+zs*.25*d/L;
     /* 끝으로 갈수록 더 휘는 곡선을 잘게 나눠 미리 계산 */
     const NS=20,px=[0],py=[0];for(let j=0;j<NS;j++){const q=Math.min(1,Math.max(0,((j+.5)/NS-.2)/.6)),a=th+cu*q*q*(3-2*q);/* 가운데쯤에서 크게 휨 */px.push(px[j]+Math.cos(a)*L/NS);py.push(py[j]+Math.sin(a)*L/NS)}
@@ -2358,7 +2358,7 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.8,-.6,
         let tx=b[0]-a0[0],ty=b[1]-a0[1],tz=b[2]-a0[2];const tl=Math.hypot(tx,ty,tz)||1;tx/=tl;ty/=tl;tz/=tl;
         let nx=-ty,ny=tx;const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;const bx=-tz*ny,by=tz*nx,bz=tx*ny-ty*nx;
         /* 굵기: 첫 마디는 굵고 마디가 불거짐, 둘째 마디는 뾰족하게 */
-        const rad=RAD0(i)*(s<0?1.1:Math.pow(1-s/3,.65)+.04);
+        const rad=RAD0(i)*(s<0?1.6:Math.pow(1-s/3,.65)+.04);
         for(let j=0;j<RAD;j++){const an=j/RAD*Math.PI*2,c=Math.cos(an)*rad,sn=Math.sin(an)*rad*.8;sp[so++]=a[0]+nx*c+bx*sn;sp[so++]=a[1]+ny*c+by*sn;sp[so++]=a[2]+bz*sn}}}
       for(let i=0;i<C.pn.length;i++){const P_=C.pn[i],A=sps[P_[0]],B=sps[P_[1]];for(let iu=0;iu<=MU;iu++){const u=iu/MU;for(let jv=0;jv<=MV;jv++){const v=jv/MV;
         const k=3*u*P_[2]*(1-P_[3]*Math.sin(Math.PI*v)*u),a=A(k),b=B(k),bl=Math.sin(Math.PI*v)*Math.sin(Math.PI*Math.min(1,u*1.1))*(.05+.03*Math.sin(t*2.4+i+u*4.)*(o.flap??1));
@@ -4749,7 +4749,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v504';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v505';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
