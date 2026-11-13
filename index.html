@@ -2311,7 +2311,7 @@ function airStep(e,dt){const A=e.air,M=e.M;A.t+=dt;
 function deathFx(e){const g=e.g,side=Math.random()<.5?-1:1;e.mat.transparent=true;const y0=g.position.y;
   fx.push({m:g,t:0,dur:.75,keep:1,upd(k){g.rotation.z=side*Math.min(1,k*2.2)*1.3;g.position.y=y0-Math.max(0,k-.45)*1.2;e.mat.opacity=1-Math.max(0,(k-.4)/.6)},end(){e.mat.dispose()}})}
 /* v131 보스 쓰러짐: 비틀거림 → 옆으로 쓰러짐(쿵, 먼지·흔들림) → 잠시 누워 있다가 땅속으로 가라앉음 */
-function bossFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
+function bossFall(e){if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
   /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
   const MW=!!((e.maw||e.duel)&&e.M&&e.M.root),/* v383: 잿불 검귀도 몸통만 쓰러지고 바닥 원(등급 고리·그림자)은 그대로 */tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
   const lp=MW?{x:e.pos.x-side*Math.cos(ry)*H*.5,z:e.pos.z+side*Math.sin(ry)*H*.5}:e.pos;
@@ -2322,6 +2322,17 @@ function bossFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.s
     else{if(!land){land=1;shake=Math.max(shake,.55);groundFx(lp,shockTex,MW?0xa080d0:0xc8b090,1,e.r*3.4,.55,.8,true,.08);spray(PNRM,lp,26,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:MW?0x6a5a8a:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}
       const a=T-1.15;tg.rotation.z=rz0+side*(1.45+.1*Math.sin(a*10)*Math.exp(-a*6));if(T>2.05)tg.position.y=-(T-2.05)/.75*H*.7}},
     end(){try{e.mat.dispose()}catch(_){}}})}
+/* v478: 잿불 검귀 사망 — 한쪽 무릎을 꿇고 대검을 땅에 꽂은 뒤(1초) 그대로 굳었다가 재가 되어 가라앉음 */
+function bkKneel(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const K=BKN,g=e.g,r=K.root,M=e.M,u=M.u,ry=g.rotation.y,U=!!(S.duel&&S.duel.uber),D=K.acts.die._clip.duration,SC=g.scale.x*BKC.S;let hit=0;
+  if(e.air)e.air=null;e.jy=0;g.position.y=0;bkSword('hand');u.body.rotation.set(0,0,0);r.rotation.y=0;r.position.y=0;shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
+  const sp={x:e.pos.x+Math.sin(ry)*.5*SC,z:e.pos.z+Math.cos(ry)*.5*SC};
+  fx.push({m:g,t:0,dur:3.4,keep:1,upd(k){const T=k*3.4;g.rotation.y=ry;
+    for(const n in K.acts){const a=K.acts[n];a.setEffectiveWeight(n==='die'?1:0);if(n==='die')a.time=Math.min(T,D-.02)}K.mx.update(0);
+    for(const m of K.mats){const d=m.userData;if(d.c0){const f=1-.75*clamp((T-1.2)/1.6,0,1);m.emissive.copy(d.e0).multiplyScalar(f);m.color.copy(d.c0)}}
+    if(!hit&&T>=.98){hit=1;shake=Math.max(shake,.6);groundFx(sp,shockTex,U?0xff7ac0:0xffb070,1,e.r*3.2,.5,.8,true,.08);decalFx(sp,crackTex,U?0xff3a9a:0xff7a2a,3.2,3.2,.9,true);blastFx(sp,2.2);
+      spray(PNRM,sp,22,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}
+    if(T>2.5){r.position.y=-(T-2.5)/.9*1.25;if(Math.random()<.6*QM())emit(PADD,{x:e.pos.x+rnd(-2,2),y:rnd(.2,3),z:e.pos.z+rnd(-2,2),vy:rnd(1,3),life:rnd(.5,1),s0:1.1,s1:.1,c0:U?0xff9ad0:0xffb060,c1:U?0x80104a:0xa01800,a:.8,tex:1})}},
+    end(){r.position.y=0;try{e.mat.dispose()}catch(_){}}})}
 function dropEnemy(e,anim){e._rm=true;if(anim){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);deathFx(e);return}scene.remove(e.g);e.mat.dispose();e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1)}
 /* 스토리 맵: 길을 따라 미리 배치된 무리 (가까이 가면 깨어남) */
 /* v75: 스토리 장은 처음부터 길 전체에 몬스터를 배치하고 다시 생성하지 않음. 총 마릿수는 기존 처치 목표(goal)와 같음 */
@@ -2362,34 +2373,39 @@ function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [.
   return {root:g,legs:[u.legL,u.legR],arms:[],h:2.3,duel:1,u,armor}}
 /* v396: 잿불 검귀 — 전사와 같은 3D 모델(warrior.glb)을 따로 한 벌 더 불러와 입힘(어두운 갑옷 + 잿불 빛). 불러오기 전·실패 시엔 기존 절차적 모델.
    보이지 않는 절차적 몸(u.body)은 그대로 움직여 칼끝(u.weaponTip)·패턴 코드가 그대로 동작. 패턴마다 전사 동작(베기·내려찍기·회전·달리기)을 시간에 맞춰 재생 */
-const BKN={st:0,root:null,mx:null,acts:null,tip:null,sw:null,mats:[],cur:'idle',prev:null,fade:0,fadeT:0,tm:{}};
-function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=SKC.warrior;
-  new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(C.S);let sw=null;
-    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material=o.material.clone();K.mats.push(o.material);if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone))sw=o}});
-    if(sw)swStraight(sw);if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;K.sw=sw;
-    K.tip=new THREE.Object3D();K.tip.position.set(...C.tip);K.tip.scale.setScalar(1/C.S);(sw||r).add(K.tip);
+/* v478: 전용 모델(models/knight.glb) — 걷기·등장(등의 대검을 뽑음)·사망(한쪽 무릎 꿇고 대검을 땅에 꽂음) 동작 포함. 베기·내려찍기·회전·대기·피격은 전사 동작을 옮겨 씀 */
+const BKC={file:'models/knight.glb',S:1.67,introT:1.3,introK:.8,grab:.45},BKN={st:0,root:null,mx:null,acts:null,tip:null,sw:null,mats:[],cur:'idle',prev:null,fade:0,fadeT:0,tm:{}};
+function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=BKC;
+  new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(C.S);
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material=o.material.clone();K.mats.push(o.material)}});
+    const sw=r.getObjectByName('knight_sword');K.sw=sw;K.hand=sw.parent;K.swP=sw.position.clone();K.swQ=sw.quaternion.clone();K.bk=r.getObjectByName('knight_sword_back');K.swOn='hand';
+    K.tip=r.getObjectByName('knight_tip')||sw;
     K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
     K.root=r;K.st=2;skwWarm(K);for(const e of enemies)if(e.duel&&!e.maw)bkAttach(e);delete BOSS_IMG.knightn;delete BOSS_IMG.knightu;try{if(bossOpen)renderBoss()}catch(_){}}catch(_){K.st=3}},undefined,()=>{K.st=3})}
-function bkColor(U){for(const m of BKN.mats){let isw=false;if(BKN.sw)BKN.sw.traverse(o=>{if(o.material===m)isw=true});
-    m.userData.c0=new THREE.Color().setRGB(...(isw?[1.1,.78,.7]:U?[1.45,.95,1.4]:[1.6,1.05,.9]));m.userData.e0=new THREE.Color(isw?0xff4a14:U?0xe0308a:0xff6a1e);m.emissiveIntensity=isw?2.4:1.9;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}}
+/* 대검 위치: 등장 동작에서 손이 닿기 전까지는 등(knight_sword_back), 그 뒤로는 오른손 */
+function bkSword(on){const K=BKN;if(!K.sw||K.swOn===on)return;K.swOn=on;if(on==='back'&&K.bk){K.bk.add(K.sw);K.sw.position.set(0,0,0);K.sw.quaternion.identity()}else{K.hand.add(K.sw);K.sw.position.copy(K.swP);K.sw.quaternion.copy(K.swQ)}}
+function bkColor(U){for(const m of BKN.mats){const isw=BKN.sw&&BKN.sw.material===m;
+    m.userData.c0=new THREE.Color().setRGB(...(isw?[2.2,1.9,1.8]:U?[2.5,1.9,2.9]:[2.8,2.55,2.45]));m.userData.e0=new THREE.Color(U?0xff2a9a:0xff5a18);m.emissiveIntensity=isw?2:1.7;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}}
 function bkAttach(e){const K=BKN;if(!K.st)bkLoad();const M=e.M;if(K.st!==2||!M||!M.duel||M.sk||e.hp<=0)return;const r=K.root,u=M.u,U=!!(S.duel&&S.duel.uber);
   if(r.parent)r.parent.remove(r);r.position.set(0,0,0);r.rotation.set(0,0,0);M.root.add(r);M.sk=r;u.body.visible=false;
   bkColor(U);
   e.mat=new THREE.MeshLambertMaterial();/* 피격 깜빡임 값만 받는 그릇 — 실제 색은 bkTick에서 더해 줌 */
-  K.cur='idle';K.prev=null;K.fadeT=0;K.tm={}}
+  K.cur='idle';K.prev=null;K.fadeT=0;K.tm={};bkSword(e.introT!==undefined&&e.introT<BKC.grab/BKC.introK?'back':'hand');r.position.y=0}
 function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)return;const A=e.dA,e2=x=>1-Math.pow(1-clamp(x,0,1),2);
   const slash=(x,h)=>x<h?.1+.42*e2(x/h):.52+.6*clamp((x-h)/.3,0,1);/* 들어 올림 → 휘두름 */
   const cast=(x,h,T)=>x<h?.78*e2(x/h):x<h+.075?.78+.47*(x-h)/.075:x<h+.25?1.25+.35*(x-h-.075)/.175:1.6+.5*clamp((x-h-.25)/Math.max(.1,T-h-.25),0,1);/* 들기 → 내려꽂기 → 버팀 → 복귀 */
-  let st='idle',t=null,rate=1;
-  if(A){const x=A.t,h=A.hit||.5;
+  let st='idle',t=null,rate=1;const IN=e.introT!==undefined&&e.introT<BKC.introT/BKC.introK;
+  if(IN){st='intro';t=e.introT*BKC.introK;e.introT+=dt;e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,.7);bkSword(t<BKC.grab?'back':'hand')}
+  else if(A){const x=A.t,h=A.hit||.5;
     if(A.k==='wave'||A.k==='swing'){st='slash';t=slash(x,h)}
     else if(A.k==='slam'||A.k==='star'||A.k==='donut'){st='cast';t=cast(x,A.k==='slam'?h:h*.7,A.dur)}
     else if(A.k==='meteor'){st='cast';t=.78*e2(x/.35)}
-    else if(A.k==='charge'){st='run';rate=1.7}
+    else if(A.k==='charge'){st='walk';rate=2.6}
     else if(A.k==='whirl'){if(x<h){st='slash';t=.1+.3*e2(x/h)}else{st='spin';t=1.7}}
     else if(A.k==='barrage'){st='slash';const ph=((x-.1)%.42)/.42;t=x<.1?.1+.3*(x/.1):ph<.6?.1+.42*ph/.6:.52+.58*(ph-.6)/.4}
     else if(A.k==='sipe'){st='cast';const k=A.sw0===undefined?-1:x-A.sw0,D=A.swD||1.28;t=k<0?.3*e2(x/.5):k<D-.1?.3+.48*e2(k/(D*.6)):k<D?.78+.47*(k-D+.1)/.1:k<D+.4?1.25+.35*(k-D)/.4:1.6+.5*clamp((k-D-.4)/.35,0,1)}}
-  else if(moving){st='run';rate=clamp(e.spd/5.5,.6,1.7)}
+  else if(moving){st='walk';rate=clamp(e.spd/3.6,.6,1.6)}
+  if(!IN)bkSword('hand');
   if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='slash'||st==='cast'||st==='spin')?.06:.14;K.cur=st}
   const As=K.acts,dur=k=>As[k]._clip.duration;
   if(t!==null)K.tm[st]=Math.min(t,dur(st)-.01);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
@@ -2400,7 +2416,8 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
-  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;bkAttach(e);return e}
+  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;bkIntro(e);bkAttach(e);return e}
+function bkIntro(e){const D=BKC.introT/BKC.introK;e.introT=0;e.holdT=D;e.holdA=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z);e.pt=Math.max(e.pt||0,D+.7);if(BKN.st===2&&e.M&&e.M.sk){bkSword('back');BKN.cur='intro';BKN.prev=null;BKN.fadeT=0}}
 function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math.PI/2;
   const bg=new THREE.Mesh(new THREE.CircleGeometry(len,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false}));
   const fill=new THREE.Mesh(new THREE.CircleGeometry(1,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.5,depthWrite:false}));
@@ -2412,9 +2429,17 @@ function circTele(p,r,dur,end){const ring=flatMesh(ringGeo,0xffb090,1);ring.scal
 function waveFx(p0,a,half,len){const ts=a-half-Math.PI/2,m=new THREE.Mesh(new THREE.RingGeometry(.82,1,40,1,ts,half*2),new THREE.MeshBasicMaterial({color:0xffb070,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
   m.rotation.x=-Math.PI/2;m.position.set(p0.x,1.1,p0.z);scene.add(m);fx.push({m,t:0,dur:.38,geo:m.geometry,upd(k){const r=1.5+len*k;m.scale.set(r,r,1);m.material.opacity=.95*(1-k*k);
     if(Math.random()<.9){const t=a+rnd(-half,half),d=r;emit(PADD,{x:p0.x+Math.sin(t)*d,y:1,z:p0.z+Math.cos(t)*d,vy:rnd(0,1),life:.3,s0:1,s1:.2,c0:0xffe0b0,c1:0xff4a10,a:.8,tex:1})}}})}
+/* v478: 잿불 검귀 검기 — 부채꼴 끝까지 날아가는 초승달(주황, 우버는 자홍). 예고가 끝나는 순간 발사, 판정은 기존 그대로(즉시) */
+function knightWaveFx(p0,a,half,len){const U=S.duel&&S.duel.uber,c=U?0xe0308a:0xff7a20,c2=U?0xff9ad0:0xffd090,g=new THREE.Group();g.position.set(p0.x,1.7,p0.z);g.rotation.y=a;
+  const geo=arcGeo(.8,1,-half,half,40),geo2=arcGeo(.88,.985,-half*.92,half*.92,32),ms=[];
+  for(const [gg,col,ed,y,op] of [[geo,c,0xffffff,0,1],[geo2,0xffffff,0xffffff,.55,.85],[geo,c,c2,-.6,.55],[geo2,c,c2,1.2,.4]]){const m=new THREE.Mesh(gg,waveMat(col,ed));m.position.y=y;m.userData.op=op;m.frustumCulled=false;g.add(m);ms.push(m)}
+  scene.add(g);let lr=2;
+  fx.push({m:g,t:0,dur:.55,upd(k){const r=2+len*(1-Math.pow(1-k,1.6)),f=Math.min(1,k/.08)*(1-Math.pow(k,3));g.scale.set(r,1,r);for(const m of ms){m.material.uniforms.uOp.value=m.userData.op*f;m.material.uniforms.uT.value=k*.55}
+      const n=Math.ceil((r-lr)*1.2*QM());lr=r;for(let i=0;i<n;i++){const t=a+rnd(-half,half),d=r*rnd(.86,1);emit(PADD,{x:p0.x+Math.sin(t)*d,y:rnd(.3,2.6),z:p0.z+Math.cos(t)*d,vy:rnd(.5,2.5),life:rnd(.25,.55),s0:1.3,s1:.15,c0:c2,c1:U?0x80104a:0xff3a10,a:.85,tex:1})}},
+    end(){geo.dispose();geo2.dispose()}})}
 function duelStart(e,k){const a=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),p0={x:e.pos.x,z:e.pos.z},R=e.rage,U=S.duel&&S.duel.uber,sp=U?.85:1;
   if(k==='wave'){const W=(R?.85:1.05)*sp;e.dA={k,t:0,a,dur:W+.35,hit:W};const fans=R?[-.6,0,.6]:[0];
-    for(const o of fans)fanTele(p0,a+o,.3,24,W,()=>{waveFx(p0,a+o,.3,24);shake=Math.max(shake,.25);if(P.hp>0&&inFan(P.pos,p0,a+o,.3,24))dh(.4)})}
+    for(const o of fans)fanTele(p0,a+o,.3,24,W,()=>{waveFx(p0,a+o,.3,24);knightWaveFx(p0,a+o,.3,24);shake=Math.max(shake,.25);if(P.hp>0&&inFan(P.pos,p0,a+o,.3,24))dh(.4)})}
   else if(k==='swing'){const W=(R?.55:.7)*sp;e.dA={k,t:0,a,dur:W+.35,hit:W};fanTele(p0,a,1.2,8,W,()=>{shake=Math.max(shake,.3);
       for(let i=0;i<14;i++){const t=a-1.2+i/13*2.4;emit(PADD,{x:p0.x+Math.sin(t)*6,y:1.6,z:p0.z+Math.cos(t)*6,vy:rnd(0,1),life:.35,s0:1.4,s1:.3,c0:0xffd0a0,c1:0xff4a10,a:.8,tex:1})}
       if(P.hp>0&&inFan(P.pos,p0,a,1.2,8)){dh(.35);const d=Math.hypot(P.pos.x-p0.x,P.pos.z-p0.z)||1;P.pos.x+=(P.pos.x-p0.x)/d*3;P.pos.z+=(P.pos.z-p0.z)/d*3}})}
@@ -3301,7 +3326,7 @@ function hurtPlayer(d){
   if(P.hp<=0)die();
 }
 function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
-  if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z)}}later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
+  if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z);bkIntro(e)}}later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
   if(inArena()){P.pos.set(FB_START.x,0,FB_START.z);for(const e of enemies)if(e.final){if(e.rage){e.rage=false;e.spd/=1.3}e.air=null;e.ip=0;e.g.position.y=0;e.g.children.forEach(c=>c.visible=true);e.hp=e.mhp;e.aggro=false;e.nova=5;e.chg=null;e.pat=4;e.patN=0;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.25,()=>defeatCine(`${FINAL.boss}에게 패배했습니다`,showArenaFail));return}
@@ -4187,7 +4212,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v477';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v478';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -4967,14 +4992,14 @@ let bossOpen=false,bossSel={b:'knight',m:null};const BOSS_IMG={};
 function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return BOSS_IMG[key];let url='';
   try{const W=300,H=340,rd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rd.setSize(W,H,false);rd.setPixelRatio(1);rd.setClearColor(0,0);
     const sc=new THREE.Scene(),skin=kind==='knight'&&BKN.st===2&&BKN.root,M=kind==='maw'?mawModel(U):skin?{root:BKN.root}:knightModel(),g=new THREE.Group();let sv=null;
-    if(skin){/* v397: 보스 창 그림도 전사 3D 모델 — 전투 중인 보스가 쓰는 모델을 잠깐 빌려 대기 자세로 찍고 되돌림 */const r=BKN.root;sv={par:r.parent,ry:r.rotation.y,py:r.position.y};r.rotation.y=0;r.position.y=0;bkColor(U);for(const k in BKN.acts){const a=BKN.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}BKN.mx.update(0)}
+    if(skin){/* v397: 보스 창 그림도 전사 3D 모델 — 전투 중인 보스가 쓰는 모델을 잠깐 빌려 대기 자세로 찍고 되돌림 */const r=BKN.root;sv={par:r.parent,ry:r.rotation.y,py:r.position.y,sw:BKN.swOn};bkSword('back');/* v478: 보스 창 그림은 대검을 등에 멘 모습 */r.rotation.y=0;r.position.y=0;bkColor(U);for(const k in BKN.acts){const a=BKN.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}BKN.mx.update(0)}
     g.add(M.root);if(kind==='knight'&&U&&!skin)M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)});sc.add(g);
     sc.add(new THREE.AmbientLight(0xffffff,.85));const d1=new THREE.DirectionalLight(0xffe0c0,1.1);d1.position.set(3,6,5);sc.add(d1);const d2=new THREE.DirectionalLight(kind==='maw'?0x8a50ff:0xff6a30,.8);d2.position.set(-5,2,-3);sc.add(d2);
     g.updateMatrixWorld(true);const bx=new THREE.Box3().setFromObject(g),sz=bx.getSize(new THREE.Vector3()),ct=bx.getCenter(new THREE.Vector3());
     const cam=new THREE.PerspectiveCamera(28,W/H,.1,200),R=Math.max(sz.y/1.0,sz.x/(1.0*W/H),sz.z*.6)*.5/Math.tan(14*Math.PI/180)*1.12;
     g.rotation.y=kind==='maw'?-.5:-.35;g.updateMatrixWorld(true);cam.position.set(ct.x,ct.y+sz.y*.05,ct.z+R);cam.lookAt(ct.x,ct.y,ct.z);
     rd.render(sc,cam);url=rd.domElement.toDataURL('image/png');rd.dispose();try{rd.forceContextLoss()}catch(e){}
-    if(sv){const r=BKN.root;g.remove(r);if(sv.par)sv.par.add(r);r.rotation.y=sv.ry;r.position.y=sv.py;bkColor(!!(S.duel&&S.duel.uber))}}catch(e){url=''}
+    if(sv){const r=BKN.root;g.remove(r);if(sv.par)sv.par.add(r);r.rotation.y=sv.ry;r.position.y=sv.py;bkSword(sv.sw);bkColor(!!(S.duel&&S.duel.uber))}}catch(e){url=''}
   if(kind==='knight'&&BKN.st!==2){bkLoad();return url}/* 모델이 아직이면 캐시하지 않고, 받는 대로 다시 그림 */
   return BOSS_IMG[key]=url}
 function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
