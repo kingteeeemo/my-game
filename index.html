@@ -4829,7 +4829,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v513';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v514';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5247,7 +5247,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
 /* v490: 큰 수 줄임 — 10만 미만 그대로, 1억 미만 K+, 그 이상 M+ (내림) */
-const fmtKM=v=>v>=1e29?'∞':v<1e5?Math.round(v).toLocaleString('ko-KR'):v<1e8?Math.floor(v/1e3).toLocaleString('ko-KR')+'K+':Math.floor(v/1e6).toLocaleString('ko-KR')+'M+';
+const fmtKM=v=>v>=1e29?'∞':v<1e5?Math.round(v).toLocaleString('ko-KR'):v<1e8?Math.floor(v/1e3).toLocaleString('ko-KR')+'K+':v<1e9?Math.floor(v/1e6).toLocaleString('ko-KR')+'M+':v<1e12?Math.floor(v/1e9).toLocaleString('ko-KR')+'B+':v<1e15?Math.floor(v/1e12).toLocaleString('ko-KR')+'T+':Math.floor(v/1e15).toLocaleString('ko-KR')+'Qa+';/* v514: 1,000M+ → B+ → T+ → Qa+ */
 function skillDps(id){return rawDps(()=>skillDps0(id))}
 function skillDps0(id){
   const b=SK[id],st=skillStats(id),base=baseDmg(),crit=NS()?nsCritF():(1+Math.min(1,critCh())*.8)*critComp(S.lv),cd=Math.max(.05,st.cd);/* v446: 100%에서 자름 + 레벨 보정 */
