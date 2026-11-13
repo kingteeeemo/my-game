@@ -5236,7 +5236,7 @@ function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=s
   if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffb070',i:'tk'});
   for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
   return o}
-function renderInv(){
+function renderInv(){if(!NS())return renderInvOld();
   /* v484 장비창 개편 — 세로: 위 캐릭터·장착 칸 / 아래 가방, 가로·PC: 왼쪽 캐릭터·장착 칸 / 오른쪽 가방 */
   const sh=$('invSheet'),port=innerWidth<innerHeight;sh.className='sheet inv2';$('inv').classList.add('iv2on');$('inv').classList.remove('center');
   if(!['weapon','armor','acc','etc'].includes(invFilter))invFilter='weapon';
@@ -5277,6 +5277,27 @@ function renderInv(){
   sh.innerHTML=`<div class="iv2 ${port?'p':'l'}">${stage}${panel}${top}${pop}</div>`;
   const nb=sh.querySelector('.iv2bag');if(nb)nb.scrollTop=st;
 }
+function renderInvOld(){
+  const g=gear(),mode=invMode(),sh=$('invSheet');sh.className='sheet inv-'+mode;$('inv').classList.remove('iv2on');$('inv').classList.toggle('center',mode!=='p');
+  const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null;
+  const head=`<div class="shead"><div><div class="chap">Equipment · Bag</div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
+  const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):(mode==='l'?'<div class="ivact ph"></div>':'');
+  const foot=lookRow()+`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
+  <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
+  const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구'],['etc','기타']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
+  const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:k==='etc'?etcList().length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
+  let bag=filt+`<div class="bag${lockMode?' lkmode':''}">`;const shown=invFilter==='all'?S.inv:invFilter==='etc'?[]:S.inv.filter(ifOk);
+  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=`<div class="tile etc" title="${e.n}" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div>`;if(!L.length)bag+=`<div class="tile none"></div>`}
+  else for(let i=0;i<(invFilter==='all'?BAG:Math.max(shown.length,1));i++){const it=shown[i];if(!it){bag+=`<div class="tile none"></div>`;continue}
+    const up=isBetter(it,S.eq[it.slot]);bag+=`<button class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" data-i="${it.id}" style="border-color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">🔒</span>':''}${ico(icoSlot(it.slot))}<small>${it.ns?it.tier+'티어':'iLv '+it.ilvl}</small></button>`}
+  bag+=`</div>`;
+  let h;
+  if(mode==='p')h=head+`<div class="pfix">${cmp}${act||'<div class="ivact ph"></div>'}</div><div class="pscroll">${ivEq('strip')}${foot}${bag}</div>`;/* v79: 세로는 요약 줄 생략 · v363: 현재 장착/선택 카드는 위에 고정, 아래(착용 장비·가방)만 스크롤 */
+  else if(mode==='l')h=head+`<div class="ivrow"><div class="ivcol" style="flex:0 0 50%">${cmp}${act}</div><div class="ivcol" style="flex:1"><span class="tag" style="color:var(--muted)">장착 중인 장비</span>${ivEq('grid3')}${foot}${bag}</div></div>`;
+  else h=head+`<div class="pcgrid">${ivCard(cur,'cur')}<div class="ivrow top">${ivCard(sel,'sel',cur)}<div class="ivcol side">${act||'<p class="hint" style="margin:0">가방에서 아이템을 누르면 장착 시 DPS 변화와 장착·판매 버튼이 나옵니다. ▲는 지금 장비보다 좋은 아이템, ★는 특수 능력치입니다.</p>'}</div></div>${ivEq('paper')}<div class="ivcol pcbag">${foot}${bag}</div></div>`;
+  const keep=[...sh.querySelectorAll('.ivcol')].map(c=>c.scrollTop),top=sh.scrollTop;
+  sh.innerHTML=h;sh.scrollTop=top;sh.querySelectorAll('.ivcol').forEach((c,i)=>{if(keep[i])c.scrollTop=keep[i]});
+}
 addEventListener('resize',()=>{if(invOpen)renderInv()});
 $('invSheet').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
@@ -5288,7 +5309,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.id==='iLockMode'){lockMode=!lockMode;if(lockMode){invSel=null;eqSel=null}renderInv();return}
   if(b.dataset.i&&lockMode){const it=S.inv.find(x=>x.id===+b.dataset.i);if(it){it.lock=!it.lock;save()}renderInv();return}
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
-  if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:k}renderInv();return}
+  if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel&&NS()){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:k}renderInv();return}
   if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],old=S.eq[it.slot];if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
@@ -5301,7 +5322,7 @@ $('invSheet').addEventListener('click',e=>{
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
-function openInv(){closeAllSheets();invOpen=true;document.body.classList.add('invmode');ddOpen=null;lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
+function openInv(){closeAllSheets();invOpen=true;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
 function closeInv(){invOpen=false;$('inv').hidden=true;document.body.classList.remove('invmode');$('inv').classList.remove('iv2on');refreshUpBtn()}
 $('openInv').onclick=openInv;
 $('autoEq').onclick=()=>equipBest();
@@ -6053,7 +6074,7 @@ function invCam(){const f=P.face||0,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,H
   _icp.set(P.pos.x+dx*D,1.55,P.pos.z+dz*D);camera.position.lerp(_icp,.3);
   _icl.set(P.pos.x+dz*side,1.05-down,P.pos.z-dx*side);camera.lookAt(_icl)}
 function frameCam(dt,target=P.pos){
-  if(invOpen&&!S.demo){invCam();return}
+  if(invOpen&&!S.demo&&NS()){invCam();return}
   if(S.demo&&target===P.pos){const port=innerWidth<innerHeight;target=_dt.set(P.pos.x+(port?0:4.5),0,P.pos.z+(port?6:0))}/* v82: 시연 중에는 선택 창에 가리지 않게 캐릭터를 위(세로)·왼쪽(가로)으로 */
   else if(S.duel&&target===P.pos){const b=enemies.find(e=>e.duel);if(b){const w=b.maw?.5:.3;target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*w,0,P.pos.z+(b.pos.z-P.pos.z)*w-1.5)}}/* v210: 고정형 아귀는 더 가운데로 *//* v95: 결투장은 거대 보스가 화면에 들어오게 */
   camT.lerp(target,Math.min(1,dt*6));
