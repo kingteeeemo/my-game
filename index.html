@@ -149,6 +149,7 @@ table.stage .pm.wide{padding:4px 8px;font-size:11px}
 .tile small{font:500 9px var(--en);font-stretch:87%;color:var(--muted)}
 .tile .up{position:absolute;top:2px;right:4px;color:#7fe07a;font-size:10px}.tile .lk{position:absolute;bottom:1px;right:2px;font-size:9px}.tile.locked{box-shadow:inset 0 0 0 1px rgba(255,210,74,.5)}
 .footr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.hideup{padding:4px 9px;border-radius:14px;border:1px solid var(--line);background:#202028;color:var(--muted);font:700 11px var(--ko)}.hideup.on{color:var(--ember);border-color:var(--ember)}
+.lookrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 2px}.lookrow button{padding:5px 11px;border-radius:14px;border:1px solid var(--line);background:#202028;color:var(--ink);font:700 11px var(--ko)}.lookrow button.on{border-color:#9db4ff;color:#c6d4ff;background:rgba(120,150,255,.16);box-shadow:0 0 10px rgba(120,150,255,.35)}
 .ifilt{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}.ifilt button{padding:4px 8px;border-radius:14px;border:1px solid var(--line);background:#202028;color:var(--ink);font:700 11px var(--ko)}.ifilt button.on{border-color:var(--ember);color:var(--ember);background:rgba(255,138,58,.12)}.ifilt button:disabled{opacity:.35}.ifilt i{font-style:normal;color:var(--muted);margin-left:3px;font-size:10px}.lockon{border-color:#ffd24a!important;color:#ffd24a!important}
 .tile.sel{outline:2px solid var(--gem);outline-offset:1px}
 .tile.none{border-style:dashed;opacity:.35}
@@ -2002,6 +2003,77 @@ function skwWarm(K){if(K.warm||!K.root||K.root.parent)return;K.warm=1;try{const 
   const rt=new THREE.WebGLRenderTarget(4,4),prev=renderer.getRenderTarget();renderer.compile(scene,camera);renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(prev);rt.dispose();
   scene.remove(g);g.remove(r)}catch(e){}}
 
+/*WING<*/
+/* 외형: 빛의 날개 — 빛줄기(리본)마다 곡선을 따라 카메라를 향하는 띠를 만들고, 셰이더에서 줄기별 위상으로 살랑임 */
+const WGC={seg:44,col:[.36,.36,1],hot:[.8,.85,1],y:2.1,z:-.26,dy:-.2,dz:-.25,S:1.45,sw:.22};
+function wingFeathers(){const F=[],V=(x,y,z)=>new THREE.Vector3(x,y,z),L=(a,b,k)=>a+(b-a)*k;
+  /* 큰 깃: 뿌리 → 머리 위 '손목'까지 솟음 → 바깥으로 길게. [손목 x,y, 끝 x,y, 굵기, 아치] — 위는 수평으로 길고 아래로 갈수록 가파르게 처짐 */
+  const M=[[.9,1.28,3.0,.55,.14,.3],[.78,.98,2.8,.44,.1,.03],[.86,.9,2.55,-.2,.125,.2],[.82,.6,2.25,-.72,.115,.17],[.74,.3,1.95,-1.3,.1,.14],[.62,.04,1.55,-1.42,.086,.1],[.48,-.16,1.12,-1.4,.07,.07]];
+  M.forEach((m,i)=>{const [wx,wy,tx,ty,w,ar]=m,zz=-.035*i,dx=tx-wx,dy=ty-wy,ln=Math.hypot(dx,dy),nx=-dy/ln,ny=dx/ln;
+    const zk=1-.5*i/6,at=(k,h,z)=>V(L(wx,tx,k)+nx*h*ln,L(wy,ty,k)+ny*h*ln,z*zk+zz);
+    F.push({pts:[V(.1,0,0),V(.14+wx*.2,wy*.3,-.06+zz),V(wx*.62,wy*.76,-.13+zz),V(wx,wy,-.18+zz),at(.3,ar*.55,-.26),at(.62,ar*.5,-.36),at(.86,ar*.22,-.42),V(tx,ty,-.46*zk+zz)],w,hol:1,amp:1,seed:.13+i*.117})});
+  /* 안쪽 고리 2줄: 머리 옆으로 솟았다가 감겨 내려와 바깥 아래로 */
+  for(let i=0;i<2;i++){const k=i;
+    F.push({pts:[V(.09,0,0),V(.2+.04*k,.42-.1*k,-.08),V(.42+.08*k,.86-.2*k,-.16),V(.74+.1*k,.98-.3*k,-.22),V(.86+.12*k,.8-.3*k,-.27),V(.98+.14*k,.3-.26*k,-.31),V(1.2+.18*k,-.2-.2*k,-.36),V(1.58+.2*k,-.52-.2*k,-.42)],w:.078-.012*k,hol:1,amp:1.15,seed:.61+i*.093})}
+  /* 가는 빛실 3줄: 큰 깃 사이를 채움 */
+  [[.8,1.12,2.2,.72],[.74,.9,1.95,-.2],[.58,.56,1.36,-.72]].forEach((m,i)=>{const [wx,wy,tx,ty]=m;
+    F.push({pts:[V(.1,0,0),V(.2,wy*.36,-.1),V(wx,wy,-.22),V(L(wx,tx,.4),L(wy,ty,.4)+.14,-.3),V(L(wx,tx,.78),L(wy,ty,.78)+.06,-.38),V(tx,ty,-.42)],w:.03,hol:0,amp:1.5,seed:.37+i*.171})});
+  return F}
+function wingGeo(){const F=wingFeathers(),SEG=WGC.seg,pos=[],nxt=[],prm=[],aux=[],idx=[];let v0=0;
+  for(const sx of [1,-1])for(const f of F){const c=new THREE.CatmullRomCurve3(f.pts.map(p=>new THREE.Vector3(p.x*sx,p.y,p.z)),false,'centripetal'),P=c.getSpacedPoints(SEG+1),sd=f.seed+(sx<0?.29:0);
+    for(let i=0;i<=SEG;i++){const a=P[i],b=P[i+1],t=i/SEG;for(const s of [-1,1]){pos.push(a.x,a.y,a.z);nxt.push(b.x,b.y,b.z);prm.push(t,s,sd,f.w);aux.push(f.amp,f.hol,sx)}
+      if(i<SEG){const k=v0+i*2;idx.push(k,k+1,k+2,k+1,k+3,k+2)}}v0+=(SEG+1)*2}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('nxt',new THREE.Float32BufferAttribute(nxt,3));g.setAttribute('prm',new THREE.Float32BufferAttribute(prm,4));g.setAttribute('aux',new THREE.Float32BufferAttribute(aux,3));g.setIndex(idx);
+  g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.3,-.2),4);return g}
+function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+  uniforms:{uT:{value:0},uA:{value:1},uDrag:{value:new THREE.Vector3()},uOpen:{value:1},uTw:{value:0},uSw:{value:WGC.sw},uS:{value:WGC.S},uCol:{value:new THREE.Vector3(...WGC.col)},uHot:{value:new THREE.Vector3(...WGC.hot)}},
+  vertexShader:`attribute vec3 nxt;attribute vec4 prm;attribute vec3 aux;uniform float uT,uOpen,uS,uTw,uSw;uniform vec3 uDrag;varying vec3 vP;varying float vH;
+    vec3 sway(vec3 p,float t,float sd,float amp,float sx){
+      float k=pow(t,1.5)*amp,a=uT*(1.05+.6*fract(sd*7.31))+sd*41.;
+      float w1=sin(a-t*3.4),w2=sin(a*1.71+1.3-t*5.6+sd*11.),w3=sin(a*.43+sd*5.);
+      /* 뒤로 젖힘(위에서 보면 V자) — 옆에서도 날개가 보이게 */float sa=uSw*sx,sc=cos(sa),ss=sin(sa);p.xz=vec2(p.x*sc+p.z*ss,p.z*sc-p.x*ss);
+      /* 접기: 뿌리를 축으로 아래·뒤로 모음 */float fo=(1.-uOpen)*.9,cs=cos(fo*sx),sn=sin(fo*sx);p.xy=vec2(p.x*cs+p.y*sn,-p.x*sn+p.y*cs);
+      /* 날개 전체의 느린 숨 */float br=sin(uT*.9+sx*.4)*.035*t;p.y+=br*abs(p.x);
+      p.y+=k*(.11*w1+.05*w2);p.z+=k*(.13*sin(a*.83-t*2.7+2.)+.055*w2);p.x+=k*.045*w3;
+      float lg=t*t*(1.+.5*fract(sd*3.7));p+=uDrag*lg;p.z+=uTw*p.x*lg;return p;}
+    void main(){float t=prm.x,dt=1./${WGC.seg}.;vec3 a=sway(position,t,prm.z,aux.x,aux.z),b=sway(nxt,t+dt,prm.z,aux.x,aux.z);
+      vec4 va=modelViewMatrix*vec4(a,1.),vb=modelViewMatrix*vec4(b,1.);vec3 T=normalize(vb.xyz-va.xyz),N=normalize(cross(T,normalize(va.xyz)));
+      float w=prm.w*(.25+.75*smoothstep(0.,.2,t))*pow(max(1.-t,0.),.75)*(1.+.08*sin(uT*1.7+prm.z*30.));
+      va.xyz+=N*prm.y*w*3.3*uS;vP=vec3(t,prm.y,prm.z);vH=aux.y;gl_Position=projectionMatrix*va;}`,
+  fragmentShader:`uniform float uT,uA;uniform vec3 uCol,uHot;varying vec3 vP;varying float vH;
+    void main(){float t=vP.x,r=abs(vP.y)/.34;
+      float body=smoothstep(1.03,.9,r),rim=exp(-pow((r-.9)/.1,2.)),core=exp(-r*r*3.),d=max(r-.9,0.),halo=exp(-d*1.9)*smoothstep(2.95,1.6,r);
+      float fl=.5+.5*sin(t*26.-uT*2.6+vP.z*50.),fl2=.5+.5*sin(t*9.-uT*1.3+vP.z*23.);
+      float tube=body*(.3+.14*fl*fl2)+rim*.84,line=core*.95;
+      float hot=mix(line,tube,vH);
+      float fade=smoothstep(.02,.16,t)*mix(.42,1.,smoothstep(.08,.5,t))*smoothstep(1.,.88,t)*(.88+.12*sin(uT*2.1+vP.z*70.));
+      vec3 c=mix(uCol,uHot,clamp(mix(core,rim*1.1+body*.12,vH),0.,1.))*hot+uCol*halo*mix(.24,.2,vH);
+      gl_FragColor=vec4(c*fade*uA,1.);}`})}
+/* v479 외형 아이템(능력치 없음) — S.look = 착용 중인 외형 id. 가방 창의 '외형' 줄에서 켜고 끔 */
+const LOOKS={wings:{n:'빛의 날개'}};
+function lookRow(){return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
+function lookSet(id){S.look=id&&LOOKS[id]?id:null;save()}
+const WG={m:null,a:0,open:1,tw:0,v:new THREE.Vector3(),pp:null,pr:0,_v:new THREE.Vector3()};
+function wingTick(dt){const on=S.look==='wings'&&hero&&!S.demo&&P.hp>0;let m=WG.m;
+  if(!on&&!(m&&m.parent))return;
+  if(!m){m=WG.m=new THREE.Mesh(wingGeo(),wingMat());m.scale.setScalar(WGC.S);m.frustumCulled=false;m.renderOrder=4;
+    const g=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0x5a6cff,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.16}));g.scale.set(3.4,2.2,1);g.position.set(0,.45,-.2);m.add(g);WG.g=g}
+  const U=m.material.uniforms;
+  if(on&&m.parent!==hero){if(m.parent)m.parent.remove(m);hero.add(m);m.position.set(0,WGC.y,WGC.z);WG.pp=null;WG.a=0;WG.v.set(0,0,0);WG.tw=0;WG.open=.25}
+  WG.a=clamp(WG.a+(on?dt*1.6:-dt*3.5),0,1);U.uA.value=WG.a*WG.a*(3-2*WG.a)*(GQS[GUQ].post?.54:1);WG.g.material.opacity=.16*U.uA.value;
+  if(!on){if(WG.a<=0&&m.parent)m.parent.remove(m);U.uT.value+=dt;return}
+  /* 붙는 자리: 등 뼈(Spine2)를 따라가되 방향은 몸통 방향 그대로 — 구르기·피격 때 날개가 뒤집히지 않게 */
+  let tx=0,ty=WGC.y,tz=WGC.z;const u=hero.userData,K=skOf(hero);
+  if(u.sk&&K&&K.st===2){const b=K.spB||(K.spB=u.sk.getObjectByName('mixamorigSpine2'));if(b){b.getWorldPosition(WG._v);hero.worldToLocal(WG._v);tx=WG._v.x;ty=WG._v.y+WGC.dy;tz=WG._v.z+WGC.dz}}
+  const k=dt>0?1-Math.exp(-dt*12):0;m.position.x+=(tx-m.position.x)*k;m.position.y+=(ty-m.position.y)*k;m.position.z+=(tz-m.position.z)*k;m.rotation.x=-hero.rotation.x;
+  /* 이동·회전에 끌려 뒤로 젖혀짐 */
+  if(dt>0){const ry=hero.rotation.y,c=Math.cos(ry),s=Math.sin(ry);let lx=0,lz=0,w=0;
+    if(WG.pp){const vx=(P.pos.x-WG.pp.x)/dt,vz=(P.pos.z-WG.pp.z)/dt;lx=vx*c-vz*s;lz=vx*s+vz*c;let d=ry-WG.pr;d=Math.atan2(Math.sin(d),Math.cos(d));w=d/dt}
+    WG.pp={x:P.pos.x,z:P.pos.z};WG.pr=ry;const sp=Math.hypot(lx,lz);
+    WG._v.set(-lx*.03,sp*.012,-lz*.045);if(WG._v.length()>.5)WG._v.setLength(.5);WG.v.lerp(WG._v,1-Math.exp(-dt*5));WG.tw+=(clamp(w*.045,-.35,.35)-WG.tw)*(1-Math.exp(-dt*6));
+    const op=P.mv?.45:sp>1?.9:1;U.uSw.value+=((sp>1?WGC.sw+.3:WGC.sw)-U.uSw.value)*(1-Math.exp(-dt*4));WG.open+=(op-WG.open)*(1-Math.exp(-dt*(op<WG.open?10:3.2)))}
+  U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
+/*>WING*/
 function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
 function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
   const r=K.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
@@ -4212,7 +4284,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v478';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v479';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -4837,7 +4909,7 @@ function renderInv(){
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null;
   const head=`<div class="shead"><div><div class="chap">Equipment · Bag</div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
   const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):(mode==='l'?'<div class="ivact ph"></div>':'');
-  const foot=`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
+  const foot=lookRow()+`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구'],['etc','기타']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
   const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:k==='etc'?etcList().length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
@@ -4862,6 +4934,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;renderInv();return}
   if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],old=S.eq[it.slot];S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
+  if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
   if(b.id==='iDrop'){const it=S.inv.find(x=>x.id===invSel);if(it&&!it.lock){S.gold+=sellPrice(it);S.inv=S.inv.filter(x=>x!==it)}invSel=null;save();renderInv();refreshUpBtn();return}
@@ -5689,7 +5762,7 @@ function loop(now){
   const fo=paused()&&fxOnly();
   if(!paused()){update(dt);updDmg(dt);hud();cdLabels(dt);if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
-  if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);renderFrame(now/1000);requestAnimationFrame(loop);
+  if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);wingTick(paused()&&!fo&&!invOpen?0:dt);renderFrame(now/1000);requestAnimationFrame(loop);
 }
 
 /* boot */
