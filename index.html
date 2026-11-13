@@ -9,7 +9,7 @@
 body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack,body.invmode .feed,body.invmode #feed{visibility:hidden}
 .sheet.inv2{position:fixed;inset:0;width:auto;height:auto;max-width:none;max-height:none;border:0;border-radius:0;background:transparent;padding:0;gap:0;overflow:hidden;display:block;box-shadow:none}
 .iv2{position:absolute;inset:0;display:grid;font:inherit}
-.iv2.p{grid-template-rows:minmax(0,57fr) minmax(0,43fr);transition:grid-template-rows .28s ease}.iv2.p.exp{grid-template-rows:minmax(0,34fr) minmax(0,66fr)}.iv2low{position:absolute;bottom:8px;display:none;gap:6px;z-index:2}.iv2.p.exp .iv2low{display:flex}.iv2.p.exp .iv2col .lock{display:none}.iv2low.L{right:calc(50% + 50px)}.iv2low.R{left:calc(50% + 50px)}.iv2.p.exp .iv2sum{opacity:0;pointer-events:none}.iv2sum{transition:opacity .2s}.iv2.p.exp .iv2slot{width:clamp(44px,min(12vw,8.99vh),63px)}.iv2.p.exp .iv2col{gap:5px}.iv2grab{display:none}.iv2.p .iv2grab{display:block;position:absolute;left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);border:0;padding:0}.iv2.p .iv2grab::before{content:'';position:absolute;inset:-12px -30px}.iv2.p .iv2panel{padding-top:16px}
+.iv2.p{grid-template-rows:minmax(0,1fr) var(--ph,43%)}.iv2.p.snap{transition:grid-template-rows .26s ease}.iv2low{position:absolute;bottom:8px;display:none;gap:6px;z-index:2}.iv2.p.exp .iv2low{display:flex}.iv2.p.exp .iv2col .lock{display:none}.iv2low.L{right:calc(50% + 50px)}.iv2low.R{left:calc(50% + 50px)}.iv2.p.exp .iv2sum{opacity:0;pointer-events:none}.iv2sum{transition:opacity .2s}.iv2.p.exp .iv2slot{width:clamp(44px,min(12vw,8.99vh),63px)}.iv2.p.exp .iv2col{gap:5px}.iv2grab{display:none}.iv2.p .iv2grab{display:block;position:absolute;left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);border:0;padding:0}.iv2.p .iv2grab::before{content:'';position:absolute;inset:-12px -30px}.iv2.p .iv2panel{padding-top:16px}
 .iv2.l{grid-template-columns:minmax(0,1fr) min(46vw,540px)}
 .iv2stage{position:relative;min-height:0;touch-action:none;cursor:grab;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 55%,rgba(8,8,12,.28) 100%);padding:calc(env(safe-area-inset-top,0px) + 54px) max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px))}
 .iv2.l .iv2stage{padding-top:calc(env(safe-area-inset-top,0px) + 56px)}
@@ -4743,7 +4743,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v499';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v500';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5418,10 +5418,10 @@ function renderInv(){if(!NS())return renderInvOld();
   if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>').replace('🔒 해제',LKI()+' 해제').replace('🔓 잠금',LKI(1)+' 잠금')}</div></div>`;
   else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(S.eq[eqSel])}<div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div></div></div>`;
   const keep=sh.querySelector('.iv2bag'),st=keep?keep.scrollTop:0;
-  sh.innerHTML=`<div class="iv2 ${port?'p':'l'}${port&&IVS.exp?' exp':''}">${stage}${panel}${top}${pop}</div>`;
+  sh.innerHTML=`<div class="iv2 ${port?'p':'l'}${port&&IVS.exp?' exp':''}" style="--ph:${(IVS.ph*100).toFixed(2)}%">${stage}${panel}${top}${pop}</div>`;
   const nb=sh.querySelector('.iv2bag');if(nb){nb.scrollTop=st;/* v496: 세로 — 가방을 아래로 내려 보면 가방 영역이 넓어지고(캐릭터 영역 축소), 맨 위로 올리면 원래대로 */
-    if(port)nb.onscroll=()=>{const R=sh.querySelector('.iv2');if(!R)return;if(!IVS.exp&&nb.scrollTop>24&&nb.scrollHeight-nb.clientHeight>.3*innerHeight){IVS.exp=true;R.classList.add('exp')}else if(IVS.exp&&nb.scrollTop<=0){IVS.exp=false;R.classList.remove('exp')}}}
-  const gb=sh.querySelector('#iGrab');if(gb)gb.onclick=e=>{e.stopPropagation();IVS.exp=!IVS.exp;sh.querySelector('.iv2').classList.toggle('exp',IVS.exp)};
+}
+  const gb=sh.querySelector('#iGrab');if(gb)gb.onclick=e=>{e.stopPropagation();ivPh(IVS.exp?IVS_PH[0]:IVS_PH[1],true)};
 }
 function renderInvOld(){
   const g=gear(),mode=invMode(),sh=$('invSheet');sh.className='sheet inv-'+mode;$('inv').classList.remove('iv2on');$('inv').classList.toggle('center',mode!=='p');
@@ -5470,7 +5470,7 @@ $('invSheet').addEventListener('click',e=>{
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
-function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;IVS.exp=false;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
+function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;IVS.exp=false;IVS.ph=IVS_PH[0];if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
 function closeInv(){invOpen=false;$('inv').hidden=true;document.body.classList.remove('invmode');$('inv').classList.remove('iv2on');refreshUpBtn()}
 $('openInv').onclick=openInv;
 $('autoEq').onclick=()=>equipBest();
@@ -6217,7 +6217,7 @@ const _dt=new THREE.Vector3();
 /* v484 장비창: 카메라를 캐릭터 정면으로 — 세로는 위쪽, 가로·PC는 왼쪽(가방 반대편) 가운데에 캐릭터가 오도록 */
 const _icp=new THREE.Vector3(),_icl=new THREE.Vector3();
 /* v489 장비창 전용 공간 — 월드(마을·사냥터)는 그리지 않고, 밝은 스튜디오 + 전용 조명 안에 내 캐릭터만. 레이어 1만 그리는 방식 */
-const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0,exp:false,f:.57};
+const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0,exp:false,f:.57,ph:.43};
 function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
   const bg=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     vertexShader:`varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -6234,7 +6234,7 @@ function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=in
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
   g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
-  IVS.f+=((IVS.exp?.34:.57)-IVS.f)*(IVS.snap?1:.2);const pf=IVS.f;
+  const pf=.57;/* v499: 가방을 넓혀도 캐릭터 크기·위치는 그대로(가방이 아래를 덮음) */
   const FOV=port?26:28,ch=port?.46*(pf/.57)*Hh:Hh,want=(port?4.15:3.8)/.85;/* v496: 세로 캐릭터 영역 57%(넓힐 때 34%) — 캐릭터 크기는 57%일 때 v493과 같게, 줄면 같이 작아짐 · /* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
   if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
   const visH=want*Hh/ch,D=visH/2/Math.tan(FOV*Math.PI/360);
@@ -6246,6 +6246,21 @@ function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=in
 /* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
 $('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.drag={id:e.pointerId,x:e.clientX,r:IVS.rot,mv:false}});
 addEventListener('pointermove',e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x;if(Math.abs(dx)>5)d.mv=true;if(d.mv)IVS.rot=d.r-dx*.012});
+/* v499: 세로 — 가방 영역을 손가락으로 끌어 올리면 가방이 따라 올라오며 넓어지고(캐릭터 영역 위를 덮음), 맨 위에서 끌어 내리면 다시 내려감. 끝까지 넓힌 뒤에는 가방 스크롤 */
+const IVS_PH=[.43,.58];
+function ivPh(v,snap){const R=$('invSheet').querySelector('.iv2.p');IVS.ph=clamp(v,IVS_PH[0],IVS_PH[1]);if(snap)IVS.ph=IVS.ph>(IVS_PH[0]+IVS_PH[1])/2?IVS_PH[1]:IVS_PH[0];IVS.exp=IVS.ph>(IVS_PH[0]+IVS_PH[1])/2;if(!R)return;R.classList.toggle('snap',!!snap);R.style.setProperty('--ph',(IVS.ph*100).toFixed(2)+'%');R.classList.toggle('exp',IVS.exp)}
+const IVP={on:false,y0:0,p0:0,mode:null,last:0,v:0,bag:null};
+function ivpStart(y,t){const R=$('invSheet').querySelector('.iv2.p');if(!invOpen||!R||!t.closest('.iv2panel')||t.closest('.iv2dim,.iv2menu'))return false;IVP.on=true;IVP.y0=y;IVP.p0=IVS.ph;IVP.mode=null;IVP.last=y;IVP.v=0;IVP.bag=R.querySelector('.iv2bag');return true}
+function ivpMove(y){if(!IVP.on)return false;const dy=y-IVP.y0;IVP.v=y-IVP.last;IVP.last=y;
+  if(!IVP.mode){if(Math.abs(dy)<6)return false;const top=!IVP.bag||IVP.bag.scrollTop<=0;IVP.mode=(dy<0&&IVS.ph<IVS_PH[1]-.001)||(dy>0&&top&&IVS.ph>IVS_PH[0]+.001)?'rs':'sc';IVP.y0=y;IVP.p0=IVS.ph}
+  if(IVP.mode!=='rs')return false;ivPh(IVP.p0-(y-IVP.y0)/innerHeight);return true}
+function ivpEnd(){if(!IVP.on)return;IVP.on=false;if(IVP.mode!=='rs')return;IVS.dragEnd=Date.now();const mid=(IVS_PH[0]+IVS_PH[1])/2;ivPh(IVP.v<-2?IVS_PH[1]:IVP.v>2?IVS_PH[0]:IVS.ph>mid?IVS_PH[1]:IVS_PH[0],true)}
+$('invSheet').addEventListener('touchstart',e=>{if(e.touches.length===1)ivpStart(e.touches[0].clientY,e.target)},{passive:true});
+$('invSheet').addEventListener('touchmove',e=>{if(IVP.on&&ivpMove(e.touches[0].clientY))e.preventDefault()},{passive:false});
+$('invSheet').addEventListener('touchend',ivpEnd);$('invSheet').addEventListener('touchcancel',ivpEnd);
+$('invSheet').addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')ivpStart(e.clientY,e.target)});
+addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&IVP.on&&ivpMove(e.clientY))e.preventDefault()});
+addEventListener('pointerup',e=>{if(e.pointerType==='mouse')ivpEnd()});
 const ivsUp=e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;if(d.mv)IVS.dragEnd=Date.now();IVS.drag=null};addEventListener('pointerup',ivsUp);addEventListener('pointercancel',ivsUp);
 function frameCam(dt,target=P.pos){
   if(invOpen&&!S.demo&&NS()){invCam();return}
