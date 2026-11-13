@@ -2301,9 +2301,13 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       /* 화염: 바깥 광채가 빠르게 일렁이고 끝 쪽이 붉게 식음 */if(uFl>0.){float fk=vn(vec2(t*14.-uT*7.+sd*13.,s*2.5-uT*2.));c*=mix(1.,.55+.9*fk,uFl);c=mix(c,c*vec3(1.,.4,.25),uFl*smoothstep(.3,1.,t)*.85);c*=1.+uFl*.25;}
       gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v484 외형: 용암 날개 — 마디에서 각지게 꺾이는 검은 가시(거미 다리형) + 용암빛 막(표면을 타고 번지는 불줄기) + 이동 시 불 잔상 */
-const LWC={S:1.2,mN:5,cv:.75,y:2.1,z:-.26,dy:.17,dz:-.2,rx:.05,ry:-.06,rz:.24,fw:.4,mem:.82,notch:.62,
-  /* 가시: [뻗는 각도°, 첫 마디 길이, 꺾이는 각도°, 둘째 마디 길이] — 위쪽은 거의 곧고, 아래로 갈수록 마디에서 크게 꺾여 내려옴 */
-  sp:[[78,1.0,-12,.7],[54,1.1,-20,.85],[30,1.25,-28,1.0],[6,1.3,-40,1.0],[-18,1.1,-50,.85],[-42,.8,-50,.6],[-64,.5,-40,.42],[-86,.34,-30,.3]]};
+const LWC={S:1.25,y:2.1,z:-.26,dy:.17,dz:-.2,fw:.4,rx:.06,ry:-.5,rz:.24,hx:.3,hy:.22,bul:.1,
+  /* v503 가시: [뻗는 각도°, 길이, 휘는 각도°(끝까지 가며 도는 양), 겹(0=앞 날개,1=뒤 날개,2=맨 발톱), 팔에서 갈라지는 자리(1=어깨 마디)] — 모두 낫처럼 매끈하게 휨 */
+  sp:[[96,1.6,-50,0,1],[70,1.2,-46,0,1],[-8,2.0,-82,0,1],[-40,1.2,-54,0,1],
+      [28,1.6,-26,1,1],[14,1.72,-30,1,1],[-4,1.55,-32,1,1],
+      [-35,.5,-60,2,.5],[-55,.4,-50,2,.28]],
+  /* 막: [가시 a, 가시 b, 덮는 길이, 가장자리 파임] */
+  pn:[[0,1,.9,.4],[1,2,.8,.62],[2,3,.9,.4],[4,5,.88,.42],[5,6,.88,.42]]};
 const LW_NOISE=`float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
   float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
   float fbm(vec2 p){return n2(p)*.5+n2(p*2.1+3.)*.3+n2(p*4.3+7.)*.2;}`;
@@ -2326,42 +2330,42 @@ function lwMemMat(){return new THREE.ShaderMaterial({side:THREE.DoubleSide,
       c=mix(c,c*.35,smoke*.7);
       c+=vec3(1.7,1.05,.3)*fil*zone*1.5+vec3(1.,.3,.03)*zone*(.35+.4*fbm(q*.7));
       gl_FragColor=vec4(c*(.82+.2*sin(uT*3.1+vP*2.+u*4.))*uK,1.);}`})}
-function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.6,-.25,0,.5,.9,1,1.1,1.3,1.55,1.85,2.2,2.6,3],RS=RQ.length-1,RAD=6,MU=12,MV=6,D=Math.PI/180;
+function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.8,-.6,-.4,-.2,0,.25,.5,.8,1.1,1.4,1.7,2,2.3,2.6,2.85,3],RS=RQ.length-1,RAD=6,MU=12,MV=6,D=Math.PI/180;
   const bm=new THREE.MeshStandardMaterial({color:0x0a090b,roughness:.3,metalness:.25,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-3});
   const sp=new Float32Array(2*N*(RS+1)*RAD*3),si=[];
   for(let s=0;s<2*N;s++){const o=s*(RS+1)*RAD;for(let i=0;i<RS;i++)for(let j=0;j<RAD;j++){const a=o+i*RAD+j,b=o+i*RAD+(j+1)%RAD,c=a+RAD,d=b+RAD;si.push(a,b,c,b,d,c)}}
   const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sp,3));sg.setIndex(si);const spm=new THREE.Mesh(sg,bm);spm.frustumCulled=false;g.add(spm);
-  const NPn=2*(N-1),NVt=NPn*(MU+1)*(MV+1),mp=new Float32Array(NVt*3),lp=new Float32Array(NVt*3),muv=new Float32Array(NVt*2),mpid=new Float32Array(NVt),mi=[];
+  const NPn=2*C.pn.length,NVt=NPn*(MU+1)*(MV+1),mp=new Float32Array(NVt*3),lp=new Float32Array(NVt*3),muv=new Float32Array(NVt*2),mpid=new Float32Array(NVt),mi=[];
   for(let p=0;p<NPn;p++){const o=p*(MU+1)*(MV+1);for(let i=0;i<=MU;i++)for(let j=0;j<=MV;j++){const k=o+i*(MV+1)+j;muv[k*2]=i/MU;muv[k*2+1]=j/MV;mpid[k]=p;if(i<MU&&j<MV)mi.push(k,k+MV+1,k+1,k+1,k+MV+1,k+MV+2)}}
   const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.BufferAttribute(mp,3));mg.setAttribute('lp',new THREE.BufferAttribute(lp,3));mg.setAttribute('uv',new THREE.BufferAttribute(muv,2));mg.setAttribute('pid',new THREE.BufferAttribute(mpid,1));mg.setIndex(mi);
   const mem=new THREE.Mesh(mg,lwMemMat());mem.frustumCulled=false;g.add(mem);
   
   /* 가시 한 줄: s∈[0,1]=첫 마디(곧게), s∈[1,3]=둘째 마디(마디에서 각지게 꺾인 뒤 낫처럼 살짝 휨). 반환 f(s)→[x,y,z] */
-  function mkSpine(sx,i,t,o){const fl=o.flap??1,back=o.back??0,fold=o.fold??0,[a0,L1,bd,L2]=C.sp[i],ph=sx>0?0:.4,br=Math.sin(t*1.25+ph);
-    let th=a0*D+(i-3.5)*-.03*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22-(o.bob||0)*(.55+.45*Math.cos(th));/* 몸이 들썩이면 가시가 늦게 따라옴 */
-    const twz=(o.tw||0)*sx,be=bd*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25-(o.bob||0)*.7,zb=-.1-(i%2)*.07,zs=-(.3+back*.9)-.04*Math.sin(t*1.9+i)*fl;
-    const kx=.17+Math.cos(th)*L1,ky=Math.sin(th)*L1,T=L1+L2,th2=th+be;
-    const zf=d=>zb+zs*(d/T)*(d/T)*T/3+zs*.25*d/T;
-    return s=>{if(s<0){/* v499 뿌리: 등 속에서 뒤로 나온 뒤 바깥으로 벌어져 가시가 시작되는 자리로 이어짐 */const k=1+s,z0=zf(0);return [(C.rx+(.17-C.rx)*k*k)*sx,C.ry*(1-k)*(1-k),C.rz+(z0-C.rz)*(k*(2-k))]}
-      if(s<=1){const d=L1*s;return [(.17+Math.cos(th)*d)*sx,Math.sin(th)*d+.05*Math.sin(Math.PI*s)*L1*(i<4?1:-1)*.4,zf(d)+twz*d*d/T]}
-      const r=(s-1)/2,d=L2*r,a=th2-C.cv*.5*r;/* v500 낫처럼 휘어 내려옴 */return [(kx+Math.cos(a)*d)*sx,ky+Math.sin(a)*d,zf(L1+d)+twz*(L1+d)*(L1+d)/T]}}
-  const LAST=[null,null],RAD0=i=>.068-.0035*i;
+  function mkSpine(sx,i,t,o){const fl=o.flap??1,back=o.back??0,fold=o.fold??0,[a0,L,cud,ly,kc]=C.sp[i],ph=sx>0?0:.4,br=Math.sin(t*1.25+ph);
+    let th=a0*D+(a0-10)*D*.05*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22-(o.bob||0)*(.55+.45*Math.cos(th));/* 몸이 들썩이면 가시가 늦게 따라옴 */
+    const twz=(o.tw||0)*sx,cu=cud*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25-(o.bob||0)*.7,zl=(ly===1?-.17:0)-(i%2)*.03,zs=-(.2+back*.9)-.04*Math.sin(t*1.9+i)*fl;
+    /* 팔: 등 속에서 나와 바깥으로 불룩하게 휘며 어깨 높이 마디까지 올라감 */
+    const arm=k=>[(C.rx+(C.hx-C.rx)*k+C.bul*Math.sin(Math.PI*k))*sx,C.ry*(1-k)+C.hy*k,C.rz+(-.1-C.rz)*(k*(2-k))],O=arm(kc);
+    const zf=d=>zl*Math.min(1,d/.3)+zs*(d/L)*(d/L)*L/3+zs*.25*d/L;
+    return s=>{if(s<0)return arm((1+s)*kc);
+      const d=L*s/3,h=cu*(s/3)/2,ch=Math.abs(h)<1e-4?d:d*Math.sin(h)/h,a=th+h;return [O[0]+Math.cos(a)*ch*sx,O[1]+Math.sin(a)*ch,O[2]+zf(d)+twz*d*d/L]}}
+  const LAST=[null,null],RAD0=i=>.03+.014*C.sp[i][1];
   function update(t,o={}){let so=0,mo=0;
     for(const sx of [1,-1]){const sps=[];for(let i=0;i<N;i++)sps.push(mkSpine(sx,i,t,o));LAST[sx>0?0:1]=sps;
       for(let i=0;i<N;i++){const f=sps[i];for(let r=0;r<=RS;r++){const s=RQ[r],a=f(s),b=f(Math.min(3,s+.04)),a0=f(Math.max(RQ[0],s-.04));
         let tx=b[0]-a0[0],ty=b[1]-a0[1],tz=b[2]-a0[2];const tl=Math.hypot(tx,ty,tz)||1;tx/=tl;ty/=tl;tz/=tl;
         let nx=-ty,ny=tx;const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;const bx=-tz*ny,by=tz*nx,bz=tx*ny-ty*nx;
         /* 굵기: 첫 마디는 굵고 마디가 불거짐, 둘째 마디는 뾰족하게 */
-        const rad=RAD0(i)*(s<0?(.62-.5*s):s<=1?(.62+.38*s):Math.pow(1-(s-1)/2,.6)+.03)*(1+.45*Math.exp(-Math.pow((s-1)*5.,2.)));
+        const rad=RAD0(i)*(s<0?1.1:Math.pow(1-s/3,.65)+.04);
         for(let j=0;j<RAD;j++){const an=j/RAD*Math.PI*2,c=Math.cos(an)*rad,sn=Math.sin(an)*rad*.8;sp[so++]=a[0]+nx*c+bx*sn;sp[so++]=a[1]+ny*c+by*sn;sp[so++]=a[2]+bz*sn}}}
-      for(let i=0;i<N-1;i++){const A=sps[i],B=sps[i+1];for(let iu=0;iu<=MU;iu++){const u=iu/MU;for(let jv=0;jv<=MV;jv++){const v=jv/MV;
-        const k=i<C.mN?3*u*C.mem*(1-C.notch*Math.sin(Math.PI*v)*u):0,a=A(k),b=B(k),bl=(i<C.mN?1:0)*Math.sin(Math.PI*v)*Math.sin(Math.PI*Math.min(1,u*1.1))*(.05+.03*Math.sin(t*2.4+i+u*4.)*(o.flap??1));
+      for(let i=0;i<C.pn.length;i++){const P_=C.pn[i],A=sps[P_[0]],B=sps[P_[1]];for(let iu=0;iu<=MU;iu++){const u=iu/MU;for(let jv=0;jv<=MV;jv++){const v=jv/MV;
+        const k=3*u*P_[2]*(1-P_[3]*Math.sin(Math.PI*v)*u),a=A(k),b=B(k),bl=Math.sin(Math.PI*v)*Math.sin(Math.PI*Math.min(1,u*1.1))*(.05+.03*Math.sin(t*2.4+i+u*4.)*(o.flap??1));
         const x=a[0]+(b[0]-a[0])*v,y=a[1]+(b[1]-a[1])*v,z=a[2]+(b[2]-a[2])*v-bl;lp[mo]=x;mp[mo++]=x;lp[mo]=y;mp[mo++]=y;lp[mo]=z;mp[mo++]=z}}}}
     sg.attributes.position.needsUpdate=true;sg.computeVertexNormals();mg.attributes.position.needsUpdate=true;mg.attributes.lp.needsUpdate=true;
     const U=mem.material.uniforms;U.uT.value=t;for(let sd=0;sd<2;sd++){const b=o.burst!==undefined?o.burst:Math.pow(Math.max(0,Math.sin(t*.85+sd*1.9)),2);if(sd)U.uB.value.y=b;else U.uB.value.x=b}U.uMv.value=o.mv||0}
-  g.userData.pt=(side,i,u,v)=>{i=Math.min(i,C.mN-1);const S=LAST[side],k=3*u*C.mem*(1-C.notch*Math.sin(Math.PI*v)*u),a=S[i](k),b=S[i+1](k);return [a[0]+(b[0]-a[0])*v,a[1]+(b[1]-a[1])*v,a[2]+(b[2]-a[2])*v]};
+  g.userData.pt=(side,i,u,v)=>{const P_=C.pn[Math.min(i,C.pn.length-1)],S=LAST[side],k=3*u*P_[2]*(1-P_[3]*Math.sin(Math.PI*v)*u),a=S[P_[0]](k),b=S[P_[1]](k);return [a[0]+(b[0]-a[0])*v,a[1]+(b[1]-a[1])*v,a[2]+(b[2]-a[2])*v]};
   /* 이동 잔상: 막 여러 자리에서 지나온 자리를 기억해 뒤로 늘어지는 불 띠(세계 좌표, 가산 블렌딩 한 메시). scene에 따로 붙임 */
-  const TA=[];for(let sd=0;sd<2;sd++)for(let i=0;i<C.mN;i++)for(const u of [.6,1])TA.push([sd,i,u,.5]);
+  const TA=[];for(let sd=0;sd<2;sd++)for(let i=0;i<C.pn.length;i++)for(const u of [.6,1])TA.push([sd,i,u,.5]);
   const NT=TA.length,H=12,tp=new Float32Array(NT*H*2*3),tuv=new Float32Array(NT*H*2*2),ta=new Float32Array(NT*H*2*2),ti=[];
   for(let r=0;r<NT;r++){const o=r*H*2;for(let j=0;j<H;j++){tuv.set([j/(H-1),0,j/(H-1),1],(o+j*2)*2);if(j<H-1){const a=o+j*2;ti.push(a,a+1,a+2,a+1,a+3,a+2)}}}
   const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.BufferAttribute(tp,3));tg.setAttribute('uv',new THREE.BufferAttribute(tuv,2));tg.setAttribute('ta',new THREE.BufferAttribute(ta,2));tg.setIndex(ti);
@@ -4743,7 +4747,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v502';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v503';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
