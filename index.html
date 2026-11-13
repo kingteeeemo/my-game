@@ -2008,15 +2008,15 @@ function skwWarm(K){if(K.warm||!K.root||K.root.parent)return;K.warm=1;try{const 
 const WGC={seg:44,col:[.3,.56,1],hot:[.93,.97,1],y:2.1,z:-.26,dy:-.2,dz:-.25,S:1.45,sw:.22};
 function wingFeathers(){const F=[],V=(x,y,z)=>new THREE.Vector3(x,y,z),L=(a,b,k)=>a+(b-a)*k;
   /* 큰 깃: 뿌리 → 머리 위 '손목'까지 솟음 → 바깥으로 길게. [손목 x,y, 끝 x,y, 굵기, 아치] — 위는 수평으로 길고 아래로 갈수록 가파르게 처짐 */
-  const M=[[.9,1.28,3.0,.55,.14,.3],[.86,.9,2.55,-.2,.125,.2],[.82,.6,2.25,-.72,.115,.17],[.74,.3,1.95,-1.3,.1,.14],[.62,.04,1.55,-1.42,.086,.1],[.48,-.16,1.12,-1.4,.07,.07]];
+  const M=[[.9,1.28,3.0,.55,.14,.3],[.86,.9,2.55,-.2,.125,.2],[.82,.6,2.25,-.72,.115,.17],[.74,.3,1.95,-1.3,.1,.14],[.48,-.16,1.12,-1.4,.07,.07]];
   M.forEach((m,i)=>{const [wx,wy,tx,ty,w,ar]=m,zz=-.035*i,dx=tx-wx,dy=ty-wy,ln=Math.hypot(dx,dy),nx=-dy/ln,ny=dx/ln;
-    const zk=1-.5*i/5,at=(k,h,z)=>V(L(wx,tx,k)+nx*h*ln,L(wy,ty,k)+ny*h*ln,z*zk+zz);
+    const zk=1-.5*i/4,at=(k,h,z)=>V(L(wx,tx,k)+nx*h*ln,L(wy,ty,k)+ny*h*ln,z*zk+zz);
     F.push({pts:[V(.1,0,0),V(.14+wx*.2,wy*.3,-.06+zz),V(wx*.62,wy*.76,-.13+zz),V(wx,wy,-.18+zz),at(.3,ar*.55,-.26),at(.62,ar*.5,-.36),at(.86,ar*.22,-.42),V(tx,ty,-.46*zk+zz)],w,hol:1,amp:1,seed:.13+i*.117})});
   /* 안쪽 고리 2줄: 머리 옆으로 솟았다가 감겨 내려와 바깥 아래로 */
-  for(let i=0;i<2;i++){const k=i;
+  for(let i=0;i<1;i++){const k=i;
     F.push({pts:[V(.09,0,0),V(.2+.04*k,.42-.1*k,-.08),V(.42+.08*k,.86-.2*k,-.16),V(.74+.1*k,.98-.3*k,-.22),V(.86+.12*k,.8-.3*k,-.27),V(.98+.14*k,.3-.26*k,-.31),V(1.2+.18*k,-.2-.2*k,-.36),V(1.58+.2*k,-.52-.2*k,-.42)],w:.078-.012*k,hol:1,amp:1.15,seed:.61+i*.093})}
   /* 가는 빛실 3줄: 큰 깃 사이를 채움 */
-  [[.8,1.12,2.3,.5],[.6,.6,1.5,-.75]].forEach((m,i)=>{const [wx,wy,tx,ty]=m;
+  [[.8,1.12,2.3,.5]].forEach((m,i)=>{const [wx,wy,tx,ty]=m;
     F.push({pts:[V(.1,0,0),V(.2,wy*.36,-.1),V(wx,wy,-.22),V(L(wx,tx,.4),L(wy,ty,.4)+.14,-.3),V(L(wx,tx,.78),L(wy,ty,.78)+.06,-.38),V(tx,ty,-.42)],w:.05,hol:0,amp:1.3,seed:.37+i*.171})});
   return F}
 function wingGeo(){const F=wingFeathers(),SEG=WGC.seg,pos=[],nxt=[],prm=[],aux=[],idx=[];let v0=0;
@@ -4291,7 +4291,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v480';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v481';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
