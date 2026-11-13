@@ -2301,7 +2301,7 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       /* 화염: 바깥 광채가 빠르게 일렁이고 끝 쪽이 붉게 식음 */if(uFl>0.){float fk=vn(vec2(t*14.-uT*7.+sd*13.,s*2.5-uT*2.));c*=mix(1.,.55+.9*fk,uFl);c=mix(c,c*vec3(1.,.4,.25),uFl*smoothstep(.3,1.,t)*.85);c*=1.+uFl*.25;}
       gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v484 외형: 용암 날개 — 마디에서 각지게 꺾이는 검은 가시(거미 다리형) + 용암빛 막(표면을 타고 번지는 불줄기) + 이동 시 불 잔상 */
-const LWC={S:1.45,y:2.1,z:-.26,dy:.17,dz:-.22,fw:.4,mem:.7,notch:.5,
+const LWC={S:1.45,y:2.1,z:-.26,dy:.17,dz:-.2,rx:.05,ry:-.06,rz:.2,fw:.4,mem:.7,notch:.5,
   /* 가시: [뻗는 각도°, 첫 마디 길이, 꺾이는 각도°, 둘째 마디 길이] — 위쪽은 거의 곧고, 아래로 갈수록 마디에서 크게 꺾여 내려옴 */
   sp:[[66,1.05,-38,1.25],[48,1.3,-42,1.55],[30,1.5,-46,1.65],[12,1.55,-46,1.55],[-8,1.3,-66,1.3],[-28,.95,-60,1.05],[-50,.68,-46,.85],[-74,.48,-26,.6]]};
 const LW_NOISE=`float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
@@ -2326,7 +2326,7 @@ function lwMemMat(){return new THREE.ShaderMaterial({side:THREE.DoubleSide,
       c=mix(c,c*.35,smoke*.7);
       c+=vec3(1.7,1.05,.3)*fil*zone*1.5+vec3(1.,.3,.03)*zone*(.35+.4*fbm(q*.7));
       gl_FragColor=vec4(c*(.82+.2*sin(uT*3.1+vP*2.+u*4.))*uK,1.);}`})}
-function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[0,.5,.9,1,1.1,1.3,1.55,1.85,2.2,2.6,3],RS=RQ.length-1,RAD=6,MU=12,MV=6,D=Math.PI/180;
+function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.6,-.25,0,.5,.9,1,1.1,1.3,1.55,1.85,2.2,2.6,3],RS=RQ.length-1,RAD=6,MU=12,MV=6,D=Math.PI/180;
   const bm=new THREE.MeshStandardMaterial({color:0x0a090b,roughness:.3,metalness:.25,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-3});
   const sp=new Float32Array(2*N*(RS+1)*RAD*3),si=[];
   for(let s=0;s<2*N;s++){const o=s*(RS+1)*RAD;for(let i=0;i<RS;i++)for(let j=0;j<RAD;j++){const a=o+i*RAD+j,b=o+i*RAD+(j+1)%RAD,c=a+RAD,d=b+RAD;si.push(a,b,c,b,d,c)}}
@@ -2342,16 +2342,17 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[0,.5,.9,1,1
     const twz=(o.tw||0)*sx,be=bd*D*(1+.07*Math.sin(t*1.6+i*2.3+ph)*fl)-fold*.25-(o.bob||0)*.7,zb=-.1-(i%2)*.07,zs=-(.3+back*.9)-.04*Math.sin(t*1.9+i)*fl;
     const kx=.17+Math.cos(th)*L1,ky=Math.sin(th)*L1,T=L1+L2,th2=th+be;
     const zf=d=>zb+zs*(d/T)*(d/T)*T/3+zs*.25*d/T;
-    return s=>{if(s<=1){const d=L1*s;return [(.17+Math.cos(th)*d)*sx,Math.sin(th)*d+.05*Math.sin(Math.PI*s)*L1*(i<4?1:-1)*.4,zf(d)+twz*d*d/T]}
+    return s=>{if(s<0){/* v499 뿌리: 등 속에서 뒤로 나온 뒤 바깥으로 벌어져 가시가 시작되는 자리로 이어짐 */const k=1+s,z0=zf(0);return [(C.rx+(.17-C.rx)*k*k)*sx,C.ry*(1-k)*(1-k),C.rz+(z0-C.rz)*(k*(2-k))]}
+      if(s<=1){const d=L1*s;return [(.17+Math.cos(th)*d)*sx,Math.sin(th)*d+.05*Math.sin(Math.PI*s)*L1*(i<4?1:-1)*.4,zf(d)+twz*d*d/T]}
       const r=(s-1)/2,d=L2*r,a=th2-.3*r*r;/* 끝으로 갈수록 살짝 더 안으로 */return [(kx+Math.cos(th2-.12*r)*d)*sx,ky+Math.sin(a)*d,zf(L1+d)+twz*(L1+d)*(L1+d)/T]}}
   const LAST=[null,null],RAD0=i=>.064-.003*i;
   function update(t,o={}){let so=0,mo=0;
     for(const sx of [1,-1]){const sps=[];for(let i=0;i<N;i++)sps.push(mkSpine(sx,i,t,o));LAST[sx>0?0:1]=sps;
-      for(let i=0;i<N;i++){const f=sps[i];for(let r=0;r<=RS;r++){const s=RQ[r],a=f(s),b=f(Math.min(3,s+.04)),a0=f(Math.max(0,s-.04));
+      for(let i=0;i<N;i++){const f=sps[i];for(let r=0;r<=RS;r++){const s=RQ[r],a=f(s),b=f(Math.min(3,s+.04)),a0=f(Math.max(RQ[0],s-.04));
         let tx=b[0]-a0[0],ty=b[1]-a0[1],tz=b[2]-a0[2];const tl=Math.hypot(tx,ty,tz)||1;tx/=tl;ty/=tl;tz/=tl;
         let nx=-ty,ny=tx;const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;const bx=-tz*ny,by=tz*nx,bz=tx*ny-ty*nx;
         /* 굵기: 첫 마디는 굵고 마디가 불거짐, 둘째 마디는 뾰족하게 */
-        const rad=RAD0(i)*(s<=1?(.62+.38*s):Math.pow(1-(s-1)/2,.6)+.03)*(1+.45*Math.exp(-Math.pow((s-1)*5.,2.)));
+        const rad=RAD0(i)*(s<0?(.62-.5*s):s<=1?(.62+.38*s):Math.pow(1-(s-1)/2,.6)+.03)*(1+.45*Math.exp(-Math.pow((s-1)*5.,2.)));
         for(let j=0;j<RAD;j++){const an=j/RAD*Math.PI*2,c=Math.cos(an)*rad,sn=Math.sin(an)*rad*.8;sp[so++]=a[0]+nx*c+bx*sn;sp[so++]=a[1]+ny*c+by*sn;sp[so++]=a[2]+bz*sn}}}
       for(let i=0;i<N-1;i++){const A=sps[i],B=sps[i+1];for(let iu=0;iu<=MU;iu++){const u=iu/MU;for(let jv=0;jv<=MV;jv++){const v=jv/MV;
         const k=3*u*C.mem*(1-C.notch*Math.sin(Math.PI*v)*u),a=A(k),b=B(k),bl=Math.sin(Math.PI*v)*Math.sin(Math.PI*Math.min(1,u*1.1))*(.05+.03*Math.sin(t*2.4+i+u*4.)*(o.flap??1));
@@ -4742,7 +4743,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v498';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v499';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
