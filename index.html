@@ -9,7 +9,7 @@
 body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack,body.invmode .feed,body.invmode #feed{visibility:hidden}
 .sheet.inv2{position:fixed;inset:0;width:auto;height:auto;max-width:none;max-height:none;border:0;border-radius:0;background:transparent;padding:0;gap:0;overflow:hidden;display:block;box-shadow:none}
 .iv2{position:absolute;inset:0;display:grid;font:inherit}
-.iv2.p{grid-template-rows:minmax(0,46fr) minmax(0,54fr)}
+.iv2.p{grid-template-rows:minmax(0,57fr) minmax(0,43fr);transition:grid-template-rows .28s ease}.iv2.p.exp{grid-template-rows:minmax(0,34fr) minmax(0,66fr)}.iv2low{position:absolute;bottom:48px;display:flex;gap:6px;z-index:2;transition:bottom .28s ease}.iv2low.L{right:calc(50% + 50px)}.iv2low.R{left:calc(50% + 50px)}.iv2.p.exp .iv2low{bottom:8px}.iv2.p.exp .iv2sum{opacity:0;pointer-events:none}.iv2sum{transition:opacity .2s}.iv2.p.exp .iv2slot{width:clamp(44px,min(12vw,8.99vh),63px)}.iv2.p.exp .iv2col{gap:5px}.iv2grab{display:none}.iv2.p .iv2grab{display:block;position:absolute;left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);border:0;padding:0}.iv2.p .iv2grab::before{content:'';position:absolute;inset:-12px -30px}.iv2.p .iv2panel{padding-top:16px}
 .iv2.l{grid-template-columns:minmax(0,1fr) min(46vw,540px)}
 .iv2stage{position:relative;min-height:0;touch-action:none;cursor:grab;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 0,rgba(0,0,0,0) 55%,rgba(8,8,12,.28) 100%);padding:calc(env(safe-area-inset-top,0px) + 54px) max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px))}
 .iv2.l .iv2stage{padding-top:calc(env(safe-area-inset-top,0px) + 56px)}
@@ -4742,7 +4742,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v496';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v497';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5386,8 +5386,10 @@ function renderInv(){if(!NS())return renderInvOld();
   const lockSlot=t=>`<div class="iv2slot lock" title="${t}"><span>${LKI()}</span></div>`;
   const g=gear(),dps=skillDps(C().skills[0]).main;
   const stage=`<div class="iv2stage"><div class="iv2who"><b>${S.nick||C().n}</b><small>Lv ${S.lv} · ${C().n}</small></div>
-    <div class="iv2col L">${slot('weapon')}${slot('amulet')}${slot('ring')}${lockSlot('고유 아이템 (추가 예정)')}${lockSlot('고유 아이템 (추가 예정)')}</div>
-    <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>
+    ${port?`<div class="iv2col L">${slot('weapon')}${slot('amulet')}${slot('ring')}</div><div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}</div>
+    <div class="iv2low L">${lockSlot('고유 아이템 (추가 예정)')}${lockSlot('고유 아이템 (추가 예정)')}</div><div class="iv2low R">${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>`
+    :`<div class="iv2col L">${slot('weapon')}${slot('amulet')}${slot('ring')}${lockSlot('고유 아이템 (추가 예정)')}${lockSlot('고유 아이템 (추가 예정)')}</div>
+    <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span><span>생명력 <b>${fmtN(heroMax())}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>
     <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span><span><i style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg)"></i>${fmtKM(S.ess||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
@@ -5408,15 +5410,17 @@ function renderInv(){if(!NS())return renderInvOld();
   const lowN=S.inv.filter(x=>x.rar<=1&&!x.lock),allN=S.inv.filter(x=>!x.lock);
   const foot=`<div class="iv2foot"><span class="cnt">${S.inv.length} / ${bagCap()}</span><span class="r"><button id="iSellLow" ${lowN.length?'':'disabled'}>${NS()?'5·6티어':'일반·마법'} 판매 <span class="gp">+${fmtG(lowN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button id="iSellAll" ${allN.length?'':'disabled'}>${clearArm?'한 번 더 누르면 판매':'모두 판매'} <span class="gp">+${fmtG(allN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button></span></div>`;
   const look=invFilter==='etc'?lookRow():'';
-  const panel=`<div class="iv2panel">${tabs}<div class="iv2bag">${bag}${look}</div>${foot}</div>`;
+  const panel=`<div class="iv2panel">${port?'<button class="iv2grab" id="iGrab" aria-label="가방 넓히기/줄이기"></button>':''}${tabs}<div class="iv2bag">${bag}${look}</div>${foot}</div>`;
   /* 선택 팝업: 가방 아이템 = 현재 장착과 비교 + 장착·잠금·판매 / 장착 칸 = 장착 장비 정보 */
   let pop='';
   const pico=it=>`<span class="pico" style="--rc:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot))}</span>`;
   if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>').replace('🔒 해제',LKI()+' 해제').replace('🔓 잠금',LKI(1)+' 잠금')}</div></div>`;
   else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(S.eq[eqSel])}<div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div></div></div>`;
   const keep=sh.querySelector('.iv2bag'),st=keep?keep.scrollTop:0;
-  sh.innerHTML=`<div class="iv2 ${port?'p':'l'}">${stage}${panel}${top}${pop}</div>`;
-  const nb=sh.querySelector('.iv2bag');if(nb)nb.scrollTop=st;
+  sh.innerHTML=`<div class="iv2 ${port?'p':'l'}${port&&IVS.exp?' exp':''}">${stage}${panel}${top}${pop}</div>`;
+  const nb=sh.querySelector('.iv2bag');if(nb){nb.scrollTop=st;/* v496: 세로 — 가방을 아래로 내려 보면 가방 영역이 넓어지고(캐릭터 영역 축소), 맨 위로 올리면 원래대로 */
+    if(port)nb.onscroll=()=>{const R=sh.querySelector('.iv2');if(!R)return;if(!IVS.exp&&nb.scrollTop>24&&nb.scrollHeight-nb.clientHeight>.3*innerHeight){IVS.exp=true;R.classList.add('exp')}else if(IVS.exp&&nb.scrollTop<=0){IVS.exp=false;R.classList.remove('exp')}}}
+  const gb=sh.querySelector('#iGrab');if(gb)gb.onclick=e=>{e.stopPropagation();IVS.exp=!IVS.exp;sh.querySelector('.iv2').classList.toggle('exp',IVS.exp)};
 }
 function renderInvOld(){
   const g=gear(),mode=invMode(),sh=$('invSheet');sh.className='sheet inv-'+mode;$('inv').classList.remove('iv2on');$('inv').classList.toggle('center',mode!=='p');
@@ -5465,7 +5469,7 @@ $('invSheet').addEventListener('click',e=>{
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
-function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
+function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;IVS.exp=false;if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
 function closeInv(){invOpen=false;$('inv').hidden=true;document.body.classList.remove('invmode');$('inv').classList.remove('iv2on');refreshUpBtn()}
 $('openInv').onclick=openInv;
 $('autoEq').onclick=()=>equipBest();
@@ -6212,7 +6216,7 @@ const _dt=new THREE.Vector3();
 /* v484 장비창: 카메라를 캐릭터 정면으로 — 세로는 위쪽, 가로·PC는 왼쪽(가방 반대편) 가운데에 캐릭터가 오도록 */
 const _icp=new THREE.Vector3(),_icl=new THREE.Vector3();
 /* v489 장비창 전용 공간 — 월드(마을·사냥터)는 그리지 않고, 밝은 스튜디오 + 전용 조명 안에 내 캐릭터만. 레이어 1만 그리는 방식 */
-const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0};
+const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0,exp:false,f:.57};
 function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
   const bg=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     vertexShader:`varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -6229,11 +6233,12 @@ function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=in
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
   g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
-  const FOV=port?26:28,ch=port?.46*Hh:Hh,want=(port?4.15:3.8)/.85;/* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
+  IVS.f+=((IVS.exp?.34:.57)-IVS.f)*(IVS.snap?1:.2);const pf=IVS.f;
+  const FOV=port?26:28,ch=port?.46*(pf/.57)*Hh:Hh,want=(port?4.15:3.8)/.85;/* v496: 세로 캐릭터 영역 57%(넓힐 때 34%) — 캐릭터 크기는 57%일 때 v493과 같게, 줄면 같이 작아짐 · /* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
   if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
   const visH=want*Hh/ch,D=visH/2/Math.tan(FOV*Math.PI/360);
   /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
-  const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy=port?(.5-.255)*Hh:-.02*Hh;
+  const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy=port?(.5-(pf/2+.025))*Hh:-.02*Hh;
   camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();
   _icp.set(P.pos.x+dx*D,1.7,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
   _icl.set(P.pos.x,1.45,P.pos.z);camera.lookAt(_icl)}
