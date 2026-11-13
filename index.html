@@ -2335,7 +2335,7 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[0,.5,.9,1,1
   for(let p=0;p<NPn;p++){const o=p*(MU+1)*(MV+1);for(let i=0;i<=MU;i++)for(let j=0;j<=MV;j++){const k=o+i*(MV+1)+j;muv[k*2]=i/MU;muv[k*2+1]=j/MV;mpid[k]=p;if(i<MU&&j<MV)mi.push(k,k+MV+1,k+1,k+1,k+MV+1,k+MV+2)}}
   const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.BufferAttribute(mp,3));mg.setAttribute('lp',new THREE.BufferAttribute(lp,3));mg.setAttribute('uv',new THREE.BufferAttribute(muv,2));mg.setAttribute('pid',new THREE.BufferAttribute(mpid,1));mg.setIndex(mi);
   const mem=new THREE.Mesh(mg,lwMemMat());mem.frustumCulled=false;g.add(mem);
-  const hub=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),bm);hub.scale.set(1.5,1.2,.8);g.add(hub);
+  
   /* 가시 한 줄: s∈[0,1]=첫 마디(곧게), s∈[1,3]=둘째 마디(마디에서 각지게 꺾인 뒤 낫처럼 살짝 휨). 반환 f(s)→[x,y,z] */
   function mkSpine(sx,i,t,o){const fl=o.flap??1,back=o.back??0,fold=o.fold??0,[a0,L1,bd,L2]=C.sp[i],ph=sx>0?0:.4,br=Math.sin(t*1.25+ph);
     let th=a0*D+(i-3.5)*-.03*br*fl+.025*Math.sin(t*2.1+i*1.7+ph)*fl;th=th*(1-fold*.3)-fold*.22-(o.bob||0)*(.55+.45*Math.cos(th));/* 몸이 들썩이면 가시가 늦게 따라옴 */
@@ -4742,7 +4742,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v495';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v496';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
