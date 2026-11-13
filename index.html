@@ -1656,7 +1656,7 @@ const GSTY=[{s:'dirt',st:.22},{s:'dirt',st:.42},{s:'dirt',st:.5,rough:.7},{s:'fl
 const inArena=()=>!inTown&&(!!S.duel||S.ch===LAST&&(S.phase===3||S.phase===4));
 function curTheme(){if(inTown)return {key:'town',d:TOWN,pt:TOWN.pt};if(inArena())return {key:'final',d:FINAL,pt:FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
 let groundGlow=false,propTheme='',inTown=false;
-const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라'},TOWN_R=17;
+const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'재단사 라사'},TOWN_R=17;
 function applyTheme(){
   const th=curTheme(),d=th.d,gs=groundSet(th.key,d);
   groundMat.map=gs.map;groundMat.bumpMap=gs.bump;groundMat.roughnessMap=gs.rough;groundMat.emissiveMap=gs.emi;groundMat.emissiveIntensity=gs.emi?1:0;groundGlow=!!gs.emi;for(const t of [gs.map,gs.bump,gs.rough,gs.emi])if(t)t.repeat.set(groundRep[0],groundRep[1]);groundMat.needsUpdate=true;
@@ -1839,9 +1839,9 @@ function setMap(fresh){const want=inTown?'town':inArena()?'arena':S.ch<NCH?'stor
 /* 마을 (v29): 집 · 화로 · 우물 · 상인 · 대장장이. 몬스터 없음, 이동 스킬만 사용 가능 */
 const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,roughness:.9}),clothMat=SM({color:0x7a2a2a,roughness:.95,side:THREE.DoubleSide});
 const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420}];
-const npcOn=n=>n.id!=='stash'||NS();/* v508: 창고 건물은 테스트 캐릭터 마을에만 */
+const npcOn=n=>true;/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
 const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관']},NSACT={gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기'};
-const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승']};
+const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['재단사 라사','외형장비 판매']};
 const npcName=id=>NS()&&NSNPC[id]?NSNPC[id][0]:(TOWN[id]||TOWN.smith),npcSub=id=>NS()&&NSNPC[id]?NSNPC[id][1]:NPCN[id][1];
 function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창고 — 쇠띠 두른 큰 궤짝 + 상자 더미 + 통 */
   g.add(mesh(new THREE.BoxGeometry(1.9,.95,1.1),W,0,.48,0),mesh(new THREE.BoxGeometry(1.98,.16,1.18),W,0,1.02,0));
@@ -1850,11 +1850,12 @@ function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창
   g.add(mesh(new THREE.BoxGeometry(.26,.3,.1),FE,0,.85,.58),mesh(new THREE.BoxGeometry(.12,.12,.1),SM({color:0xd8b040}),0,.82,.64));
   g.add(mesh(new THREE.BoxGeometry(.8,.7,.8),W,-1.55,.35,.15),mesh(new THREE.BoxGeometry(.6,.55,.6),W,-1.5,.98,.12),mesh(new THREE.CylinderGeometry(.34,.38,.8,12),W,1.5,.4,.2),mesh(new THREE.CylinderGeometry(.36,.36,.07,12),FE,1.5,.62,.2),mesh(new THREE.CylinderGeometry(.4,.4,.07,12),FE,1.5,.22,.2));
   g.position.set(n.x,0,n.z);g.rotation.y=Math.atan2(-n.x,-n.z);return g}
-function npcMesh(n){if(n.id==='stash')return stashMesh(n);const g=new THREE.Group();g.add(mesh(new THREE.CylinderGeometry(.36,.58,1.4,10),SM({color:n.c}),0,.7,0),mesh(new THREE.SphereGeometry(.27,12,10),SM({color:0xd8b090}),0,1.66,0));
+function npcMesh(n){if(n.id==='stash'&&NS())return stashMesh(n);const g=new THREE.Group();g.add(mesh(new THREE.CylinderGeometry(.36,.58,1.4,10),SM({color:n.c}),0,.7,0),mesh(new THREE.SphereGeometry(.27,12,10),SM({color:0xd8b090}),0,1.66,0));
   if(n.id==='smith'){g.add(mesh(new THREE.BoxGeometry(.9,.12,.5),SM({color:0x3a2a20}),0,1.25,.2));const h=mesh(new THREE.BoxGeometry(.12,.7,.12),PM.wood,.55,1.1,.2);h.rotation.z=.6;g.add(h,mesh(new THREE.BoxGeometry(.3,.18,.18),PM.iron,.78,1.4,.2))}
   else if(n.id==='gear'){const hat=mesh(new THREE.CylinderGeometry(.42,.42,.06,14),SM({color:n.hat}),0,1.9,0),top=mesh(new THREE.CylinderGeometry(.22,.26,.3,12),SM({color:n.hat}),0,2.05,0);g.add(hat,top);
     const sw=mesh(new THREE.BoxGeometry(.08,1.1,.08),PM.iron,.5,1.1,.1);sw.rotation.z=-.3;g.add(sw,mesh(new THREE.BoxGeometry(.6,.08,.3),SM({color:0x6a4a2a}),0,1.05,.25))}
   else if(n.id==='heir'){const hood=mesh(new THREE.ConeGeometry(.36,.6,10),SM({color:n.hat}),0,2.02,0),st=mesh(new THREE.CylinderGeometry(.04,.05,1.9,6),PM.wood,.55,.95,.15),orb=mesh(new THREE.SphereGeometry(.16,12,10),new THREE.MeshBasicMaterial({color:0x5ae0d0}),.55,1.98,.15);g.add(hood,st,orb)}
+  else if(n.id==='stash'){/* v511: 재단사 — 베레모 + 옷감 두루마리 + 어깨의 줄자 */const cap=mesh(new THREE.CylinderGeometry(.34,.3,.14,14),SM({color:0x8a3a6a}),0,1.95,0),tape=mesh(new THREE.TorusGeometry(.34,.035,6,16),SM({color:0xe8d8a8}),0,1.4,0);tape.rotation.x=Math.PI/2.4;const rol=mesh(new THREE.CylinderGeometry(.14,.14,.7,10),SM({color:0xc890ff}),.55,.9,.15);rol.rotation.z=.5;g.add(cap,tape,rol)}
   else{const hood=mesh(new THREE.ConeGeometry(.34,.55,10),SM({color:n.hat}),0,2,0);g.add(hood,mesh(new THREE.BoxGeometry(.5,.4,.3),PM.wood,.45,.9,.1))}
   g.position.set(n.x,0,n.z);g.rotation.y=Math.atan2(-n.x,8-n.z);return g}
 function house(x,z){const g=new THREE.Group(),r=Math.atan2(-x,-z);g.add(mesh(new THREE.BoxGeometry(4,2.6,3.4),PM.pillar,0,1.3,0));
@@ -1877,7 +1878,7 @@ function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,9
     for(let i=0;i<4;i++){const b=mesh(new THREE.BoxGeometry(.08,1.1,.03),PM.iron,-1+i*.65,1.05,.18);b.rotation.z=(i%2?.15:-.15);g.add(b)}
     for(const px of [-.7,.7]){const sh=mesh(new THREE.CylinderGeometry(.32,.32,.08,12),SM({color:[0x8a2a2a,0x2a4a8a][px>0?1:0],roughness:.6}),px,1.95,.1);sh.rotation.x=Math.PI/2;g.add(sh)}
     g.position.set(0,0,-7.4);scene.add(g);propMeshes.push(g);colliders.push({x:-1,z:-7.4,r:.8},{x:1,z:-7.4,r:.8})}
-  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
+  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML='';d.hidden=true;$('names').appendChild(d);return d});
@@ -2409,7 +2410,7 @@ const LOOKS={wings:{n:'빛의 날개',wing:1,col:[.3,.56,1],hot:[.93,.97,1],sp:[
   wings_lava:{n:'용암 날개',lava:1},
   wings_fire:{n:'화염 날개',wing:1,col:[1,.13,.01],hot:[1,.5,.12],sp:[1,.6,.2],fl:1,glow:0xff4a10,em:1}};
 /* v483: 외형 상점(재화 구매)이 생기기 전까지는 테스트 캐릭터에서만 보이고 착용됨 — 일반 캐릭터는 외형 줄 숨김·저장된 착용 값 무시 */
-const lookOk=()=>!!(S&&S.test);
+const lookOk=()=>!!S;/* v511: 외형은 일반 모드에도 적용 */
 function lookRow(){if(!lookOk()||!Object.keys(LOOKS).some(lookOwn))return '';return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).filter(lookOwn).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
 function lookSet(id){if(!lookOk())return;S.look=id&&LOOKS[id]?id:null;save()}
 /* v508: 외형 구매 재화 「광휘의 파편」 — 재단사 세라에게서 외형 장비를 삼. 획득처(드롭·보상)는 추후, 테스트 캐릭터는 무한 */
@@ -3861,7 +3862,7 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
   const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=Math.floor(ex)+(Math.random()<ex%1?1:0);for(let i=0;i<n;i++)dropEssAt(e.pos,1);
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 (테스트 캐릭터 전용) */
-  if(NS()&&n>0)lumiAdd(n)}
+  if(n>0)lumiAdd(n)}
 const LUMI_MAX=1000;function lumiAdd(n){const o=S.lumi||0;S.lumi=Math.min(LUMI_MAX,o+n)}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
@@ -3947,7 +3948,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   /* v406 정산: 처치한 균열 몹의 골드·정수 × 등급 배수(실패 .6 · B .8 · A 1 · S 1.3) + 그동안 나온 골드 주머니(그대로) + S등급 확정 강화 주문서(위험도/10개) */
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
   const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(S.tier/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */;/* v428: 장비 지급 없음 */
-  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;const kl=NS()?Math.round((A.l||0)*m):0;if(kl)lumiAdd(kl);if(tk)S.tickets=(S.tickets||0)+tk;save();
+  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;const kl=Math.round((A.l||0)*m);if(kl)lumiAdd(kl);if(tk)S.tickets=(S.tickets||0)+tk;save();
   /* v427: 정산 창(일시정지) — 글자만 뜨던 팝업을 별도 창으로: 성공/실패·시간·항목별 보상·총 골드 */
   const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];if(kl)R.push(['광휘의 파편',`+${fmtG(kl)}`,'#c890ff',`×${m}`]);
   if(A.pn)R.push([`골드 주머니 ${A.pn}개`,`+${fmtG(A.pg)} G`,'#ffd24a']);if(A.ln)R.push([`전설 골드 주머니 ${A.ln}개`,`+${fmtG(A.lg)} G`,'#d09aff']);
@@ -4380,7 +4381,7 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
   for(let i=0;i<14;i++)wingTick(.1)}
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 1,000';
-  let h=`<div class="shead"><div><div class="chap">Tailor · ${npcName('heir')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
+  let h=`<div class="shead"><div><div class="chap">Tailor · ${NS()?npcName('heir'):npcName('stash')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur"><i></i><span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
   for(const k of Object.keys(LOOKS)){const L=LOOKS[k],own=lookOwn(k),on=S.look===k,ok=lookCoin()>=(L.pr||0);
     h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':''}</div>
@@ -4819,7 +4820,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v510';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v511';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5452,10 +5453,10 @@ let invFilter='weapon',lockMode=false,invSub=null,ddOpen=null;/* v131 가방 종
 function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=sc.length-a;
   if(a)o.push({n:'각인의 서',k:a,c:'#5ae0d0',i:'scr'});if(b)o.push({n:'상급 각인의 서',k:b,c:'#c890ff',i:'scrU'});
   if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffb070',i:'tk'});
-  if(NS()){const cur=(n,v,c,sh)=>o.push({n,c,h:`<span class="cdia ${sh||''}" style="--c:${c}"></span>`,kt:S.test?'∞':fmtKM(v||0)});cur('윤회의 불씨',S.rr,'#ff9a4a');cur('광휘의 파편',S.lumi,'#c890ff');cur('잿불 정수',S.ess,'#ff5a3a','sq')}
+  {const cur=(n,v,c,sh)=>o.push({n,c,h:`<span class="cdia ${sh||''}" style="--c:${c}"></span>`,kt:S.test?'∞':fmtKM(v||0)});if(NS())cur('윤회의 불씨',S.rr,'#ff9a4a');cur('광휘의 파편',S.lumi,'#c890ff');if(NS()||S.ch>=NCH||(S.ess||0)>0)cur('잿불 정수',S.ess,'#ff5a3a','sq')}
   if(NS()){nsPotInit();for(const [kk,nm,c] of [['hp','생명력','#ff7a6a'],['mp','마나','#6aa8ff']])o.push({n:`${nm} 물약`,c,pot:kk})}else for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
   return o}
-function renderInv(){if(!NS())return renderInvOld();
+function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (장비 시스템만 테스트 캐릭터 전용) */
   /* v484 장비창 개편 — 세로: 위 캐릭터·장착 칸 / 아래 가방, 가로·PC: 왼쪽 캐릭터·장착 칸 / 오른쪽 가방 */
   const sh=$('invSheet'),port=innerWidth<innerHeight;sh.className='sheet inv2';$('inv').classList.add('iv2on');$('inv').classList.remove('center');
   if(!['weapon','armor','acc','etc'].includes(invFilter))invFilter='weapon';
@@ -5471,7 +5472,7 @@ function renderInv(){if(!NS())return renderInvOld();
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>
-    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span><span><i style="background:#ff5a3a"></i>${fmtKM(S.ess||0)}</span><span><i class="dm" style="background:#ff9a4a"></i>${S.test?'∞':fmtKM(S.rr||0)}</span><span><i class="dm" style="background:#c890ff"></i>${S.test?'∞':fmtKM(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
+    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span>${NS()||S.ch>=NCH||(S.ess||0)>0?`<span><i style="background:#ff5a3a"></i>${fmtKM(S.ess||0)}</span>`:''}${NS()?`<span><i class="dm" style="background:#ff9a4a"></i>${S.test?'∞':fmtKM(S.rr||0)}</span>`:''}<span><i class="dm" style="background:#c890ff"></i>${S.test?'∞':fmtKM(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
   const subOk=x=>!invSub||x.slot===invSub,subN=k=>k&&FG[invFilter]&&FG[invFilter].includes(k)?SLOTN[k]:'';
@@ -5535,7 +5536,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.id==='iLockMode'){lockMode=!lockMode;if(lockMode){invSel=null;eqSel=null}renderInv();return}
   if(b.dataset.i&&lockMode){const it=S.inv.find(x=>x.id===+b.dataset.i);if(it){it.lock=!it.lock;save()}renderInv();return}
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
-  if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel&&NS()){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:k}renderInv();return}
+  if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:k}renderInv();return}
   if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],old=S.eq[it.slot];if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[it.slot]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
@@ -5548,7 +5549,7 @@ $('invSheet').addEventListener('click',e=>{
 
 });
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv()});
-function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;IVS.exp=false;IVS.ph=IVS_PH[0];if(NS())document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter=NS()?'weapon':'all';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
+function openInv(){closeAllSheets();invOpen=true;IVS.rot=0;IVS.exp=false;IVS.ph=IVS_PH[0];document.body.classList.add('invmode');ddOpen=null;invSub=null;invFilter='weapon';lockMode=false;invSel=null;eqSel=null;clearArm=0;renderInv();$('inv').hidden=false;releaseAll();guide('inv')}
 function closeInv(){invOpen=false;$('inv').hidden=true;document.body.classList.remove('invmode');$('inv').classList.remove('iv2on');refreshUpBtn()}
 $('openInv').onclick=openInv;
 $('autoEq').onclick=()=>equipBest();
@@ -5624,7 +5625,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(!NS()&&npcNear.id==='stash')return openLooks();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
@@ -6350,7 +6351,7 @@ addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&IVP.on&&ivpMove(e
 addEventListener('pointerup',e=>{if(e.pointerType==='mouse')ivpEnd()});
 const ivsUp=e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;if(d.mv)IVS.dragEnd=Date.now();IVS.drag=null};addEventListener('pointerup',ivsUp);addEventListener('pointercancel',ivsUp);
 function frameCam(dt,target=P.pos){
-  if(invOpen&&!S.demo&&NS()){invCam();return}
+  if(invOpen&&!S.demo){invCam();return}
   if(IVS.on)invStudioOff();
   if(S.demo&&target===P.pos){const port=innerWidth<innerHeight;target=_dt.set(P.pos.x+(port?0:4.5),0,P.pos.z+(port?6:0))}/* v82: 시연 중에는 선택 창에 가리지 않게 캐릭터를 위(세로)·왼쪽(가로)으로 */
   else if(S.duel&&target===P.pos){const b=enemies.find(e=>e.duel);if(b){const w=b.maw?.5:.3;target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*w,0,P.pos.z+(b.pos.z-P.pos.z)*w-1.5)}}/* v210: 고정형 아귀는 더 가운데로 *//* v95: 결투장은 거대 보스가 화면에 들어오게 */
