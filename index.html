@@ -58,7 +58,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2tab.on .iv2menu button{color:var(--ink)}.iv2menu button.on{background:#2e2e3a;color:var(--ember)}.iv2menu button i{font-style:normal;color:var(--muted);font-size:11px}
 .iv2bag{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .iv2bag::-webkit-scrollbar{display:none}.iv2bag{padding:3px}.iv2.l .iv2tab button{padding:7px 9px}.iv2.l .iv2tab .dd{padding:7px 8px 7px 0}.iv2.l .iv2tabs{gap:5px}
-.iv2bag .bag{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 8px}
+.iv2bag .bag.lkmode{outline:0}.iv2bag .bag{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 8px}
 .iv2it{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;border:0;background:transparent;padding:0;color:var(--ink);font:inherit}
 .iv2it .tile{width:100%}
 .iv2it .inm{font-size:10.5px;line-height:1.25;color:#d8d0c0;text-align:center;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:keep-all}
@@ -4735,7 +4735,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v492';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v493';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6222,14 +6222,14 @@ function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=in
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
   g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
-  const FOV=port?26:28,ch=port?.46*Hh:Hh,want=port?4.15:3.8;/* want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
+  const FOV=port?26:28,ch=port?.46*Hh:Hh,want=(port?4.15:3.8)/.85;/* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
   if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
   const visH=want*Hh/ch,D=visH/2/Math.tan(FOV*Math.PI/360);
   /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
   const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy=port?(.5-.255)*Hh:-.02*Hh;
   camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();
-  _icp.set(P.pos.x+dx*D,1.6,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
-  _icl.set(P.pos.x,1.35,P.pos.z);camera.lookAt(_icl)}
+  _icp.set(P.pos.x+dx*D,1.7,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
+  _icl.set(P.pos.x,1.45,P.pos.z);camera.lookAt(_icl)}
 /* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
 $('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.drag={id:e.pointerId,x:e.clientX,r:IVS.rot,mv:false}});
 addEventListener('pointermove',e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x;if(Math.abs(dx)>5)d.mv=true;if(d.mv)IVS.rot=d.r-dx*.012});
