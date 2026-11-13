@@ -63,7 +63,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2it .tile{width:100%}
 .iv2it .inm{font-size:10.5px;line-height:1.25;color:#d8d0c0;text-align:center;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:keep-all}
 .iv2it .tile .lv{position:absolute;left:3px;top:2px;font:800 9.5px var(--en);font-stretch:87%;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:0 4px}
-.iv2foot{flex:none;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.iv2foot{flex:none;display:flex;align-items:center;gap:6px;flex-wrap:nowrap}.iv2foot .cnt,.iv2foot button{white-space:nowrap}
 .iv2foot .cnt{font:700 12px var(--en);font-stretch:87%;color:var(--ink);background:#26262e;border-radius:14px;padding:6px 11px}
 .iv2foot button{border:1px solid #3a3a46;background:#202028;color:var(--ink);border-radius:14px;padding:6px 10px;font:700 11.5px var(--ko)}
 .iv2foot .r{margin-left:auto;display:flex;gap:6px}
@@ -206,7 +206,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.pot.empty{opacity:.4}
 .pseg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;fill:none;stroke-width:2.8;stroke-linecap:round}.pseg path{stroke:rgba(255,255,255,.16)}.pseg path.on{stroke:var(--liq);filter:drop-shadow(0 0 2px var(--glow))}
 .act.pot.nsp b{display:none}.act.pot.nsp .flask{margin-top:0}.act.pot.nsp.empty{opacity:.6}
-.tile.etc .pot2{position:relative;width:70%;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.tile.etc .pot2 .flask{width:62%;height:62%;margin:0}.tile.etc .pot2 .pseg path{stroke-width:3.2}
+.tile.etc .pot2{position:relative;width:70%;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.tile.etc .pot2 .flask{width:86%;height:86%;margin:0}.tile.etc .pot2 .pseg path{stroke-width:3.2}
 .autoeq{pointer-events:auto;margin-top:8px;display:flex;align-items:center;gap:6px;background:rgba(30,46,26,.92);border:1px solid #7fe07a;color:var(--ink);border-radius:10px;padding:8px 11px;font:500 12px var(--ko);max-width:min(240px,62vw);text-align:left}
 .autoeq b{color:#7fe07a}.autoeq .up{color:#7fe07a}
 .autoeq.fbgo{background:rgba(60,22,16,.92);border-color:var(--ember)}.autoeq.fbgo b{color:var(--ember)}
@@ -1061,7 +1061,7 @@ const RANK=[
   {n:'고유',c:'#ff8a3a',hex:0xff8a3a,hp:1,dmg:1,xp:1,sc:1}
 ];
 const RARE_PRE=['광폭한','교활한','단단한','재빠른','굶주린'],UNI_PRE=['피에 굶주린','저주받은','불멸의','잔혹한','고대의'];
-const tkFor=t=>t>=80?900:t>=70?700:t>=50?400:300,/* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70;/* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+const tkFor=t=>t>=80?900:t>=70?700:t>=50?400:300,/* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이']};
@@ -4004,7 +4004,7 @@ function dropItem(p,boss,rar){
 /* 가방이 가득 차면 (v29): 가방 안의 기존 장비 중 가장 약한 것(지금 장비보다 좋은 ▲ 아이템은 제외, 낮은 등급 → 낮은 평가 순)을
    자동으로 팔고 새 장비를 받음 */
 /* v131: 잠근 아이템은 자동 판매하지 않음. 가방이 잠근 아이템으로 가득 차면 새 아이템을 대신 판매 */
-function makeRoom(){if(S.inv.length<BAG)return true;const ul=S.inv.filter(x=>!x.lock);if(!ul.length)return false;const ups=new Set(upgrades()),c=ul.filter(x=>!ups.has(x)),pool=c.length?c:ul;
+function makeRoom(){if(S.inv.length<bagCap())return true;const ul=S.inv.filter(x=>!x.lock);if(!ul.length)return false;const ups=new Set(upgrades()),c=ul.filter(x=>!ups.has(x)),pool=c.length?c:ul;
   let w=pool[0];for(const x of pool)if(x.rar<w.rar||(x.rar===w.rar&&score(x)<score(w)))w=x;
   S.gold+=sellPrice(w);S.inv.splice(S.inv.indexOf(w),1);return true}
 function addItem(it){
@@ -4302,7 +4302,7 @@ function renderStash(){const d=stashD,sel=stashSel&&(stashSrc==='s'?d.items:S.in
   <div class="ivcmp">${sel?ivCard(sel,'sel'):'<div class="ivc sel empty"><span class="ivlab">선택한 아이템</span></div>'}</div>
   <div class="btns"><button class="primary" data-ns="move" ${sel?'':'disabled'}>${stashSrc==='s'?'가방으로 옮기기':'창고로 옮기기'}</button><button class="ghost" data-ns="expand">창고 +5칸 <span class="gp">${fmtG(stashCost(d.cap))}G</span></button></div>
   <div class="tag">창고 ${d.items.length} / ${d.cap}</div><div class="bag">${d.items.map(it=>nsTile(it,it.id===stashSel,'s')).join('')}${Array.from({length:Math.max(0,d.cap-d.items.length)},()=>'<div class="tile none"></div>').join('')}</div>
-  <div class="tag">가방 ${S.inv.length} / ${BAG}</div><div class="bag">${S.inv.map(it=>nsTile(it,it.id===stashSel,'b')).join('')}</div>`;
+  <div class="tag">가방 ${S.inv.length} / ${bagCap()}</div><div class="bag">${S.inv.map(it=>nsTile(it,it.id===stashSel,'b')).join('')}</div>`;
   $('nsBody').innerHTML=h}
 function openStash(){closeAllSheets();nsSheet();stashLoad();stashOpen=true;stashSel=null;renderStash();$('nsSheet').hidden=false;releaseAll()}
 /* 옵션 리롤: 아이템 전체 단위 — 티어·베이스·줄 수·옵션 종류 유지, 수치만 티어 범위 안에서 다시 뽑음 */
@@ -4320,7 +4320,7 @@ function openRR(){closeAllSheets();nsSheet();rrOpen=true;rrSel=null;renderRR();$
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashSel=+id;stashSrc=src;renderStash()}else{rrSel=+id;renderRR()}return}
-  if(a==='move'&&stashOpen){const from=stashSrc==='s'?stashD.items:S.inv,to=stashSrc==='s'?S.inv:stashD.items,cap=stashSrc==='s'?BAG:stashD.cap,i=from.findIndex(x=>x.id===stashSel);
+  if(a==='move'&&stashOpen){const from=stashSrc==='s'?stashD.items:S.inv,to=stashSrc==='s'?S.inv:stashD.items,cap=stashSrc==='s'?bagCap():stashD.cap,i=from.findIndex(x=>x.id===stashSel);
     if(i<0)return;if(to.length>=cap){toast('공간 부족',stashSrc==='s'?'가방이 가득 찼습니다':'창고가 가득 찼습니다');return}to.push(from.splice(i,1)[0]);stashSel=null;stashSave();save();renderStash();return}
   if(a==='expand'&&stashOpen){const c=stashCost(stashD.cap);if(S.gold<c){toast('골드 부족',`${fmtG(c)}G가 필요합니다`);return}S.gold-=c;stashD.cap+=5;stashSave();save();renderStash();return}
   if(a==='rr'&&rrOpen){const it=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===rrSel);if(!it)return;if(!S.test){if((S.rr||0)<RR_COST)return;S.rr-=RR_COST}rerollItem(it);refreshMax();save();renderRR();return}}
@@ -4742,7 +4742,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v494';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v495';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5399,14 +5399,14 @@ function renderInv(){if(!NS())return renderInvOld();
       ${ddOpen===k?`<div class="iv2menu">${[[null,'전체'],...FG[k].map(s=>[s,SLOTN[s]])].map(([s,nm])=>`<button data-sub="${k},${s||''}" class="${on&&(invSub||null)===s?'on':''}">${nm}<i>${s?S.inv.filter(x=>x.slot===s).length:cnt(k)}</i></button>`).join('')}</div>`:''}</div>`};
   const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>${lockMode?'<p class="hint lkhint" style="margin:0">잠금 모드 · 아이템을 누르면 잠금/해제됩니다</p>':''}`;
   let bag=`<div class="bag${lockMode?' lkmode':''}">`;
-  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=e.pot?`<div class="iv2it"><div class="tile etc ${e.pot==='hp'?'ph':'mpot'}" style="border-color:${e.c}"><span class="pot2">${potFlask(P.pch[e.pot]/potMaxN())}${potSeg(P.pch[e.pot],potMaxN())}</span><small style="color:${e.c}">${P.pch[e.pot]}/${potMaxN()}</small></div><span class="inm">${e.n}</span></div>`:`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
+  if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=e.pot?`<div class="iv2it"><div class="tile etc ${e.pot==='hp'?'ph':'mpot'}" style="border-color:${e.c}"><span class="pot2">${potFlask(1)}</span></div><span class="inm">${e.n}</span></div>`:`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
   else{const shown=S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x));
     for(const it of shown){const up=isBetter(it,S.eq[it.slot]),c=it.ns?NT_C[it.tier]:RAR[it.rar].c;
       bag+=`<button class="iv2it" data-i="${it.id}"><span class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" style="border-color:${c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">'+LKI()+'</span>':''}<span class="lv">${it.ns?it.tier+'T':it.ilvl}</span>${ico(icoSlot(it.slot))}</span><span class="inm" style="color:${c}">${it.name}</span></button>`}
     if(!shown.length)bag+=`<div class="iv2empty">${invSub?SLOTN[invSub]:({weapon:'무기',armor:'방어구',acc:'장신구'})[invFilter]}이(가) 가방에 없습니다</div>`}
   bag+=`</div>`;
   const lowN=S.inv.filter(x=>x.rar<=1&&!x.lock),allN=S.inv.filter(x=>!x.lock);
-  const foot=`<div class="iv2foot"><span class="cnt">🎒 ${S.inv.length} / ${BAG}</span><span class="r"><button id="iHideUp" title="화면의 자동 장착 알림 버튼">${S.hideUp?'알림 켜기':'🙈'}</button><button id="iSellLow" ${lowN.length?'':'disabled'}>${NS()?'5·6티어':'일반·마법'} 판매 <span class="gp">+${fmtG(lowN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button id="iSellAll" ${allN.length?'':'disabled'}>${clearArm?'한 번 더 누르면 판매':'모두 판매'} <span class="gp">+${fmtG(allN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button></span></div>`;
+  const foot=`<div class="iv2foot"><span class="cnt">${S.inv.length} / ${bagCap()}</span><span class="r"><button id="iSellLow" ${lowN.length?'':'disabled'}>${NS()?'5·6티어':'일반·마법'} 판매 <span class="gp">+${fmtG(lowN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button id="iSellAll" ${allN.length?'':'disabled'}>${clearArm?'한 번 더 누르면 판매':'모두 판매'} <span class="gp">+${fmtG(allN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button></span></div>`;
   const look=invFilter==='etc'?lookRow():'';
   const panel=`<div class="iv2panel">${tabs}<div class="iv2bag">${bag}${look}</div>${foot}</div>`;
   /* 선택 팝업: 가방 아이템 = 현재 장착과 비교 + 장착·잠금·판매 / 장착 칸 = 장착 장비 정보 */
