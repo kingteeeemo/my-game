@@ -2026,7 +2026,7 @@ function wingGeo(){const F=wingFeathers(),SEG=WGC.seg,pos=[],nxt=[],prm=[],aux=[
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('nxt',new THREE.Float32BufferAttribute(nxt,3));g.setAttribute('prm',new THREE.Float32BufferAttribute(prm,4));g.setAttribute('aux',new THREE.Float32BufferAttribute(aux,3));g.setIndex(idx);
   g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.3,-.2),4);return g}
 function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
-  uniforms:{uT:{value:0},uA:{value:1},uDrag:{value:new THREE.Vector3()},uOpen:{value:1},uTw:{value:0},uSw:{value:WGC.sw},uS:{value:WGC.S},uCol:{value:new THREE.Vector3(...WGC.col)},uHot:{value:new THREE.Vector3(...WGC.hot)}},
+  uniforms:{uT:{value:0},uA:{value:1},uDrag:{value:new THREE.Vector3()},uOpen:{value:1},uTw:{value:0},uSw:{value:WGC.sw},uS:{value:WGC.S},uCol:{value:new THREE.Vector3(...WGC.col)},uHot:{value:new THREE.Vector3(...WGC.hot)},uSp:{value:new THREE.Vector3(.8,.95,1)},uFl:{value:0}},
   vertexShader:`attribute vec3 nxt;attribute vec4 prm;attribute vec3 aux;uniform float uT,uOpen,uS,uTw,uSw;uniform vec3 uDrag;varying vec3 vP;varying float vW;
     vec3 sway(vec3 p,vec2 n,float t,float sd,float amp,float sx){
       /* 펄럭임: 뿌리→끝으로 흘러가는 물결(깃발처럼). 줄기마다 박자·위상이 다르고 끝으로 갈수록 커짐 */
@@ -2043,7 +2043,7 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       /* 굵기: 뿌리 쪽이 굵고 끝은 채찍처럼 가늘게 + 흘러가는 굵기 맥동 */
       float w=prm.w*(.3+.7*smoothstep(0.,.14,t))*(.1+.9*pow(max(1.-t,0.),1.15))*(1.+.16*sin(t*11.-uT*3.4+prm.z*30.));
       va.xyz+=N*prm.y*w*3.8*uS;vP=vec3(t,prm.y,prm.z);vW=w;gl_Position=projectionMatrix*va;}`,
-  fragmentShader:`uniform float uT,uA;uniform vec3 uCol,uHot;varying vec3 vP;varying float vW;
+  fragmentShader:`uniform float uT,uA,uFl;uniform vec3 uCol,uHot,uSp;varying vec3 vP;varying float vW;
     float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
     float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1,0)),f.x),mix(h1(i+vec2(0,1)),h1(i+vec2(1,1)),f.x),f.y);}
     void main(){float t=vP.x,sd=vP.z,s=vP.y;
@@ -2054,18 +2054,22 @@ function wingMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:
       float edge=smoothstep(1.,.55,abs(s));
       float fade=smoothstep(.0,.12,t)*mix(.3,1.,smoothstep(.05,.5,t))*smoothstep(1.,.93,t)*(.82+.18*sin(uT*5.3+sd*70.+t*6.));
       /* 반짝임 */vec2 sq=vec2(t*70.,s*4.+2.),sf=fract(sq)-.5;float sp=step(.988,h1(floor(sq)+floor(uT*8.+sd*9.)*vec2(3.1,1.7)+sd))*exp(-dot(sf,sf)*22.)*exp(-abs(s)*1.5);
-      vec3 c=uHot*(core*.9+glow*.22)+uCol*(glow*.5+mist*.36)+vec3(.8,.95,1.)*sp*1.2;
+      vec3 c=uHot*(core*.9+glow*.22)+uCol*(glow*.5+mist*.36)+uSp*sp*1.2;
+      /* 화염: 바깥 광채가 빠르게 일렁이고 끝 쪽이 붉게 식음 */if(uFl>0.){float fk=vn(vec2(t*14.-uT*7.+sd*13.,s*2.5-uT*2.));c*=mix(1.,.55+.9*fk,uFl);c=mix(c,c*vec3(1.,.4,.25),uFl*smoothstep(.3,1.,t)*.85);c*=1.+uFl*.25;}
       gl_FragColor=vec4(c*edge*fade*uA,1.);}`})}
 /* v479 외형 아이템(능력치 없음) — S.look = 착용 중인 외형 id. 가방 창의 '외형' 줄에서 켜고 끔 */
-const LOOKS={wings:{n:'빛의 날개'}};
+/* 날개 색: col 광채, hot 심지, sp 반짝임, fl 화염 일렁임(0~1), em 위로 날리는 불씨 */
+const LOOKS={wings:{n:'빛의 날개',wing:1,col:[.3,.56,1],hot:[.93,.97,1],sp:[.8,.95,1],fl:0},
+  wings_gold:{n:'황금 날개',wing:1,col:[1,.62,.12],hot:[1,.95,.72],sp:[1,.92,.6],fl:0,glow:0xffb030},
+  wings_fire:{n:'화염 날개',wing:1,col:[1,.13,.01],hot:[1,.5,.12],sp:[1,.6,.2],fl:1,glow:0xff4a10,em:1}};
 function lookRow(){return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
 function lookSet(id){S.look=id&&LOOKS[id]?id:null;save()}
 const WG={m:null,a:0,open:1,tw:0,v:new THREE.Vector3(),pp:null,pr:0,_v:new THREE.Vector3()};
-function wingTick(dt){const on=S.look==='wings'&&hero&&!S.demo&&P.hp>0;let m=WG.m;
+function wingTick(dt){const L=S.look&&LOOKS[S.look],on=!!(L&&L.wing)&&hero&&!S.demo&&P.hp>0;let m=WG.m;
   if(!on&&!(m&&m.parent))return;
   if(!m){m=WG.m=new THREE.Mesh(wingGeo(),wingMat());m.scale.setScalar(WGC.S);m.frustumCulled=false;m.renderOrder=4;
     const g=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0x5a6cff,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.16}));g.scale.set(3.4,2.2,1);g.position.set(0,.45,-.2);m.add(g);WG.g=g}
-  const U=m.material.uniforms;
+  const U=m.material.uniforms;if(L&&L.wing&&WG.lk!==S.look){WG.lk=S.look;U.uCol.value.set(...L.col);U.uHot.value.set(...L.hot);U.uSp.value.set(...L.sp);U.uFl.value=L.fl||0;WG.g.material.color.setHex(L.glow||0x5a6cff)}
   if(on&&m.parent!==hero){if(m.parent)m.parent.remove(m);hero.add(m);m.position.set(0,WGC.y,WGC.z);WG.pp=null;WG.a=0;WG.v.set(0,0,0);WG.tw=0;WG.open=.25}
   WG.a=clamp(WG.a+(on?dt*1.6:-dt*3.5),0,1);U.uA.value=WG.a*WG.a*(3-2*WG.a)*(GQS[GUQ].post?.54:1);WG.g.material.opacity=.16*U.uA.value;
   if(!on){if(WG.a<=0&&m.parent)m.parent.remove(m);U.uT.value+=dt;return}
@@ -2079,6 +2083,9 @@ function wingTick(dt){const on=S.look==='wings'&&hero&&!S.demo&&P.hp>0;let m=WG.
     WG.pp={x:P.pos.x,z:P.pos.z};WG.pr=ry;const sp=Math.hypot(lx,lz);
     WG._v.set(-lx*.03,sp*.012,-lz*.045);if(WG._v.length()>.5)WG._v.setLength(.5);WG.v.lerp(WG._v,1-Math.exp(-dt*5));WG.tw+=(clamp(w*.045,-.35,.35)-WG.tw)*(1-Math.exp(-dt*6));
     const op=P.mv?.45:sp>1?.9:1;U.uSw.value+=((sp>1?WGC.sw+.3:WGC.sw)-U.uSw.value)*(1-Math.exp(-dt*4));WG.open+=(op-WG.open)*(1-Math.exp(-dt*(op<WG.open?10:3.2)))}
+  /* 화염 날개: 날개 범위에서 불씨가 위로 날림 */
+  if(L.em&&dt>0){WG.ec=Math.min(6,(WG.ec||0)+dt*26*QM())}while(L.em&&WG.ec>=1){WG.ec--;const sx=Math.random()<.5?-1:1,r=Math.random(),lx=sx*(.25+2.7*r)*WGC.S,ly=m.position.y+(.9-1.7*r*r)*WGC.S*(.4+.6*Math.random()),lz=m.position.z-.5*r*WGC.S;
+    WG._v.set(lx,ly,lz);hero.localToWorld(WG._v);emit(PADD,{x:WG._v.x,y:WG._v.y,z:WG._v.z,vy:rnd(1,2.4),life:rnd(.6,1.1),s0:.32,s1:.05,c0:0xffd070,c1:0x801800,a:1,tex:1})}
   U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
 /*>WING*/
 function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
@@ -4291,7 +4298,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v481';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v482';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
