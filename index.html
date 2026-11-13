@@ -17,8 +17,8 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2top>*{pointer-events:auto}
 .iv2auto{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:17px;border:1px solid rgba(255,255,255,.18);background:rgba(20,20,28,.85);color:var(--ink);font:700 12.5px var(--ko)}
 .iv2auto b{color:#7fe07a}.iv2auto:disabled{opacity:.45}
-.iv2money{margin-left:auto;display:flex;gap:10px;align-items:center;font:700 12.5px var(--en);font-stretch:87%;color:var(--ink);background:rgba(20,20,28,.7);border-radius:17px;padding:6px 12px}
-.iv2money i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.iv2money{margin-left:auto;display:flex;gap:8px;align-items:center;font:700 12.5px var(--en);font-stretch:87%;color:var(--ink);background:rgba(20,20,28,.7);border-radius:17px;padding:6px 12px}
+.iv2money i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:3px;vertical-align:-1px}.iv2money i.dm{border-radius:2px;transform:rotate(45deg) scale(.85)}
 .iv2x{width:38px;height:38px;border-radius:50%;border:0;background:transparent;color:#fff;font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center}
 .iv2who{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 50px);text-align:center;pointer-events:none;z-index:1}
 .iv2.l .iv2who{top:calc(env(safe-area-inset-top,0px) + 52px)}
@@ -4819,7 +4819,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v509';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v510';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5471,7 +5471,7 @@ function renderInv(){if(!NS())return renderInvOld();
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>
-    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span><span><i style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg)"></i>${fmtKM(S.ess||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
+    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span><span><i style="background:#ff5a3a"></i>${fmtKM(S.ess||0)}</span><span><i class="dm" style="background:#ff9a4a"></i>${S.test?'∞':fmtKM(S.rr||0)}</span><span><i class="dm" style="background:#c890ff"></i>${S.test?'∞':fmtKM(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
   const subOk=x=>!invSub||x.slot===invSub,subN=k=>k&&FG[invFilter]&&FG[invFilter].includes(k)?SLOTN[k]:'';
