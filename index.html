@@ -31,7 +31,11 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2slot.empty{border-style:solid;border-color:rgba(255,255,255,.12);background:rgba(18,18,24,.55)}
 .iv2slot.empty .ico{opacity:.22;filter:grayscale(1)}
 .iv2slot.lock{border-color:rgba(255,255,255,.08);background:rgba(18,18,24,.4)}
-.iv2slot.lock span{font-size:15px;opacity:.35}
+.iv2slot.lock span{font-size:17px;color:#fff;opacity:.4;display:flex}
+.lki{display:inline-block;vertical-align:-.15em;color:#fff}
+.iv2it .tile .lk{color:#fff;display:flex}
+.iv2tabs .lkm .lki{font-size:14px}.iv2tabs .lkm.on .lki{color:#ffd24a}
+.iv2pop .ivact .btns .lki{font-size:15px;margin-right:2px}
 .iv2slot.on{box-shadow:0 0 0 2px #fff,0 0 14px rgba(255,255,255,.35)}
 .iv2slot .lv{position:absolute;left:-4px;top:-6px;min-width:20px;height:18px;padding:0 5px;border-radius:9px;background:#14141a;border:1px solid rgba(255,255,255,.25);font:800 10.5px var(--en);font-stretch:87%;color:#fff;display:flex;align-items:center;justify-content:center}
 .iv2slot .tg{position:absolute;right:2px;bottom:1px;font:700 9px var(--ko);color:#fff;opacity:.85;text-shadow:0 1px 2px #000}
@@ -80,6 +84,9 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivact .btns{display:grid;grid-template-columns:1fr 1.3fr 1.2fr;gap:6px;margin:0}
 .iv2pop .ivact .btns button{min-height:42px}
 .iv2pop .ivdps{background:rgba(22,22,29,.98)}
+/* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
+.iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
+.iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
 </style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -4727,7 +4734,7 @@ function teleFlush(){if(!TELE_URL||teleBusy||!teleQ.length)return;teleBusy=true;
   fetch(TELE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(batch),keepalive:true})
     .then(()=>{teleQ.splice(0,batch.length);try{localStorage.setItem(TELE_KEY,JSON.stringify(teleQ))}catch(e){}}).catch(()=>{}).finally(()=>{teleBusy=false});}
 if(TELE_URL){setInterval(()=>{tele('hb');teleFlush()},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){tele('hide');teleFlush()}else teleLast=Date.now()});addEventListener('pagehide',()=>{tele('hide');teleFlush()})}
-const APP_VER='v489';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v490';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5144,6 +5151,8 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   parts.push(NS()&&b.kind==='whirl'?`타격 간격 ${nsAct(1-hasteP()*gl(id,'haste')).toFixed(2)}초 (채널링)`:`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
+/* v490: 큰 수 줄임 — 10만 미만 그대로, 1억 미만 K+, 그 이상 M+ (내림) */
+const fmtKM=v=>v>=1e29?'∞':v<1e5?Math.round(v).toLocaleString('ko-KR'):v<1e8?Math.floor(v/1e3).toLocaleString('ko-KR')+'K+':Math.floor(v/1e6).toLocaleString('ko-KR')+'M+';
 function skillDps(id){return rawDps(()=>skillDps0(id))}
 function skillDps0(id){
   const b=SK[id],st=skillStats(id),base=baseDmg(),crit=NS()?nsCritF():(1+Math.min(1,critCh())*.8)*critComp(S.lv),cd=Math.max(.05,st.cd);/* v446: 100%에서 자름 + 레벨 보정 */
@@ -5350,6 +5359,8 @@ function ivAct(it,cur){if(!it)return '';const a=dpsWith(it),b=cur?dpsWith(cur):s
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
 function ivEq(kind){return `<div class="iveq ${kind}">${EQS.map(k=>{const it=S.eq[k],L=enhL(k),c=it?(it.ns?NT_C[it.tier]:RAR[it.rar].c):'#555',sp=spOf(it);
   return `<button class="ivq${eqSel===k?' on':''}" data-eq="${k}" style="--rc:${c}">${ico(icoSlot(k),'eqi')}<span class="k">${kind==='list'?SLOTN[k]:SLOTEN[k]+(kind==='paper'?' · '+SLOTN[k]:'')}${L?` <b class="enh">+${L}</b>`:''}</span><b style="color:${c}">${it?it.name:'비어 있음'}</b><small>${it?(it.ns?`${it.tier}티어`:`${kind==='paper'?RAR[it.rar].n+' · ':''}iLv ${it.ilvl}`):''}${sp?' <i class="spt">★</i>':''}</small></button>`}).join('')}</div>`}
+/* v490: 잠금 아이콘 — 색 이모지 대신 흰색 선 아이콘 */
+const LKI=(o)=>`<svg class="lki" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="${o?'M8 10.5V7a4 4 0 0 1 7.6-1.7':'M8 10.5V7a4 4 0 0 1 8 0v3.5'}"/></svg>`;
 let invFilter='weapon',lockMode=false,invSub=null,ddOpen=null;/* v131 가방 종류별 보기 */
 /* v367: 기타 — 각인의 서 · 상급 각인의 서 · 확정 강화 주문서 · 물약 (보유 수량 표시) */
 function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=sc.length-a;
@@ -5364,26 +5375,26 @@ function renderInv(){if(!NS())return renderInvOld();
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?S.eq[sel.slot]:eqSel?S.eq[eqSel]:null,ups=upgrades();
   const slot=k=>{const it=S.eq[k],L=enhL(k),c=it?(it.ns?NT_C[it.tier]:RAR[it.rar].c):'',up=ups.some(x=>x.slot===k);
     return `<button class="iv2slot${it?'':' empty'}${eqSel===k?' on':''}" data-eq="${k}" style="${c?'--rc:'+c:''}" aria-label="${SLOTN[k]}">${ico(icoSlot(k))}${L?`<span class="lv">+${L}</span>`:''}${it&&it.ns?`<span class="tg">${it.tier}T</span>`:''}${up?'<span class="up">▲</span>':''}</button>`};
-  const lockSlot=t=>`<div class="iv2slot lock" title="${t}"><span>🔒</span></div>`;
+  const lockSlot=t=>`<div class="iv2slot lock" title="${t}"><span>${LKI()}</span></div>`;
   const g=gear(),dps=skillDps(C().skills[0]).main;
   const stage=`<div class="iv2stage"><div class="iv2who"><b>${S.nick||C().n}</b><small>Lv ${S.lv} · ${C().n}</small></div>
     <div class="iv2col L">${slot('weapon')}${slot('amulet')}${slot('ring')}${lockSlot('고유 아이템 (추가 예정)')}${lockSlot('고유 아이템 (추가 예정)')}</div>
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('boots')}${lockSlot('외형 (추가 예정)')}${lockSlot('외형 (추가 예정)')}</div>
-    <div class="iv2sum"><span>DPS <b>${fmtN(dps)}</b></span><span>생명력 <b>${fmtN(heroMax())}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
+    <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span><span>생명력 <b>${fmtN(heroMax())}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>
-    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtG(S.gold)}</span><span><i style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg)"></i>${fmtG(S.ess||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
+    <span class="iv2money"><span><i style="background:#ffd24a"></i>${fmtKM(S.gold)}</span><span><i style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg)"></i>${fmtKM(S.ess||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
   const subOk=x=>!invSub||x.slot===invSub,subN=k=>k&&FG[invFilter]&&FG[invFilter].includes(k)?SLOTN[k]:'';
   const tab=(k,t,dd)=>{const on=invFilter===k,n=k==='etc'?etcList().length:cnt(k);
     return `<div class="iv2tab${on?' on':''}"><button class="lb" data-if="${k}">${t}${on&&invSub&&dd?' · '+SLOTN[invSub]:''}<i>${n}</i></button>${dd?`<button class="dd" data-dd="${k}" aria-label="${t} 부위 고르기">▼</button>`:''}
       ${ddOpen===k?`<div class="iv2menu">${[[null,'전체'],...FG[k].map(s=>[s,SLOTN[s]])].map(([s,nm])=>`<button data-sub="${k},${s||''}" class="${on&&(invSub||null)===s?'on':''}">${nm}<i>${s?S.inv.filter(x=>x.slot===s).length:cnt(k)}</i></button>`).join('')}</div>`:''}</div>`};
-  const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒</button></div>${lockMode?'<p class="hint lkhint" style="margin:0">잠금 모드 · 아이템을 누르면 잠금/해제됩니다</p>':''}`;
+  const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>${lockMode?'<p class="hint lkhint" style="margin:0">잠금 모드 · 아이템을 누르면 잠금/해제됩니다</p>':''}`;
   let bag=`<div class="bag${lockMode?' lkmode':''}">`;
   if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
   else{const shown=S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x));
     for(const it of shown){const up=isBetter(it,S.eq[it.slot]),c=it.ns?NT_C[it.tier]:RAR[it.rar].c;
-      bag+=`<button class="iv2it" data-i="${it.id}"><span class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" style="border-color:${c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">🔒</span>':''}<span class="lv">${it.ns?it.tier+'T':it.ilvl}</span>${ico(icoSlot(it.slot))}</span><span class="inm" style="color:${c}">${it.name}</span></button>`}
+      bag+=`<button class="iv2it" data-i="${it.id}"><span class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" style="border-color:${c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">${LKI()}</span>':''}<span class="lv">${it.ns?it.tier+'T':it.ilvl}</span>${ico(icoSlot(it.slot))}</span><span class="inm" style="color:${c}">${it.name}</span></button>`}
     if(!shown.length)bag+=`<div class="iv2empty">${invSub?SLOTN[invSub]:({weapon:'무기',armor:'방어구',acc:'장신구'})[invFilter]}이(가) 가방에 없습니다</div>`}
   bag+=`</div>`;
   const lowN=S.inv.filter(x=>x.rar<=1&&!x.lock),allN=S.inv.filter(x=>!x.lock);
@@ -5393,7 +5404,7 @@ function renderInv(){if(!NS())return renderInvOld();
   /* 선택 팝업: 가방 아이템 = 현재 장착과 비교 + 장착·잠금·판매 / 장착 칸 = 장착 장비 정보 */
   let pop='';
   const pico=it=>`<span class="pico" style="--rc:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot))}</span>`;
-  if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>')}</div></div>`;
+  if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>').replace('🔒 해제',LKI()+' 해제').replace('🔓 잠금',LKI(1)+' 잠금')}</div></div>`;
   else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(S.eq[eqSel])}<div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div></div></div>`;
   const keep=sh.querySelector('.iv2bag'),st=keep?keep.scrollTop:0;
   sh.innerHTML=`<div class="iv2 ${port?'p':'l'}">${stage}${panel}${top}${pop}</div>`;
@@ -6204,16 +6215,20 @@ function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
   fl.rotation.x=-Math.PI/2;fl.position.y=.005;g.add(fl);
   const hm=new THREE.HemisphereLight(0xffffff,0x9a9fae,.95),key=new THREE.DirectionalLight(0xfff4e6,.9),rim=new THREE.DirectionalLight(0xbfd4ff,.7);
   g.add(hm,key,key.target,rim,rim.target);g.userData={key,rim};g.traverse(o=>o.layers.set(1));scene.add(g);return g}
-function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0)}
-function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh,D=port?7.8:7.4;
+function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0);camera.clearViewOffset();resize()}
+/* v490: 세로 모드 게임 카메라(시야각 73°)를 그대로 기울여 쓰면 화면 위쪽에서 위아래로 늘어나 보임 → 장비창은 좁은 시야각(망원)으로 정면에서 찍고, 카메라를 기울이지 않고 화면을 평행 이동해 캐릭터 자리를 잡음 */
+function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh;
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
   g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
-  /* 조명은 카메라를 따라 돎 — 어느 쪽으로 돌려도 앞에서 비춤 */
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
-  const halfH=D*Math.tan(camera.fov*Math.PI/360),halfW=halfH*camera.aspect;
-  const side=port?0:Math.min(.44*W,520)/W*halfW,down=port?.38*halfH:-.2*halfH;
-  _icp.set(P.pos.x+dx*D,1.55,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
-  _icl.set(P.pos.x+dz*side,1.05-down,P.pos.z-dx*side);camera.lookAt(_icl)}
+  const FOV=port?26:28,ch=port?.46*Hh:Hh,want=port?4.15:3.8;/* want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
+  if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
+  const visH=want*Hh/ch,D=visH/2/Math.tan(FOV*Math.PI/360);
+  /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
+  const bagW=port?0:Math.min(.44*W,520),ox=port?0:bagW/2,oy=port?(.5-.255)*Hh:-.02*Hh;
+  camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();
+  _icp.set(P.pos.x+dx*D,1.6,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
+  _icl.set(P.pos.x,1.35,P.pos.z);camera.lookAt(_icl)}
 /* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
 $('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.drag={id:e.pointerId,x:e.clientX,r:IVS.rot,mv:false}});
 addEventListener('pointermove',e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x;if(Math.abs(dx)>5)d.mv=true;if(d.mv)IVS.rot=d.r-dx*.012});
