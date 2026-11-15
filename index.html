@@ -2655,10 +2655,10 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
 /* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림).
    v522 불꽃은 코드로 그림: 날개 곳곳에서 나온 불 띠가 지나온 길을 따라 이어짐 — 서 있으면 위로 날름거리고, 달리면 바람에 날리듯 뒤로 길게 흐름. 연기는 플립북(models/flame02.jpg) 모양을 검회색으로.
    lwBuild(코드로 그린 날개)와 같은 userData 규격(mem·trail·update·trailTick·pt)이라 lavaTick이 그대로 붙이고 움직임 */
-const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:62,lean:14,/* v524 옆에서 보면 위쪽이 뒤로 살짝 누움 */pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:16,H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
+const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:62,lean:25,/* v524 옆에서 보면 위쪽이 뒤로 살짝 누움 */pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:16,NT:7,/* NR=평소 타오르는 불 띠, NT=달릴 때 날개 가운데서 나오는 잔상 띠(한쪽당) */H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
 function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Math.PI/180;g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   /* 불 띠: 띠마다 붙은 자리의 지난 위치(H개)를 이어 카메라를 보는 리본으로 만듦(세계 좌표) */
-  const NR=C.NR*2,H=C.H,NP=H+1,rp=new Float32Array(NR*NP*2*3),ruv=new Float32Array(NR*NP*2*2),rsd=new Float32Array(NR*NP*2),rk=new Float32Array(NR*NP*2),ri=[];
+  const NR=(C.NR+C.NT)*2,H=C.H,NP=H+1,rp=new Float32Array(NR*NP*2*3),ruv=new Float32Array(NR*NP*2*2),rsd=new Float32Array(NR*NP*2),rk=new Float32Array(NR*NP*2),ri=[];
   for(let r=0;r<NR;r++){const sd=Math.random();for(let j=0;j<NP;j++)for(let e=0;e<2;e++){const k=(r*NP+j)*2+e;ruv[k*2]=j/H;ruv[k*2+1]=e*2-1;rsd[k]=sd}
     for(let j=0;j<H;j++){const a=(r*NP+j)*2;ri.push(a,a+1,a+2,a+1,a+3,a+2)}}
   const rg=new THREE.BufferGeometry(),rpa=new THREE.BufferAttribute(rp,3);rpa.setUsage(THREE.DynamicDrawUsage);rg.setAttribute('position',rpa);rg.setAttribute('uv',new THREE.BufferAttribute(ruv,2));rg.setAttribute('aS',new THREE.BufferAttribute(rsd,1));const rka=new THREE.BufferAttribute(rk,1);rka.setUsage(THREE.DynamicDrawUsage);rg.setAttribute('aK',rka);rg.setIndex(ri);
@@ -2691,7 +2691,7 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
         gl_FragColor=vec4(vec3(.075,.07,.068)+c*.06,smoothstep(.02,.55,l)*vA*uK);}`});
   new THREE.TextureLoader().load(C.fl+'?'+APP_VER,t=>{t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;sm.uniforms.uM.value=t});
   const smk=new THREE.Mesh(sg,sm);smk.frustumCulled=false;smk.renderOrder=5;tr.add(smk);
-  const K=[],R=[];let acs=0,hacc=0;const _v=new THREE.Vector3(),_a=new THREE.Vector3(),_b=new THREE.Vector3(),_t=new THREE.Vector3(),_s=new THREE.Vector3(),_c=new THREE.Vector3();
+  const K=[],R=[],TP=new Float32Array((C.H+1)*3);let acs=0,hacc=0;const _v=new THREE.Vector3(),_a=new THREE.Vector3(),_b=new THREE.Vector3(),_t=new THREE.Vector3(),_s=new THREE.Vector3(),_c=new THREE.Vector3();
   /* 날개 표면의 한 점(세계 좌표) */
   function wpt(side,out,pi){const q=piv[side];if(!q)return null;const a=q.pts,i=pi!==undefined?pi:Math.floor(Math.random()*(a.length/3))*3;out.set(a[i],a[i+1],a[i+2]);out.pi=i;return q.me.localToWorld(out)}
   if(THREE.GLTFLoader)new THREE.GLTFLoader().load(C.file+'?'+APP_VER,gl=>{try{let src=null;gl.scene.traverse(o=>{if(o.isMesh&&!src)src=o});if(!src)return;
@@ -2703,8 +2703,11 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
       const p=new THREE.Group();p.rotation.order='YXZ';p.add(me);p.position.x=sx*C.x/C.S;g.add(p);
       const n=Math.min(600,cand.length),pts=new Float32Array(n*3);for(let k=0;k<n;k++){const vi=cand[Math.floor(Math.random()*cand.length)];pts[k*3]=P.getX(vi);pts[k*3+1]=P.getY(vi);pts[k*3+2]=P.getZ(vi)}
       piv.push({p,me,sx,pts});
-      /* 불 띠가 붙는 자리 */
-      for(let k=0;k<C.NR;k++)R.push({side:piv.length-1,pi:Math.floor(Math.random()*n)*3,h:null,ah:null,st:3,tm:rnd(0,1.6),amp:0,pv:null,w:rnd(.6,1.05),vy:rnd(1.6,2.8),len:rnd(.6,1),ph:Math.random()*6.28,wx:rnd(-.35,.35),wz:rnd(-.35,.35)})}
+      /* 불 띠가 붙는 자리: 평소 띠는 아무 데나, 잔상 띠는 날개 가운데(표본점 평균에 가까운 1/5)에서만 */
+      const sd=piv.length-1;let cx=0,cy=0,cz=0;for(let k=0;k<n;k++){cx+=pts[k*3];cy+=pts[k*3+1];cz+=pts[k*3+2]}cx/=n;cy/=n;cz/=n;
+      const near=[];for(let k=0;k<n;k++)near.push([Math.hypot(pts[k*3]-cx,pts[k*3+1]-cy,pts[k*3+2]-cz),k]);near.sort((a,b)=>a[0]-b[0]);const nc=Math.max(1,Math.floor(n/5));
+      for(let k=0;k<C.NR;k++)R.push({side:sd,pi:Math.floor(Math.random()*n)*3,h:null,ah:null,st:3,tm:rnd(0,1.6),amp:0,pv:null,w:rnd(.6,1.05),vy:rnd(1.6,2.8),len:rnd(.6,1),ph:Math.random()*6.28,wx:rnd(-.35,.35),wz:rnd(-.35,.35)});
+      for(let k=0;k<C.NT;k++)R.push({tr:1,side:sd,pi:near[Math.floor(Math.random()*nc)][1]*3,h:null,ah:null,amp:0,pv:null,w:rnd(1.2,1.9),vy:rnd(.5,1.1),len:1,ph:Math.random()*6.28,wx:rnd(-.2,.2),wz:rnd(-.2,.2)})}
     g.userData.ready=1}catch(e){console.warn('wing',e)}});
   /* 숨쉬듯 벌어졌다 오므라듦, 이동하면 뒤로 젖혀 접힘, 몸이 들썩이거나 돌면 늦게 따라옴 */
   g.userData.update=(t,o)=>{if(mat)mat.emissiveIntensity=U.uK.value*(.52+.07*Math.sin(t*3.1)+.05*Math.sin(t*7.3));
@@ -2716,25 +2719,32 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
     /* 지난 위치 기록: tau초마다 한 칸씩 밀림. h[k]=k칸 전의 자리 → 방향을 바꿔도 이미 남은 띠는 지나온 길에 그대로 */
     hacc+=dt;let sh=0;while(hacc>=C.tau){hacc-=C.tau;sh++}sh=Math.min(sh,H);const f=hacc/C.tau,cp=cam||camera.position;
     for(let r=0;r<R.length;r++){const o=R[r];
-      /* v524 타오르는 느낌: 띠마다 [붙음 → 타오름 → 사그라듦 → 쉼]을 제각각 되풀이하고, 쉬는 동안 다른 자리로 옮겨 다시 붙음 */
-      o.tm-=dt;if(o.st===0){o.amp=Math.min(1,o.amp+dt/.3);if(o.amp>=1){o.st=1;o.tm=rnd(.6,1.9)}}else if(o.st===1){if(o.tm<=0)o.st=2}else if(o.st===2){o.amp=Math.max(0,o.amp-dt/.45);if(o.amp<=0){o.st=3;o.tm=H*C.tau+rnd(0,.5)}}
-      else if(o.tm<=0){o.st=0;o.amp=0;o.pi=Math.floor(Math.random()*(piv[o.side].pts.length/3))*3;o.h=null;o.pv=null;o.w=rnd(.6,1.05);o.vy=rnd(1.6,2.8);o.len=rnd(.6,1)}
-      wpt(o.side,_v,o.pi);if(!o.h){o.h=new Float32Array(H*3);o.ah=new Float32Array(H);for(let j=0;j<H;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
-      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(sh){h.copyWithin(sh*3,0,(H-sh)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */o.ah.copyWithin(sh,0,H-sh);for(let j=0;j<sh;j++){const q=(j+f)/(sh+f);o.ah[j]=o.amp;h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
-      const L=o.len,base=r*NP*2*3;let px=_v.x,py=_v.y,pz=_v.z;
-      for(let j=0;j<NP;j++){let x,y,z;if(j===0){x=_v.x;y=_v.y;z=_v.z}else{const a=j*3,b=(j-1)*3;if(j<H){x=h[a]+(h[b]-h[a])*f;y=h[a+1]+(h[b+1]-h[a+1])*f;z=h[a+2]+(h[b+2]-h[a+2])*f}else{x=h[b];y=h[b+1];z=h[b+2]}}
-        /* 나이에 따라 위로 떠오르고 살짝 흩날림(서 있을 때는 이것만으로 위로 날름거리는 불꽃이 됨) */
-        const age=j*C.tau/* 기록 한 칸 밀릴 때마다 높이가 튀던 것(끊겨 보임) 수정: 나이는 칸 번호로만 */,u=j/H,ak=j===0?o.amp:j<H?o.ah[j]+(o.ah[j-1]-o.ah[j])*f:o.ah[j-1],wig=Math.sin(t*5+o.ph+u*5)*.12*u;x+=(o.wx*age+wig)*(1-.5*mv);y+=o.vy*age*(1-.45*mv)*L;z+=(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv);
-        if(j===0){_t.set(0,1,0)}else{_t.set(x-px,y-py,z-pz);if(_t.lengthSq()<1e-8)_t.set(0,1,0)}px=x;py=y;pz=z;
-        _c.set(cp.x-x,cp.y-y,cp.z-z);_s.crossVectors(_t,_c);const sl=_s.length()||1;
-        const w=o.w*(.3+1.5*u*Math.exp(1-u*3.2)*.9+.25*mv*u)*(1-u*.35)*.5/sl,k=base+j*6;
+      if(o.tr){/* v525 잔상 띠: 달리는 동안만 켜지고(가운데에서), 멈추면 꼬리부터 자연스럽게 꺼짐 */
+        const tg=mv>.12?(.78+.22*Math.sin(t*3.7+o.ph)):0;o.amp+=(tg-o.amp)*(1-Math.exp(-dt*(tg>o.amp?5:3.2)))}
+      else{/* 평소 띠: [붙음 → 타오름 → 사그라듦 → 쉼]을 제각각 되풀이하고 쉬는 동안 자리를 옮김. 달리기 시작하면 사그라들고, 멈추면 다시 여기저기서 붙음 */
+        o.tm-=dt;const run=mv>.2;if(run&&o.st<2)o.st=2;
+        if(o.st===0){o.amp=Math.min(1,o.amp+dt/.3);if(o.amp>=1){o.st=1;o.tm=rnd(.6,1.9)}}else if(o.st===1){if(o.tm<=0)o.st=2}else if(o.st===2){o.amp=Math.max(0,o.amp-dt/.45);if(o.amp<=0){o.st=3;o.tm=H*C.tau+rnd(0,.5)}}
+        else if(o.tm<=0&&!run){o.st=0;o.amp=0;o.pi=Math.floor(Math.random()*(piv[o.side].pts.length/3))*3;o.h=null;o.pv=null;o.w=rnd(.6,1.05);o.vy=rnd(1.6,2.8);o.len=rnd(.6,1)}}
+      wpt(o.side,_v,o.pi);if(!o.h){o.h=new Float32Array(NP*3);o.ah=new Float32Array(NP);for(let j=0;j<NP;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
+      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(sh){h.copyWithin(sh*3,0,(NP-sh)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */o.ah.copyWithin(sh,0,NP-sh);for(let j=0;j<sh;j++){const q=(j+f)/(sh+f);o.ah[j]=o.amp;h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
+      const L=o.len,base=r*NP*2*3,rs=o.tr?1-.3*mv:1-.45*mv;
+      /* 1) 띠의 점들: j칸 전(=지금-j*tau)의 자리 + 나이만큼 떠오름. 기록은 H+1칸이라 끝 점까지 매끄럽게 이어짐 */
+      for(let j=0;j<NP;j++){let x,y,z;if(j===0){x=_v.x;y=_v.y;z=_v.z}else{const a=j*3,b=a-3;x=h[a]+(h[b]-h[a])*f;y=h[a+1]+(h[b+1]-h[a+1])*f;z=h[a+2]+(h[b+2]-h[a+2])*f}
+        const age=j*C.tau,u=j/H,wig=Math.sin(t*5+o.ph+u*5)*.12*u;TP[j*3]=x+(o.wx*age+wig)*(1-.5*mv);TP[j*3+1]=y+o.vy*age*rs*L;TP[j*3+2]=z+(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv)}
+      /* 2) 폭 방향: 앞뒤 점으로 구한 방향 × 카메라 방향. 점이 겹쳐 방향이 흐려지면 위쪽으로, 앞 점과 뒤집히면 맞춰 돌려 꼬임·깜빡임을 막음 */
+      let sx_=0,sy_=0,sz_=0;
+      for(let j=0;j<NP;j++){const a=Math.max(0,j-1)*3,b=Math.min(H,j+1)*3,x=TP[j*3],y=TP[j*3+1],z=TP[j*3+2];_t.set(TP[b]-TP[a],TP[b+1]-TP[a+1],TP[b+2]-TP[a+2]);const tl=_t.length();
+        if(tl<.02)_t.set(0,1,0);else{_t.multiplyScalar(1/tl);if(tl<.12)_t.lerp(_b.set(0,1,0),1-(tl-.02)/.1).normalize()}
+        _c.set(cp.x-x,cp.y-y,cp.z-z);_s.crossVectors(_t,_c);const sl=_s.length();if(sl<1e-5){_s.set(sx_,sy_,sz_)}else _s.multiplyScalar(1/sl);
+        if(j&&_s.x*sx_+_s.y*sy_+_s.z*sz_<0)_s.multiplyScalar(-1);sx_=_s.x;sy_=_s.y;sz_=_s.z;
+        const u=j/H,ak=j===0?o.amp:o.ah[j]+(o.ah[j-1]-o.ah[j])*f,w=o.w*(o.tr?(.55+.55*u)*(1-u*.45):(.3+1.5*u*Math.exp(1-u*3.2)*.9)*(1-u*.35))*.5,k=base+j*6;
         rp[k]=x-_s.x*w;rp[k+1]=y-_s.y*w;rp[k+2]=z-_s.z*w;rp[k+3]=x+_s.x*w;rp[k+4]=y+_s.y*w;rp[k+5]=z+_s.z*w;const kk=(r*NP+j)*2;rk[kk]=rk[kk+1]=ak}}
     rpa.needsUpdate=true;rka.needsUpdate=true;
-    acs=Math.min(20,acs+dt*(26+34*mv)*QM());while(acs>=1){acs--;if(K.length>=NS)continue;const side=Math.random()<.5?0:1;if(!wpt(side,_v))break;
+    acs=Math.min(20,acs+dt*(26+46*mv)*QM());while(acs>=1){acs--;if(K.length>=NS)continue;const side=Math.random()<.5?0:1;/* 달릴 때는 연기도 잔상이 나오는 가운데에서 나와 뒤에 남음 */const o=mv>.2&&Math.random()<.8?R[Math.min(R.length-1,(side?C.NR+C.NT:0)+C.NR+Math.floor(Math.random()*C.NT))]:null;if(!(o?wpt(o.side,_v,o.pi):wpt(side,_v)))break;
       K.push({x:_v.x,y:_v.y+.3,z:_v.z,vx:rnd(-.25,.25),vy:rnd(.9,1.6),vz:rnd(-.25,.25),age:0,life:rnd(1,1.9),s:rnd(1.1,1.9),f0:Math.random()*64,fl:Math.random()<.5?-1:1,ln:rnd(-.3,.3)})}
     let n=0;for(let i=K.length-1;i>=0;i--){const q=K[i];q.age+=dt;if(q.age>=q.life){K[i]=K[K.length-1];K.pop();continue}q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt}
     for(const q of K){const k=q.age/q.life,i4=n*4,al=Math.min(1,k/.3)*(1-k);so[i4]=q.x;so[i4+1]=q.y;so[i4+2]=q.z;so[i4+3]=q.s*(.8+1.1*k);
-      sa[i4]=q.fl*(1+Math.floor((q.f0+q.age*18)%64));sa[i4+1]=al*.45;sa[i4+2]=q.ln;sa[i4+3]=1+.5*k;n++}
+      sa[i4]=q.fl*(1+Math.floor((q.f0+q.age*18)%64));sa[i4+1]=al*.5;sa[i4+2]=q.ln;sa[i4+3]=1+.5*k;n++}
     sg.instanceCount=n;bo.needsUpdate=true;ba.needsUpdate=true;sm.uniforms.uK.value=Math.min(1,fm.uniforms.uK.value)};
   return g}
 /* v484 용암 날개 착용 처리 — 등 뼈를 따라 붙이고, 이동 속도로 젖힘·접힘·잔상, 불씨. 잔상 메시는 세계 좌표라 scene에 붙임 */
@@ -5127,7 +5137,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v524';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v525';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
