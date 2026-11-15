@@ -590,7 +590,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .tbtn svg{width:16px;height:16px}
   .mini{width:94px;height:94px}
   .top .rail,.lcol .rail.v{display:none}
-  .lsstrip{display:flex;top:calc(6px + env(safe-area-inset-top,0px));right:calc(max(14px,env(safe-area-inset-right,0px)) + 102px);width:128px}
+  .lsstrip{display:flex;top:calc(6px + env(safe-area-inset-top,0px));right:calc(max(14px,env(safe-area-inset-right,0px)) + 102px);width:172px}/* v534: 가로 화면도 한 줄에 4개 (윗줄 상태·장비·스킬·사냥터 / 아랫줄 보스·지도·설정·전체) */
   .lsstrip .tbtn{position:relative}
   .acts{width:152px;height:148px;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px))}
   .act.s1{width:82px;height:82px;font-size:13px}
@@ -739,6 +739,15 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .lkgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}.lkc{display:flex;flex-direction:column;gap:7px;min-width:0}.lkimg{position:relative;aspect-ratio:1;border-radius:14px;border:2px solid #3a3a46;background:#202028 center/cover no-repeat;overflow:hidden}.lkimg.on{border-color:#c890ff;box-shadow:0 0 14px rgba(200,144,255,.35)}.lkn{position:absolute;left:8px;top:8px;padding:3px 9px;border-radius:10px;background:rgba(10,10,14,.7);font:800 12.5px var(--ko);color:#fff}.lkw{position:absolute;right:8px;bottom:8px;padding:3px 8px;border-radius:9px;background:#c890ff;color:#1a1020;font:800 11px var(--ko)}
 .lkb{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lkp,.lkbuy{min-height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 14px var(--en);font-stretch:87%;box-sizing:border-box}.lkp{background:#202028;border:1px solid #3a3a46;color:#e8c8ff}.lkp.own{color:#8a8a96;font:700 12.5px var(--ko)}.lkbuy{border:0;background:#ff8a3a;color:#1a1008;font:800 14px var(--ko)}.lkbuy.w{background:#2e2e3a;color:var(--ink);border:1px solid #4a4a56}.lkbuy:disabled{opacity:.4}
 .cdia{display:block;width:26px;height:26px;margin:auto;background:var(--c);transform:rotate(45deg) scale(.72);border-radius:4px;box-shadow:0 0 12px var(--c),inset 0 0 8px rgba(255,255,255,.45)}.cdia.sq{border-radius:50%;transform:scale(.8)}
+.skr{display:flex;gap:10px;align-items:stretch;background:#1f1f27;border:1px solid var(--line);border-radius:12px;padding:8px}.skr.off{opacity:.55}
+.ski{flex:none;width:60px;height:60px;align-self:center;border-radius:10px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--c) 26%,#16161c),#101015 75%);border:1.5px solid color-mix(in srgb,var(--c) 60%,transparent);box-shadow:inset 0 0 12px rgba(0,0,0,.6);display:grid;place-items:center}
+.ski svg{width:40px;height:40px;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--c) 70%,transparent))}
+.skm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.sgt{display:flex;align-items:center;gap:8px;min-width:0}.sgt b{flex:none;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:800 13px var(--ko);color:var(--ink);padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.sgb{flex:1;min-width:0;display:flex;gap:3px;height:12px;padding:2px;border-radius:4px;border:1px solid rgba(255,210,74,.35);background:rgba(0,0,0,.3)}.sgb i{flex:1;border-radius:2px;background:rgba(255,255,255,.07)}.sgb i.on{background:linear-gradient(180deg,#ffe58a,#ffc23a);box-shadow:0 0 5px rgba(255,200,60,.6)}
+.sgl{flex:none;font:700 11px var(--en);font-stretch:87%;color:var(--muted);min-width:30px;text-align:right}
+.sgd{flex:1;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 8px;align-items:center;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 8px;min-height:38px}
+.sgx{flex:1 1 150px;min-width:0;font-size:11.5px;color:#cfc8d6;white-space:pre-line;line-height:1.45}.sgc{flex:none;display:flex;gap:4px;align-items:center}
 #verBox{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 18px);transform:translateX(-50%);z-index:9999;width:min(340px,calc(100vw - 28px));box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:rgba(24,24,32,.97);border:1px solid #ff8a3a;box-shadow:0 8px 30px rgba(0,0,0,.6);color:var(--ink);font:14px var(--ko)}#verBox b{font:800 16px var(--ko);color:#ffb070}#verBox span{color:#d8d0c0;font-size:13px;line-height:1.4}#verBox .vc{color:#8ae08a;font-weight:700}#verBox button{margin-top:4px;min-height:42px;border:0;border-radius:12px;background:#ff8a3a;color:#1a1008;font:800 15px var(--ko)}
 .rrwrap{margin:8px 0}.rrbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}.rrbar button{min-height:48px}.rrcoin{display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:12px;background:#202028;border:1px solid #3a3a46;color:var(--ink);font:700 13px var(--ko);min-width:0}.rrcoin i{flex:none;width:12px;height:12px;border-radius:2px;background:linear-gradient(135deg,#ffb060,#ff5a3a);transform:rotate(45deg)}.rrcoin .cn{color:#d8d0c0;white-space:nowrap}.rrcoin b{margin-left:auto;font:800 15px var(--en);font-stretch:87%}.rrcoin small{display:none}.rrwrap .ivc{width:100%;box-sizing:border-box}.rrl{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:13px;padding:2px 0}.rrl .rn{color:#d8d0c0}.rrl .rv{color:var(--ink)}.rrl .rv.rrfl,.rrl .rb b.rrfl{animation:rrFlash .5s ease-out}@keyframes rrFlash{0%{color:#ffd24a;text-shadow:0 0 8px rgba(255,210,74,.7)}100%{text-shadow:none}}.rrl .rb{font-size:11.5px;color:var(--muted)}.rrl .rb b{color:#e8dcc4;font-weight:700}.rrl .d{font-size:11px;font-weight:800}.rrl .d.good{color:#7fe07a}.rrl .d.bad{color:#ff7a6a}
 .shead .shbtn{display:flex;gap:6px;align-items:center;flex:none}.shead .shbtn .close{white-space:nowrap}.shead .sx{font-size:12px;padding:7px 10px;white-space:nowrap}.btns.stb{display:grid;grid-template-columns:1fr 2fr;gap:8px}.btns.stb .ghost.on{border-color:#ffd24a;color:#ffd24a}
@@ -804,6 +813,10 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   #lvlSheet .shead h2{font-size:17px}#lvlSheet .cards{gap:6px}#lvlSheet .card{padding:8px 11px;gap:10px;font-size:14px}#lvlSheet .card small{margin-top:1px;line-height:1.35}#lvlSheet .btns .ghost{padding:8px}#lvlSheet .hint{line-height:1.4}
   #lvlSheet .autog{width:62px}
 }
+/* v534: 모든 창을 화면 가운데에 · PC는 아이템 팝업 2배 */
+.scrim{align-items:center}.scrim>.sheet{border-radius:16px;border:1px solid var(--line);max-height:calc(100% - 20px)}
+.scrim>.sheet.dragok>.shead{cursor:grab}.scrim>.sheet.dragging>.shead{cursor:grabbing}
+@media (hover:hover) and (pointer:fine) and (min-width:900px){.iv2pop{zoom:2;width:min(360px,calc((100vw - 40px)/2));max-height:calc((100vh - 30px)/2)}}
 </style>
 
 <canvas id="c"></canvas>
@@ -839,7 +852,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="rail v">
         <button class="tbtn" id="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span style="color:var(--ink)">스킬</span><b class="pts" id="lvBadge" hidden></b></button>
         <button class="tbtn" id="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg><span style="color:var(--ink)">보스</span></button>
-        <button class="tbtn" id="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-9"/></svg><span style="color:var(--ink)">스탯</span><b class="pts" id="ptsBadge" hidden></b></button>
+        <button class="tbtn" id="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20.5c.6-4.2 3.6-6.8 7.5-6.8s6.9 2.6 7.5 6.8"/></svg><span style="color:var(--ink)">상태</span><b class="pts" id="ptsBadge" hidden></b></button>
       </div>
       <div class="rail">
         <button class="tbtn sm" id="openMap" aria-label="월드맵" title="월드맵 (M)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button>
@@ -849,11 +862,11 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     </div>
   </div>
   <div class="lsstrip" id="lsStrip">
-    <button class="tbtn" data-px="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg>스킬</button>
-    <button class="tbtn" data-px="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg>보스</button>
-    <button class="tbtn" data-px="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-9"/></svg>스탯</button>
+    <button class="tbtn" data-px="openStat" style="color:#ff6a6a"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20.5c.6-4.2 3.6-6.8 7.5-6.8s6.9 2.6 7.5 6.8"/></svg>상태</button>
     <button class="tbtn" data-px="openInv" style="color:#f0d040"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>장비</button>
+    <button class="tbtn" data-px="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg>스킬</button>
     <button class="tbtn" data-px="openTown" style="color:#ffb070"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>마을</button>
+    <button class="tbtn" data-px="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg>보스</button>
     <button class="tbtn" data-px="openMap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>지도</button>
     <button class="tbtn" data-px="openPause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>설정</button>
     <button class="tbtn" data-px="openFs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>전체</button>
@@ -4062,7 +4075,7 @@ const dmgLayer=$('dmg'),dnPool=[];/* v131: PC는 HUD 전체가 zoom 1.7이라 �
 const pcHz=()=>{const r=document.documentElement;if(matchMedia('(orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine)').matches){r.style.setProperty('--hz',Math.max(1,Math.min(1.7,innerWidth/960,innerHeight/530)).toFixed(3))}else r.style.removeProperty('--hz')};pcHz();addEventListener('resize',pcHz);
 let dmZ=1;const calcDmZ=()=>{try{dmZ=parseFloat(getComputedStyle(document.querySelector('.hud')).zoom)||1}catch(_){dmZ=1}};calcDmZ();addEventListener('resize',calcDmZ);
 for(let i=0;i<30;i++){const d=document.createElement('div');d.className='dn';d.hidden=true;dmgLayer.appendChild(d);dnPool.push({el:d,live:false,wp:new THREE.Vector3(),t:0})}
-function dmgNum(p,val,cls='',h){const d=dnPool.find(x=>!x.live);if(!d)return;d.live=true;d.t=0;d.wp.set(p.x+rand(-.4,.4),h?Math.max(1,h*.82):2.2,p.z);/* v131: 맞은 몬스터 키에 맞춰 표시 */d.el.textContent=val;d.el.className='dn '+cls;d.el.hidden=false}
+function dmgNum(p,val,cls='',h){if(cls==='hurt')return;/* v534: 피격 피해 숫자 표시 삭제 */const d=dnPool.find(x=>!x.live);if(!d)return;d.live=true;d.t=0;d.wp.set(p.x+rand(-.4,.4),h?Math.max(1,h*.82):2.2,p.z);/* v131: 맞은 몬스터 키에 맞춰 표시 */d.el.textContent=val;d.el.className='dn '+cls;d.el.hidden=false}
 const tmpV=new THREE.Vector3();
 function updDmg(dt){for(const d of dnPool){if(!d.live)continue;d.t+=dt;d.wp.y+=dt*1.6;tmpV.copy(d.wp).project(camera);
   d.el.style.transform=`translate(${(tmpV.x+1)/2*innerWidth/dmZ}px,${(1-tmpV.y)/2*innerHeight/dmZ}px) translate(-50%,-50%)`;d.el.style.opacity=1-Math.max(0,d.t-.45)/.3;if(d.t>.75){d.live=false;d.el.hidden=true}}}
@@ -5160,7 +5173,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v533';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v534';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5225,7 +5238,7 @@ function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">En
     <p class="hint">엔드게임부터 심연의 냉기로 <b style="color:#ff8a6a">생명력이 초당 계속 감소</b>합니다. 위험도가 오를수록 감소량이 커집니다.</p>
     <p class="hint"><b style="color:var(--ink)">힘 스탯</b>이나 장비의 <b style="color:var(--ink)">생명력 재생 능력치</b>로 상쇄할 수 있습니다. 화면 위쪽의 환경 표시에서 감소량과 내 재생량을 확인하세요.</p>
     <button class="primary" id="noticeOk">확인</button>`;$('notice').hidden=false;releaseAll()}
-function stageBanner(min){if(!S.cls)return;if(S.ch>=NCH&&!S.duel&&!S.n5&&!inTown){S.n5=1;later(1.2,showDrainNotice)}/* v236: 환경 피해 안내는 엔드게임 첫 진입 때 */const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;const mc=min===true?' min':'';el.className='sbanner '+i.c+mc;void el.offsetWidth;el.className='sbanner on '+i.c+mc}
+function stageBanner(min){if(!S.cls)return;/* v534: 엔드게임 진입 시 생명력 감소 안내 삭제 *//* v236: 환경 피해 안내는 엔드게임 첫 진입 때 */const i=stageInfo(),el=$('sBanner');$('sbK').textContent=i.k;$('sbN').textContent=i.n;$('sbT').textContent=i.t;const mc=min===true?' min':'';el.className='sbanner '+i.c+mc;void el.offsetWidth;el.className='sbanner on '+i.c+mc}
 let cdLblT=0;function cdLabels(dt){if((cdLblT-=dt)>0||!S.cls)return;cdLblT=.5;try{const c=C(),b=c.basic,f=v=>v.toFixed(2)+'초';$('tS1').textContent=f(skillStats(c.skills[0]).cd);$('tMv').textContent=f(mvCd())}catch(_){}}/* v272: 버튼에 현재 쿨타임 표시 */
 function labelButtons(){cdLblT=0;const c=C(),s1=SK[c.skills[0]];bossBtn();$('lS1').textContent=s1.n;$('cS1').textContent='MP '+mpCost(c.skills[0]);$('hL').textContent=s1.n;$('hR').textContent=c.bn;$('bS2').hidden=true;$('lMv').textContent='구르기';$('hM').textContent='구르기'}
 
@@ -5632,6 +5645,59 @@ function dpsCmpHtml(id){const me=skillDps(id).main,cur=S.ch<NCH?S.ch:NCH,req=sta
   <small class="dpssub">적정 DPS = 몬스터가 생겨나는 속도만큼 처치하는 데 필요한 적 1명 기준 DPS (스킬이 평균 4명을 동시에 맞힌다고 가정). 막대 가운데 선이 100%</small></div>`}
 function dpsHtml(id){const d=skillDps(id);
   return `<div class="dpsrow"><span class="tag" style="color:var(--muted)">DPS</span><b>${fmtN(d.main)}</b><small>${d.label}</small></div><small class="dpssub">${d.sub} · 마나가 충분할 때</small><small class="dpssub">기본 공격(${C().bn}) DPS ${fmtN(basicDps())}</small>`}
+/* v534: 스킬 강화 아이콘 — 강화마다 효과를 나타내는 그림(SVG, 강화 색으로 그림) */
+const SKIG={
+  chev:'<path d="M10 14l9 10-9 10M20 14l9 10-9 10M30 14l9 10-9 10"/>',
+  rings:'<circle cx="24" cy="24" r="5"/><circle cx="24" cy="24" r="11" opacity=".75"/><circle cx="24" cy="24" r="17" opacity=".45"/><path d="M24 2v5M24 41v5M2 24h5M41 24h5"/>',
+  spiral:'<path d="M24 24c0-3 4-3 4 0 0 5-8 6-9 0-1-7 9-10 14-4 6 7 0 17-10 16-11-1-15-14-8-22 6-7 17-6 21 0"/>',
+  crack:'<path d="M4 30l8-4 6 5 7-9 6 6 7-8 6 3"/><path d="M4 38h40" opacity=".4"/><path d="M36 12l6-4M40 18l5-1" opacity=".7"/>',
+  lava:'<path d="M4 26l8-4 6 5 7-9 6 6 7-8 6 3"/><path d="M14 34c0 3 3 5 3 5s3-2 3-5-3-6-3-6-3 3-3 6zM28 36c0 2 2 4 2 4s2-2 2-4-2-4-2-4-2 2-2 4z" fill="currentColor" stroke="none"/>',
+  rainW:'<path d="M6 8v14M6 22l-3-4M6 22l3-4M18 6v14M18 20l-3-4M18 20l3-4M30 6v14M30 20l-3-4M30 20l3-4M42 8v14M42 22l-3-4M42 22l3-4"/><ellipse cx="24" cy="36" rx="20" ry="6" opacity=".6"/>',
+  rainD:'<path d="M16 6v18M16 24l-3-4M16 24l3-4M24 4v20M24 24l-3-4M24 24l3-4M32 6v18M32 24l-3-4M32 24l3-4"/><ellipse cx="24" cy="36" rx="9" ry="4"/><ellipse cx="24" cy="36" rx="14" ry="6" opacity=".4"/>',
+  fan:'<path d="M8 40L36 12M36 12h-8M36 12v8M8 40l36-8M44 32l-7-4M44 32l-7 4M8 40l12-34M20 6l-6 5M20 6l2 8"/>',
+  pierceS:'<circle cx="22" cy="24" r="7"/><path d="M4 24h14M26 24h6M32 24l10-10M32 24l10 10M42 14v6M42 14h-6M42 34v-6M42 34h-6"/>',
+  shards:'<circle cx="24" cy="24" r="5" fill="currentColor" stroke="none"/><path d="M24 4l3 8h-6zM24 44l-3-8h6zM4 24l8-3v6zM44 24l-8 3v-6zM10 10l8 3-5 5zM38 38l-8-3 5-5zM38 10l-3 8-5-5zM10 38l3-8 5 5z" fill="currentColor" stroke="none" opacity=".85"/>',
+  orb:'<circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="8" fill="currentColor" stroke="none" opacity=".35"/><path d="M18 18a8 8 0 0 1 6-3" /><circle cx="24" cy="24" r="20" opacity=".35"/>',
+  bounce:'<path d="M6 10l8 10-4 2 10 14"/><circle cx="20" cy="36" r="3" fill="currentColor" stroke="none"/><path d="M20 36l8-14-4-2 10-10"/><circle cx="34" cy="10" r="3" fill="currentColor" stroke="none"/><path d="M34 10l8 6"/>',
+  fork:'<path d="M24 4l-6 14h8l-6 12"/><path d="M20 30l-10 14M20 30l2 14M20 30l12 12"/>',
+  dash:'<path d="M4 16h14M2 24h18M4 32h14"/><path d="M26 12l12 12-12 12M34 12l10 12-10 12"/>',
+  flame:'<path d="M24 44c-9 0-14-6-14-13 0-8 7-11 8-19 5 4 6 9 6 12 2-2 3-5 3-8 6 5 11 10 11 16 0 7-5 12-14 12z"/><path d="M24 44c-4 0-6-3-6-6 0-4 4-6 5-10 3 3 7 6 7 10 0 3-2 6-6 6z" fill="currentColor" stroke="none" opacity=".5"/>',
+  snow:'<path d="M24 4v40M7 14l34 20M7 34l34-20M24 10l-4-4M24 10l4-4M24 38l-4 4M24 38l4 4M12 17l-5 1M12 17l-1-5M36 31l5-1M36 31l1 5M12 31l-5-1M12 31l-1 5M36 17l5 1M36 17l1-5"/>',
+  shock:'<path d="M4 40h40"/><path d="M14 40a10 10 0 0 1 20 0" /><path d="M7 40a17 17 0 0 1 34 0" opacity=".6"/><path d="M24 30V8M24 8l-5 6M24 8l5 6"/>',
+  spikes:'<path d="M24 40L8 10M24 40L18 6M24 40l6-34M24 40L40 10M24 40L4 26M24 40l20-14"/><circle cx="24" cy="40" r="3" fill="currentColor" stroke="none"/>',
+  split:'<path d="M24 4v18M24 22l-12 18M24 22v20M24 22l12 18M12 40l1-7M12 40l6-3M36 40l-1-7M36 40l-6-3M24 42l-3-5M24 42l3-5"/>',
+  rainBolt:'<path d="M10 6v12M10 18l-3-4M10 18l3-4M38 6v12M38 18l-3-4M38 18l3-4"/><path d="M26 8l-8 16h8l-6 18 14-22h-8l6-12z" fill="currentColor" stroke="none" opacity=".85"/>',
+  over:'<circle cx="24" cy="24" r="18"/><path d="M27 10l-9 16h8l-5 12 11-17h-8l5-11z" fill="currentColor" stroke="none"/>',
+  storm:'<path d="M12 22a8 8 0 0 1 2-15 10 10 0 0 1 19 2 7 7 0 0 1 3 13z"/><path d="M20 26l-4 9h5l-3 9M32 26l-4 8h5l-3 8"/>',
+  tri:'<circle cx="24" cy="12" r="7"/><circle cx="12" cy="34" r="7"/><circle cx="36" cy="34" r="7"/><circle cx="24" cy="12" r="3" fill="currentColor" stroke="none"/><circle cx="12" cy="34" r="3" fill="currentColor" stroke="none"/><circle cx="36" cy="34" r="3" fill="currentColor" stroke="none"/>',
+  nova:'<circle cx="24" cy="24" r="6" fill="currentColor" stroke="none" opacity=".6"/><path d="M24 2v10M24 36v10M2 24h10M36 24h10M8 8l7 7M33 33l7 7M40 8l-7 7M15 33l-7 7"/><circle cx="24" cy="24" r="14" opacity=".4"/>',
+  boomer:'<path d="M6 30h24a10 10 0 0 0 0-20H14"/><path d="M14 10l6-5M14 10l6 5"/><path d="M6 30l6-4M6 30l6 4"/>',
+  burst:'<path d="M24 4l4 12 12-6-6 12 12 4-12 4 6 12-12-6-4 12-4-12-12 6 6-12-12-4 12-4-6-12 12 6z"/><circle cx="24" cy="24" r="4" fill="currentColor" stroke="none"/>',
+  link:'<rect x="5" y="17" width="20" height="14" rx="7"/><rect x="23" y="17" width="20" height="14" rx="7"/>',
+  echo:'<path d="M10 12a17 17 0 0 0 0 24M18 16a11 11 0 0 0 0 16"/><circle cx="28" cy="24" r="6" fill="currentColor" stroke="none"/><path d="M38 12a17 17 0 0 1 0 24" opacity=".5"/>',
+  pierce:'<path d="M4 24h38M42 24l-7-5M42 24l-7 5M14 12v24M24 12v24" /><path d="M4 24l4-4M4 24l4 4" opacity=".5"/>',
+  target:'<circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2" fill="currentColor" stroke="none"/><path d="M24 2v8M24 38v8M2 24h8M38 24h8"/>',
+  eye:'<path d="M4 24s8-12 20-12 20 12 20 12-8 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="6" fill="currentColor" stroke="none"/>',
+  axe:'<path d="M14 42L36 10"/><path d="M30 8c6 0 12 4 12 12-6 0-11-3-14-8z" fill="currentColor" stroke="none" opacity=".8"/>',
+  slash:'<path d="M8 38L30 8M16 42L38 12M24 44L44 18"/>',
+  giant:'<circle cx="24" cy="10" r="5"/><path d="M14 44V26c0-5 4-8 10-8s10 3 10 8v18M24 18v26"/><path d="M4 36l5-5M44 36l-5-5" opacity=".6"/>',
+  wave:'<path d="M4 34c8-16 32-16 40 0"/><path d="M10 34c6-10 22-10 28 0" opacity=".6"/><path d="M4 34h40" opacity=".35"/>',
+  pillar:'<path d="M18 44V8h12v36"/><path d="M14 44h20M24 8V2" /><path d="M10 20l-4-2M38 20l4-2M10 30l-5 1M38 30l5 1" opacity=".7"/>',
+  gem:'<path d="M24 4l14 14-14 26L10 18z"/><path d="M10 18h28M24 4l-6 14 6 26 6-26z" opacity=".5"/>'
+};
+const SKIGK={haste:'chev',power:'target',critup:'eye',execute:'axe',stack:'slash',giant:'giant',
+  area:'rings',swift:'spiral',vortex:'spiral',echo:'echo',burn:'flame',knock:'shock',
+  qlen:'crack',qmag:'lava',aftsh:'shock',qspread:'spikes',
+  rarea:'rainW',rdens:'rainD',meteor2:'split',relem:'rainBolt',
+  multi:'fan',chpierce:'pierceS',pierce:'pierce',chain:'link',blast:'burst',boomer:'boomer',lblast:'burst',
+  barrage:'shards',orbsize:'orb',tri:'tri',fnova:'nova',
+  cbounce:'bounce',cfork:'fork',overl:'over',cstorm:'storm',
+  dash:'dash',flame:'flame',
+  wlen:'wave',wecho:'echo',wfan:'fan',wburst:'burst',brad:'burst',bember:'flame',bmulti:'shards',bshrap:'shards',prad:'pillar',ptwin:'pillar',pchain:'link',pecho:'echo'};
+function skIco(k,c){let g=SKIGK[k]||'gem';if(k==='flame'&&typeof whEl==='function'&&whEl()==='frost')g='snow';
+  return `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:${c}">${SKIG[g]}</svg>`}
+const skSeg=(L,M)=>Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('');
+const skRow=o=>`<div class="skr${o.off?' off':''}" style="--c:${o.c}"><div class="ski">${skIco(o.k,o.c)}</div><div class="skm"><div class="sgt"><b>${o.n}</b><span class="sgb">${skSeg(o.L,o.M)}</span><span class="sgl">${o.L}/${o.M}</span></div><div class="sgd"><span class="sgx">${o.d}</span><span class="sgc">${o.btns}</span></div></div></div>`;
 function renderMenu(){
   const c=C();
   let h=`<div class="shead"><div><div class="chap">${c.en} · Lv ${S.lv}</div><h2>${c.n} 스킬</h2></div><button class="close" id="mClose">닫기</button></div>
@@ -5645,19 +5711,17 @@ function renderMenu(){
   if(NS()&&menuTab==='aura')h+=auraTabHtml();
   else for(const id of c.skills){
     const pts=skp(id);
-    h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="dps">${dpsHtml(id)}</div><div class="stats">${statLine(id)}</div>
-    ${showSk?`<div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b>${detBtn()}</div><div class="gems">`:''}`;
+    h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="stats">${statLine(id)}</div>
+    ${showSk?`<div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b></div><div class="gems">`:''}`;
     if(showSk)for(const g of gemsFor(id)){const L=gl(id,g);
-      h+=`<div class="grow"><span class="gd" style="background:${GEMS[g].c}"></span><span class="t">${GEMS[g].n}<span class="pips" style="--c:${GEMS[g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
-      <span class="lvp">${L}/${GMAX}</span>${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button><small class="gdesc">${L?GEMS[g].d(L):'다음: '+GEMS[g].d(1)}</small></div>`}
+      h+=skRow({k:g,c:GEMS[g].c,n:GEMS[g].n,L,M:GMAX,d:L?GEMS[g].d(L):'다음: '+GEMS[g].d(1),btns:`${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button>`})}
     if(showSk)h+=`</div>`;
     const g2s=showSk2?gems2For(id):[];
     if(g2s.length){const open=done1(id);
-      h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span>${detBtn()}</div>
+      h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span></div>
       <p class="hint" style="margin:0">${open?'잿불 정수와 골드로 올립니다. 실패는 없습니다.':`이 스킬의 1차 강화를 모두 채우면 해금됩니다. 잿불 정수는 엔드게임(위험도 모드)의 몬스터를 처치하면 바로 얻습니다.`}</p><div class="gems">`;
       for(const g of g2s){const L=g2(g),M=g2Max(g),c=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=c&&S.gold>=gc;
-        h+=`<div class="grow${open?'':' off'}"><span class="gd" style="background:${GEMS2[g].c};border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">${GEMS2[g].n}<span class="pips" style="--c:${GEMS2[g].c}">${Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('')}</span></span>
-        <span class="lvp">${L}/${M}</span>${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button><small class="gdesc">${L?GEMS2[g].d(L):'다음: '+GEMS2[g].d(1)}</small></div>`}
+        h+=skRow({k:g,c:GEMS2[g].c,n:GEMS2[g].n,L,M,off:!open,d:L?GEMS2[g].d(L):'다음: '+GEMS2[g].d(1),btns:`${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button>`})}
       if(id==='volley'||id==='rain'){const el=arEl(),c=elCost(),can=S.gold>=c;
         h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
@@ -5738,7 +5802,7 @@ $('statSheet').addEventListener('click',e=>{
   refreshMax();save();renderStat();
 });
 $('stat').addEventListener('click',e=>{if(e.target.id==='stat')closeStat()});
-function openStat(){if(NS()){toast('스탯 없음','시즌 2부터는 스탯이 없습니다 · 레벨업으로 생명력·마나·이동 속도가 오릅니다');return}closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
+function openStat(){if(NS()){toast('상태','상태창은 준비 중입니다');return}closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
 function closeAllSheets(){if(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))nsClose();if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeof stageOpen!=='undefined'&&stageOpen)closeStage();if(typeof bossOpen!=='undefined'&&bossOpen)closeBoss();if(typeof smithOpen!=='undefined'&&smithOpen)closeSmith();if(menuOpen)closeMenu();if(invOpen)closeInv();if(statOpen)closeStat();if(typeof shopOpen!=='undefined'&&shopOpen)closeShop();if(typeof restartOpen!=='undefined'&&restartOpen)closeRestart()}
@@ -5777,7 +5841,7 @@ function ivCard(it,role,other){
   const L=enhL(it.slot),sp=spOf(it),osp=other&&spOf(other),v=ivVals(it),ov=other?ivVals(other):null;
   const keys=[...(it.ns?[]:['_b']),...Object.keys(v).filter(k=>k!=='_b')];if(ov&&role==='sel')for(const k of Object.keys(ov))if(!keys.includes(k))keys.push(k);
   const row=k=>{const a=v[k],b=ov?ov[k]:undefined;let d='';
-    if(role==='sel'&&ov){if(a===undefined)d=`<span class="d bad">▼ ${ivFmt(k,b).replace(/^[-+]/,'')}</span>`;else if(b===undefined)d='<span class="d good">신규</span>';else{const x=Math.round((a-b)*10)/10;d=x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${ivFmt(k,Math.abs(x)).replace(/^[-+]/,'')}</span>`:'<span class="d same">=</span>'}}
+    if(role==='sel'&&ov){if(a===undefined)d=`<span class="d bad">▼ ${ivFmt(k,b).replace(/^[-+]/,'')}</span>`;else if(b===undefined)d=`<span class="d good">▲ ${ivFmt(k,a).replace(/^[-+]/,'')}</span>`;/* v534: 새 옵션도 0에서 늘어난 만큼 표시 */else{const x=Math.round((a-b)*10)/10;d=x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${ivFmt(k,Math.abs(x)).replace(/^[-+]/,'')}</span>`:'<span class="d same">=</span>'}}
     return `<div class="ivl"><span>${ivName(k,it.slot,it)}</span><b>${a===undefined?'—':ivFmt(k,a)}</b>${d}</div>`};
   let spl='';
   if(sp)spl=`<div class="ivl"><span class="spb">특수</span><span class="spt">${optLine(sp,L,it.slot)}</span>${role==='sel'&&osp?(osp.k===sp.k?(()=>{const x=sp.v-osp.v;return x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${Math.abs(x)}</span>`:'<span class="d same">=</span>'})():`<span class="d bad">기존 ★ 대체</span>`):''}</div>`;
@@ -5824,7 +5888,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
   const tab=(k,t,dd)=>{const on=invFilter===k,n=k==='etc'?etcList().length:cnt(k);
     return `<div class="iv2tab${on?' on':''}"><button class="lb" data-if="${k}">${t}${on&&invSub&&dd?' · '+SLOTN[invSub]:''}<i>${n}</i></button>${dd?`<button class="dd" data-dd="${k}" aria-label="${t} 부위 고르기">▼</button>`:''}
       ${ddOpen===k?`<div class="iv2menu">${[[null,'전체'],...FG[k].map(s=>[s,SLOTN[s]])].map(([s,nm])=>`<button data-sub="${k},${s||''}" class="${on&&(invSub||null)===s?'on':''}">${nm}<i>${s?S.inv.filter(x=>x.slot===s).length:cnt(k)}</i></button>`).join('')}</div>`:''}</div>`};
-  const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>${lockMode?'<p class="hint lkhint" style="margin:0">잠금 모드 · 아이템을 누르면 잠금/해제됩니다</p>':''}`;
+  const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>`;
   let bag=`<div class="bag${lockMode?' lkmode':''}">`;
   if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=e.pot?`<div class="iv2it"><div class="tile etc ${e.pot==='hp'?'ph':'mpot'}" style="border-color:${e.c}"><span class="pot2">${potFlask(1)}</span></div><span class="inm">${e.n}</span></div>`:`<div class="iv2it"><div class="tile etc" style="border-color:${e.c}">${e.h||ico(e.i)}<small style="color:${e.c}">${e.kt!=null?e.kt:'×'+e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
   else{const shown=S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x));
@@ -5855,7 +5919,7 @@ function renderInvOld(){
   const foot=lookRow()+`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
   const FG={weapon:['weapon'],armor:['helm','armor','boots'],acc:['amulet','ring']},IFS=[['all','전체'],['weapon','무기'],['armor','방어구'],['acc','장신구'],['etc','기타']],ifOk=x=>invFilter==='all'||(FG[invFilter]||[]).includes(x.slot);
-  const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:k==='etc'?etcList().length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금</button></div>${lockMode?'<p class="hint lkhint">잠금 모드 · 아이템을 누르면 잠금/해제됩니다. 끝나면 잠금 버튼을 다시 눌러 끄세요.</p>':''}`;
+  const filt=`<div class="ifilt">${IFS.map(([k,t])=>{const n=k==='all'?S.inv.length:k==='etc'?etcList().length:S.inv.filter(x=>FG[k].includes(x.slot)).length;return `<button data-if="${k}" class="${invFilter===k?'on':''}" ${n||k==='all'?'':'disabled'}>${t}<i>${n}</i></button>`}).join('')}<button id="iLockMode" class="lkm${lockMode?' on':''}">🔒 잠금</button></div>`;
   let bag=filt+`<div class="bag${lockMode?' lkmode':''}">`;const shown=invFilter==='all'?S.inv:invFilter==='etc'?[]:S.inv.filter(ifOk);
   if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=`<div class="tile etc" title="${e.n}" style="border-color:${e.c}">${ico(e.i)}<small style="color:${e.c}">×${e.k}</small></div>`;if(!L.length)bag+=`<div class="tile none"></div>`}
   else for(let i=0;i<(invFilter==='all'?BAG:Math.max(shown.length,1));i++){const it=shown[i];if(!it){bag+=`<div class="tile none"></div>`;continue}
@@ -6681,13 +6745,15 @@ const IVS_PH=[.43,.58];
 const ivK=()=>clamp((IVS.ph-IVS_PH[0])/(IVS_PH[1]-IVS_PH[0]),0,1);
 function ivPhSet(v){const R=$('invSheet').querySelector('.iv2.p');IVS.ph=clamp(v,IVS_PH[0],IVS_PH[1]);IVS.exp=IVS.ph>(IVS_PH[0]+IVS_PH[1])/2;if(!R)return;R.style.setProperty('--ph',(IVS.ph*100).toFixed(2)+'%');R.style.setProperty('--k',ivK().toFixed(3));R.classList.toggle('exp',IVS.exp)}
 /* v501: 놓았을 때 목표 높이까지 매 프레임 이어서 움직임(장착 칸·잠긴 칸·캐릭터가 함께 부드럽게) */
-function ivPh(v,snap){cancelAnimationFrame(IVS.anim||0);if(!snap)return ivPhSet(v);const to=v>(IVS_PH[0]+IVS_PH[1])/2?IVS_PH[1]:IVS_PH[0],from=IVS.ph,t0=performance.now(),T=240;
+function ivPh(v,snap){cancelAnimationFrame(IVS.anim||0);cancelAnimationFrame(IVS.fl||0);IVS.fl=0;if(!snap)return ivPhSet(v);const to=v>(IVS_PH[0]+IVS_PH[1])/2?IVS_PH[1]:IVS_PH[0],from=IVS.ph,t0=performance.now(),T=300;
   const st=now=>{const t=Math.min(1,(now-t0)/T),e=1-Math.pow(1-t,3);ivPhSet(from+(to-from)*e);if(t<1)IVS.anim=requestAnimationFrame(st)};IVS.anim=requestAnimationFrame(st)}
 const IVP={on:false,y0:0,p0:0,mode:null,last:0,v:0,bag:null};
 function ivpStart(y,t){const R=$('invSheet').querySelector('.iv2.p');if(!invOpen||!R||!t.closest('.iv2panel')||t.closest('.iv2dim,.iv2menu'))return false;IVP.on=true;IVP.y0=y;IVP.p0=IVS.ph;IVP.mode=null;IVP.last=y;IVP.v=0;IVP.bag=R.querySelector('.iv2bag');return true}
 function ivpMove(y){if(!IVP.on)return false;const dy=y-IVP.y0;IVP.v=y-IVP.last;IVP.last=y;
   if(!IVP.mode){if(Math.abs(dy)<6)return false;const top=!IVP.bag||IVP.bag.scrollTop<=0;IVP.mode=(dy<0&&IVS.ph<IVS_PH[1]-.001)||(dy>0&&top&&IVS.ph>IVS_PH[0]+.001)?'rs':'sc';IVP.y0=y;IVP.p0=IVS.ph}
-  if(IVP.mode!=='rs')return false;ivPh(IVP.p0-(y-IVP.y0)/innerHeight);return true}
+  if(IVP.mode!=='rs')return false;ivFollow(IVP.p0-(y-IVP.y0)/innerHeight);return true}
+/* v534: 끄는 동안 손가락 위치를 매 프레임 부드럽게 따라감(빠르게 끌어도 튀지 않게) */
+function ivFollow(v){IVS.tgt=clamp(v,IVS_PH[0],IVS_PH[1]);if(IVS.fl)return;cancelAnimationFrame(IVS.anim||0);let last=performance.now();const st=now=>{const dt=Math.min(.05,(now-last)/1000);last=now;const d=IVS.tgt-IVS.ph;if(!IVP.on||Math.abs(d)<.0004){if(IVP.on)ivPhSet(IVS.tgt);IVS.fl=0;return}ivPhSet(IVS.ph+d*(1-Math.exp(-dt*18)));IVS.fl=requestAnimationFrame(st)};IVS.fl=requestAnimationFrame(st)}
 function ivpEnd(){if(!IVP.on)return;IVP.on=false;if(IVP.mode!=='rs')return;IVS.dragEnd=Date.now();const mid=(IVS_PH[0]+IVS_PH[1])/2;ivPh(IVP.v<-2?IVS_PH[1]:IVP.v>2?IVS_PH[0]:IVS.ph>mid?IVS_PH[1]:IVS_PH[0],true)}
 $('invSheet').addEventListener('touchstart',e=>{if(e.touches.length===1)ivpStart(e.touches[0].clientY,e.target)},{passive:true});
 $('invSheet').addEventListener('touchmove',e=>{if(IVP.on&&ivpMove(e.touches[0].clientY))e.preventDefault()},{passive:false});
@@ -6784,6 +6850,18 @@ applyTheme();applyGfx();
 document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click',()=>{GUQ=+b.dataset.q;try{localStorage.setItem(GFX_KEY,String(GUQ))}catch(e){}applyGfx()}));
 function camSegUI(){document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.z===CAM_Z))}
 document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click',()=>{CAM_Z=+b.dataset.z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(e){}camSegUI();resize();frameCam(1)}));camSegUI();
+/* v534: PC — 창 상단(제목 줄)을 끌어 창 이동(다시 열면 처음 위치) · 마우스 휠로 카메라 거리 조절 */
+(()=>{const pc=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;let D=null;
+  document.addEventListener('pointerdown',e=>{if(!pc()||e.button!==0)return;const hd=e.target.closest&&e.target.closest('.scrim>.sheet>.shead');if(!hd||e.target.closest('button,input,select,a'))return;
+    const sh=hd.parentElement,m=/(-?[\d.]+)px (-?[\d.]+)px/.exec(sh.style.translate||'')||[0,0,0];D={sh,x0:e.clientX-(+m[1]),y0:e.clientY-(+m[2])};sh.classList.add('dragging');e.preventDefault()});
+  addEventListener('pointermove',e=>{if(!D)return;const r=D.sh.getBoundingClientRect();let x=e.clientX-D.x0,y=e.clientY-D.y0;D.sh.style.translate=`${x}px ${y}px`});
+  addEventListener('pointerup',()=>{if(D){D.sh.classList.remove('dragging');D=null}});
+  const mo=new MutationObserver(ms=>{for(const m of ms){const s=m.target;if(s.hidden)s.querySelectorAll(':scope>.sheet').forEach(x=>x.style.translate='')}});
+  const hook=()=>document.querySelectorAll('.scrim').forEach(s=>{if(s._dg)return;s._dg=1;mo.observe(s,{attributes:true,attributeFilter:['hidden']});s.querySelectorAll(':scope>.sheet').forEach(x=>{if(pc())x.classList.add('dragok')})});hook();setTimeout(hook,1500);
+  addEventListener('wheel',e=>{if(!pc()||!e.target||(e.target.closest&&e.target.closest('.scrim,.sheet,.iv2,#mini,.feed,#cl')))return;if(typeof paused==='function'&&paused())return;
+    const z=Math.max(-30,Math.min(30,CAM_Z+(e.deltaY>0?-5:5)));if(z===CAM_Z)return;CAM_Z=z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}try{camSegUI()}catch(_){}resize();frameCam(1)},{passive:true});
+})();
+
 {const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%'};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
 (function(){const e=$('emb');for(let i=0;i<26;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 $('goStart').onclick=()=>{$('title').hidden=true;showSlots()};
