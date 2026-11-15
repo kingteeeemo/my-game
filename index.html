@@ -2651,7 +2651,7 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
   U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
 /* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림) + 실사 불꽃 플립북(models/flame02.jpg, 16x4=64장).
    lwBuild(코드로 그린 날개)와 같은 userData 규격(mem·trail·update·trailTick·pt)이라 lavaTick이 그대로 붙이고 움직임 */
-const TWC={S:1.9,dy:.15,dz:-.24,fw:.4,x:.2,yaw:70,pv:[.5,-.3,.8],NF:170,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
+const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:70,pv:[.24,-.4,.8],/* v520 pv=팔 밑동 끝(등에 박히는 자리) */NF:170,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
 function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Math.PI/180;g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   /* 불꽃: 세계 좌표에 남는 카메라 향 판 — 서 있으면 날개에서 피어오르고, 움직이면 뒤에 남아 잔상이 됨 */
   const NF=C.NF,fg=new THREE.InstancedBufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-.5,0,0,.5,0,0,.5,1,0,-.5,1,0]),3));fg.setIndex([0,1,2,0,2,3]);
@@ -5079,7 +5079,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v519';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v520';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
