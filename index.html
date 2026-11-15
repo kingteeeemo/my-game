@@ -2655,16 +2655,16 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
 /* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림).
    v522 불꽃은 코드로 그림: 날개 곳곳에서 나온 불 띠가 지나온 길을 따라 이어짐 — 서 있으면 위로 날름거리고, 달리면 바람에 날리듯 뒤로 길게 흐름. 연기는 플립북(models/flame02.jpg) 모양을 검회색으로.
    lwBuild(코드로 그린 날개)와 같은 userData 규격(mem·trail·update·trailTick·pt)이라 lavaTick이 그대로 붙이고 움직임 */
-const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:70,pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:13,H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
+const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:62,lean:14,/* v524 옆에서 보면 위쪽이 뒤로 살짝 누움 */pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:16,H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
 function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Math.PI/180;g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   /* 불 띠: 띠마다 붙은 자리의 지난 위치(H개)를 이어 카메라를 보는 리본으로 만듦(세계 좌표) */
-  const NR=C.NR*2,H=C.H,NP=H+1,rp=new Float32Array(NR*NP*2*3),ruv=new Float32Array(NR*NP*2*2),rsd=new Float32Array(NR*NP*2),ri=[];
+  const NR=C.NR*2,H=C.H,NP=H+1,rp=new Float32Array(NR*NP*2*3),ruv=new Float32Array(NR*NP*2*2),rsd=new Float32Array(NR*NP*2),rk=new Float32Array(NR*NP*2),ri=[];
   for(let r=0;r<NR;r++){const sd=Math.random();for(let j=0;j<NP;j++)for(let e=0;e<2;e++){const k=(r*NP+j)*2+e;ruv[k*2]=j/H;ruv[k*2+1]=e*2-1;rsd[k]=sd}
     for(let j=0;j<H;j++){const a=(r*NP+j)*2;ri.push(a,a+1,a+2,a+1,a+3,a+2)}}
-  const rg=new THREE.BufferGeometry(),rpa=new THREE.BufferAttribute(rp,3);rpa.setUsage(THREE.DynamicDrawUsage);rg.setAttribute('position',rpa);rg.setAttribute('uv',new THREE.BufferAttribute(ruv,2));rg.setAttribute('aS',new THREE.BufferAttribute(rsd,1));rg.setIndex(ri);
+  const rg=new THREE.BufferGeometry(),rpa=new THREE.BufferAttribute(rp,3);rpa.setUsage(THREE.DynamicDrawUsage);rg.setAttribute('position',rpa);rg.setAttribute('uv',new THREE.BufferAttribute(ruv,2));rg.setAttribute('aS',new THREE.BufferAttribute(rsd,1));const rka=new THREE.BufferAttribute(rk,1);rka.setUsage(THREE.DynamicDrawUsage);rg.setAttribute('aK',rka);rg.setIndex(ri);
   const fm=new THREE.ShaderMaterial({uniforms:{uK:{value:0},uT:{value:0},uMv:{value:0}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
-    vertexShader:`attribute float aS;varying vec2 vU;varying float vS;void main(){vU=uv;vS=aS;gl_Position=projectionMatrix*viewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform float uK,uT,uMv;varying vec2 vU;varying float vS;
+    vertexShader:`attribute float aS;attribute float aK;varying vec2 vU;varying float vS;varying float vK;void main(){vU=uv;vS=aS;vK=aK;gl_Position=projectionMatrix*viewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float uK,uT,uMv;varying vec2 vU;varying float vS;varying float vK;
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
       float fb(vec2 p){return n(p)*.55+n(p*2.1+7.)*.3+n(p*4.3+13.)*.15;}
@@ -2675,7 +2675,7 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
         /* 끝으로 갈수록 무늬에 깎여 갈라지며 꺼짐 */
         float e=u*1.05+abs(v)*.3,I=core*pow(1.-u,1.15)*(.38+.95*smoothstep(e-.1,e+.5,f*.75+f2*.35+core*.2));
         vec3 c=mix(vec3(.9,.08,.0),vec3(1.,.36,.03),smoothstep(.05,.5,I));c=mix(c,vec3(1.,.66,.2),smoothstep(.55,1.,I));
-        gl_FragColor=vec4(c*I*uK*.42,1.);}`});
+        gl_FragColor=vec4(c*I*uK*.42*vK,1.);}`});
   const tr=new THREE.Mesh(rg,fm);tr.frustumCulled=false;tr.renderOrder=6;g.userData.trail=tr;
   /* 연기 판(보통 혼합, 불보다 먼저 그림) — 플립북의 불꽃 모양을 검회색으로 */
   const NS=C.NS,sg=new THREE.InstancedBufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-.5,0,0,.5,0,0,.5,1,0,-.5,1,0]),3));sg.setIndex([0,1,2,0,2,3]);
@@ -2704,28 +2704,32 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
       const n=Math.min(600,cand.length),pts=new Float32Array(n*3);for(let k=0;k<n;k++){const vi=cand[Math.floor(Math.random()*cand.length)];pts[k*3]=P.getX(vi);pts[k*3+1]=P.getY(vi);pts[k*3+2]=P.getZ(vi)}
       piv.push({p,me,sx,pts});
       /* 불 띠가 붙는 자리 */
-      for(let k=0;k<C.NR;k++)R.push({side:piv.length-1,pi:Math.floor(Math.random()*n)*3,h:null,pv:null,w:rnd(.6,1.05),vy:rnd(1.6,2.8),len:rnd(.6,1),ph:Math.random()*6.28,wx:rnd(-.35,.35),wz:rnd(-.35,.35)})}
+      for(let k=0;k<C.NR;k++)R.push({side:piv.length-1,pi:Math.floor(Math.random()*n)*3,h:null,ah:null,st:3,tm:rnd(0,1.6),amp:0,pv:null,w:rnd(.6,1.05),vy:rnd(1.6,2.8),len:rnd(.6,1),ph:Math.random()*6.28,wx:rnd(-.35,.35),wz:rnd(-.35,.35)})}
     g.userData.ready=1}catch(e){console.warn('wing',e)}});
   /* 숨쉬듯 벌어졌다 오므라듦, 이동하면 뒤로 젖혀 접힘, 몸이 들썩이거나 돌면 늦게 따라옴 */
   g.userData.update=(t,o)=>{if(mat)mat.emissiveIntensity=U.uK.value*(.52+.07*Math.sin(t*3.1)+.05*Math.sin(t*7.3));
     for(const q of piv){const sx=q.sx,ph=sx>0?0:.5,yaw=C.yaw+4*Math.sin(t*1.25+ph)-(o.fold||0)*20-(o.back||0)*25;
-      q.p.rotation.set(-(o.back||0)*.35-(o.bob||0)*.5+.02*Math.sin(t*1.7+ph),-sx*yaw*D+(o.tw||0)*.6,-sx*((o.bob||0)*.6+.03*Math.sin(t*1.25+ph)))}};
+      q.p.rotation.set(-(o.back||0)*.35-(o.bob||0)*.5+.02*Math.sin(t*1.7+ph),-sx*yaw*D+(o.tw||0)*.6,-sx*((o.bob||0)*.6+.03*Math.sin(t*1.25+ph)-C.lean*D))}};
   g.userData.pt=(side)=>{if(!wpt(side,_v))return null;g.worldToLocal(_v);return [_v.x,_v.y,_v.z]};
   g.userData.trailTick=(dt,t,spd,cam)=>{const mv=Math.min(1,spd/5);fm.uniforms.uT.value=t;fm.uniforms.uMv.value+=(mv-fm.uniforms.uMv.value)*(1-Math.exp(-dt*6));
     if(!g.userData.ready){rg.setDrawRange(0,0);return}rg.setDrawRange(0,Infinity);
     /* 지난 위치 기록: tau초마다 한 칸씩 밀림. h[k]=k칸 전의 자리 → 방향을 바꿔도 이미 남은 띠는 지나온 길에 그대로 */
     hacc+=dt;let sh=0;while(hacc>=C.tau){hacc-=C.tau;sh++}sh=Math.min(sh,H);const f=hacc/C.tau,cp=cam||camera.position;
-    for(let r=0;r<R.length;r++){const o=R[r];wpt(o.side,_v,o.pi);if(!o.h){o.h=new Float32Array(H*3);for(let j=0;j<H;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
-      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(sh){h.copyWithin(sh*3,0,(H-sh)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */for(let j=0;j<sh;j++){const q=(j+f)/(sh+f);h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
+    for(let r=0;r<R.length;r++){const o=R[r];
+      /* v524 타오르는 느낌: 띠마다 [붙음 → 타오름 → 사그라듦 → 쉼]을 제각각 되풀이하고, 쉬는 동안 다른 자리로 옮겨 다시 붙음 */
+      o.tm-=dt;if(o.st===0){o.amp=Math.min(1,o.amp+dt/.3);if(o.amp>=1){o.st=1;o.tm=rnd(.6,1.9)}}else if(o.st===1){if(o.tm<=0)o.st=2}else if(o.st===2){o.amp=Math.max(0,o.amp-dt/.45);if(o.amp<=0){o.st=3;o.tm=H*C.tau+rnd(0,.5)}}
+      else if(o.tm<=0){o.st=0;o.amp=0;o.pi=Math.floor(Math.random()*(piv[o.side].pts.length/3))*3;o.h=null;o.pv=null;o.w=rnd(.6,1.05);o.vy=rnd(1.6,2.8);o.len=rnd(.6,1)}
+      wpt(o.side,_v,o.pi);if(!o.h){o.h=new Float32Array(H*3);o.ah=new Float32Array(H);for(let j=0;j<H;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
+      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(sh){h.copyWithin(sh*3,0,(H-sh)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */o.ah.copyWithin(sh,0,H-sh);for(let j=0;j<sh;j++){const q=(j+f)/(sh+f);o.ah[j]=o.amp;h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
       const L=o.len,base=r*NP*2*3;let px=_v.x,py=_v.y,pz=_v.z;
       for(let j=0;j<NP;j++){let x,y,z;if(j===0){x=_v.x;y=_v.y;z=_v.z}else{const a=j*3,b=(j-1)*3;if(j<H){x=h[a]+(h[b]-h[a])*f;y=h[a+1]+(h[b+1]-h[a+1])*f;z=h[a+2]+(h[b+2]-h[a+2])*f}else{x=h[b];y=h[b+1];z=h[b+2]}}
         /* 나이에 따라 위로 떠오르고 살짝 흩날림(서 있을 때는 이것만으로 위로 날름거리는 불꽃이 됨) */
-        const age=Math.max(0,j-(j?f:0))*C.tau,u=j/H,wig=Math.sin(t*5+o.ph+u*5)*.12*u;x+=(o.wx*age+wig)*(1-.5*mv);y+=o.vy*age*(1-.45*mv)*L;z+=(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv);
+        const age=j*C.tau/* 기록 한 칸 밀릴 때마다 높이가 튀던 것(끊겨 보임) 수정: 나이는 칸 번호로만 */,u=j/H,ak=j===0?o.amp:j<H?o.ah[j]+(o.ah[j-1]-o.ah[j])*f:o.ah[j-1],wig=Math.sin(t*5+o.ph+u*5)*.12*u;x+=(o.wx*age+wig)*(1-.5*mv);y+=o.vy*age*(1-.45*mv)*L;z+=(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv);
         if(j===0){_t.set(0,1,0)}else{_t.set(x-px,y-py,z-pz);if(_t.lengthSq()<1e-8)_t.set(0,1,0)}px=x;py=y;pz=z;
         _c.set(cp.x-x,cp.y-y,cp.z-z);_s.crossVectors(_t,_c);const sl=_s.length()||1;
         const w=o.w*(.3+1.5*u*Math.exp(1-u*3.2)*.9+.25*mv*u)*(1-u*.35)*.5/sl,k=base+j*6;
-        rp[k]=x-_s.x*w;rp[k+1]=y-_s.y*w;rp[k+2]=z-_s.z*w;rp[k+3]=x+_s.x*w;rp[k+4]=y+_s.y*w;rp[k+5]=z+_s.z*w}}
-    rpa.needsUpdate=true;
+        rp[k]=x-_s.x*w;rp[k+1]=y-_s.y*w;rp[k+2]=z-_s.z*w;rp[k+3]=x+_s.x*w;rp[k+4]=y+_s.y*w;rp[k+5]=z+_s.z*w;const kk=(r*NP+j)*2;rk[kk]=rk[kk+1]=ak}}
+    rpa.needsUpdate=true;rka.needsUpdate=true;
     acs=Math.min(20,acs+dt*(26+34*mv)*QM());while(acs>=1){acs--;if(K.length>=NS)continue;const side=Math.random()<.5?0:1;if(!wpt(side,_v))break;
       K.push({x:_v.x,y:_v.y+.3,z:_v.z,vx:rnd(-.25,.25),vy:rnd(.9,1.6),vz:rnd(-.25,.25),age:0,life:rnd(1,1.9),s:rnd(1.1,1.9),f0:Math.random()*64,fl:Math.random()<.5?-1:1,ln:rnd(-.3,.3)})}
     let n=0;for(let i=K.length-1;i>=0;i--){const q=K[i];q.age+=dt;if(q.age>=q.life){K[i]=K[K.length-1];K.pop();continue}q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt}
@@ -5123,7 +5127,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v523';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v524';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
