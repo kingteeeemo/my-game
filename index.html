@@ -3380,7 +3380,37 @@ const mawC=()=>S.duel&&S.duel.uber?{melee:.08,wave:.5,breath:.4,rain:.2,sting:NS
 const duelDef=()=>S.duel&&S.duel.b==='maw'?MAW:DUEL;
 /* 구르기 무적을 무시하는 % 피해 (브레스) */
 function hurtPctRaw(pct){if(P.hp<=0||S.testGod)return;if(NS()){nsHurtPct(pct,true);return}const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=Math.max(P.inv,.15);dmgNum(P.pos,d,'hurt');const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
-function mawModel(U){const root=new THREE.Group();
+/* v539: 심연의 아귀 모델(models/maw.glb) — 한 덩어리 모델에 뼈 6개(몸통 5 + 머리)를 코드로 심어, 기존 곡선(물결·숙임)을 따라 휘게 함. 받기 전·실패 시엔 기존 절차적 모델 */
+const MWC={file:'models/maw.glb',S:4.3,y0:-.6,ys:[-.95,-.7,-.45,-.2,.02],neck:.12,mouth:[0,.46,.34]},MWN={st:0,geo:null,mat:null};
+function mawPool(U){
+  const pool=new THREE.Group();const pd=new THREE.Mesh(new THREE.CircleGeometry(3.9,64),new THREE.MeshStandardMaterial({color:0x06030a,roughness:.1,metalness:.5,emissive:U?0x3a0616:0x180a30,emissiveIntensity:.9}));pd.rotation.x=-Math.PI/2;pd.position.y=.035;
+  const rim=flatMesh(ringGeo,U?0xff3a6a:0x8a3aff,.5);rim.scale.set(4.1,4.1,1);rim.position.y=.045;const rim2=flatMesh(ringGeo,0x2a1040,.9);rim2.scale.set(4.5,4.5,1);rim2.position.y=.04;pool.add(pd,rim2,rim);
+  return pool}
+function mawLoad(){const K=MWN,C=MWC;if(K.st||!THREE.GLTFLoader)return;K.st=1;
+  new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{let src=null;g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(o.isMesh&&!src)src=o});const geo=src.geometry.clone();geo.applyMatrix4(src.matrixWorld);
+    const P=geo.attributes.position,n=P.count,si=new Uint16Array(n*4),sw=new Float32Array(n*4),ys=C.ys,ss=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+    for(let i=0;i<n;i++){const y=P.getY(i),z=P.getZ(i);/* 머리 몫: 목 위쪽 + 몸통 앞으로 튀어나온 송곳니 */const hw=Math.max(ss(0,.2,y),ss(.2,.32,z)*ss(-.2,-.05,y));
+      let b=0;while(b<ys.length-2&&y>ys[b+1])b++;const f=clamp((y-ys[b])/(ys[b+1]-ys[b]),0,1);
+      si[i*4]=b;sw[i*4]=(1-hw)*(1-f);si[i*4+1]=b+1;sw[i*4+1]=(1-hw)*f;si[i*4+2]=ys.length;sw[i*4+2]=hw}
+    geo.setAttribute('skinIndex',new THREE.BufferAttribute(si,4));geo.setAttribute('skinWeight',new THREE.BufferAttribute(sw,4));
+    geo.translate(0,.95,0);geo.scale(C.S,C.S,C.S);geo.translate(0,C.y0,0);geo.computeBoundingBox();geo.computeBoundingSphere();
+    const m=src.material;m.metalness=Math.min(m.metalness,.2);m.skinning=true;m.emissiveMap=m.map;m.emissive=new THREE.Color(0xffffff);m.emissiveIntensity=.3;/* 어두운 결투장에서 묻히지 않게 제 색으로 살짝 빛남 */K.geo=geo;K.mat=m;K.st=2;
+    for(const e of enemies)if(e.maw&&e.hp>0&&e.M&&!e.M.mdl){const U=!!(S.duel&&S.duel.uber),y=e.M.root.position.y,M=mawModel(U);e.g.remove(e.M.root,e.M.pool);e.g.add(M.root,M.pool);M.root.position.y=y;e.M=M;e.mat=M.body.material}
+    delete BOSS_IMG.mawn;delete BOSS_IMG.mawu;try{if(bossOpen)renderBoss()}catch(_){}}catch(_){K.st=3}},undefined,()=>{K.st=3})}
+function mawModelG(U){const C=MWC,root=new THREE.Group(),Y=y=>(y+.95)*C.S+C.y0,mat=MWN.mat.clone();mat.skinning=true;if(U){mat.color.setRGB(1.25,.72,.8);mat.emissive.setRGB(1.3,.6,.7)}
+  const bones=C.ys.map(y=>{const b=new THREE.Bone();b.position.set(0,Y(y),0);root.add(b);return b}),hb=new THREE.Bone();hb.position.set(0,Y(C.neck),0);root.add(hb);bones.push(hb);
+  const mesh=new THREE.SkinnedMesh(MWN.geo,mat);mesh.frustumCulled=false;mesh.castShadow=true;root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new THREE.Skeleton(bones));
+  /* 입 자리(브레스·침이 나가는 곳) + 입 속 빛 */
+  const head=new THREE.Object3D();head.position.set(C.mouth[0]*C.S,(C.mouth[1]-C.neck)*C.S,C.mouth[2]*C.S);hb.add(head);
+  const eyes=[],gl=[];for(const [z,sc,op,col] of [[-1.0,2.8,.36,U?0xff2a5a:0x8a40ff],[-.9,1.1,.7,U?0xff9ab0:0xd0b0ff]]){const o=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));o.position.set(0,-.05,z);o.scale.setScalar(sc);o.userData.s=sc;head.add(o);gl.push(o)}
+  const top=Y(C.neck),CP0=[C.y0,C.y0+(top-C.y0)/3,C.y0+(top-C.y0)*2/3,top,top+1.6].map(y=>new THREE.Vector3(0,y,0)),CP=CP0.map(v=>v.clone()),curve=new THREE.CatmullRomCurve3(CP,false,'centripetal',.5),L=top+1.6-C.y0;
+  const M={root,pool:mawPool(U),legs:[],arms:[],h:7.4,maw:1,head,jaw:{rotation:{x:0}},mands:[],eyes,segs:[],spines:[],plates:[],stripes:[],CP0,CP,curve,body:mesh,up:new THREE.Vector3(0,1,0),mdl:{bones,hb,gl,ts:bones.map(b=>(b.position.y-C.y0)/L)}};
+  mawPose(M,0,0);return M}
+function mawPoseG(M,ph,open){const {CP0,CP,curve}=M,D=M.mdl,n=CP.length;/* 뿌리는 고정, 위로 갈수록 크게 흔들림 · 공격(open) 때 앞으로 내밀며 머리를 쳐듦 */
+  for(let i=0;i<n;i++){const k=i/(n-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.38*k,CP0[i].y+Math.sin(ph*.9+i)*.06*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.26*k+open*1.1*k*k)}curve.updateArcLengths();
+  for(let i=0;i<D.bones.length;i++){const b=D.bones[i],t=Math.min(1,D.ts[i]);curve.getPointAt(t,b.position);curve.getTangentAt(t,_mt);b.quaternion.setFromUnitVectors(_my,_mt)}
+  D.hb.quaternion.multiply(_mq.setFromAxisAngle(_mp.set(1,0,0),-open*.3+Math.sin(ph*1.1)*.05));for(const o of D.gl)o.scale.setScalar(o.userData.s*(1+.1*Math.sin(ph*5)+open*.5))}
+function mawModel(U){if(MWN.st===2)return mawModelG(U);mawLoad();const root=new THREE.Group();
   /* v211: 물속에서 솟아오른 기다란 뱀용 — 곡선을 따라 촘촘한 구체 몸통(매 프레임 물결침) + 등가시·지느러미·여러 턱의 머리 */
   const skin=new THREE.MeshStandardMaterial({color:0x2c1e4a,roughness:.38,metalness:.22,emissive:0x0a0418,emissiveIntensity:.6}),belly=new THREE.MeshStandardMaterial({color:0x4a3868,roughness:.55,metalness:.05}),
     fin=new THREE.MeshStandardMaterial({color:U?0x6a1030:0x2a1060,roughness:.5,metalness:.1,emissive:U?0xff2a5a:0x7a30ff,emissiveIntensity:.35,side:THREE.DoubleSide,transparent:true,opacity:.92}),
@@ -3414,13 +3444,12 @@ function mawModel(U){const root=new THREE.Group();
   /* 발광 줄무늬(등줄기) */
   const stripes=[];for(let i=4;i<N-3;i+=2){const st=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),glow);root.add(st);stripes.push({m:st,t:i/(N-1)})}
   /* 웅덩이 */
-  const pool=new THREE.Group();const pd=new THREE.Mesh(new THREE.CircleGeometry(3.9,64),new THREE.MeshStandardMaterial({color:0x06030a,roughness:.1,metalness:.5,emissive:U?0x3a0616:0x180a30,emissiveIntensity:.9}));pd.rotation.x=-Math.PI/2;pd.position.y=.035;
-  const rim=flatMesh(ringGeo,U?0xff3a6a:0x8a3aff,.5);rim.scale.set(4.1,4.1,1);rim.position.y=.045;const rim2=flatMesh(ringGeo,0x2a1040,.9);rim2.scale.set(4.5,4.5,1);rim2.position.y=.04;pool.add(pd,rim2,rim);
+  const pool=mawPool(U);
   const M={root,pool,legs:[],arms:[],h:7.4,maw:1,head,jaw,mands,eyes,segs,spines,plates,stripes,CP0,CP,curve,body:segs[0].m,up:new THREE.Vector3(0,1,0)};
   mawPose(M,0,0);return M}
 /* 곡선을 따라 몸통 재배치 — ph: 물결 위상, open: 턱 벌림 */
 const _mp=new THREE.Vector3(),_mt=new THREE.Vector3(),_mq=new THREE.Quaternion(),_mz=new THREE.Vector3(0,0,1),_my=new THREE.Vector3(0,1,0);
-function mawPose(M,ph,open){const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){const k=i/(CP.length-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.12*k,CP0[i].y+Math.sin(ph*.9+i)*.08*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.08*k)}curve.updateArcLengths();
+function mawPose(M,ph,open){if(M.mdl)return mawPoseG(M,ph,open);const {CP0,CP,curve}=M;for(let i=0;i<CP.length;i++){const k=i/(CP.length-1);CP[i].set(CP0[i].x+Math.sin(ph*1.3+i*1.4)*.12*k,CP0[i].y+Math.sin(ph*.9+i)*.08*k,CP0[i].z+Math.cos(ph*1.1+i*.9)*.08*k)}curve.updateArcLengths();
   const at=(t,out)=>curve.getPointAt(Math.min(1,Math.max(0,t)),out);
   for(const s of M.segs){at(s.t,s.m.position)}
   for(const s of M.plates){at(s.t,s.m.position);curve.getTangentAt(s.t,_mt);_mq.setFromUnitVectors(_my,_mt);s.m.quaternion.copy(_mq);s.m.position.addScaledVector(_mz.set(0,0,1).applyQuaternion(_mq),s.r*.35)}
@@ -6083,7 +6112,11 @@ function closeStage(){stageOpen=false;$('stage').hidden=true}
 $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 /* v318: 「보스」 창 — 왼쪽 잿불 검귀 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
 let bossOpen=false,bossSel={b:'knight',m:null};const BOSS_IMG={};
+/* v539: 보스 모델은 게임에 들어온 뒤 한가할 때 미리 받아 둠 — 보스 창을 처음 열 때 그림이 늦게 뜨지 않게 */
+{const iv=setInterval(()=>{if(typeof S!=='undefined'&&S&&hero&&!S.demo){clearInterval(iv);setTimeout(()=>{try{bkLoad();mawLoad()}catch(_){}},5000)}},1500)}
 function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return BOSS_IMG[key];let url='';
+  /* v539: 모델을 받는 중이면 예전(코드로 그린) 그림을 잠깐 보여 주지 않고 빈 칸으로 두었다가 받는 대로 그림 — 불러오기에 실패했을 때만 예전 그림 */
+  if(THREE.GLTFLoader){const K=kind==='maw'?MWN:BKN;if(K.st<2){kind==='maw'?mawLoad():bkLoad();return ''}}
   try{const W=300,H=340,rd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rd.setSize(W,H,false);rd.setPixelRatio(1);rd.setClearColor(0,0);
     const sc=new THREE.Scene(),skin=kind==='knight'&&BKN.st===2&&BKN.root,M=kind==='maw'?mawModel(U):skin?{root:BKN.root}:knightModel(),g=new THREE.Group();let sv=null;
     if(skin){/* v397: 보스 창 그림도 전사 3D 모델 — 전투 중인 보스가 쓰는 모델을 잠깐 빌려 대기 자세로 찍고 되돌림 */const r=BKN.root;sv={par:r.parent,ry:r.rotation.y,py:r.position.y,sw:BKN.swOn};bkSword('back');/* v478: 보스 창 그림은 대검을 등에 멘 모습 */r.rotation.y=0;r.position.y=0;bkColor(U);for(const k in BKN.acts){const a=BKN.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}BKN.mx.update(0)}
@@ -6094,7 +6127,7 @@ function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return
     g.rotation.y=kind==='maw'?-.5:-.35;g.updateMatrixWorld(true);cam.position.set(ct.x,ct.y+sz.y*.05,ct.z+R);cam.lookAt(ct.x,ct.y,ct.z);
     rd.render(sc,cam);url=rd.domElement.toDataURL('image/png');rd.dispose();try{rd.forceContextLoss()}catch(e){}
     if(sv){const r=BKN.root;g.remove(r);if(sv.par)sv.par.add(r);r.rotation.y=sv.ry;r.position.y=sv.py;bkSword(sv.sw);bkColor(!!(S.duel&&S.duel.uber))}}catch(e){url=''}
-  if(kind==='knight'&&BKN.st!==2){bkLoad();return url}/* 모델이 아직이면 캐시하지 않고, 받는 대로 다시 그림 */
+  if(kind==='knight'&&BKN.st!==2){bkLoad();return url}
   return BOSS_IMG[key]=url}
 function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   const card=(k,name,sub)=>{const U=bs.b===k&&bs.m==='u',img=bossPortrait(k,U);return `<button class="bcard${bs.b===k?' on':''}" data-bs="${k}"><div class="bimg">${img?`<img src="${img}" alt="">`:''}</div><b>${name}</b><small>${sub}</small></button>`};
