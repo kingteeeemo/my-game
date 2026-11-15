@@ -2737,34 +2737,34 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
   g.userData.pt=(side)=>{if(!wpt(side,_v))return null;g.worldToLocal(_v);return [_v.x,_v.y,_v.z]};
   const SF=new Float32Array(C.H+1);let wasRun=false;
   let hpx=null,hpz=0,hvx=0,hvz=0;
-  g.userData.trailTick=(dt,t,spd,cam)=>{const mv=Math.min(1,spd/5);if(dt>0){if(hpx!==null){hvx=(P.pos.x-hpx)/dt;hvz=(P.pos.z-hpz)/dt}hpx=P.pos.x;hpz=P.pos.z}fm.uniforms.uT.value=t;fm.uniforms.uMv.value+=(mv-fm.uniforms.uMv.value)*(1-Math.exp(-dt*6));
+  g.userData.trailTick=(dt,t,spd,cam)=>{const mv=Math.min(1,spd/5);if(dt>0){if(hpx!==null){hvx=(P.pos.x-hpx)/dt;hvz=(P.pos.z-hpz)/dt}hpx=P.pos.x;hpz=P.pos.z}const hsp=Math.hypot(hvx,hvz);fm.uniforms.uT.value=t;fm.uniforms.uMv.value+=(mv-fm.uniforms.uMv.value)*(1-Math.exp(-dt*6));
     if(!g.userData.ready){rg.setDrawRange(0,0);return}rg.setDrawRange(0,Infinity);
     /* 지난 위치 기록: tau초마다 한 칸씩 밀림. h[k]=k칸 전의 자리 → 방향을 바꿔도 이미 남은 띠는 지나온 길에 그대로 */
     hacc+=dt;let sh=0;while(hacc>=C.tau){hacc-=C.tau;sh++}sh=Math.min(sh,H);const f=hacc/C.tau,cp=cam||camera.position;
     for(let r=0;r<R.length;r++){const o=R[r];
       if(o.tr){/* v525 잔상 띠: 달리는 동안만 켜지고(가운데에서), 멈추면 꼬리부터 자연스럽게 꺼짐 */
-        const tg=mv>.12?(.78+.22*Math.sin(t*3.7+o.ph)):0;o.amp+=(tg-o.amp)*(1-Math.exp(-dt*(tg>o.amp?5:3.2)))/* v535: 멈추면 잔상이 확 꺼지지 않고 0.6초쯤에 걸쳐 사그라듦 */}
+        const frz=hsp<1.2;/* 몸이 실제로 멈춘 순간(늦게 따라오는 값이 아니라 지금 빠르기) */const tg=!frz?(.78+.22*Math.sin(t*3.7+o.ph)):0;o.amp+=(tg-o.amp)*(1-Math.exp(-dt*(tg>o.amp?5:4)));/* v536: 멈추면 남은 잔상이 날개로 빨려 들어가지 않고 그 자리에 남아 위로 피어오르며 사그라듦 */if(frz&&!o.fz){o.fz=1;o.ff=f;o.lift=0}else if(!frz&&o.fz)o.fz=0;if(o.fz)o.lift+=dt*1.1;else if(o.lift)o.lift*=Math.exp(-dt*10)/* v535: 멈추면 잔상이 확 꺼지지 않고 0.6초쯤에 걸쳐 사그라듦 */}
       else{/* 평소 띠: [붙음 → 타오름 → 사그라듦 → 쉼]을 제각각 되풀이하고 쉬는 동안 자리를 옮김. 달리기 시작하면 사그라들고, 멈추면 다시 여기저기서 붙음 */
         o.tm-=dt;const run=mv>.2;if(run&&o.st<2)o.st=2;if(!run&&wasRun&&o.st===3)o.tm=rnd(0,1.2);/* v534: 멈춘 직후 쉬던 불꽃이 한꺼번에 붙지 않고 하나씩 되살아남 */
         if(o.st===0){o.amp=Math.min(1,o.amp+dt/.3);if(o.amp>=1){o.st=1;o.tm=rnd(.6,1.9)}}else if(o.st===1){if(o.tm<=0)o.st=2}else if(o.st===2){o.amp=Math.max(0,o.amp-dt/.45);if(o.amp<=0){o.st=3;o.tm=H*C.tau+rnd(0,.5)}}
         else if(o.tm<=0&&!run){o.st=0;o.amp=0;{const inn=piv[o.side].inn;o.pi=inn[Math.floor(Math.random()*inn.length)]}o.h=null;o.pv=null;o.w=rnd(.6,1.05);o.vy=rnd(1.6,2.8);o.len=rnd(.6,1)}}
-      wpt(o.side,_v,o.pi);if(!o.h){o.h=new Float32Array(NP*3);o.ah=new Float32Array(NP);o.dh=new Float32Array(NP).fill(1);for(let j=0;j<NP;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
-      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(sh){h.copyWithin(sh*3,0,(NP-sh)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */o.ah.copyWithin(sh,0,NP-sh);o.dh.copyWithin(sh,0,NP-sh);/* v535: 몸이 나아가는 것과 따로 날개만 크게 휘둘릴 때(급회전)만 어둡게 — 구르기처럼 몸이 빠르게 나아갈 때는 잔상이 그대로 남음 */const ik=dt>0?1/dt:0,rel=Math.hypot((_v.x-pv[0])*ik-hvx,(_v.y-pv[1])*ik,(_v.z-pv[2])*ik-hvz),q2=clamp((rel-6)/8,0,1);let dm=1-.85*q2*q2*(3-2*q2);if(P.mv)dm=Math.max(dm,.55);for(let j=0;j<sh;j++){const q=(j+f)/(sh+f);o.ah[j]=o.amp;o.dh[j]=dm;h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
+      wpt(o.side,_v,o.pi);const shr=o.fz?0:sh,fr=o.fz?o.ff:f;if(!o.h){o.h=new Float32Array(NP*3);o.ah=new Float32Array(NP);o.dh=new Float32Array(NP).fill(1);for(let j=0;j<NP;j++){o.h[j*3]=_v.x;o.h[j*3+1]=_v.y;o.h[j*3+2]=_v.z}}
+      const h=o.h,pv=o.pv||(o.pv=[_v.x,_v.y,_v.z]);if(shr){h.copyWithin(shr*3,0,(NP-shr)*3);/* 프레임이 느려 여러 칸이 한꺼번에 밀리면 그 사이를 고르게 채워 꺾이지 않게 */o.ah.copyWithin(shr,0,NP-shr);o.dh.copyWithin(shr,0,NP-shr);/* v535: 몸이 나아가는 것과 따로 날개만 크게 휘둘릴 때(급회전)만 어둡게 — 구르기처럼 몸이 빠르게 나아갈 때는 잔상이 그대로 남음 */const ik=dt>0?1/dt:0,rel=Math.hypot((_v.x-pv[0])*ik-hvx,(_v.y-pv[1])*ik,(_v.z-pv[2])*ik-hvz),q2=clamp((rel-6)/8,0,1);let dm=1-.85*q2*q2*(3-2*q2);if(P.mv)dm=Math.max(dm,.55);for(let j=0;j<shr;j++){const q=(j+fr)/(shr+fr);o.ah[j]=o.amp;o.dh[j]=dm;h[j*3]=_v.x+(pv[0]-_v.x)*q;h[j*3+1]=_v.y+(pv[1]-_v.y)*q;h[j*3+2]=_v.z+(pv[2]-_v.z)*q}}pv[0]=_v.x;pv[1]=_v.y;pv[2]=_v.z;
       const L=o.len,base=r*NP*2*3,rs=o.tr?1-.3*mv:1-.45*mv;
       /* v526 잔상 띠는 지나온 길이가 짧아지면(멈춤·제자리) 같이 꺼짐 — 한 점에 뭉쳐 떨리는 덩어리가 되지 않게 */
       let pl=1;if(o.tr){let d=0;for(let j=3;j<NP*3;j+=3)d+=Math.hypot(h[j]-h[j-3],h[j+2]-h[j-1]);pl=clamp((d-.5)/1.6,0,1);pl=pl*pl*(3-2*pl);
         /* v534 띠의 점마다 '그 점이 남겨질 때 날개가 움직이던 빠르기'로 밝기를 정함 — 멈춘 자리에 겹쳐 쌓인 점은 꺼지고(멈춘 뒤 날개 위에서 삐죽삐죽 떨리던 원인), 방향을 홱 돌릴 때 날개가 크게 휘둘리며 남는 큰 호는 어둡게 */
-        for(let j=1;j<NP;j++){const a=j*3,sp=Math.hypot(h[a]-h[a-3],h[a+1]-h[a-2],h[a+2]-h[a-1])/C.tau,q=clamp((sp-1)/2.2,0,1),dh=o.dh[j]+(o.dh[j-1]-o.dh[j])*f;SF[j]=q*q*(3-2*q)*dh}SF[0]=SF[1]}
+        for(let j=1;j<NP;j++){const a=j*3,sp=Math.hypot(h[a]-h[a-3],h[a+1]-h[a-2],h[a+2]-h[a-1])/C.tau,q=clamp((sp-1)/2.2,0,1),dh=o.dh[j]+(o.dh[j-1]-o.dh[j])*fr;SF[j]=q*q*(3-2*q)*dh}SF[0]=SF[1]}
       /* 1) 띠의 점들: j칸 전(=지금-j*tau)의 자리 + 나이만큼 떠오름. 기록은 H+1칸이라 끝 점까지 매끄럽게 이어짐 */
-      for(let j=0;j<NP;j++){let x,y,z;if(j===0){x=_v.x;y=_v.y;z=_v.z}else{const a=j*3,b=a-3;x=h[a]+(h[b]-h[a])*f;y=h[a+1]+(h[b+1]-h[a+1])*f;z=h[a+2]+(h[b+2]-h[a+2])*f}
-        const age=j*C.tau,u=j/H,wig=Math.sin(t*5+o.ph+u*5)*.12*u;TP[j*3]=x+(o.wx*age+wig)*(1-.5*mv);TP[j*3+1]=y+o.vy*age*rs*L;TP[j*3+2]=z+(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv)}
+      for(let j=0;j<NP;j++){let x,y,z;if(j===0){x=_v.x;y=_v.y;z=_v.z}else{const a=j*3,b=a-3;x=h[a]+(h[b]-h[a])*fr;y=h[a+1]+(h[b+1]-h[a+1])*fr;z=h[a+2]+(h[b+2]-h[a+2])*fr}
+        const age=j*C.tau,u=j/H,wig=Math.sin(t*5+o.ph+u*5)*.12*u;TP[j*3]=x+(o.wx*age+wig)*(1-.5*mv);TP[j*3+1]=y+o.vy*age*rs*L+(o.lift||0)*u;TP[j*3+2]=z+(o.wz*age+Math.cos(t*4.3+o.ph+u*4)*.12*u)*(1-.5*mv)}
       /* 2) 폭 방향: 앞뒤 점으로 구한 방향 × 카메라 방향. 점이 겹쳐 방향이 흐려지면 위쪽으로, 앞 점과 뒤집히면 맞춰 돌려 꼬임·깜빡임을 막음 */
       let sx_=0,sy_=0,sz_=0;
       for(let j=0;j<NP;j++){const a=Math.max(0,j-1)*3,b=Math.min(H,j+1)*3,x=TP[j*3],y=TP[j*3+1],z=TP[j*3+2];_t.set(TP[b]-TP[a],TP[b+1]-TP[a+1],TP[b+2]-TP[a+2]);const tl=_t.length();
         if(tl<.03)_t.set(0,1,0);else{_t.multiplyScalar(1/tl);if(tl<.25){const q=(tl-.03)/.22;_t.lerp(_b.set(0,1,0),1-q*q*(3-2*q)).normalize()}}
         _c.set(cp.x-x,cp.y-y,cp.z-z);_s.crossVectors(_t,_c);const sl=_s.length();if(sl<1e-5){_s.set(sx_,sy_,sz_)}else _s.multiplyScalar(1/sl);
         if(j&&_s.x*sx_+_s.y*sy_+_s.z*sz_<0)_s.multiplyScalar(-1);sx_=_s.x;sy_=_s.y;sz_=_s.z;
-        const u=j/H,ak=o.tr?Math.min(o.amp,j===0?o.amp:o.ah[j]+(o.ah[j-1]-o.ah[j])*f)*pl*.62*(j===0?SF[0]:SF[j]+(SF[j-1]-SF[j])*f):(j===0?o.amp:o.ah[j]+(o.ah[j-1]-o.ah[j])*f)/* v534: 잔상 띠는 멈추면 남아 있던 부분까지 통째로 함께 꺼짐 */,w=o.w*(o.tr?(.55+.55*u)*(1-u*.45):(.3+1.5*u*Math.exp(1-u*3.2)*.9)*(1-u*.35))*.5,k=base+j*6;
+        const u=j/H,ak=o.tr?Math.min(o.amp,j===0?o.amp:o.ah[j]+(o.ah[j-1]-o.ah[j])*fr)*pl*.62*(j===0?SF[0]:SF[j]+(SF[j-1]-SF[j])*fr):(j===0?o.amp:o.ah[j]+(o.ah[j-1]-o.ah[j])*fr)/* v534: 잔상 띠는 멈추면 남아 있던 부분까지 통째로 함께 꺼짐 */,w=o.w*(o.tr?(.55+.55*u)*(1-u*.45):(.3+1.5*u*Math.exp(1-u*3.2)*.9)*(1-u*.35))*.5,k=base+j*6;
         rp[k]=x-_s.x*w;rp[k+1]=y-_s.y*w;rp[k+2]=z-_s.z*w;rp[k+3]=x+_s.x*w;rp[k+4]=y+_s.y*w;rp[k+5]=z+_s.z*w;const kk=(r*NP+j)*2;rk[kk]=rk[kk+1]=ak}}
     wasRun=mv>.2;rpa.needsUpdate=true;rka.needsUpdate=true;
     acs=Math.min(20,acs+dt*(26+46*mv)*QM());while(acs>=1){acs--;if(K.length>=NS)continue;const side=Math.random()<.5?0:1;/* 달릴 때는 연기도 잔상이 나오는 가운데에서 나와 뒤에 남음 */const o=mv>.2&&Math.random()<.8?R[Math.min(R.length-1,(side?C.NR+C.NT:0)+C.NR+Math.floor(Math.random()*C.NT))]:null;if(!(o?wpt(o.side,_v,o.pi):wpt(side,_v)))break;
@@ -5177,7 +5177,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v535';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v536';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
