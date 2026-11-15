@@ -2614,7 +2614,7 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.6,-.25
 /* 날개 색: col 광채, hot 심지, sp 반짝임, fl 화염 일렁임(0~1), em 위로 날리는 불씨 */
 const LOOKS={wings:{n:'빛의 날개',wing:1,col:[.3,.56,1],hot:[.93,.97,1],sp:[.8,.95,1],fl:0},
   wings_gold:{n:'황금 날개',wing:1,col:[1,.62,.12],hot:[1,.95,.72],sp:[1,.92,.6],fl:0,glow:0xffb030},
-  wings_lava:{n:'용암 날개',lava:1},
+  wings_lava:{n:'용암 날개',lava:1,mdl:1},
   wings_fire:{n:'화염 날개',wing:1,col:[1,.13,.01],hot:[1,.5,.12],sp:[1,.6,.2],fl:1,glow:0xff4a10,em:1}};
 /* v483: 외형 상점(재화 구매)이 생기기 전까지는 테스트 캐릭터에서만 보이고 착용됨 — 일반 캐릭터는 외형 줄 숨김·저장된 착용 값 무시 */
 const lookOk=()=>!!S;/* v511: 외형은 일반 모드에도 적용 */
@@ -2649,14 +2649,58 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
   if(L.em&&dt>0){WG.ec=Math.min(6,(WG.ec||0)+dt*26*QM())}while(L.em&&WG.ec>=1){WG.ec--;const sx=Math.random()<.5?-1:1,r=Math.random(),lx=sx*(.25+2.7*r)*WGC.S,ly=m.position.y+(.9-1.7*r*r)*WGC.S*(.4+.6*Math.random()),lz=m.position.z-.5*r*WGC.S;
     WG._v.set(lx,ly,lz);hero.localToWorld(WG._v);emit(PADD,{x:WG._v.x,y:WG._v.y,z:WG._v.z,vy:rnd(1,2.4),life:rnd(.6,1.1),s0:.32,s1:.05,c0:0xffd070,c1:0x801800,a:1,tex:1})}
   U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
+/* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림) + 실사 불꽃 플립북(models/flame02.jpg, 16x4=64장).
+   lwBuild(코드로 그린 날개)와 같은 userData 규격(mem·trail·update·trailTick·pt)이라 lavaTick이 그대로 붙이고 움직임 */
+const TWC={S:1.9,dy:.15,dz:-.24,fw:.4,x:.2,yaw:70,pv:[.5,-.3,.8],NF:170,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
+function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Math.PI/180;g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
+  /* 불꽃: 세계 좌표에 남는 카메라 향 판 — 서 있으면 날개에서 피어오르고, 움직이면 뒤에 남아 잔상이 됨 */
+  const NF=C.NF,fg=new THREE.InstancedBufferGeometry();fg.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-.5,0,0,.5,0,0,.5,1,0,-.5,1,0]),3));fg.setIndex([0,1,2,0,2,3]);
+  const fo=new Float32Array(NF*4),fa=new Float32Array(NF*4),ao=new THREE.InstancedBufferAttribute(fo,4),aa=new THREE.InstancedBufferAttribute(fa,4);ao.setUsage(THREE.DynamicDrawUsage);aa.setUsage(THREE.DynamicDrawUsage);
+  fg.setAttribute('aO',ao);fg.setAttribute('aA',aa);fg.instanceCount=0;
+  const fm=new THREE.ShaderMaterial({uniforms:{uK:{value:0},uM:{value:null}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+    vertexShader:`attribute vec4 aO;attribute vec4 aA;varying vec2 vU;varying vec2 vF;varying float vA;
+      void main(){vU=vec2(position.x+.5,position.y);float fr=floor(abs(aA.x));vF=vec2(mod(fr,16.),floor(fr/16.));if(aA.x<0.)vU.x=1.-vU.x;vA=aA.y;
+        vec4 mv=viewMatrix*vec4(aO.xyz,1.);mv.xy+=vec2(position.x*aO.w*.5+aA.z*position.y*position.y,position.y*aO.w*aA.w);gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`uniform sampler2D uM;uniform float uK;varying vec2 vU;varying vec2 vF;varying float vA;
+      void main(){vec2 uv=vec2((vF.x+.03+vU.x*.94)/16.,1.-(vF.y+1.-(.02+vU.y*.96))/4.);vec3 c=texture2D(uM,uv).rgb;
+        c*=smoothstep(0.,.16,vU.y)*smoothstep(0.,.12,vU.x)*smoothstep(0.,.12,1.-vU.x);/* 바닥이 잘린 불꽃 밑동을 부드럽게 */
+        gl_FragColor=vec4(c*c*1.15*vA*uK,1.);}`});
+  new THREE.TextureLoader().load(C.fl+'?'+APP_VER,t=>{t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;fm.uniforms.uM.value=t});
+  const tr=new THREE.Mesh(fg,fm);tr.frustumCulled=false;tr.renderOrder=6;g.userData.trail=tr;
+  const F=[];let acc=0;const _v=new THREE.Vector3();
+  /* 날개 표면의 한 점(세계 좌표) */
+  function wpt(side,out,pi){const q=piv[side];if(!q)return null;const a=q.pts,i=pi!==undefined?pi:Math.floor(Math.random()*(a.length/3))*3;out.set(a[i],a[i+1],a[i+2]);out.pi=i;return q.me.localToWorld(out)}
+  if(THREE.GLTFLoader)new THREE.GLTFLoader().load(C.file+'?'+APP_VER,gl=>{try{let src=null;gl.scene.traverse(o=>{if(o.isMesh&&!src)src=o});if(!src)return;
+    const G=src.geometry,P=G.attributes.position,I=G.index.array;mat=src.material;mat.metalness=Math.min(mat.metalness,.3);mat.emissiveMap=mat.map;mat.emissive=new THREE.Color(1,1,1);mat.emissiveIntensity=0;
+    /* 주황 막만 스스로 빛나고 검은 뼈대는 그대로 */
+    mat.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n#ifdef USE_EMISSIVEMAP\ntotalEmissiveRadiance*=smoothstep(.05,.3,emissiveColor.r-emissiveColor.b);\n#endif')};
+    for(const sx of [1,-1]){const idx=[],cand=[];for(let i=0;i<I.length;i+=3){const cx=P.getX(I[i])+P.getX(I[i+1])+P.getX(I[i+2]);if(cx*sx>0){idx.push(I[i],I[i+1],I[i+2]);if(P.getY(I[i])>-.3)cand.push(I[i])}}
+      const g2=G.clone();g2.setIndex(idx);g2.computeBoundingSphere();const me=new THREE.Mesh(g2,mat);me.castShadow=true;me.frustumCulled=false;me.position.set(-C.pv[0]*sx,-C.pv[1],-C.pv[2]);/* 뿌리를 회전 중심으로 */
+      const p=new THREE.Group();p.rotation.order='YXZ';p.add(me);p.position.x=sx*C.x/C.S;g.add(p);
+      const n=Math.min(600,cand.length),pts=new Float32Array(n*3);for(let k=0;k<n;k++){const vi=cand[Math.floor(Math.random()*cand.length)];pts[k*3]=P.getX(vi);pts[k*3+1]=P.getY(vi);pts[k*3+2]=P.getZ(vi)}
+      piv.push({p,me,sx,pts})}
+    g.userData.ready=1}catch(e){console.warn('wing',e)}});
+  /* 숨쉬듯 벌어졌다 오므라듦, 이동하면 뒤로 젖혀 접힘, 몸이 들썩이거나 돌면 늦게 따라옴 */
+  g.userData.update=(t,o)=>{if(mat)mat.emissiveIntensity=U.uK.value*(.52+.07*Math.sin(t*3.1)+.05*Math.sin(t*7.3));
+    for(const q of piv){const sx=q.sx,ph=sx>0?0:.5,yaw=C.yaw+4*Math.sin(t*1.25+ph)-(o.fold||0)*20-(o.back||0)*25;
+      q.p.rotation.set(-(o.back||0)*.35-(o.bob||0)*.5+.02*Math.sin(t*1.7+ph),-sx*yaw*D+(o.tw||0)*.6,-sx*((o.bob||0)*.6+.03*Math.sin(t*1.25+ph)))}};
+  g.userData.pt=(side)=>{if(!wpt(side,_v))return null;g.worldToLocal(_v);return [_v.x,_v.y,_v.z]};
+  g.userData.trailTick=(dt,t,spd)=>{const mv=Math.min(1,spd/5);
+    if(g.userData.ready){acc=Math.min(30,acc+dt*(115+50*mv)*QM());while(acc>=1){acc--;if(F.length>=NF)continue;const side=Math.random()<.5?0:1;if(!wpt(side,_v))break;
+      F.push({side,pi:_v.pi,x:_v.x,y:_v.y-.2,z:_v.z,vx:rnd(-.15,.15),vy:rnd(.45,1),vz:rnd(-.15,.15),age:0,life:rnd(.55,1.05),s:rnd(.7,1.35),f0:Math.random()*64,fl:Math.random()<.5?-1:1,ln:rnd(-.25,.25)})}}
+    let n=0;for(let i=F.length-1;i>=0;i--){const f=F[i];f.age+=dt;if(f.age>=f.life){F[i]=F[F.length-1];F.pop();continue}/* 붙은 자리를 조금 늦게 따라감 → 서 있으면 날개에 붙어 타오르고, 움직이면 뒤로 끌려 잔상이 됨 */wpt(f.side,_v,f.pi);const k=1-Math.exp(-dt*(9-5*f.age/f.life)),a=f.age;f.x+=(_v.x+f.vx*a-f.x)*k;f.y+=(_v.y-.2+f.vy*a-f.y)*k;f.z+=(_v.z+f.vz*a-f.z)*k}
+    for(const f of F){const k=f.age/f.life,i4=n*4,al=Math.min(1,k/.18)*(1-Math.max(0,(k-.45)/.55));fo[i4]=f.x;fo[i4+1]=f.y;fo[i4+2]=f.z;fo[i4+3]=f.s*(.75+.45*k);
+      fa[i4]=f.fl*(1+Math.floor((f.f0+f.age*30)%64));fa[i4+1]=al*al*(3-2*al)*.42;fa[i4+2]=f.ln;fa[i4+3]=1+.25*k;n++}
+    fg.instanceCount=n;ao.needsUpdate=true;aa.needsUpdate=true};
+  return g}
 /* v484 용암 날개 착용 처리 — 등 뼈를 따라 붙이고, 이동 속도로 젖힘·접힘·잔상, 불씨. 잔상 메시는 세계 좌표라 scene에 붙임 */
 const LV={g:null,a:0,bk:0,spd:0,pp:null,T:0,ec:0,_v:new THREE.Vector3(),q:new THREE.Quaternion(),_q:new THREE.Quaternion(),_q2:new THREE.Quaternion(),_o:new THREE.Vector3(),yl:null,bob:0,yawL:null,tw:0};
 function lavaTick(dt){const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.lava)&&hero&&!S.demo&&P.hp>0;let g=LV.g;
   if(!on&&!(g&&g.parent))return;
-  if(!g){g=LV.g=lwBuild();g.traverse(o=>{if(o.isMesh&&!o.material.isShaderMaterial)o.castShadow=true})}
+  if(!g){g=LV.g=(L&&L.mdl?twBuild:lwBuild)();g.traverse(o=>{if(o.isMesh&&!o.material.isShaderMaterial)o.castShadow=true})}
   const tr=g.userData.trail;
   if(on&&g.parent!==hero){if(g.parent)g.parent.remove(g);hero.add(g);g.position.set(0,LWC.y,LWC.z);if(tr.parent!==scene)scene.add(tr);LV.a=0;LV.bk=0;LV.spd=0;LV.pp=null;LV.q.identity();LV.yl=null;LV.yawL=null;LV.bob=0;LV.tw=0}
-  LV.a=clamp(LV.a+(on?dt*2.2:-dt*4),0,1);const a=LV.a*LV.a*(3-2*LV.a),post=GQS[GUQ].post;g.scale.setScalar(LWC.S*(.25+.75*a));
+  LV.a=clamp(LV.a+(on?dt*2.2:-dt*4),0,1);const a=LV.a*LV.a*(3-2*LV.a),post=GQS[GUQ].post;const WC=g.userData.C||LWC;g.scale.setScalar(WC.S*(.25+.75*a));
   g.userData.mem.material.uniforms.uK.value=a*(post?1:1.1);tr.material.uniforms.uK.value=a*(post?1.1:1.3);
   if(!on){if(LV.a<=0){g.parent.remove(g);if(tr.parent)tr.parent.remove(tr)}return}
   let tx=0,ty=LWC.y,tz=LWC.z;const u=hero.userData,K=skOf(hero),v=LV._v;
@@ -2666,16 +2710,16 @@ function lavaTick(dt){const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.lava)&&
     if(K.spQ0===undefined){K.spQ0=null;let sk=null;u.sk.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o});const i=sk?sk.skeleton.bones.indexOf(b):-1;
       if(i>=0){const m=sk.skeleton.boneInverses[i].clone().invert();K.spQ0=new THREE.Quaternion();m.decompose(new THREE.Vector3(),K.spQ0,new THREE.Vector3())}}
     b.getWorldPosition(v);hero.worldToLocal(v);tx=v.x;by=ty=v.y;tz=v.z;
-    if(K.spQ0){const hq=hero.getWorldQuaternion(LV._q2);b.getWorldQuaternion(D);const rq=u.sk.getWorldQuaternion(new THREE.Quaternion()).multiply(K.spQ0);D.multiply(rq.invert());/* 세계 기준 회전 변화 */D.premultiply(hq.clone().invert()).multiply(hq);/* 전부 따라가면 달릴 때 날개가 눕는다 → 일부만(LWC.fw) */D.slerp(LV._q2.identity(),1-LWC.fw)}}}
+    if(K.spQ0){const hq=hero.getWorldQuaternion(LV._q2);b.getWorldQuaternion(D);const rq=u.sk.getWorldQuaternion(new THREE.Quaternion()).multiply(K.spQ0);D.multiply(rq.invert());/* 세계 기준 회전 변화 */D.premultiply(hq.clone().invert()).multiply(hq);/* 전부 따라가면 달릴 때 날개가 눕는다 → 일부만(LWC.fw) */D.slerp(LV._q2.identity(),1-WC.fw)}}}
   LV.q.slerp(D,dt>0?1-Math.exp(-dt*22):1);g.quaternion.copy(LV.q);
-  const of=LV._o.set(0,LWC.dy,LWC.dz).applyQuaternion(LV.q);g.position.set(tx+of.x,ty+of.y,tz+of.z);
+  const of=LV._o.set(0,WC.dy,WC.dz).applyQuaternion(LV.q);g.position.set(tx+of.x,ty+of.y,tz+of.z);
   if(dt>0){/* 들썩임: 몸 높이를 늦게 따라가는 점과의 차이 → 가시 끝이 늦게 따라옴 */if(LV.yl===null)LV.yl=by;LV.yl+=(by-LV.yl)*(1-Math.exp(-dt*9));LV.bob+=(clamp((by-LV.yl)*2.6,-.3,.3)-LV.bob)*(1-Math.exp(-dt*18));
     /* 회전: 몸(방향+상체 비틀림)이 돌면 날개 끝이 늦게 따라옴 */const f=LV._o.set(0,0,1).applyQuaternion(LV.q),yaw=hero.rotation.y+Math.atan2(f.x,f.z);if(LV.yawL===null)LV.yawL=yaw;let d=yaw-LV.yawL;d=Math.atan2(Math.sin(d),Math.cos(d));LV.yawL+=d*(1-Math.exp(-dt*7));LV.tw+=(clamp(d*.7,-.5,.5)-LV.tw)*(1-Math.exp(-dt*14))}
   if(dt>0){if(LV.pp){const s=Math.hypot(P.pos.x-LV.pp.x,P.pos.z-LV.pp.z)/dt;LV.spd+=(s-LV.spd)*(1-Math.exp(-dt*10))}LV.pp={x:P.pos.x,z:P.pos.z};
     LV.bk+=(Math.min(1,LV.spd/5)-LV.bk)*(1-Math.exp(-dt*5));LV.T+=dt}
   hero.updateMatrixWorld(true);g.userData.update(LV.T,{back:LV.bk*.4,fold:P.mv?1:LV.bk*.6,mv:LV.bk,bob:LV.bob,tw:LV.tw});
   if(dt>0){g.userData.trailTick(dt,LV.T,LV.spd,camera.position);
-    LV.ec=Math.min(20,LV.ec+dt*(26+40*LV.bk)*QM());while(LV.ec>=1){LV.ec--;const p=g.userData.pt(Math.random()<.5?0:1,Math.floor(Math.random()*7),rnd(.2,.95),Math.random());v.set(p[0],p[1],p[2]);g.localToWorld(v);
+    LV.ec=Math.min(20,LV.ec+dt*(26+40*LV.bk)*QM());while(LV.ec>=1){LV.ec--;const p=g.userData.pt(Math.random()<.5?0:1,Math.floor(Math.random()*7),rnd(.2,.95),Math.random());if(!p)continue;v.set(p[0],p[1],p[2]);g.localToWorld(v);
       emit(PADD,{x:v.x,y:v.y,z:v.z,vy:rnd(1.2,3),life:rnd(.6,1.2),s0:.3,s1:.04,c0:0xffc050,c1:0x901c00,a:1,tex:1})}}}
 /*>WING*/
 function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
