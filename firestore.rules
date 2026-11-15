@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 본인 계정의 문서(활성 기기 정보 + 저장 데이터)만 읽고 쓸 수 있음
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /saves/{key} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        // 저장 한 건은 문자열(v)과 시각(t)만, 크기는 600KB 이하
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['v', 't'])
+          && request.resource.data.v is string && request.resource.data.v.size() < 600000
+          && request.resource.data.t is number;
+        allow delete: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+    // 그 외 모든 경로는 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

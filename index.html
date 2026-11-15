@@ -921,6 +921,199 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+/* v516: 클라우드 저장 — 아이디/비밀번호 로그인(필수) + 저장 데이터를 Firebase(Firestore)에 동기화.
+   기기 저장(localStorage)은 그대로 쓰고, 그 위에 서버 사본을 얹는 구조. 한 번에 한 기기만 활성(나중에 접속한 기기가 이어받음). */
+(()=>{
+const FB_CFG={apiKey:"AIzaSyBi_EI0yVP2jCBRh3RdJKcnGGlUi3LDvv4",authDomain:"ember-sanctum.firebaseapp.com",projectId:"ember-sanctum",storageBucket:"ember-sanctum.firebasestorage.app",messagingSenderId:"1080413542565",appId:"1:1080413542565:web:cf2b0e6a463a639f3a554c"};
+const SYNC_RE=/^ember-sanctum-(slot-\d|acct|stash|stash-test|skip)$/;
+const SYNC_KEYS=['ember-sanctum-slot-0','ember-sanctum-slot-1','ember-sanctum-slot-2','ember-sanctum-slot-3','ember-sanctum-slot-4','ember-sanctum-acct','ember-sanctum-stash','ember-sanctum-stash-test','ember-sanctum-skip'];
+const DOM='@ember-sanctum.app',CT_KEY='es-cloud-ct',UID_KEY='es-cloud-uid',DEL_KEY='es-cloud-del',ID_KEY='es-cloud-id',MIN_MS=30000;
+const _get=Storage.prototype.getItem,_set=Storage.prototype.setItem,_rem=Storage.prototype.removeItem;
+const rd=k=>{try{return _get.call(localStorage,k)}catch(e){return null}};
+const wr=(k,v)=>{try{_set.call(localStorage,k,v)}catch(e){}};
+const rm=k=>{try{_rem.call(localStorage,k)}catch(e){}};
+const J=(k,d)=>{try{const v=rd(k);return v?JSON.parse(v):d}catch(e){return d}};
+const pj=s=>{try{return s?JSON.parse(s):null}catch(e){return null}};
+const CL=window.CL={ok:false,uid:null,id:'',dev:Math.random().toString(36).slice(2)+Date.now().toString(36),dirty:new Set(),timer:0,last:0,locked:false,noSave:false,lastSync:0,busy:false,offline:false};
+window.CL_PAUSE=true;/* 로그인 전에는 게임이 진행되지 않음 */
+let auth=null,db=null,unsub=null;
+const uref=()=>db.collection('users').doc(CL.uid),sref=k=>uref().collection('saves').doc(k);
+
+/* ---------- 기기 저장 후크: 저장될 때마다 서버 업로드 대기열에 올림 ---------- */
+function localT(k){let t=J(CT_KEY,{})[k]||0;if(/slot/.test(k)){const d=pj(rd(k));if(d&&d.savedAt>t)t=d.savedAt}return t}
+function touch(k){const ct=J(CT_KEY,{});ct[k]=Date.now();wr(CT_KEY,JSON.stringify(ct));const del=J(DEL_KEY,[]);if(del.includes(k))wr(DEL_KEY,JSON.stringify(del.filter(x=>x!==k)));CL.dirty.add(k);schedule()}
+Storage.prototype.setItem=function(k,v){if(this===localStorage&&typeof k==='string'&&SYNC_RE.test(k)){if(CL.noSave)return;_set.call(this,k,v);touch(k);return}return _set.call(this,k,v)};
+Storage.prototype.removeItem=function(k){if(this===localStorage&&typeof k==='string'&&SYNC_RE.test(k)){if(CL.noSave)return;_rem.call(this,k);const ct=J(CT_KEY,{});delete ct[k];wr(CT_KEY,JSON.stringify(ct));const del=J(DEL_KEY,[]);if(!del.includes(k))del.push(k);wr(DEL_KEY,JSON.stringify(del));CL.dirty.delete(k);schedule();return}return _rem.call(this,k)};
+
+function schedule(){if(!CL.ok||CL.locked||CL.timer)return;const wait=Math.max(1500,CL.last+MIN_MS-Date.now());CL.timer=setTimeout(()=>{CL.timer=0;flush()},wait)}
+async function flush(){
+  if(!CL.ok||CL.locked||CL.busy)return true;
+  const keys=[...CL.dirty],dels=J(DEL_KEY,[]);if(!keys.length&&!dels.length)return true;
+  const sent={};for(const k of keys){const v=rd(k);if(v!=null)sent[k]=v}
+  CL.busy=true;let ok=false;
+  try{
+    await db.runTransaction(async tx=>{
+      const l=await tx.get(uref());if(!l.exists||l.data().dev!==CL.dev)throw new Error('LOCK');
+      for(const k in sent)tx.set(sref(k),{v:sent[k],t:localT(k)});
+      for(const k of dels)tx.delete(sref(k));
+      tx.update(uref(),{lt:Date.now()});
+    });
+    for(const k in sent)if(rd(k)===sent[k])CL.dirty.delete(k);
+    wr(DEL_KEY,JSON.stringify(J(DEL_KEY,[]).filter(k=>!dels.includes(k))));
+    CL.last=CL.lastSync=Date.now();CL.offline=false;ok=true;
+  }catch(e){
+    if(String(e&&e.message).includes('LOCK'))lockOut();
+    else{CL.offline=true;CL.last=Date.now()-MIN_MS+10000}
+  }finally{CL.busy=false;if((CL.dirty.size||J(DEL_KEY,[]).length)&&!CL.locked)schedule()}
+  return ok}
+function flushNow(){try{if(typeof save==='function')save()}catch(e){}flush()}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushNow()});
+addEventListener('pagehide',flushNow);
+
+/* ---------- 화면 ---------- */
+const css=document.createElement('style');css.textContent=`#cl{position:fixed;inset:0;z-index:10000;background:rgba(5,5,8,.94);display:flex;align-items:center;justify-content:center;overflow-y:auto}#cl[hidden]{display:none}#cl .sheet{margin:auto;max-height:none;gap:10px;display:flex;flex-direction:column}
+.clin{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 16px var(--ko);box-sizing:border-box}.clin:focus{outline:none;border-color:var(--ember)}
+#cl .primary{width:100%}#cl .clsub{background:none;border:0;color:var(--muted);font:600 13px var(--ko);padding:8px;text-decoration:underline}#cl .clsec{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);font:700 14px var(--ko)}
+#cl .clmsg{min-height:18px;font-size:12.5px;color:#ff8a7a;line-height:1.5}#cl .clwarn{font-size:12px;color:#ffd24a;line-height:1.55;margin:0}#cl ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:var(--ink)}
+.clrow{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}.clrow b{color:var(--ink)}.clrow button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:8px;padding:7px 11px;font:700 12px var(--ko)}`;
+document.head.appendChild(css);
+const box=document.createElement('div');box.id='cl';box.innerHTML='<div class="sheet modal" id="clSheet"></div>';document.body.appendChild(box);
+const $c=id=>document.getElementById(id),show=h=>{$c('clSheet').innerHTML=h;box.hidden=false;window.CL_PAUSE=true},hide=()=>{box.hidden=true;window.CL_PAUSE=false};
+const head=t=>`<div class="shead"><div><div class="chap">Ember Sanctum · Cloud</div><h2>${t}</h2></div></div>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function showBusy(t){show(head('잠시만요')+`<p class="hint">${t}</p>`)}
+function showFail(t,retry){show(head('연결할 수 없어요')+`<p class="hint">${t}</p>`+(retry?'<button class="primary" id="clRetry">다시 시도</button>':'')+(rd(UID_KEY)?'<button class="clsec" id="clOff">오프라인으로 계속 (저장은 이 기기에만 됩니다)</button>':''));
+  const r=$c('clRetry');if(r)r.onclick=()=>location.reload();const o=$c('clOff');if(o)o.onclick=()=>{CL.offline=true;hide()}}
+
+let mode='in';
+function showLogin(msg){
+  const up=mode==='up';
+  show(head(up?'계정 만들기':'로그인')+`<p class="hint">${up?'아이디와 비밀번호만 정하면 돼요. 개인정보는 받지 않아요.':'로그인하면 어느 기기에서든 같은 캐릭터를 이어서 플레이할 수 있어요.'}</p>
+<input class="clin" id="clId" placeholder="아이디 (영문 소문자·숫자·_ 3~16자)" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="16" value="${esc(rd(ID_KEY)||'')}">
+<input class="clin" id="clPw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="${up?'new-password':'current-password'}">
+${up?'<input class="clin" id="clPw2" type="password" placeholder="비밀번호 확인" autocomplete="new-password"><p class="clwarn">⚠ 이메일을 받지 않기 때문에 비밀번호를 잊으면 복구할 수 없어요. 꼭 기억해 두세요.</p>':''}
+<div class="clmsg" id="clMsg">${msg?esc(msg):''}</div>
+<button class="primary" id="clGo">${up?'가입하고 시작':'로그인'}</button>
+<button class="clsub" id="clSw">${up?'이미 계정이 있어요 → 로그인':'계정이 없어요 → 가입하기'}</button>`);
+  $c('clGo').onclick=submit;$c('clSw').onclick=()=>{mode=up?'in':'up';showLogin()};
+  box.querySelectorAll('.clin').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')submit()}))}
+const ERR={'auth/email-already-in-use':'이미 사용 중인 아이디예요.','auth/invalid-credential':'아이디 또는 비밀번호가 맞지 않아요.','auth/wrong-password':'아이디 또는 비밀번호가 맞지 않아요.','auth/user-not-found':'아이디 또는 비밀번호가 맞지 않아요.','auth/weak-password':'비밀번호는 6자 이상이어야 해요.','auth/too-many-requests':'시도가 너무 많아요. 잠시 후 다시 해 주세요.','auth/network-request-failed':'인터넷 연결을 확인해 주세요.','auth/operation-not-allowed':'로그인 방식이 아직 켜져 있지 않아요. 관리자에게 알려 주세요.'};
+async function submit(){
+  const id=($c('clId').value||'').trim().toLowerCase(),pw=$c('clPw').value||'',msg=t=>{$c('clMsg').textContent=t};
+  if(!/^[a-z0-9_]{3,16}$/.test(id))return msg('아이디는 영문 소문자·숫자·_ 로 3~16자여야 해요.');
+  if(pw.length<6)return msg('비밀번호는 6자 이상이어야 해요.');
+  if(mode==='up'&&pw!==$c('clPw2').value)return msg('비밀번호 확인이 달라요.');
+  $c('clGo').disabled=true;msg('');
+  try{wr(ID_KEY,id);if(mode==='up')await auth.createUserWithEmailAndPassword(id+DOM,pw);else await auth.signInWithEmailAndPassword(id+DOM,pw)}
+  catch(e){showLogin(ERR[e&&e.code]||'로그인에 실패했어요. ('+(e&&e.code||e)+')')}}
+
+function ask(title,body,btns){return new Promise(res=>{show(head(title)+body+btns.map((b,i)=>`<button class="${b.p?'primary':'clsec'}" data-i="${i}">${b.t}</button>`).join(''));box.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{showBusy('처리 중…');res(+b.dataset.i)})})}
+
+/* ---------- 동기화 ---------- */
+async function readCloud(){const s=await tmo(uref().collection('saves').get(),20000),o={};s.forEach(d=>{o[d.id]=d.data()});return o}
+function wipeLocal(){for(const k of SYNC_KEYS)rm(k);rm(CT_KEY);rm(DEL_KEY)}
+function setLocal(k,v,t){wr(k,v);const ct=J(CT_KEY,{});ct[k]=t||Date.now();wr(CT_KEY,JSON.stringify(ct))}
+function mergeAcct(a,b){const A=pj(a)||{},B=pj(b)||{},m={...A,...B};m.gold=Math.max(A.gold||0,B.gold||0);m.maxTier=Math.max(A.maxTier||0,B.maxTier||0);m.gates=[...new Set([...(A.gates||[]),...(B.gates||[])])].sort((x,y)=>x-y);m.bclr={...(A.bclr||{}),...(B.bclr||{})};if(A.g10||B.g10)m.g10=1;return JSON.stringify(m)}
+const sameChar=(a,b)=>a&&b&&a.cls===b.cls&&(a.nick||'')===(b.nick||'');
+const charName=d=>d?`${esc(d.nick||'이름 없음')} (${esc(d.cls||'')})`:'';
+
+/* 반환: {down:boolean(기기 저장이 바뀌었는지), up:Set(올려야 할 키), cancel:boolean} */
+async function reconcile(){
+  const cloud=await readCloud(),cuid=rd(UID_KEY),del=new Set(J(DEL_KEY,[])),up=new Set();let down=false;
+  const loc={};for(const k of SYNC_KEYS){const v=rd(k);if(v!=null)loc[k]=v}
+  const hasLoc=Object.keys(loc).length>0,hasCloud=Object.keys(cloud).length>0;
+  const put=(k,v,t)=>{setLocal(k,v,t);down=true};
+  if(cuid===CL.uid){
+    const newer=[];
+    for(const k of SYNC_KEYS){
+      const l=loc[k],c=cloud[k];
+      if(del.has(k))continue;
+      if(l==null&&c){put(k,c.v,c.t);continue}
+      if(l!=null&&!c){up.add(k);continue}
+      if(l==null||l===c.v)continue;
+      const tl=localT(k);if(c.t>tl)newer.push(k);else up.add(k)}
+    if(newer.length){
+      const nm=k=>k.includes('slot')?`저장 슬롯 ${+k.slice(-1)+1}`:k.includes('acct')?'계정 정보':k.includes('stash')?'보관함':'기타';
+      const r=await ask('더 최근 저장이 있어요',`<p class="hint">서버에 이 기기보다 <b>더 최근에 저장된 기록</b>이 있어요. 다른 기기에서 플레이했다면 서버 기록을 불러오는 걸 추천해요.</p><ul>${newer.map(k=>`<li>${nm(k)}</li>`).join('')}</ul>`,[{t:'서버 저장 불러오기 (추천)',p:1},{t:'이 기기 저장으로 덮어쓰기'}]);
+      for(const k of newer){if(r===0)put(k,cloud[k].v,cloud[k].t);else up.add(k)}}
+    return{down,up}}
+  /* 이 기기를 처음 연결하는 경우 */
+  if(!hasCloud){for(const k in loc)up.add(k);return{down,up}}
+  if(!hasLoc){for(const k in cloud)put(k,cloud[k].v,cloud[k].t);return{down,up}}
+  /* 둘 다 있음 → 합치기: 같은 캐릭터는 더 최근 것, 다른 캐릭터는 빈 슬롯으로 옮김 */
+  const res=[0,1,2,3,4].map(i=>cloud['ember-sanctum-slot-'+i]?cloud['ember-sanctum-slot-'+i].v:null),cs=res.slice(),over=[];
+  for(let i=0;i<5;i++){const lv=loc['ember-sanctum-slot-'+i],ld=pj(lv);if(!ld||!ld.cls)continue;const cd=pj(res[i]);
+    if(!res[i]){res[i]=lv;continue}
+    if(res[i]===lv)continue;
+    if(sameChar(ld,cd)){if((ld.savedAt||0)>(cd.savedAt||0))res[i]=lv;continue}
+    const j=res.findIndex(x=>!x);if(j<0)over.push(ld);else res[j]=lv}
+  if(over.length){const r=await ask('슬롯이 부족해요',`<p class="hint">이 기기의 캐릭터를 모두 옮기려면 빈 슬롯이 더 필요해요. 계속하면 아래 캐릭터는 <b>옮겨지지 않고 사라집니다.</b></p><ul>${over.map(d=>`<li>${charName(d)}</li>`).join('')}</ul>`,[{t:'계속 (이 캐릭터들은 삭제)',p:1},{t:'취소하고 로그아웃'}]);if(r===1)return{cancel:true}}
+  for(let i=0;i<5;i++){const k='ember-sanctum-slot-'+i;if(res[i]==null){if(loc[k]!=null){rm(k)}if(cloud[k])up.add(k);continue}
+    if(res[i]!==loc[k])put(k,res[i],JSON.parse(res[i]).savedAt);if(res[i]!==(cloud[k]&&cloud[k].v))up.add(k)}
+  {const k='ember-sanctum-acct',m=(loc[k]&&cloud[k])?mergeAcct(loc[k],cloud[k].v):(loc[k]||(cloud[k]&&cloud[k].v));if(m!=null){if(m!==loc[k])put(k,m);if(!cloud[k]||m!==cloud[k].v)up.add(k)}}
+  for(const k of ['ember-sanctum-stash','ember-sanctum-stash-test']){const l=loc[k],c=cloud[k];if(l==null&&c){put(k,c.v,c.t)}else if(l!=null&&!c)up.add(k);else if(l!=null&&c&&l!==c.v){if(localT(k)>c.t)up.add(k);else put(k,c.v,c.t)}}
+  {const k='ember-sanctum-skip';if(loc[k]!=null&&!cloud[k])up.add(k);else if(loc[k]==null&&cloud[k])put(k,cloud[k].v,cloud[k].t)}
+  return{down,up}}
+
+const tmo=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
+async function claim(){await tmo(uref().set({dev:CL.dev,lt:Date.now()},{merge:true}),20000)}
+async function afterLogin(user){
+  CL.uid=user.uid;CL.id=(user.email||'').replace(DOM,'');wr(ID_KEY,CL.id);CL.ok=false;CL.locked=false;
+  showBusy('저장 데이터를 확인하는 중…');
+  try{
+    if(rd(UID_KEY)&&rd(UID_KEY)!==CL.uid)wipeLocal();/* 다른 계정이 쓰던 기기 → 기기 저장 비우기 */
+    await claim();
+    const r=await reconcile();
+    if(r.cancel){await doLogout(true);return}
+    wr(UID_KEY,CL.uid);for(const k of r.up)CL.dirty.add(k);
+    CL.ok=true;CL.noSave=false;CL.last=0;
+    if(unsub)try{unsub()}catch(e){}
+    unsub=uref().onSnapshot(s=>{const d=s.data();if(d&&d.dev&&d.dev!==CL.dev&&CL.ok&&!CL.locked)lockOut()},()=>{});
+    if(CL.dirty.size||J(DEL_KEY,[]).length)await flush();
+    if(r.down){const n=+(sessionStorage.getItem('es-cloud-rl')||0);if(n<2){sessionStorage.setItem('es-cloud-rl',String(n+1));showBusy('불러온 저장을 적용하는 중…');location.reload();return}}
+    sessionStorage.removeItem('es-cloud-rl');
+    hide();CL.synced=true;
+  }catch(e){
+    console.warn('cloud',e);
+    showFail('서버와 통신하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.<br><small style="opacity:.6">'+esc((e&&e.code)||(e&&e.message)||e)+'</small>',true)}}
+
+function lockOut(){
+  if(CL.locked)return;CL.locked=true;CL.noSave=true;clearTimeout(CL.timer);CL.timer=0;
+  show(head('다른 기기에서 접속했어요')+`<p class="hint">같은 계정으로 다른 기기에서 접속해서 이 기기의 플레이가 멈췄어요. 이 기기에서 이어서 하려면 아래 버튼을 누르세요. 다른 기기에서 진행한 내용 그대로 이어집니다.</p><div class="clmsg" id="clMsg"></div><button class="primary" id="clTake">이 기기에서 이어하기</button>`);
+  $c('clTake').onclick=async()=>{$c('clTake').disabled=true;try{
+    await claim();const cloud=await readCloud();
+    for(const k of SYNC_KEYS){if(cloud[k])setLocal(k,cloud[k].v,cloud[k].t);else rm(k)}
+    rm(DEL_KEY);CL.dirty.clear();showBusy('불러온 저장을 적용하는 중…');location.reload()}
+  catch(e){$c('clTake').disabled=false;$c('clMsg').textContent='연결에 실패했어요. 인터넷을 확인하고 다시 눌러 주세요.'}}}
+
+async function doLogout(silent){
+  if(!silent&&CL.ok&&!CL.locked){showBusy('저장하는 중…');await flush();
+    if(CL.dirty.size||J(DEL_KEY,[]).length){const r=await ask('저장되지 않은 진행이 있어요','<p class="hint">서버에 올리지 못한 진행이 있어요. 지금 로그아웃하면 이 기기에서 다른 기기로 옮겨지지 않을 수 있어요.</p>',[{t:'취소',p:1},{t:'그래도 로그아웃'}]);if(r===0){hide();return}}}
+  CL.ok=false;CL.noSave=true;if(unsub)try{unsub()}catch(e){}
+  try{await auth.signOut()}catch(e){}
+  location.reload()}
+
+window.clRow=()=>{if(!CL.id)return'';const t=CL.lastSync?new Date(CL.lastSync).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';return`<div class="clrow"><span>☁ <b>${esc(CL.id)}</b> · ${CL.offline?'오프라인':CL.synced||CL.lastSync?'클라우드 저장 중'+(t?' · '+t+' 동기화':''):'연결 중'}</span><button id="clOut">로그아웃</button></div>`};
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='clOut')doLogout()});
+
+/* ---------- 시작 ---------- */
+function start(){
+  if(!window.firebase||!firebase.initializeApp){showFail('서버 연결 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.',true);return}
+  try{firebase.initializeApp(FB_CFG);auth=firebase.auth();db=firebase.firestore()}catch(e){showFail('초기화에 실패했어요.',true);return}
+  showBusy('연결하는 중…');
+  let first=true;
+  auth.onAuthStateChanged(u=>{
+    if(u){if(first||CL.uid!==u.uid||!CL.ok){first=false;afterLogin(u)}}
+    else{first=false;CL.ok=false;mode='in';showLogin()}});
+  setTimeout(()=>{if(!CL.uid&&!$c('clGo')&&!$c('clRetry'))showFail('서버가 응답하지 않아요.',true)},15000)}
+show('<div class="shead"><div><div class="chap">Ember Sanctum · Cloud</div><h2>연결하는 중…</h2></div></div>');
+start();
+})();
+</script>
 <script>
 /* v138: iOS 핀치·더블탭 확대 방지 (user-scalable=no를 iOS가 무시하는 경우 대비) */
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
@@ -4830,7 +5023,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v515';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v516';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6016,7 +6209,7 @@ function showSlots(){
   for(let i=0;i<SLOTS;i++){const d=readSlot(i),arm=slotArm.i===i&&Date.now()-slotArm.t<3000;
     if(d){const c=CLS[d.cls];h+=`<div class="slotrow${curSlot===i?' cur':''}"><button class="slotmain" data-play="${i}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="st"><span class="en">Slot ${i+1}${curSlot===i?' · 플레이 중':''}</span><b>${d.nick?nickSafe(d.nick):'닉네임 미설정'}</b><small class="nk${d.nick?'':' none'}">${c.n} · Lv ${d.lv} · ⏱ ${fmtPlay(d.playSec)}</small><small>${progressText(d)}${d.savedAt?' · '+fmtTime(d.savedAt):''}</small></span></button><button class="slotdel${arm?' arm':''}" data-del="${i}">${arm?'정말 삭제':'삭제'}</button></div>`}
     else h+=`<div class="slotrow"><button class="slotmain empty" data-new="${i}"><span class="badge empty">+</span><span class="st"><span class="en">Slot ${i+1}</span><b>빈 슬롯</b><small>새로 시작하기</small></span></button></div>`}
-  h+=`</div>`;
+  h+=`</div>`;h+=window.clRow?window.clRow():'';/* v516 */
   $('slotSheet').innerHTML=h;$('slots').hidden=false;releaseAll();
 }
 function closeSlots(){if(curSlot!==null&&S.cls)$('slots').hidden=true}
@@ -6420,7 +6613,7 @@ $('openPause').addEventListener('click',openPause);$('pResume').addEventListener
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
 $('resume').addEventListener('pointerdown',e=>{e.preventDefault();hideResume()});
-const paused=()=>(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>window.CL_PAUSE||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
