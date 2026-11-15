@@ -2655,7 +2655,7 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
 /* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림).
    v522 불꽃은 코드로 그림: 날개 곳곳에서 나온 불 띠가 지나온 길을 따라 이어짐 — 서 있으면 위로 날름거리고, 달리면 바람에 날리듯 뒤로 길게 흐름. 연기는 플립북(models/flame02.jpg) 모양을 검회색으로.
    lwBuild(코드로 그린 날개)와 같은 userData 규격(mem·trail·update·trailTick·pt)이라 lavaTick이 그대로 붙이고 움직임 */
-const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:38,lean:0,/* v526 yaw=벌어진 각도. 모델 자체가 27도쯤 바깥으로 퍼져 있어 62가 양옆 일직선, 38이면 뒤로 약 25도 젖혀짐 */pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:16,NT:7,/* NR=평소 타오르는 불 띠, NT=달릴 때 날개 가운데서 나오는 잔상 띠(한쪽당) */H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
+const TWC={S:1.9,dy:.15,dz:-.15,fw:.4,x:.12,yaw:38,lean:0,/* v526 yaw=벌어진 각도. 모델 자체가 27도쯤 바깥으로 퍼져 있어 62가 양옆 일직선, 38이면 뒤로 약 25도 젖혀짐 */pv:[.24,-.4,.8],/* pv=팔 밑동 끝(등에 박히는 자리) */NR:16,NT:11,/* NR=평소 타오르는 불 띠, NT=달릴 때 날개 가운데서 나오는 잔상 띠(한쪽당) */H:18,tau:.033,NS:90,file:'models/wing_thorn.glb',fl:'models/flame02.jpg'};
 function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Math.PI/180;g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   /* 불 띠: 띠마다 붙은 자리의 지난 위치(H개)를 이어 카메라를 보는 리본으로 만듦(세계 좌표) */
   const NR=(C.NR+C.NT)*2,H=C.H,NP=H+1,rp=new Float32Array(NR*NP*2*3),ruv=new Float32Array(NR*NP*2*2),rsd=new Float32Array(NR*NP*2),rk=new Float32Array(NR*NP*2),ri=[];
@@ -2705,9 +2705,12 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
       piv.push({p,me,sx,pts});
       /* 불 띠가 붙는 자리: 평소 띠는 아무 데나, 잔상 띠는 날개 가운데(표본점 평균에 가까운 1/5)에서만 */
       const sd=piv.length-1;let cx=0,cy=0,cz=0;for(let k=0;k<n;k++){cx+=pts[k*3];cy+=pts[k*3+1];cz+=pts[k*3+2]}cx/=n;cy/=n;cz/=n;
-      const near=[];for(let k=0;k<n;k++)near.push([Math.hypot(pts[k*3]-cx,pts[k*3+1]-cy,pts[k*3+2]-cz),k]);near.sort((a,b)=>a[0]-b[0]);const nc=Math.max(1,Math.floor(n/5));
+      /* v527 잔상 띠 자리: 가장자리(가운데에서 먼 35%)만 빼고 날개 면 전체에 고르게 — 축마다 퍼진 정도로 거리를 재서 길쭉한 날개에서도 고르게 걸러지고, 서로 가장 먼 점부터 뽑아 한곳에 몰리지 않게 함 */
+      let vx=0,vy_=0,vz=0;for(let k=0;k<n;k++){vx+=(pts[k*3]-cx)**2;vy_+=(pts[k*3+1]-cy)**2;vz+=(pts[k*3+2]-cz)**2}vx=Math.sqrt(vx/n)||1;vy_=Math.sqrt(vy_/n)||1;vz=Math.sqrt(vz/n)||1;
+      const near=[];for(let k=0;k<n;k++)near.push([Math.hypot((pts[k*3]-cx)/vx,(pts[k*3+1]-cy)/vy_,(pts[k*3+2]-cz)/vz),k]);near.sort((a,b)=>a[0]-b[0]);const nc=Math.max(C.NT,Math.floor(n*.65)),pick=[near[0][1]];
+      while(pick.length<C.NT){let bk=-1,bd=-1;for(let q=0;q<nc;q++){const k=near[q][1];let d=1e9;for(const m of pick)d=Math.min(d,Math.hypot(pts[k*3]-pts[m*3],pts[k*3+1]-pts[m*3+1],pts[k*3+2]-pts[m*3+2]));if(d>bd){bd=d;bk=k}}pick.push(bk)}
       for(let k=0;k<C.NR;k++)R.push({side:sd,pi:Math.floor(Math.random()*n)*3,h:null,ah:null,st:3,tm:rnd(0,1.6),amp:0,pv:null,w:rnd(.6,1.05),vy:rnd(1.6,2.8),len:rnd(.6,1),ph:Math.random()*6.28,wx:rnd(-.35,.35),wz:rnd(-.35,.35)});
-      for(let k=0;k<C.NT;k++)R.push({tr:1,side:sd,pi:near[Math.floor(Math.random()*nc)][1]*3,h:null,ah:null,amp:0,pv:null,w:rnd(1.2,1.9),vy:rnd(.5,1.1),len:1,ph:Math.random()*6.28,wx:rnd(-.2,.2),wz:rnd(-.2,.2)})}
+      for(let k=0;k<C.NT;k++)R.push({tr:1,side:sd,pi:pick[k]*3,h:null,ah:null,amp:0,pv:null,w:rnd(1,1.5),vy:rnd(.5,1.1),len:1,ph:Math.random()*6.28,wx:rnd(-.2,.2),wz:rnd(-.2,.2)})}
     g.userData.ready=1}catch(e){console.warn('wing',e)}});
   /* 숨쉬듯 벌어졌다 오므라듦, 이동하면 뒤로 젖혀 접힘, 몸이 들썩이거나 돌면 늦게 따라옴 */
   g.userData.update=(t,o)=>{if(mat)mat.emissiveIntensity=U.uK.value*(.52+.07*Math.sin(t*3.1)+.05*Math.sin(t*7.3));
@@ -5139,7 +5142,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v526';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v527';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
