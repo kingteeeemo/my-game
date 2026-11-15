@@ -940,6 +940,9 @@ const J=(k,d)=>{try{const v=rd(k);return v?JSON.parse(v):d}catch(e){return d}};
 const pj=s=>{try{return s?JSON.parse(s):null}catch(e){return null}};
 const CL=window.CL={ok:false,uid:null,id:'',dev:Math.random().toString(36).slice(2)+Date.now().toString(36),dirty:new Set(),timer:0,last:0,locked:false,noSave:false,lastSync:0,busy:false,offline:false};
 window.CL_PAUSE=true;/* 로그인 전에는 게임이 진행되지 않음 */
+/* v520: 시즌 2 시작 — 이 기기의 기존 저장(캐릭터·계정 골드/해금·창고)을 한 번만 전부 지움. 서버 쪽은 첫 로그인 때 정리 */
+const SEASON='2';
+try{if(rd('es-season')!==SEASON){for(const k of SYNC_KEYS)rm(k);rm('ember-sanctum-arpg-v2');rm(CT_KEY);rm(DEL_KEY);rm(UID_KEY);wr('es-season',SEASON)}}catch(e){}
 let auth=null,db=null,unsub=null;
 const uref=()=>db.collection('users').doc(CL.uid),sref=k=>uref().collection('saves').doc(k);
 
@@ -1067,6 +1070,7 @@ async function afterLogin(user){
   try{
     if(rd(UID_KEY)&&rd(UID_KEY)!==CL.uid)wipeLocal();/* 다른 계정이 쓰던 기기 → 기기 저장 비우기 */
     await claim();
+    {const ud=await tmo(uref().get(),20000);if(!(ud.exists&&ud.data().season===SEASON)){/* 시즌 2 이전 서버 저장은 지움 */const old=await readCloud();for(const k in old)await sref(k).delete();await uref().set({season:SEASON},{merge:true})}}
     const r=await reconcile();
     if(r.cancel){await doLogout(true);return}
     wr(UID_KEY,CL.uid);for(const k of r.up)CL.dirty.add(k);
@@ -1360,7 +1364,7 @@ function gear(){if(NS())return nsGear();const g={wdmg:0,armor:0,dmgPct:0,crit:0,
   /* v146: 쿨타임 감소 상한(40%) 폐지 — 쿨다운 배율은 최소 10%로만 보호 *//* v252: 마나 소모 감소 50% 상한 폐지 — 나눗셈 적용이라 음수가 되지 않음 */return g}
 /* ===================== v484 새 장비·전투 시스템 (NS) — 테스트 캐릭터 전용 =====================
    설계: claude/equipment-aura-redesign.md · 일반 캐릭터는 기존 시스템 그대로 */
-const NS=()=>!!(typeof S!=='undefined'&&S&&S.test);
+const NS=()=>true;/* v520: 새 장비 시스템을 모든 모드에 적용 (테스트 전용 기능은 S.test로 구분) */
 const NT_C=['','#ff8a3a','#c890ff','#f0d040','#6a9aff','#7fe07a','#c8c4bc'],NT_RAR=[0,3,3,2,2,1,0];
 /* 티어별 범위: lin(1티어 하한, 1티어 상한, 티어당 감소) */
 const nLin=(a,b,d)=>[0,1,2,3,4,5].map(i=>[a-d*i,b-d*i]);
@@ -1532,7 +1536,7 @@ function isBetter(it,cur){if(!cur)return true;if(it.ns&&it.slot==='weapon'&&it.w
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0});
+const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 function migrate(s){
@@ -1863,7 +1867,7 @@ const GSTY=[{s:'dirt',st:.22},{s:'dirt',st:.42},{s:'dirt',st:.5,rough:.7},{s:'fl
 const inArena=()=>!inTown&&(!!S.duel||S.ch===LAST&&(S.phase===3||S.phase===4));
 function curTheme(){if(inTown)return {key:'town',d:TOWN,pt:TOWN.pt};if(inArena())return {key:'final',d:FINAL,pt:FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
 let groundGlow=false,propTheme='',inTown=false;
-const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'재단사 라사'},TOWN_R=17;
+const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'창고'},TOWN_R=17;
 function applyTheme(){
   const th=curTheme(),d=th.d,gs=groundSet(th.key,d);
   groundMat.map=gs.map;groundMat.bumpMap=gs.bump;groundMat.roughnessMap=gs.rough;groundMat.emissiveMap=gs.emi;groundMat.emissiveIntensity=gs.emi?1:0;groundGlow=!!gs.emi;for(const t of [gs.map,gs.bump,gs.rough,gs.emi])if(t)t.repeat.set(groundRep[0],groundRep[1]);groundMat.needsUpdate=true;
@@ -2048,7 +2052,7 @@ const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,rou
 const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420}];
 const npcOn=n=>true;/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
 const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관']},NSACT={gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기'};
-const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['재단사 라사','외형장비 판매']};
+const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관']};
 const npcName=id=>NS()&&NSNPC[id]?NSNPC[id][0]:(TOWN[id]||TOWN.smith),npcSub=id=>NS()&&NSNPC[id]?NSNPC[id][1]:NPCN[id][1];
 function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창고 — 쇠띠 두른 큰 궤짝 + 상자 더미 + 통 */
   g.add(mesh(new THREE.BoxGeometry(1.9,.95,1.1),W,0,.48,0),mesh(new THREE.BoxGeometry(1.98,.16,1.18),W,0,1.02,0));
@@ -2062,7 +2066,6 @@ function npcMesh(n){if(n.id==='stash'&&NS())return stashMesh(n);const g=new THRE
   else if(n.id==='gear'){const hat=mesh(new THREE.CylinderGeometry(.42,.42,.06,14),SM({color:n.hat}),0,1.9,0),top=mesh(new THREE.CylinderGeometry(.22,.26,.3,12),SM({color:n.hat}),0,2.05,0);g.add(hat,top);
     const sw=mesh(new THREE.BoxGeometry(.08,1.1,.08),PM.iron,.5,1.1,.1);sw.rotation.z=-.3;g.add(sw,mesh(new THREE.BoxGeometry(.6,.08,.3),SM({color:0x6a4a2a}),0,1.05,.25))}
   else if(n.id==='heir'){const hood=mesh(new THREE.ConeGeometry(.36,.6,10),SM({color:n.hat}),0,2.02,0),st=mesh(new THREE.CylinderGeometry(.04,.05,1.9,6),PM.wood,.55,.95,.15),orb=mesh(new THREE.SphereGeometry(.16,12,10),new THREE.MeshBasicMaterial({color:0x5ae0d0}),.55,1.98,.15);g.add(hood,st,orb)}
-  else if(n.id==='stash'){/* v511: 재단사 — 베레모 + 옷감 두루마리 + 어깨의 줄자 */const cap=mesh(new THREE.CylinderGeometry(.34,.3,.14,14),SM({color:0x8a3a6a}),0,1.95,0),tape=mesh(new THREE.TorusGeometry(.34,.035,6,16),SM({color:0xe8d8a8}),0,1.4,0);tape.rotation.x=Math.PI/2.4;const rol=mesh(new THREE.CylinderGeometry(.14,.14,.7,10),SM({color:0xc890ff}),.55,.9,.15);rol.rotation.z=.5;g.add(cap,tape,rol)}
   else{const hood=mesh(new THREE.ConeGeometry(.34,.55,10),SM({color:n.hat}),0,2,0);g.add(hood,mesh(new THREE.BoxGeometry(.5,.4,.3),PM.wood,.45,.9,.1))}
   g.position.set(n.x,0,n.z);g.rotation.y=Math.atan2(-n.x,8-n.z);return g}
 function house(x,z){const g=new THREE.Group(),r=Math.atan2(-x,-z);g.add(mesh(new THREE.BoxGeometry(4,2.6,3.4),PM.pillar,0,1.3,0));
@@ -3435,10 +3438,10 @@ function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 잿불 검귀는 각인의 서만, 심연의 아귀는 확정 강화 주문서만 굴림(v227 분리) */
 const TK_P=.3;/* v245: 아귀 확정 강화 주문서 10% → 30% (+20%p, 일반·우버 공통) */let duelBonus=null;
 function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.res=[];
-  if(!b.mb&&Math.random()<scrP(b.m)){const sc={v:DUEL_M[b.m].v};/* v227: 각인의 서는 잿불 검귀에서만 */S.scrolls=(S.scrolls||[]).concat(sc);b.res.push({t:'scr',sc})}
+  if(!b.mb){const n=b.U?100:30;rrAdd(n);b.res.push({t:'rr',n})}/* v520: 잿불 검귀 보상 = 윤회의 불씨(확정, 일반 30 · 우버 100) — 각인의 서는 폐지 */
   if(b.mb&&Math.random()<TK_P){const q=Math.random(),n=b.U?(q<.2?5:q<.5?4:3):1;S.tickets=(S.tickets||0)+n;b.res.push({t:'tk',n})}/* v224: 우버 아귀 — 획득 시 5개 20% · 4개 30% · 3개 50% (일반은 1개) *//* v221: 확정 강화 주문서는 심연의 아귀에서만 — 일반 1개 · 우버 3개, 확률 10% */
   save()}
-const bonusLine=r=>{const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서 ×${r.n||1}</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
+const bonusLine=r=>{if(r.t==='rr')return `<bx class="brow"><s class="bslot" style="--rc:#ff9a4a">◆</s><bx class="btx"><b style="color:#ff9a4a">윤회의 불씨 ×${r.n}</b><small>조율사 카엘에게서 장비 옵션 수치를 다시 굴리는 데 씁니다</small></bx></bx>`;const sc=r.t==='scr',c=sc?(r.sc.v>=10?'#c890ff':'#5ae0d0'):'#ffd24a';return `<bx class="brow"><s class="bslot" style="--rc:${c}">${sc?'★':'✦'}</s><bx class="btx">`+(sc?`<b style="color:${c}">${scrName(r.sc)} (${r.sc.v}%)</b><small>아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용</small>`:`<b style="color:${c}">확정 강화 주문서 ×${r.n||1}</b><small>대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다</small>`)+`</bx></bx>`};
 function bonusCine(done){const b=duelBonus,res=b.res,got=res.length>0,el=document.createElement('div');el.className='ecine charge bonus';el.style.setProperty('--ec',b.U?'180,130,255':'230,200,120');
   el.innerHTML=`<div class="rune"></div><div class="rune r2"></div><div class="orb"></div><div class="wait"><small>BONUS REWARD</small><b>?</b><span>추가 보상 확인 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   document.body.appendChild(el);let over=0,rv=0,cc=0,tm=0;
@@ -4128,16 +4131,20 @@ function dropGold(p,amt){S.gold+=amt*nsGain('gGold')}/* v410: 골드는 필드�
 /* 잿불 정수: 40레벨부터 떨어짐. 엔드게임 위험도가 높을수록 조금씩 더 잘 나옴 */
 const essGeo=new THREE.OctahedronGeometry(.2,0),essMat=new THREE.MeshBasicMaterial({color:0xff5a3a});
 function dropEssAt(p,amt){S.ess=(S.ess||0)+amt}/* v410: 정수도 즉시 획득 */
+const RR_MAX=9999,RR_TIER=40;function rrAdd(n){S.rr=Math.min(RR_MAX,(S.rr||0)+n)}
+const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(S.tier,30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
-  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=Math.floor(ex)+(Math.random()<ex%1?1:0);for(let i=0;i<n;i++)dropEssAt(e.pos,1);
-  /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 (테스트 캐릭터 전용) */
-  if(n>0)lumiAdd(n)}
+  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
+  /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
+  if(n>0)lumiAdd(n);
+  /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
+  if(S.tier>=RR_TIER){const r=rollN(ex*nsGain('gReroll'));if(r>0)rrAdd(r)}}
 const LUMI_MAX=1000;function lumiAdd(n){const o=S.lumi||0;S.lumi=Math.min(LUMI_MAX,o+n)}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
-const POUCH_P=1/8000,/* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
-const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=1/200000,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
+const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
+const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
 const pouchAmt=t=>Math.round(300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
 const pouchMatL=new THREE.MeshStandardMaterial({color:0x9a4ad8,emissive:0x44106e,roughness:.4,metalness:.5});
@@ -4185,7 +4192,7 @@ function riftOpen(near){const ang=rand(0,Math.PI*2),r=near?2.5:rand(10,14),L=B-R
   const obj=riftObj();obj.position.set(c.x,0,c.z);scene.add(obj);
   const a0=rand(0,Math.PI*2),gates=[];for(let i=0;i<RIFT.N;i++){const a=a0+i/RIFT.N*Math.PI*2+rand(-.35,.35),d=rand(...RIFT.dist),q={x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)},pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
   const lab=document.createElement('div');lab.className='nm r3';lab.innerHTML='<span style="color:#ffb070">잿불 성화</span><i style="width:60px;height:5px"><b style="background:#ff9a3a"></b></i>';namesEl.appendChild(lab);
-  RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false,acc:{k:0,g:0,e:0,l:0,pn:0,pg:0,ln:0,lg:0}};
+  RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false,acc:{k:0,g:0,e:0,l:0,r:0,pn:0,pg:0,ln:0,lg:0}};
   ringFx(c,3.4,0xff7a30,.8);flash(c,0xff7a30,3.5);shake=Math.max(shake,.25);
   feed('잿불 균열이 열렸습니다!','#ff9a4a');if(!near)toast('🔥 잿불 균열',`${RIFT.wait}초 안에 잿불 성화로 가면 균열이 시작됩니다`,'#ff9a4a')}
 function riftCount(){const Z=RZ;Z.st='count';Z.t=0;Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){ringFx(q,2.4,0xc060ff,.6)}
@@ -4200,7 +4207,7 @@ function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W
   Z.wT=0;Z.sp=list.length;list.forEach((rk,i)=>later(i/list.length*4,()=>{Z.sp--;if(RZ===Z&&Z.st==='on'){const e=riftMob(Z.gates[i%Z.gates.length],rk,W.hp);e.rw=n}}));/* v459: 모든 웨이브 몹은 4초에 걸쳐 등장 */
   for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
-function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;{const n=Math.floor(ex)+(Math.random()<ex%1?1:0);A.e+=n;A.l=(A.l||0)+n}
+function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;{const n=rollN(ex);A.e+=rollN(ex*nsGain('gEss'));A.l=(A.l||0)+n;if(S.tier>=RR_TIER)A.r=(A.r||0)+rollN(ex*nsGain('gReroll'))}
   if(Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(S.tier),false,'acc');/* v407: 주머니는 빛기둥·끌려오는 연출 그대로, 알림 없이 정산에만 합산 */
   if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true,'acc');
   emit(PADD,{x:e.pos.x,y:1,z:e.pos.z,vy:2.5,life:.5,s0:.6,s1:.15,c0:0xffe080,c1:0xffa020,a:.9,tex:1})}/* 처치 시 금빛 불티만 — 실제 지급은 끝날 때 한 번에 */
@@ -4218,9 +4225,9 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   /* v406 정산: 처치한 균열 몹의 골드·정수 × 등급 배수(실패 .6 · B .8 · A 1 · S 1.3) + 그동안 나온 골드 주머니(그대로) + S등급 확정 강화 주문서(위험도/10개) */
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
   const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(S.tier/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */;/* v428: 장비 지급 없음 */
-  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;const kl=Math.round((A.l||0)*m);if(kl)lumiAdd(kl);if(tk)S.tickets=(S.tickets||0)+tk;save();
+  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;const kl=Math.round((A.l||0)*m),kr=Math.round((A.r||0)*m);if(kl)lumiAdd(kl);if(kr)rrAdd(kr);if(tk)S.tickets=(S.tickets||0)+tk;save();
   /* v427: 정산 창(일시정지) — 글자만 뜨던 팝업을 별도 창으로: 성공/실패·시간·항목별 보상·총 골드 */
-  const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];if(kl)R.push(['광휘의 파편',`+${fmtG(kl)}`,'#c890ff',`×${m}`]);
+  const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];if(kr)R.push(['윤회의 불씨',`+${fmtG(kr)}`,'#ff9a4a',`×${m}`]);if(kl)R.push(['광휘의 파편',`+${fmtG(kl)}`,'#c890ff',`×${m}`]);
   if(A.pn)R.push([`골드 주머니 ${A.pn}개`,`+${fmtG(A.pg)} G`,'#ffd24a']);if(A.ln)R.push([`전설 골드 주머니 ${A.ln}개`,`+${fmtG(A.lg)} G`,'#d09aff']);
   if(tk)R.push(['확정 강화 주문서',`${tk}장`,'#7fe8d8']);
   const gtot=kg+A.pg+A.lg;
@@ -4584,7 +4591,7 @@ function potSeg(c,m){const r=17.2,g=m>1?16:0;let h='';for(let i=0;i<m;i++){const
   h+=`<path class="${i<c?'on':''}" d="M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${(360/m-g)>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}"/>`}return `<svg class="pseg" viewBox="0 0 40 40" aria-hidden="true">${h}</svg>`}
 function nsPotHud(){nsPotInit();const m=potMaxN();for(const [k,b,n] of [['hp','bHp','nHp'],['mp','bMp','nMp']]){const c=P.pch[k],B=$(b);$(n).textContent=c;B.classList.toggle('empty',!c);B.classList.add('nsp');const key=c+'/'+m;if(B.dataset.seg!==key){B.dataset.seg=key;const o=B.querySelector('.pseg');if(o)o.remove();B.insertAdjacentHTML('beforeend',potSeg(c,m))}const l=$(b).querySelector('.liq');if(l)l.style.clipPath=`inset(${(1-c/m)*100}% 0 0 0)`}}
 /* 창고: 장비 이동용, 모든 캐릭터 공유. 30칸 시작, 5칸씩 확장 — 1억부터 ×2 (테스트 캐릭터는 테스트 전용 창고) */
-const STASH_KEY=()=>NS()?'ember-sanctum-stash-test':'ember-sanctum-stash';
+const STASH_KEY=()=>S&&S.test?'ember-sanctum-stash-test':'ember-sanctum-stash';
 let stashOpen=false,stashD=null,stashSel=null,stashSrc=null;
 function stashLoad(){try{stashD=JSON.parse(localStorage.getItem(STASH_KEY())||'null')}catch(_){stashD=null}if(!stashD||!Array.isArray(stashD.items))stashD={items:[],cap:30};return stashD}
 function stashSave(){try{localStorage.setItem(STASH_KEY(),JSON.stringify(stashD))}catch(_){}}
@@ -4651,7 +4658,7 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
   for(let i=0;i<14;i++)wingTick(.1)}
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 1,000';
-  let h=`<div class="shead"><div><div class="chap">Tailor · ${NS()?npcName('heir'):npcName('stash')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
+  let h=`<div class="shead"><div><div class="chap">Tailor · ${npcName('heir')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur"><i></i><span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
   for(const k of Object.keys(LOOKS)){const L=LOOKS[k],own=lookOwn(k),on=S.look===k,ok=lookCoin()>=(L.pr||0);
     h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':''}</div>
@@ -5098,7 +5105,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v521';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v522';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5339,9 +5346,10 @@ $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
-  for(const k of EQS)S.eq[k]=makeItem(k,30,2,0);S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
+  for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
+const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==S.cls){it.wc=S.cls;it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
 function startGame(cls,main,skip){
-  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=makeItem('weapon',1,0);S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
+  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide)setTimeout(tutAsk,900);}
@@ -5675,7 +5683,7 @@ $('statSheet').addEventListener('click',e=>{
   refreshMax();save();renderStat();
 });
 $('stat').addEventListener('click',e=>{if(e.target.id==='stat')closeStat()});
-function openStat(){if(NS()){toast('스탯 없음','새 시스템(테스트 캐릭터)에서는 스탯이 없습니다 · 레벨업으로 생명력·마나·이동 속도가 오릅니다');return}closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
+function openStat(){if(NS()){toast('스탯 없음','시즌 2부터는 스탯이 없습니다 · 레벨업으로 생명력·마나·이동 속도가 오릅니다');return}closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
 function closeAllSheets(){if(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))nsClose();if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeof stageOpen!=='undefined'&&stageOpen)closeStage();if(typeof bossOpen!=='undefined'&&bossOpen)closeBoss();if(typeof smithOpen!=='undefined'&&smithOpen)closeSmith();if(menuOpen)closeMenu();if(invOpen)closeInv();if(statOpen)closeStat();if(typeof shopOpen!=='undefined'&&shopOpen)closeShop();if(typeof restartOpen!=='undefined'&&restartOpen)closeRestart()}
@@ -5907,7 +5915,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(!NS()&&npcNear.id==='stash')return openLooks();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
@@ -6330,7 +6338,8 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
     else slotArm={i,t:Date.now()};
     showSlots()}
 });
-function enterGame(){
+function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;S.lumi=S.lumi||0}/* v520 */
+
   tele('start');const FLD=S.fld;fldHold=true;
   riftT=(S.riftT>0&&S.riftT<=RIFT.gap[1])?S.riftT:rand(...RIFT.first);/* v419: 균열 쿨타임 유지(새로고침·재접속) */
   if(S.ch>=NCH)egMapFor(S.tier);
