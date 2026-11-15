@@ -3138,7 +3138,7 @@ function bossFall(e){if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts
       const a=T-1.15;tg.rotation.z=rz0+side*(1.45+.1*Math.sin(a*10)*Math.exp(-a*6));if(T>2.05)tg.position.y=-(T-2.05)/.75*H*.7}},
     end(){try{e.mat.dispose()}catch(_){}}})}
 /* v478: 잿불 검귀 사망 — 한쪽 무릎을 꿇고 대검을 땅에 꽂은 뒤(1초) 그대로 굳었다가 재가 되어 가라앉음 */
-function bkKneel(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const K=BKN,g=e.g,r=K.root,M=e.M,u=M.u,ry=g.rotation.y,U=!!(S.duel&&S.duel.uber),D=K.acts.die._clip.duration,SC=g.scale.x*BKC.S;let hit=0;
+function bkKneel(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const K=BKN,g=e.g,r=K.root,M=e.M,u=M.u,ry=g.rotation.y,U=!!(S.duel&&S.duel.uber),D=K.acts.die._clip.duration,SC=g.scale.x*BKC.S*M.root.scale.x;let hit=0;
   if(e.air)e.air=null;e.jy=0;g.position.y=0;bkSword('hand');u.body.rotation.set(0,0,0);r.rotation.y=0;r.position.y=0;shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
   const sp={x:e.pos.x+Math.sin(ry)*.5*SC,z:e.pos.z+Math.cos(ry)*.5*SC};
   fx.push({m:g,t:0,dur:3.4,keep:1,upd(k){const T=k*3.4;g.rotation.y=ry;
@@ -3229,9 +3229,10 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   K.mx.update(0);r.rotation.y=u.body.rotation.y;r.position.y=u.body.position.y;/* 회전베기·몸 비틀기·주저앉기는 절차적 몸 값 그대로 */
   const fe=e.mat.emissive,rg=Math.max(fe.r,fe.g,fe.b);for(const m of K.mats){const d=m.userData;if(!d.c0)continue;m.emissive.copy(d.e0).add(fe).add(fe);m.color.copy(d.c0).addScalar(rg*.5)}
   if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
+const BK_SZ=.8;/* v540: 잿불 검귀 크기 −20% (몸·피격 범위·이름표 높이) — 공격 범위·장판은 그대로 */
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp}e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
-  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(1);e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2;bkIntro(e);bkAttach(e);return e}
+  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(BK_SZ);e.r*=BK_SZ;e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2*BK_SZ;bkIntro(e);bkAttach(e);return e}
 function bkIntro(e){const D=BKC.introT/BKC.introK;e.introT=0;e.holdT=D;e.holdA=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z);e.pt=Math.max(e.pt||0,D+.7);if(BKN.st===2&&e.M&&e.M.sk){bkSword('back');BKN.cur='intro';BKN.prev=null;BKN.fadeT=0}}
 function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math.PI/2;
   const bg=new THREE.Mesh(new THREE.CircleGeometry(len,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false}));
@@ -5206,7 +5207,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v539';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v540';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
