@@ -2454,7 +2454,11 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9);/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
       if(mn==='mage_eye'){/* v339: 두건 속 눈 — 푸른 점광 */o.material.emissiveIntensity=3;o.castShadow=false;const g=new THREE.Sprite(glowMat(0x8ad8ff));g.scale.setScalar(.055);o.add(g);o.position.z=.103;/* v530: 눈을 두건 안쪽 벽에서 검은 얼굴 앞면으로 당김 */if(!o.parent.userData.face){/* v530: 두건 속 검은 얼굴 — 옆에서 봐도 속이 비어 보이지 않게 */const f=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:0x020203}));f.scale.set(.088,.105,.078);f.position.set(0,.05,.02);f.frustumCulled=false;o.parent.userData.face=f;K.faceAdd=[o.parent,f]}}
       if(mn==='mage_gem'){o.material=o.material.clone();K.gemM=o.material}else if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone)){o.material=o.material.clone();K.swM=o.material;sw=o}}});
-    if(K.faceAdd){K.faceAdd[0].add(K.faceAdd[1]);K.faceAdd=null}if(cls==='warrior'&&sw)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
+    if(K.faceAdd){K.faceAdd[0].add(K.faceAdd[1]);K.faceAdd=null}if(cls==='mage')r.traverse(o=>{/* v531: 두건 안쪽 면(얼굴 쪽을 향한 면)을 검게 — 옆에서 봐도 두건 입구까지 검은 얼굴로 보이게 */if(!o.isSkinnedMesh||o.geometry.attributes.aIn)return;const bi=o.skeleton.bones.findIndex(b=>/Head$/.test(b.name));if(bi<0)return;
+      const c=new THREE.Vector3(0,.05,.03).applyMatrix4(new THREE.Matrix4().copy(o.skeleton.boneInverses[bi]).invert()),P=o.geometry.attributes.position,N=o.geometry.attributes.normal,a=new Float32Array(P.count),d=new THREE.Vector3(),n=new THREE.Vector3();
+      for(let i=0;i<P.count;i++){d.set(c.x-P.getX(i),(c.y-P.getY(i))*.85,c.z-P.getZ(i));const l=d.length();n.set(N.getX(i),N.getY(i),N.getZ(i));if(l<.2&&Math.abs(d.x)<.115&&P.getY(i)>c.y-.1&&d.dot(n)/l>.15)a[i]=1}
+      o.geometry.setAttribute('aIn',new THREE.BufferAttribute(a,1));const ob=o.material.onBeforeCompile;
+      o.material.onBeforeCompile=(s,rr)=>{if(ob)ob(s,rr);s.vertexShader='attribute float aIn;varying float vIn;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvIn=aIn;');s.fragmentShader='varying float vIn;\n'+s.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\ngl_FragColor.rgb*=1.-smoothstep(.15,.7,vIn)*.97;')};o.material.needsUpdate=true});if(cls==='warrior'&&sw)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
     if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;/* v338: 지팡이가 몸통+보석 두 메시로 나뉘면 묶음(Group)을 지팡이로 */K.sw=sw;
     if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
       try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
@@ -5143,7 +5147,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v530';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v531';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
