@@ -2801,7 +2801,7 @@ function skwBack(r){const sw=SKW.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r
   return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q);sw.scale.copy(sv.s)}}
 /* v342: 마법사 지팡이 잡기 — 바인드 자세의 손 뼈 위치로 주먹 중심을 구해 지팡이를 손에 '고정'(모든 동작에서 같이 움직임), 오른손 손가락은 매 프레임 쥔 자세로 덮어씀.
    지팡이 방향은 손목 뼈를 세계 기준으로 살짝 돌려 맞춤(평소 수직·시전 시 앞으로) — 회전량 상한(maxDeg)으로 손목이 꺾이지 않게 */
-const SKG={pn:1,R:.034,cu:1.7,cn:1.3,wy:1,ang:{Thumb:[30,35,30],Index:[62,54,46],Middle:[62,56,46],Ring:[64,58,48],Pinky:[66,60,48]},ground:.02,twF:1,twO:.6};/* R: 지팡이 막대 반지름(모델 단위) — 주먹 중심 = 손가락 뿌리 + 손가락 방향×R×cu + 손바닥 방향×R×cn */
+const SKG={pn:1,R:.034,cu:-.7,cn:1.2,/* v532: 지팡이가 손가락 끝 앞에 떠 있던 것 → 손바닥과 접은 손가락 사이로(cu 1.7→-.7, cn 1.3→1.2) */wy:1,ang:{Thumb:[30,35,30],Index:[62,54,46],Middle:[62,56,46],Ring:[64,58,48],Pinky:[66,60,48]},ground:.02,twF:1,twO:.6};/* R: 지팡이 막대 반지름(모델 단위) — 주먹 중심 = 손가락 뿌리 + 손가락 방향×R×cu + 손바닥 방향×R×cn */
 function skmGrip(K,r){const hand=K.hand,sw=K.sw;let sk=null;r.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o});if(!sk)return;const bones=sk.skeleton.bones,inv=sk.skeleton.boneInverses;
   const bindW=b=>{const i=bones.indexOf(b);return i<0?null:inv[i].clone().invert()},V=()=>new THREE.Vector3();
   const bindQ=b=>{const W=bindW(b),Wp=b.parent&&bindW(b.parent);if(!W)return b.quaternion.clone();return new THREE.Quaternion().setFromRotationMatrix(Wp?Wp.invert().multiply(W):W)};
@@ -2818,6 +2818,19 @@ function skmGrip(K,r){const hand=K.hand,sw=K.sw;let sk=null;r.traverse(o=>{if(o.
   if(SKG.ground){/* 대기 자세에서 지팡이 바닥이 땅에 닿도록 손잡이 위치를 지팡이 축 방향으로 보정 */const A=K.acts.idle;if(A){A.setEffectiveWeight(1);A.time=1;K.mx.update(0);r.updateMatrixWorld(true);const f0=P?P.face:0;if(P)P.face=0;K.stQ=null;skmStaff(K,0,1,70);if(P)P.face=f0;r.updateMatrixWorld(true);
     let y0=Infinity;sw.traverse(o=>{if(o.isMesh){o.geometry.computeBoundingBox();y0=Math.min(y0,o.geometry.boundingBox.min.y)}});const bw=sw.localToWorld(V().set(0,y0,0)),ry=V().setFromMatrixPosition(r.matrixWorld).y,dy=clamp((bw.y-ry)/K.S,-SKG.ground,SKG.ground);
     sw.position.addScaledVector(Y,-dy);A.setEffectiveWeight(0);K.handQa=null;K.stQ=null}}}
+/* v532: 발이 땅속으로 꺼지지 않게 — 대기 자세에서 한쪽 발목이 원래 높이보다 낮으면 무릎을 조금 굽혀 발목을 올리고, 발바닥·발끝을 수평으로(땅에 묻혀 납작해 보이던 문제) */
+function skFootFix(K,w){if(!(w>0))return;const r=K.root,V=()=>new THREE.Vector3(),Q=()=>new THREE.Quaternion();
+  if(!K.ft){K.ft=[];let sk=null;r.traverse(o=>{if(o.isSkinnedMesh&&!sk)sk=o});if(!sk)return;const B=sk.skeleton.bones,inv=sk.skeleton.boneInverses,bw=b=>inv[B.indexOf(b)].clone().invert(),bp=b=>V().setFromMatrixPosition(bw(b));
+    for(const s of ['Left','Right']){const g=n=>B.find(b=>b.name==='mixamorig'+s+n),u=g('UpLeg'),l=g('Leg'),f=g('Foot'),t=g('ToeBase');if(!u||!l||!f||!t)continue;const pf=bp(f),d=bp(t).sub(pf);
+      K.ft.push({u,l,f,t,ay:pf.y,sl:d.y/Math.hypot(d.x,d.z),tq:Q().setFromRotationMatrix(bw(f).invert().multiply(bw(t)))})}}
+  if(!K.ft.length)return;r.updateMatrixWorld(true);const S=r.getWorldScale(V()).x,ry=r.getWorldPosition(V()).y,cl=x=>Math.max(-1,Math.min(1,x));
+  const rot=(b,R)=>{const pq=b.parent.getWorldQuaternion(Q());b.quaternion.premultiply(pq.clone().invert().multiply(R).multiply(pq))};
+  for(const L of K.ft){const H=L.u.getWorldPosition(V()),Kn=L.l.getWorldPosition(V()),A=L.f.getWorldPosition(V()),d=(L.ay*S+ry-A.y)*w;if(d<=.002)continue;
+    const A1=A.clone();A1.y+=d;const hk=Kn.clone().sub(H),ka=A.clone().sub(Kn),l1=hk.length(),l2=ka.length(),d0=A.distanceTo(H),d1=Math.min(A1.distanceTo(H),l1+l2-1e-4);
+    const p0=Math.acos(cl((l1*l1+l2*l2-d0*d0)/(2*l1*l2))),p1=Math.acos(cl((l1*l1+l2*l2-d1*d1)/(2*l1*l2)));let ax=V().crossVectors(hk,ka);if(ax.lengthSq()<1e-8)ax.set(1,0,0).applyQuaternion(L.u.getWorldQuaternion(Q()));ax.normalize();
+    const R1=Q().setFromAxisAngle(ax,p0-p1);rot(L.l,R1);const A2=Kn.clone().add(ka.applyQuaternion(R1));rot(L.u,Q().setFromUnitVectors(A2.sub(H).normalize(),A1.clone().sub(H).normalize()));
+    L.u.updateWorldMatrix(false,true);const dir=L.t.getWorldPosition(V()).sub(L.f.getWorldPosition(V())),h=Math.hypot(dir.x,dir.z);
+    if(h>1e-4&&dir.y/h<L.sl){const tg=V().set(dir.x,L.sl*h,dir.z).normalize();rot(L.f,Q().slerp(Q().setFromUnitVectors(dir.normalize(),tg),w))}L.t.quaternion.slerp(L.tq,w)}}
 function skmFist(K){if(!K.fing)return;const q=K._q;for(const f of K.fing){const g=SKG.ang[f.f],ang=g?g[f.i-1]||0:0;f.j.quaternion.copy(f.rest).multiply(q.setFromAxisAngle(f.a,ang*Math.PI/180))}}
 function skmPre(K){if(K.hand&&K.handQa)K.hand.quaternion.copy(K.handQa)}/* 믹서가 손목을 다시 쓰지 않는 프레임에도 보정이 누적되지 않게 — 애니메이션 값으로 되돌림 */
 function skmStaff(K,aim,dt,maxDeg=70,full=true,twist=110){const sw=K.sw,hand=K.hand;if(!sw||!hand)return;if(!K.handQa)K.handQa=new THREE.Quaternion();K.handQa.copy(hand.quaternion);skmFist(K);sw.quaternion.copy(K.swQ0);
@@ -2882,7 +2895,7 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
   K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
   for(const k in A){const a=A[k],w=k===K.cur?1-(K.prev&&K.prev!==k?f:0):(k===K.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=K.tm[k]||0}
-  if(mage)skmPre(K);K.mx.update(0);
+  if(mage)skmPre(K);K.mx.update(0);if(mage){K.ftW=(K.ftW||0)+((st==='idle'?1:0)-(K.ftW||0))*(1-Math.exp(-dt*8));skFootFix(K,K.ftW)}
   if(arc)skaBow(K,inTown&&st==='idle'?'back':(st==='shot'||st==='sky'||st==='roll'||st==='die')?'aim':'carry',dt);
   if(mage){const free=st==='roll'||st==='hit'||st==='die';skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
@@ -5147,7 +5160,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v531';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v532';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5308,7 +5321,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
   /* v395: 배경 빛 스프라이트(dotTex) 삭제 — 모바일에서 배경에 색 점이 찍히던 원인 후보. 배경은 2D 캔버스 그라데이션으로 그리고 3D는 투명 배경으로 그려 위에 합성 */
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
-    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='warrior')skB.back=skwBack(r);else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='mage')skFootFix(K,1);if(cls==='warrior')skB.back=skwBack(r);else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
   /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
@@ -6640,16 +6653,16 @@ function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
     fragmentShader:`varying vec3 vP;void main(){float h=normalize(vP).y;vec3 c=mix(vec3(.47,.50,.57),vec3(.24,.26,.32),smoothstep(0.,.55,h));gl_FragColor=vec4(c,1.);}`}));bg.renderOrder=-10;g.add(bg);
   const fl=new THREE.Mesh(new THREE.CircleGeometry(58,48),new THREE.ShaderMaterial({fog:false,
     vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`varying vec2 vP;void main(){float r=length(vP);vec3 c=mix(vec3(.66,.68,.73),vec3(.47,.50,.57),smoothstep(.5,16.,r));c*=1.-.42*exp(-r*r*1.6);gl_FragColor=vec4(c,1.);}`}));
+    fragmentShader:`varying vec2 vP;void main(){float r=length(vP);vec3 c=mix(vec3(.66,.68,.73),vec3(.47,.50,.57),smoothstep(.5,16.,r));gl_FragColor=vec4(c,1.);}`}));
   fl.rotation.x=-Math.PI/2;fl.position.y=.005;g.add(fl);
   const dk=new THREE.Mesh(new THREE.CircleGeometry(58,48),new THREE.ShaderMaterial({fog:false,vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec2 vP;void main(){float r=length(vP);vec3 c=mix(vec3(.17,.19,.25),vec3(.05,.06,.09),smoothstep(1.,9.,r));vec2 q=fract(vP*.55);float e=min(min(q.x,1.-q.x),min(q.y,1.-q.y));c*=.72+.28*smoothstep(0.,.07,e);gl_FragColor=vec4(c,1.);}`}));dk.rotation.x=-Math.PI/2;dk.position.y=.01;dk.visible=false;g.add(dk);
   const hm=new THREE.HemisphereLight(0xffffff,0x9a9fae,.95),key=new THREE.DirectionalLight(0xfff4e6,.9),rim=new THREE.DirectionalLight(0xbfd4ff,.7);
   g.add(hm,key,key.target,rim,rim.target);g.userData={key,rim,dk};g.traverse(o=>o.layers.set(1));scene.add(g);return g}
 function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0);camera.clearViewOffset();resize()}
 /* v490: 세로 모드 게임 카메라(시야각 73°)를 그대로 기울여 쓰면 화면 위쪽에서 위아래로 늘어나 보임 → 장비창은 좁은 시야각(망원)으로 정면에서 찍고, 카메라를 기울이지 않고 화면을 평행 이동해 캐릭터 자리를 잡음 */
-function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh;
+function invCam(){if(IVS.snap||IVS.ra==null)IVS.ra=IVS.rot;else IVS.ra+=(IVS.rot-IVS.ra)*.35;/* v532: 각도를 부드럽게 따라가고 카메라는 항상 같은 거리의 원 위에 — 빨리 돌려도 캐릭터가 커지지 않음(전에는 위치를 직선으로 따라가 원 안쪽을 가로질렀음) */const f=(P.face||0)+IVS.ra,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh;
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
-  g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>o.layers.enable(1));
+  g.position.set(P.pos.x,0,P.pos.z);hero.traverse(o=>{if(o.geometry===shadowGeo)o.layers.disable(1);else o.layers.enable(1)});/* v532: 장비창에서는 발밑 그림자 없음 */
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
   const pf=.57;/* v499: 가방을 넓혀도 캐릭터 크기·위치는 그대로(가방이 아래를 덮음) */
   const FOV=port?26:28,ch=port?.46*(pf/.57)*Hh:Hh,want=(port?4.15:3.8)/.85;/* v496: 세로 캐릭터 영역 57%(넓힐 때 34%) — 캐릭터 크기는 57%일 때 v493과 같게, 줄면 같이 작아짐 · /* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
@@ -6658,7 +6671,7 @@ function invCam(){const f=(P.face||0)+IVS.rot,dx=Math.sin(f),dz=Math.cos(f),W=in
   /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
   const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy0=port?(.5-(pf/2+.025))*Hh:-.02*Hh,oy=port?Math.max(oy0,Hh/2+1.45*Hh/visH-((1-IVS.ph)*Hh-14)):oy0;/* v501: 가방 윗선이 발을 가리면 그만큼 캐릭터를 위로 */
   camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();
-  _icp.set(P.pos.x+dx*D,1.7,P.pos.z+dz*D);if(IVS.snap){camera.position.copy(_icp);IVS.snap=false}else camera.position.lerp(_icp,.35);
+  _icp.set(P.pos.x+dx*D,1.7,P.pos.z+dz*D);camera.position.copy(_icp);IVS.snap=false;
   _icl.set(P.pos.x,1.45,P.pos.z);camera.lookAt(_icl)}
 /* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
 $('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.drag={id:e.pointerId,x:e.clientX,r:IVS.rot,mv:false}});
