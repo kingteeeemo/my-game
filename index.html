@@ -76,7 +76,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivc{background:rgba(22,22,29,.98);border:1.5px solid rgba(255,255,255,.2);box-shadow:0 14px 44px rgba(0,0,0,.65);border-radius:16px;padding:14px 15px;gap:5px}
 .iv2pop .ivc.sel .ivlab{display:none}
 .iv2pop .ivc .ivn{font-size:17px;padding-right:66px}.iv2pop .ivc .k,.iv2pop .ivc .ivs{padding-right:66px}
-.iv2pop .ivl{font-size:13.5px}.iv2pop .ivl .d{font-size:13px}
+.iv2pop .ivc{padding-top:22px;padding-bottom:20px;gap:7px}.iv2pop .ivc .ivs{margin-bottom:8px}.iv2pop .ivl{font-size:13.5px}.iv2pop .ivl .d{font-size:13px}
 .iv2pop .pico{position:absolute;right:14px;top:14px;width:58px;height:58px;border-radius:12px;border:2px solid var(--rc,#3a3a44);background:rgba(10,10,14,.7);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1}
 .iv2pop .pico .ico{width:78%;height:78%;object-fit:contain}
 .iv2pop .pclose{position:absolute;right:-4px;top:-34px;border:0;background:transparent;color:#fff;font-size:24px;z-index:2}
@@ -85,7 +85,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivact .btns button{min-height:42px}
 .iv2pop .ivdps{background:rgba(22,22,29,.98)}
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
-.iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
+.iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
 .iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
 </style></head><body>
 <title>잿불 성역</title>
@@ -5177,7 +5177,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v538';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v539';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5715,7 +5715,7 @@ function renderMenu(){
   if(NS()&&menuTab==='aura')h+=auraTabHtml();
   else for(const id of c.skills){
     const pts=skp(id);
-    h+=`<div class="skill"><h3>${c.skills.indexOf(id)+1}번 · ${SK[id].n}<small>스킬 Lv ${skillLv(id)} · MP ${mpCost(id)}</small></h3><div class="stats">${statLine(id)}</div>
+    h+=`<div class="skill"><h3>${SK[id].n}</h3>
     ${showSk?`<div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b></div><div class="gems">`:''}`;
     if(showSk)for(const g of gemsFor(id)){const L=gl(id,g);
       h+=skRow({k:g,c:GEMS[g].c,n:GEMS[g].n,L,M:GMAX,d:L?GEMS[g].d(L):'다음: '+GEMS[g].d(1),btns:`${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button>`})}
