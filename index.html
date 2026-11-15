@@ -1116,9 +1116,9 @@ async function hx(s){const b=await crypto.subtle.digest('SHA-256',new TextEncode
 function showMaint(){
   show(`<div style="text-align:center;padding:28px 6px 10px"><div class="chap">Ember Sanctum</div><h2 style="margin:10px 0 8px;font-size:26px">시즌 2 준비 중</h2><p class="hint">더 나은 모습으로 곧 돌아올게요.</p></div><button class="clsub" id="clAdm" style="opacity:.35;font-size:11px;text-decoration:none">관리자</button>`);
   $c('clAdm').onclick=()=>{show(head('관리자 확인')+`<input class="clin" id="clAp" type="password" placeholder="관리자 암호" autocomplete="off"><div class="clmsg" id="clMsg"></div><button class="primary" id="clAo">확인</button><button class="clsub" id="clAb">돌아가기</button>`);
-    const go=async()=>{const pw=$c('clAp').value||'';let h='';try{h=await hx('ember-sanctum:'+pw)}catch(e){}if(h===DEV_H){wr('dev_ok',DEV_H);location.reload()}else $c('clMsg').textContent='암호가 다릅니다'};
+    const go=async()=>{const pw=$c('clAp').value||'';let h='';try{h=await hx('ember-sanctum:'+pw)}catch(e){}if(h===DEV_H){wr('maint_ok',DEV_H);location.reload()}else $c('clMsg').textContent='암호가 다릅니다'};
     $c('clAo').onclick=go;$c('clAp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});$c('clAb').onclick=showMaint}}
-if(MAINT&&rd('dev_ok')!==DEV_H)showMaint();
+if(MAINT&&rd('maint_ok')!==DEV_H)showMaint();
 else{show('<div class="shead"><div><div class="chap">Ember Sanctum · Cloud</div><h2>연결하는 중…</h2></div></div>');
 start()}
 })();
@@ -5032,7 +5032,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v517';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v518';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
