@@ -3169,8 +3169,9 @@ function dragonAnim(e,dt,moving){if(e.M.mdl)return drgAnimG(e,dt,moving);const M
   M.jaw.rotation.x=(A&&A.st==='fly')?.6:.05+at*.55;M.body.rotation.x=air?-.12:0}
 /* ===== v544 최종 보스: Meshy 용 모델(models/dragon.glb) — 뼈대 41개. 두 발로 선 원본을 4족 자세로 눕혀 걷고, 날개를 펴 날고, 날아와 내려앉는다 ===== */
 const DRK=(()=>{
-const DG={gy:-.47,hipH:.235,zc:-.2,ph:.3,ps:.22,pc:.26,nk:[-.2,-.25,-.2],armS:1.18,
-  handX:.2,handZ:.06,handY:.065,handR:-1.25,footX:.13,footZ:-.02,stride:.2,lift:.07,stn:.62,
+/* v566: 앞다리를 네발짐승처럼 — 상체를 덜 숙여 어깨를 올리고, 앞다리를 길게(armS) 어깨 바로 아래에 기둥처럼 세움. 손바닥을 바닥에 붙이지 않고 손목을 든 채(handY) 발가락 쪽으로 딛음(handR) */
+const DG={gy:-.47,hipH:.235,zc:-.2,ph:.24,ps:.17,pc:.18,nk:[-.2,-.25,-.2],armS:1.3,
+  handX:.18,handZ:.04,handY:.14,handR:-.65,footX:.13,footZ:-.02,stride:.2,lift:.09,stn:.62,
   wYaw:1.32,wTilt:-.12,wLvl:.75,wFlyX:1.4,flapA:.62,wWalk:.3,wFlut:.3,wA:[.45,2.1,-.35,-.6,-.9,-1.1]};
 const _q0=new THREE.Quaternion(),_q1=new THREE.Quaternion(),_q2=new THREE.Quaternion(),_e0=new THREE.Euler(),_a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Vector3(),_d=new THREE.Vector3(),_n=new THREE.Vector3(),_m=new THREE.Vector3(),_t=new THREE.Vector3(),_pl=new THREE.Vector3(),_tv=new THREE.Vector3(),
   _Z=new THREE.Vector3(0,0,1),_QI=new THREE.Quaternion();
@@ -3213,7 +3214,7 @@ function drgPose(K,S){const C=S.o?Object.assign({},DG,S.o):DG,B=K.B,R=K.R,t=S.t|
         const fa=Math.sin(fl-1.1+(s>0?0:.45))*fly,dr=Math.sin(t*1.25+s*1.3)*fly,rc=S.reach||0;
         _b.set(s*(.05+.025*fa+.015*dr),-.2+.06*fa-.06*rc,.05+rear*.1+.1*fa+.035*dr+.17*rc).applyQuaternion(K.wq.chest).add(_tv);_t.lerp(_b,air)}
       _pl.set(s*.25,.1,-1);dgIK(K,'arm'+sd+'1','arm'+sd+'2','hand'+sd,_t,_pl,C.armS);
-      /* 앞발: 발톱이 앞을 향하게 눕힘 */_e0.set(dglerp(C.handR+fy*.5*mv,-.15,air)-chg*.3,s*.12,0,'YXZ');_q2.setFromEuler(_e0);if(air>0){_q0.copy(K.wq['arm'+sd+'2']);_q2.slerp(_q0,air*.6);/* 발톱을 날갯짓에 맞춰 쥐었다 폄 · 착지 직전엔 펴서 땅을 향함 */_e0.set((Math.sin(fl-1.9+(s>0?0:.45))*.45*fly-.5*(S.reach||0))*air,0,0,'YXZ');_q0.setFromEuler(_e0);_q2.multiply(_q0)}dgW(K,'hand'+sd,_q2);B['arm'+sd+'1'].scale.setScalar(C.armS)}
+      /* 앞발: 발톱이 앞을 향하게 눕힘 */_e0.set(dglerp(C.handR+fy*.9*mv/* 발을 들 때 발끝이 아래로 처졌다가 디딜 때 펴짐 */,-.15,air)-chg*.3,s*.12,0,'YXZ');_q2.setFromEuler(_e0);if(air>0){_q0.copy(K.wq['arm'+sd+'2']);_q2.slerp(_q0,air*.6);/* 발톱을 날갯짓에 맞춰 쥐었다 폄 · 착지 직전엔 펴서 땅을 향함 */_e0.set((Math.sin(fl-1.9+(s>0?0:.45))*.45*fly-.5*(S.reach||0))*air,0,0,'YXZ');_q0.setFromEuler(_e0);_q2.multiply(_q0)}dgW(K,'hand'+sd,_q2);B['arm'+sd+'1'].scale.setScalar(C.armS)}
     else{_tv.copy(K.L0['leg'+sd+'1']).applyQuaternion(K.wq.hips).add(K.wp.hips);/* 엉덩이 관절 */const tilt=fy*.5*mv+fly*.9+chg*.3;
       /* 발목 = 발볼에서 발등 뼈를 거꾸로 */_e0.set(tilt,0,0,'YXZ');_q2.setFromEuler(_e0);_a.copy(K.L0['foot'+sd]).applyQuaternion(_q2);_t.set(s*C.footX,G+.025+fy*C.lift*mv,_tv.z+C.footZ+fz*L-chg*.08).sub(_a);
       if(fly>0){/* 공중: 뒷발을 뒤로 뻗어 붙임 */_b.set(s*.03,-.07,-.19).add(_tv);_t.lerp(_b,fly)}
@@ -5433,7 +5434,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v565';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v566';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
