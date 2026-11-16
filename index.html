@@ -5767,7 +5767,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v594';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v595';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5776,7 +5776,7 @@ let toastT=0;
 function toast(t,s,col){$('tt').textContent=t;$('tt').style.color=col||'';$('ts').style.color=col?'#efe8da':'';$('ts').textContent=s||'';$('toast').classList.add('on');toastT=2.6}
 /* v113: 세로=보스바 아래(상단 스택), 가로=좌측 열(체력바 아래) */
 const PORT_MQ=matchMedia('(max-width:640px) and (orientation:portrait)');
-function placeEnv(){const e=$('qenv'),f=$('fbGo'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){if(e.parentNode!==ts)ts.insertBefore(e,$('bossExit'));if(f.parentNode!==ts)ts.insertBefore(f,$('bossExit'))}else{if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild);if(f.parentNode!==ls)ls.appendChild(f)}}/* v202: 세로 모드에서 최종 결전 재도전은 화면 위 가운데(열기 아래)로 — 자동 장착 창과 겹침 방지 */
+function placeEnv(){const e=$('qenv'),f=$('fbGo'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){const bx=$('bossExit'),rf=bx.parentNode===ts?bx:null;/* v594: 나가기 버튼이 다른 칸으로 옮겨져 회전 때마다 오류 나던 것 */if(e.parentNode!==ts)ts.insertBefore(e,rf);if(f.parentNode!==ts)ts.insertBefore(f,rf)}else{if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild);if(f.parentNode!==ls)ls.appendChild(f)}}/* v202: 세로 모드에서 최종 결전 재도전은 화면 위 가운데(열기 아래)로 — 자동 장착 창과 겹침 방지 */
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
 /* v559: 세로 폰 — 골드·정수는 생명력·마나 아래 재화 칸, 보스전 나가기는 그 아래 칸으로 옮김(가로·PC는 원래 자리) */
 function placePort(){const x=$('bossExit'),xs=$('exitSlot');if(x.parentNode!==xs)xs.appendChild(x)}/* v569: 모든 화면에서 보스전 나가기는 재화 아래 칸 */
@@ -7542,13 +7542,20 @@ let fxWarm=0;function prewarmFx(){fxWarm=1;const g=new THREE.Group(),ms=[],tk=[]
   for(const m of [EMBER_MAT(),DOME_MAT(0xff9a40),pillarMat(0x4a0a9a,0xa030ff),waveMat(0xff9a30,0xffffff),slashMat(0xffffff,0xffffff,1)])add(m);
   scene.add(g);try{if(GQS[GUQ].post){if(!PP.rt)ppSize();renderer.setRenderTarget(PP.rt)}renderer.compile(scene,camera);for(const m of [PP.bright,PP.blur,PP.comp]){PP.quad.material=m;renderer.compile(PP.sc,PP.cam)}}catch(e){}
   renderer.setRenderTarget(null);scene.remove(g);for(const m of tk)mfree(m)}
+let _lpErrT=0,_vwW=innerWidth,_vwH=innerHeight;addEventListener('resize',()=>{_vwW=innerWidth;_vwH=innerHeight},true);
+/* v594: 회전 직후 iOS가 크기 확정 전에 resize를 보내 화면이 늘어진 채 남던 문제 → 몇 차례 다시 맞추고, 매 프레임 크기를 확인 */
+const _rsKick=()=>{[60,200,450,900].forEach(t=>setTimeout(()=>dispatchEvent(new Event('resize')),t))};addEventListener('orientationchange',_rsKick);try{screen.orientation&&screen.orientation.addEventListener('change',_rsKick)}catch(e){}try{visualViewport&&visualViewport.addEventListener('resize',()=>{if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'))})}catch(e){}
 function loop(now){
+  requestAnimationFrame(loop);/* v594: 다음 프레임을 먼저 예약 — 한 프레임에서 오류가 나도 게임이 멈추지 않음 */
+  if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'));
+  try{
   if(!fxWarm)prewarmFx();
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const fo=paused()&&fxOnly();
   if(!paused()){update(dt);updDmg(dt);hud();cdLabels(dt);if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);else if(cineFocus)drgCineTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
-  if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);wingTick(paused()&&!fo&&!invOpen?0:dt);if(invOpen&&IVS.on)skwTick(dt);renderFrame(now/1000);requestAnimationFrame(loop);
+  if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);wingTick(paused()&&!fo&&!invOpen?0:dt);if(invOpen&&IVS.on)skwTick(dt);renderFrame(now/1000);
+  }catch(e){if(now-_lpErrT>3000){_lpErrT=now;console.error('[loop]',e)}}
 }
 
 /* boot */
