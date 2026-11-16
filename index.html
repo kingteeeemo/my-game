@@ -920,9 +920,11 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .top .bar.hp span{z-index:2}
 .top .bar.hp .esV{position:absolute;right:5px;top:0;bottom:0;display:flex;align-items:center;font:800 10px var(--en);font-stretch:87%;font-style:normal;color:#d6f0ff;text-shadow:0 1px 2px #000,0 0 4px rgba(60,150,255,.9);z-index:3;pointer-events:none}
 .top .pid,.top .mring,.top .mbd{display:none}
-/* v582 세로 D안 — 지역 칸 삭제: [LV·직업·닉네임 / 체력 / 마나 / 경험치 / 재화 한 줄 | 미니맵(둘레=처치 게이지, 12시=위험도)] */
-@media (max-width:640px) and (orientation:portrait){
-  .top{grid-template-columns:minmax(0,1fr) 111px!important;column-gap:14px;row-gap:6px}
+/* v582 D안 — 지역 칸 삭제: [LV·직업·닉네임 / 체력 / 마나 / 경험치 / 재화 한 줄 | 미니맵(둘레=처치 게이지, 12시=위험도)] · v583: 가로·PC도 같은 구조 */
+@media (max-width:640px) and (orientation:portrait){html .top{grid-template-columns:minmax(0,1fr) 111px!important}html .top .rcol{grid-column:2!important}}
+@media (orientation:landscape){.top .rcol{margin-top:10px!important}}
+@media all{
+  .top{grid-template-columns:237px minmax(0,1fr) 111px!important;column-gap:14px;row-gap:6px}
   .top .stagechip{display:none!important}
   .top .lvbox,.top .bldnm{display:none!important}
   .top .pid{display:flex;grid-column:1;grid-row:1;align-items:baseline;gap:8px;height:22px;white-space:nowrap;min-width:0;text-shadow:0 1px 3px #000}
@@ -939,7 +941,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   #curBar .cr1,#curBar .cr2{display:contents}
   #curBar .cr1>span,#curBar .cr2>span{height:19px}
   #curBar .ci{width:15px;height:15px;margin-right:4px}
-  .top .rcol{grid-column:2;grid-row:1/6;width:111px!important;justify-self:end;margin-top:6px}
+  .top .rcol{grid-column:3;grid-row:1/6;width:111px!important;justify-self:end;margin-top:6px}
   .top .mring{display:block;position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
   .top .mring circle{fill:none;stroke-width:4.5}.top .mring .trk{stroke:rgba(255,255,255,.14)}.top .mring .val{stroke:#e8dcc4;stroke-linecap:round;stroke-dasharray:0 100}
   .top .mring.off{display:none}
@@ -5582,7 +5584,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v582';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v583';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5608,7 +5610,7 @@ function hmOpen(){hmBuild();hmSync();$('hmenu').hidden=false;releaseAll()}
 function hmClose(){$('hmenu').hidden=true}
 $('hamBtn').onclick=hmOpen;$('hmX').onclick=hmClose;$('hmenu').addEventListener('click',e=>{if(e.target.id==='hmenu'){hmClose();return}const b=e.target.closest('[data-hm]');if(b){hmClose();$(b.dataset.hm).click()}});
 $('hmCh').onclick=()=>{hmClose();save();closeAllSheets();showSlots()};
-setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn;if($('pCls').textContent!==cn)$('pCls').textContent=cn;const nk=S&&S.nick||'';if($('nickNm').textContent!==nk)$('nickNm').textContent=nk;if(PORT_MQ.matches)chipSpot()},400);/* v569: 모든 화면 */
+setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn;if($('pCls').textContent!==cn)$('pCls').textContent=cn;const nk=S&&S.nick||'';if($('nickNm').textContent!==nk)$('nickNm').textContent=nk;chipSpot()},400);/* v569: 모든 화면 */
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
 /* v569: 골드는 숫자 4자리까지(9,999 → 1,500K → 9,999K → 1,500M …), 정수·윤회의 불씨·광휘의 파편은 999까지 */
 const fmtG4=v=>v>=1e29?'∞':v<1e4?Math.floor(v).toLocaleString('ko-KR'):[[1e7,1e3,'K'],[1e10,1e6,'M'],[1e13,1e9,'B'],[1e16,1e12,'T'],[Infinity,1e15,'Qa']].map(([l,d,u])=>v<l?Math.floor(v/d).toLocaleString('ko-KR')+u:null).find(x=>x);
@@ -5660,8 +5662,8 @@ function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   const c=CH[S.ch];if(!c)return '';if(S.phase===0)return `${S.kills}/${c.goal}`;if(S.phase===1)return `보스까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`;return ''}
 /* v553: 칩을 숨긴 보스전에서는 보스 체력바(topStack)를 칩이 있던 자리로 올림 — 칩을 잠깐 보여 자리를 잰 뒤 다시 숨김 */
 /* v582 세로: 미니맵 둘레 = 처치 진행(6시에서 시작해 오른쪽으로), 12시 박스 = 위험도/장 */
-let mRingK='';function mRing(){if(!PORT_MQ.matches)return;const pr=chipProg(),i=stageInfo(),k=pr+'|'+i.n;if(k===mRingK)return;mRingK=k;const m=/^(\d+)\/(\d+)$/.exec(pr),f=m?Math.min(1,m[1]/m[2]):pr?1:-1;$('mRing').classList.toggle('off',f<0);$('mRingV').style.strokeDasharray=(Math.max(0,f)*100)+' 100';const b=$('mBd');b.textContent=i.n;b.hidden=!i.n}
-function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(PORT_MQ.matches){/* v582 세로: 재화 줄 13px 아래 화면 가운데 250px, 나가기는 왼쪽 같은 높이 */const cb=$('curBar').getBoundingClientRect(),t=Math.round(cb.bottom+13);ts.style.top=t+'px';ts.style.left='50%';ts.style.width='250px';const r=document.documentElement.style;r.setProperty('--bxT',t+'px');const bb=$('bossbar');if(!bb.hidden){const h=Math.round(bb.getBoundingClientRect().height);if(h)r.setProperty('--bxH',h+'px')}return}if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* v573 세로 폰: 체력바 오른쪽 끝 ~ 미니맵 왼쪽 끝 사이를 다 씀 */const hb=document.querySelector('.top .bar.hp').getBoundingClientRect(),mb=$('mini').getBoundingClientRect(),L=hb.right+8,R=mb.left-8;ts.style.left=((L+R)/2)+'px';ts.style.width=(R-L)+'px'}else ts.style.left=ts.style.width=''}
+let mRingK='';function mRing(){const pr=chipProg(),i=stageInfo(),k=pr+'|'+i.n;if(k===mRingK)return;mRingK=k;const m=/^(\d+)\/(\d+)$/.exec(pr),f=m?Math.min(1,m[1]/m[2]):pr?1:-1;$('mRing').classList.toggle('off',f<0);$('mRingV').style.strokeDasharray=(Math.max(0,f)*100)+' 100';const b=$('mBd');b.textContent=i.n;b.hidden=!i.n}
+function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(1){/* v582 세로: 재화 줄 13px 아래 화면 가운데 250px, 나가기는 왼쪽 같은 높이 *//* PC는 HUD에 zoom이 걸려 있어 화면 px ÷ 배율로 맞춤 */const zk=e=>{const h=e.offsetHeight;return h?e.getBoundingClientRect().height/h:1},k1=zk(ts),cb=$('curBar').getBoundingClientRect(),t=cb.bottom/k1+13;ts.style.top=t.toFixed(1)+'px';ts.style.left='50%';ts.style.width='250px';const r=document.documentElement.style,bx=$('bossExit'),bb=$('bossbar');let k2=k1;if(!bx.hidden)k2=zk(bx);r.setProperty('--bxT',(t*k1/k2).toFixed(1)+'px');if(!bb.hidden){const h=bb.getBoundingClientRect().height/k2;if(h)r.setProperty('--bxH',h.toFixed(1)+'px')}return}if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* v573 세로 폰: 체력바 오른쪽 끝 ~ 미니맵 왼쪽 끝 사이를 다 씀 */const hb=document.querySelector('.top .bar.hp').getBoundingClientRect(),mb=$('mini').getBoundingClientRect(),L=hb.right+8,R=mb.left-8;ts.style.left=((L+R)/2)+'px';ts.style.width=(R-L)+'px'}else ts.style.left=ts.style.width=''}
 addEventListener('resize',()=>setTimeout(chipSpot,60));
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
   {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid){ce.hidden=hid;chipSpot()}if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
