@@ -2013,7 +2013,7 @@ function groundHL(x,z){const d=sOutL(x,z);if(d<=0)return 0;const n=Math.sin(x*.2
 function groundH(x,z){if(mapKind!=='story')return 0;const q=W2L(x,z);return groundHL(q.x,q.z)}
 function spawnPt(){if(inArena())return {x:FB_START.x,z:FB_START.z};if(mapKind==='story')return startPt();return {x:0,z:0}}
 /* 바닥 메시를 맵 크기로 다시 만들고 높이(언덕)를 입힘 (스토리는 로컬 좌표로 만들고 메시를 θ만큼 회전) */
-function setGround(w,l,seg){groundHoleR=0;const g=new THREE.PlaneGeometry(w,l,Math.round(w/seg),Math.round(l/seg)),pa=g.attributes.position,story=mapKind==='story';
+function setGround(w,l,seg){groundHoleR=0;if(typeof mawPitClear==='function')mawPitClear();const g=new THREE.PlaneGeometry(w,l,Math.round(w/seg),Math.round(l/seg)),pa=g.attributes.position,story=mapKind==='story';
   const col=new Float32Array(pa.count*3),ht=HILL_TINT[Math.min(S.ch||0,LAST)];
   for(let i=0;i<pa.count;i++){const x=pa.getX(i),z=-pa.getY(i),h=story?groundHL(x,z):0;pa.setZ(i,h);let r=1,gg=1,b=1;
     if(story){const o=sOutL(x,z);if(o>0){const k=Math.min(1,o/5),l=.85+Math.min(.5,h*.035);r=1+(ht[0]*l-1)*k;gg=1+(ht[1]*l-1)*k;b=1+(ht[2]*l-1)*k}
@@ -3692,7 +3692,7 @@ function mawLoad(){const K=MWN,C=MWC;if(K.st||!THREE.GLTFLoader)return;K.st=1;
     geo.setAttribute('skinIndex',new THREE.BufferAttribute(si,4));geo.setAttribute('skinWeight',new THREE.BufferAttribute(sw,4));
     geo.translate(0,.95,0);geo.scale(C.S,C.S,C.S);geo.translate(0,C.y0,0);geo.computeBoundingBox();geo.computeBoundingSphere();
     const m=src.material;m.metalness=Math.min(m.metalness,.2);m.skinning=true;m.emissiveMap=m.map;m.emissive=new THREE.Color(0xffffff);m.emissiveIntensity=.3;/* 어두운 결투장에서 묻히지 않게 제 색으로 살짝 빛남 */K.geo=geo;K.mat=m;K.st=2;
-    for(const e of enemies)if(e.maw&&e.hp>0&&e.M&&!e.M.mdl){const U=!!(S.duel&&S.duel.uber),y=e.M.root.position.y,M=mawModel(U);e.g.remove(e.M.root,e.M.pool);e.g.add(M.root,M.pool);M.root.position.y=y;e.M=M;e.mat=M.body.material}
+    for(const e of enemies)if(e.maw&&e.hp>0&&e.M&&!e.M.mdl){const U=!!(S.duel&&S.duel.uber),y=e.M.root.position.y,M=mawModel(U);e.g.remove(e.M.root);if(e.M.pool&&e.M.pool.parent)e.M.pool.parent.remove(e.M.pool);if(mawPit===e.M.pool)mawPit=null;e.g.add(M.root);M.root.position.y=y;e.M=M;e.mat=M.body.material}
     delete BOSS_IMG.mawn;delete BOSS_IMG.mawu;try{if(bossOpen)renderBoss()}catch(_){}}catch(_){K.st=3}},undefined,()=>{K.st=3})}
 function mawModelG(U){const C=MWC,root=new THREE.Group(),Y=y=>(y+.95)*C.S+C.y0,mat=MWN.mat.clone();mat.skinning=true;if(U){mat.color.setRGB(1.25,.72,.8);mat.emissive.setRGB(1.3,.6,.7)}
   const bones=C.ys.map(y=>{const b=new THREE.Bone();b.position.set(0,Y(y),0);root.add(b);return b}),hb=new THREE.Bone();hb.position.set(0,Y(C.neck),0);root.add(hb);bones.push(hb);
@@ -3757,7 +3757,7 @@ function mawPose(M,ph,open){if(M.mdl)return mawPoseG(M,ph,open);const {CP0,CP,cu
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
   e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8*2/* v390: 우버 아귀 체력 ×2 (30억) */:1.3*2.2/* v391: 일반 아귀 ×2.2 */)*(U?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.dummy?5:1));if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp*(S.duel&&S.duel.dummy?5:1)}if(S.duel&&S.duel.dummy){e.name='허수아비 '+e.name;e.dummy=1}/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
-  e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);arenaHole(1);for(const c of e.g.children)if(c!==M.root&&c!==M.pool)c.visible=false;/* 구멍 위에 뜨는 등급 고리·그림자 숨김 */if(bossFailed.maw){e.introT=MWI.end;e.isk=0}else{e.introT=0;e.isk=1.25;M.root.position.y=-11}e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
+  e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root);e.M=M;e.g.scale.setScalar(U?1.15:1);arenaHole(1);mawPitFix(e);for(const c of e.g.children)if(c!==M.root&&c!==M.pool)c.visible=false;/* 구멍 위에 뜨는 등급 고리·그림자 숨김 */if(bossFailed.maw){e.introT=MWI.end;e.isk=0}else{e.introT=0;e.isk=1.25;M.root.position.y=-11}e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
 function mawReset(e){e.dA=null;e.wv=0;e.pullCd=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;e.isk=0;e.stir=0;if(e.introT!==undefined)e.introT=MWI.end;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
 function mawMouth(e){const v=new THREE.Vector3();e.M.head.getWorldPosition(v);v.y-=.2;return v}
@@ -3839,7 +3839,11 @@ function mawStep(e,dt){if(mawIntroOn(e))return mawIntro(e,dt);if(e.dummy){e.dA=n
   if(d<MAW_MELEE){e.bt-=dt;e.at=0;if(e.bt<=0){e.bt=2;e.jaw=1;const dir=Math.atan2(P.pos.x,P.pos.z);later(.22,()=>{if(e.hp<=0||e.dA)return;const q={x:Math.sin(dir)*3.6,z:Math.cos(dir)*3.6};groundFx(q,shockTex,0xc080ff,.4,2.6,.25,.6,true,.07);if(P.hp>0&&mawDist()<MAW_MELEE+.6)hurtPct(C.melee)})}}
   else if(e.grace<=0){e.at-=dt;if(e.at<=0){e.at=1.5;e.jaw=.6;e.wv=1;toast('전방위 파동',`${e.name}에게 가까이 붙으세요`);donutTele(O,MAW_MELEE,ARENA_R+1,.6,()=>{e.wv=0;if(e.hp<=0||(e.dA&&e.dA.k==='sipe'))return;shake=Math.max(shake,.3);const ring=flatMesh(ringGeo,0x9a60ff,.8);ring.position.set(0,.35,0);scene.add(ring);fx.push({m:ring,t:0,dur:.4,upd(k){const r=MAW_MELEE+(ARENA_R-MAW_MELEE+2)*k;ring.scale.set(r,r,1);ring.material.opacity=.8*(1-k)}});if(P.hp>0&&mawDist()>MAW_MELEE)hurtPct(C.wave)},true)}}
   e.pt-=dt;if(e.pt>0||e.wv||d>=MAW_MELEE)return;const pool=(e.pullCd||0)>0?['breath','sting','orbs']:['breath','sting','pull','orbs'];/* v216: 심연의 파동은 흡입 뒤에만 · v218: 흡입 쿨타임 */let k=pool[Math.random()*pool.length|0];if(k===e.lastK)k=pool[(pool.indexOf(k)+1)%pool.length];e.lastK=k;mawStart(e,k)}
-function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink||0)+(e.isk||0))*9;M.pool.rotation.y=-e.g.rotation.y;M.pool.scale.setScalar(1/e.g.scale.x);/* 구덩이는 보스가 돌아도 제자리 */{const w=M.pool.userData.wv;if(w){w[0].rotation.z+=dt*.11;w[1].rotation.z-=dt*.17;const k=1+(e.stir||0)*1.6;w[0].material.opacity=Math.min(1,w[0].userData.o*k);w[1].material.opacity=Math.min(1,w[1].userData.o*k);M.pool.userData.glow.emissiveIntensity=.5+(e.stir||0)*2.2}}
+/* v581: 구덩이(물·암벽·돌)를 아귀(e.g)에서 떼어 장면에 직접 붙임 — 아귀가 돌거나 흔들려도 구덩이는 꿈쩍 안 함. 한 번에 하나만 두고, 투기장 바닥을 원래대로 돌릴 때 같이 치움 */
+var mawPit=null;
+function mawPitFix(e){const pl=e.M.pool;if(pl.parent===scene)return;if(pl.parent)pl.parent.remove(pl);if(mawPit&&mawPit!==pl)scene.remove(mawPit);pl.position.set(e.pos.x,0,e.pos.z);pl.rotation.set(0,0,0);pl.scale.setScalar(1);scene.add(pl);mawPit=pl}
+function mawPitClear(){if(mawPit){scene.remove(mawPit);mawPit=null}}
+function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink||0)+(e.isk||0))*9;mawPitFix(e);/* v581: 구덩이·돌은 아귀와 별개 — 장면에 따로 붙여 고정 */{const w=M.pool.userData.wv;if(w){w[0].rotation.z+=dt*.11;w[1].rotation.z-=dt*.17;const k=1+(e.stir||0)*1.6;w[0].material.opacity=Math.min(1,w[0].userData.o*k);w[1].material.opacity=Math.min(1,w[1].userData.o*k);M.pool.userData.glow.emissiveIntensity=.5+(e.stir||0)*2.2}}
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,2.9);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
@@ -5539,7 +5543,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v580';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v581';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
