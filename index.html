@@ -830,6 +830,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skr .sgt{height:36px;justify-content:space-between}.skr .sgt b{height:36px;box-sizing:border-box;display:flex;align-items:center;max-width:none;flex:0 1 auto;min-width:0}
 .skr .sgc{height:36px;gap:4px}.skr .sgc button{height:36px;min-height:0;box-sizing:border-box;padding-top:0;padding-bottom:0;line-height:1.1}.skr .sgc .esb{font-size:12px}.skr .sgc .esb small{font-size:9.5px!important}
 .skr .sgv{height:18px;display:flex;align-items:flex-end;gap:8px}.skr .sgv .sgb{height:16px;box-sizing:border-box}
+#sheet .mstk{position:sticky;top:-18px;z-index:5;background:#17171d;margin:-18px -16px 0;padding:18px 16px 8px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
 </style>
 
 <canvas id="c"></canvas>
@@ -5220,7 +5221,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v541';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v542';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5759,9 +5760,9 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   w.onclick=ev=>{if(ev.target===w||ev.target.closest('.skix'))w.remove()};document.body.appendChild(w)});
 function renderMenu(){
   const c=C();
-  let h=`<div class="shead"><div><div class="chap">${c.en} · Lv ${S.lv}</div><h2>${c.n} 스킬</h2></div><button class="close" id="mClose">닫기</button></div>
+  const tabsH=NS()?`<div class="seg mtabs">${[['sk','스킬 강화'],['sk2','추가 강화'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}</div>`:'';
+  let h=`<div class="mstk"><div class="shead"><div><div class="chap">${c.en} · Lv ${S.lv}</div><h2>${c.n} 스킬</h2></div><button class="close" id="mClose">닫기</button></div>${tabsH}</div>
   ${S.test?`<div class="ptsline" style="background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">테스트 캐릭터 · 강화를 − 로 내리면 포인트·정수가 돌아옵니다 · 저장 안 됨</span><button class="ghost" id="tGod" style="padding:6px 10px;font-size:12px">체력 무한 ${S.testGod?'끄기':'켜기'}</button><button class="ghost" id="tMp" style="padding:6px 10px;font-size:12px">마나 무한 ${S.testMp?'끄기':'켜기'}</button></div>`:''}
-  ${NS()?`<div class="seg mtabs">${[['sk','스킬 강화'],['sk2','추가 강화'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}</div>`:''}
   ${S.pending?`<div class="ptsline" style="background:#2a2118;border:1px solid var(--ember);border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">고르지 않은 레벨업 강화 <b>${S.pending}</b>회</span><button class="primary" id="mLvNow" style="padding:8px 12px;font-size:13px">지금 고르기</button></div>`:''}
 
 `;
