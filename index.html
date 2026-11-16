@@ -2376,7 +2376,7 @@ function knBuild(){const root=new THREE.Group(),G=new THREE.Group(),R=KNA.R,LY=K
 /* v588: 입장 → 다리 출발점에서 시작해 달려감(낮은 등 뒤 시점으로 검귀를 보며) → 결투장 원 안에 들어서면 화면이 어두워졌다가 등장 연출 시작 */
 function knFadeEl(){let f=document.getElementById('knFade');if(!f){f=document.createElement('div');f.id='knFade';f.style.cssText='position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:24;transition:opacity .45s ease';document.body.appendChild(f)}return f}
 function knActs(on){const a=document.getElementById('acts'),ap=document.getElementById('autoPop');if(a)a.style.visibility=on?'':'hidden';if(!on&&ap)ap.hidden=true}
-/* ===== v597: 심연의 수몰굴 — 심연의 아귀 맵. 불이 닿지 않는 물에 잠긴 동굴: 검은 물 한가운데 바위 섬(결투장), 푸른 발광 이끼, 위에서 떨어지는 빛줄기.
+/* ===== v597: 심연의 밑바닥 — 심연의 아귀 맵. 불이 닿지 않는 물에 잠긴 동굴: 검은 물 한가운데 바위 섬(결투장), 푸른 발광 이끼, 위에서 떨어지는 빛줄기.
    남쪽 협곡의 돌계단을 내려오며 구덩이 위에 뜬 잿불빛(미끼)을 보게 되고, 바닥에 닿으면 불빛이 가라앉고 어두워진 뒤 물속에서 눈이 뜨이며 아귀가 솟구침.
    쿼터뷰 카메라(남쪽 위)에서 가리지 않도록 높은 구조물은 북쪽·바깥쪽에만 둠 ===== */
 var mwSet=null,mwOn=false,mwSave=null,mwCine=null,mwDark=0;
@@ -4181,7 +4181,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   mawPose(M,t,e.jaw||0);mawLureUpd(M,t);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,2.9);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 수몰굴로':'잿불 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥로':'잿불 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
@@ -5878,7 +5878,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v598';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v599';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5956,7 +5956,7 @@ function hud(){placeEnv();placePort();
 
 }
 /* v43 현재 단계 표시: 화면 위 중앙 칩(항상) + 단계가 바뀔 때 중앙 큰 배너 */
-const duelMapN=()=>S.duel&&S.duel.b!=='maw'?'잿불 성채':'심연의 수몰굴';/* v597: 심연의 아귀 맵 이름 *//* v591: 잿불 검귀 맵 이름 = 잿불 성채 */
+const duelMapN=()=>S.duel&&S.duel.b!=='maw'?'잿불 성채':'심연의 밑바닥';/* v597: 심연의 아귀 맵 이름 *//* v591: 잿불 검귀 맵 이름 = 잿불 성채 */
 function stageInfo(){if(inTown)return {c:'town',n:'마을',t:TOWN.n,k:'Town'};if(S.tutor)return {c:'',n:'훈련장',t:'튜토리얼',k:'Tutorial'};if(S.duel)return {c:'fb',n:duelMapN(),t:duelDef().n,k:'Duel'};if(S.ch>=NCH)return {c:'eg',n:`위험도 ${S.tier}`,t:EGMAPS[egMapFor(S.tier)].n,k:'Endless Abyss'};
   if(inArena())return {c:'fb',n:'최종 결전',t:FINAL.n,k:'Final Battle'};const c=CH[Math.min(S.ch,LAST)];return {c:'',n:`${S.ch+1}장`,t:c.n,k:`Chapter ${S.ch+1} / ${NCH}`}}
 /* v109: 사냥 진행도(처치 수·보스까지 거리) — 칩 아래줄에 표시 */
@@ -6881,7 +6881,7 @@ function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
   const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div><div class="cmp2 duelc" style="border-color:#5ad1c8;margin-top:8px"><div class="dt"><b>${FINAL.boss} (테스트)</b><small>최종 보스 용 · 체력 우버 ${MAW.n}와 같음 · 등장 연출 포함 · 보상 없음</small></div><button class="primary" data-drg="1">${S.ch===LAST&&S.phase>=3&&!S.duel&&enemies.some(e=>e.final&&e.hp>0)?'다시 도전':'도전'}</button></div>`:'';/* v545: 테스트 — 최종 보스 바로 도전 */
   $('bossSheet').innerHTML=`<div class="shead"><div><div class="chap">Boss</div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
-  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'잿불 성채')}${card('maw',MAW.n,'심연의 수몰굴')}</div>
+  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'잿불 성채')}${card('maw',MAW.n,'심연의 밑바닥')}</div>
   <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div></div><div class="bright">${info}${test}</div></div>`}
 function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
 function closeBoss(){bossOpen=false;$('bossP').hidden=true}
