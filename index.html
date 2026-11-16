@@ -914,6 +914,32 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 @media (orientation:landscape) and (max-height:520px){.hmp{width:min(340px,48vw);padding-top:calc(60px + env(safe-area-inset-top,0px))}.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}.hmsec{display:contents}}/* v569: 가로 폰 메뉴 — 한 줄 4개 */
 @media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867;--mw:120px}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
 
+/* v586 새 시즌 상태창 */
+#statSheet:has(.nst){padding:16px 14px 18px}
+.nst{display:flex;flex-direction:column;gap:12px}
+.nhd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nid{display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}.nid .lvt{font:800 17px var(--en);font-stretch:87%;color:#e8dcc4}.nid .lvt small{font-size:11px;color:#a39f99;letter-spacing:.1em;margin-right:3px}
+.nid i{width:1px;height:13px;background:rgba(232,220,196,.35);align-self:center}.nid .cl{font:600 11px var(--en);font-stretch:87%;letter-spacing:.1em;color:#a39f99;text-transform:uppercase}.nid b{font:800 17px var(--ko);overflow:hidden;text-overflow:ellipsis}
+.nx{flex:none;width:34px;height:34px;border-radius:50%;background:#f0ece4;color:#16161c;border:0;display:grid;place-items:center;font:800 15px var(--en);padding:0}
+.nbig{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ncd{border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116;padding:10px 12px 11px}.ncd.iv{border-color:#e8dcc4}
+.ncd small{display:block;font:700 10.5px var(--en);font-stretch:87%;letter-spacing:.14em;color:#a39f99}.ncd em{display:block;font-style:normal;font-size:11px;color:#a39f99;margin-top:1px}
+.ncd b{display:block;font:800 26px var(--en);font-stretch:87%;margin-top:4px;line-height:1}.ncd.iv b{color:#e8dcc4}
+.nsec{border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:10px 12px}
+.nst2{display:flex;align-items:center;gap:8px;font:800 12px var(--ko);letter-spacing:.08em;color:#e8dcc4;margin-bottom:8px}.nst2:after{content:"";flex:1;height:1px;background:rgba(232,220,196,.18)}
+.ntwo{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+.nr{display:flex;align-items:center;justify-content:space-between;height:25px;font-size:13px}.nr span{color:#cfc9bd}.nr b{font:800 14px var(--en);font-stretch:87%}.nr b small{font:600 11px var(--en);color:#a39f99;margin-left:2px}
+.nd3{display:grid;grid-template-columns:1fr auto auto;column-gap:14px;align-items:center;font-size:13px}
+.nd3 .h{font:700 9.5px var(--en);font-stretch:87%;letter-spacing:.12em;color:#77736d;height:16px;text-align:right}.nd3 .h:first-child{text-align:left}
+.nd3 span{height:25px;display:flex;align-items:center;gap:7px;color:#cfc9bd}.nd3 span i{width:9px;height:9px;border-radius:2px}
+.nd3 b{font:800 14px var(--en);font-stretch:87%;text-align:right}.nd3 u{text-decoration:none;font:800 14px var(--en);font-stretch:87%;text-align:right;min-width:52px;white-space:nowrap}
+.nmb{height:12px;border-radius:6px;background:rgba(0,0,0,.6);overflow:hidden;display:flex;margin:9px 0 4px}.nmb i{display:block;height:100%}
+.nml{display:flex;justify-content:space-between;font:600 10.5px var(--en);font-stretch:87%;color:#a39f99}.nml b{color:#e8dcc4;font-weight:800}
+.nst .cD{background:#e0554a}.nst .cE{background:#7ed08a}.nst .cS{background:#58b4ff}
+.nst .tH{color:#ff8a7a}.nst .tM{color:#7ab4f0}.nst .tE{color:#8fe09a}.nst .tS{color:#8fd0ff}
+.nehp{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;padding-top:9px;border-top:1px dashed rgba(232,220,196,.2);font-size:12px;color:#a39f99}.nehp b{font:800 13px var(--en);font-stretch:87%;color:#f1ece2;white-space:nowrap}
+.nhint{margin:6px 0 0;font-size:11px;color:#a39f99}
+@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){#statSheet:has(.nst){zoom:1.3}}
 /* v585 PC 메뉴 — 아이콘·글자를 줄여 한 줄 4개 */
 @media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.hmp{width:min(250px,80vw);padding-left:10px;padding-right:10px}.hmsec{gap:9px 0;padding:11px 0}.hmsec button{font-size:9.5px;gap:4px;padding:3px 0}.hmsec button svg{width:15px;height:15px}.hmsec button .hdot{right:calc(50% - 13px);width:8px;height:8px}.hmx{width:30px;height:30px}.hmx svg{width:15px;height:15px}.hmp{padding-top:calc(48px + env(safe-area-inset-top,0px))}}
 /* v582 에너지 쉴드 — 체력바 위에 반투명 하늘색 막(최대 체력 대비 비율), 쉴드 수치는 체력바 오른쪽 끝 · 모든 화면 */
@@ -5586,7 +5612,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v585';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v586';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6259,7 +6285,28 @@ $('statSheet').addEventListener('click',e=>{
   refreshMax();save();renderStat();
 });
 $('stat').addEventListener('click',e=>{if(e.target.id==='stat')closeStat()});
-function openStat(){if(NS()){toast('상태','상태창은 준비 중입니다');return}closeAllSheets();statOpen=true;renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
+/* v586 새 시즌 상태창 — DPS·EHP 카드 / 공격·이동 / 자원 / 방어(방어력·회피·에너지 쉴드 → EHP) */
+function nsRenderStat(){const g=gear(),am=k=>1+(auraOn(k)?.03*auraL(k):0),raw={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},D=nsDef(),sh=nsShieldMax(),red=Math.min(.95,D.def+D.eva),ehp=(P.mhp+sh)/(1-red);
+  const n=v=>Math.round(v).toLocaleString('ko-KR'),pc=(v,d=1)=>(+v).toFixed(d)+'%',sp=v=>(v>=0?'+':'')+(+v).toFixed(1)+'%',nk=S.nick||'',cn=CLS[S.cls]?CLS[S.cls].en:'';
+  const rg=v=>v<10?v.toFixed(1):n(v),esP=D.es>0?D.es/(1-D.es):0;
+  $('statSheet').innerHTML=`<div class="nst"><div class="nhd"><div class="nid"><span class="lvt"><small>LV</small>${S.lv}</span><i></i><span class="cl">${cn}</span><b>${nk.replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';')}</b></div><button class="nx" id="sClose" aria-label="닫기">✕</button></div>
+  <div class="nbig"><div class="ncd"><small>DPS</small><em>초당 피해</em><b>${fmtG4(skillDpsCache())}</b></div><div class="ncd iv"><small>EHP</small><em>유효 체력</em><b>${n(ehp)}</b></div></div>
+  <div class="nsec"><div class="nst2">공격 · 이동</div><div class="ntwo">
+   <div class="nr"><span>치명타 확률</span><b>${pc(Math.min(1,nsCritCh())*100)}</b></div><div class="nr"><span>치명타 피해</span><b>${pc(nsCritMul()*100,0)}</b></div>
+   <div class="nr"><span>${S.cls==='mage'?'시전 속도':'공격 속도'}</span><b>${sp(g.aspd||0)}</b></div><div class="nr"><span>이동 속도</span><b>${sp(spdEff(spdRaw()))}</b></div></div></div>
+  <div class="nsec"><div class="nst2">자원</div><div class="ntwo">
+   <div class="nr"><span>생명력</span><b class="tH">${n(P.mhp)}</b></div><div class="nr"><span>마나</span><b class="tM">${n(P.mmp)}</b></div>
+   <div class="nr"><span>생명력 재생</span><b class="tH">${rg(hpRegen())}<small>/초</small></b></div><div class="nr"><span>마나 재생</span><b class="tM">${rg(mpRegen())}<small>/초</small></b></div>
+   <div class="nr"><span>에너지 쉴드</span><b class="tS">${n(sh)}</b></div></div></div>
+  <div class="nsec"><div class="nst2">방어</div><div class="nd3"><div class="h">유형</div><div class="h">총합</div><div class="h">효과</div>
+   <span><i class="cD"></i>방어력</span><b>${n(raw.def)}</b><u class="tH">피해 −${pc(D.def*100)}</u>
+   <span><i class="cE"></i>회피</span><b>${n(raw.eva)}</b><u class="tE">회피 ${pc(D.eva*100)}</u>
+   <span><i class="cS"></i>에너지 쉴드</span><b>${n(raw.es)}</b><u class="tS">보호막 +${pc(esP*100)}</u></div>
+   <div class="nmb"><i class="cD" style="width:${D.def*100}%"></i><i class="cE" style="width:${D.eva*100}%"></i><i class="cS" style="width:${D.es*100}%"></i></div>
+   <div class="nml"><span>종합 방어 <b>${pc(D.total*100)}</b></span><span>상한 85%</span></div>
+   <div class="nehp"><span>생명력 ${n(P.mhp)} + 쉴드 ${n(sh)} → 방어·회피 반영</span><b>EHP ${n(ehp)}</b></div>
+   ${S.duel?'<p class="nhint">보스전 기준(보스 방어 상수) 수치입니다</p>':''}</div></div>`}
+function openStat(){closeAllSheets();statOpen=true;if(NS())nsRenderStat();else renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
 function closeAllSheets(){if(!$('hmenu').hidden)$('hmenu').hidden=true;if(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))nsClose();if(mapOpen)closeMap();if(heirOpen)closeHeir();if(typeof stageOpen!=='undefined'&&stageOpen)closeStage();if(typeof bossOpen!=='undefined'&&bossOpen)closeBoss();if(typeof smithOpen!=='undefined'&&smithOpen)closeSmith();if(menuOpen)closeMenu();if(invOpen)closeInv();if(statOpen)closeStat();if(typeof shopOpen!=='undefined'&&shopOpen)closeShop();if(typeof restartOpen!=='undefined'&&restartOpen)closeRestart()}
