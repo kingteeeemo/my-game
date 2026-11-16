@@ -726,7 +726,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 }
 @media (max-width:640px) and (orientation:portrait) and (min-height:760px){.sbanner{top:calc(380px + env(safe-area-inset-top,0px))}.toast{top:calc(446px + env(safe-area-inset-top,0px))}}
 /* v555: 보스전 입장 문구(결투장·보스 이름)는 세로 폰에서 화면을 위에서 아래로 6등분했을 때 위에서 두 번째 칸 가운데(≈25%)에 — 가운데 선 보스와 겹치지 않게 */
-@media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:21.4%!important}}/* v560: 7등분의 두 번째 칸 가운데(1.5/7) */
+@media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:17%!important}}/* v563: 세로 17% */
+@media (orientation:landscape){.sbanner.duel{margin-top:-10vh}}/* v563: 가로 화면은 지금 자리에서 화면 높이의 10%만큼 위로 */
 /* v70 월드맵 */
 #wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0f1014;border:1px solid var(--line)}
@@ -2128,7 +2129,7 @@ arenaRing.rotation.x=-Math.PI/2;arenaRing.position.y=.04;arenaRing.visible=false
 const arenaLights=[[0,-10],[0,10]].map(([x,z])=>{const l=new THREE.PointLight(0xff6a30,.8,26,1.2);l.position.set(x,4,z);l.visible=false;scene.add(l);return l});
 function buildArena(){clearProps();mapKind='arena';setGround(96,96,96);
   for(let i=0;i<20;i++){const t=i/20*Math.PI*2;addProp(Math.cos(t)*(ARENA_R+1.6),Math.sin(t)*(ARENA_R+1.6),i%2?'pillar':'firePillar')}
-  for(let i=0;i<4;i++){const t=i/4*Math.PI*2+Math.PI/4;addProp(Math.cos(t)*9,Math.sin(t)*9,'firePillar')}
+  /* v563: 투기장 안쪽 불기둥 4개 삭제 — 보스가 걸려 움직임이 이상해지던 문제 */
   for(let i=0;i<10;i++){const t=rand(0,6.3),r=rand(3,ARENA_R-2);addProp(Math.cos(t)*r,Math.sin(t)*r,'bones')}
   for(let i=0;i<22;i++){const t=rand(0,6.3),r=rand(0,ARENA_R);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=true;for(const l of arenaLights)l.visible=true;mapKind='arena';propTheme='final'}
@@ -3235,7 +3236,7 @@ function drgPose(K,S){const C=S.o?Object.assign({},DG,S.o):DG,B=K.B,R=K.R,t=S.t|
   return K}
 
 return {DG,setup:drgSetup,pose:drgPose}})();
-const DGC={file:'models/dragon.glb',S:2.53,h:2.214,glow:1.7,col:1.5},DGN={st:0};
+const DGC={file:'models/dragon.glb',turn:1.3,S:3.036,h:2.657,glow:1.7,col:1.5},DGN={st:0};
 function drgLoad(){const N=DGN;if(N.st||!THREE.GLTFLoader)return;N.st=1;
   new THREE.GLTFLoader().load(DGC.file+'?'+APP_VER,g=>{try{const w=g.scene;let mesh=null;w.traverse(o=>{if(o.isSkinnedMesh)mesh=o});mesh.frustumCulled=false;mesh.castShadow=true;
     const m=mesh.material;m.metalness=0;m.emissive.setScalar(DGC.glow);m.color.setScalar(DGC.col);/* 발광 텍스처 = 용암 균열·눈(+몸 전체 아주 약하게) → 어두운 왕좌에서도 균열이 빛남 */
@@ -3254,10 +3255,13 @@ function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.
     else if(s==='land'){fly=T<.72?1:.15;wup=T>.45?1:0;sp=1;fs=7;rch=T>.4?1:0}
     else{fly=1;fs=s==='fly'?10:7.5;bre=s==='fly'?1:0}}
   else if(c){if(c.w>0){cr=1;chg=.45;sp=.55;wup=.3}else chg=1}/* v559: 돌진 준비 — 웅크린 채 몸을 앞으로 숙이고 날개를 반쯤 들어 노려봄 */
+  else if(e.brW>0){/* v563 브레스 준비: 상체를 살짝 들고 숨을 들이쉼 */rear=.5;sp=.6;wup=.25}
+  else if(e.brT>0){/* 브레스: 몸을 낮추고 머리를 앞으로 내밀어 뿜음 */bre=.8;cr=.5;sp=.85;fs=14}
   else if(e.holdT>0){/* 직선 불꽃(내려찍기): 상체를 들었다가 터질 때 앞발로 내리찍음 */if(e.holdT>.52){rear=1;sp=.7}else if(e.holdT>.3)cr=1}
   const k=Math.min(1,dt*7),kf=Math.min(1,dt*10);D.fly+=(fly-D.fly)*k;D.sp+=(sp-D.sp)*k;D.rear+=(rear-D.rear)*(rear<D.rear?Math.min(1,dt*13):k*.8);D.wup+=(wup-D.wup)*k;D.rch=(D.rch||0)+(rch-(D.rch||0))*k;D.bre+=(bre-D.bre)*k;D.chg+=(chg-D.chg)*kf;D.cr+=(cr-D.cr)*kf;D.mv+=(mv-D.mv)*k;
   /* 걸음: 실제로 움직인 거리에 맞춰 발을 옮김(미끄러짐 방지) */
-  if(D.px!==null&&dt>0){const d=Math.min(Math.hypot(e.pos.x-D.px,e.pos.z-D.pz),e.spd*dt*1.6);if(mv)D.wk+=d/(sc*G.stride/G.stn)*6.2832}D.px=e.pos.x;D.pz=e.pos.z;
+  if(D.px!==null&&dt>0){const d=Math.min(Math.hypot(e.pos.x-D.px,e.pos.z-D.pz),e.spd*dt*1.6);if(mv)D.wk+=d/(sc*G.stride/G.stn)*6.2832;
+    /* v563: 제자리에서 몸을 돌릴 때도 발을 옮김 */let dr=e.g.rotation.y-(D.ry===undefined?e.g.rotation.y:D.ry);dr=Math.abs(Math.atan2(Math.sin(dr),Math.cos(dr)));if(!A&&!c&&dr>1e-4){D.wk+=dr*.42/(G.stride/G.stn)*6.2832;D.mv=Math.max(D.mv,Math.min(.85,dr/dt/.9))}}D.px=e.pos.x;D.pz=e.pos.z;D.ry=e.g.rotation.y;
   D.fl+=dt*fs;
   S2.t=time+e.ph;S2.walk=D.wk;S2.mv=D.mv;S2.fly=D.fly;S2.flap=D.fl;S2.spread=D.sp;S2.rear=D.rear;S2.wup=D.wup;S2.reach=D.rch;S2.breath=D.bre;S2.chg=D.chg;S2.crouch=D.cr;S2.atk=e.atk>0?Math.sin(e.atk/.35*Math.PI):0;
   DRK.pose(D.K,S2);
@@ -3286,7 +3290,7 @@ function drgCineTick(dt){const e=enemies.find(x=>x.final);if(e&&e.air&&e.air.int
 const FLY_Y=4.6,rockGeo=new THREE.ConeGeometry(.42,2,6),rockMat=new THREE.MeshStandardMaterial({color:0x5a4a44,roughness:.9}),_mv=new THREE.Vector3();
 function fallRock(p,r,dmg){telegraph(p,r,dmg,1);const m=new THREE.Mesh(rockGeo,rockMat);m.rotation.x=Math.PI;m.position.set(p.x,40,p.z);scene.add(m);
   fx.push({m,t:0,dur:1.1*TELE_S,keep:1,upd(k){const f=Math.max(0,(k-.5)/.5);m.position.y=1+16*(1-f*f)+(f>0?0:30)},end(){spray(PNRM,p,8,{sp:[2,5],up:[2,5],y:[.2,.6],life:[.4,.7],s0:[.3,.5],s1:[.05,.1],c0:0x8a7a70,c1:0x3a3230,a:.8,drag:1,tex:2})}})}
-function startAir(e){e.chg=null;e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});e.air={st:'up',t:0,n:0,rk:.6,sc:0,y0:e.g.position.y};
+function startAir(e){e.chg=null;e.brT=0;e.brW=0;e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});e.air={st:'up',t:0,n:0,rk:.6,sc:0,y0:e.g.position.y};
   toast('사이 페이즈',`${e.name}이(가) 날아오릅니다 · 브레스와 낙석을 피하세요`,'#ff8a5a');shake=.35;ringFx(e.pos,6,0xff6a2a,.6);groundFx(e.pos,shockTex,0xffb070,1,7,.6,.8,true,.08)}
 function planPass(e){const A=e.air,a=Math.random()*6.283,dx=Math.sin(a),dz=Math.cos(a),R2=ARENA_R-1;
   const b=P.pos.x*dx+P.pos.z*dz,c=P.pos.x*P.pos.x+P.pos.z*P.pos.z-R2*R2,q=Math.sqrt(Math.max(0,b*b-c)),t1=-b-q,t2=-b+q;
@@ -3449,7 +3453,7 @@ function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math
   const edge=new THREE.Mesh(new THREE.RingGeometry(len-.18,len,40,1,ts,half*2),new THREE.MeshBasicMaterial({color:0xffb090,transparent:true,opacity:1,depthWrite:false}));
   for(const m of [bg,fill,edge]){m.rotation.x=-Math.PI/2;g.add(m)}fill.position.y=.005;edge.position.y=.01;g.position.set(p0.x,.065,p0.z);scene.add(g);
   fx.push({m:g,t:0,dur,geo:bg.geometry,upd(k){const s=Math.max(.01,len*k);fill.scale.set(s,s,1)},end(){fill.geometry.dispose();edge.geometry.dispose();end&&end()}})}
-function circTele(p,r,dur,end){const ring=flatMesh(ringGeo,0xffb090,1);ring.scale.set(r,r,1);const fill=flatMesh(discGeo,0xff3a28,.5);const g=new THREE.Group();g.add(ring,fill);g.position.set(p.x,.07,p.z);scene.add(g);
+function circTele(p,r,dur,end){const ring=flatMesh(ringThin(r),0xffb090,1);ring.scale.set(r,r,1);const fill=flatMesh(discGeo,0xff3a28,.5);const g=new THREE.Group();g.add(ring,fill);g.position.set(p.x,.07,p.z);scene.add(g);
   fx.push({m:g,t:0,dur,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end})}
 function waveFx(p0,a,half,len){const ts=a-half-Math.PI/2,m=new THREE.Mesh(new THREE.RingGeometry(.82,1,40,1,ts,half*2),new THREE.MeshBasicMaterial({color:0xffb070,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
   m.rotation.x=-Math.PI/2;m.position.set(p0.x,1.1,p0.z);scene.add(m);fx.push({m,t:0,dur:.38,geo:m.geometry,upd(k){const r=1.5+len*k;m.scale.set(r,r,1);m.material.opacity=.95*(1-k*k);
@@ -3848,12 +3852,14 @@ function nearestEnemy(p,maxd,skip){let best=null,bd=maxd;for(const e of enemies)
 
 /* ================= fx ================= */
 const ringGeo=new THREE.RingGeometry(.86,1,44),discGeo=new THREE.CircleGeometry(1,36);
+/* v563: 큰 원일수록 테두리가 두꺼워 보이던 문제 — 반지름과 상관없이 폭 약 0.22로 */
+const ringThinC={};function ringThin(r){const k=Math.round(Math.max(.02,Math.min(.14,.22/Math.max(.1,r)))*100);return ringThinC[k]||(ringThinC[k]=new THREE.RingGeometry(1-k/100,1,64))}
 /* v194 재질 풀: 이펙트마다 새 재질을 만들고 버리던 것(초당 수백 개 → 셰이더 캐시 키 계산·GC 부담)을 재사용. 모양·밝기는 그대로 */
 const MPOOL={};function mtake(k,make,reset){const a=MPOOL[k];let m=a&&a.pop();if(!m){m=make();m.userData.pk=k}m.userData.free=false;reset(m);return m}
 function mfree(m){if(!m)return;const u=m.userData;if(u&&u.pk){if(u.free)return;u.free=true;const a=MPOOL[u.pk]||(MPOOL[u.pk]=[]);if(a.length<300)a.push(m);else{u.pk=null;m.dispose()}}else m.dispose()}
 const basicMat=(k,o)=>mtake(k,()=>new THREE.MeshBasicMaterial(o),m=>{m.color.setHex(o.color);m.opacity=o.opacity;m.blending=o.blending||THREE.NormalBlending;m.side=o.side||THREE.FrontSide;m.depthTest=o.depthTest!==false;m.depthWrite=false;m.transparent=true});
 function flatMesh(geo,color,op){const m=new THREE.Mesh(geo,basicMat('fm',{color,opacity:op,side:THREE.DoubleSide}));m.rotation.x=-Math.PI/2;return m}
-function ringFx(p,r,color,dur=.35,grow=true){if(r>=1.4)flash(p,color,Math.min(2.4,.5+r*.3));const m=flatMesh(ringGeo,color,.9);m.position.set(p.x,.06,p.z);scene.add(m);fx.push({cos:1,m,t:0,dur,upd(k){const s=r*(grow?.35+.65*(1-(1-k)*(1-k)):1);m.scale.set(s,s,1);m.material.opacity=.9*(1-k)}})}
+function ringFx(p,r,color,dur=.35,grow=true){if(r>=1.4)flash(p,color,Math.min(2.4,.5+r*.3));const m=flatMesh(mapKind==='arena'&&r>=1.6?ringThin(r):ringGeo,color,.9);m.position.set(p.x,.06,p.z);scene.add(m);fx.push({cos:1,m,t:0,dur,upd(k){const s=r*(grow?.35+.65*(1-(1-k)*(1-k)):1);m.scale.set(s,s,1);m.material.opacity=.9*(1-k)}})}
 /* v179 잔불 바닥: 셰이더 — 그을린 검은 바닥(울퉁불퉁한 가장자리) 위에 숯처럼 갈라진 불씨가 노이즈로 깜빡이고, 갈라진 틈이 노랗게 달아오름. 불티가 띄엄띄엄 떠오르고 옅은 연기 */
 let _EMB=null;const EMBER_MAT=()=>(_EMB||(_EMB=(()=>{const vs=`varying vec2 vUv;void main(){vUv=uv*2.-1.;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   fs=`precision mediump float;varying vec2 vUv;uniform float uT,uK,uOp,seed;uniform vec3 cA,cB,cC;${FIRE_NOISE}
@@ -3877,7 +3883,7 @@ function burnField(p,r,dmg,dur=3,bm){
 }
 const TELE_S=1.44,BOSS_CD=1.3,BOSS_DM=.9;/* v202: 스토리 보스 예고→타격 20% 늦춤 → v203: 20% 더(×1.44) · 패턴 간격 +30% · 모든 공격 피해 -10% (일반·격노 모두) */
 function telegraph(p,r,dmg,noLava){
-  const ring=flatMesh(ringGeo,0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
+  const ring=flatMesh(ringThin(r),0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
   const fill=flatMesh(discGeo,0xd04a3a,.25);fill.position.set(p.x,.06,p.z);
   const grp=new THREE.Group();grp.add(ring,fill);scene.add(grp);
   fx.push({m:grp,t:0,dur:1.1*TELE_S,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
@@ -3907,6 +3913,16 @@ function lineTele(p0,a,len,w,dur,end){const g=new THREE.Group();g.position.set(p
   g.add(bg,fill,eL,eR);scene.add(g);
   fx.push({m:g,t:0,dur,upd(k){const l=Math.max(.01,len*k);fill.scale.set(w,l,1);fill.position.z=l/2},end})}
 function later(t,fn){timers.push({t,fn})}
+/* v563 전방 브레스: 부채꼴 예고 → 1.1초 동안 불을 내뿜음(첫 타 30% + 0.18초마다 12%×5, 범위 안에 있을 때만). 격노 시 더 넓고 빠름 */
+function bossBreath(e){const a0=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),p0={x:e.pos.x,z:e.pos.z},half=e.rage?.62:.5,len=16,dur=(e.rage?1:1.25)*TELE_S,T=1.1;
+  fanTele(p0,a0,half,len,dur,()=>{if(e.hp<=0||!enemies.includes(e)||e.air)return;e.brT=T;e.brA=a0;e.brH=half;e.brL=len;shake=Math.max(shake,.3);let n=0;
+    const tick=()=>{if(e.hp<=0||!enemies.includes(e)||e.air)return;if(P.hp>0&&inFan(P.pos,p0,a0,half,len))hurtPct((n?.12:.3)*BOSS_DM,!!n);if(++n<6)later(.18,tick)};tick();
+    for(let i=0;i<7;i++)later(.1+i*.1,()=>{const d=3+i*2,t=a0+rnd(-half,half)*.7;decalFx({x:p0.x+Math.sin(t)*d,z:p0.z+Math.cos(t)*d},crackTex,0xff7a2a,1.8,1.8,.7,true)})});
+  ringFx(e.pos,e.r*1.8,0xff4a2a,dur);e.holdT=dur+T+.3;e.holdA=a0;e.brW=dur}
+function breathFx(e,dt){const a0=e.brA,half=e.brH,len=e.brL;let mx=e.pos.x+Math.sin(a0)*e.r,my=2.2,mz=e.pos.z+Math.cos(a0)*e.r;if(e.M&&e.M.mouth){e.M.mouth.getWorldPosition(_mv);mx=_mv.x;my=_mv.y;mz=_mv.z}
+  const n=Math.ceil(dt*150*QM());for(let i=0;i<n;i++){const a=a0+rnd(-half,half)*.92,sp=rnd(15,24),life=len/sp*rnd(.6,1);emit(PADD,{x:mx,y:my,z:mz,vx:Math.sin(a)*sp,vy:-(my-.4)/life,vz:Math.cos(a)*sp,life,s0:rnd(.5,.9),s1:rnd(2.4,3.6),c0:0xfff0b0,c1:0xff4a10,a:.75,tex:1})}
+  if(Math.random()<dt*14*QM()){const a=a0+rnd(-half,half),d=rnd(3,len);emit(PNRM,{x:e.pos.x+Math.sin(a)*d,y:.3,z:e.pos.z+Math.cos(a)*d,vy:rnd(1,2.5),life:rnd(.6,1),s0:1.2,s1:2.6,c0:0x4a3a30,c1:0x1c1a18,a:.4,drag:2,tex:2})}
+  shake=Math.max(shake,.08)}
 /* 최종 보스 패턴 (v40) — 돌진: 경고선 뒤 직선으로 빠르게 돌진, 경로에 닿으면 큰 피해 / 내려찍기: 직선 충격파(격노 시 부채꼴 3줄) */
 function bossCharge(e){const a=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),dx=Math.sin(a),dz=Math.cos(a),R2=ARENA_R-e.r-.4;
   const b=e.pos.x*dx+e.pos.z*dz,c=e.pos.x*e.pos.x+e.pos.z*e.pos.z-R2*R2,t=-b+Math.sqrt(Math.max(0,b*b-c));
@@ -5416,7 +5432,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v562';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v563';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6918,12 +6934,17 @@ function update(dt){packTick();
     if(e.chg)chargeStep(e,dt);
     else if(e.kbT>0){e.pos.x+=e.kbx*dt;e.pos.z+=e.kbz*dt;e.kbT-=dt}
     else if(!frz&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob){const v=steer(e,dx/dd,dz/dd,dd,dt),sk=e.spdK===undefined?1:e.spdK;/* v562: 검귀 걷기 시작 동작 동안 속도를 서서히 */e.pos.x+=v.x*spd*sk*dt;e.pos.z+=v.z*spd*sk*dt}
-    if(e.holdT>0)e.holdT-=dt;e.g.rotation.y=e.chg?e.chg.a:e.dA?e.dA.a:e.holdT>0?e.holdA:Math.atan2(dx,dz);
+    if(e.holdT>0)e.holdT-=dt;{const ta=e.chg?e.chg.a:e.dA?e.dA.a:e.holdT>0?e.holdA:Math.atan2(dx,dz);
+      if(e.final&&e.M&&e.M.mdl&&!(e.chg&&e.chg.w<=0)){/* v563: 용은 몸을 천천히 돌림(초당 최대 DGC.turn, 예고 중엔 더 빨리) — 캐릭터가 빨리 움직여도 제자리에서 휙휙 돌지 않게. 덜 돌았으면 그만큼 천천히 걸음 */
+        let d=ta-e.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const mx=e.chg?7:e.holdT>0?4.5:DGC.turn;e.tv=(e.tv||0)+(clamp(d*3.5,-mx,mx)-(e.tv||0))*Math.min(1,dt*(e.chg||e.holdT>0?12:4));
+        const st=clamp(e.tv*dt,-Math.abs(d),Math.abs(d));e.g.rotation.y+=d*st>0?st:0;e.spdK=Math.max(.12,Math.cos(Math.min(1.5,Math.abs(d))))}
+      else e.g.rotation.y=ta}
     e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob);
     if(e.rng&&!ob){if(!frz){e.acd-=dt;if(dd<e.rng+.5&&e.acd<=0){e.acd=2.2;e.atk=.35;nsShoot(e)}}}
     else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=e.boss?1.3:1.05;e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
     if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
-    if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;if(e.patN%2)bossCharge(e);else bossSlam(e)}}
+    if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;const pk=e.patN%3;if(pk===1)bossCharge(e);else if(pk===2)bossSlam(e);else bossBreath(e)/* v563: 전방 브레스 추가 — 돌진 → 내려찍기 → 브레스 순 */}
+      if(e.brW>0)e.brW-=dt;if(e.brT>0){e.brT-=dt;breathFx(e,dt)}}
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
     if(e.final&&!frz){if(!e.rage&&e.hp<e.mhp*.5){e.rage=true;e.spd*=1.3;toast('격노',`${e.name}이(가) 분노합니다`);ringFx(e.pos,6,0xff4a2a,.6);shake=.3}
       e.nova-=dt;if(e.nova<=0){e.nova=(e.rage?4.5:7)*BOSS_CD;telegraph({x:e.pos.x,z:e.pos.z},6.5,e.dmg*1.2)}}
