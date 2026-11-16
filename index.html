@@ -727,7 +727,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 }
 @media (max-width:640px) and (orientation:portrait) and (min-height:760px){.sbanner{top:calc(380px + env(safe-area-inset-top,0px))}.toast{top:calc(446px + env(safe-area-inset-top,0px))}}
 /* v555: 보스전 입장 문구(결투장·보스 이름)는 세로 폰에서 화면을 위에서 아래로 6등분했을 때 위에서 두 번째 칸 가운데(≈25%)에 — 가운데 선 보스와 겹치지 않게 */
-@media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:25%!important}}
+@media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:21.4%!important}}/* v560: 7등분의 두 번째 칸 가운데(1.5/7) */
 /* v70 월드맵 */
 #wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0f1014;border:1px solid var(--line)}
@@ -5393,7 +5393,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v559';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v560';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7015,7 +7015,7 @@ function frameCam(dt,target=P.pos){
   if(mapKind==='arena')drgCam(dt);
 }
 /* v548: 보스 등장 카메라(용 → v550 잿불 검귀도) — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
-const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1,kn:{d0:17,d1:13.5,yaw:.32,y:2.2,ly:.55,a0:-.1,a1:.75,q0:.45,q1:1.5}},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
+const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1,kn:{land:1.4,landLy:.24,/* 가로 화면: 더 멀리서 잡고 검귀를 화면 아래쪽에 — 위쪽 입장 문구와 겹치지 않게 */d0:17,d1:13.5,yaw:.32,y:2.2,ly:.55,a0:-.1,a1:.75,q0:.45,q1:1.5}},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
 function drgCam(dt){const C=DGCAM;let b=enemies.find(e=>e.final&&e.air&&e.air.intro),w=0,kn=null;
   if(b){const A=b.air;w=A.st==='roar'?1-Math.min(1,A.t/C.ret):1;w=w*w*(3-2*w)}
   else if((kn=enemies.find(e=>e.duel&&!e.maw&&e.hp>0&&e.M&&e.M.sk&&e.introT!==undefined))){/* v551: 잿불 검귀 — 등장하는 동안은 검귀만 정면에서 잡고, 칼을 다 뽑으면 캐릭터 등 뒤로 물러났다가 쿼터뷰로 */const E=BKC.introT/BKC.introK,K=C.kn,k=(kn.introT-(E+K.q0))/(K.q1-K.q0);if(k<1){b=kn;w=1-Math.max(0,k);w=w*w*(3-2*w)}}
@@ -7024,8 +7024,8 @@ function drgCam(dt){const C=DGCAM;let b=enemies.find(e=>e.final&&e.air&&e.air.in
   let dx=P.pos.x-FB_POS.x,dz=P.pos.z-FB_POS.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
   _dcP.set(P.pos.x+dx*C.back-dz*C.side,C.up,P.pos.z+dz*C.back+dx*C.side);
   if(kn){const K=C.kn,E=BKC.introT/BKC.introK,sc=b.g.scale.x/3,pr=clamp((b.introT+BKC.pre)/(BKC.pre+E),0,1);let ax=P.pos.x-b.pos.x,az=P.pos.z-b.pos.z;const al=Math.hypot(ax,az)||1,cs=Math.cos(K.yaw),sn=Math.sin(K.yaw);ax/=al;az/=al;
-    const D=(K.d0+(K.d1-K.d0)*pr*pr*(3-2*pr))*sc,a=clamp((b.introT-(E+K.a0))/(K.a1-K.a0),0,1),ae=a*a*(3-2*a);/* 정면 약간 옆에서 낮게 올려다보며 천천히 다가감 → 캐릭터 등 뒤로 */
-    _dcL.set(b.pos.x+(ax*cs-az*sn)*D,K.y*sc,b.pos.z+(ax*sn+az*cs)*D);_dcP.lerp(_dcL,1-ae);_dcQ.set(b.pos.x,b.h*(K.ly+(.5-K.ly)*ae),b.pos.z);if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.copy(_dcQ)}
+    const ld=innerWidth>innerHeight,D=(K.d0+(K.d1-K.d0)*pr*pr*(3-2*pr))*sc*(ld?K.land:1),a=clamp((b.introT-(E+K.a0))/(K.a1-K.a0),0,1),ae=a*a*(3-2*a);/* 정면 약간 옆에서 낮게 올려다보며 천천히 다가감 → 캐릭터 등 뒤로 */
+    _dcL.set(b.pos.x+(ax*cs-az*sn)*D,K.y*sc,b.pos.z+(ax*sn+az*cs)*D);_dcP.lerp(_dcL,1-ae);_dcQ.set(b.pos.x,b.h*(K.ly+(ld?K.landLy:0)+(.5-K.ly-(ld?K.landLy:0))*ae),b.pos.z);if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.copy(_dcQ)}
   else{const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix)}
   /* v550: 연출 동안 캐릭터가 보스 쪽을 바라봄(직접 움직이면 그 방향 우선) */if(DGCAM.px===P.pos.x&&DGCAM.pz===P.pos.z){P.face=Math.atan2(b.pos.x-P.pos.x,b.pos.z-P.pos.z);let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,Math.max(dt,.016)*8)}DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;
   if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*5));
