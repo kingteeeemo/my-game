@@ -87,6 +87,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
 .iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
 .iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
+body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -5766,7 +5767,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v591';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v592';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5807,6 +5808,7 @@ const fmtC=v=>v>=1e29?'∞':v>CUR_MAX?CUR_MAX+'+':String(Math.floor(v));
 function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.textContent!==t)e.textContent=t};st('goldT',fmtG4(S.gold||0));
   const T=S.test;st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('lumiT',T?'∞':fmtC(S.lumi||0))}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
+  {const ci=bossIntroOn()&&knAppr!==1;if(document.body.classList.contains('cineui')!==ci)document.body.classList.toggle('cineui',ci)}/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&(!bossIntroOn()||knAppr===1);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML='↩<span class="xl"> 나가기</span>'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
@@ -7052,6 +7054,8 @@ function drawMini(){
   else if(mapKind==='field')mctx.fillRect(mx(-B),mz(-B),2*B*k,2*B*k);
   else{mctx.beginPath();mctx.arc(mx(0),mz(0),(mapKind==='town'?TOWN_R:ARENA_R)*k,0,7);mctx.fill()}
   mctx.fillStyle='rgba(150,145,160,.45)';for(const c of colliders){if(Math.abs(c.x-cx)>V+3||Math.abs(c.z-cz)>V+3)continue;mctx.beginPath();mctx.arc(mx(c.x),mz(c.z),Math.max(1,c.r*k),0,7);mctx.fill()}
+  if(knOn){/* v592: 잿불 성채 — 다리·문 앞 발판·통로 */const K=KNB;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(K.z0-1),K.w*k,(K.z1-K.z0-2.4)*k);mctx.fillRect(mx(-5),mz(K.z1-3.6),10*k,3.6*k);mctx.fillRect(mx(-K.gw),mz(K.z1-.9),K.gw*2*k,1.8*k);mctx.fillRect(mx(-K.tw),mz(K.z1+.9),K.tw*2*k,4.6*k);
+    mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,W/140);mctx.strokeRect(mx(-K.w/2),mz(K.z0-1),K.w*k,(K.z1-K.z0-2.4)*k)}
   if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,W/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
   const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){if(!npcOn(n))continue;mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,W/40),0,7);mctx.fill()}
   if(mapKind==='story'){const ax=clamp(mx(ALTAR.x),4,W-4),az=clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,W/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
@@ -7176,7 +7180,7 @@ function steer(e,ux,uz,dd,dt){if(!colliders.length)return {x:ux,z:uz};const ex=e
 function pushOut(p,r){
   for(const c of colliders){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-4){p.x=c.x+dx/d*m;p.z=c.z+dz/d*m}}
   mapClamp(p,r);
-  if(mapKind==='arena'||mapKind==='town'){const d=Math.hypot(p.x,p.z),m=(mapKind==='town'?TOWN_R:ARENA_R)-r;if(d>m){if(knAppr&&p===P.pos&&mapKind==='arena'){/* v588: 다리 위 — 폭 안에서만 */const K=KNB,hw=(p.z>K.z1+.9?K.tw-.6:p.z>K.z1-.9?K.gw-.5:p.z>K.z1-3.6?4.4:K.w/2-.55)-r*.3;p.x=clamp(p.x,-hw,hw);p.z=clamp(p.z,0,K.z1+K.tl-3)}else{p.x*=m/d;p.z*=m/d}}
+  if(mapKind==='arena'||mapKind==='town'){const d=Math.hypot(p.x,p.z),m=(mapKind==='town'?TOWN_R:ARENA_R)-r;if(d>m){if(knAppr&&p===P.pos&&mapKind==='arena'){/* v588: 다리 위 — 폭 안에서만 */const K=KNB,hw=(p.z>K.z1+.9?K.tw-.6:p.z>K.z1-.9?K.gw-.5:p.z>K.z1-3.6?4.4:K.w/2-.55)-r*.3;p.x=clamp(p.x,-hw,hw);p.z=clamp(p.z,0,K.z1+5)/* v592: 출발 위치보다 뒤로는 못 감 */}else{p.x*=m/d;p.z*=m/d}}
     if(S.duel&&S.duel.b==='maw'&&p===P.pos){const pm=MAW_POOL+r;if(d<pm){if(d<1e-4){p.z=pm}else{p.x*=pm/d;p.z*=pm/d}}}}/* v216: 웅덩이 접근 불가 */
 }
 /* ================= 구르기 (v122) =================
