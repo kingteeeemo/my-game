@@ -831,6 +831,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skr .sgc{height:36px;gap:4px}.skr .sgc button{height:36px;min-height:0;box-sizing:border-box;padding-top:0;padding-bottom:0;line-height:1.1}.skr .sgc .esb{font-size:12px}.skr .sgc .esb small{font-size:9.5px!important}
 .skr .sgv{height:18px;display:flex;align-items:flex-end;gap:8px}.skr .sgv .sgb{height:16px;box-sizing:border-box}
 #sheet .mstk{position:sticky;top:-18px;z-index:5;background:#17171d;margin:-18px -16px 0;padding:18px 16px 8px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.augs{margin-top:2px}.augs button.on{background:var(--gc);border-color:var(--gc)}.augs button i{font-style:normal;font-size:10px;margin-left:5px;background:rgba(0,0,0,.35);color:#fff;border-radius:8px;padding:1px 6px}
+.skill.s2{gap:12px}.skill.s2 h3{min-height:30px}.s2ess{display:flex;align-items:center;gap:8px;font:600 12px var(--ko);color:var(--muted)}.s2ess b{color:#ff9a4a;font-size:15px;font-weight:800}
 </style>
 
 <canvas id="c"></canvas>
@@ -1533,14 +1535,18 @@ function nsShoot(e){const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,d=Math.hypot(dx,
 function nsShotStep(dt){for(let i=nsShots.length-1;i>=0;i--){const o=nsShots[i];o.t+=dt;o.m.position.x+=o.vx*dt;o.m.position.z+=o.vz*dt;
   const hit=Math.hypot(o.m.position.x-P.pos.x,o.m.position.z-P.pos.z)<.7&&P.hp>0;if(hit&&!P.mv)hurtPlayer(o.dmg);
   if(hit&&!P.mv||o.t>2||inTown){scene.remove(o.m);nsShots.splice(i,1)}}}
+function auraRow(k){if(k==='pot'){const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0,D='1회: 3초 동안 생명력 30% / 마나 20%\n처치 점수 40점(일반 1·정예 3·유니크 10)마다 1회 · 보스 체력 20%마다 1회 · 보스 입장 시 가득';
+    return skRow({k:'au_pot',c:'#ff7a6a',n:'물약 충전 횟수',L:m,M:5,cur:`최대 충전 ${m}회\n`+D,nx:m<5?`최대 충전 ${m+1}회`:'',btns:`<button class="esb" data-pu="1" ${m<5&&(S.ess||0)>=c?'':'disabled'}>${m>=5?'최대':`◆ ${c}`}</button>`})}
+  const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
+  const st=k==='blood'?(on?(P.bloodAct?'발동 중':'대기 (생명력 50% 이상에서 켜짐)'):(bloodOk()?'':'장비 생명력 재생 9.4% 이상 필요')):'';
+  return skRow({k:'au_'+k,c:a.c,n:a.n,L,M:10,cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')):'',btns:`${S.test?`<button class="pm" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-au="${k}" ${can?'':'disabled'}>${L>=10?'최대':`◆ ${c}`}</button><button class="pm wide${on?' on':''}" data-at="${k}" ${L?'':'disabled'}>${on?'ON':'OFF'}</button>`})}
+const AUGR=[['def','방어','#7fb0ff',['def','eva','es']],['dmg','피해','#ff6a4a',['crit','haste','blood']],['reg','재생','#5ad18a',['hreg','mreg','pot']]];
+let auG='def';
 function auraTabHtml(){const res=gear().res,rv=nsReserve();
   let h=`<div class="tier2"><div class="t2h"><b>오라</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span></div>
-  <p class="hint" style="margin:0">마나 점유 ${rv.toFixed(1)}% · 마나 점유 효율 +${res.toFixed(1)}% (점유율 ÷ ${(1+res/100).toFixed(2)}) · 쓸 수 있는 마나 ${Math.max(0,100-rv).toFixed(1)}%</p><div class="gems">`;
-  for(const k in NAURA){const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
-    const st=k==='blood'?(on?(P.bloodAct?'발동 중':'대기 (생명력 50% 이상에서 켜짐)'):(bloodOk()?'':'장비 생명력 재생 9.4% 이상 필요')):'';
-    h+=skRow({k:'au_'+k,c:a.c,n:a.n,L,M:10,cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')):'',btns:`${S.test?`<button class="pm" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-au="${k}" ${can?'':'disabled'}>${L>=10?'최대':`◆ ${c}`}</button><button class="pm wide${on?' on':''}" data-at="${k}" ${L?'':'disabled'}>${on?'ON':'OFF'}</button>`})}
-  {const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0,D='1회: 3초 동안 생명력 30% / 마나 20%\n처치 점수 40점(일반 1·정예 3·유니크 10)마다 1회 · 보스 체력 20%마다 1회 · 보스 입장 시 가득';
-    h+=skRow({k:'au_pot',c:'#ff7a6a',n:'물약 충전 횟수',L:m,M:5,cur:`최대 충전 ${m}회\n`+D,nx:m<5?`최대 충전 ${m+1}회`:'',btns:`<button class="esb" data-pu="1" ${m<5&&(S.ess||0)>=c?'':'disabled'}>${m>=5?'최대':`◆ ${c}`}</button>`})}
+  <p class="hint" style="margin:0">마나 점유 ${rv.toFixed(1)}% · 마나 점유 효율 +${res.toFixed(1)}% (점유율 ÷ ${(1+res/100).toFixed(2)}) · 쓸 수 있는 마나 ${Math.max(0,100-rv).toFixed(1)}%</p>`;
+  h+=`<div class="seg augs">${AUGR.map(([g,t,col,ks])=>{const n=ks.filter(k=>k!=='pot'&&auraOn(k)).length;return `<button data-aug="${g}" class="${auG===g?'on':''}" style="--gc:${col}">${t}${n?`<i>${n}</i>`:''}</button>`}).join('')}</div><div class="gems">`;
+  for(const k of AUGR.find(x=>x[0]===auG)[3])h+=auraRow(k);
   return h+`</div></div>`}
 
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
@@ -5221,7 +5227,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v542';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v543';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5770,15 +5776,15 @@ function renderMenu(){
   if(NS()&&menuTab==='aura')h+=auraTabHtml();
   else for(const id of c.skills){
     const pts=skp(id);
-    h+=`<div class="skill"><h3>${SK[id].n}${showSk?`<button class="agbtn${S.autoGem?' on':''}" data-ag="${S.autoGem?'':'bal'}">자동 분배 ${S.autoGem?'ON':'OFF'}</button>`:''}</h3>
+    const s2o=showSk2&&!showSk&&gems2For(id).length?done1(id):null;
+    h+=`<div class="skill${s2o!==null?' s2':''}"><h3>${SK[id].n}${s2o!==null?`<span class="s2ess">${s2o?`보유 잿불 정수<b>◆ ${fmtG(S.ess||0)}</b>`:'1차 강화를 모두 채우면 열립니다'}</span>`:''}${showSk?`<button class="agbtn${S.autoGem?' on':''}" data-ag="${S.autoGem?'':'bal'}">자동 분배 ${S.autoGem?'ON':'OFF'}</button>`:''}</h3>
     ${showSk?`<div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b></div><div class="gems">`:''}`;
     if(showSk)for(const g of gemsFor(id)){const L=gl(id,g);
       h+=skRow({k:g,c:GEMS[g].c,n:GEMS[g].n,L,M:GMAX,cur:L?GEMS[g].d(L):'',nx:L<GMAX?GEMS[g].d(L+1):'',btns:`${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button>`})}
     if(showSk)h+=`</div>`;
     const g2s=showSk2?gems2For(id):[];
     if(g2s.length){const open=done1(id);
-      h+=`<div class="tier2"><div class="t2h"><b>2차 강화</b><span class="goldline essline"><i></i>잿불 정수 ${fmtG(S.ess||0)}</span></div>
-      <p class="hint" style="margin:0">${open?'잿불 정수와 골드로 올립니다. 실패는 없습니다.':`이 스킬의 1차 강화를 모두 채우면 해금됩니다. 잿불 정수는 엔드게임(위험도 모드)의 몬스터를 처치하면 바로 얻습니다.`}</p><div class="gems">`;
+      h+=`<div><div class="gems">`;
       for(const g of g2s){const L=g2(g),M=g2Max(g),c=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=c&&S.gold>=gc;
         h+=skRow({k:g,c:GEMS2[g].c,n:GEMS2[g].n,L,M,off:!open,cur:L?GEMS2[g].d(L):'',nx:L<M?GEMS2[g].d(L+1):'',btns:`${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button>`})}
       if(id==='volley'||id==='rain'){const el=arEl(),c=elCost(),can=S.gold>=c;
@@ -5803,6 +5809,7 @@ $('sheet').addEventListener('click',e=>{
   if(b.dataset.ag!==undefined){S.autoGem=b.dataset.ag||null;autoSpend();save();renderMenu();return}
   if(b.dataset.gostage){closeMenu();openStage();return}
   if(b.dataset.tab){menuTab=b.dataset.tab;renderMenu();return}
+  if(b.dataset.aug){auG=b.dataset.aug;renderMenu();return}
   if(b.dataset.pu){const m=potMaxN(),c=NPOT_UP[m-3];if(m<5&&(S.ess||0)>=c){S.ess-=c;S.potUp=(S.potUp||0)+1;save()}renderMenu();return}
   if(b.dataset.at){auraToggle(b.dataset.at);renderMenu();return}
   if(b.dataset.au){const k=b.dataset.au;if(auraUp(k)){feed(`${NAURA[k].n} Lv ${auraL(k)}`,NAURA[k].c);ringFx(P.pos,2.4,0xff5a3a,.5);refreshMax();save()}renderMenu();return}
