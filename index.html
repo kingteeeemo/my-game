@@ -3327,7 +3327,7 @@ function knightModel(){const g=NM.hero('warrior'),u=g.userData;for(const c of [.
 /* v396: 잿불 검귀 — 전사와 같은 3D 모델(warrior.glb)을 따로 한 벌 더 불러와 입힘(어두운 갑옷 + 잿불 빛). 불러오기 전·실패 시엔 기존 절차적 모델.
    보이지 않는 절차적 몸(u.body)은 그대로 움직여 칼끝(u.weaponTip)·패턴 코드가 그대로 동작. 패턴마다 전사 동작(베기·내려찍기·회전·달리기)을 시간에 맞춰 재생 */
 /* v478: 전용 모델(models/knight.glb) — 걷기·등장(등의 대검을 뽑음)·사망(한쪽 무릎 꿇고 대검을 땅에 꽂음) 동작 포함. 베기·내려찍기·회전·대기·피격은 전사 동작을 옮겨 씀 */
-const BKC={file:'models/knight.glb',S:1.67,introT:1.3,introK:.8,grab:.45},BKN={st:0,root:null,mx:null,acts:null,tip:null,sw:null,mats:[],cur:'idle',prev:null,fade:0,fadeT:0,tm:{}};
+const BKC={file:'models/knight.glb',S:1.67,introT:1.3,introK:.8,grab:.45,pre:1.7},BKN={st:0,root:null,mx:null,acts:null,tip:null,sw:null,mats:[],cur:'idle',prev:null,fade:0,fadeT:0,tm:{}};
 function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=BKC;
   new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(C.S);
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.material=o.material.clone();K.mats.push(o.material)}});
@@ -3348,7 +3348,9 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   const slash=(x,h)=>x<h?.1+.42*e2(x/h):.52+.6*clamp((x-h)/.3,0,1);/* 들어 올림 → 휘두름 */
   const cast=(x,h,T)=>x<h?.78*e2(x/h):x<h+.075?.78+.47*(x-h)/.075:x<h+.25?1.25+.35*(x-h-.075)/.175:1.6+.5*clamp((x-h-.25)/Math.max(.1,T-h-.25),0,1);/* 들기 → 내려꽂기 → 버팀 → 복귀 */
   let st='idle',t=null,rate=1;const IN=e.introT!==undefined&&e.introT<BKC.introT/BKC.introK;
-  if(IN){st='intro';t=e.introT*BKC.introK;e.introT+=dt;e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,.7);bkSword(t<BKC.grab?'back':'hand')}
+  if(IN&&e.introT<0){/* v550: 칼을 뽑기 전 — 대검을 멘 채 가만히 서 있고 발밑에서 불길이 치솟음 (불러오기 화면 동안은 시간을 멈춤) */st='idle';const t0=e.introT;if(!ldBusy)e.introT+=dt;bkFire(e,t0,e.introT);e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,.7);bkSword('back')}
+  else if(IN){st='intro';t=e.introT*BKC.introK;const t0=e.introT;e.introT+=dt;bkFire(e,t0,e.introT);e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,.7);bkSword(t<BKC.grab?'back':'hand')}
+  else if(e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+3)e.introT+=dt;/* 등장 카메라가 쿼터뷰로 돌아가는 시간 계산용 */
   else if(A){const x=A.t,h=A.hit||.5;
     if(A.k==='wave'||A.k==='swing'){st='slash';t=slash(x,h)}
     else if(A.k==='slam'||A.k==='star'||A.k==='donut'){st='cast';t=cast(x,A.k==='slam'?h:h*.7,A.dur)}
@@ -3371,7 +3373,18 @@ const BK_SZ=.8;/* v540: 잿불 검귀 크기 −20% (몸·피격 범위·이름�
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp}e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
   e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(BK_SZ);e.r*=BK_SZ;e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2*BK_SZ;bkIntro(e);bkAttach(e);return e}
-function bkIntro(e){const D=BKC.introT/BKC.introK;e.introT=0;e.holdT=D;e.holdA=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z);e.pt=Math.max(e.pt||0,D+.7);if(BKN.st===2&&e.M&&e.M.sk){bkSword('back');BKN.cur='intro';BKN.prev=null;BKN.fadeT=0}}
+function bkIntro(e){const D=BKC.introT/BKC.introK+BKC.pre;e.introT=-BKC.pre;e.holdT=D;e.holdA=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z);e.pt=Math.max(e.pt||0,D+.7);if(BKN.st===2&&e.M&&e.M.sk){bkSword('back');BKN.cur='intro';BKN.prev=null;BKN.fadeT=0}}
+/* v550: 잿불 검귀 등장 불길 — 발밑 균열이 달아오름(−1.5초) → 주위로 불티가 피어오름 → 불길이 확 치솟음(−0.35초) → 칼을 뽑는 순간 불꽃이 휘몰아침 → 전투 시작 충격파 */
+function bkFire(e,a,b){const U=!!(S.duel&&S.duel.uber),c0=U?0xff9ad0:0xffd080,c1=U?0xe0308a:0xff4a10,cx=U?0xff5ab0:0xff7a2a,p=e.pos,sc=e.g.scale.x,at=x=>a<x&&b>=x,E=BKC.introT/BKC.introK,gr=BKC.grab/BKC.introK;
+  if(at(-1.5)){decalFx(p,crackTex,cx,3.2*sc/3,3.6,.9,true);groundFx(p,shockTex,cx,.5,4.5*sc/3,1.1,.5,true,.07)}
+  if(b>-1.5&&b<E){const k=b<-.35?(b+1.5)/1.15:1,n=Math.ceil((b-a)*(b<-.35?40+60*k:55)*QM());for(let i=0;i<n;i++){const t=Math.random()*6.28,r=rnd(1.2,4.2)*sc/3;
+    emit(PADD,{x:p.x+Math.sin(t)*r,y:rnd(.05,.4),z:p.z+Math.cos(t)*r,vx:-Math.sin(t)*rnd(0,.8),vy:rnd(2,5)*(b<-.35?.6+.4*k:1),vz:-Math.cos(t)*rnd(0,.8),life:rnd(.5,1.1),s0:rnd(.5,1.1),s1:.05,c0,c1,a:.9,tex:1})}}
+  if(at(-.35)){shake=Math.max(shake,.5);ringFx(p,6.5*sc/3,c1,.55);groundFx(p,shockTex,c0,1,9*sc/3,.7,.8,true,.08);decalFx(p,crackTex,cx,5*sc/3,3,.9,true);
+    spray(PADD,p,60,{r0:3.5*sc/3,sp:[.5,2],up:[6,12],y:[.1,.6],life:[.6,1.1],s0:[.8,1.5],s1:[.1,.3],c0,c1,a:.9,drag:1,tex:1});spray(PNRM,p,24,{sp:[3,8],up:[1,3],y:[.2,.6],life:[.7,1.2],s0:[1,1.6],s1:[2,3],c0:0x5a4638,c1:0x1c1a18,a:.5,drag:2,tex:2})}
+  if(b>-.35&&b<gr+.3){/* 불의 벽: 둘레에서 높게 타오름 → 칼을 뽑고 나면 잦아듦 */const f=b<0?1:1-.7*b/(gr+.3),n=Math.ceil((b-a)*160*f*QM());for(let i=0;i<n;i++){const t=Math.random()*6.28,r=rnd(2.4,3.4)*sc/3;emit(PADD,{x:p.x+Math.sin(t)*r,y:rnd(.1,1),z:p.z+Math.cos(t)*r,vy:rnd(6,13),life:rnd(.4,.8),s0:rnd(1.3,2.4),s1:.3,c0,c1,a:.85,tex:1})}
+    if(b<.25){const m=Math.ceil((b-a)*50*QM());for(let i=0;i<m;i++)emit(PADD,{x:p.x+rnd(-.8,.8),y:rnd(0,1),z:p.z+rnd(-.8,.8),vy:rnd(8,15),life:rnd(.3,.6),s0:rnd(1.5,2.6),s1:.4,c0,c1,a:.7,tex:1})}}
+  if(at(gr)){shake=Math.max(shake,.3);ringFx(p,4*sc/3,c0,.4);spray(PADD,p,30,{sp:[4,9],up:[2,6],y:[2,4],life:[.4,.8],s0:[.4,.8],s1:[.05,.1],c0,c1,a:.9,drag:1.5,tex:1})}
+  if(at(E-.05)){shake=Math.max(shake,.45);ringFx(p,8*sc/3,c1,.6);groundFx(p,shockTex,c0,1,11*sc/3,.7,.7,true,.08)}}
 function fanTele(p0,a,half,len,dur,end){const g=new THREE.Group(),ts=a-half-Math.PI/2;
   const bg=new THREE.Mesh(new THREE.CircleGeometry(len,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.3,depthWrite:false}));
   const fill=new THREE.Mesh(new THREE.CircleGeometry(1,40,ts,half*2),new THREE.MeshBasicMaterial({color:0xff3a28,transparent:true,opacity:.5,depthWrite:false}));
@@ -5345,7 +5358,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v549';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v550';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6965,21 +6978,24 @@ function frameCam(dt,target=P.pos){
   camera.lookAt(camT.x,camT.y+1,camT.z);
   if(mapKind==='arena')drgCam(dt);
 }
-/* v548: 용 등장 카메라 — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
-const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
-function drgCam(dt){const b=enemies.find(e=>e.final&&e.air&&e.air.intro),C=DGCAM;let w=0;
+/* v548: 보스 등장 카메라(용 → v550 잿불 검귀도) — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
+const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,zoom:.36,fog:1},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
+function drgCam(dt){const C=DGCAM;let b=enemies.find(e=>e.final&&e.air&&e.air.intro),w=0,kn=null;
   if(b){const A=b.air;w=A.st==='roar'?1-Math.min(1,A.t/C.ret):1;w=w*w*(3-2*w)}
+  else if((kn=enemies.find(e=>e.duel&&!e.maw&&e.hp>0&&e.M&&e.M.sk&&e.introT!==undefined))){/* v550: 잿불 검귀 — 칼을 다 뽑기 조금 전부터 쿼터뷰로 */const E=BKC.introT/BKC.introK,k=(kn.introT-(E-.35))/C.ret;if(k<1){b=kn;w=1-Math.max(0,k);w=w*w*(3-2*w)}}
   if(w!==dgCamW){dgCamW=w;scene.fog.near=20*camK()*(1+w*C.fog);scene.fog.far=48*camK()*(1+w*C.fog)}
-  if(w<=0){DGCAM.lk=0;return}
+  if(w<=0){DGCAM.lk=0;if(DGCAM.f0){camera.fov=DGCAM.f0;DGCAM.f0=0;camera.updateProjectionMatrix()}return}
+  if(kn){/* 멀리 선 검귀가 작게 보이지 않게 연출 동안만 당겨 봄 */if(!DGCAM.f0)DGCAM.f0=camera.fov;camera.fov=DGCAM.f0*(1-C.zoom*w);camera.updateProjectionMatrix()}
   let dx=P.pos.x-FB_POS.x,dz=P.pos.z-FB_POS.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
   _dcP.set(P.pos.x+dx*C.back-dz*C.side,C.up,P.pos.z+dz*C.back+dx*C.side);
-  const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix);
+  if(kn)_dcQ.set(b.pos.x,b.h*.5,b.pos.z);else{const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix)}
+  /* v550: 연출 동안 캐릭터가 보스 쪽을 바라봄(직접 움직이면 그 방향 우선) */if(DGCAM.px===P.pos.x&&DGCAM.pz===P.pos.z){P.face=Math.atan2(b.pos.x-P.pos.x,b.pos.z-P.pos.z);let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,Math.max(dt,.016)*8)}DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;
   if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*5));
   camera.position.lerp(_dcP,w);_dcQ.set(camT.x,camT.y+1,camT.z).lerp(_dcL,w);camera.lookAt(_dcQ);/* 위치와 바라보는 곳을 함께 옮겨 크레인처럼 쿼터뷰로 올라감 */
   if(shake>0&&dt>0){camera.position.x+=rand(-.12,.12);camera.position.y+=rand(-.1,.1)}}
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
 let mobView=false;
-function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
+function resize(){if(typeof DGCAM!=='undefined')DGCAM.f0=0;const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
   CAM_OFF.set(0,17,12);scene.fog.near=20*camK();scene.fog.far=48*camK();camera.updateProjectionMatrix();if(PP.rt)ppSize()}
 addEventListener('resize',resize);resize();
 /* ================= 전체화면 ================= */
