@@ -3369,6 +3369,8 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   K.mx.update(0);r.rotation.y=u.body.rotation.y;r.position.y=u.body.position.y;/* 회전베기·몸 비틀기·주저앉기는 절차적 몸 값 그대로 */
   const fe=e.mat.emissive,rg=Math.max(fe.r,fe.g,fe.b);for(const m of K.mats){const d=m.userData;if(!d.c0)continue;m.emissive.copy(d.e0).add(fe).add(fe);m.color.copy(d.c0).addScalar(rg*.5)}
   if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
+/* v552: 보스 등장 연출 중인지 — 이때는 나가기 버튼을 숨김 */
+function bossIntroOn(){for(const e of enemies){if(e.final&&e.air&&e.air.intro)return true;if(e.duel&&!e.maw&&e.hp>0&&e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+1.5)return true}return false}
 const BK_SZ=.8;/* v540: 잿불 검귀 크기 −20% (몸·피격 범위·이름표 높이) — 공격 범위·장판은 그대로 */
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp}e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
@@ -3682,7 +3684,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=-(e.sink||0)*9;
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,3.6);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:.1,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,3.6);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{const tz=b!=='maw'&&BKN.st===2?(BKC.pre+BKC.introT/BKC.introK+1.4)*1000:0;/* v551: 검귀 등장 연출이 끝난 뒤 안내 — 이름이 검귀 얼굴을 가리지 않게 */setTimeout(()=>{if(S.duel)toast(m==='u'?`☠ ${curseName()} 발동`:`결투장 · ${D.n} ${N}`,m==='u'?`우버 ${N}의 힘이 도전자를 짓누릅니다 — 최종 피해 −20% · 위험도 ${D.tier} 추천`:`위험도 ${D.tier} 추천`,m==='u'?'#c890ff':undefined)},tz);stageBanner()})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
@@ -5358,7 +5360,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v551';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v552';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5373,7 +5375,7 @@ let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(
 function hudMoney(){if(!S||!S.cls)return;const gt=fmtKM(S.gold||0);/* v512: 모든 모드 K+/M+ */if($('goldT').textContent!==gt)$('goldT').textContent=gt;
   const es=!NS()&&(S.ch>=NCH||S.ess>0);$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();
-  {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
+  {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&!bossIntroOn();if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
@@ -5415,6 +5417,7 @@ function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   if(S.ch>=NCH){if(gatePending())return '관문 보스';const n=Math.min(S.tierKills,tkFor(S.tier));return `${n}/${tkFor(S.tier)}`}
   const c=CH[S.ch];if(!c)return '';if(S.phase===0)return `${S.kills}/${c.goal}`;if(S.phase===1)return `보스까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`;return ''}
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
+  {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid)ce.hidden=hid;if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
   /* 현재 DPS / 적정 DPS (스킬 창과 같은 계산, 1초마다 갱신) */
   {const el=$('scD');if(inTown){if(dpsKey!=='t'){el.textContent='';dpsKey='t'}}else{const me=skillDpsCache(),req=S.duel?duelReq():S.ch>=NCH?stageReq(NCH,S.tier):inArena()?fbReq():stageReq(S.ch),r=me/req,c=r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a',k=Math.round(me)+'/'+Math.round(req);
     const pr=chipProg(),k2=k+'|'+pr;if(k2!==dpsKey){dpsKey=k2;el.innerHTML=`DPS <i style="color:var(--ink)">${fmtKM(me)}</i>${pr?` · <i style="color:#ffb070;font-style:normal">${pr}</i>`:''}`/* v98: 적정 DPS 표기 숨김 · v109: 진행도를 칩에 합침 */}}}
