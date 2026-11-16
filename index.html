@@ -728,6 +728,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 /* v555: 보스전 입장 문구(결투장·보스 이름)는 세로 폰에서 화면을 위에서 아래로 6등분했을 때 위에서 두 번째 칸 가운데(≈25%)에 — 가운데 선 보스와 겹치지 않게 */
 @media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:17%!important}}/* v563: 세로 17% */
 @media (orientation:landscape){.sbanner.duel{margin-top:-10vh}}/* v563: 가로 화면은 지금 자리에서 화면 높이의 10%만큼 위로 */
+@media (orientation:landscape) and (max-height:520px){.sbanner.duel{margin-top:-5vh}}/* v571: 모바일 가로는 5% 낮춤(-10vh→-5vh) */
+@media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:20vh}}/* v571: PC는 30% 낮춤 — 기존 -10vh에선 화면 밖으로 나갔음(-10vh→+20vh) */
 /* v70 월드맵 */
 #wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0f1014;border:1px solid var(--line)}
@@ -5455,7 +5457,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v570';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v571';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
