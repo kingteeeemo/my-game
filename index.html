@@ -833,6 +833,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 #sheet .mstk{position:sticky;top:-18px;z-index:5;background:#17171d;margin:-18px -16px 0;padding:18px 16px 8px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
 .augs{margin-top:2px}.augs button.on{background:var(--gc);border-color:var(--gc)}.augs button i{font-style:normal;font-size:10px;margin-left:5px;background:rgba(0,0,0,.35);color:#fff;border-radius:8px;padding:1px 6px}
 .skill.s2{gap:12px}.skill.s2 h3{min-height:30px}.s2ess{display:flex;align-items:center;gap:8px;font:600 12px var(--ko);color:var(--muted)}.s2ess b{color:#ff9a4a;font-size:15px;font-weight:800}
+.skr .sgt b{border:0;background:none;padding-left:0}
+.ski{border-color:var(--ink);background:radial-gradient(circle at 50% 38%,#24242c,#101015 75%)}.ski svg{color:var(--ink)!important}
 </style>
 
 <canvas id="c"></canvas>
@@ -5341,7 +5343,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v546';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v547';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
