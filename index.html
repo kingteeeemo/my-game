@@ -700,24 +700,6 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 /* v55 세로 폰 메인 UI: 윗줄 [레벨·HP/MP | 던전 정보 | 미니맵], 좌측 세로 [장비·마을·스킬·단계·스탯], 우측 세로 [골드·정수·전체화면·정지·슬롯] */
 @media (max-width:640px) and (orientation:portrait){
   .hud{padding-top:calc(10px + env(safe-area-inset-top,0px))}
-  /* v559 세로 HUD: [LV][빌드] [지역] [미니맵] / 생명력 / 마나 / 재화 / 나가기 · 미니맵 아래 메뉴(햄버거) */
-  .top{display:grid;grid-template-columns:40px minmax(0,1fr) minmax(0,1.5fr) 76px;column-gap:6px;row-gap:4px;align-items:start;justify-content:stretch}
-  .lcol,.rcol,.rail,.rail.v,.vitals,.bars,.lstack{display:contents}
-  .lvbox{grid-column:1;grid-row:1;width:40px;height:34px;box-sizing:border-box;gap:1px}.lvbox small{font-size:8px}.lvbox span{font-size:15px}
-  .bldnm{display:flex;grid-column:2;grid-row:1;height:34px;box-sizing:border-box;align-items:center;justify-content:center;padding:0 8px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font:800 12.5px var(--ko);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-  .bars .bar.hp,.bar.hp{grid-column:1/3;grid-row:2;height:18px}.bars .bar.mp,.bar.mp{grid-column:1/3;grid-row:3;height:16px}.bar.mp span{line-height:14px}.bars .bar.xp,.bar.xp{grid-column:1/3;grid-row:4;height:4px;align-self:start}
-  .bar span{font-size:10px}
-  .stagechip{position:static;transform:none;grid-column:3;grid-row:1/4;align-self:stretch;height:76px;box-sizing:border-box;margin-top:0;justify-self:stretch;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:6px 8px;border-radius:12px;white-space:nowrap;overflow:hidden}
-  .stagechip .scrow{flex-direction:column;gap:4px;min-width:0;align-items:center;max-width:100%}.stagechip b{font-size:14px;padding:2px 9px;flex:none}.stagechip span{font-size:12.5px;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}.stagechip em{font-size:10.5px;overflow:hidden;text-overflow:ellipsis}.stagechip em:empty{display:none}
-  .rcol>.mini{grid-column:4;grid-row:1/4;width:76px;height:76px;justify-self:end}
-  #openInv,#openTown,#openMenu,#openBoss,#openStat,#openMap,#openPause,#openFs,#openRestart{display:none!important}
-  #hamBtn{display:flex;grid-column:4;grid-row:5/7;justify-self:end;align-self:start}
-  #curBar{display:flex;grid-column:1/3;grid-row:5;gap:6px;flex-wrap:wrap;align-items:center;min-width:0}
-  #curBar .goldline{height:26px;padding:0 10px;border-radius:13px;background:var(--panel);border:1px solid var(--line);box-sizing:border-box;margin:0}
-  #exitSlot{display:flex;grid-column:1/3;grid-row:6;min-width:0}#exitSlot:empty,#exitSlot:has(#bossExit[hidden]){display:none}
-  #exitSlot #bossExit{padding:8px 16px;border-radius:12px;font-size:13px}
-  .quest{grid-column:1/4;grid-row:7;min-width:0;justify-self:start;max-width:100%}
-  .autoeq{grid-column:1/3;grid-row:8;justify-self:start;display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   #topStack .env{width:100%;text-align:center;max-width:none}#topStack .env.min{width:max-content}
   #topStack .autoeq.fbgo{grid-column:auto;grid-row:auto;justify-self:auto;width:max-content;max-width:none;margin-top:0;padding:7px 14px;font-size:12px;text-align:center}
   .feed{grid-column:1/4;grid-row:9;margin-top:0}
@@ -870,8 +852,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .mslot{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.mslot button{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--b2);color:var(--b3);padding:7px;display:grid;place-items:center;min-width:0}.mslot button svg{width:100%;height:100%;display:block}
 .mslot button.on{border-color:var(--iv);background:var(--ivd);color:var(--iv)}
 /* v559: 세로 HUD 빌드 이름·재화 칸·나가기 칸·메뉴(햄버거) — 기본은 숨김, 세로 폰에서만 표시 */
-.bldnm,#curBar,#exitSlot,#hamBtn{display:none}
-@media (max-width:640px) and (orientation:portrait){.bldnm,#curBar,#exitSlot,#hamBtn{display:flex}#exitSlot:has(#bossExit[hidden]){display:none}}
 #hamBtn{pointer-events:auto;position:relative;width:40px;height:40px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--ink);align-items:center;justify-content:center;padding:0}
 #hamBtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .hdot{position:absolute;right:-3px;top:-3px;width:10px;height:10px;border-radius:50%;background:#ff4a3a;border:2px solid #141418}
@@ -884,18 +864,64 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .hmsec button svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .hmsec button .hdot{right:calc(50% - 22px);top:0}
 .hmch{margin-top:auto;align-self:flex-end;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:6px;font:600 12px var(--ko);padding:8px 4px}.hmch svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* v569 새 HUD — 세로·가로·PC 공통: 위쪽 [캐릭터 정보 | 지역 | 미니맵], 메뉴는 미니맵에 걸친 버튼 하나로 */
+.top{--sw:210px;--mw:100px;display:grid!important;grid-template-columns:var(--sw) minmax(0,1fr) var(--sw);column-gap:14px;row-gap:4.5px;align-items:start;justify-content:stretch;gap:4.5px 14px}
+.top .lcol,.top .vitals,.top .bars,.top .lstack,.top .rail,.top .rail.v{display:contents!important}
+.top .tbtn,.lsstrip,.top .bar.xp{display:none!important}
+.top .lvbox{grid-column:1;grid-row:1;justify-self:start;align-self:center;width:30px;height:30px;box-sizing:border-box;border:0;border-radius:50%;padding:0;gap:0;
+  background:radial-gradient(closest-side,rgba(10,10,14,.78) calc(100% - 2.6px),transparent calc(100% - 2.2px)),conic-gradient(#ffd24a calc(var(--xpp,0)*1%),rgba(232,220,196,.35) 0)}
+.top .lvbox small{display:none}.top .lvbox span{font:800 13px var(--en);font-stretch:87%;color:#e8dcc4;text-shadow:0 1px 2px #000}
+.top .bldnm{display:flex;grid-column:1;grid-row:1;flex-direction:column;justify-content:center;min-width:0;margin-left:38px;height:30px;line-height:1.15;text-shadow:0 1px 3px #000}
+.top .bldnm small{font:600 9.5px var(--en);font-stretch:87%;letter-spacing:.1em;color:#a39f99;text-transform:uppercase;white-space:nowrap}
+.top .bldnm b{font:800 12.5px var(--ko);color:#f1ece2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .bar.hp,.top .bar.mp{grid-column:1;height:17px!important;flex:none;border-radius:5px;border:1px solid rgba(0,0,0,.45);background:rgba(0,0,0,.6);box-sizing:border-box}
+.top .bar.hp{grid-row:2}.top .bar.mp{grid-row:3}
+.top .bar.hp i{background:linear-gradient(#e0554a,#9a2c26)}.top .bar.mp i{background:linear-gradient(#5a9ae0,#2a5a9a)}
+.top .bar.hp span,.top .bar.mp span{display:flex;align-items:center;justify-content:center;line-height:1!important;font-size:10.5px!important;font-weight:700;color:#fff}
+#curBar{display:flex;grid-column:1;grid-row:4;flex-direction:column;align-items:flex-start;gap:2px;margin-top:5px;padding-left:1.2px;min-width:0;font:800 12px var(--en);font-stretch:87%;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #000;pointer-events:none}
+#curBar .cr1,#curBar .cr2{display:flex;align-items:center;height:16px;white-space:nowrap}#curBar .cr2{gap:6px}
+#curBar span{display:inline-flex;align-items:center}#curBar .cic{flex:none;margin-right:3px;overflow:visible}
+#curBar b{font-weight:800}.cg{color:#f0c84a}.ce{color:#ff6a4a}.cf{color:#ff9a3c}.cl{color:#ffeebd}
+#exitSlot{display:flex;grid-column:1;grid-row:5;min-width:0}#exitSlot:empty,#exitSlot:has(#bossExit[hidden]){display:none}
+#exitSlot #bossExit{padding:7px 16px;border-radius:12px;font-size:13px}
+.top .stagechip{position:static;transform:none;grid-column:2;grid-row:1/5;justify-self:center;align-self:start;display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 0 0;margin:0;background:none!important;border:0!important;box-shadow:none;border-radius:0;min-width:0;max-width:100%;text-align:center;text-shadow:0 1px 4px #000;white-space:nowrap;overflow:visible}
+.top .stagechip .scrow{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;max-width:100%}
+.top .stagechip b{font:700 10px var(--ko)!important;letter-spacing:.14em;color:#e8dcc4!important;background:none!important;padding:0!important;border-radius:0}
+.top .stagechip.town b{color:#ffd24a!important}.top .stagechip.eg b{color:#5ae0d0!important}.top .stagechip.fb b{color:#ff8a6a!important}
+.top .stagechip span{font:800 15px var(--ko)!important;color:#f1ece2;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.top .stagechip .scpg{width:86px;height:3px;margin-top:6px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}.top .stagechip .scpg i{display:block;height:100%;width:0;background:#e8dcc4}
+.top .stagechip em{display:block;font:500 9.5px var(--en)!important;font-stretch:87%;color:#a39f99;margin-top:3px}.top .stagechip em:empty{display:none}.top .stagechip em i{color:inherit!important}
+.top .rcol{display:block!important;grid-column:3;grid-row:1/6;justify-self:end;position:relative;width:var(--mw)}
+.top .rcol>.mini{display:block;width:100%!important;height:auto!important;aspect-ratio:1;border-radius:50%;border:1.5px solid rgba(232,220,196,.22);box-sizing:border-box;margin:0}
+#hamBtn{display:flex;position:absolute;right:-4px;bottom:-6px;width:34px;height:34px;border-radius:50%;background:#16161c;border:1.5px solid #e8dcc4;color:#f1ece2;z-index:2}
+#hamBtn svg{width:20px;height:20px}#hamBtn .hdot{position:absolute;top:-3px;right:-3px}
+.top .quest{grid-column:1/3;grid-row:6;justify-self:start;min-width:0;max-width:100%}
+.top #qenv{grid-column:1;grid-row:7}
+.top .autoeq{grid-column:1;grid-row:8;justify-self:start}.top .autoeq.fbgo{grid-row:9}
+.top .feed{grid-column:1/3;grid-row:10;margin-top:0}
+@media (max-width:640px) and (orientation:portrait){
+  .top{--sw:minmax(0,1fr);grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
+  .top .rcol{width:100%}
+  .top .autoeq{display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
+  .top .feed{grid-column:1/4}.top .quest{grid-column:1/4}
+  #topStack{top:calc(env(safe-area-inset-top,0px) + 88px)}
+}
+@media (orientation:landscape){#topStack{top:calc(env(safe-area-inset-top,0px) + 80px)}}
+@media (orientation:landscape) and (max-height:520px){.hmp{width:min(340px,48vw);padding-top:calc(60px + env(safe-area-inset-top,0px))}.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}.hmsec{display:contents}}/* v569: 가로 폰 메뉴 — 한 줄 4개 */
+@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
 </style>
 
 <canvas id="c"></canvas>
 <div class="stick" id="stick"><div class="knob" id="knob" hidden><i id="nub"></i></div></div>
 <div class="flash" id="flash"></div><div class="buyflash" id="buyFlash"></div><div class="sprays" id="spRays"></div><div class="rfade" id="regionFade"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="cuemboss" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation=".7" result="b"/><feOffset in="b" dx="-.8" dy="-.8" result="hi"/><feOffset in="b" dx=".9" dy=".9" result="lo"/><feFlood flood-color="#fff3c0" flood-opacity=".9"/><feComposite in2="hi" operator="in" result="H"/><feFlood flood-color="#4a2c04" flood-opacity=".9"/><feComposite in2="lo" operator="in" result="L"/><feMerge><feMergeNode in="L"/><feMergeNode in="H"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="cudrop" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.6"/><feOffset dy="2" result="o"/><feFlood flood-color="#000" flood-opacity=".6"/><feComposite in2="o" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="cugrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComponentTransfer in="g" result="g2"><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer><feComposite in="g2" in2="SourceAlpha" operator="in" result="g3"/><feBlend in="SourceGraphic" in2="g3" mode="multiply"/></filter><filter id="cuglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="cuflick" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".09 .05" numOctaves="2" seed="7" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".5"/></filter><filter id="curock" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".18" numOctaves="4" seed="11" result="n"/><feDiffuseLighting in="n" surfaceScale="2.5" lighting-color="#bfb6a6" result="l"><feDistantLight azimuth="235" elevation="45"/></feDiffuseLighting><feComposite in="l" in2="SourceAlpha" operator="in" result="lr"/><feBlend in="SourceGraphic" in2="lr" mode="multiply"/></filter><linearGradient id="cugM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b8"/><stop offset=".18" stop-color="#e9b83a"/><stop offset=".38" stop-color="#9c6510"/><stop offset=".55" stop-color="#f6cf5a"/><stop offset=".72" stop-color="#b47a16"/><stop offset="1" stop-color="#5c3604"/></linearGradient><linearGradient id="cugF" x1=".2" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".35" stop-color="#e2a92c"/><stop offset=".65" stop-color="#c2861a"/><stop offset="1" stop-color="#7a4a08"/></linearGradient><radialGradient id="cugS" cx=".35" cy=".28" r=".35"><stop offset="0" stop-color="#fffbe6" stop-opacity=".9"/><stop offset="1" stop-color="#fffbe6" stop-opacity="0"/></radialGradient><linearGradient id="cugEdge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9a234"/><stop offset=".5" stop-color="#7a4a08"/><stop offset="1" stop-color="#3e2402"/></linearGradient><linearGradient id="curA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb39c"/><stop offset="1" stop-color="#e2321c"/></linearGradient><linearGradient id="curB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d0301a"/><stop offset="1" stop-color="#5e0806"/></linearGradient><linearGradient id="curC" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a1408"/><stop offset="1" stop-color="#2e0302"/></linearGradient><radialGradient id="curGlow"><stop offset="0" stop-color="#ff4a26" stop-opacity=".6"/><stop offset="1" stop-color="#ff4a26" stop-opacity="0"/></radialGradient><radialGradient id="cufO" cx=".5" cy=".8" r=".7"><stop offset="0" stop-color="#ffcf5a"/><stop offset=".45" stop-color="#ff7414"/><stop offset=".8" stop-color="#c22a06"/><stop offset="1" stop-color="#5a0e02" stop-opacity="0"/></radialGradient><radialGradient id="cufI" cx=".5" cy=".85" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#fff2b0"/><stop offset=".8" stop-color="#ffb43a"/><stop offset="1" stop-color="#ff8a1e" stop-opacity="0"/></radialGradient><linearGradient id="curing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe0a0"/><stop offset=".5" stop-color="#ff8a1e"/><stop offset="1" stop-color="#8a2a06"/></linearGradient><symbol id="cuGB" viewBox="0 0 64 64"><g filter="url(#cudrop)"><g id="cucn"><ellipse cx="26" cy="50" rx="20" ry="7" fill="#3e2402"/><rect x="6" y="44" width="40" height="6" fill="url(#cugEdge)"/><path d="M6 44v6M10 44.8v6M14 45.4v6M18 45.8v6M22 46v6M26 46v6M30 46v6M34 45.8v6M38 45.4v6M42 44.8v6" stroke="#5c3604" stroke-width=".8" opacity=".6"/><ellipse cx="26" cy="44" rx="20" ry="7" fill="url(#cugF)"/><ellipse cx="26" cy="44" rx="15" ry="5" fill="none" stroke="#7a4a08" stroke-width=".8" opacity=".7"/></g><use href="#cucn" y="-8"/><use href="#cucn" y="-16" x="1"/><g transform="translate(14 -2)"><circle cx="32" cy="27" r="16" fill="url(#cugEdge)"/><circle cx="32" cy="26" r="16" fill="url(#cugM)"/><circle cx="32" cy="26" r="12.5" fill="url(#cugF)" filter="url(#cugrain)"/><circle cx="32" cy="26" r="12.5" fill="none" stroke="#6a4006" stroke-width=".8"/><path d="M32 19l2.4 5 5.5.6-4 3.8 1 5.4-4.9-2.7-4.9 2.7 1-5.4-4-3.8 5.5-.6z" fill="#e5ad34" filter="url(#cuemboss)"/><ellipse cx="27" cy="19" rx="8" ry="5" fill="url(#cugS)" transform="rotate(-30 27 19)"/></g></g></symbol><symbol id="cuEA" viewBox="0 0 64 64"><circle cx="32" cy="34" r="28" fill="url(#curGlow)"/><g filter="url(#cudrop)"><path d="M32 6l18 17-18 35-18-35z" fill="#3a0402"/><path d="M14 23l9-12h18l9 12z" fill="url(#curA)"/><path d="M23 11l9 12 9-12z" fill="#ffd4c4"/><path d="M14 23l9-12 9 12z" fill="#ff8a6a"/><path d="M41 11l9 12H32z" fill="#e2432a"/><path d="M14 23h18L32 58z" fill="url(#curB)"/><path d="M50 23H32v35z" fill="url(#curC)"/><path d="M24 23l8 35 8-35z" fill="#c42412"/><path d="M28 23l4 35 4-35z" fill="#ff5232" opacity=".7"/><path d="M14 23h36" stroke="#ffb8a0" stroke-width=".8" opacity=".8"/><path d="M32 6l18 17-18 35-18-35z" fill="none" stroke="#1e0201" stroke-width="1"/><path d="M26 14l3 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><g fill="#fff"><path d="M20 26l1 3 1-3 3-1-3-1-1-3-1 3-3 1z" opacity=".9"/></g></g></symbol><symbol id="cuFC" viewBox="0 0 64 64"><circle cx="32" cy="36" r="26" fill="url(#curGlow)"/><circle cx="32" cy="34" r="27" fill="none" stroke="url(#curing)" stroke-width="2.4" stroke-dasharray="11 5" opacity=".9" filter="url(#cuglow)"/><g filter="url(#cudrop)"><path d="M13 46c-2-7 2-13 9-15 2-7 8-11 15-9 7 0 12 6 12 13 2 5 0 10-5 12-9 3-22 3-31-1z" fill="#2a120a"/><path d="M13 46c-2-7 2-13 9-15 2-7 8-11 15-9 7 0 12 6 12 13 2 5 0 10-5 12-9 3-22 3-31-1z" fill="#3a1c10" filter="url(#curock)"/><g stroke="#ff7a1a" stroke-width="2.2" fill="none" stroke-linecap="round" filter="url(#cuglow)"><path d="M17 43c1-4 4-7 8-8M29 29c3-3 8-3 11 0M39 37c3 0 6 2 6 5M27 44l5-5 4 3"/></g><g stroke="#ffe0a0" stroke-width=".9" fill="none" stroke-linecap="round"><path d="M17 43c1-4 4-7 8-8M29 29c3-3 8-3 11 0M39 37c3 0 6 2 6 5"/></g></g><g filter="url(#cuflick)"><path d="M32 6c3.4 3.4 5.4 6 5.4 9a5.4 5.4 0 0 1-10.8 0c0-3 2-5.6 5.4-9z" fill="url(#cufO)"/><path d="M32 12c1.6 1.5 2.4 2.6 2.4 3.8a2.4 2.4 0 0 1-4.8 0c0-1.2.8-2.3 2.4-3.8z" fill="url(#cufI)"/></g><g fill="#ffc46a"><circle cx="20" cy="20" r="1.1"/><circle cx="45" cy="17" r=".9"/></g></symbol><radialGradient id="culGlow"><stop offset="0" stop-color="#fff6d0" stop-opacity=".85"/><stop offset=".4" stop-color="#ffe08a" stop-opacity=".35"/><stop offset="1" stop-color="#ffe08a" stop-opacity="0"/></radialGradient><linearGradient id="cupr1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cfe8ff"/></linearGradient><linearGradient id="cupr2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bfe0ff"/><stop offset=".5" stop-color="#d9c4ff"/><stop offset="1" stop-color="#ffc4e0"/></linearGradient><linearGradient id="cupr3" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8b8f0"/><stop offset="1" stop-color="#5a5aa8"/></linearGradient><symbol id="cuRC" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="url(#culGlow)" opacity=".8"/><ellipse cx="32" cy="34" rx="25" ry="8" fill="none" stroke="#fff3c8" stroke-width="2" opacity=".9" filter="url(#cuglow)" transform="rotate(-18 32 34)"/><g filter="url(#cudrop)"><path d="M32 5l11 19-11 35-11-35z" fill="#3a3a78"/><path d="M32 5L21 24l11-3z" fill="url(#cupr1)"/><path d="M32 5l11 19-11-3z" fill="url(#cupr2)"/><path d="M21 24l11-3v38z" fill="url(#cupr2)" opacity=".95"/><path d="M43 24l-11-3v38z" fill="url(#cupr3)"/><path d="M32 5L21 24l11 35 11-35z" fill="none" stroke="#2a2a5a" stroke-width="1"/><path d="M32 5v54M21 24l11-3 11 3" stroke="#fff" stroke-width=".7" fill="none" opacity=".8"/><path d="M28 12l-3 7" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></g><path d="M32 26 A25 8 -18 0 0 55.8 26.3" fill="none"/><path d="M8.2 41.7c8 5.5 22 4.5 34-1" fill="none" stroke="#fffbe8" stroke-width="2" stroke-linecap="round" opacity=".95" filter="url(#cuglow)"/><path d="M46 12l1.4 3.6 3.6 1.4-3.6 1.4-1.4 3.6-1.4-3.6-3.6-1.4 3.6-1.4z" fill="#fff"/></symbol></defs></svg>
 <div class="hud">
   <div id="names"></div>
   <div class="top">
-  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden>↩ 나가기</button><div id="riftHud" hidden></div></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><em id="scD"></em></div>
+  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden>↩ 나가기</button><div id="riftHud" hidden></div></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><div class="scpg" id="scPgW" hidden><i id="scPg"></i></div><em id="scD"></em></div>
     <div class="lcol">
-      <div class="bldnm" id="bldNm"></div>
-      <div id="curBar"></div><div id="exitSlot"></div>
+      <div class="bldnm"><small id="clsNm"></small><b id="bldNm"></b></div>
+      <div id="curBar"><div class="cr1"><span class="cg"><svg class="cic" viewBox="5.6 0 56.4 64" style="width:11.24px;height:12.75px"><use href="#cuGB" width="64" height="64"/></svg><b id="goldT">0</b></span></div><div class="cr2"><span class="ce"><svg class="cic" viewBox="13.4 0 37.2 64" style="width:6.92px;height:11.9px"><use href="#cuEA" width="64" height="64"/></svg><b id="essT">0</b></span><span class="cf"><svg class="cic" viewBox="3.8 0 56.4 64" style="width:10.49px;height:11.9px"><use href="#cuFC" width="64" height="64"/></svg><b id="rrT">0</b></span><span class="cl"><svg class="cic" viewBox="7.1 0 49.8 64" style="width:9.26px;height:11.9px"><use href="#cuRC" width="64" height="64"/></svg><b id="lumiT">0</b></span></div></div><div id="exitSlot"></div>
       <div class="vitals">
         <div class="lvbox"><small>LV</small><span id="lv">1</span></div>
         <div class="bars">
@@ -917,8 +943,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     <div class="rcol">
       <canvas class="mini" id="mini" aria-label="미니맵"></canvas>
       <button id="hamBtn" aria-label="메뉴 열기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><b class="hdot" id="hamDot" hidden></b></button>
-      <div class="goldline" id="goldLine"><i></i><span id="goldT">0</span> G</div>
-      <div class="goldline essline" id="essLine" hidden><i></i><span id="essT">0</span></div>
       <div class="rail v">
         <button class="tbtn" id="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span style="color:var(--ink)">스킬</span><b class="pts" id="lvBadge" hidden></b></button>
         <button class="tbtn" id="openBoss" style="color:#e8c07a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19l1.5-10 4.5 4 2-8 2 8 4.5-4L20 19z"/></svg><span style="color:var(--ink)">보스</span></button>
@@ -2181,7 +2205,7 @@ function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,9
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML='';d.hidden=true;$('names').appendChild(d);return d});
-function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBeam(p);if(p.kind==='pouch'&&p.acc){keepBeam(p);scene.remove(p.m);if(RZ)riftPouch(p);else S.gold+=p.amt;continue}if(p.kind==='pouch'){keepBeam(p);const a=p.amt,l=p.leg,rf=p.rift;setTimeout(()=>pouchFx(a,l,rf),fxN++*700)}if(p.kind==='tk')setTimeout(()=>tkFx(S.tickets||0),fxN++*700);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')S.ess=(S.ess||0)+p.amt;else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
+function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBeam(p);if(p.kind==='pouch'&&p.acc){keepBeam(p);scene.remove(p.m);if(RZ)riftPouch(p);else S.gold+=p.amt;continue}if(p.kind==='pouch'){keepBeam(p);const a=p.amt,l=p.leg,rf=p.rift;setTimeout(()=>pouchFx(a,l,rf),fxN++*700)}if(p.kind==='tk')setTimeout(()=>tkFx(S.tickets||0),fxN++*700);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')essAdd(p.amt);else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
@@ -4482,8 +4506,12 @@ const coinGeo=new THREE.CylinderGeometry(.2,.2,.06,12),coinMat=new THREE.MeshBas
 function dropGold(p,amt){S.gold+=amt*nsGain('gGold')}/* v410: 골드는 필드에 떨어지지 않고 처치 즉시 자동 획득 */
 /* 잿불 정수: 40레벨부터 떨어짐. 엔드게임 위험도가 높을수록 조금씩 더 잘 나옴 */
 const essGeo=new THREE.OctahedronGeometry(.2,0),essMat=new THREE.MeshBasicMaterial({color:0xff5a3a});
-function dropEssAt(p,amt){S.ess=(S.ess||0)+amt}/* v410: 정수도 즉시 획득 */
-const RR_MAX=9999,RR_TIER=40;function rrAdd(n){S.rr=Math.min(RR_MAX,(S.rr||0)+n)}
+function dropEssAt(p,amt){essAdd(amt)}/* v410: 정수도 즉시 획득 */
+/* v569: 정수·윤회의 불씨·광휘의 파편은 999개까지 — 꽉 차면 더 얻지 못하고 안내(이미 999 넘게 가진 경우도 그대로 두고 획득만 막음) */
+const CUR_MAX=999,capNoteT={};function capNote(n){const t=performance.now();if(capNoteT[n]&&t-capNoteT[n]<8000)return;capNoteT[n]=t;toast(`${n} 가득 참`,`999개까지만 가질 수 있어 더 이상 얻을 수 없습니다`,'#ffb070')}
+function capAdd(k,n,nm){if(!n||n<=0)return;const o=S[k]||0;if(S.test){S[k]=o+n;return}if(o>=CUR_MAX){capNote(nm);return}S[k]=Math.min(CUR_MAX,o+n);if(S[k]>=CUR_MAX)capNote(nm)}
+function essAdd(n){capAdd('ess',n,'잿불 정수')}
+const RR_MAX=999,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(S.tier,30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
@@ -4492,7 +4520,7 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
   if(S.tier>=RR_TIER){const r=rollN(ex*nsGain('gReroll'));if(r>0)rrAdd(r)}}
-const LUMI_MAX=1000;function lumiAdd(n){const o=S.lumi||0;S.lumi=Math.min(LUMI_MAX,o+n)}
+const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
@@ -4577,7 +4605,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   /* v406 정산: 처치한 균열 몹의 골드·정수 × 등급 배수(실패 .6 · B .8 · A 1 · S 1.3) + 그동안 나온 골드 주머니(그대로) + S등급 확정 강화 주문서(위험도/10개) */
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
   const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(S.tier/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */;/* v428: 장비 지급 없음 */
-  S.gold+=kg+A.pg+A.lg;S.ess=(S.ess||0)+ke;const kl=Math.round((A.l||0)*m),kr=Math.round((A.r||0)*m);if(kl)lumiAdd(kl);if(kr)rrAdd(kr);if(tk)S.tickets=(S.tickets||0)+tk;save();
+  S.gold+=kg+A.pg+A.lg;essAdd(ke);const kl=Math.round((A.l||0)*m),kr=Math.round((A.r||0)*m);if(kl)lumiAdd(kl);if(kr)rrAdd(kr);if(tk)S.tickets=(S.tickets||0)+tk;save();
   /* v427: 정산 창(일시정지) — 글자만 뜨던 팝업을 별도 창으로: 성공/실패·시간·항목별 보상·총 골드 */
   const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];if(kr)R.push(['윤회의 불씨',`+${fmtG(kr)}`,'#ff9a4a',`×${m}`]);if(kl)R.push(['광휘의 파편',`+${fmtG(kl)}`,'#c890ff',`×${m}`]);
   if(A.pn)R.push([`골드 주머니 ${A.pn}개`,`+${fmtG(A.pg)} G`,'#ffd24a']);if(A.ln)R.push([`전설 골드 주머니 ${A.ln}개`,`+${fmtG(A.lg)} G`,'#d09aff']);
@@ -5009,7 +5037,7 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
   u.dk.visible=false;S.look=sl;camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
   for(let i=0;i<14;i++)wingTick(.1)}
 function renderLooks(){lookShots();
-  const cur=S.test?'∞':fmtG(S.lumi||0)+' / 1,000';
+  const cur=S.test?'∞':fmtG(S.lumi||0)+' / 999';
   let h=`<div class="shead"><div><div class="chap">Tailor · ${npcName('heir')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur"><i></i><span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
   for(const k of Object.keys(LOOKS)){const L=LOOKS[k],own=lookOwn(k),on=S.look===k,ok=lookCoin()>=(L.pr||0);
@@ -5457,7 +5485,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v571';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v572';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5469,9 +5497,7 @@ const PORT_MQ=matchMedia('(max-width:640px) and (orientation:portrait)');
 function placeEnv(){const e=$('qenv'),f=$('fbGo'),ts=$('topStack'),ls=document.querySelector('.lstack');if(PORT_MQ.matches){if(e.parentNode!==ts)ts.insertBefore(e,$('bossExit'));if(f.parentNode!==ts)ts.insertBefore(f,$('bossExit'))}else{if(e.parentNode!==ls)ls.insertBefore(e,ls.firstChild);if(f.parentNode!==ls)ls.appendChild(f)}}/* v202: 세로 모드에서 최종 결전 재도전은 화면 위 가운데(열기 아래)로 — 자동 장착 창과 겹침 방지 */
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.addListener(placeEnv);addEventListener('resize',placeEnv);
 /* v559: 세로 폰 — 골드·정수는 생명력·마나 아래 재화 칸, 보스전 나가기는 그 아래 칸으로 옮김(가로·PC는 원래 자리) */
-function placePort(){const p=PORT_MQ.matches,g=$('goldLine'),e=$('essLine'),x=$('bossExit'),cb=$('curBar'),xs=$('exitSlot'),rc=document.querySelector('.rcol'),ts=$('topStack');
-  if(p){if(g.parentNode!==cb){cb.appendChild(g);cb.appendChild(e)}if(x.parentNode!==xs)xs.appendChild(x)}
-  else{if(g.parentNode!==rc){const r=rc.querySelector('.rail.v');rc.insertBefore(g,r);rc.insertBefore(e,r)}if(x.parentNode!==ts)ts.insertBefore(x,$('riftHud'))}}
+function placePort(){const x=$('bossExit'),xs=$('exitSlot');if(x.parentNode!==xs)xs.appendChild(x)}/* v569: 모든 화면에서 보스전 나가기는 재화 아래 칸 */
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placePort):PORT_MQ.addListener(placePort);addEventListener('resize',placePort);
 /* v559: 메뉴 펼치기 패널 — 기존 버튼을 대신 눌러 줌(메뉴 추가 시 HMENU에 한 줄만 추가) */
 const HMENU=[[['openInv','장비'],['openMenu','스킬'],['openStat','상태']],[['openTown','마을'],['openBoss','보스'],['openMap','지도']],[['openPause','설정'],['openFs','전체화면']]];
@@ -5485,20 +5511,23 @@ function hmOpen(){hmBuild();hmSync();$('hmenu').hidden=false;releaseAll()}
 function hmClose(){$('hmenu').hidden=true}
 $('hamBtn').onclick=hmOpen;$('hmX').onclick=hmClose;$('hmenu').addEventListener('click',e=>{if(e.target.id==='hmenu'){hmClose();return}const b=e.target.closest('[data-hm]');if(b){hmClose();$(b.dataset.hm).click()}});
 $('hmCh').onclick=()=>{hmClose();save();closeAllSheets();showSlots()};
-setInterval(()=>{if(PORT_MQ.matches){hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t}},400);
+setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn},400);/* v569: 모든 화면 */
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
-function hudMoney(){if(!S||!S.cls)return;const gt=fmtKM(S.gold||0);/* v512: 모든 모드 K+/M+ */if($('goldT').textContent!==gt)$('goldT').textContent=gt;
-  const es=!NS()&&(S.ch>=NCH||S.ess>0);$('essLine').hidden=!es;if(es){const et=fmtG(S.ess||0);if($('essT').textContent!==et)$('essT').textContent=et}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
+/* v569: 골드는 숫자 4자리까지(9,999 → 1,500K → 9,999K → 1,500M …), 정수·윤회의 불씨·광휘의 파편은 999까지 */
+const fmtG4=v=>v>=1e29?'∞':v<1e4?Math.floor(v).toLocaleString('ko-KR'):[[1e7,1e3,'K'],[1e10,1e6,'M'],[1e13,1e9,'B'],[1e16,1e12,'T'],[Infinity,1e15,'Qa']].map(([l,d,u])=>v<l?Math.floor(v/d).toLocaleString('ko-KR')+u:null).find(x=>x);
+const fmtC=v=>v>=1e29?'∞':v>CUR_MAX?CUR_MAX+'+':String(Math.floor(v));
+function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.textContent!==t)e.textContent=t};st('goldT',fmtG4(S.gold||0));
+  const T=S.test;st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('lumiT',T?'∞':fmtC(S.lumi||0))}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&!bossIntroOn();if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`+(P.esMax>0?` · 쉴드 ${Math.ceil(P.es)}`:'');
-  $('xpb').style.width=(S.lv>=LV_MAX?100:Math.min(100,S.xp/needXp()*100))+'%';
-  $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';$('mpt').textContent=`${Math.floor(P.mp)} / ${P.mmp}`+(NS()&&nsReserve()>0?` · 점유 ${nsReserve().toFixed(0)}%`:'');
-  if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);
-   hudMoney()}
+  {const xp=S.lv>=LV_MAX?100:Math.min(100,S.xp/needXp()*100);$('xpb').style.width=xp+'%';document.querySelector('.lvbox').style.setProperty('--xpp',xp.toFixed(1))}/* v569: 레벨 원 테두리 = 경험치 */
+  $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';{const rs=NS()&&nsReserve()>0;$('mpt').textContent=rs?`${Math.floor(P.mp)}/${P.mmp} · 점유${nsReserve().toFixed(0)}%`:`${Math.floor(P.mp)} / ${P.mmp}`}/* v569: 좁은 칸에 맞게 */
+  if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);}
+  hudMoney();/* v569: 새 시즌에서도 재화 칸 갱신 */
   {const n=S.spdPot||0;$('nSp').textContent=n;$('bSp').classList.toggle('empty',!n);$('bSp').style.setProperty('--p',P.hasteT>0?1-P.hasteT/SPD_POT.dur:0)}$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
   {const c1=mpCost(C().skills[0]);$('bS1').classList.toggle('nomp',P.mp<c1);const t='MP '+c1;if($('cS1').textContent!==t)$('cS1').textContent=t}
   if(S.ch<NCH){const c=CH[S.ch];$('qtag').textContent=`Main Quest · ${S.ch+1}장 ${c.n}`;
@@ -5537,8 +5566,8 @@ addEventListener('resize',()=>setTimeout(chipSpot,60));
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
   {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid){ce.hidden=hid;chipSpot()}if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
   /* 현재 DPS / 적정 DPS (스킬 창과 같은 계산, 1초마다 갱신) */
-  {const el=$('scD');if(inTown){if(dpsKey!=='t'){el.textContent='';dpsKey='t'}}else{const me=skillDpsCache(),req=S.duel?duelReq():S.ch>=NCH?stageReq(NCH,S.tier):inArena()?fbReq():stageReq(S.ch),r=me/req,c=r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a',k=Math.round(me)+'/'+Math.round(req);
-    const pr=chipProg(),k2=k+'|'+pr;if(k2!==dpsKey){dpsKey=k2;el.innerHTML=PORT_MQ.matches?(pr?`<i style="color:#ffb070;font-style:normal">${pr}</i>`:''):`DPS <i style="color:var(--ink)">${fmtKM(me)}</i>${pr?` · <i style="color:#ffb070;font-style:normal">${pr}</i>`:''}`/* v98: 적정 DPS 표기 숨김 · v109: 진행도를 칩에 합침 */}}}
+  {const el=$('scD');if(inTown){if(dpsKey!=='t'){el.textContent='';$('scPgW').hidden=true;dpsKey='t'}}else{const me=skillDpsCache(),req=S.duel?duelReq():S.ch>=NCH?stageReq(NCH,S.tier):inArena()?fbReq():stageReq(S.ch),r=me/req,c=r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a',k=Math.round(me)+'/'+Math.round(req);
+    const pr=chipProg(),k2=k+'|'+pr;if(k2!==dpsKey){dpsKey=k2;{const m=/^(\d+)\/(\d+)$/.exec(pr);$('scPgW').hidden=!m;if(m)$('scPg').style.width=Math.min(100,m[1]/m[2]*100)+'%';el.textContent=m?`${m[1]} / ${m[2]}`:pr}/* v569: DPS 표기 삭제 · 진행 막대 + 숫자 *//* v98: 적정 DPS 표기 숨김 · v109: 진행도를 칩에 합침 */}}}
   const k=i.c+i.n+i.t;if(k===chipKey)return;chipKey=k;const el=$('stageChip');el.className='stagechip '+i.c;$('scN').textContent=i.n;$('scT').textContent=i.t}
 function showDrainNotice(){$('noticeSheet').innerHTML=`<div><div class="chap">Endless Abyss</div><h2>생명력이 계속 줄어듭니다</h2></div>
     <p class="hint">엔드게임부터 심연의 냉기로 <b style="color:#ff8a6a">생명력이 초당 계속 감소</b>합니다. 위험도가 오를수록 감소량이 커집니다.</p>
@@ -5587,7 +5616,7 @@ let GDQ=[],GCUR=null;
 function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
 function guideRect(sel){if(sel==='@left'){const w=innerWidth,h=innerHeight;return {left:12,top:h*.5,right:w*.45,bottom:h-12}}
-  let el=document.querySelector(sel);if(el&&!el.hidden&&!el.offsetParent&&PORT_MQ.matches&&el.closest('.rail'))el=$('hamBtn');/* v559: 세로 폰에서는 메뉴 안 버튼 대신 메뉴 버튼을 가리킴 */if(!el||el.hidden||!el.offsetParent)return null;const r=el.getBoundingClientRect();return r.width>0?r:null}
+  let el=document.querySelector(sel);if(el&&!el.hidden&&!el.offsetParent&&el.closest('.rail'))el=$('hamBtn');/* v559: 세로 폰에서는 메뉴 안 버튼 대신 메뉴 버튼을 가리킴 */if(!el||el.hidden||!el.offsetParent)return null;const r=el.getBoundingClientRect();return r.width>0?r:null}
 function guideRender(){const g=GCUR,st=g.steps[g.i],n=g.steps.length,sp=$('gSpot'),cd=$('gCard');
   let R=null;for(const s of st.tgt||[]){const r=guideRect(s);if(!r)continue;R=R?{left:Math.min(R.left,r.left),top:Math.min(R.top,r.top),right:Math.max(R.right,r.right),bottom:Math.max(R.bottom,r.bottom)}:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}
   if(R){const p=6;sp.className='gspot';Object.assign(sp.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.right-R.left+p*2+'px',height:R.bottom-R.top+p*2+'px'})}else sp.className='gspot none';
@@ -7021,7 +7050,7 @@ function update(dt){packTick();
     if(p.kind==='pouch'||p.kind==='tk'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
     if(p.t>.35&&dd<1.8){if(p.kind==='pouch'||p.kind==='tk')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
       if(p.kind==='item')addItem(p.item);
-      else if(p.kind==='ess'){S.ess=(S.ess||0)+p.amt}
+      else if(p.kind==='ess'){essAdd(p.amt)}
       else if(p.kind==='gold'){S.gold+=p.amt}
       else if(p.kind==='pouch'){if(p.acc&&RZ)riftPouch(p);else{S.gold+=p.amt;if(!p.acc)pouchFx(p.amt,p.leg,p.rift);save()}}
       else if(p.kind==='tk'){S.tickets=(S.tickets||0)+1;tkFx(S.tickets);save()}
