@@ -913,6 +913,45 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 @media (orientation:landscape){#topStack{top:calc(env(safe-area-inset-top,0px) + 80px)}}
 @media (orientation:landscape) and (max-height:520px){.hmp{width:min(340px,48vw);padding-top:calc(60px + env(safe-area-inset-top,0px))}.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}.hmsec{display:contents}}/* v569: 가로 폰 메뉴 — 한 줄 4개 */
 @media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867;--mw:120px}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
+
+/* v582 에너지 쉴드 — 체력바 위에 반투명 하늘색 막(최대 체력 대비 비율), 쉴드 수치는 체력바 오른쪽 끝 · 모든 화면 */
+.top .bar.hp .esF{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(rgba(160,225,255,.85),rgba(40,165,255,.66));box-shadow:inset 0 1px 0 rgba(255,255,255,.8);border-right:1.5px solid #bfe6ff;box-sizing:border-box;z-index:1;pointer-events:none}
+.top .bar.hp .esF.full{border-right:0}.top .bar.hp .esF[hidden],.top .bar.hp .esV[hidden]{display:none}
+.top .bar.hp span{z-index:2}
+.top .bar.hp .esV{position:absolute;right:5px;top:0;bottom:0;display:flex;align-items:center;font:800 10px var(--en);font-stretch:87%;font-style:normal;color:#d6f0ff;text-shadow:0 1px 2px #000,0 0 4px rgba(60,150,255,.9);z-index:3;pointer-events:none}
+.top .pid,.top .mring,.top .mbd{display:none}
+/* v582 세로 D안 — 지역 칸 삭제: [LV·직업·닉네임 / 체력 / 마나 / 경험치 / 재화 한 줄 | 미니맵(둘레=처치 게이지, 12시=위험도)] */
+@media (max-width:640px) and (orientation:portrait){
+  .top{grid-template-columns:minmax(0,1fr) 111px!important;column-gap:14px;row-gap:6px}
+  .top .stagechip{display:none!important}
+  .top .lvbox,.top .bldnm{display:none!important}
+  .top .pid{display:flex;grid-column:1;grid-row:1;align-items:baseline;gap:8px;height:22px;white-space:nowrap;min-width:0;text-shadow:0 1px 3px #000}
+  .top .pid .lvt{font:800 15px var(--en);font-stretch:87%;color:#e8dcc4}.top .pid .lvt small{font-size:10.5px;color:#a39f99;letter-spacing:.1em;margin-right:3px}.top .pid .lvt b{font:inherit}
+  .top .pid .sep{width:1px;height:12px;background:rgba(232,220,196,.35);align-self:center}
+  .top .pid small#pCls{font:600 10.5px var(--en);font-stretch:87%;letter-spacing:.1em;color:#a39f99;text-transform:uppercase}
+  .top .pid #nickNm{font:800 15px var(--ko);color:#f1ece2;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .top .bar.hp,.top .bar.mp{height:21px!important;border-radius:6px}
+  .top .bar.hp span,.top .bar.mp span{font-size:12.5px!important}
+  .top .bar.hp .esV{font-size:11.5px;right:6px}
+  .top .bar.xp{display:block!important;grid-column:1;grid-row:4;position:relative;height:5px!important;margin-top:-1px;border-radius:3px;border:0;background:rgba(0,0,0,.6);overflow:hidden}
+  .top .bar.xp i{position:absolute;inset:0 auto 0 0;background:#ffd24a!important}
+  #curBar{grid-row:5;flex-direction:row;align-items:center;gap:9px;margin-top:0;zoom:1;font-size:14px}
+  #curBar .cr1,#curBar .cr2{display:contents}
+  #curBar .cr1>span,#curBar .cr2>span{height:19px}
+  #curBar .ci{width:15px;height:15px;margin-right:4px}
+  .top .rcol{grid-column:2;grid-row:1/6;width:111px!important;justify-self:end;margin-top:6px}
+  .top .mring{display:block;position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+  .top .mring circle{fill:none;stroke-width:4.5}.top .mring .trk{stroke:rgba(255,255,255,.14)}.top .mring .val{stroke:#e8dcc4;stroke-linecap:round;stroke-dasharray:0 100}
+  .top .mring.off{display:none}
+  .top .mbd{display:block;position:absolute;left:50%;top:-11px;transform:translateX(-50%);white-space:nowrap;font:800 11px var(--ko);letter-spacing:.06em;padding:3px 9px;border-radius:6px;background:#16161c;border:1.5px solid #e8dcc4;color:#e8dcc4;z-index:3;pointer-events:none}
+  .top .mbd[hidden]{display:none}
+  .top .quest,.top .feed{grid-column:1/3}
+  #exitSlot{grid-row:6;height:0;overflow:visible}
+  #exitSlot #bossExit{position:fixed;left:14px;top:var(--bxT,144px);height:var(--bxH,52px);width:48px;padding:0;display:grid;place-items:center;border-radius:12px;font:800 20px var(--ko);z-index:7}
+  #exitSlot #bossExit[hidden]{display:none}
+  #bossExit .xl{display:none}
+  #topStack .bossbar{width:100%}
+}
 </style>
 
 <canvas id="c"></canvas>
@@ -922,14 +961,14 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="hud">
   <div id="names"></div>
   <div class="top">
-  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden>↩ 나가기</button><div id="riftHud" hidden></div></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><div class="scpg" id="scPgW" hidden><i id="scPg"></i></div><em id="scD"></em></div>
+  <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden aria-label="나가기">↩<span class="xl"> 나가기</span></button><div id="riftHud" hidden></div></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><div class="scpg" id="scPgW" hidden><i id="scPg"></i></div><em id="scD"></em></div>
     <div class="lcol">
-      <div class="bldnm"><small id="clsNm"></small><b id="bldNm"></b></div>
+      <div class="bldnm"><small id="clsNm"></small><b id="bldNm"></b></div><div class="pid"><span class="lvt"><small>LV</small><b id="pLv">1</b></span><i class="sep"></i><small id="pCls"></small><b id="nickNm"></b></div>
       <div id="curBar"><div class="cr1"><span class="cg"><svg class="ci" viewBox="4.2 5 55.5 55.5"><use href="#cuGC" width="64" height="64"/></svg><b id="goldT">0</b></span></div><div class="cr2"><span class="ce"><svg class="ci" viewBox="5.2 5.4 53.6 53.6"><use href="#cuEA" width="64" height="64"/></svg><b id="essT">0</b></span><span class="cf"><svg class="ci" viewBox="3.8 5.8 56.4 56.4"><use href="#cuFC" width="64" height="64"/></svg><b id="rrT">0</b></span><span class="cl"><svg class="ci" viewBox="3.8 4.1 56.4 56.4"><use href="#cuRC" width="64" height="64"/></svg><b id="lumiT">0</b></span></div></div><div id="exitSlot"></div>
       <div class="vitals">
         <div class="lvbox"><small>LV</small><span id="lv">1</span></div>
         <div class="bars">
-          <div class="bar hp"><i id="hpb"></i><span id="hpt"></span></div>
+          <div class="bar hp"><i id="hpb"></i><b class="esF" id="esF" hidden></b><span id="hpt"></span><em class="esV" id="esV" hidden></em></div>
           <div class="bar mp"><i id="mpb"></i><span id="mpt"></span></div>
           <div class="bar xp"><i id="xpb"></i></div>
         </div>
@@ -945,7 +984,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="feed" id="feed"></div>
     </div>
     <div class="rcol">
-      <canvas class="mini" id="mini" aria-label="미니맵"></canvas>
+      <canvas class="mini" id="mini" aria-label="미니맵"></canvas><svg class="mring" id="mRing" viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="47.75"/><g transform="translate(50 50) rotate(90) scale(1 -1)"><circle class="val" id="mRingV" r="47.75" pathLength="100"/></g></svg><div class="mbd" id="mBd" hidden></div>
       <button id="hamBtn" aria-label="메뉴 열기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><b class="hdot" id="hamDot" hidden></b></button>
       <div class="rail v">
         <button class="tbtn" id="openMenu" style="color:#5ad1c8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span style="color:var(--ink)">스킬</span><b class="pts" id="lvBadge" hidden></b></button>
@@ -5543,7 +5582,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v581';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v582';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5569,7 +5608,7 @@ function hmOpen(){hmBuild();hmSync();$('hmenu').hidden=false;releaseAll()}
 function hmClose(){$('hmenu').hidden=true}
 $('hamBtn').onclick=hmOpen;$('hmX').onclick=hmClose;$('hmenu').addEventListener('click',e=>{if(e.target.id==='hmenu'){hmClose();return}const b=e.target.closest('[data-hm]');if(b){hmClose();$(b.dataset.hm).click()}});
 $('hmCh').onclick=()=>{hmClose();save();closeAllSheets();showSlots()};
-setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn},400);/* v569: 모든 화면 */
+setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn;if($('pCls').textContent!==cn)$('pCls').textContent=cn;const nk=S&&S.nick||'';if($('nickNm').textContent!==nk)$('nickNm').textContent=nk;if(PORT_MQ.matches)chipSpot()},400);/* v569: 모든 화면 */
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
 /* v569: 골드는 숫자 4자리까지(9,999 → 1,500K → 9,999K → 1,500M …), 정수·윤회의 불씨·광휘의 파편은 999까지 */
 const fmtG4=v=>v>=1e29?'∞':v<1e4?Math.floor(v).toLocaleString('ko-KR'):[[1e7,1e3,'K'],[1e10,1e6,'M'],[1e13,1e9,'B'],[1e16,1e12,'T'],[Infinity,1e15,'Qa']].map(([l,d,u])=>v<l?Math.floor(v/d).toLocaleString('ko-KR')+u:null).find(x=>x);
@@ -5577,11 +5616,12 @@ const fmtC=v=>v>=1e29?'∞':v>CUR_MAX?CUR_MAX+'+':String(Math.floor(v));
 function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.textContent!==t)e.textContent=t};st('goldT',fmtG4(S.gold||0));
   const T=S.test;st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('lumiT',T?'∞':fmtC(S.lumi||0))}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
-  {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&!bossIntroOn();if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.textContent='↩ 나가기'}}
+  {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&!bossIntroOn();if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML='↩<span class="xl"> 나가기</span>'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
-  $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`+(P.esMax>0?` · 쉴드 ${Math.ceil(P.es)}`:'');
+  $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`;{const on=P.esMax>0,f=$('esF'),v=$('esV');if(f.hidden===on){f.hidden=v.hidden=!on}if(on){const r=Math.min(1,Math.max(0,(P.es||0)/P.mhp));f.style.width=r*100+'%';f.classList.toggle('full',r>=1);const t=String(Math.ceil(P.es||0));if(v.textContent!==t)v.textContent=t}}/* v582: 쉴드 = 체력바 위 반투명 막 + 오른쪽 끝 숫자 */
+  $('pLv').textContent=S.lv;mRing();
   {const xp=S.lv>=LV_MAX?100:Math.min(100,S.xp/needXp()*100);$('xpb').style.width=xp+'%';document.querySelector('.lvbox').style.setProperty('--xpp',xp.toFixed(1))}/* v569: 레벨 원 테두리 = 경험치 */
   $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';{const rs=NS()&&nsReserve()>0;$('mpt').textContent=rs?`${Math.floor(P.mp)}/${P.mmp} · 점유${nsReserve().toFixed(0)}%`:`${Math.floor(P.mp)} / ${P.mmp}`}/* v569: 좁은 칸에 맞게 */
   if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);}
@@ -5619,7 +5659,9 @@ function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   if(S.ch>=NCH){if(gatePending())return '관문 보스';const n=Math.min(S.tierKills,tkFor(S.tier));return `${n}/${tkFor(S.tier)}`}
   const c=CH[S.ch];if(!c)return '';if(S.phase===0)return `${S.kills}/${c.goal}`;if(S.phase===1)return `보스까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`;return ''}
 /* v553: 칩을 숨긴 보스전에서는 보스 체력바(topStack)를 칩이 있던 자리로 올림 — 칩을 잠깐 보여 자리를 잰 뒤 다시 숨김 */
-function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* v573 세로 폰: 체력바 오른쪽 끝 ~ 미니맵 왼쪽 끝 사이를 다 씀 */const hb=document.querySelector('.top .bar.hp').getBoundingClientRect(),mb=$('mini').getBoundingClientRect(),L=hb.right+8,R=mb.left-8;ts.style.left=((L+R)/2)+'px';ts.style.width=(R-L)+'px'}else ts.style.left=ts.style.width=''}
+/* v582 세로: 미니맵 둘레 = 처치 진행(6시에서 시작해 오른쪽으로), 12시 박스 = 위험도/장 */
+let mRingK='';function mRing(){if(!PORT_MQ.matches)return;const pr=chipProg(),i=stageInfo(),k=pr+'|'+i.n;if(k===mRingK)return;mRingK=k;const m=/^(\d+)\/(\d+)$/.exec(pr),f=m?Math.min(1,m[1]/m[2]):pr?1:-1;$('mRing').classList.toggle('off',f<0);$('mRingV').style.strokeDasharray=(Math.max(0,f)*100)+' 100';const b=$('mBd');b.textContent=i.n;b.hidden=!i.n}
+function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(PORT_MQ.matches){/* v582 세로: 재화 줄 13px 아래 화면 가운데 250px, 나가기는 왼쪽 같은 높이 */const cb=$('curBar').getBoundingClientRect(),t=Math.round(cb.bottom+13);ts.style.top=t+'px';ts.style.left='50%';ts.style.width='250px';const r=document.documentElement.style;r.setProperty('--bxT',t+'px');const bb=$('bossbar');if(!bb.hidden){const h=Math.round(bb.getBoundingClientRect().height);if(h)r.setProperty('--bxH',h+'px')}return}if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* v573 세로 폰: 체력바 오른쪽 끝 ~ 미니맵 왼쪽 끝 사이를 다 씀 */const hb=document.querySelector('.top .bar.hp').getBoundingClientRect(),mb=$('mini').getBoundingClientRect(),L=hb.right+8,R=mb.left-8;ts.style.left=((L+R)/2)+'px';ts.style.width=(R-L)+'px'}else ts.style.left=ts.style.width=''}
 addEventListener('resize',()=>setTimeout(chipSpot,60));
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
   {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid){ce.hidden=hid;chipSpot()}if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
