@@ -5767,7 +5767,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v592';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v593';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7052,10 +7052,10 @@ function drawMini(){
   if(mapKind==='story'){mctx.beginPath();const pl=W2L(cx,cz),z0=Math.min(STORY_L,pl.z+V*1.5),z1=Math.max(-STORY_L,pl.z-V*1.5),pt=(x,z)=>{const w=L2W(x,z);mctx.lineTo(mx(w.x),mz(w.z))};for(let z=z0;z>=z1;z-=2)pt(pathC(z)-pathW(z),z);for(let z=z1;z<=z0;z+=2)pt(pathC(z)+pathW(z),z);mctx.closePath();mctx.fill();
     const e=endPt(),s_=startPt();for(const [q,r] of [[e,ARENA_END.r],[s_,START_R]]){mctx.beginPath();mctx.arc(mx(q.x),mz(q.z),r*k,0,7);mctx.fill()}}
   else if(mapKind==='field')mctx.fillRect(mx(-B),mz(-B),2*B*k,2*B*k);
-  else{mctx.beginPath();mctx.arc(mx(0),mz(0),(mapKind==='town'?TOWN_R:ARENA_R)*k,0,7);mctx.fill()}
+  else{mctx.beginPath();mctx.arc(mx(0),mz(0),(mapKind==='town'?TOWN_R:knOn?KNA.R*KNA.s:ARENA_R)*k,0,7);mctx.fill()}/* v593: 잿불 성채는 경기장 바닥 전체(다리와 맞닿는 가장자리까지) */
   mctx.fillStyle='rgba(150,145,160,.45)';for(const c of colliders){if(Math.abs(c.x-cx)>V+3||Math.abs(c.z-cz)>V+3)continue;mctx.beginPath();mctx.arc(mx(c.x),mz(c.z),Math.max(1,c.r*k),0,7);mctx.fill()}
-  if(knOn){/* v592: 잿불 성채 — 다리·문 앞 발판·통로 */const K=KNB;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(K.z0-1),K.w*k,(K.z1-K.z0-2.4)*k);mctx.fillRect(mx(-5),mz(K.z1-3.6),10*k,3.6*k);mctx.fillRect(mx(-K.gw),mz(K.z1-.9),K.gw*2*k,1.8*k);mctx.fillRect(mx(-K.tw),mz(K.z1+.9),K.tw*2*k,4.6*k);
-    mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,W/140);mctx.strokeRect(mx(-K.w/2),mz(K.z0-1),K.w*k,(K.z1-K.z0-2.4)*k)}
+  if(knOn){/* v592: 잿불 성채 — 다리·문 앞 발판·통로 */const K=KNB;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(K.z0-.6),K.w*k,(K.z1-K.z0-3)*k);mctx.fillRect(mx(-5),mz(K.z1-3.6),10*k,3.6*k);mctx.fillRect(mx(-K.gw),mz(K.z1-.9),K.gw*2*k,1.8*k);mctx.fillRect(mx(-K.tw),mz(K.z1+.9),K.tw*2*k,4.6*k);
+    mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,W/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*K.w/2),mz(K.z0-.25));mctx.lineTo(mx(sx*K.w/2),mz(K.z1-3.6))}mctx.stroke()}
   if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,W/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
   const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){if(!npcOn(n))continue;mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,W/40),0,7);mctx.fill()}
   if(mapKind==='story'){const ax=clamp(mx(ALTAR.x),4,W-4),az=clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,W/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
