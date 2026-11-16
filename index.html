@@ -2340,13 +2340,35 @@ function knBuild(){const root=new THREE.Group(),G=new THREE.Group(),R=KNA.R,LY=K
       const bm=(w,h)=>{const t=bt.clone();t.needsUpdate=true;t.repeat.set(Math.max(1,w/4),Math.max(1,h/2));return new THREE.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:.04,roughness:.95})};
       const box=(w,h,d,x,y,z,fw)=>{const m=mesh(new THREE.BoxGeometry(w,h,d),bm(fw||w,h),x,y,z);m.castShadow=false;B.add(m);return m};
       const zw=K.z1,H=10,yb=LY,gw=K.gw,gh=K.gh,WW=34;
-      /* 정면 벽(문 양옆·문 위) + 흉벽 */
-      box(WW-gw,H-yb,1.6,-(gw+WW)/2,(H+yb)/2,zw);box(WW-gw,H-yb,1.6,(gw+WW)/2,(H+yb)/2,zw);box(gw*2,H-gh,1.6,0,(H+gh)/2,zw);
-      for(let x=-WW+.6;x<WW;x+=1.6)box(.8,.9,1.7,x,H+.45,zw,.8);
-      /* 문틀: 돌 기둥 + 상인방 */
-      for(const sx of [-1,1])B.add(mesh(new THREE.BoxGeometry(.7,gh+.2,1.9),PM.pillar,sx*(gw+.1),gh/2,zw));B.add(mesh(new THREE.BoxGeometry(gw*2+1.6,.8,2),PM.pillar,0,gh+.3,zw));
+      /* v591: 판타지 성채 정문 — 둥근 아치 문(쐐기돌 테두리) · 반쯤 올린 쇠창살 · 안쪽으로 열린 두 짝 나무 문 · 양옆 원형 탑(흉벽·고깔 지붕·깃발) */
+      const SP=4.1,GW=gw,AT=SP+GW,TX=GW+4.1,TR=2.7,TH=14;
+      /* 문이 뚫린 정면 벽(가운데) — 아치 모양 구멍 */
+      {const sh=new THREE.Shape(),hw=TX;sh.moveTo(-hw,yb);sh.lineTo(hw,yb);sh.lineTo(hw,H);sh.lineTo(-hw,H);sh.lineTo(-hw,yb);const ho=new THREE.Path();ho.moveTo(-GW,0);ho.lineTo(GW,0);ho.lineTo(GW,SP);ho.absarc(0,SP,GW,0,Math.PI,false);ho.lineTo(-GW,0);sh.holes.push(ho);
+        const eg=new THREE.ExtrudeGeometry(sh,{depth:2,bevelEnabled:false,curveSegments:24}),t=bt.clone();t.needsUpdate=true;t.repeat.set(.25,.5);const m=new THREE.Mesh(eg,new THREE.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:.04,roughness:.95}));m.position.z=zw-1;B.add(m)}
+      /* 양옆 벽 */box(WW-TX,H-yb,1.6,-(TX+WW)/2,(H+yb)/2,zw);box(WW-TX,H-yb,1.6,(TX+WW)/2,(H+yb)/2,zw);
+      for(let x=-WW+.6;x<WW;x+=1.6)if(Math.abs(x)>TX+TR-.4||Math.abs(x)<TX-TR-.2)box(.8,.9,1.7,x,H+.45,zw,.8);
+      /* 쐐기돌 아치 + 문설주 */
+      {const n=13;for(let k=0;k<n;k++){const a=Math.PI*(k+.5)/n,big=k===(n>>1),st=mesh(new THREE.BoxGeometry(big?1.1:.82,big?1.5:1.15,2.3),PM.pillar,Math.cos(a)*(GW+.5),SP+Math.sin(a)*(GW+.5),zw);st.rotation.z=a-Math.PI/2;st.castShadow=false;B.add(st)}
+        for(const sx of [-1,1]){for(let y=0;y<SP;y+=1.03){const q=mesh(new THREE.BoxGeometry(y/1.03%2<1?1.1:.85,1,2.3),PM.pillar,sx*(GW+.45),y+.5,zw);q.castShadow=false;B.add(q)}B.add(mesh(new THREE.BoxGeometry(1.5,.45,2.5),PM.pillar,sx*(GW+.55),SP-.1,zw))}}
+      /* 반쯤 올린 쇠창살(아래 끝 뾰족) */
+      {const pg=new THREE.Group(),bar=new THREE.BoxGeometry(.13,4.2,.13),tip=new THREE.ConeGeometry(.12,.45,4);for(let x=-GW+.35;x<GW;x+=.55){const b=new THREE.Mesh(bar,PM.iron);b.position.set(x,2.1,0);const tp=new THREE.Mesh(tip,PM.iron);tp.position.set(x,-.2,0);tp.rotation.x=Math.PI;pg.add(b,tp)}
+        for(let y=.7;y<4.2;y+=.9){const h=new THREE.Mesh(new THREE.BoxGeometry(GW*2-.2,.12,.16),PM.iron);h.position.set(0,y,0);pg.add(h)}pg.position.set(0,SP+.9,zw+.35);B.add(pg)}
+      /* 안쪽으로 활짝 열린 두 짝 나무 문(쇠띠·징) */
+      {const dm=SM({color:0x4a3324,roughness:.9}),dw=GW-.1,dh=SP+GW*.7;for(const sx of [-1,1]){const d=new THREE.Group(),pl=new THREE.Mesh(new THREE.BoxGeometry(dw,dh,.28),dm);pl.position.set(sx*dw/2,dh/2,0);d.add(pl);
+          for(const y of [.8,dh*.45,dh-1]){const bd=new THREE.Mesh(new THREE.BoxGeometry(dw-.15,.22,.36),PM.iron);bd.position.set(sx*dw/2,y,0);d.add(bd)}
+          for(let k=0;k<5;k++){const v=new THREE.Mesh(new THREE.BoxGeometry(.06,dh-.2,.32),SM({color:0x2e2018}));v.position.set(sx*(k+.5)*dw/5,dh/2,0);d.add(v)}
+          d.position.set(sx*(K.tw-.2),0,zw+1.15);d.rotation.y=sx*Math.PI/2*.94;B.add(d)}}
+      /* 원형 탑 두 개 */
+      for(const sx of [-1,1]){const tg=new THREE.CylinderGeometry(TR,TR*1.12,TH-yb,28,1,true),t=bt.clone();t.needsUpdate=true;t.repeat.set(TR*6.28/4,(TH-yb)/2);const tw=new THREE.Mesh(tg,new THREE.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:.04,roughness:.95}));tw.position.set(sx*TX,(TH+yb)/2,zw-.6);B.add(tw);
+        const cap=new THREE.Mesh(new THREE.CylinderGeometry(TR+.35,TR+.35,.5,28),PM.pillar);cap.position.set(sx*TX,TH,zw-.6);B.add(cap);
+        for(let k=0;k<12;k++){const a=k/12*Math.PI*2,c=mesh(new THREE.BoxGeometry(.75,.9,.5),PM.pillar,sx*TX+Math.cos(a)*(TR+.15),TH+.7,zw-.6+Math.sin(a)*(TR+.15));c.rotation.y=-a;c.castShadow=false;B.add(c)}
+        const rf=new THREE.Mesh(new THREE.ConeGeometry(TR*.95,4.6,20),SM({color:0x2e1a18,roughness:.85}));rf.position.set(sx*TX,TH+2.9,zw-.6);B.add(rf);B.add(mesh(new THREE.ConeGeometry(.12,1.2,6),PM.iron,sx*TX,TH+5.7,zw-.6));
+        for(const y of [5.2,9])B.add(mesh(new THREE.BoxGeometry(.35,.9,.3),SM({color:0x0a0606}),sx*TX,y,zw-.6-TR-.02));/* 화살 구멍 */
+        /* 깃발 */const bn=new THREE.Mesh(new THREE.PlaneGeometry(1.5,4.2),SM({color:0x6a1414,roughness:.95,side:THREE.DoubleSide,emissive:0x200402}));bn.position.set(sx*(TX-TR*.55),7,zw-.6-TR*.86);bn.rotation.y=-sx*.55;B.add(bn);
+        const em=new THREE.Mesh(new THREE.CircleGeometry(.42,16),SM({color:0xd88a2a,emissive:0x3a1800,side:THREE.DoubleSide}));em.position.copy(bn.position);em.position.y+=.9;em.rotation.y=bn.rotation.y;em.translateZ(-.02);B.add(em);
+        const rod=mesh(new THREE.BoxGeometry(1.8,.12,.12),PM.iron,bn.position.x,9.15,bn.position.z);rod.rotation.y=bn.rotation.y;B.add(rod)}
       /* 통로: 양옆 벽 + 천장(카메라가 이 안에서 바라봄) */
-      for(const sx of [-1,1])box(1,gh+1.5,K.tl,sx*(K.tw+.5),(gh+1.5)/2,zw+K.tl/2,K.tl);box(K.tw*2+2,1,K.tl,0,gh+1,zw+K.tl/2,K.tl);box(K.tw*2+2,gh+2,1,0,(gh+2)/2,zw+K.tl+.5);
+      for(const sx of [-1,1])box(1,AT+1.8,K.tl,sx*(K.tw+.5),(AT+1.8)/2,zw+K.tl/2,K.tl);box(K.tw*2+2,1,K.tl,0,AT+1.3,zw+K.tl/2,K.tl);box(K.tw*2+2,AT+2.3,1,0,(AT+2.3)/2,zw+K.tl+.5);
       /* 통로 벽 횃불 빛 */for(const z of [4,9])for(const sx of [-1,1]){const f=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xff8a30,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.9}));f.position.set(sx*(K.tw-.15),3.2,zw+z);f.scale.set(.9,1.4,1);B.add(f);B.add(mesh(new THREE.BoxGeometry(.3,.5,.3),PM.iron,sx*(K.tw-.1),2.7,zw+z))}}
     root.add(B)}
   root.visible=false;scene.add(root);knSet=root}
@@ -4047,7 +4069,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   mawPose(M,t,e.jaw||0);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,2.9);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,'결투장으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'결투장으로':'잿불 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
@@ -5744,7 +5766,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v590';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v591';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5807,7 +5829,7 @@ function hud(){placeEnv();placePort();
   $('qenv').onclick=()=>{envMin=!envMin;try{localStorage.setItem('envMin',envMin?'1':'')}catch(e){}hud()};
   {const qb=document.querySelector('.quest');const sh=!!S.tutor&&!inTown;if(qb.hidden===sh)qb.hidden=!sh}
   if(S.ch>=NCH){const gp=gatePending();$('qtag').textContent='Endgame · 파밍';$('qtitle').textContent=gp?`관문 보스 처치 · 위험도 ${S.tier}`:`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`;$('qprog').textContent=gp?'★':S.tier<S.maxTier?`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)} · 해금됨`:`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)}`}
-  if(S.duel&&!inTown){const b=enemies.find(x=>x.duel);$('qtag').textContent=`Duel · 위험도 ${S.duel.tier}`;$('qtitle').textContent=`결투장 · ${duelDef().n} 처치`+(curseOn()?' · ☠ 최종 피해 −20%':'');$('qprog').textContent=b?`${Math.ceil(b.hp/b.mhp*100)}%`:'완료'}
+  if(S.duel&&!inTown){const b=enemies.find(x=>x.duel);$('qtag').textContent=`Duel · 위험도 ${S.duel.tier}`;$('qtitle').textContent=`${duelMapN()} · ${duelDef().n} 처치`+(curseOn()?' · ☠ 최종 피해 −20%':'');$('qprog').textContent=b?`${Math.ceil(b.hp/b.mhp*100)}%`:'완료'}
   if(S.tutor&&!inTown){const st=S.tutStep||0,T=['첫 무리 처치','레벨업 · 스탯 찍기','「스킬」 창 열어 보기','두 번째 무리 처치','훈련 교관 처치','완료'][st]||'';$('qtag').textContent='Tutorial · 훈련장';$('qtitle').textContent=`${Math.min(st+1,5)}/5 · ${T}`;
     $('qprog').textContent=st===0?`${enemies.filter(x=>x.tp===1).length}마리 남음`:st===3?`${enemies.filter(x=>x.tp===2).length}마리 남음`:st===4?`끝까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`:''}
   if(inTown){$('qtag').textContent='Town';$('qtitle').textContent=`${TOWN.n} · 정비`;$('qprog').textContent=''}
@@ -5821,7 +5843,8 @@ function hud(){placeEnv();placePort();
 
 }
 /* v43 현재 단계 표시: 화면 위 중앙 칩(항상) + 단계가 바뀔 때 중앙 큰 배너 */
-function stageInfo(){if(inTown)return {c:'town',n:'마을',t:TOWN.n,k:'Town'};if(S.tutor)return {c:'',n:'훈련장',t:'튜토리얼',k:'Tutorial'};if(S.duel)return {c:'fb',n:'결투장',t:duelDef().n,k:'Duel'};if(S.ch>=NCH)return {c:'eg',n:`위험도 ${S.tier}`,t:EGMAPS[egMapFor(S.tier)].n,k:'Endless Abyss'};
+const duelMapN=()=>S.duel&&S.duel.b!=='maw'?'잿불 성채':'결투장';/* v591: 잿불 검귀 맵 이름 = 잿불 성채 */
+function stageInfo(){if(inTown)return {c:'town',n:'마을',t:TOWN.n,k:'Town'};if(S.tutor)return {c:'',n:'훈련장',t:'튜토리얼',k:'Tutorial'};if(S.duel)return {c:'fb',n:duelMapN(),t:duelDef().n,k:'Duel'};if(S.ch>=NCH)return {c:'eg',n:`위험도 ${S.tier}`,t:EGMAPS[egMapFor(S.tier)].n,k:'Endless Abyss'};
   if(inArena())return {c:'fb',n:'최종 결전',t:FINAL.n,k:'Final Battle'};const c=CH[Math.min(S.ch,LAST)];return {c:'',n:`${S.ch+1}장`,t:c.n,k:`Chapter ${S.ch+1} / ${NCH}`}}
 /* v109: 사냥 진행도(처치 수·보스까지 거리) — 칩 아래줄에 표시 */
 function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
@@ -6138,7 +6161,7 @@ function showArenaFail(){const me=skillDps(C().skills[0]).main,req=fbReq(),r=me/
     <div class="btns"><button class="ghost" id="fbBack">${NCH}장으로 돌아가 성장</button><button class="primary" id="fbRetry">바로 재도전</button></div>`;
   $('clear').hidden=false;releaseAll()}
 $('bossExit').addEventListener('click',()=>{if(paused())return;const b=$('bossExit');/* v131: 확인 창(일시정지) 후 나가기 */
-  askConfirm('정말 나가시겠습니까?',S.duel?'결투장에서 나가 엔드게임 사냥터로 돌아갑니다.':`최종 결전에서 나가 ${NCH}장으로 돌아갑니다.`,'나가기',()=>{b.hidden=true;if(S.duel)duelLeave();else retreatToCh5()})});
+  askConfirm('정말 나가시겠습니까?',S.duel?duelMapN()+'에서 나가 엔드게임 사냥터로 돌아갑니다.':`최종 결전에서 나가 ${NCH}장으로 돌아갑니다.`,'나가기',()=>{b.hidden=true;if(S.duel)duelLeave();else retreatToCh5()})});
 function retreatToCh5(){S.phase=5;save();mapLoad(`${NCH}장 · ${CH[LAST].n}`,'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>toast(`${NCH}장 · ${CH[LAST].n}`,'장비를 모으고 강화한 뒤 「최종 결전 재도전」을 누르세요'))}
 function showFinalClear(){
   $('clearSheet').innerHTML=`<div><div class="chap">Final Chapter Clear</div><h2>${FINAL.boss} 처치</h2></div>
@@ -6745,7 +6768,7 @@ function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
   const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div><div class="cmp2 duelc" style="border-color:#5ad1c8;margin-top:8px"><div class="dt"><b>${FINAL.boss} (테스트)</b><small>최종 보스 용 · 체력 우버 ${MAW.n}와 같음 · 등장 연출 포함 · 보상 없음</small></div><button class="primary" data-drg="1">${S.ch===LAST&&S.phase>=3&&!S.duel&&enemies.some(e=>e.final&&e.hp>0)?'다시 도전':'도전'}</button></div>`:'';/* v545: 테스트 — 최종 보스 바로 도전 */
   $('bossSheet').innerHTML=`<div class="shead"><div><div class="chap">Boss</div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
-  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'결투장')}${card('maw',MAW.n,'결투장')}</div>
+  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'잿불 성채')}${card('maw',MAW.n,'결투장')}</div>
   <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div></div><div class="bright">${info}${test}</div></div>`}
 function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
 function closeBoss(){bossOpen=false;$('bossP').hidden=true}
