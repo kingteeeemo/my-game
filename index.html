@@ -5767,7 +5767,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v595';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v596';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7455,7 +7455,7 @@ function frameCam(dt,target=P.pos){
 /* v548: 보스 등장 카메라(용 → v550 잿불 검귀도) — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
 const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1,kn:{land:1.4,landLy:.24,/* 가로 화면: 더 멀리서 잡고 검귀를 화면 아래쪽에 — 위쪽 입장 문구와 겹치지 않게 */d0:17,d1:13.5,yaw:.32,y:2.2,ly:.55,a0:-.1,a1:.75,q0:.45,q1:1.5}},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
 function drgCam(dt){const C=DGCAM;
-  if(knAppr){/* v588: 다리를 달리는 동안 — 낮은 등 뒤 시점으로 멀리 선 검귀를 바라봄 */const K=KNB,kn=enemies.find(e=>e.duel&&!e.maw);if(dgCamW!==1){dgCamW=1;scene.fog.near=20*camK()*(1+C.fog);scene.fog.far=48*camK()*(1+C.fog)}
+  if(knAppr){/* v588: 다리를 달리는 동안 — 낮은 등 뒤 시점으로 멀리 선 검귀를 바라봄 */const K=KNB,kn=enemies.find(e=>e.duel&&!e.maw);{/* v596: 안개는 매 프레임 다리용으로 고정 — 화면 크기·설정 변경이 덮어써도 검귀가 가려지지 않게 */dgCamW=1;scene.fog.near=20*camK()*(1+C.fog);scene.fog.far=48*camK()*(1+C.fog)}
     camera.position.set(P.pos.x*.6,K.cy,P.pos.z+K.cb);camera.lookAt(P.pos.x*.3+(kn?kn.pos.x*.1:0),K.ly,P.pos.z-18);DGCAM.lk=0;DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;return}
   let b=enemies.find(e=>e.final&&e.air&&e.air.intro),w=0,kn=null,mw=null;
   if(b){const A=b.air;w=A.st==='roar'?1-Math.min(1,A.t/C.ret):1;w=w*w*(3-2*w)}
@@ -7563,7 +7563,7 @@ camT.set(0,0,0);frameCam(1);
 applyTheme();applyGfx();
 document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click',()=>{GUQ=+b.dataset.q;try{localStorage.setItem(GFX_KEY,String(GUQ))}catch(e){}applyGfx()}));
 function camSegUI(){document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.z===CAM_Z))}
-document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click',()=>{CAM_Z=+b.dataset.z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(e){}camSegUI();resize();frameCam(1)}));camSegUI();
+document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click',()=>{if(knAppr){camSegUI();toast('카메라','다리를 건너는 동안은 바꿀 수 없습니다');return}/* v596 */CAM_Z=+b.dataset.z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(e){}camSegUI();resize();frameCam(1)}));camSegUI();
 /* v534: PC — 창 상단(제목 줄)을 끌어 창 이동(다시 열면 처음 위치) · 마우스 휠로 카메라 거리 조절 */
 (()=>{const pc=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;let D=null;
   document.addEventListener('pointerdown',e=>{if(!pc()||e.button!==0)return;const hd=e.target.closest&&e.target.closest('.scrim>.sheet>.shead');if(!hd||e.target.closest('button,input,select,a'))return;
@@ -7572,7 +7572,7 @@ document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click
   addEventListener('pointerup',()=>{if(D){D.sh.classList.remove('dragging');D=null}});
   const mo=new MutationObserver(ms=>{for(const m of ms){const s=m.target;if(s.hidden)s.querySelectorAll(':scope>.sheet').forEach(x=>x.style.translate='')}});
   const hook=()=>document.querySelectorAll('.scrim').forEach(s=>{if(s._dg)return;s._dg=1;mo.observe(s,{attributes:true,attributeFilter:['hidden']});s.querySelectorAll(':scope>.sheet').forEach(x=>{if(pc())x.classList.add('dragok')})});hook();setTimeout(hook,1500);
-  addEventListener('wheel',e=>{if(!pc()||!e.target||(e.target.closest&&e.target.closest('.scrim,.sheet,.iv2,#mini,.feed,#cl')))return;if(typeof paused==='function'&&paused())return;
+  addEventListener('wheel',e=>{if(!pc()||!e.target||(e.target.closest&&e.target.closest('.scrim,.sheet,.iv2,#mini,.feed,#cl')))return;if(typeof paused==='function'&&paused())return;if(knAppr)return;/* v596: 다리 구간에선 휠 확대·축소 막음 */
     const z=Math.max(-30,Math.min(30,CAM_Z+(e.deltaY>0?-5:5)));if(z===CAM_Z)return;CAM_Z=z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}try{camSegUI()}catch(_){}resize();frameCam(1)},{passive:true});
 })();
 
