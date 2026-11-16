@@ -5343,7 +5343,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v547';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v548';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6961,7 +6961,20 @@ function frameCam(dt,target=P.pos){
   camera.position.copy(camT).addScaledVector(CAM_OFF,camK());
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
   camera.lookAt(camT.x,camT.y+1,camT.z);
+  if(mapKind==='arena')drgCam(dt);
 }
+/* v548: 용 등장 카메라 — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
+const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
+function drgCam(dt){const b=enemies.find(e=>e.final&&e.air&&e.air.intro),C=DGCAM;let w=0;
+  if(b){const A=b.air;w=A.st==='roar'?1-Math.min(1,A.t/C.ret):1;w=w*w*(3-2*w)}
+  if(w!==dgCamW){dgCamW=w;scene.fog.near=20*camK()*(1+w*C.fog);scene.fog.far=48*camK()*(1+w*C.fog)}
+  if(w<=0){DGCAM.lk=0;return}
+  let dx=P.pos.x-FB_POS.x,dz=P.pos.z-FB_POS.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+  _dcP.set(P.pos.x+dx*C.back-dz*C.side,C.up,P.pos.z+dz*C.back+dx*C.side);
+  const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix);
+  if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*5));
+  camera.position.lerp(_dcP,w);_dcQ.set(camT.x,camT.y+1,camT.z).lerp(_dcL,w);camera.lookAt(_dcQ);/* 위치와 바라보는 곳을 함께 옮겨 크레인처럼 쿼터뷰로 올라감 */
+  if(shake>0&&dt>0){camera.position.x+=rand(-.12,.12);camera.position.y+=rand(-.1,.1)}}
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
 let mobView=false;
 function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
