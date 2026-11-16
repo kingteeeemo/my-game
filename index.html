@@ -864,6 +864,9 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .msub{display:flex;gap:6px}.msub button{flex:1;padding:9px 0;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font:800 13px var(--ko)}.msub button.on{border-color:var(--iv);color:var(--iv);background:var(--ivd)}.msub i{font-style:normal;font-size:10px;margin-left:6px;background:var(--iv);color:#1a1008;border-radius:8px;padding:1px 6px}
 .msec .grow.elsw{background:var(--b2);border-color:var(--line);margin-top:8px}.msec .elsw .gd{background:var(--iv)!important;border-radius:50%;transform:none}.msec .elseg .pm.on{background:var(--iv);border-color:var(--iv);color:#1a1008}
 #skInfo .skic{border-color:#3a3a45}#skInfo .sgb{border-color:#3a3a45}#skInfo .sgb i.on{background:var(--iv,#e8dcc4);box-shadow:none}
+.maura{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.mslot{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.mslot button{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--b2);color:var(--b3);padding:7px;display:grid;place-items:center;min-width:0}.mslot button svg{width:100%;height:100%;display:block}
+.mslot button.on{border-color:var(--iv);background:var(--ivd);color:var(--iv)}
 </style>
 
 <canvas id="c"></canvas>
@@ -1575,10 +1578,11 @@ const AUGR=[['def','방어',['def','eva','es']],['dmg','피해',['crit','haste',
 let auG='def';
 function auraTabHtml(){const res=gear().res,rv=nsReserve(),act=Object.keys(NAURA).filter(k=>auraOn(k));
   let h=`<div class="mmana"><div class="mlb"><span>마나 점유 ${rv.toFixed(1)}% · 효율 +${res.toFixed(1)}%</span><span>잔여 마나 <b>${Math.max(0,100-rv).toFixed(1)}%</b></span></div><div class="mbr"><i style="width:${Math.min(100,rv)}%"></i></div></div>
-  <div class="mact"><span>켜진 오라</span>${act.map(k=>`<i>${skIco('au_'+k,'currentColor')}</i>`).join('')}<em>${act.length}개</em></div>
   <div class="msub">${AUGR.map(([g,t,ks])=>{const n=ks.filter(k=>k!=='pot'&&auraOn(k)).length;return `<button data-aug="${g}" class="${auG===g?'on':''}">${t}${n?`<i>${n}</i>`:''}</button>`}).join('')}</div><div class="msec">`;
   for(const k of AUGR.find(x=>x[0]===auG)[2])h+=auraRow(k);
-  return h+`</div>`}
+  /* v557: 켜진 오라 — 아래쪽 고정 칸(모든 오라 자리를 미리 깔아 두고 켜진 것만 밝힘 → 켜고 꺼도 위 UI가 밀리지 않음) */
+  const ak=AUGR.flatMap(x=>x[2].filter(k=>k!=='pot').map(k=>[k,x[0]]));
+  return h+`</div><div class="maura"><div class="mlb"><span>켜진 오라</span><span><b>${act.length}</b> / ${ak.length}</span></div><div class="mslot">${ak.map(([k,g])=>`<button class="${auraOn(k)?'on':''}" data-aug="${g}" aria-label="${NAURA[k].n}">${skIco('au_'+k,'currentColor')}</button>`).join('')}</div></div>`}
 
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
    일반 옵션(최대 생명력 기준)이 iLv에 비례해 커지는 만큼, 특수 능력치의 평균 수치 증가분을 뺀 비율로 가중치를 올려
