@@ -3202,7 +3202,7 @@ function drgPose(K,S){const C=S.o?Object.assign({},DG,S.o):DG,B=K.B,R=K.R,t=S.t|
   dgL(K,'hips',C.ph+lean*.5+flyP*.5,mv*sw*.05,mv*sw*-.03);dgL(K,'spine',C.ps+lean*.3+flyP*.3,mv*sw*-.04,0);dgL(K,'chest',C.pc+lean*.2+flyP*.2+br*.012*gr,mv*sw*-.05,mv*sw*.03);
   /* --- 목·머리 --- */
   const nk=C.nk,look=rear*.3-atk*.35+fly*.15+bre*.75+chg*.25+cr*.2,hy=Math.sin(t*.7)*gr*(1-rear);
-  dgL(K,'neck1',nk[0]-lean*.3+look*.3-flyP*.3+br*.01,hy*.05,0);dgL(K,'neck2',nk[1]-lean*.3+look*.3-flyP*.3,Math.sin(t*.7+.6)*.06*gr*(1-rear),0);dgL(K,'head',nk[2]-lean*.2+look*.4-flyP*.25+Math.sin(t*1.1)*.02-rear*.25,Math.sin(t*.7+1.2)*.05*gr*(1-rear),0);
+  const ly=S.look||0;dgL(K,'neck1',nk[0]-lean*.3+look*.3-flyP*.3+br*.01,hy*.05+ly*.3,0);dgL(K,'neck2',nk[1]-lean*.3+look*.3-flyP*.3,Math.sin(t*.7+.6)*.06*gr*(1-rear)+ly*.35,0);dgL(K,'head',nk[2]-lean*.2+look*.4-flyP*.25+Math.sin(t*1.1)*.02-rear*.25,Math.sin(t*.7+1.2)*.05*gr*(1-rear)+ly*.3,ly*-.12);
   /* --- 다리 4개: 대각선 두 발씩 번갈아(걷기) --- */
   const L=C.stride*mv,stn=C.stn;
   for(let i=0;i<4;i++){const front=i<2,s=i%2?-1:1,sd=s>0?'L':'R',u=(((ph/6.2832+((i===0||i===3)?0:.5)+(front?0:.08))%1)+1)%1;
@@ -3236,7 +3236,7 @@ function drgPose(K,S){const C=S.o?Object.assign({},DG,S.o):DG,B=K.B,R=K.R,t=S.t|
   return K}
 
 return {DG,setup:drgSetup,pose:drgPose}})();
-const DGC={file:'models/dragon.glb',turn:1.3,S:3.036,h:2.657,glow:1.7,col:1.5},DGN={st:0};
+const DGC={file:'models/dragon.glb',turn:1.05,turnOn:.75,turnOff:.12,lookMax:.95,S:3.036,h:2.657,glow:1.7,col:1.5},DGN={st:0};
 function drgLoad(){const N=DGN;if(N.st||!THREE.GLTFLoader)return;N.st=1;
   new THREE.GLTFLoader().load(DGC.file+'?'+APP_VER,g=>{try{const w=g.scene;let mesh=null;w.traverse(o=>{if(o.isSkinnedMesh)mesh=o});mesh.frustumCulled=false;mesh.castShadow=true;
     const m=mesh.material;m.metalness=0;m.emissive.setScalar(DGC.glow);m.color.setScalar(DGC.col);/* 발광 텍스처 = 용암 균열·눈(+몸 전체 아주 약하게) → 어두운 왕좌에서도 균열이 빛남 */
@@ -3261,7 +3261,8 @@ function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.
   const k=Math.min(1,dt*7),kf=Math.min(1,dt*10);D.fly+=(fly-D.fly)*k;D.sp+=(sp-D.sp)*k;D.rear+=(rear-D.rear)*(rear<D.rear?Math.min(1,dt*13):k*.8);D.wup+=(wup-D.wup)*k;D.rch=(D.rch||0)+(rch-(D.rch||0))*k;D.bre+=(bre-D.bre)*k;D.chg+=(chg-D.chg)*kf;D.cr+=(cr-D.cr)*kf;D.mv+=(mv-D.mv)*k;
   /* 걸음: 실제로 움직인 거리에 맞춰 발을 옮김(미끄러짐 방지) */
   if(D.px!==null&&dt>0){const d=Math.min(Math.hypot(e.pos.x-D.px,e.pos.z-D.pz),e.spd*dt*1.6);if(mv)D.wk+=d/(sc*G.stride/G.stn)*6.2832;
-    /* v563: 제자리에서 몸을 돌릴 때도 발을 옮김 */let dr=e.g.rotation.y-(D.ry===undefined?e.g.rotation.y:D.ry);dr=Math.abs(Math.atan2(Math.sin(dr),Math.cos(dr)));if(!A&&!c&&dr>1e-4){D.wk+=dr*.42/(G.stride/G.stn)*6.2832;D.mv=Math.max(D.mv,Math.min(.85,dr/dt/.9))}}D.px=e.pos.x;D.pz=e.pos.z;D.ry=e.g.rotation.y;
+    /* v563: 제자리에서 몸을 돌릴 때도 발을 옮김 */let dr=e.g.rotation.y-(D.ry===undefined?e.g.rotation.y:D.ry);dr=Math.abs(Math.atan2(Math.sin(dr),Math.cos(dr)));if(!A&&!c&&!mv&&dr>1e-4){/* v564: 제자리 회전은 90°에 두 걸음쯤 크게 딛도록 */D.wk+=dr*.5*6.2832;D.mv=Math.max(D.mv,Math.min(.9,dr/dt/.5))}}
+  {const lk=A||c?0:(e.lookY||0);D.lk=(D.lk||0)+(lk-(D.lk||0))*Math.min(1,dt*3.5);S2.look=D.lk}D.px=e.pos.x;D.pz=e.pos.z;D.ry=e.g.rotation.y;
   D.fl+=dt*fs;
   S2.t=time+e.ph;S2.walk=D.wk;S2.mv=D.mv;S2.fly=D.fly;S2.flap=D.fl;S2.spread=D.sp;S2.rear=D.rear;S2.wup=D.wup;S2.reach=D.rch;S2.breath=D.bre;S2.chg=D.chg;S2.crouch=D.cr;S2.atk=e.atk>0?Math.sin(e.atk/.35*Math.PI):0;
   DRK.pose(D.K,S2);
@@ -5432,7 +5433,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v563';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v564';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6936,7 +6937,11 @@ function update(dt){packTick();
     else if(!frz&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob){const v=steer(e,dx/dd,dz/dd,dd,dt),sk=e.spdK===undefined?1:e.spdK;/* v562: 검귀 걷기 시작 동작 동안 속도를 서서히 */e.pos.x+=v.x*spd*sk*dt;e.pos.z+=v.z*spd*sk*dt}
     if(e.holdT>0)e.holdT-=dt;{const ta=e.chg?e.chg.a:e.dA?e.dA.a:e.holdT>0?e.holdA:Math.atan2(dx,dz);
       if(e.final&&e.M&&e.M.mdl&&!(e.chg&&e.chg.w<=0)){/* v563: 용은 몸을 천천히 돌림(초당 최대 DGC.turn, 예고 중엔 더 빨리) — 캐릭터가 빨리 움직여도 제자리에서 휙휙 돌지 않게. 덜 돌았으면 그만큼 천천히 걸음 */
-        let d=ta-e.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const mx=e.chg?7:e.holdT>0?4.5:DGC.turn;e.tv=(e.tv||0)+(clamp(d*3.5,-mx,mx)-(e.tv||0))*Math.min(1,dt*(e.chg||e.holdT>0?12:4));
+        let d=ta-e.g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const aim=e.chg||e.holdT>0,mx=e.chg?7:e.holdT>0?4.5:DGC.turn,ad=Math.abs(d),far=dd>(e.rng||e.r+.75);
+        /* v564: 먼저 고개(목)로 따라보고, 각도가 DGC.turnOn 넘게 벌어져야 몸을 돌리기 시작 → DGC.turnOff 안으로 들어오면 멈춤. 걸어가는 중엔 완만하게 계속 돎 */
+        if(aim||far)e.trn=1;else if(ad>DGC.turnOn)e.trn=1;else if(ad<DGC.turnOff)e.trn=0;
+        e.lookY=aim?0:clamp(d,-DGC.lookMax,DGC.lookMax);
+        e.tv=(e.tv||0)+((e.trn?clamp(d*2.5,-mx,mx):0)-(e.tv||0))*Math.min(1,dt*(aim?12:2.5));
         const st=clamp(e.tv*dt,-Math.abs(d),Math.abs(d));e.g.rotation.y+=d*st>0?st:0;e.spdK=Math.max(.12,Math.cos(Math.min(1.5,Math.abs(d))))}
       else e.g.rotation.y=ta}
     e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob);
