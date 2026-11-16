@@ -879,6 +879,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .top .bar.hp i{background:linear-gradient(#e0554a,#9a2c26)}.top .bar.mp i{background:linear-gradient(#5a9ae0,#2a5a9a)}
 .top .bar.hp span,.top .bar.mp span{display:flex;align-items:center;justify-content:center;line-height:1!important;font-size:10.5px!important;font-weight:700;color:#fff}
 #curBar{display:flex;grid-column:1;grid-row:4;flex-direction:column;align-items:flex-start;gap:2px;margin-top:5px;padding-left:1.2px;min-width:0;font:800 12px var(--en);font-stretch:87%;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #000;pointer-events:none}
+#curBar{zoom:1.1}#topStack .bossbar span{white-space:nowrap}
+@media (orientation:landscape){#curBar{zoom:1.2}}/* v573: 재화 글자 세로 +10% · 가로·PC +20% */
 #curBar .cr1,#curBar .cr2{display:flex;align-items:center;height:16px;white-space:nowrap}#curBar .cr2{gap:6px}
 #curBar span{display:inline-flex;align-items:center}#curBar .cic{flex:none;margin-right:3px;overflow:visible}
 #curBar b{font-weight:800}.cg{color:#f0c84a}.ce{color:#ff6a4a}.cf{color:#ff9a3c}.cl{color:#ffeebd}
@@ -901,7 +903,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .top .feed{grid-column:1/3;grid-row:10;margin-top:0}
 @media (max-width:640px) and (orientation:portrait){
   .top{--sw:minmax(0,1fr);grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
-  .top .rcol{width:100%}
+  .top .rcol{width:90%}/* v573: 세로 미니맵 −10% */
+  #curBar .cr2{gap:3px}#curBar .cic{margin-right:2px}/* v573: 글자 +10%에도 체력바 폭 안에 들어가게 간격만 줄임 */
   .top .autoeq{display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   .top .feed{grid-column:1/4}.top .quest{grid-column:1/4}
   #topStack{top:calc(env(safe-area-inset-top,0px) + 88px)}
@@ -4380,7 +4383,7 @@ let shake=0;
 /* damage numbers */
 const dmgLayer=$('dmg'),dnPool=[];/* v131: PC는 HUD 전체가 zoom 1.7이라 숫자 위치가 1.7배로 밀리던 문제 — 좌표를 zoom으로 나눔 */
 /* v134: PC UI 확대 비율을 창 크기에 맞춤(최대 1.7배) — 좁은 창에서 위쪽 패널·버튼·미니맵이 겹치지 않게 */
-const pcHz=()=>{const r=document.documentElement;if(matchMedia('(orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine)').matches){r.style.setProperty('--hz',Math.max(1,Math.min(1.7,innerWidth/960,innerHeight/530)).toFixed(3))}else r.style.removeProperty('--hz')};pcHz();addEventListener('resize',pcHz);
+const pcHz=()=>{const r=document.documentElement;if(matchMedia('(orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine)').matches){r.style.setProperty('--hz',(Math.max(1,Math.min(1.7,innerWidth/960,innerHeight/530))*1.15).toFixed(3))/* v573: PC UI 전체 +15% */}else r.style.removeProperty('--hz')};pcHz();addEventListener('resize',pcHz);
 let dmZ=1;const calcDmZ=()=>{try{dmZ=parseFloat(getComputedStyle(document.querySelector('.hud')).zoom)||1}catch(_){dmZ=1}};calcDmZ();addEventListener('resize',calcDmZ);
 for(let i=0;i<30;i++){const d=document.createElement('div');d.className='dn';d.hidden=true;dmgLayer.appendChild(d);dnPool.push({el:d,live:false,wp:new THREE.Vector3(),t:0})}
 function dmgNum(p,val,cls='',h){if(cls==='hurt')return;/* v534: 피격 피해 숫자 표시 삭제 */const d=dnPool.find(x=>!x.live);if(!d)return;d.live=true;d.t=0;d.wp.set(p.x+rand(-.4,.4),h?Math.max(1,h*.82):2.2,p.z);/* v131: 맞은 몬스터 키에 맞춰 표시 */d.el.textContent=val;d.el.className='dn '+cls;d.el.hidden=false}
@@ -5485,7 +5488,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v572';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v573';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5561,7 +5564,7 @@ function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   if(S.ch>=NCH){if(gatePending())return '관문 보스';const n=Math.min(S.tierKills,tkFor(S.tier));return `${n}/${tkFor(S.tier)}`}
   const c=CH[S.ch];if(!c)return '';if(S.phase===0)return `${S.kills}/${c.goal}`;if(S.phase===1)return `보스까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`;return ''}
 /* v553: 칩을 숨긴 보스전에서는 보스 체력바(topStack)를 칩이 있던 자리로 올림 — 칩을 잠깐 보여 자리를 잰 뒤 다시 숨김 */
-function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* 세로 폰: 칩 칸 너비에 맞춤 */ts.style.left=(r.left+r.width/2)+'px';ts.style.width=r.width+'px'}else ts.style.left=ts.style.width=''}
+function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* v573 세로 폰: 체력바 오른쪽 끝 ~ 미니맵 왼쪽 끝 사이를 다 씀 */const hb=document.querySelector('.top .bar.hp').getBoundingClientRect(),mb=$('mini').getBoundingClientRect(),L=hb.right+8,R=mb.left-8;ts.style.left=((L+R)/2)+'px';ts.style.width=(R-L)+'px'}else ts.style.left=ts.style.width=''}
 addEventListener('resize',()=>setTimeout(chipSpot,60));
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
   {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid){ce.hidden=hid;chipSpot()}if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
