@@ -3249,7 +3249,7 @@ function drgLoad(){const N=DGN;if(N.st||!THREE.GLTFLoader)return;N.st=1;
     N.w=w;N.mat=m;N.K=DRK.setup(w);N.mouth=new THREE.Object3D();N.mouth.position.set(-.03,-.03,.13);N.K.B.head.add(N.mouth);
     /* 눈·가슴 용암 핵에 빛 번짐(멀리서도 보이게) */N.gl=[];for(const [b,x,y,z,sc,op] of [['head',-.047,.022,.09,.07,.9],['head',.022,.016,.09,.07,.9],['chest',0,-.035,.135,.34,.5]]){const o=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xff7a20,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));o.position.set(x,y,z);o.scale.setScalar(sc);o.userData.s=sc;o.userData.o=op;N.K.B[b].add(o);N.gl.push(o)}N.st=2;
     for(const e of enemies)if(e.final&&e.hp>0&&e.M&&!e.M.mdl){const M=dragonModelG();e.g.remove(e.M.root);e.g.add(M.root);e.M=M;e.h=M.h*e.g.scale.x+.3}}catch(_){N.st=3}},undefined,()=>{N.st=3})}
-function dragonModelG(){const N=DGN,C=DGC,root=new THREE.Group(),w=N.w;if(w.parent)w.parent.remove(w);w.scale.setScalar(C.S);w.position.set(0,-DRK.DG.gy*C.S,0);root.add(w);
+function dragonModelG(){endCorpses();const N=DGN,C=DGC,root=new THREE.Group(),w=N.w;if(w.parent)w.parent.remove(w);w.scale.setScalar(C.S);w.position.set(0,-DRK.DG.gy*C.S,0);root.add(w);
   return {root,legs:[],arms:[],wings:[],tail:[],dragon:true,mouth:N.mouth,h:C.h,mdl:{K:N.K,mat:N.mat,S:{},wk:0,fl:0,mv:0,fly:0,sp:0,rear:0,wup:0,bre:0,chg:0,cr:0,px:null,pz:0}}}
 function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.DG,sc=e.g.scale.x*DGC.S;
   e.atk=Math.max(0,e.atk-dt);let fly=0,sp=e.rage?.12:0,rear=0,rch=0,wup=0,bre=0,chg=0,cr=0,fs=1.6,mv=moving&&!c?1:0;
@@ -3326,11 +3326,12 @@ function airStep(e,dt){const A=e.air,M=e.M;A.t+=dt;if(A.intro)return drgIntroSte
 function deathFx(e){const g=e.g,side=Math.random()<.5?-1:1;e.mat.transparent=true;const y0=g.position.y;
   fx.push({m:g,t:0,dur:.75,keep:1,upd(k){g.rotation.z=side*Math.min(1,k*2.2)*1.3;g.position.y=y0-Math.max(0,k-.45)*1.2;e.mat.opacity=1-Math.max(0,(k-.4)/.6)},end(){e.mat.dispose()}})}
 /* v131 보스 쓰러짐: 비틀거림 → 옆으로 쓰러짐(쿵, 먼지·흔들림) → 잠시 누워 있다가 땅속으로 가라앉음 */
-/* v569: 용 사망 — 비틀거리며 고개를 쳐들었다가(0.45초) 앞다리가 꺾이며 앞으로 쓰러짐(0.6초) → 턱과 가슴이 바닥에 닿고 날개가 양옆으로 늘어짐 → 균열 빛이 꺼지고 가라앉음 */
+/* v570: 시체는 사라지지 않고 그 자리에 남음(스테이지를 나갈 때만 정리) */
+/* v569: 용 사망 — 비틀거리며 고개를 쳐들었다가(0.45초) 앞다리가 꺾이며 앞으로 쓰러짐(0.6초) → 턱과 가슴이 바닥에 닿고 날개가 양옆으로 늘어짐 → 균열 빛이 꺼진 채 시체로 남음 */
 function drgFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,D=e.M.mdl,S2=D.S,ry=g.rotation.y,y0=g.position.y,side=Math.random()<.5?-1:1,sc=g.scale.x*DGC.S,H=e.h||3;let land=0;
   const f0=D.fly,m0=D.mv,r0=D.rear,s0=D.sp,c0=D.cr,h0=D.chg,b0=D.bre,w0=D.wup,T1=.45,T2=1.05,lp={x:e.pos.x+Math.sin(ry)*.55*sc,z:e.pos.z+Math.cos(ry)*.55*sc};
   if(e.air)e.air=null;e.chg=null;g.children.forEach(c=>c.visible=true);g.rotation.set(0,ry,0);shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
-  fx.push({m:g,t:0,dur:3.5,keep:1,upd(k){if(DGN.w.parent!==e.M.root)return;/* 그 사이 새 용이 나오면 모델을 넘겨줌 */const T=k*3.5,a=Math.min(1,T/T1),o=1-a;let dd=0,rear=r0*o+Math.sin(a*Math.PI)*.4;
+  const F={m:g,t:0,dur:1e5,keep:1,corpse:1,upd(k){if(DGN.w.parent!==e.M.root){F.t=F.dur;return}/* 그 사이 새 용이 나오면 모델을 넘겨줌 */const T=Math.min(k*1e5,3.5);if(F.set)return;if(T>=3.5)F.set=1;a=Math.min(1,T/T1),o=1-a;let dd=0,rear=r0*o+Math.sin(a*Math.PI)*.4;
     g.position.y=y0*o*o;
     if(T>=T1){const b=Math.min(1,(T-T1)/(T2-T1));dd=b*b;rear=0;if(T>=T2){const c=T-T2;dd=1-.07*Math.sin(c*11)*Math.exp(-c*5);
       if(!land){land=1;shake=Math.max(shake,.6);groundFx(lp,shockTex,0xc8b090,1,e.r*3.4,.55,.8,true,.08);spray(PNRM,lp,30,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}}}
@@ -3338,8 +3339,8 @@ function drgFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.sp
     S2.t=time+e.ph;S2.walk=D.wk;S2.mv=m0*o;S2.fly=f0*o;S2.flap=D.fl;S2.spread=Math.max(s0*o,Math.sin(a*Math.PI)*.7*(1-dd));S2.rear=rear;S2.wup=w0*o;S2.reach=0;S2.breath=b0*o;S2.chg=h0*o;S2.crouch=c0*o;S2.atk=0;S2.look=(D.lk||0)*o;S2.dead=dd;S2.side=side;S2.bank=side*.1*dd+Math.sin(T*34)*.03*o;
     DRK.pose(D.K,S2);
     /* 균열·눈의 빛이 서서히 꺼짐 */const gk=T<T2?1:Math.max(.12,1-(T-T2)/1.1),g0=DGC.glow*gk;D.mat.emissive.setRGB(g0,g0,g0);D.mat.color.setScalar(DGC.col);for(const q of DGN.gl){q.scale.setScalar(q.userData.s*gk);q.material.opacity=q.userData.o*gk*gk}
-    if(T>2.6)g.position.y=-(T-2.6)/.9*H*.45},
-    end(){S2.dead=0;S2.side=0;S2.bank=0;try{e.mat.dispose()}catch(_){}}})}
+    },
+    end(){S2.dead=0;S2.side=0;S2.bank=0;try{e.mat.dispose()}catch(_){}}};fx.push(F)}
 function bossFall(e){if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);if(e.final&&e.M&&e.M.mdl)return drgFall(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
   /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
   const MW=!!((e.maw||e.duel)&&e.M&&e.M.root),/* v383: 잿불 검귀도 몸통만 쓰러지고 바닥 원(등급 고리·그림자)은 그대로 */tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
@@ -3352,15 +3353,15 @@ function bossFall(e){if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts
       const a=T-1.15;tg.rotation.z=rz0+side*(1.45+.1*Math.sin(a*10)*Math.exp(-a*6));if(T>2.05)tg.position.y=-(T-2.05)/.75*H*.7}},
     end(){try{e.mat.dispose()}catch(_){}}})}
 /* v478: 잿불 검귀 사망 — 한쪽 무릎을 꿇고 대검을 땅에 꽂은 뒤(1초) 그대로 굳었다가 재가 되어 가라앉음 */
-function bkKneel(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const K=BKN,g=e.g,r=K.root,M=e.M,u=M.u,ry=g.rotation.y,U=!!(S.duel&&S.duel.uber),D=K.acts.die._clip.duration,SC=g.scale.x*BKC.S*M.root.scale.x;let hit=0;
+function bkKneel(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const K=BKN,g=e.g,r=K.root,M=e.M,u=M.u,ry=g.rotation.y,U=!!(S.duel&&S.duel.uber),D=K.acts.die._clip.duration,SC=g.scale.x*BKC.S*M.root.scale.x;let hit=0,done=0;
   if(e.air)e.air=null;e.jy=0;g.position.y=0;bkSword('hand');u.body.rotation.set(0,0,0);r.rotation.y=0;r.position.y=0;shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);
   const sp={x:e.pos.x+Math.sin(ry)*.5*SC,z:e.pos.z+Math.cos(ry)*.5*SC};
-  fx.push({m:g,t:0,dur:3.4,keep:1,upd(k){const T=k*3.4;g.rotation.y=ry;
+  fx.push({m:g,t:0,dur:1e5,keep:1,corpse:1,upd(k){const T=Math.min(k*1e5,3.4);if(done)return;if(T>=3.4)done=1;g.rotation.y=ry;
     for(const n in K.acts){const a=K.acts[n];a.setEffectiveWeight(n==='die'?1:0);if(n==='die')a.time=Math.min(T,D-.02)}K.mx.update(0);
     for(const m of K.mats){const d=m.userData;if(d.c0){const f=1-.75*clamp((T-1.2)/1.6,0,1);m.emissive.copy(d.e0).multiplyScalar(f);m.color.copy(d.c0)}}
     if(!hit&&T>=.98){hit=1;shake=Math.max(shake,.6);groundFx(sp,shockTex,U?0xff7ac0:0xffb070,1,e.r*3.2,.5,.8,true,.08);decalFx(sp,crackTex,U?0xff3a9a:0xff7a2a,3.2,3.2,.9,true);blastFx(sp,2.2);
       spray(PNRM,sp,22,{sp:[2,6],up:[.5,2.5],y:[.1,.6],life:[.6,1.2],s0:[.8,1.4],s1:[1.6,2.4],c0:0x8a7a68,c1:0x3a342c,drag:2,grav:-1,tex:0})}
-    if(T>2.5){r.position.y=-(T-2.5)/.9*1.25;if(Math.random()<.6*QM())emit(PADD,{x:e.pos.x+rnd(-2,2),y:rnd(.2,3),z:e.pos.z+rnd(-2,2),vy:rnd(1,3),life:rnd(.5,1),s0:1.1,s1:.1,c0:U?0xff9ad0:0xffb060,c1:U?0x80104a:0xa01800,a:.8,tex:1})}},
+    },
     end(){r.position.y=0;try{e.mat.dispose()}catch(_){}}})}
 function dropEnemy(e,anim){e._rm=true;if(anim){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);deathFx(e);return}scene.remove(e.g);e.mat.dispose();e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1)}
 /* 스토리 맵: 길을 따라 미리 배치된 무리 (가까이 가면 깨어남) */
@@ -3415,7 +3416,8 @@ function bkLoad(){const K=BKN;if(K.st||!THREE.GLTFLoader)return;K.st=1;const C=B
 function bkSword(on){const K=BKN;if(!K.sw||K.swOn===on)return;K.swOn=on;if(on==='back'&&K.bk){K.bk.add(K.sw);K.sw.position.set(0,0,0);K.sw.quaternion.identity()}else{K.hand.add(K.sw);K.sw.position.copy(K.swP);K.sw.quaternion.copy(K.swQ)}}
 function bkColor(U){for(const m of BKN.mats){const isw=BKN.sw&&BKN.sw.material===m;
     m.userData.c0=new THREE.Color().setRGB(...(isw?[2.2,1.9,1.8]:U?[2.5,1.9,2.9]:[2.8,2.55,2.45]));m.userData.e0=new THREE.Color(U?0xff2a9a:0xff5a18);m.emissiveIntensity=isw?2:1.7;m.color.copy(m.userData.c0);m.emissive.copy(m.userData.e0)}}
-function bkAttach(e){const K=BKN;if(!K.st)bkLoad();const M=e.M;if(K.st!==2||!M||!M.duel||M.sk||e.hp<=0)return;const r=K.root,u=M.u,U=!!(S.duel&&S.duel.uber);
+function endCorpses(){for(const f of fx)if(f.corpse)f.t=f.dur}/* v570: 새 보스가 같은 모델을 쓰기 전에 남아 있던 시체를 정리 */
+function bkAttach(e){const K=BKN;if(!K.st)bkLoad();const M=e.M;if(K.st!==2||!M||!M.duel||M.sk||e.hp<=0)return;endCorpses();const r=K.root,u=M.u,U=!!(S.duel&&S.duel.uber);
   if(r.parent)r.parent.remove(r);r.position.set(0,0,0);r.rotation.set(0,0,0);M.root.add(r);M.sk=r;u.body.visible=false;
   bkColor(U);
   e.mat=new THREE.MeshLambertMaterial();/* 피격 깜빡임 값만 받는 그릇 — 실제 색은 bkTick에서 더해 줌 */
@@ -5453,7 +5455,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v569';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v570';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
