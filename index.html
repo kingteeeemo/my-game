@@ -3660,14 +3660,14 @@ function hurtPctRaw(pct){if(P.hp<=0||S.testGod)return;if(NS()){nsHurtPct(pct,tru
 /* v539: 심연의 아귀 모델(models/maw.glb) — 한 덩어리 모델에 뼈 6개(몸통 5 + 머리)를 코드로 심어, 기존 곡선(물결·숙임)을 따라 휘게 함. 받기 전·실패 시엔 기존 절차적 모델 */
 const MWC={file:'models/maw.glb',S:4.3,y0:-.6,ys:[-.95,-.7,-.45,-.2,.02],neck:.12,mouth:[0,.46,.34]},MWN={st:0,geo:null,mat:null};
 /* v578: 웅덩이 → 깊은 구덩이. 가장자리가 울퉁불퉁하고 거친 암벽이 아래로 어두워지며, 한참 아래(MWP.wy)에 검은 물이 차 있음. 아귀는 그 물에서 올라옴(몸통을 MWP.dy 만큼 내림) */
-const MWP={wy:-1.35,dy:-.8,rin:2.85},mawWTex=(()=>{let t=null;return()=>{if(t)return t;const c=mkCv(256),g=c.getContext('2d');g.clearRect(0,0,256,256);g.lineCap='round';
+const MWP={wy:-2.3,dy:-1.75,rin:2.7}/* v579: 깊이 1.7배(-1.35→-2.3) */,mawWTex=(()=>{let t=null;return()=>{if(t)return t;const c=mkCv(256),g=c.getContext('2d');g.clearRect(0,0,256,256);g.lineCap='round';
   for(let i=0;i<70;i++){const a=Math.random()*6.283,r=18+Math.random()*104,l=.25+Math.random()*.7;g.strokeStyle='rgba(255,255,255,'+(.05+Math.random()*.22)+')';g.lineWidth=1+Math.random()*3.5;g.beginPath();g.arc(128,128,r,a,a+l);g.stroke()}
   const q=g.createRadialGradient(128,128,20,128,128,128);q.addColorStop(0,'rgba(0,0,0,0)');q.addColorStop(.8,'rgba(0,0,0,0)');q.addColorStop(1,'rgba(0,0,0,1)');g.globalCompositeOperation='destination-out';g.fillStyle=q;g.fillRect(0,0,256,256);t=new THREE.CanvasTexture(c);return t}})();
 function mawPool(U){
   const pool=new THREE.Group(),W=MWP,N=64,hs=(a,b)=>{const x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x)};
   /* 암벽: 깊이별 고리를 울퉁불퉁하게 쌓고, 위는 바닥 돌 색 → 아래는 거의 검정. 각진 면으로 거친 느낌 */
-  const ys=[0,-.16,-.5,-.95,W.wy-.05,W.wy-.9],pos=[],col=[],idx=[];
-  for(let r=0;r<ys.length;r++)for(let k=0;k<N;k++){const t=-k/N*Math.PI*2,d=-ys[r],n=r?(hs(k,r)-.5)*.2+(hs(k*.5|0,r+9)-.5)*.14:0,rr=mawRimR(t)*(1-.035*d)+n-(r===1?.05:0);pos.push(Math.cos(t)*rr,ys[r]+(r&&r<ys.length-1?(hs(k,r+3)-.5)*.14:0),-Math.sin(t)*rr);
+  const ys=[0,-.16,-.5,-1,-1.6,W.wy-.05,W.wy-.9],pos=[],col=[],idx=[];
+  for(let r=0;r<ys.length;r++)for(let k=0;k<N;k++){const t=-k/N*Math.PI*2,d=-ys[r],n=r?(hs(k,r)-.5)*.2+(hs(k*.5|0,r+9)-.5)*.14:0,rr=mawRimR(t)*(1-.02*d)+n-(r===1?.05:0);pos.push(Math.cos(t)*rr,ys[r]+(r&&r<ys.length-1?(hs(k,r+3)-.5)*.14:0),-Math.sin(t)*rr);
     const f=Math.max(0,1-d/(-W.wy)),v=(.07+.5*f*f)*(.8+hs(k,r+5)*.4);col.push(v*1.0,v*.74,v*.68)}
   for(let r=0;r<ys.length-1;r++)for(let k=0;k<N;k++){const a=r*N+k,b=r*N+(k+1)%N,c=a+N,d=b+N;idx.push(a,c,b,b,c,d)}
   const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));wg.setAttribute('color',new THREE.Float32BufferAttribute(col,3));wg.setIndex(idx);const wgn=wg.toNonIndexed();wgn.computeVertexNormals();
@@ -5537,7 +5537,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v578';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v579';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
