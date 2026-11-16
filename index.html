@@ -2381,7 +2381,7 @@ function knActs(on){const a=document.getElementById('acts'),ap=document.getEleme
    쿼터뷰 카메라(남쪽 위)에서 가리지 않도록 높은 구조물은 북쪽·바깥쪽에만 둠 ===== */
 var mwSet=null,mwOn=false,mwSave=null,mwCine=null,mwDark=0;
 const MWS={z0:18.6,n:30,sd:1,sh:.3,w:5.2,cw:7,RW:40,WH:24,by:1.55};MWS.L=MWS.n*MWS.sd;MWS.h=MWS.n*MWS.sh;MWS.z1=MWS.z0+MWS.L;MWS.zE=MWS.z1+14;
-const MWL={hold:1.3,sink:1.1,dark:.9,eyes:1.3,cam:2.9};MWL.t1=MWL.hold;MWL.t2=MWL.t1+MWL.sink;MWL.t3=MWL.t2+MWL.dark;MWL.end=MWL.t3+MWL.eyes;
+const MWL={hold:1.3,sink:1.1,dark:.9,eyes:.6/* v598: 물속의 눈 삭제 — 어둠 속 정적만 잠깐 */,cam:2.9};MWL.t1=MWL.hold;MWL.t2=MWL.t1+MWL.sink;MWL.t3=MWL.t2+MWL.dark;MWL.end=MWL.t3+MWL.eyes;
 const mwStepY=z=>z>=MWS.z1?MWS.h:z<=MWS.z0?0:(Math.floor((z-MWS.z0)/MWS.sd)+1)*MWS.sh,mwHs=(a,b)=>{const x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x)},mwEdgeR=t=>20.7+.45*Math.sin(5*t+1)+.3*Math.sin(11*t+2.2)+.18*Math.sin(23*t+.4);
 /* 쿼터뷰에서 캐릭터를 가리지 않는 최대 높이 — 결투장 남쪽은 낮게, 북쪽·옆은 높게 */
 const mwHmax=(x,z)=>{if(Math.abs(x)>=21)return 9;const zs=Math.sqrt(Math.max(0,19.5*19.5-x*x));return z<-zs?12:clamp(1.1*(z-zs)-.4,.45,7)};
@@ -2392,7 +2392,6 @@ function mwFloorTex(){const N=512,a=fbm(N,6,5),b=fbm(N,5,4),c=fbm(N,10,3),d=fbm(
   {const g=cv.getContext('2d');g.lineCap='round';for(let q=0;q<26;q++){let x=Math.random()*N,y=Math.random()*N,d=Math.random()*6.28;g.strokeStyle='rgba(4,6,10,'+(.35+Math.random()*.4)+')';g.lineWidth=.8+Math.random()*1.6;g.beginPath();g.moveTo(x,y);for(let s=0;s<9;s++){d+=(Math.random()-.5)*1.3;x+=Math.cos(d)*(8+Math.random()*16);y+=Math.sin(d)*(8+Math.random()*16);g.lineTo(x,y)}g.stroke()}}
   return {t:cvTex(cv),r:cvTex(cr),e:cvTex(ce)}}
 function mwRipTex(){const N=256,c=mkCv(N),g=c.getContext('2d');g.clearRect(0,0,N,N);g.lineCap='round';for(let i=0;i<46;i++){const x=Math.random()*N,y=Math.random()*N,r=5+Math.random()*24,a=Math.random()*6.28,l=.6+Math.random()*2.2;g.strokeStyle='rgba(255,255,255,'+(.1+Math.random()*.4)+')';g.lineWidth=.8+Math.random()*1.8;for(const ox of [-N,0,N])for(const oy of [-N,0,N]){g.beginPath();g.ellipse(x+ox,y+oy,r,r*.42,0,a,a+l);g.stroke()}}return cvTex(c)}
-function mwEyeTex(){const c=mkCv(128),g=c.getContext('2d');g.clearRect(0,0,128,128);g.save();g.translate(64,64);g.scale(1,.46);const r=g.createRadialGradient(0,0,4,0,0,62);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.45,'rgba(255,255,255,.75)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.beginPath();g.arc(0,0,62,0,7);g.fill();g.restore();g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.92)';g.beginPath();g.ellipse(64,64,5,22,0,0,7);g.fill();return new THREE.CanvasTexture(c)}
 function mwShaftTex(){const c=mkCv(64),g=c.getContext('2d'),q=g.createLinearGradient(0,0,0,64);q.addColorStop(0,'rgba(255,255,255,0)');q.addColorStop(.25,'rgba(255,255,255,.9)');q.addColorStop(.75,'rgba(255,255,255,.45)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)}
 function mwBuild(){const S_=MWS,G=mwSet=new THREE.Group(),U=G.userData,hs=mwHs,F=mwFloorTex(),_m=new THREE.Matrix4(),_q=new THREE.Quaternion(),_e=new THREE.Euler(),_p=new THREE.Vector3(),_s=new THREE.Vector3(),_c=new THREE.Color();
   const put=(im,i,x,y,z,sx,sy,sz,rx,ry,rz,col)=>{_e.set(rx||0,ry||0,rz||0);_q.setFromEuler(_e);_m.compose(_p.set(x,y,z),_q,_s.set(sx,sy,sz));im.setMatrixAt(i,_m);if(col!==undefined)im.setColorAt(i,_c.setScalar(col))};
@@ -2448,8 +2447,7 @@ function mwBuild(){const S_=MWS,G=mwSet=new THREE.Group(),U=G.userData,hs=mwHs,F
   {const b=new THREE.Group(),sp=(s,op,col)=>{const o=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));o.scale.setScalar(s);o.userData.s=s;b.add(o);return o};U.bh=sp(4.6,.55,0xff7a28);U.bc=sp(1.1,1,0xffe2a8);
     const st=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,1,5),new THREE.MeshBasicMaterial({color:0x0a0810}));st.geometry.translate(0,-.5,0);st.scale.y=6;st.position.y=-.2;b.add(st);G.add(b);U.bait=b;
     const rf=new THREE.Mesh(new THREE.CircleGeometry(1,24),new THREE.MeshBasicMaterial({map:dotTex,color:0xff7a28,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending}));rf.rotation.x=-Math.PI/2;rf.scale.setScalar(2.6);rf.position.y=MWP.wy+.05;G.add(rf);U.brf=rf}
-  /* 물속의 눈 */
-  {const et=mwEyeTex();U.eyes=[-1,1].map(sx=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),new THREE.MeshBasicMaterial({map:et,color:0xc080ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));m.rotation.set(-Math.PI/2,0,sx*.42);m.position.set(sx*.92,MWP.wy+.07,.55);m.visible=false;G.add(m);return m})}
+  U.eyes=[];
   U.look=new THREE.Vector3();G.visible=false;scene.add(G)}
 function mwArena(on){if(on&&!mwSet)mwBuild();if(!mwSet||mwOn===on)return;mwOn=on;mwSet.visible=on;ground.visible=!on;const L=arenaLights,rm=arenaRing.material;
   if(on){mwSave={s:hemi.color.getHex(),g:hemi.groundColor.getHex(),i:hemi.intensity,su:sun.intensity,rc:rm.color.getHex(),ro:rm.opacity};hemi.color.setHex(0x6388b4);hemi.groundColor.setHex(0x0a1a24);rm.color.setHex(0x38b8d8);rm.opacity=.28;L[0].color.setHex(0xff8030);L[0].distance=34;L[0].intensity=0;L[1].color.setHex(0x3aa0d0);L[1].position.set(0,10,0);L[1].distance=48;mwDark=0;mwCine=null}
@@ -5880,7 +5878,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v597';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v598';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
