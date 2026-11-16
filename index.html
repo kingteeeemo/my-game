@@ -835,6 +835,33 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skill.s2{gap:12px}.skill.s2 h3{min-height:30px}.s2ess{display:flex;align-items:center;gap:8px;font:600 12px var(--ko);color:var(--muted)}.s2ess b{color:#ff9a4a;font-size:15px;font-weight:800}
 .skr .sgt b{border:0;background:none;padding-left:0}
 .ski{border-color:var(--ink);background:radial-gradient(circle at 50% 38%,#24242c,#101015 75%)}.ski svg{color:var(--ink)!important}
+
+/* v551 스킬창 B안 — 아이보리 + 차콜, 정수만 빨강 */
+#sheet{background:#141418;--iv:#e8dcc4;--ivd:#2c2a26;--ivm:#6e675a;--b2:#1f1f27;--b3:#2a2a32;--ln2:#24242b;gap:12px}
+#sheet .mstk{background:#141418;gap:4px;padding-bottom:0;border-bottom:1px solid var(--line)}
+#sheet .shead h2{margin:0;font-size:20px}
+.mtab{display:flex;align-items:center;gap:18px}.mtab button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:700 14px var(--ko);padding:8px 2px 10px;margin:0}.mtab button.on{color:var(--ink);border-bottom-color:var(--iv)}
+.mes{margin-left:auto;color:#ff6a4a;font:800 13px var(--ko);letter-spacing:0}.mes.lk{color:var(--muted);font-weight:600;font-size:11px}
+.mhero{display:flex;align-items:center;gap:12px}.mhi{box-sizing:border-box;width:52px;height:52px;border:1.5px solid var(--iv);border-radius:12px;color:var(--iv);padding:9px;background:var(--ivd);flex:none}.mhi svg,.mi svg,.mact i svg{width:100%;height:100%;display:block}
+.mhero b{display:block;font-size:17px;color:var(--ink)}.mhero small{color:var(--muted);font-size:12px}.mhero small em{font-style:normal;color:var(--iv);font-weight:800}
+#sheet .agbtn{margin-left:auto;font:800 12px var(--ko);height:34px;padding:0 12px;border-radius:9px;background:var(--ivd);border:1px solid var(--ivm);color:var(--iv);white-space:nowrap}#sheet .agbtn.on{background:var(--iv);border-color:var(--iv);color:#1a1008}
+.msec{display:flex;flex-direction:column}.mlbl{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);letter-spacing:.08em;font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.mr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ln2)}.mr.off{opacity:.5}
+.mi{width:36px;height:36px;flex:none;color:var(--muted);padding:6px;border-radius:8px;background:var(--b2);cursor:pointer;box-sizing:border-box}.mr.has .mi{color:var(--iv)}
+.mm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}.mt{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.mn{font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ml{font:700 11.5px var(--en);font-stretch:87%;color:var(--muted);flex:none}
+.mbar{display:flex;gap:2px;height:6px}.mbar i{flex:1;background:var(--b3);border-radius:2px}.mbar i.on{background:var(--iv)}
+.mb{display:flex;gap:6px;align-items:center;width:112px;flex:none}.mb.tt{width:150px}.msp{width:46px;flex:none}
+.mbt{flex:1;min-width:0;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--b2);color:var(--ink);font:800 12px var(--ko);padding:0 6px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.mbt.sq{flex:none;width:34px;padding:0}.mbt.p{background:var(--iv);border-color:var(--iv);color:#1a1008;font-size:16px}
+.mbt.e{background:#3a1712;border-color:#8a2e22;color:#ff8a6a;flex-direction:column;gap:0;line-height:1.15}.mbt.e small{font-size:9.5px;opacity:.8;color:inherit}
+.mbt:disabled{opacity:.35}.mb .msw{flex:none}
+.msw{width:46px;height:26px;border-radius:13px;background:var(--b3);border:0;position:relative;padding:0}.msw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#6a6770;transition:left .15s}.msw.on{background:var(--iv)}.msw.on:after{left:23px;background:#1a1008}.msw:disabled{opacity:.35}
+.mmana{display:flex;flex-direction:column;gap:6px}.mlb{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-weight:700}.mlb b{color:var(--iv);font-size:13px}.mbr{height:8px;border-radius:4px;background:var(--b3);overflow:hidden}.mbr i{display:block;height:100%;background:var(--iv)}
+.mact{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);font-weight:700}.mact i{width:26px;height:26px;border-radius:7px;border:1px solid var(--ivm);background:var(--ivd);color:var(--iv);padding:4px;box-sizing:border-box}.mact em{margin-left:auto;font-style:normal;color:var(--ink)}
+.msub{display:flex;gap:6px}.msub button{flex:1;padding:9px 0;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font:800 13px var(--ko)}.msub button.on{border-color:var(--iv);color:var(--iv);background:var(--ivd)}.msub i{font-style:normal;font-size:10px;margin-left:6px;background:var(--iv);color:#1a1008;border-radius:8px;padding:1px 6px}
+.msec .grow.elsw{background:var(--b2);border-color:var(--line);margin-top:8px}.msec .elsw .gd{background:var(--iv)!important;border-radius:50%;transform:none}.msec .elseg .pm.on{background:var(--iv);border-color:var(--iv);color:#1a1008}
+#skInfo .skic{border-color:#3a3a45}#skInfo .sgb{border-color:#3a3a45}#skInfo .sgb i.on{background:var(--iv,#e8dcc4);box-shadow:none}
 </style>
 
 <canvas id="c"></canvas>
@@ -1537,19 +1564,19 @@ function nsShoot(e){const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,d=Math.hypot(dx,
 function nsShotStep(dt){for(let i=nsShots.length-1;i>=0;i--){const o=nsShots[i];o.t+=dt;o.m.position.x+=o.vx*dt;o.m.position.z+=o.vz*dt;
   const hit=Math.hypot(o.m.position.x-P.pos.x,o.m.position.z-P.pos.z)<.7&&P.hp>0;if(hit&&!P.mv)hurtPlayer(o.dmg);
   if(hit&&!P.mv||o.t>2||inTown){scene.remove(o.m);nsShots.splice(i,1)}}}
-function auraRow(k){if(k==='pot'){const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0,D='1회: 3초 동안 생명력 30% / 마나 20%\n처치 점수 40점(일반 1·정예 3·유니크 10)마다 1회 · 보스 체력 20%마다 1회 · 보스 입장 시 가득';
-    return skRow({k:'au_pot',c:'#ff7a6a',n:'물약 충전 횟수',L:m,M:5,cur:`최대 충전 ${m}회\n`+D,nx:m<5?`최대 충전 ${m+1}회`:'',btns:`<button class="esb" data-pu="1" ${m<5&&(S.ess||0)>=c?'':'disabled'}>${m>=5?'최대':`◆ ${c}`}</button>`})}
+function auraRow(k){const tt=S.test;if(k==='pot'){const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0,D='1회: 3초 동안 생명력 30% / 마나 20%\n처치 점수 40점(일반 1·정예 3·유니크 10)마다 1회 · 보스 체력 20%마다 1회 · 보스 입장 시 가득';
+    return mnRow({k:'au_pot',n:'물약 충전 횟수',L:m,M:5,cur:`최대 충전 ${m}회\n`+D,nx:m<5?`최대 충전 ${m+1}회`:'',btns:m>=5?`<button class="mbt" disabled>최대</button><span class="msp"></span>`:`<button class="mbt e" data-pu="1" ${(S.ess||0)>=c?'':'disabled'}>◆ ${c}</button><span class="msp"></span>`})}
   const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
   const st=k==='blood'?(on?(P.bloodAct?'발동 중':'대기 (생명력 50% 이상에서 켜짐)'):(bloodOk()?'':'장비 생명력 재생 9.4% 이상 필요')):'';
-  return skRow({k:'au_'+k,c:a.c,n:a.n,L,M:10,cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')):'',btns:`${S.test?`<button class="pm" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-au="${k}" ${can?'':'disabled'}>${L>=10?'최대':`◆ ${c}`}</button><button class="pm wide${on?' on':''}" data-at="${k}" ${L?'':'disabled'}>${on?'ON':'OFF'}</button>`})}
-const AUGR=[['def','방어','#7fb0ff',['def','eva','es']],['dmg','피해','#ff6a4a',['crit','haste','blood']],['reg','재생','#5ad18a',['hreg','mreg','pot']]];
+  return mnRow({k:'au_'+k,n:a.n,L,M:10,cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'\n마나 점유 없음')):'',btns:`${tt?`<button class="mbt sq" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}${L>=10?`<button class="mbt" disabled>최대</button>`:`<button class="mbt e" data-au="${k}" ${can?'':'disabled'}>◆ ${c}</button>`}<button class="msw${on?' on':''}" data-at="${k}" ${L?'':'disabled'} aria-label="${a.n} ${on?'끄기':'켜기'}"></button>`})}
+const AUGR=[['def','방어',['def','eva','es']],['dmg','피해',['crit','haste','blood']],['reg','재생',['hreg','mreg','pot']]];
 let auG='def';
-function auraTabHtml(){const res=gear().res,rv=nsReserve();
-  let h=`<div class="skill s2"><h3>오라<span class="s2ess">보유 잿불 정수<b>◆ ${fmtG(S.ess||0)}</b></span></h3>
-  <p class="hint" style="margin:0">마나 점유 ${rv.toFixed(1)}% · 마나 점유 효율 +${res.toFixed(1)}% · 잔여 마나 ${Math.max(0,100-rv).toFixed(1)}%</p>`;
-  h+=`<div class="seg augs">${AUGR.map(([g,t,col,ks])=>{const n=ks.filter(k=>k!=='pot'&&auraOn(k)).length;return `<button data-aug="${g}" class="${auG===g?'on':''}" style="--gc:${col}">${t}${n?`<i>${n}</i>`:''}</button>`}).join('')}</div><div class="gems">`;
-  for(const k of AUGR.find(x=>x[0]===auG)[3])h+=auraRow(k);
-  return h+`</div></div>`}
+function auraTabHtml(){const res=gear().res,rv=nsReserve(),act=Object.keys(NAURA).filter(k=>auraOn(k));
+  let h=`<div class="mmana"><div class="mlb"><span>마나 점유 ${rv.toFixed(1)}% · 효율 +${res.toFixed(1)}%</span><span>잔여 마나 <b>${Math.max(0,100-rv).toFixed(1)}%</b></span></div><div class="mbr"><i style="width:${Math.min(100,rv)}%"></i></div></div>
+  <div class="mact"><span>켜진 오라</span>${act.map(k=>`<i>${skIco('au_'+k,'currentColor')}</i>`).join('')}<em>${act.length}개</em></div>
+  <div class="msub">${AUGR.map(([g,t,ks])=>{const n=ks.filter(k=>k!=='pot'&&auraOn(k)).length;return `<button data-aug="${g}" class="${auG===g?'on':''}">${t}${n?`<i>${n}</i>`:''}</button>`}).join('')}</div><div class="msec">`;
+  for(const k of AUGR.find(x=>x[0]===auG)[2])h+=auraRow(k);
+  return h+`</div>`}
 
 /* 특수 능력치 가중치는 아이템 레벨에 따라 상승 (v26):
    일반 옵션(최대 생명력 기준)이 iLv에 비례해 커지는 만큼, 특수 능력치의 평균 수치 증가분을 뺀 비율로 가중치를 올려
@@ -5360,7 +5387,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v552';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v553';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5896,44 +5923,39 @@ function skIco(k,c){let g=SKIGK[k]||'gem';if(k==='flame'&&typeof whEl==='functio
 const skSeg=(L,M)=>Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('');
 const SKI={};
 const skRow=o=>{const key=o.k+'|'+o.n;SKI[key]=o;return `<div class="skr${o.off?' off':''}" style="--c:${o.c}"><div class="ski" data-info="${key}" role="button">${skIco(o.k,o.c)}</div><div class="skm"><div class="sgt"><b data-info="${key}" role="button">${o.n}</b><span class="sgc">${o.btns}</span></div><div class="sgv"><span class="sgb">${skSeg(o.L,o.M)}</span><span class="sgl">${o.L}/${o.M}</span></div></div></div>`};
+const mnRow=o=>{const key=o.k+'|'+o.n;o.c='#e8dcc4';SKI[key]=o;return `<div class="mr${o.off?' off':''}${o.L?' has':''}"><div class="mi" data-info="${key}" role="button">${skIco(o.k,'currentColor')}</div><div class="mm"><div class="mt"><b class="mn" data-info="${key}" role="button">${o.n}</b><span class="ml">${o.L}/${o.M}</span></div><div class="mbar">${skSeg(o.L,o.M)}</div></div><span class="mb${S.test?' tt':''}">${o.btns}</span></div>`};
+const SKHERO={whirl:'area',volley:'multi',frost:'orbsize',quake:'qlen',rain:'rarea',chainl:'cbounce'};
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(!t)return;const o=SKI[t.dataset.info];if(!o)return;
   let w=document.getElementById('skInfo');if(w)w.remove();w=document.createElement('div');w.id='skInfo';w.style.setProperty('--c',o.c);
   w.innerHTML=`<div class="skic"><button class="skix" aria-label="닫기">✕</button><div class="skih"><div class="ski">${skIco(o.k,o.c)}</div><div><b>${o.n}</b><span class="sgl">${o.L}/${o.M}</span></div></div><div class="sgb">${skSeg(o.L,o.M)}</div>${o.cur?`<div class="skis"><small>현재 효과</small><p>${o.cur}</p></div>`:''}${o.nx?`<div class="skis"><small>다음 단계</small><p>${o.nx}</p></div>`:'<div class="skis"><small>최대 단계</small></div>'}</div>`;
   w.onclick=ev=>{if(ev.target===w||ev.target.closest('.skix'))w.remove()};document.body.appendChild(w)});
 function renderMenu(){
-  const c=C();
-  const tabsH=NS()?`<div class="seg mtabs">${[['sk','스킬 강화'],['sk2','추가 강화'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}</div>`:'';
-  let h=`<div class="mstk"><div class="shead"><div><div class="chap">${c.en} · Lv ${S.lv}</div><h2>${c.n} 스킬</h2></div><button class="close" id="mClose">닫기</button></div>${tabsH}</div>
+  const c=C();if(menuTab!=='aura')menuTab='sk';
+  const tabsH=`<div class="mtab">${[['sk','스킬'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}${menuTab==='aura'?`<span class="mes">◆ ${fmtG(S.ess||0)}</span>`:''}</div>`;
+  let h=`<div class="mstk"><div class="shead"><h2>${c.n} 스킬</h2><button class="close" id="mClose">닫기</button></div>${tabsH}</div>
   ${S.test?`<div class="ptsline" style="background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">테스트 캐릭터 · 강화를 − 로 내리면 포인트·정수가 돌아옵니다 · 저장 안 됨</span><button class="ghost" id="tGod" style="padding:6px 10px;font-size:12px">체력 무한 ${S.testGod?'끄기':'켜기'}</button><button class="ghost" id="tMp" style="padding:6px 10px;font-size:12px">마나 무한 ${S.testMp?'끄기':'켜기'}</button></div>`:''}
   ${S.pending?`<div class="ptsline" style="background:#2a2118;border:1px solid var(--ember);border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">고르지 않은 레벨업 강화 <b>${S.pending}</b>회</span><button class="primary" id="mLvNow" style="padding:8px 12px;font-size:13px">지금 고르기</button></div>`:''}
-
 `;
-  const showSk=!NS()||menuTab==='sk',showSk2=!NS()||menuTab==='sk2';
-  if(NS()&&menuTab==='aura')h+=auraTabHtml();
+  if(menuTab==='aura')h+=auraTabHtml();
   else for(const id of c.skills){
-    const pts=skp(id);
-    const s2o=showSk2&&!showSk&&gems2For(id).length?done1(id):null;
-    h+=`<div class="skill${s2o!==null?' s2':''}"><h3>${SK[id].n}${s2o!==null?`<span class="s2ess">${s2o?`보유 잿불 정수<b>◆ ${fmtG(S.ess||0)}</b>`:'1차 강화를 모두 채우면 열립니다'}</span>`:''}${showSk?`<button class="agbtn${S.autoGem?' on':''}" data-ag="${S.autoGem?'':'bal'}">자동 분배 ${S.autoGem?'ON':'OFF'}</button>`:''}</h3>
-    ${showSk?`<div class="ptsline"><span>남은 강화 포인트</span><b>${pts}</b></div><div class="gems">`:''}`;
-    if(showSk)for(const g of gemsFor(id)){const L=gl(id,g);
-      h+=skRow({k:g,c:GEMS[g].c,n:GEMS[g].n,L,M:GMAX,cur:L?GEMS[g].d(L):'',nx:L<GMAX?GEMS[g].d(L+1):'',btns:`${S.test?`<button class="pm" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}<button class="pm" data-a="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="pm wide" data-ax="${id},${g}" ${pts&&L<GMAX?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button>`})}
-    if(showSk)h+=`</div>`;
-    const g2s=showSk2?gems2For(id):[];
-    if(g2s.length){const open=done1(id);
-      h+=`<div><div class="gems">`;
-      for(const g of g2s){const L=g2(g),M=g2Max(g),c=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=c&&S.gold>=gc;
-        h+=skRow({k:g,c:GEMS2[g].c,n:GEMS2[g].n,L,M,off:!open,cur:L?GEMS2[g].d(L):'',nx:L<M?GEMS2[g].d(L+1):'',btns:`${S.test?`<button class="pm" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}<button class="esb" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">${L>=M?'최대':`◆ ${c}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(gc)}G</small>`}</button><button class="pm wide" data-ax2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 전부 강화">전부</button>`})}
+    const pts=skp(id),open=done1(id),g2s=gems2For(id);
+    h+=`<div class="mhero"><div class="mhi">${skIco(SKHERO[id]||SK[id].gems[0],'currentColor')}</div><div><b>${SK[id].n}</b><small>남은 강화 포인트 <em>${pts}</em></small></div><button class="agbtn${S.autoGem?' on':''}" data-ag="${S.autoGem?'':'bal'}">자동 분배 ${S.autoGem?'ON':'OFF'}</button></div>
+    <div class="msec"><div class="mlbl"><span>강화</span></div>`;
+    for(const g of gemsFor(id)){const L=gl(id,g);
+      h+=mnRow({k:g,n:GEMS[g].n,L,M:GMAX,cur:L?GEMS[g].d(L):'',nx:L<GMAX?GEMS[g].d(L+1):'',btns:`${S.test?`<button class="mbt sq" data-d="${id},${g}" ${L?'':'disabled'} aria-label="${GEMS[g].n} 내리기">−</button>`:''}${L>=GMAX?`<button class="mbt" disabled>최대</button>`:`<button class="mbt sq p" data-a="${id},${g}" ${pts?'':'disabled'} aria-label="${GEMS[g].n} 올리기">+</button><button class="mbt" data-ax="${id},${g}" ${pts?'':'disabled'} aria-label="${GEMS[g].n} 전부 올리기">전부</button>`}`})}
+    h+=`</div>`;
+    if(g2s.length){
+      h+=`<div class="msec"><div class="mlbl"><span>추가 강화</span><span class="mes${open?'':' lk'}">${open?'◆ '+fmtG(S.ess||0):'1차 강화를 모두 채우면 열립니다'}</span></div>`;
+      for(const g of g2s){const L=g2(g),M=g2Max(g),cc=L<M?g2Cost(g,L):0,gc=L<M?g2Gold(g,L):0,can=open&&L<M&&(S.ess||0)>=cc&&S.gold>=gc;
+        h+=mnRow({k:g,n:GEMS2[g].n,L,M,off:!open,cur:L?GEMS2[g].d(L):'',nx:L<M?GEMS2[g].d(L+1):'',btns:`${S.test?`<button class="mbt sq" data-d2="${g}" ${L?'':'disabled'} aria-label="${GEMS2[g].n} 내리기">−</button>`:''}${L>=M?`<button class="mbt" disabled>최대</button>`:`<button class="mbt e" data-a2="${g}" ${can?'':'disabled'} aria-label="${GEMS2[g].n} 강화">◆ ${cc}<small>${fmtG(gc)}G</small></button>`}`})}
       if(id==='volley'||id==='rain'){const el=arEl(),c=elCost(),can=S.gold>=c;
-        h+=`<div class="grow elsw"><span class="gd" style="background:${el==='fire'?'#ff7a4a':'#b8a0ff'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
+        h+=`<div class="grow elsw"><span class="gd"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='bolt'?' on':''}" data-el="bolt" ${el==='bolt'||!can?'disabled':''}>⚡ 번개</button><button class="pm wide${el==='fire'?' on':''}" data-el="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button></span></div>`}
       if(id==='whirl'){const el=whEl(),c=elCost(),can=S.gold>=c;
-        h+=`<div class="grow elsw"><span class="gd" style="background:${el==='frost'?'#7fd0ff':'#ff8a3a'};border-radius:50%;transform:none"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
+        h+=`<div class="grow elsw"><span class="gd"></span><span class="t">폭발 속성<small>피해·범위는 같고 모습만 바뀝니다 · 바꿀 때 ${fmtG(c)}G (레벨이 높을수록 비쌈)</small></span>
           <span class="elseg"><button class="pm wide${el==='fire'?' on':''}" data-wel="fire" ${el==='fire'||!can?'disabled':''}>🔥 화염</button><button class="pm wide${el==='frost'?' on':''}" data-wel="frost" ${el==='frost'||!can?'disabled':''}>❄ 서리</button></span></div>`}
-      if(!NS()){const L=S.sk2dmg||0,c=infCost(L),done=g2Done(id),can=done&&(S.ess||0)>=c.e&&S.gold>=c.g;
-        h+=`<div class="grow${done?'':' off'}" style="border-color:${done?'rgba(255,90,58,.6)':'var(--line)'}"><span class="gd" style="background:#ff5a3a;border-radius:2px;transform:rotate(45deg) scale(.8)"></span><span class="t">피해 증가 <span class="lvtag">무한</span></span>
-        <span class="lvp">${L}</span>${S.test?`<button class="pm" data-dinf="1" ${L?'':'disabled'}>−</button>`:''}<button class="esb" data-inf="1" ${can?'':'disabled'}>◆ ${c.e}<small style="display:block;font-size:10px;color:#ffd24a">${fmtG(c.g)}G</small></button><button class="pm wide" data-infx="1" ${can?'':'disabled'}>전부</button><small class="gsub">${done?`스킬 피해 +${Math.round(infDmg(L)*100)}% (단계당 +${INF_D*100}%)`:'2차 강화를 모두 채우면 열립니다'}</small></div>`}
-      h+=`</div></div>`}
-    h+=`</div>`}
+      h+=`</div>`}
+  }
   h+=`<div class="foot"><span>PC: 좌클릭 스킬 · 우클릭/Space 기본 공격</span><button id="mReset">저장 슬롯 화면</button></div>`;
   $('sheet').innerHTML=h;
 }
