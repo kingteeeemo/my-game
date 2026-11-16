@@ -2557,7 +2557,7 @@ function mawLureUpd(M,t,U){if(!M.lure){const g=new THREE.Group(),st=new THREE.Me
 /* ===== v601: 잿불 왕좌 — 아쉬카르(스토리 최종 결전) 맵. 화산 정상의 무너진 왕좌 홀: 구름 바다 위로 솟은 원형 단상, 부러진 거대 기둥과 아치, 북쪽 끝의 왕좌, 남쪽으로 내려가는 큰 계단.
    쿼터뷰 카메라(남쪽 위)를 가리지 않게 높은 구조물은 북쪽·옆에만(mwHmax 규칙), 남쪽은 밑동만 남은 기둥 ===== */
 var thSet=null,thOn=false,thSave=null;
-const THR={RF:23,cy:-17};
+const THR={RF:23,cy:-17,/* v609: 아쉬카르가 앉아 있는 동쪽(오른쪽) 바위산 꼭대기 */pk:{x:60,y:11,z:-16}};
 function thFloorTex(){const N=2048,R=THR.RF,S=N/2/R,C=N/2,c=mkCv(N),g=c.getContext('2d'),E=1024,ES=E/2/R,EC=E/2,ec=mkCv(E),eg=ec.getContext('2d');
   g.fillStyle='#120d0b';g.fillRect(0,0,N,N);eg.fillStyle='#000';eg.fillRect(0,0,E,E);
   const seg=(r0,r1,a0,a1,base,gap,tint)=>{gap=gap||.07;const ra=r0+gap,rb=r1-gap,da=gap/Math.max(.5,(r0+r1)/2),A0=a0+da,A1=a1-da;if(A1<=A0||rb<=ra)return;
@@ -2632,6 +2632,9 @@ function thBuild(){const T=THR,R=T.RF,G=thSet=new THREE.Group(),U=G.userData,hs=
     /* 떨어진 등받이 조각 */{const o=bx(3,1.2,4.4,6.4,.5,-21.4,base,.5);o.rotation.z=.16}
     U.fl=[];for(const sx of [-1,1]){const o=new THREE.Mesh(new THREE.CylinderGeometry(.55,1.25,9.5,6),dark);o.position.set(sx*7.2,4.75,-25.2);o.castShadow=true;BK.add(o);const bw=new THREE.Mesh(new THREE.CylinderGeometry(1.25,.6,.8,10),gold);bw.position.set(sx*7.2,9.9,-25.2);BK.add(bw);
       for(const [s,op,col,dy] of [[4.2,.55,0xff6a20,.9],[1.8,.95,0xffd08a,.6]]){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:col,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));sp.scale.set(s,s*1.35,1);sp.position.set(sx*7.2,10.3+dy,-25.2);sp.userData.s=s;BK.add(sp);U.fl.push(sp)}}}
+  /* v609: 동쪽 바위산 — 아쉬카르가 앉아 있다가 날아오르는 곳. 뒤에 잿불빛을 깔아 윤곽이 보이게 */{const K=T.pk,H=K.y-(T.cy-6),g=new THREE.CylinderGeometry(3.2,16,H,11,6),p=g.attributes.position,col=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),u=y/H+.5,a=Math.atan2(z,x),k=u>.97?1:1+(.22*Math.sin(a*3+y*.5)+.14*Math.sin(a*7-y*.9))*(1-u*.6);p.setX(i,x*k);p.setZ(i,z*k);const c=.25+.75*u*u;col[i*3]=.2*c;col[i*3+1]=.1*c;col[i*3+2]=.075*c}
+    g.setAttribute('color',new THREE.BufferAttribute(col,3));const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,fog:false}));m.position.set(K.x,K.y-H/2,K.z);G.add(m);
+    const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xff5a1a,transparent:true,opacity:.3,depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));gl.scale.set(64,44,1);gl.position.set(K.x+14,K.y+6,K.z-10);gl.renderOrder=-4;G.add(gl)}
   /* 남쪽 큰 계단(올라온 길) — 아래로 내려가 구름 속으로 */
   {const n=22,im=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9,map:F.t}),n+4);for(let i=0;i<n;i++)put(im,i,0,-.2-i*.4-3,R-.6+(i+.5)*1.25,10+hs(i,50)*.3,6,1.27,0,0,0,.55+hs(i,51)*.2);
     for(const sx of [-1,1]){put(im,n+(sx>0?0:1),sx*5.7,-4.6,R+13,1.3,10,28,-.31,0,0,.42);put(im,n+(sx>0?2:3),sx*5.7,.55,R+.2,1.7,1.5,1.7,0,0,0,.5)}im.castShadow=im.receiveShadow=true;im.frustumCulled=false;im.instanceColor.needsUpdate=true;G.add(im)}
@@ -2644,7 +2647,7 @@ function thBreak(now){if(!thSet)return;const U=thSet.userData;if(!U.brk.visible)
 function thMend(){if(!thSet)return;const U=thSet.userData;U.brk.visible=true;U.rub.visible=false}
 const thStepY=z=>{const z0=THR.RF-.6;return z<=z0?0:-.2-.4*Math.min(21,Math.floor((z-z0)/1.25))};
 /* v603: 왕좌로 오르는 계단 — 아래에서 시작해 올라오면 등장 연출(소개 화면)이 시작됨 */
-function thApprStart(fb){knAppr=1;knActs(false);const z=THR.RF-.6+1.25*17+.6;P.pos.set(0,thStepY(z),z);P.mv=null;camT.set(0,0,z);P.face=Math.PI;hero.rotation.y=Math.PI;if(fb&&!fb.perch)fb.g.visible=false;/* v608: 아쉬카르는 계단을 오르는 동안에도 먼 봉우리에 앉은 모습이 보임 */thSet.userData.ap=1;$('cine').hidden=true}
+function thApprStart(fb){knAppr=1;knActs(false);const z=THR.RF-.6+1.25*17+.6;P.pos.set(0,thStepY(z),z);P.mv=null;camT.set(0,0,z);P.face=Math.PI;hero.rotation.y=Math.PI;if(fb)fb.g.visible=false;/* v609: 계단을 오르는 동안은 아무것도 없음 */thSet.userData.ap=1;$('cine').hidden=true}
 function thCam(dt){const px=P.pos.x,py=P.pos.y,pz=P.pos.z;scene.fog.near=30;scene.fog.far=130;dgCamW=-1;camera.position.set(px*.6+1.6,py+2.7,pz+7.4);camera.lookAt(px*.3,py+3.6,pz-14);DGCAM.lk=0;DGCAM.px=px;DGCAM.pz=pz}
 function thArena(on){if(!on&&typeof ashItlDrop==='function')ashItlDrop();if(on)thMend();if(on&&!thSet)thBuild();if(!thSet||thOn===on)return;thOn=on;thSet.visible=on;ground.visible=!on;
   if(on){thSave={g:hemi.groundColor.getHex(),i:hemi.intensity};hemi.groundColor.setHex(0x8a3410);hemi.intensity=.7}else{if(thSave){hemi.groundColor.setHex(thSave.g);hemi.intensity=thSave.i;thSave=null}thSet.userData.ap=0;P.pos.y=0}}
@@ -2653,24 +2656,26 @@ function thTick(dt,t){const U=thSet.userData;if(knAppr===1&&U.ap){P.pos.y+=(thSt
   if(dt<=0)return;/* 절벽 아래에서 올라오는 불티 */if(Math.random()<dt*9*QM()){const a=rnd(0,6.28),r=THR.RF+rnd(.5,5);emit(PADD,{x:Math.cos(a)*r,y:rnd(-6,-1),z:Math.sin(a)*r,vx:rnd(-.4,.4),vz:rnd(-.4,.4),vy:rnd(2,5),life:rnd(1.6,3),s0:rnd(.12,.3),s1:.04,c0:0xff8a30,c1:0x8a1a04,a:.9,drag:.2})}}
 /* ===== v603: 거대한 아쉬카르 — 왕좌 뒤 절벽에서 올라와 앞발로 단상을 짚고 상반신만 보이는 자세(perch). 앞발을 축으로 몸 전체를 뒤로 세워 하반신은 절벽 아래로 내림.
    1페이즈 패턴: 내려찍기 · 불씨 비 · 물어뜯기(뒤에 머리가 내려와 약점 노출) ===== */
-const ASH={sc:12,a:-.6,pz:-18.8,zp:-.274,dy:5,dz:2.5,arm:1.3,r:7.5,rise:1.5,roar:1.7,/* v608 등장: 먼 봉우리에 앉아 있다가(far) 날아와(fly) 왕좌에 내려앉음(land) */far:1.5,fly:2.8,land:.6,hov:[0,10,-30],cd:4.4,cd2:3.9,weak:2.6,wk:1.5,
-  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-12.9,shZ:4.4,shR:3.3,p1:.9};
+const ASH={sc:12,a:-.6,pz:-15,/* v609: 밀려나던 것을 없애고 자리를 직접 정함 — 가슴이 무너진 북쪽 가장자리에서 올라오는 위치 */zp:-.274,dy:5,dz:2.5,arm:1.3,r:7.5,rise:1.5,roar:1.7,/* v608 등장: 먼 봉우리에 앉아 있다가(far) 날아와(fly) 왕좌에 내려앉음(land) */far:2.1,fly:3.6,land:.6,hov:[0,10,-30],c1:[42,28,-52],c2:[0,26,-72],cd:4.4,cd2:3.9,weak:2.6,wk:1.5,
+  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-16,shZ:4.4,shR:3.3,p1:.9};
 function ashSetup(e,intro){e.perch=1;e.g.scale.setScalar(ASH.sc);e.pos.set(0,0,ASH.pz);e.r=ASH.r;e.spd=0;e.h=7;e.py=0;e.pat=3.2;e.patN=0;e.weakT=0;e.holdT=0;e.p2=0;ashItlDrop();e.itl=null;e.brW=0;e.brT=0;e.chg=null;e.g.rotation.order='YXZ';e.g.rotation.set(0,0,0);e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});
-  e.py=0;e.aimT=0;if(intro){thMend();e.air={st:'far',t:0,intro:1};e.aggro=false;e.pk=0;const F=e.fpos=ashPeak();e.g.position.set(F.x,F.y,F.z);ashFog(e,false);enemyAnim(e,0,false)}else{thBreak(1);e.air=null;e.aggro=true;e.pk=1;e.g.position.set(e.pos.x,0,e.pos.z);ashFog(e,true)}}
+  e.py=0;e.aimT=0;if(intro){thMend();e.air={st:'far',t:0,intro:1};e.aggro=false;e.pk=0;const F=ashPeak();e.fw=new THREE.Vector3(F.x,F.y,F.z);e.fy=Math.atan2(-F.x,-F.z-8);e.g.position.set(0,0,ASH.pz);ashFog(e,false);enemyAnim(e,0,false)}else{thBreak(1);e.air=null;e.fw=null;e.aggro=true;e.pk=1;e.g.position.set(0,0,ASH.pz);ashFog(e,true)}}
 /* v605: 몸을 dy 만큼 내리고 dz 만큼 뒤로 — 허리 아래는 절벽 밑으로. 앞발은 그만큼 위·앞으로 뻗어 단상을 그대로 짚음(ashArm), 뒷다리는 숨김 */
-function ashPose(e){const R=e.M.root,a=ASH.a,z=ASH.zp,k=e.pk===undefined?1:e.pk;/* pk 0=자유(앉기·비행) → 1=왕좌에 걸친 자세 */R.rotation.x=a*k;R.position.set(0,(z*Math.sin(a)-ASH.dy/ASH.sc)*k,(-z*Math.cos(a)-ASH.dz/ASH.sc)*k)}
-function ashPeak(){const hs=mwHs,d=62+hs(5,1)*22,h=24+hs(5,2)*26;return{x:0,y:THR.cy-6+h-1.5,z:-d}}/* 정북쪽 봉우리 꼭대기 */
+function ashPose(e){const R=e.M.root,a=ASH.a,z=ASH.zp,k=e.pk===undefined?1:e.pk;/* pk 0=자유(앉기·비행) → 1=왕좌에 걸친 자세 */const f=e.fw,sc=ASH.sc;/* v609: e.pos(=그룹 위치)는 왕좌에 둔 채, 비행 중 위치·방향(e.fw·e.fy)은 모델 뿌리에만 줌 — 판정·이름표·카메라 기준이 흔들리지 않게 */R.rotation.order='YXZ';R.rotation.x=a*k;R.rotation.y=f?e.fy||0:0;R.position.set(f?(f.x-e.pos.x)/sc:0,(z*Math.sin(a)-ASH.dy/sc)*k+(f?f.y/sc:0),(-z*Math.cos(a)-ASH.dz/sc)*k+(f?(f.z-e.pos.z)/sc:0))}
+function ashPeak(){return THR.pk}
 function ashArm(){const I=ASH,k=I.sc*DGC.S,c=Math.cos(-I.a),n=Math.sin(-I.a),G=DRK.DG;return{handY:G.handY+(I.dy*c-I.dz*n)/k,handZ:G.handZ+(I.dy*n+I.dz*c)/k,armS:I.arm}}
 /* v608: 평소엔 몸·팔·얼굴 모두 정면 고정. 겨냥하는 패턴(내려찍기·물어뜯기·숨결) 동안만 그 방향으로 돌았다가 정면으로 돌아옴 */
 function ashFace(e,dt){e.g.position.set(e.pos.x,0,e.pos.z);e.aimT=Math.max(0,(e.aimT||0)-dt);const ty=e.aimT>0?e.aimY:0;e.g.rotation.y+=(ty-e.g.rotation.y)*Math.min(1,dt*(e.aimT>0?3:1.6))}
 function ashAim(e,t){e.aimY=clamp(Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),-.45,.45);e.aimT=t}
-function ashIntroStep(e,dt){const A=e.air,T=A.t,I=ASH,paws=[{x:-6.6,z:I.pz},{x:6.6,z:I.pz}],g=e.g,F=e.fpos||(e.fpos=ashPeak()),H=I.hov;g.rotation.y=0;e.py=0;
-  if(A.st==='far'){e.pk=0;g.position.set(F.x,F.y,F.z);if(T>I.far){A.st='fly';A.t=0}}
-  else if(A.st==='fly'){e.pk=0;const k=Math.min(1,T/I.fly),q=k*k*(3-2*k);g.position.set(F.x+(H[0]-F.x)*q,F.y+(H[1]-F.y)*q+Math.sin(k*Math.PI)*7,F.z+(H[2]-F.z)*q);if(k>=1){A.st='land';A.t=0}}
-  else if(A.st==='land'){const k=Math.min(1,T/I.land),q=k*k;e.pk=k*k*(3-2*k);g.position.set(H[0]*(1-q),H[1]*(1-q),H[2]+(I.pz-H[2])*q);if(k>.35&&!A.brk){A.brk=1;thBreak(0)}shake=Math.max(shake,.15+.3*k);
+function ashIntroStep(e,dt){const A=e.air,T=A.t,I=ASH,paws=[{x:-6.6,z:I.pz},{x:6.6,z:I.pz}],g=e.g,F=ashPeak(),H=I.hov,W=e.fw||(e.fw=new THREE.Vector3());e.py=0;g.position.set(0,0,I.pz);g.rotation.y=0;
+  const yaw=(ty,r)=>{let d=ty-e.fy;d=Math.atan2(Math.sin(d),Math.cos(d));e.fy+=d*Math.min(1,dt*r)};
+  if(A.st==='far'){e.pk=0;W.set(F.x,F.y,F.z);if(!A.i0){A.i0=1;e.fy=Math.atan2(-F.x,-F.z-8)}if(T>I.far){A.st='fly';A.t=0}}
+  else if(A.st==='fly'){/* 오른쪽 산에서 날아올라 북쪽으로 크게 돌아 정면에서 다가옴(3차 곡선) */e.pk=0;const k=Math.min(1,T/I.fly),u=k*k*(3-2*k),v=1-u,C1=I.c1,C2=I.c2,P0=[F.x,F.y,F.z],bz=i=>v*v*v*P0[i]+3*v*v*u*C1[i]+3*v*u*u*C2[i]+u*u*u*H[i],dv=i=>3*v*v*(C1[i]-P0[i])+6*v*u*(C2[i]-C1[i])+3*u*u*(H[i]-C2[i]);
+    W.set(bz(0),bz(1),bz(2));yaw(Math.atan2(dv(0),dv(2)),k>.85?8:4);if(k>=1){A.st='land';A.t=0}}
+  else if(A.st==='land'){const k=Math.min(1,T/I.land),q=k*k;yaw(0,10);e.pk=k*k*(3-2*k);W.set(H[0]*(1-q),H[1]*(1-q),H[2]+(I.pz-H[2])*q);if(k>.35&&!A.brk){A.brk=1;thBreak(0)}shake=Math.max(shake,.15+.3*k);
     if(k>=1&&!A.hit){A.hit=1;shake=1;for(const p of paws){ringFx(p,6,0xff7a3a,.6);spray(PNRM,p,26,{r0:2.5,sp:[2,7],up:[1,5],y:[.1,.6],life:[.7,1.4],s0:[.9,1.6],s1:[2.2,3.4],c0:0x6a5a50,c1:0x1a1210,a:.6,drag:2,grav:-2,tex:0});spray(PADD,p,30,{r0:2,sp:[2,9],up:[3,10],y:[.1,.4],life:[.5,1.1],s0:[.25,.5],s1:[.05,.1],c0:0xffa040,c1:0x8a1a04,a:.9,drag:.8,grav:-14,tex:1})}}
     if(T>I.land+.5){A.st='roar';A.t=0}}
-  else{e.pk=1;g.position.set(e.pos.x,0,e.pos.z);if(T<1.2){shake=Math.max(shake,.25);if(Math.floor(T/.3)!==Math.floor((T-dt)/.3))ringFx({x:0,z:I.pz+2},8+T*8,0xff6a2a,.5)}if(T>=I.roar){e.air=null;e.aggro=true;e.pat=3;ashFog(e,true)}}
+  else{e.pk=1;e.fy=0;W.set(0,0,I.pz);if(T<1.2){shake=Math.max(shake,.25);if(Math.floor(T/.3)!==Math.floor((T-dt)/.3))ringFx({x:0,z:I.pz+2},8+T*8,0xff6a2a,.5)}if(T>=I.roar){e.air=null;e.fw=null;e.aggro=true;e.pat=3;ashFog(e,true)}}
   enemyAnim(e,dt,false)}
 function ashFog(e,on){const m=e.M&&e.M.mdl&&e.M.mdl.mat;if(m&&m.fog!==on){m.fog=on;m.needsUpdate=true}}/* 멀리 봉우리에 있을 땐 안개에 묻히지 않게 */
 function ashStep(e,dt){const I=ASH;if(e.itl)return ashInterStep(e,dt);ashFace(e,dt);e.weakT=Math.max(0,(e.weakT||0)-dt);e.holdT=Math.max(0,(e.holdT||0)-dt);e.brW=Math.max(0,(e.brW||0)-dt);e.brT=Math.max(0,(e.brT||0)-dt);if(e.weakT>0)e.brT=Math.max(e.brT,.1);/* 물어뜯은 뒤엔 머리를 내린 채 */
@@ -7713,7 +7718,7 @@ function update(dt){packTick();
     else e.mat.emissive.setHex(frz?0x3a78b0:e.slowT>0?0x223a55:0);
   }
   for(let i=0;i<enemies.length;i++)for(let j=i+1;j<enemies.length;j++){const a=enemies[i],b=enemies[j];const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,dd=Math.hypot(dx,dz),m=a.r+b.r;if(dd<m&&dd>1e-4){const o=(m-dd)/2,ux=dx/dd,uz=dz/dd;if(!a.boss){a.pos.x-=ux*o;a.pos.z-=uz*o}if(!b.boss){b.pos.x+=ux*o;b.pos.z+=uz*o}}}
-  for(const e of enemies)pushOut(e.pos,e.r);
+  for(const e of enemies)if(!e.perch)pushOut(e.pos,e.r);/* v609: 왕좌에 걸친 아쉬카르는 단상 가장자리 밖이 제자리 — 안쪽으로 밀어 넣지 않음(7m쯤 앞으로 밀려 있던 문제) */
 
   hgBuild();
   for(let i=projs.length-1;i>=0;i--){const p=projs[i],pp=p.m.position;
@@ -7857,7 +7862,7 @@ function drgCam(dt){const C=DGCAM;
   else if(mw){const K=MWI.cam,sc=b.g.scale.x,ld=innerWidth>innerHeight?K.land:1;let ax=P.pos.x-b.pos.x,az=P.pos.z-b.pos.z;const al=Math.hypot(ax,az)||1,cs=Math.cos(K.yaw),sn=Math.sin(K.yaw);ax/=al;az/=al;
     const a=clamp((b.introT-(MWI.pre-.15))/.9,0,1),ae=a*a*(3-2*a),pr=clamp(b.introT/MWI.pre,0,1),D=(K.d0-1.2*pr+(K.d1*ld-K.d0+1.2)*ae)*sc,y=(K.y0-.6*pr+(K.y1-K.y0+.6)*ae)*sc;/* 천천히 구멍으로 다가가다 → 솟구칠 때 뒤로 빠지며 낮아짐 */
     _dcP.set(b.pos.x+(ax*cs-az*sn)*D,y,b.pos.z+(ax*sn+az*cs)*D);_dcQ.set(b.pos.x,MWP.wy+(b.h*K.ly-MWP.wy)*ae,b.pos.z);_dcL.copy(_dcQ);DGCAM.lk=1}
-  else if(b.perch){/* v608: 먼 봉우리에 앉은 모습 → 날아오는 동안 따라 봄 → 내려앉으면 멀찍이서 올려다봄 */const st=b.air.st,gp=b.g.position;if(st==='far'||st==='fly')_dcQ.set(gp.x,gp.y+5,gp.z);else _dcQ.set(0,8.5,ASH.pz-3);_dcP.set(P.pos.x*.5+3.5,3.4,P.pos.z+10)}
+  else if(b.perch){/* v608: 먼 봉우리에 앉은 모습 → 날아오는 동안 따라 봄 → 내려앉으면 멀찍이서 올려다봄 */const st=b.air.st,gp=b.fw||b.g.position;if(st==='far'||st==='fly')_dcQ.set(gp.x,gp.y+5,gp.z);/* v609: 오른쪽 바위산으로 카메라를 돌렸다가 날아오는 용을 따라 돌아옴 */else _dcQ.set(0,8.5,ASH.pz-3);{const q=b._cq||(b._cq=new THREE.Vector3());if(!DGCAM.lk){q.set(P.pos.x*.3,3.6,P.pos.z-14);_dcL.copy(q);DGCAM.lk=1}/* 정면을 보던 시선에서 천천히 돌림 */q.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*(st==='far'?2.4:6)));_dcQ.copy(q)}_dcP.set(P.pos.x*.5+3.5,3.4,P.pos.z+10)}
   else{const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix)}
   /* v550: 연출 동안 캐릭터가 보스 쪽을 바라봄(직접 움직이면 그 방향 우선) */if(DGCAM.px===P.pos.x&&DGCAM.pz===P.pos.z){P.face=Math.atan2(b.pos.x-P.pos.x,b.pos.z-P.pos.z);let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,Math.max(dt,.016)*8)}DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;
   if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*5));
