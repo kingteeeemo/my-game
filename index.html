@@ -3377,7 +3377,6 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   let st='idle',t=null,rate=1;const IN=e.introT!==undefined&&e.introT<BKC.introT/BKC.introK;
   if(IN&&e.introT<0){/* v550: 칼을 뽑기 전 — 대검을 멘 채 가만히 서 있고 발밑에서 불길이 치솟음 (불러오기 화면 동안은 시간을 멈춤) */st='idle';const t0=e.introT;if(!ldBusy)e.introT+=dt;bkFire(e,t0,e.introT);e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,.7);bkSword('back')}
   else if(IN){st='intro';t=e.introT*BKC.introK;const t0=e.introT;e.introT+=dt;bkFire(e,t0,e.introT);e.holdT=Math.max(e.holdT||0,.06);e.pt=Math.max(e.pt||0,BKC.rest);bkSword(t<BKC.grab?'back':'hand')}
-  else if(e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+3)e.introT+=dt;/* 등장 카메라가 쿼터뷰로 돌아가는 시간 계산용 */
   else if(A){const x=A.t,h=A.hit||.5;
     if(A.k==='wave'||A.k==='swing'){st='slash';t=slash(x,h)}
     else if(A.k==='slam'||A.k==='star'||A.k==='donut'){st='cast';t=cast(x,A.k==='slam'?h:h*.7,A.dur)}
@@ -3387,7 +3386,7 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
     else if(A.k==='barrage'){st='slash';const ph=((x-.1)%.42)/.42;t=x<.1?.1+.3*(x/.1):ph<.6?.1+.42*ph/.6:.52+.58*(ph-.6)/.4}
     else if(A.k==='sipe'){st='cast';const k=A.sw0===undefined?-1:x-A.sw0,D=A.swD||1.28;t=k<0?.3*e2(x/.5):k<D-.1?.3+.48*e2(k/(D*.6)):k<D?.78+.47*(k-D+.1)/.1:k<D+.4?1.25+.35*(k-D)/.4:1.6+.5*clamp((k-D-.4)/.35,0,1)}}
   else if(moving){st='walk';rate=clamp(e.spd/3.6,.6,1.6)}
-  if(!IN)bkSword('hand');
+  if(!IN){bkSword('hand');if(e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+3)e.introT+=dt}/* 등장 카메라가 쿼터뷰로 돌아가는 시간 계산용 — v553: 걷기·패턴 판단과 따로 (전엔 이 시간 동안 걷기 동작이 빠져 미끄러짐) */
   if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='slash'||st==='cast'||st==='spin')?.06:.14;K.cur=st}
   const As=K.acts,dur=k=>As[k]._clip.duration;
   if(t!==null)K.tm[st]=Math.min(t,dur(st)-.01);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
@@ -5429,7 +5428,7 @@ function hud(){placeEnv();
   if(inTown){$('qtag').textContent='Town';$('qtitle').textContent=`${TOWN.n} · 정비`;$('qprog').textContent=''}
   {const fg=$('fbGo');const sh=!inTown&&S.ch===LAST&&S.phase===5;if(fg.hidden===sh)fg.hidden=!sh}
   {const tb=$('openTown');const t=inTown?'사냥터':'마을';if(tb.lastChild.textContent!==t){tb.lastChild.textContent=t;townIcon(tb)}const pb=$('lsStrip').querySelector('[data-px=openTown]');if(pb){const tn=[...pb.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());if(tn&&tn.textContent!==t){tn.textContent=t;townIcon(pb)}}$('acts').classList.toggle('town',inTown)}
-  const boss=enemies.find(e=>e.boss&&e.aggro)||(RZ&&RZ.boss&&RZ.boss.hp>0&&enemies.includes(RZ.boss)?RZ.boss:null);/* v404: 균열 군주도 상단 체력바 */$('bossbar').hidden=!boss;
+  const boss=enemies.find(e=>e.boss&&e.aggro)||(RZ&&RZ.boss&&RZ.boss.hp>0&&enemies.includes(RZ.boss)?RZ.boss:null);/* v404: 균열 군주도 상단 체력바 */$('bossbar').hidden=!boss||bossIntroOn();/* v553: 등장 연출이 끝나면 체력바 */
   if(boss){$('bossname').textContent=`${boss.name} · ${Math.ceil(boss.hp/boss.mhp*100)}%`;$('bossb').style.width=(boss.hp/boss.mhp*100)+'%'}
   $('ptsBadge').hidden=!S.statPts;$('ptsBadge').textContent=S.statPts;
   const sk=C().skills;
@@ -5443,8 +5442,11 @@ function stageInfo(){if(inTown)return {c:'town',n:'마을',t:TOWN.n,k:'Town'};if
 function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   if(S.ch>=NCH){if(gatePending())return '관문 보스';const n=Math.min(S.tierKills,tkFor(S.tier));return `${n}/${tkFor(S.tier)}`}
   const c=CH[S.ch];if(!c)return '';if(S.phase===0)return `${S.kills}/${c.goal}`;if(S.phase===1)return `보스까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`;return ''}
+/* v553: 칩을 숨긴 보스전에서는 보스 체력바(topStack)를 칩이 있던 자리로 올림 — 칩을 잠깐 보여 자리를 잰 뒤 다시 숨김 */
+function chipSpot(){const ce=$('stageChip'),ts=$('topStack');if(!ce.hidden){ts.style.top=ts.style.left=ts.style.width='';return}ce.hidden=false;const r=ce.getBoundingClientRect();ce.hidden=true;ts.style.top=Math.max(0,r.top)+'px';if(innerWidth<innerHeight&&innerWidth<=640){/* 세로 폰: 칩 칸 너비에 맞춤 */ts.style.left=(r.left+r.width/2)+'px';ts.style.width=r.width+'px'}else ts.style.left=ts.style.width=''}
+addEventListener('resize',()=>setTimeout(chipSpot,60));
 let chipKey='',dpsKey='';function stageChip(){const i=stageInfo();
-  {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid)ce.hidden=hid;if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
+  {const hid=!inTown&&inArena(),ce=$('stageChip');if(ce.hidden!==hid){ce.hidden=hid;chipSpot()}if(hid)return}/* v552: 보스전(결투장·최종 결전)에서는 위쪽 가운데 단계·DPS 칩을 숨김 */
   /* 현재 DPS / 적정 DPS (스킬 창과 같은 계산, 1초마다 갱신) */
   {const el=$('scD');if(inTown){if(dpsKey!=='t'){el.textContent='';dpsKey='t'}}else{const me=skillDpsCache(),req=S.duel?duelReq():S.ch>=NCH?stageReq(NCH,S.tier):inArena()?fbReq():stageReq(S.ch),r=me/req,c=r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a',k=Math.round(me)+'/'+Math.round(req);
     const pr=chipProg(),k2=k+'|'+pr;if(k2!==dpsKey){dpsKey=k2;el.innerHTML=`DPS <i style="color:var(--ink)">${fmtKM(me)}</i>${pr?` · <i style="color:#ffb070;font-style:normal">${pr}</i>`:''}`/* v98: 적정 DPS 표기 숨김 · v109: 진행도를 칩에 합침 */}}}
