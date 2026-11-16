@@ -711,7 +711,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 @media (max-width:640px) and (orientation:portrait){.sbanner.duel{top:17%!important}}/* v563: 세로 17% */
 @media (orientation:landscape){.sbanner.duel{margin-top:-10vh}}/* v563: 가로 화면은 지금 자리에서 화면 높이의 10%만큼 위로 */
 @media (orientation:landscape) and (max-height:520px){.sbanner.duel{margin-top:-5vh}}/* v571: 모바일 가로는 5% 낮춤(-10vh→-5vh) */
-@media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:20vh}}/* v571: PC는 30% 낮춤 — 기존 -10vh에선 화면 밖으로 나갔음(-10vh→+20vh) */
+@media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:calc(17vh/var(--hz,1.7) - 98px)}}/* v572: PC는 HUD zoom(--hz) 때문에 px·vh 값이 zoom배로 커져 보임 → 문구 중심이 화면 높이의 17%에 오도록 zoom으로 나눠 맞춤 */
 /* v70 월드맵 */
 #wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0f1014;border:1px solid var(--line)}
