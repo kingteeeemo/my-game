@@ -3381,7 +3381,9 @@ function drgFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.sp
     /* 균열·눈의 빛이 서서히 꺼짐 */const gk=T<T2?1:Math.max(.12,1-(T-T2)/1.1),g0=DGC.glow*gk;D.mat.emissive.setRGB(g0,g0,g0);D.mat.color.setScalar(DGC.col);for(const q of DGN.gl){q.scale.setScalar(q.userData.s*gk);q.material.opacity=q.userData.o*gk*gk}
     },
     end(){S2.dead=0;S2.side=0;S2.bank=0;try{e.mat.dispose()}catch(_){}}};fx.push(F)}
-function bossFall(e){if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);if(e.final&&e.M&&e.M.mdl)return drgFall(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
+/* v580: 보스에게 지고 다시 도전할 때는 등장 연출 생략(이기면 다시 보여 줌) */
+const bossFailed={};
+function bossFall(e){bossFailed[e.final?'dragon':e.maw?'maw':'knight']=0;if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);if(e.final&&e.M&&e.M.mdl)return drgFall(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
   /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
   const MW=!!((e.maw||e.duel)&&e.M&&e.M.root),/* v383: 잿불 검귀도 몸통만 쓰러지고 바닥 원(등급 고리·그림자)은 그대로 */tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
   const lp=MW?{x:e.pos.x-side*Math.cos(ry)*H*.5,z:e.pos.z+side*Math.sin(ry)*H*.5}:e.pos;
@@ -3497,7 +3499,7 @@ function bossIntroOn(){for(const e of enemies)if(bossIntroE(e))return true;retur
 const BK_SZ=.72;/* v540: 잿불 검귀 크기 −20% → v555: 또 −10% (몸·피격 범위·이름표 높이) — 공격 범위·장판은 그대로 */
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();arenaHole(0);const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
   e.duel=true;e.aggro=true;e.hp=e.mhp=Math.round(duelReq()*DUEL.t*2.5*(S.duel&&S.duel.uber?1.96:1)*(S.duel&&S.duel.uber?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.uber?1.6:2.2)/* v391: 검귀 일반 ×2.2 · 우버 ×1.6 */);/* v131: 우버 체력 +40% → v159: 또 ×1.4 (현재의 1.4배, 총 ×1.96) */if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp}e.dmg*=1.2;e.r=1.55;e.spd=3.2;e.pt=2.5;e.dA=null;e.rage=false;
-  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(BK_SZ);e.r*=BK_SZ;e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2*BK_SZ;bkIntro(e);bkAttach(e);return e}
+  e.g.remove(e.M.root);const M=knightModel();e.g.add(M.root);e.M=M;e.g.scale.setScalar(S.duel&&S.duel.uber?3.4:3);if(S.duel&&S.duel.uber){e.name='우버 '+DUEL.n;e.lab.firstChild.textContent=e.name;M.root.traverse(o=>{if(o.isMesh&&o.material.emissive&&o.material.metalness>.5)o.material.emissive.setHex(0x3a0a20)})}M.root.scale.setScalar(BK_SZ);e.r*=BK_SZ;e.mat.dispose();e.mat=M.armor||e.mat;e.h=7.2*BK_SZ;if(!bossFailed.knight)bkIntro(e);bkAttach(e);return e}
 function bkIntro(e){const D=BKC.introT/BKC.introK+BKC.pre;e.introT=-BKC.pre;e.holdT=D;e.holdA=Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z);e.pt=Math.max(e.pt||0,D+.7);if(BKN.st===2&&e.M&&e.M.sk){bkSword('back');BKN.cur='intro';BKN.prev=null;BKN.fadeT=0}}
 /* v550: 잿불 검귀 등장 불길 — 발밑 균열이 달아오름(−1.5초) → 주위로 불티가 피어오름 → 불길이 확 치솟음(−0.35초) → 칼을 뽑는 순간 불꽃이 휘몰아침 → 전투 시작 충격파 */
 function bkFire(e,a,b){const U=!!(S.duel&&S.duel.uber),c0=U?0xff9ad0:0xffd080,c1=U?0xe0308a:0xff4a10,cx=U?0xff5ab0:0xff7a2a,p=e.pos,sc=e.g.scale.x,at=x=>a<x&&b>=x,E=BKC.introT/BKC.introK,gr=BKC.grab/BKC.introK;
@@ -3755,7 +3757,7 @@ function mawPose(M,ph,open){if(M.mdl)return mawPoseG(M,ph,open);const {CP0,CP,cu
   M.jaw.rotation.x=open*.9;for(const md of M.mands)md.g.rotation.y=-md.sx*(.15+open*.75)}
 function spawnMaw(){const U=!!(S.duel&&S.duel.uber),e=spawnEnemy('boss',0,0,3,{name:(U?'우버 ':'')+MAW.n});
   e.duel=true;e.maw=true;e.aggro=true;e.hp=e.mhp=Math.round(uberKnightHp()*(U?8*2/* v390: 우버 아귀 체력 ×2 (30억) */:1.3*2.2/* v391: 일반 아귀 ×2.2 */)*(U?DUEL_HPX.u:DUEL_HPX.n)*(S.duel&&S.duel.dummy?5:1));if(NS()){const B=nsBossCfg();e.hp=e.mhp=B.hp*(S.duel&&S.duel.dummy?5:1)}if(S.duel&&S.duel.dummy){e.name='허수아비 '+e.name;e.dummy=1}/* v221: 일반 = 우버 검귀 ×1.3 · 우버 = ×8 */e.r=2.6;e.spd=0;e.dA=null;e.rage=false;e.pt=3;e.grace=3;/* v211: 시작 후 3초간 전체 파동 없음 */e.bt=0;e.at=0;e.sipeDone=0;
-  e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);arenaHole(1);for(const c of e.g.children)if(c!==M.root&&c!==M.pool)c.visible=false;/* 구멍 위에 뜨는 등급 고리·그림자 숨김 */e.introT=0;e.isk=1.25;M.root.position.y=-11;e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
+  e.g.remove(e.M.root);const M=mawModel(U);e.g.add(M.root,M.pool);e.M=M;e.g.scale.setScalar(U?1.15:1);arenaHole(1);for(const c of e.g.children)if(c!==M.root&&c!==M.pool)c.visible=false;/* 구멍 위에 뜨는 등급 고리·그림자 숨김 */if(bossFailed.maw){e.introT=MWI.end;e.isk=0}else{e.introT=0;e.isk=1.25;M.root.position.y=-11}e.lab.firstChild.textContent=e.name;e.mat.dispose();e.mat=M.body.material;e.h=M.h*e.g.scale.x;return e}
 function mawReset(e){e.dA=null;e.wv=0;e.pullCd=0;e.pt=3;e.grace=3;e.bt=0;e.at=0;e.sipeDone=0;e.spd=0;e.jaw=0;e.sink=0;e.isk=0;e.stir=0;if(e.introT!==undefined)e.introT=MWI.end;if(e.M&&e.M.root)e.M.root.position.y=0}
 const mawDist=()=>Math.hypot(P.pos.x,P.pos.z);
 function mawMouth(e){const v=new THREE.Vector3();e.M.head.getWorldPosition(v);v.y-=.2;return v}
@@ -3895,7 +3897,7 @@ function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('c
   <button class="primary" id="duelAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
 function spawnFinalBoss(){if(enemies.some(e=>e.final))return;const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:FINAL.boss});
   e.final=true;e.hp=e.mhp=e.mhp*FB_HP;e.dmg*=FB_DMG*BOSS_DM;e.xp*=3;e.g.scale.multiplyScalar(1.35);e.r*=1.35;e.mat.color.setHex(0x8a2a1e);e.nova=5;e.rage=false;e.ip=0;
-  e.g.remove(e.M.root);const M=dragonModel(e.mat);e.g.add(M.root);e.M=M;e.h=M.h*e.g.scale.x+.3;drgIntro(e);return e}
+  e.g.remove(e.M.root);const M=dragonModel(e.mat);e.g.add(M.root);e.M=M;e.h=M.h*e.g.scale.x+.3;if(!bossFailed.dragon)drgIntro(e);return e}
 /* 위험도 진행 (v29)
    - 위험도마다 200마리 처치 → 다음 위험도 해금. 「자동 상승」이 켜져 있으면 바로 다음 위험도로 이동
    - 위험도 5·10·15…의 끝에는 관문 보스. 쓰러뜨려야 다음 위험도가 열림 (첫 처치 보상: 전설 2개 + 골드)
@@ -4511,10 +4513,10 @@ function nsHurt(d,raw){const D=nsDef();
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);
   if(P.hp<=0)die()}
 function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
-  if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z);bkIntro(e)}}later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
+  if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z);e.introT=undefined;e.holdT=0}}bossFailed[S.duel.b==='maw'?'maw':'knight']=1;later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
-  if(inArena()){P.pos.set(FB_START.x,0,FB_START.z);for(const e of enemies)if(e.final){if(e.rage){e.rage=false;e.spd/=1.3}e.air=null;e.ip=0;e.g.position.y=0;e.g.children.forEach(c=>c.visible=true);e.hp=e.mhp;e.aggro=false;e.nova=5;e.chg=null;e.pat=4;e.patN=0;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.25,()=>defeatCine(`${FINAL.boss}에게 패배했습니다`,showArenaFail));return}
+  if(inArena()){bossFailed.dragon=1;P.pos.set(FB_START.x,0,FB_START.z);for(const e of enemies)if(e.final){if(e.rage){e.rage=false;e.spd/=1.3}e.air=null;e.ip=0;e.g.position.y=0;e.g.children.forEach(c=>c.visible=true);e.hp=e.mhp;e.aggro=false;e.nova=5;e.chg=null;e.pat=4;e.patN=0;e.pos.set(FB_POS.x,0,FB_POS.z)}later(.25,()=>defeatCine(`${FINAL.boss}에게 패배했습니다`,showArenaFail));return}
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.chBoss){e.hp=e.mhp;e.aggro=false;e.pos.set(ALTAR.x,0,ALTAR.z)}else if(e.boss)e.hp=e.mhp;else if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<16)dropEnemy(e)}
 }
 /* v116: 스탯 자동 분배 — 한 스탯에 몰기 또는 「균형」(가장 낮은 스탯부터 1점씩) */
@@ -5537,7 +5539,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v579';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v580';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7206,6 +7208,9 @@ function drgCam(dt){const C=DGCAM;let b=enemies.find(e=>e.final&&e.air&&e.air.in
   else{const ty=b.g.position.y+1.6;_dcQ.set(FB_POS.x+(b.pos.x-FB_POS.x)*C.mix,2.2+(ty-2.2)*C.mix,FB_POS.z+(b.pos.z-FB_POS.z)*C.mix)}
   /* v550: 연출 동안 캐릭터가 보스 쪽을 바라봄(직접 움직이면 그 방향 우선) */if(DGCAM.px===P.pos.x&&DGCAM.pz===P.pos.z){P.face=Math.atan2(b.pos.x-P.pos.x,b.pos.z-P.pos.z);let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,Math.max(dt,.016)*8)}DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;
   if(!DGCAM.lk){_dcL.copy(_dcQ);DGCAM.lk=1}else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*5));
+  /* v580: 등장 카메라가 투기장 기둥 고리(반지름 ARENA_R+1.6) 밖으로 나가 기둥에 가려지던 문제 — 보스 쪽으로 당겨 고리 안에 두고, 당긴 만큼 시야각을 넓혀 화면 크기를 비슷하게 */
+  {const Rc=ARENA_R-1.2,px=_dcP.x,pz=_dcP.z,qx=b.pos.x,qz=b.pos.z;let fk=1;if(mapKind==='arena'&&Math.hypot(px,pz)>Rc){const dx=qx-px,dz=qz-pz,A=dx*dx+dz*dz,B=2*(px*dx+pz*dz),Cc=px*px+pz*pz-Rc*Rc,dd=B*B-4*A*Cc;if(A>1e-6&&dd>=0){const u=clamp((-B-Math.sqrt(dd))/(2*A),0,.9),L0=Math.hypot(dx,dz,_dcP.y-b.h*.5);_dcP.x+=dx*u;_dcP.z+=dz*u;const L1=Math.hypot(qx-_dcP.x,qz-_dcP.z,_dcP.y-b.h*.5);fk=Math.max(.35,L1/(L0||1))}}
+    if(!DGCAM.f0)DGCAM.f0=camera.fov;const f=Math.min(80,2*Math.atan(Math.tan(DGCAM.f0*Math.PI/360)/fk)*180/Math.PI),fv=DGCAM.f0+(f-DGCAM.f0)*w;if(Math.abs(camera.fov-fv)>.01){camera.fov=fv;camera.updateProjectionMatrix()}}
   camera.position.lerp(_dcP,w);_dcQ.set(camT.x,camT.y+1,camT.z).lerp(_dcL,w);camera.lookAt(_dcQ);/* 위치와 바라보는 곳을 함께 옮겨 크레인처럼 쿼터뷰로 올라감 */
   if(shake>0&&dt>0){camera.position.x+=rand(-.12,.12);camera.position.y+=rand(-.1,.1)}}
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
