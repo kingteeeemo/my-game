@@ -904,7 +904,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 @media (max-width:640px) and (orientation:portrait){
   .top{--sw:minmax(0,1fr);grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
   .top .rcol{width:90%}/* v573: 세로 미니맵 −10% */
-  #curBar .cr2{gap:3px}#curBar .cic{margin-right:2px}/* v573: 글자 +10%에도 체력바 폭 안에 들어가게 간격만 줄임 */
   .top .autoeq{display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   .top .feed{grid-column:1/4}.top .quest{grid-column:1/4}
   #topStack{top:calc(env(safe-area-inset-top,0px) + 88px)}
@@ -5488,7 +5487,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v573';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v574';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
