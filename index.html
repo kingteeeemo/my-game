@@ -3789,7 +3789,9 @@ function duelPools(e,dt){const U=S.duel&&S.duel.uber;
     if(Math.random()<dt*3*QM())emit(PADD,{x:q.x+rnd(-1.8,1.8),y:.2,z:q.z+rnd(-1.8,1.8),vy:rnd(.6,1.4),life:rnd(.5,.9),s0:.25,s1:.5,c0:0xc08aff,c1:0x3a0a5a,a:.6,tex:1})}
   e.poolTk=(e.poolTk||0)-dt;if(e.poolTk<=0&&P.hp>0&&DPOOLS.some(q=>Math.hypot(P.pos.x-q.x,P.pos.z-q.z)<POOL_R)){e.poolTk=.5;hurtPct((U?.2:.1)*.5,1)}
   if(!(e.dA&&e.dA.k==='sipe')){e.poopT=(e.poopT===undefined?7:e.poopT)-dt;if(e.poopT<=0){e.poopT=U?9:12;poopCast(e)}}}
-function duelStep(e,dt){if(e.maw)return mawStep(e,dt);const U=S.duel&&S.duel.uber;duelPools(e,dt);
+function duelStep(e,dt){if(e.maw)return mawStep(e,dt);const U=S.duel&&S.duel.uber;
+  if(knAppr||(e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+BKC.wait)){/* v589: 다리를 건너는 동안·등장 연출·연출 뒤 대기 시간엔 어떤 패턴(바닥 장판 포함)도 시작하지 않음 */e.poopT=7;e.pt=Math.max(e.pt||0,.6);return}
+  duelPools(e,dt);
   {const n=e.sipeN||0;if(n<2&&e.hp>0&&e.hp<e.mhp*(n?.33:.66)&&!(e.dA&&e.dA.k==='sipe')){e.sipeN=n+1;sipeStart(e)}}if(!e.rage&&e.hp<e.mhp*.5){e.rage=true;e.spd*=1.25;toast('격노',`${e.name}의 검이 불타오릅니다`);ringFx(e.pos,7,0xff4a2a,.6);shake=.35}
   if(e.dA){const A=e.dA;A.t+=dt;
     if(A.k==='slam'){const u=clamp((A.t-(A.lp?.05:.2))/(A.hit-(A.lp?.05:.2)),0,1);e.pos.x=A.from.x+(A.to.x-A.from.x)*u;e.pos.z=A.from.z+(A.to.z-A.from.z)*u;e.jy=Math.sin(u*Math.PI)*(A.lp?2.5:5)}
@@ -5724,7 +5726,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v588';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v589';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
