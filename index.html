@@ -903,14 +903,15 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .top .feed{grid-column:1/3;grid-row:10;margin-top:0}
 @media (max-width:640px) and (orientation:portrait){
   .top{--sw:minmax(0,1fr);grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}
-  .top .rcol{width:90%}/* v573: 세로 미니맵 −10% */
+  .top .rcol{width:90%;justify-self:start}/* v573: 세로 미니맵 −10% · v575: 칸 왼쪽에 붙여 가운데 지역과의 양쪽 간격을 같게 */
+  .hmsec{grid-template-columns:repeat(4,1fr);gap:14px 2px}.hmsec button{font-size:11px;gap:6px}.hmsec button svg{width:23px;height:23px}.hmsec button .hdot{right:calc(50% - 19px)}/* v575: 세로 메뉴 한 줄 4개 */
   .top .autoeq{display:block;text-align:left;width:112px;max-width:112px;margin-top:4px;padding:6px 9px;font-size:10.8px;line-height:1.35;white-space:normal}
   .top .feed{grid-column:1/4}.top .quest{grid-column:1/4}
   #topStack{top:calc(env(safe-area-inset-top,0px) + 88px)}
 }
 @media (orientation:landscape){#topStack{top:calc(env(safe-area-inset-top,0px) + 80px)}}
 @media (orientation:landscape) and (max-height:520px){.hmp{width:min(340px,48vw);padding-top:calc(60px + env(safe-area-inset-top,0px))}.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}.hmsec{display:contents}}/* v569: 가로 폰 메뉴 — 한 줄 4개 */
-@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
+@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867;--mw:120px}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
 </style>
 
 <canvas id="c"></canvas>
@@ -5487,7 +5488,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v574';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v575';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5502,7 +5503,7 @@ PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.add
 function placePort(){const x=$('bossExit'),xs=$('exitSlot');if(x.parentNode!==xs)xs.appendChild(x)}/* v569: 모든 화면에서 보스전 나가기는 재화 아래 칸 */
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placePort):PORT_MQ.addListener(placePort);addEventListener('resize',placePort);
 /* v559: 메뉴 펼치기 패널 — 기존 버튼을 대신 눌러 줌(메뉴 추가 시 HMENU에 한 줄만 추가) */
-const HMENU=[[['openInv','장비'],['openMenu','스킬'],['openStat','상태']],[['openTown','마을'],['openBoss','보스'],['openMap','지도']],[['openPause','설정'],['openFs','전체화면']]];
+const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['openTown','마을']],[['openBoss','보스'],['openMap','지도'],['openPause','설정'],['openFs','전체화면']]];/* v575: 한 줄 4개 */
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
 function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=$(id)&&$(id).querySelector('svg');return `<button data-hm="${id}">${sv?sv.outerHTML:''}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
 function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const src=$(b.dataset.hm);if(!src)return;b.hidden=!!src.hidden;
