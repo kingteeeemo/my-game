@@ -859,9 +859,9 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .hmp{position:relative;width:min(300px,80vw);height:100%;box-sizing:border-box;background:#18181e;border-left:1px solid var(--line);padding:calc(56px + env(safe-area-inset-top,0px)) 14px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;animation:hmIn .18s ease-out;overflow-y:auto}
 @keyframes hmIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
 .hmx{position:absolute;right:12px;top:calc(10px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:50%;background:#f0ece4;border:0;color:#16161c;display:grid;place-items:center;padding:0}.hmx svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
-.hmg{display:flex;flex-direction:column}.hmsec{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 4px;padding:16px 0;border-bottom:1px solid var(--line)}.hmsec:last-child{border-bottom:0}
+.hmg{display:flex;flex-direction:column}.hmsec{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 2px;padding:16px 0;border-bottom:1px solid var(--line)}.hmsec:last-child{border-bottom:0}
 .hmsec button{position:relative;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:7px;font:600 12px var(--ko);padding:4px 0}.hmsec button[hidden]{display:none}
-.hmsec button svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hmsec button.dim{opacity:.38}.hmsec button span{white-space:nowrap}.hmsec button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .hmsec button .hdot{right:calc(50% - 22px);top:0}
 .hmch{margin-top:auto;align-self:flex-end;background:none;border:0;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:6px;font:600 12px var(--ko);padding:8px 4px}.hmch svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 /* v569 새 HUD — 세로·가로·PC 공통: 위쪽 [캐릭터 정보 | 지역 | 미니맵], 메뉴는 미니맵에 걸친 버튼 하나로 */
@@ -914,6 +914,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 @media (orientation:landscape) and (max-height:520px){.hmp{width:min(340px,48vw);padding-top:calc(60px + env(safe-area-inset-top,0px))}.hmg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}.hmsec{display:contents}}/* v569: 가로 폰 메뉴 — 한 줄 4개 */
 @media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.top{zoom:.867;--mw:120px}/* PC: HUD 전체가 창 크기에 맞춰 1~1.7배로 커지는데, 위쪽 정보는 그 87% (1440×900 창에서 모바일의 약 1.3배) */}
 
+/* v585 PC 메뉴 — 아이콘·글자를 줄여 한 줄 4개 */
+@media (orientation:landscape) and (min-height:521px) and (hover:hover) and (pointer:fine){.hmp{width:min(250px,80vw);padding-left:10px;padding-right:10px}.hmsec{gap:9px 0;padding:11px 0}.hmsec button{font-size:9.5px;gap:4px;padding:3px 0}.hmsec button svg{width:15px;height:15px}.hmsec button .hdot{right:calc(50% - 13px);width:8px;height:8px}.hmx{width:30px;height:30px}.hmx svg{width:15px;height:15px}.hmp{padding-top:calc(48px + env(safe-area-inset-top,0px))}}
 /* v582 에너지 쉴드 — 체력바 위에 반투명 하늘색 막(최대 체력 대비 비율), 쉴드 수치는 체력바 오른쪽 끝 · 모든 화면 */
 .top .bar.hp .esF{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(rgba(160,225,255,.85),rgba(40,165,255,.66));box-shadow:inset 0 1px 0 rgba(255,255,255,.8);border-right:1.5px solid #bfe6ff;box-sizing:border-box;z-index:1;pointer-events:none}
 .top .bar.hp .esF.full{border-right:0}.top .bar.hp .esF[hidden],.top .bar.hp .esV[hidden]{display:none}
@@ -1010,7 +1012,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     <button class="tbtn" data-px="openPause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>설정</button>
     <button class="tbtn" data-px="openFs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>전체</button>
   </div>
-  <div id="hmenu" hidden><div class="hmp" role="dialog" aria-label="메뉴"><button class="hmx" id="hmX" aria-label="닫기"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="hmg" id="hmG"></div><button class="hmch" id="hmCh"><svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg>캐릭터 변경</button></div></div>
+  <div id="hmenu" hidden><div class="hmp" role="dialog" aria-label="메뉴"><button class="hmx" id="hmX" aria-label="닫기"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="hmg" id="hmG"></div></div></div>
   <div class="sbanner" id="sBanner"><small id="sbK"></small><b id="sbN"></b><span id="sbT"></span></div>
   <div class="toast" id="toast"><b id="tt"></b><span id="ts"></span></div>
   <div id="dmg"></div>
@@ -5584,7 +5586,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v584';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v585';try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -5599,17 +5601,24 @@ PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placeEnv):PORT_MQ.add
 function placePort(){const x=$('bossExit'),xs=$('exitSlot');if(x.parentNode!==xs)xs.appendChild(x)}/* v569: 모든 화면에서 보스전 나가기는 재화 아래 칸 */
 PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placePort):PORT_MQ.addListener(placePort);addEventListener('resize',placePort);
 /* v559: 메뉴 펼치기 패널 — 기존 버튼을 대신 눌러 줌(메뉴 추가 시 HMENU에 한 줄만 추가) */
-const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['openTown','마을']],[['openBoss','보스'],['openMap','지도'],['openPause','설정'],['openFs','전체화면']]];/* v575: 한 줄 4개 */
+const SV={st:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20.5c.6-4.2 3.6-6.8 7.5-6.8s6.9 2.6 7.5 6.8"/>',ch:'<path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/>',home:'<path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z"/>'};
+/* v585: 메뉴는 고정 3줄 — [상태 장비 스킬 마을] [사냥터 보스 지도 설정] [캐릭터 변경 처음 화면 전체화면]. 마을/사냥터는 서로 바뀌지 않고 각자 자리에 고정 */
+const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['@town','마을']],[['@hunt','사냥터'],['openBoss','보스'],['openMap','지도'],['openPause','설정']],[['@char','캐릭터 변경'],['@title','처음 화면'],['@fs','전체화면']]];
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
-function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=$(id)&&$(id).querySelector('svg');return `<button data-hm="${id}">${sv?sv.outerHTML:''}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
-function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const src=$(b.dataset.hm);if(!src)return;b.hidden=!!src.hidden;
-    if(b.dataset.hm==='openTown'){const t=src.lastChild&&src.lastChild.textContent;const sp=b.querySelector('span');if(t&&sp.textContent!==t){sp.textContent=t;const sv=src.querySelector('svg'),ov=b.querySelector('svg');if(sv&&ov)ov.outerHTML=sv.outerHTML}}
-    const d=HMDOT[b.dataset.hm];if(d){const on=!$(d).hidden;b.querySelector('.hdot').hidden=!on;if(on)any=true}});
+const HMICON={'@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
+function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=HMICON[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${HMICON[id]()}</svg>`:($(id)&&$(id).querySelector('svg')?$(id).querySelector('svg').outerHTML:'');return `<button data-hm="${id}">${sv}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
+function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?inTown:!inTown);return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
+    const d=HMDOT[id];if(d){const on=!$(d).hidden;b.querySelector('.hdot').hidden=!on;if(on)any=true}});
   $('hamDot').hidden=!any}
+function hmAct(id){if(id==='@town'){if(inTown)return toast('이미 마을에 있습니다');if(!paused())townAsk();return}
+  if(id==='@hunt'){if(!inTown)return toast('이미 사냥터에 있습니다');if(!paused())toggleTown();return}
+  if(id==='@char'){save();closeAllSheets();showSlots();return}
+  if(id==='@title'){save();closeAllSheets();showSlots();$('slots').hidden=true;$('title').hidden=false;return}
+  if(id==='@fs'){toggleFs();return}
+  $(id).click()}
 function hmOpen(){hmBuild();hmSync();$('hmenu').hidden=false;releaseAll()}
 function hmClose(){$('hmenu').hidden=true}
-$('hamBtn').onclick=hmOpen;$('hmX').onclick=hmClose;$('hmenu').addEventListener('click',e=>{if(e.target.id==='hmenu'){hmClose();return}const b=e.target.closest('[data-hm]');if(b){hmClose();$(b.dataset.hm).click()}});
-$('hmCh').onclick=()=>{hmClose();save();closeAllSheets();showSlots()};
+$('hamBtn').onclick=hmOpen;$('hmX').onclick=hmClose;$('hmenu').addEventListener('click',e=>{if(e.target.id==='hmenu'){hmClose();return}const b=e.target.closest('[data-hm]');if(b){const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){hmClose();hmAct(id);return}hmClose();hmAct(id)}});
 setInterval(()=>{hmSync();const t=S&&S.cls&&SK[C().skills[0]]?SK[C().skills[0]].n:'',cn=S&&S.cls&&CLS[S.cls]?CLS[S.cls].en:'';if($('bldNm').textContent!==t)$('bldNm').textContent=t;if($('clsNm').textContent!==cn)$('clsNm').textContent=cn;if($('pCls').textContent!==cn)$('pCls').textContent=cn;const nk=S&&S.nick||'';if($('nickNm').textContent!==nk)$('nickNm').textContent=nk;chipSpot()},400);/* v569: 모든 화면 */
 let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(e){}
 /* v569: 골드는 숫자 4자리까지(9,999 → 1,500K → 9,999K → 1,500M …), 정수·윤회의 불씨·광휘의 파편은 999까지 */
@@ -7270,10 +7279,10 @@ addEventListener('resize',resize);resize();
 const FS_IN='M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',FS_OUT='M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
 const fsRoot=document.documentElement,fsReq=fsRoot.requestFullscreen||fsRoot.webkitRequestFullscreen;
 const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
-if(!fsReq)$('openFs').hidden=true;/* iPhone Safari 등 미지원 환경에서는 숨김 */
-function toggleFs(){const fail=()=>toast('전체화면을 쓸 수 없습니다','이 환경에서는 브라우저가 허용하지 않습니다');
+/* v585: iPhone Safari 등 미지원 환경에서도 버튼은 두고, 누르면 홈 화면 추가 안내 */
+function toggleFs(){const fail=()=>toast('전체화면을 쓸 수 없습니다','Safari 공유 버튼 → 「홈 화면에 추가」로 실행하면 전체 화면으로 즐길 수 있습니다');
   try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);
-    else{if(!fsReq)return fail();const r=fsReq.call(fsRoot,{navigationUI:'hide'});if(r&&r.catch)r.catch(fail)}}catch(e){fail()}}
+    else{if(!fsReq){toast('전체화면 안내','Safari에서는 홈 화면에 추가를 사용하면 전체 화면을 이용할 수 있습니다');return}const r=fsReq.call(fsRoot,{navigationUI:'hide'});if(r&&r.catch)r.catch(fail)}}catch(e){fail()}}
 $('openFs').addEventListener('click',toggleFs);
 (function(){const st=$('lsStrip');
   st.querySelectorAll('[data-px]').forEach(x=>{x.addEventListener('click',()=>$(x.dataset.px).click());
@@ -7307,7 +7316,7 @@ $('openPause').addEventListener('click',openPause);$('pResume').addEventListener
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
 $('resume').addEventListener('pointerdown',e=>{e.preventDefault();hideResume()});
-const paused=()=>window.CL_PAUSE||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>window.CL_PAUSE||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('title').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
