@@ -1504,7 +1504,7 @@ const OPT={
 let uid=Date.now()%1e6,volSeq=0;const VOL_K=.55,ovlK=(e,k,id)=>{const o=e[k]||(e[k]={__n:0}),c=o[id]||0;o[id]=c+1;if(!c&&o.__n++>=60){e[k]={[id]:1,__n:0}}return Math.pow(VOL_K,c)};/* v98: 다발 사격 한 번에 같은 적에게 겹쳐 맞을수록 피해 감소 — 1발째 100% · 2발째 55% · 3발째 30%… */
 const RAR_M=[1,1,1,1.35];/* v76: 전설(주황)은 기본 수치·일반 옵션 수치 ×1.35 (희귀 대비 +35%, 옵션 1개 더). 특수 능력치 수치는 그대로 */
 function rollRarity(boss){const w=boss?[0,50,38*.4,12*.15*.3]:[58,30,10*.4,((2+chE())*.15+(S.ch>=NCH?.04*S.tier:0))*.3];if(S.ch>=4){w[0]=0;w[1]=0}/* v44: 전설 ×0.3 · 5장(불타는 폐허)~: 노랑·주황만 */let t=Math.random()*w.reduce((a,b)=>a+b),i=0;while(t>w[i]){t-=w[i];i++}return i}
-function makeItem(slot,ilvl,rar,spP=.03){if(NS())return nsMakeItem(slot,nRollTier());/* v44: 특수 능력치 확률 — 필드 3% · 상점 10% (전설만) */
+function makeItem(slot,ilvl,rar,spP=.03){slot=kSlot(slot);/* v604: 두 번째 반지 칸(ring2)도 반지 아이템으로 생성 — 테스트·스킵·시연의 EQS 순회 오류 수정 */if(NS())return nsMakeItem(slot,nRollTier());/* v44: 특수 능력치 확률 — 필드 3% · 상점 10% (전설만) */
   const tier=Math.min(4,Math.floor(ilvl/5));
   const pre=rar===3?['고대 영웅의 ','심연의 ','잿불 왕의 '][Math.random()*3|0]:rar===2?['예리한 ','단단한 ','빛나는 '][Math.random()*3|0]:'';
   const RM=RAR_M[rar]||1,it={id:++uid,slot,ilvl,rar,name:pre+itemName(slot,tier),base:Math.round(itemBase(slot,ilvl)*RM),opts:[]};
@@ -6045,7 +6045,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v603';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v604';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
