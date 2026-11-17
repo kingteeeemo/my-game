@@ -87,7 +87,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
 .iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
 .iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
-body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
+body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
 <title>잿불 성역</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -2671,7 +2671,7 @@ const thStepY=z=>{const z0=THR.hz-.6;return z<=z0?0:-.2-.4*Math.min(21,Math.floo
 /* v603: 왕좌로 오르는 계단 — 아래에서 시작해 올라오면 등장 연출(소개 화면)이 시작됨 */
 function thApprStart(fb){knAppr=1;knActs(false);const z=THR.hz-.6+1.25*17+.6;P.pos.set(0,thStepY(z),z);P.mv=null;camT.set(0,0,z);P.face=Math.PI;hero.rotation.y=Math.PI;if(fb)fb.g.visible=false;/* v609: 계단을 오르는 동안은 아무것도 없음 */thSet.userData.ap=1;$('cine').hidden=true}
 function thCam(dt){const px=P.pos.x,py=P.pos.y,pz=P.pos.z;scene.fog.near=30;scene.fog.far=130;dgCamW=-1;camera.position.set(px*.6+1.6,py+2.7,pz+7.4);camera.lookAt(px*.3,py+3.6,pz-14);DGCAM.lk=0;DGCAM.px=px;DGCAM.pz=pz}
-function thArena(on){if(!on&&typeof ashItlDrop==='function')ashItlDrop();if(!on){thGate=0;if(ASHC.on){ASHC.on=ASHC.cam=ASHC.lie=0;knAppr=0;hero.rotation.x=0}if(ASHC.g)ASHC.g.visible=false}if(on)thMend();if(on&&!thSet)thBuild();if(!thSet||thOn===on)return;thOn=on;thSet.visible=on;ground.visible=!on;
+function thArena(on){if(!on&&typeof ashItlDrop==='function')ashItlDrop();if(!on){thGate=0;if(ASHC.on){ASHC.on=ASHC.cam=ASHC.lie=0;knAppr=0;hero.rotation.x=0;if(ASHC.sh)for(const q of ASHC.sh)q.visible=true}if(ASHC.g)ASHC.g.visible=false}if(on)thMend();if(on&&!thSet)thBuild();if(!thSet||thOn===on)return;thOn=on;thSet.visible=on;ground.visible=!on;
   if(on){thSave={g:hemi.groundColor.getHex(),i:hemi.intensity};hemi.groundColor.setHex(0x8a3410);hemi.intensity=.7}else{if(thSave){hemi.groundColor.setHex(thSave.g);hemi.intensity=thSave.i;thSave=null}thSet.userData.ap=0;P.pos.y=0}}
 function thTick(dt,t){const U=thSet.userData;if(knAppr===1&&U.ap){P.pos.y+=(thStepY(P.pos.z)-P.pos.y)*Math.min(1,dt*16);heroLight.position.y=4.2+P.pos.y;if(P.pos.z<THR.pzs-1.2){knAppr=0;knActs(true);P.pos.y=0;U.ap=0;dgCamW=-1;const fb=enemies.find(e=>e.final);if(fb)fb.g.visible=true;$('cine').hidden=false;enterArena2(1)}}U.sky.position.copy(camera.position);U.cl[0].offset.set(t*.004,t*.0025);U.cl[1].offset.set(-t*.007,t*.004);
   for(let i=0;i<U.fl.length;i++){const sp=U.fl[i],k=1+.14*Math.sin(t*12+i*2.1)+.08*Math.sin(t*7.3+i);sp.scale.set(sp.userData.s*k,sp.userData.s*1.35*k,1)}U.em.material.opacity=.6+.2*Math.sin(t*1.7);for(let i=0;i<U.bn.length;i++){const m=U.bn[i];m.rotation.x=.05*Math.sin(t*1.3+i*1.7);m.rotation.y=m.userData.r+.07*Math.sin(t*.9+i)}
@@ -2681,7 +2681,7 @@ function thTick(dt,t){const U=thSet.userData;if(knAppr===1&&U.ap){P.pos.y+=(thSt
 /* ===== v603: 거대한 아쉬카르 — 왕좌 뒤 절벽에서 올라와 앞발로 단상을 짚고 상반신만 보이는 자세(perch). 앞발을 축으로 몸 전체를 뒤로 세워 하반신은 절벽 아래로 내림.
    1페이즈 패턴: 내려찍기 · 불씨 비 · 물어뜯기(뒤에 머리가 내려와 약점 노출) ===== */
 const ASH={sc:12,a:-.6,pz:-13,/* v609: 밀려나던 것을 없애고 자리를 직접 정함 — 가슴이 무너진 북쪽 가장자리에서 올라오는 위치(v611: 네모 단상에 맞춰 -13) */zp:-.274,dy:5,dz:2.5,arm:1,/* v612 앞발: 손목 높이 보정 hy(월드 단위, 음수=더 낮게), 손바닥 기울기 hp, 상체 들기 세기 rear */hy:-.6,hp:-.12,rear:.4,/* v613: 앞발을 몸 쪽으로 hb 만큼 당기고 팔 길이를 줄여 팔꿈치를 굽힘(pole = 팔꿈치가 향하는 쪽: 바깥·위·뒤) */hb:2.4,pole:[1.4,.3,-.2],r:7.5,rise:1.5,roar:1.7,/* v608 등장: 먼 봉우리에 앉아 있다가(far) 날아와(fly) 왕좌에 내려앉음(land) */far:2.1,fly:4.8,land:.6,hov:[0,10,-28],c1:[58,30,-58],c2:[0,27,-76],cd:4.4,cd2:3.9,weak:2.6,wk:1.5,
-  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-16.2,shZ:4.4,shR:3.3,p1:.9,/* v614 2막(80%): fill 체력이 금빛으로 다시 차오름 → storm 단상이 무너지며 불비 → breath 화면 전체 숨결 → fall 추락·암전 */p2:.8,aFill:3,aStorm:7,aBreath:4,/* v616 결말: line 암전 문구 → save 금빛 보호막이 씌워짐 → carry 보호막에 실려 성역 아래로 */aLine:6,/* v617 save: 쓰러진 모습 sLie초 → 화면이 멎고 가운데 대사 sTalk초 → 빛기둥 → 보호막 */sLie:3.4,sTalk:3.6,aSave:11.6,aCarry:6.2};
+  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-16.2,shZ:4.4,shR:3.3,p1:.9,/* v614 2막(80%): fill 체력이 금빛으로 다시 차오름 → storm 단상이 무너지며 불비 → breath 화면 전체 숨결 → fall 추락·암전 */p2:.8,/* v619: 80%에서 aHold초 멈췄다가 금빛으로 */aHold:2,aFill:3,aStorm:7,aBreath:4,/* v616 결말: line 암전 문구 → save 금빛 보호막이 씌워짐 → carry 보호막에 실려 성역 아래로 */aLine:6,/* v617 save: 쓰러진 모습 sLie초 → 화면이 멎고 가운데 대사 sTalk초 → 빛기둥 → 보호막 */sLie:3.4,sTalk:3.6,aSave:11.6,aCarry:6.2};
 function ashSetup(e,intro){e.perch=1;e.g.scale.setScalar(ASH.sc);e.pos.set(0,0,ASH.pz);e.r=ASH.r;e.spd=0;e.h=7;e.py=0;e.pat=3.2;e.patN=0;e.weakT=0;e.holdT=0;e.p2=0;e.a2=null;ashItlDrop();e.itl=null;e.brW=0;e.brT=0;e.chg=null;e.g.rotation.order='YXZ';e.g.rotation.set(0,0,0);e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});
   e.py=0;e.aimT=0;if(intro){thMend();e.air={st:'fly',t:0,intro:1};/* v611: 앉아 있지 않고 이미 날아오는 중 */e.aggro=false;e.pk=0;const F=ashPeak();e.fw=new THREE.Vector3(F.x,F.y,F.z);e.fy=Math.atan2(ASH.c1[0]-F.x,ASH.c1[2]-F.z);e.g.position.set(0,0,ASH.pz);ashFog(e,false);enemyAnim(e,0,false)}else{thBreak(1);thGateSet(P.pos.z<THR.gz?2:1);e.air=null;e.fw=null;e.aggro=true;e.pk=1;e.g.position.set(0,0,ASH.pz);ashFog(e,true)}}
 /* v605: 몸을 dy 만큼 내리고 dz 만큼 뒤로 — 허리 아래는 절벽 밑으로. 앞발은 그만큼 위·앞으로 뻗어 단상을 그대로 짚음(ashArm), 뒷다리는 숨김 */
@@ -2732,29 +2732,32 @@ function ashInterStep(e,dt){const I=ASH,L=e.itl,T=(L.t+=dt),c=L.c;e.g.position.s
 /* ===== v614 2막 「꺼지지 않는 불」 — 80%에 닿으면 스토리 클리어. 체력이 금빛으로 다시 차오르고(피해 0), 단상이 무너지며 불비, 화면 전체를 덮는 숨결, 추락·암전 → 성역 아래 엔드게임 사냥터에서 깨어남 ===== */
 function ashOv(){let o=$('ashOv');if(!o){o=document.createElement('div');o.id='ashOv';o.style.cssText='position:fixed;inset:0;z-index:60;pointer-events:none';o.innerHTML='<div id="ashBg" style="position:absolute;inset:0;opacity:0"></div><div id="ashTx" style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;padding:0 24px;font-weight:600;letter-spacing:.04em;color:#f3e2c8;text-shadow:0 2px 12px #000;opacity:0;transition:opacity 1.4s"></div>';document.body.appendChild(o)}return o}
 const ashBg=(css,op)=>{ashOv();const b=$('ashBg');if(css!==null)b.style.background=css;b.style.opacity=op},ashTx=(html,on,low)=>{ashOv();const t=$('ashTx');if(html!==null)t.innerHTML=html;t.style.top=low?'76%':'50%';t.style.opacity=on?1:0};
-function ashAct2(e){if(e.a2)return;ashItlDrop();e.itl=null;e.holdT=0;e.brW=0;e.brT=0;e.weakT=0;e.a2={t:0,st:'fill',h0:e.hp,rk:0,br:0};e.name0=e.name;e.name='아쉬카르';if(e.lab&&e.lab.firstChild){e.lab.firstChild.textContent='아쉬카르';e.lab.firstChild.style.color='#ffe08a'}/* 결정적 순간에 이름 공개 */$('bossbar').classList.add('gold');
+function ashAct2(e){if(e.a2)return;ashItlDrop();e.itl=null;e.holdT=0;e.brW=0;e.brT=0;e.weakT=0;e.a2={t:0,st:'hold',h0:e.hp,rk:0,br:0};
   if(S.ch===LAST&&S.phase===3){S.phase=4;save()}/* 여기까지 오면 스토리 클리어 — 도중에 나가도 다시 싸우지 않음 */tele('fbclear');
-  shake=1;ringFx({x:0,z:ASH.pawZ+3},12,0xffd27a,.9);toast('아쉬카르','상처가 아문다 — 꺼지지 않는 불')}
+  shake=Math.max(shake,.4)}
 function ashA2Go(e,st){const A=e.a2;if(!A||A.st===st)return;A.st=st;A.t=0;
+  if(st==='fill'){/* 멈춤이 끝나면 이름 공개 · 금빛 */e.name0=e.name;e.name='아쉬카르';if(e.lab&&e.lab.firstChild){e.lab.firstChild.textContent='아쉬카르';e.lab.firstChild.style.color='#ffe08a'}$('bossbar').classList.add('gold');shake=1;ringFx({x:0,z:ASH.pawZ+3},12,0xffd27a,.9);toast('아쉬카르','상처가 아문다 — 꺼지지 않는 불')}
   if(st==='breath'){P.inv=99;P.mv=null;P.cast=null;knActs(false);ASHC.on=1;knAppr=2;/* 결말 동안 조작·스킬·물약 잠금, UI 숨김 */releaseAll();e.brT=99;A.px=P.pos.x;A.pz=P.pos.z;ashBg('radial-gradient(circle at 50% 30%,#fff3c8 0%,#ff8a2a 45%,#6a1204 100%)',0)}
   else if(st==='line'){ashTx('아직은 닿을 수 없는 불이다.',false);later(1,()=>{if(e.a2&&e.a2.st==='line')ashTx(null,true)})}
-  else if(st==='save'){ashTx(null,false);e.brT=0;ASHC.cam=1;ASHC.t=0;ASHC.lie=1;ASHC.lieY=.32;P.face=Math.PI*.8;hero.rotation.y=P.face}
+  else if(st==='save'){ashTx(null,false);e.brT=0;A.px=0;A.pz=-5;/* v619: 항상 단상 가운데(용 정면)에 쓰러져 있음 — 세로 화면에서도 용과 캐릭터가 함께 보이게 */P.pos.set(A.px,0,A.pz);camT.set(A.px,0,A.pz);ASHC.cam=1;ASHC.t=0;ASHC.lie=1;ASHC.lieY=.32;P.face=Math.PI*.8;hero.rotation.y=P.face}
   else if(st==='carry'){ashTx(null,false);e.brW=1.6}}
 /* 금빛 보호막: 구(안쪽 빛 + 겉 테두리) + 하늘에서 내려오는 빛기둥 */
 const ASHC={on:0,cam:0,lie:0,lieY:.32,t:0,g:null};/* on=결말 진행(조작 잠금·UI 숨김), cam=결말 카메라, lie=캐릭터가 쓰러져 누운 자세 */
-function ashLie(){/* 쓰러진 자세: 뒤로 넘어져 누움. 보호막 안에서는 lieY 만큼 떠서 축 늘어진 채 */const f=hero.rotation.y,o=.95;/* 발끝이 축이라 몸 가운데가 제자리(보호막 중심)에 오도록 앞으로 당김 */hero.position.set(P.pos.x+Math.sin(f)*o,P.pos.y+ASHC.lieY,P.pos.z+Math.cos(f)*o);hero.rotation.order='YXZ';hero.rotation.x=-1.42}
+function ashLie(){/* 쓰러진 자세: 뒤로 넘어져 누움. 보호막 안에서는 lieY 만큼 떠서 축 늘어진 채 */if(ASHC.sh===undefined||ASHC.shH!==hero){ASHC.shH=hero;ASHC.sh=[];hero.traverse(q=>{if(q.geometry===shadowGeo)ASHC.sh.push(q)})}for(const q of ASHC.sh)q.visible=false;/* v619: 발밑 그림자 판이 몸과 함께 세워져 보이던 문제 */const f=hero.rotation.y,o=.95;/* 발끝이 축이라 몸 가운데가 제자리(보호막 중심)에 오도록 앞으로 당김 */hero.position.set(P.pos.x+Math.sin(f)*o,P.pos.y+ASHC.lieY,P.pos.z+Math.cos(f)*o);hero.rotation.order='YXZ';hero.rotation.x=-1.42}
 function ashShield(){if(ASHC.g)return ASHC.g;const g=new THREE.Group(),mk=(r,op,side)=>new THREE.Mesh(new THREE.SphereGeometry(r,28,18),new THREE.MeshBasicMaterial({color:0xffd870,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,side,fog:false}));
-  const a=mk(1.7,.22,THREE.FrontSide),b=mk(1.78,.3,THREE.BackSide),hl=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xffc850,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));hl.scale.set(7,7,1);
-  const beam=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.9,60,20,1,true),new THREE.MeshBasicMaterial({color:0xffe6a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false}));beam.position.y=30-1.25;/* v617: 바닥까지 꽂힘 */const gd=new THREE.Mesh(new THREE.CircleGeometry(3.6,32),new THREE.MeshBasicMaterial({map:dotTex,color:0xffe090,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));gd.rotation.x=-Math.PI/2;gd.position.y=-1.05;
+  const a=mk(2.04,.22,THREE.FrontSide),b=mk(2.14,.3,THREE.BackSide),/* v619: 20% 크게 */hl=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xffc850,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));hl.scale.set(7,7,1);
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.9,60,20,1,true),new THREE.MeshBasicMaterial({color:0xffe6a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false}));beam.position.y=30-1.25;/* v617: 바닥까지 꽂힘 */const gd=new THREE.Mesh(new THREE.CircleGeometry(4.3,32),new THREE.MeshBasicMaterial({map:dotTex,color:0xffe090,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));gd.rotation.x=-Math.PI/2;gd.position.y=-1.05;
   const lt=new THREE.PointLight(0xffd070,0,16);lt.position.y=1.2;g.add(a,b,hl,beam,gd,lt);g.userData={a,b,hl,beam,gd,lt};g.visible=false;scene.add(g);return ASHC.g=g}
-function ashShieldSet(k,bm,gy){const g=ashShield(),U=g.userData,t=time;g.visible=k>0||bm>0;g.position.set(P.pos.x,P.pos.y+1.15,P.pos.z);U.gd.visible=!gy;U.gd.material.opacity=.8*Math.max(bm,k*.5);const s=Math.max(.01,k)*(1+.03*Math.sin(t*5));U.a.scale.setScalar(s);U.b.scale.setScalar(s);U.a.material.opacity=.13*k;U.b.material.opacity=.24*k;U.hl.material.opacity=.22*k;U.hl.scale.setScalar(6*s);U.lt.intensity=2.2*k;U.beam.material.opacity=.17*bm;U.beam.scale.set(.35+bm*.65,1,.35+bm*.65)}
-function ashShieldOff(){const g=ASHC.g;if(g){scene.remove(g);g.traverse(o=>{if(o.material)o.material.dispose();if(o.geometry)o.geometry.dispose()});ASHC.g=null}ASHC.on=ASHC.cam=ASHC.lie=0;hero.rotation.x=0}
+function ashShieldSet(k,bm,gy){const g=ashShield(),U=g.userData,t=time;g.visible=k>0||bm>0;g.position.set(P.pos.x,P.pos.y+1.15,P.pos.z);U.gd.visible=!gy;U.gd.material.opacity=.8*Math.max(bm,k*.5);const s=Math.max(.01,k)*(1+.03*Math.sin(t*5));U.a.scale.setScalar(s);U.b.scale.setScalar(s);U.a.material.opacity=.13*k;U.b.material.opacity=.24*k;U.hl.material.opacity=.22*k;U.hl.scale.setScalar(7.2*s);U.lt.intensity=2.2*k;U.beam.material.opacity=.17*bm;U.beam.scale.set(.35+bm*.65,1,.35+bm*.65)}
+function ashShieldOff(){const g=ASHC.g;if(g){scene.remove(g);g.traverse(o=>{if(o.material)o.material.dispose();if(o.geometry)o.geometry.dispose()});ASHC.g=null}ASHC.on=ASHC.cam=ASHC.lie=0;hero.rotation.x=0;if(ASHC.sh)for(const q of ASHC.sh)q.visible=true}
 function ashCineCam(dt){/* 결말 카메라: 캐릭터 뒤 옆에서 — 보호막에 싸인 캐릭터와 그 너머의 아쉬카르를 함께 */const e=enemies.find(q=>q.perch&&q.a2);if(!e){ASHC.cam=0;return}const A=e.a2,px=A.px,pz=A.pz,py=P.pos.y;ASHC.t+=Math.max(0,dt);
-  if(A.st==='carry'){_dcP.set(px+7.5,4.6,pz+11.5);_dcQ.set(P.pos.x,py+1.2,P.pos.z)}else{const k=Math.min(1,ASHC.t/7);_dcP.set(px+6.5-k*1.5,3.4+k*.6,pz+9.5-k);_dcQ.set(px*.7,3.2,pz-5)}
+  const port=innerWidth<innerHeight;/* 세로 화면은 좌우가 좁으므로 캐릭터 바로 뒤에서 용을 올려다봄 */
+  if(A.st==='carry'){if(port)_dcP.set(px+3,5.5,pz+14.5);else _dcP.set(px+7.5,4.6,pz+11.5);_dcQ.set(P.pos.x,py+1.2,P.pos.z)}else{const k=Math.min(1,ASHC.t/7);if(port){_dcP.set(px+2.2-k*.6,5,pz+12.5-k);_dcQ.set(px,5.6,pz-6)}else{_dcP.set(px+6.5-k*1.5,3.4+k*.6,pz+9.5-k);_dcQ.set(px,3.2,pz-5)}}
   if(ASHC.t<.05)_dcL.copy(_dcQ);else _dcL.lerp(_dcQ,Math.min(1,Math.max(dt,.016)*3));camera.position.copy(_dcP);if(shake>0){camera.position.x+=rand(-.1,.1);camera.position.y+=rand(-.08,.08)}camera.lookAt(_dcL);scene.fog.near=40;scene.fog.far=150}
 function ashAct2Step(e,dt){const A=e.a2,I=ASH,T=(A.t+=dt),U=thSet.userData;ashFace(e,dt);e.brT=Math.max(0,(e.brT||0)-dt);e.brW=Math.max(0,(e.brW||0)-dt);
   const fire=(n,rad)=>{for(let j=0;j<n;j++){const p={x:rnd(-THR.hw,THR.hw),z:rnd(-THR.hz,THR.hz)};if(Math.hypot(p.x-P.pos.x,p.z-P.pos.z)<rad)continue;spray(PADD,p,3,{sp:[1,4],up:[3,9],y:[.1,.5],life:[.4,.9],s0:[.5,.9],s1:[.1,.2],c0:0xffd080,c1:0xff3000,a:.95,drag:1,grav:-6,tex:1,r0:1.2})}};
-  if(A.st==='fill'){const k=Math.min(1,T/I.aFill);e.hp=A.h0+(e.mhp-A.h0)*k*k*(3-2*k);if(Math.random()<dt*14)spray(PADD,{x:rnd(-9,9),z:I.pawZ+rnd(-2,3)},3,{sp:[.3,1.5],up:[3,8],y:[.5,6],life:[.6,1.2],s0:[.3,.6],s1:[.05,.1],c0:0xfff0b0,c1:0xd08a10,a:.95,drag:.6,grav:-2,tex:1});if(T>I.aFill)ashA2Go(e,'storm')}
+  if(A.st==='hold'){if(T>I.aHold)ashA2Go(e,'fill')}
+  else if(A.st==='fill'){const k=Math.min(1,T/I.aFill);e.hp=A.h0+(e.mhp-A.h0)*k*k*(3-2*k);if(Math.random()<dt*14)spray(PADD,{x:rnd(-9,9),z:I.pawZ+rnd(-2,3)},3,{sp:[.3,1.5],up:[3,8],y:[.5,6],life:[.6,1.2],s0:[.3,.6],s1:[.05,.1],c0:0xfff0b0,c1:0xd08a10,a:.95,drag:.6,grav:-2,tex:1});if(T>I.aFill)ashA2Go(e,'storm')}
   else if(A.st==='storm'){const k=T/I.aStorm;U.floor.material.emissiveIntensity=1+k*2.2;shake=Math.max(shake,.12+k*.3);
     A.rk-=dt;while(A.rk<=0){A.rk+=.32-k*.12;telegraph({x:rnd(-THR.px+1,THR.px-1),z:rnd(THR.pzn+1,THR.gz-1)},2.6,e.dmg*1.1,true)}
     if(T>I.aStorm*.55&&!A.br){A.br=1;e.brW=1.2;toast('아쉬카르','숨을 깊이 들이쉰다')}
@@ -2764,15 +2767,15 @@ function ashAct2Step(e,dt){const A=e.a2,I=ASH,T=(A.t+=dt),U=thSet.userData;ashFa
   else if(A.st==='save'){/* 다시 단상 — 불길 속에 쓰러진 캐릭터(sLie초) → 화면이 멎고 가운데 대사(sTalk초) → 하늘에서 금빛 기둥이 꽂히고 둥근 보호막이 감쌈 */P.pos.set(A.px,0,A.pz);P.mv=null;U.floor.material.emissiveIntensity=3;
     const t1=I.sLie,t2=t1+I.sTalk,B=T-t2-.5/* 빛기둥이 꽂히는 순간부터의 시간 */,talk=T>t1&&T<t2;
     if(talk){/* 멎은 화면: 어둡게 가라앉고 불길·흔들림이 멈춤 */const q=Math.min(1,(T-t1)/.5,(t2-T)/.5);ashBg('#000',.5*q);if(!A.s2){A.s2=1;ashTx('<span style="font-size:.8em;opacity:.7;display:block;margin-bottom:10px;color:#ffe08a">???</span>「여기서 끝나게 두지는 않겠다.」',true)}if(T>t2-1.3)ashTx(null,false)}
-    else{ashBg(T<t1?'#000':null,T<t1?Math.max(0,1-T/1.6):0);fire(3,2.6);shake=Math.max(shake,.1)}
+    else{ashBg(T<t1?'#000':null,T<t1?Math.max(0,1-T/1.6):0);fire(3,3.1);shake=Math.max(shake,.1)}
     const bm=B<0?0:B<.35?B/.35:B<3?1:Math.max(0,1-(B-3)/1),sh=B<.7?0:Math.min(1,(B-.7)/.9);ashShieldSet(sh,bm);
     if(B>0&&!A.s1){A.s1=1;ringFx(P.pos,6,0xffd870,.8);shake=Math.max(shake,.7)}
     if(sh>0)ASHC.lieY=.32+.5*sh*sh*(3-2*sh);/* 보호막이 차오르며 몸이 살짝 떠오름 */
     if(sh>0&&Math.random()<dt*26)emit(PADD,{x:P.pos.x+rnd(-1.6,1.6),y:rnd(.2,2.6),z:P.pos.z+rnd(-1.6,1.6),vx:rnd(-.3,.3),vz:rnd(-.3,.3),vy:rnd(.6,1.8),life:rnd(.6,1.2),s0:rnd(.1,.22),s1:.03,c0:0xfff2c0,c1:0xe0a020,a:.95,drag:.4});
-    if(sh>0&&Math.random()<dt*10){/* 불길이 보호막에 부딪혀 갈라짐 */const a=rnd(-1,1);spray(PADD,{x:P.pos.x+Math.sin(a)*2.1,z:P.pos.z-Math.cos(a)*2.1},5,{sp:[2,5],up:[2,6],y:[.3,2],life:[.3,.6],s0:[.4,.7],s1:[.1,.15],c0:0xfff0c0,c1:0xff5a10,a:.95,drag:1,grav:-3,tex:1,r0:.5})}
+    if(sh>0&&Math.random()<dt*10){/* 불길이 보호막에 부딪혀 갈라짐 */const a=rnd(-1,1);spray(PADD,{x:P.pos.x+Math.sin(a)*2.5,z:P.pos.z-Math.cos(a)*2.5},5,{sp:[2,5],up:[2,6],y:[.3,2],life:[.3,.6],s0:[.4,.7],s1:[.1,.15],c0:0xfff0c0,c1:0xff5a10,a:.95,drag:1,grav:-3,tex:1,r0:.5})}
     ashLie();if(T>I.aSave)ashA2Go(e,'carry')}
   else if(A.st==='carry'){/* 보호막이 쓰러진 캐릭터를 품은 채 떠올라 남서쪽 하늘로 — 성역 아래로 */const k=Math.min(1,T/I.aCarry),up=Math.min(1,T/1.8),q=Math.max(0,(T-1.5)/(I.aCarry-1.5)),g2=q*q;
-    P.pos.set(A.px-g2*20,up*up*(3-2*up)*5.5+Math.sin(q*Math.PI)*4-g2*13,A.pz+g2*30);P.mv=null;ASHC.lieY=.82;ashShieldSet(1,0,1);ashLie();fire(2,3);
+    P.pos.set(A.px-g2*20,up*up*(3-2*up)*5.5+Math.sin(q*Math.PI)*4-g2*13,A.pz+g2*30);P.mv=null;ASHC.lieY=.9;ashShieldSet(1,0,1);ashLie();fire(2,3);
     if(Math.random()<dt*40)emit(PADD,{x:P.pos.x+rnd(-.8,.8),y:P.pos.y+rnd(0,1.6),z:P.pos.z+rnd(-.8,.8),vx:rnd(-.3,.3),vz:rnd(-.3,.3),vy:rnd(-.5,.5),life:rnd(.8,1.5),s0:rnd(.14,.3),s1:.03,c0:0xfff2c0,c1:0xe0a020,a:.95,drag:.3});
     if(T<1.4)shake=Math.max(shake,.3);if(k>.6)ashBg('#fff2cc',Math.min(1,(k-.6)/.32));
     if(T>I.aCarry&&!A.done){A.done=1;ashEnding()}}
@@ -3628,7 +3631,8 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
   if(P.flinch){if(P.hp>0)K.hitT=.35;P.flinch=false}/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */K.hitT-=dt;
   let st,t=null,rate=1,aim=0;
-  if(invOpen&&IVS.on)st='idle';/* v492: 장비창(전용 공간)에서는 항상 대기 자세 */
+  if(ASHC.lie)st='idle';/* v619: 쓰러져 실려 가는 동안은 달리기 동작 없음 */
+  else if(invOpen&&IVS.on)st='idle';/* v492: 장비창(전용 공간)에서는 항상 대기 자세 */
   else if(P.hp<=0)st='die';
   else if(P.mv){st='roll';t=.4+1.15*Math.min(1,P.mv.go/MV_GO)}
   else if(arc&&P.cast){/* v380 궁수 시전(예비): 활을 들어 시위를 당김 — shot/sky 0→1.03(완전히 당긴 자세) · 화살비는 하늘을 향해 */const k=sm(clamp(1-P.cast.t/P.cast.T,0,1));st=P.cast.id==='rain'?'sky':'shot';t=SKA_D*k;aim=1}
@@ -3927,7 +3931,7 @@ function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.
     else if(s==='up'){fly=T>.18?1:0;cr=T<.18?1:0;sp=1;fs=11}
     else if(s==='land'){fly=T<.72?1:.15;wup=T>.45?1:0;sp=1;fs=7;rch=T>.4?1:0}
     else{fly=1;fs=s==='fly'?10:7.5;bre=s==='fly'?1:0}}
-  else if(e.a2){/* v614 2막: 금빛으로 아물며 날개를 치켜듦 → 숨결. v616: 보호막이 씌워지면 고개를 들고, 떠나갈 때 포효 */const A=e.a2;sp=1;if(A.st==='fill'){wup=.9;fs=4}else if(A.st==='storm'){wup=.5;fs=6;bre=A.br>0?1:0}else if(A.st==='save'){bre=A.t<1.9?1:0;wup=.4;fs=A.t<1.9?10:3}else if(A.st==='carry'){rear=e.brW>0?1:0;wup=.7;fs=e.brW>0?14:3}else{bre=1;wup=.3;fs=10}}
+  else if(e.a2){/* v614 2막: 금빛으로 아물며 날개를 치켜듦 → 숨결. v616: 보호막이 씌워지면 고개를 들고, 떠나갈 때 포효 */const A=e.a2;sp=1;if(A.st==='hold'){wup=.2;fs=2}else if(A.st==='fill'){wup=.9;fs=4}else if(A.st==='storm'){wup=.5;fs=6;bre=A.br>0?1:0}else if(A.st==='save'){bre=A.t<1.9?1:0;wup=.4;fs=A.t<1.9?10:3}else if(A.st==='carry'){rear=e.brW>0?1:0;wup=.7;fs=e.brW>0?14:3}else{bre=1;wup=.3;fs=10}}
   else if(e.itl){/* v606 사이페: 날개를 활짝 펴 치켜들고 → 불바다 동안 머리를 숙여 뿜음 */sp=1;const it=e.itl.t<ASH.itT;wup=it?.9:.35;bre=it?0:1;fs=it?3:14}
   else if(c){if(c.w>0){cr=1;chg=.45;sp=.55;wup=.3}else chg=1}/* v559: 돌진 준비 — 웅크린 채 몸을 앞으로 숙이고 날개를 반쯤 들어 노려봄 */
   else if(e.brW>0){/* v563 브레스 준비: 상체를 살짝 들고 숨을 들이쉼 */rear=.5;sp=.6;wup=.25}
@@ -4125,6 +4129,7 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
 /* v552: 보스 등장 연출 중인지 — 이때는 나가기 버튼을 숨김 */
 const bossIntroE=e=>!!(e.final&&e.air&&e.air.intro)||!!(e.maw&&e.hp>0&&e.introT!==undefined&&e.introT<MWI.up+MWI.roar+.6)||!!(e.duel&&!e.maw&&e.hp>0&&e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+1.5);
+function cineUiSync(){/* v619: 등장·결말 연출 동안 UI(캐릭터 정보·미니맵 포함)를 모두 숨김 — 소개 화면이 떠 있어 HUD 갱신이 멈춘 동안에도 매 프레임 맞춤 */const ci=(bossIntroOn()&&knAppr!==1)||!!ASHC.on;if(document.body.classList.contains('cineui')!==ci)document.body.classList.toggle('cineui',ci)}
 function bossIntroOn(){for(const e of enemies)if(bossIntroE(e))return true;return false}
 const BK_SZ=.72;/* v540: 잿불 검귀 크기 −20% → v555: 또 −10% (몸·피격 범위·이름표 높이) — 공격 범위·장판은 그대로 */
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();arenaHole(0);const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
@@ -6239,7 +6244,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v618';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v619';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6280,7 +6285,7 @@ const fmtC=v=>v>=1e29?'∞':v>CUR_MAX?CUR_MAX+'+':String(Math.floor(v));
 function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.textContent!==t)e.textContent=t};st('goldT',fmtG4(S.gold||0));
   const T=S.test;st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('sealT',T?'∞':fmtC(S.seal||0));st('lumiT',T?'∞':fmtC(S.lumi||0))}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
-  {const ci=(bossIntroOn()&&knAppr!==1)||!!ASHC.on;if(document.body.classList.contains('cineui')!==ci)document.body.classList.toggle('cineui',ci)}/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
+  cineUiSync();/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&(!bossIntroOn()||knAppr===1);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML=XIC+'<span class="xl"> 나가기</span>'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
@@ -7959,14 +7964,15 @@ addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&IVP.on&&ivpMove(e
 addEventListener('pointerup',e=>{if(e.pointerType==='mouse')ivpEnd()});
 const ivsUp=e=>{const d=IVS.drag;if(!d||e.pointerId!==d.id)return;if(d.mv)IVS.dragEnd=Date.now();IVS.drag=null};addEventListener('pointerup',ivsUp);addEventListener('pointercancel',ivsUp);
 function frameCam(dt,target=P.pos){
+  cineUiSync();
   if(invOpen&&!S.demo){invCam();return}
   if(IVS.on)invStudioOff();
   if(S.demo&&target===P.pos){const port=innerWidth<innerHeight;target=_dt.set(P.pos.x+(port?0:4.5),0,P.pos.z+(port?6:0))}/* v82: 시연 중에는 선택 창에 가리지 않게 캐릭터를 위(세로)·왼쪽(가로)으로 */
   else if(S.duel&&target===P.pos){const b=enemies.find(e=>e.duel);if(b){const w=b.maw?.5:.3;target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*w,0,P.pos.z+(b.pos.z-P.pos.z)*w-1.5)}}/* v210: 고정형 아귀는 더 가운데로 *//* v95: 결투장은 거대 보스가 화면에 들어오게 */
   else if(target===P.pos&&mapKind==='arena'){const b=enemies.find(e=>e.final&&e.air&&e.air.intro);if(b)target=_dt.set(P.pos.x+(FB_POS.x-P.pos.x)*.62,0,P.pos.z+(FB_POS.z-P.pos.z)*.62)}/* v544: 용이 날아와 내려앉는 동안은 왕좌 쪽이 보이게 */
-  if(target===P.pos&&thOn&&mapKind==='arena'&&!knAppr){/* v611: 왼쪽 위의 아쉬카르가 화면에 들어오게 시선을 보스 쪽으로 당김 */const b=enemies.find(e=>e.perch&&e.hp>0&&!e.air);if(b)target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*.3,0,P.pos.z+(ASH.pawZ-2-P.pos.z)*.36)}
+  if(target===P.pos&&thOn&&mapKind==='arena'&&(!knAppr||ASHC.on)){/* v611: 왼쪽 위의 아쉬카르가 화면에 들어오게 시선을 보스 쪽으로 당김 */const b=enemies.find(e=>e.perch&&e.hp>0&&!e.air);if(b)target=_dt.set(P.pos.x+(b.pos.x-P.pos.x)*.3,0,P.pos.z+(ASH.pawZ-2-P.pos.z)*.36)}
   camT.lerp(target,Math.min(1,dt*6));
-  {/* v611: 잿불 왕좌 전투는 카메라를 비스듬히 돌려 보스가 왼쪽 위에 오게(계단·다른 맵은 0) */const ty=thOn&&mapKind==='arena'&&!knAppr?THR.yaw:0;camYaw+=(ty-camYaw)*Math.min(1,Math.max(dt,0)*2.5);if(Math.abs(camYaw-ty)<.002)camYaw=ty}
+  {/* v611: 잿불 왕좌 전투는 카메라를 비스듬히 돌려 보스가 왼쪽 위에 오게(계단·다른 맵은 0) */const ty=thOn&&mapKind==='arena'&&(!knAppr||ASHC.on)?THR.yaw:0;/* v619: 결말(숨결) 동안에도 비스듬한 시점 유지 */camYaw+=(ty-camYaw)*Math.min(1,Math.max(dt,0)*2.5);if(Math.abs(camYaw-ty)<.002)camYaw=ty}
   if(camYaw){const K=camK();camera.position.set(camT.x+CAM_OFF.z*Math.sin(camYaw)*K,camT.y+CAM_OFF.y*K,camT.z+CAM_OFF.z*Math.cos(camYaw)*K)}else camera.position.copy(camT).addScaledVector(CAM_OFF,camK());
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
   camera.lookAt(camT.x,camT.y+1,camT.z);
