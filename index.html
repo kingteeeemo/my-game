@@ -761,6 +761,10 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .sm2 .smnm{margin:6px 0 2px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}.sm2 .smopts.smbase{padding-bottom:6px;margin-bottom:6px!important;border-bottom:1px solid rgba(232,220,196,.35)}.sm2 .smopts.smbase div{border-bottom:0}.sm2 .smopts:not(.smbase) b{color:#a59f90}.sm2 .smnm b{font-size:15px}.sm2 .smopts.smbase{border-top:0;margin:0}.sm2 .smopts .arr{color:#7fe07a;font-size:12px}.sm2 .smopts b.p{color:#7fe07a}.sm2 .smopts.smbase+.smopts{border-top:0;margin-top:0}
 .sm2 .smtop{display:flex;align-items:center;justify-content:space-between;gap:10px}.sm2 .smtop .smrate small{width:auto}.sm2 .smpity{margin:4px 0 6px;gap:8px;display:flex;align-items:center}.sm2 .smpity .pl{width:60px;flex:none;font-size:12px;color:#8a8577;white-space:nowrap;letter-spacing:-.02em}.sm2 .pnote{margin-left:68px}
 #smith .smhr{display:flex;align-items:center;gap:12px}#smith .smhr .goldbar{position:relative;top:auto;padding:0;margin:0;border:0;background:none;gap:0}#smith .smhr .goldbar b{font-size:14px;display:inline-flex;align-items:center;gap:5px}#smith .smhr .gdelta{position:absolute;right:0;top:100%}
+.mutbox{display:flex;flex-direction:column;gap:8px}.muthd{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid rgba(232,220,196,.22);border-radius:12px;background:#111116;font-size:12.5px;color:#8a8577}.muthd b{color:var(--ink);font:800 16px var(--en);font-stretch:87%;margin-left:4px}
+.mutl{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}.mutr{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 6px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer}.mutr+.mutr{border-top:1px solid rgba(255,255,255,.05)}
+.mutr .mc{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid #4a4840;display:grid;place-items:center;font:800 12px var(--en);color:#141417}.mutr.on .mc{background:#e8dcc4;border-color:#e8dcc4}.mutr .mn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.mutr .mn b{font-size:13.5px}.mutr .mn small{font-size:11px;color:#8a8577}.mutr em{flex:none;font-style:normal;font:800 13px var(--en);font-stretch:87%;color:#8a8577}.mutr.on em{color:var(--ink)}.mutr:not(.on) .mn b{color:#a59f90}
+.mutft{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mutft button{height:38px;border-radius:10px;border:1px solid rgba(232,220,196,.3);background:#1d1d23;color:#e8dcc4;font:700 13px var(--ko)}
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -1504,6 +1508,11 @@ const D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d
 const D_GH=[781,1457,2857,5897,11520,17640,26280,37800,49320,55560,62640,70800,80160,90600,102240,116880,133680,153120,175440,201000],
   D_BR=[195,211,235,266,303,336,370,409,519,760,1053,1404,1809,2279,2764,3366,4094,4967,5982,7169];
 const dI=d=>Math.min(D_MAX,Math.max(1,Math.round(d)))-1;
+/* v624 변이 (위험도 20 전용) — 입장 전 켜고 끔. 보상 배율 = 1 + 점수 합 ÷ 100 */
+const MUT={hp:{n:'강인함',d:'몬스터 체력 +60%',p:25},dmg:{n:'흉포함',d:'몬스터 피해 +40%',p:25},spd:{n:'신속',d:'몬스터 이동·공격 속도 +25%',p:25},def:{n:'방어 약화',d:'방어력·회피·에너지 쉴드 −50%',p:30},
+  shot:{n:'사수 군단',d:'원거리 몬스터 2배',p:20},elite:{n:'정예 행렬',d:'정예·유니크 몬스터 2배',p:20},reg:{n:'재생 봉인',d:'생명력·마나 재생 −50%',p:20},burst:{n:'유언의 탄막',d:'몬스터가 죽을 때 사방으로 투사체',p:20},pot:{n:'물약 봉인',d:'물약 충전 −50%',p:15}};
+const mutOpen=()=>!!(S&&(S.d20||S.test)),mutZone=()=>!!(S&&S.ch>=NCH&&S.tier>=D_MAX&&!S.duel&&!inTown&&mapKind!=='story'&&mutOpen()),
+  mutA=k=>mutZone()&&!!(S.mut&&S.mut[k]),mutPts=()=>Object.keys(MUT).reduce((a,k)=>a+(S.mut&&S.mut[k]?MUT[k].p:0),0),mutM=()=>mutZone()?1+mutPts()/100:1;
 const tkFor=t=>t>=16?1000:t>=11?700:t>=6?500:300,/* v621: 다음 위험도까지 처치 수 — 1~5 300 · 6~10 500 · 11~15 700 · 16~20 1000 *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
@@ -1664,7 +1673,7 @@ function nLineTier(t){let r=Math.random(),o=0;for(;o<5;o++){r-=NLT_W[o];if(r<=0)
 /* 위험도별 티어 확률 (스토리: 5티어 20% · 6티어 80%) */
 function nTierW(t){if(S.ch<NCH)return[0,0,0,0,20,80];
   /* v621: 구간 최고 티어 m부터 m+2까지 — 최고 티어 비중은 구간 안에서 15% → 35%, 다음 티어 50%, 나머지 그 아래 */
-  {const m=dTop(t),[lo,hi]=D_BANDS[dBand(t)],a=hi>lo?.15+.2*(Math.min(D_MAX,t)-lo)/(hi-lo):.2,w=[0,0,0,0,0,0];w[m-1]+=a;w[Math.min(5,m)]+=.5;w[Math.min(5,m+1)]+=.5-a;return w.map(x=>x*100)}
+  {const m=dTop(t),[lo,hi]=D_BANDS[dBand(t)],a=hi>lo?.15+.2*(Math.min(D_MAX,t)-lo)/(hi-lo):.2,w=[0,0,0,0,0,0];w[m-1]+=a;w[Math.min(5,m)]+=.5;w[Math.min(5,m+1)]+=.5-a;if(m===1)w[0]*=mutM();/* v624 변이: 1티어 확률 × 배율 */return w.map(x=>x*100)}
   const lerp=(x,p)=>{if(x<=p[0][0])return p[0][1];for(let i=1;i<p.length;i++)if(x<=p[i][0]){const[a,b]=p[i-1],[c,d]=p[i];return b+(d-b)*(x-a)/(c-a)}return p[p.length-1][1]};
   const w1=t>=100?Math.min(4,2+.04*(t-100)):0,w2=t>=70?Math.min(12,3+.15*(t-70)):0,w3=t>=40?Math.min(25,3+.3*(t-40)):0;
   const w4=lerp(t,[[1,10],[39,30],[70,35],[100,40]]),w6=t>=100?0:lerp(t,[[1,55],[39,25],[99,5]]);
@@ -1699,7 +1708,7 @@ let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1};
 function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100}}
 /* 방어 유형 혼합: 주력 100% · 나머지 35%, 합산 후 x/(x+K) (상한 90%), 비율대로 배분 · v603: K 60,000 → 3,000, 상한 85% → 90%, 증가% 옵션은 오라와 더해서 곱함 */
 const NS_K=3000,NS_DCAP=.9;const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
-function nsDef(){const g=gear(),am=k=>1+(auraOn(k)?.03*auraL(k):0)+(g[k+'p']||0)/100,v={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},m=Object.keys(v).reduce((a,b)=>v[b]>v[a]?b:a,'def');
+function nsDef(){const g=gear(),mw=mutA('def')?.5:1,am=k=>(1+(auraOn(k)?.03*auraL(k):0)+(g[k+'p']||0)/100)*mw,v={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},m=Object.keys(v).reduce((a,b)=>v[b]>v[a]?b:a,'def');
   const w={};let X=0;for(const k in v){w[k]=v[k]*(k===m?1:.35);X+=w[k]}const K=nsDefK(),r=X>0?Math.min(NS_DCAP,X/(X+K)):0;
   const o={def:0,eva:0,es:0,main:m,total:r,X};if(X>0)for(const k in w)o[k]=r*w[k]/X;return o}
 const nsShieldMax=()=>{const d=nsDef();return d.es>0?P.mhp*d.es/(1-d.es):0};
@@ -1774,6 +1783,7 @@ const nsBossCfg=()=>S.duel?NS_BOSS[S.duel.b==='maw'?'maw':'knight'][S.duel.uber?
 const nsShots=[];const shotMat=new THREE.MeshBasicMaterial({color:0xff9a4a}),shotGeo=new THREE.SphereGeometry(.18,8,6);
 function nsShoot(e){const dx=P.pos.x-e.pos.x,dz=P.pos.z-e.pos.z,d=Math.hypot(dx,dz)||1,m=new THREE.Mesh(shotGeo,shotMat);m.position.set(e.pos.x,1.1,e.pos.z);scene.add(m);
   const gl_=new THREE.Sprite(glowMat(0xff7a2a));gl_.scale.setScalar(.9);m.add(gl_);nsShots.push({m,vx:dx/d*9,vz:dz/d*9,t:0,dmg:e.dmg})}
+function mutBurst(e){const n=e.rank>=2?10:e.rank===1?8:6,a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*6.283/n,m=new THREE.Mesh(shotGeo,shotMat);m.position.set(e.pos.x,1.1,e.pos.z);scene.add(m);const gl_=new THREE.Sprite(glowMat(0xc070ff));gl_.scale.setScalar(.8);m.add(gl_);nsShots.push({m,vx:Math.cos(a)*6,vz:Math.sin(a)*6,t:0,dmg:e.dmg*.5})}}
 function nsShotStep(dt){for(let i=nsShots.length-1;i>=0;i--){const o=nsShots[i];o.t+=dt;o.m.position.x+=o.vx*dt;o.m.position.z+=o.vz*dt;
   const hit=Math.hypot(o.m.position.x-P.pos.x,o.m.position.z-P.pos.z)<.7&&P.hp>0;if(hit&&!P.mv)hurtPlayer(o.dmg*(1-NSX.projr));/* v603: 투사체 피해 감소 */
   if(hit&&!P.mv||o.t>2||inTown){scene.remove(o.m);nsShots.splice(i,1)}}}
@@ -1942,7 +1952,7 @@ const heroMax=()=>NS()?(g=>Math.round((100+(S.lv-1)*7.5+g.hp)*(1+g.hpp/100)))(ge
 const heroMp=()=>NS()?Math.round(60+(S.lv-1)*4.1+gear().mp):Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·지능)으로 얻는 초당 재생량 +5~30% */
-const mpRegen=()=>NS()?P.mmp*(gear().mreg+(auraOn('mreg')?auraRegenP(auraL('mreg')):0))/100:P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(.4+gear().mreg/100)/* v471: 1+ → 0.4+ */;
+const mpRegen=()=>NS()?P.mmp*(gear().mreg+(auraOn('mreg')?auraRegenP(auraL('mreg')):0))/100*(mutA('reg')?.5:1):P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(.4+gear().mreg/100)/* v471: 1+ → 0.4+ */;
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
 /* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
 const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65+(t>90?.1*(t-90):0)))};/* v385: 위험도 90부터 냉기 증가량 ×1.1 (90 이후 증가분만 10% 가파르게, 90에서는 연속) */
@@ -1950,7 +1960,7 @@ const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;ret
 const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)return P.mhp*.006;if(t===0)return P.mhp*.007*2;const d=P.mhp*Math.min(.015,CH[LAST].drain+.001*t)*2;return t>35?coldAt(t,d):d};
 const envDrain=()=>{if(inTown||S.ch<NCH||NS())return 0;const tt=S.duel?S.duel.tier:S.tier;return coldRaw(Math.max(1,tt)-COLD_SH)*COLD_K};/* v58: 심연의 냉기 2배 */
 const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
-const hpRegen=()=>NS()?P.mhp*(gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100:P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
+const hpRegen=()=>NS()?P.mhp*(gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>NS()?.17*(S.lv-1)+gear().mspd:.5*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
 const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1);
@@ -3791,9 +3801,9 @@ function spawnEnemy(type,x,z,rank=0,o={}){
   const sc=T.sc*R.sc;g.scale.setScalar(sc);g.add(blob(.6));g.position.set(x,0,z);scene.add(g);
   const base=type==='shooter'?(CH[ci].mob.grunt||'')+' 사수':CH[ci].mob[type]||'',name=o.name||(rank===3?CH[ci].boss:rank===2?`${UNI_PRE[Math.random()*UNI_PRE.length|0]} ${base}`:rank===1?`${RARE_PRE[Math.random()*RARE_PRE.length|0]} ${base}`:base);
   const xpCh=(S.ch===0?1.3:S.ch===1?1:.6)*.7;/* 1장 +30%, 2장 그대로, 3장~엔드게임 -40%, 전 구간 추가 -30% */
-  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()?nsHpMul():1),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
+  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()?nsHpMul():1)*(mutA('hp')&&!o.noMut?1.6:1),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
   const lab=document.createElement('div');lab.className='nm r'+rank;lab.innerHTML=`<span style="color:${R.c}"></span><i><b></b></i>`;lab.firstChild.textContent=name;namesEl.appendChild(lab);
-  const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&oT(S.tier)>=30?2:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1),r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
+  const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&oT(S.tier)>=30?2:1)*(mutA('spd')&&!o.noMut?1.25:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1)*(mutA('dmg')&&!o.noMut?1.4:1),asp:mutA('spd')&&!o.noMut?1.25:1,r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
     boss:rank===3,chBoss:!!o.chBoss,aggro:rank!==3||!!o.aggro,skill:3.5,M,wk:Math.random()*6,atk:0};
   enemies.push(e);return e;
 }
@@ -5132,6 +5142,7 @@ function kill(e){
   if(S.demo)return;
   const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
   if(NS())nsPotKill(e);
+  if(mutA('burst')&&!e.boss&&!e.rift&&!e.gate)mutBurst(e);/* v624 유언의 탄막 */
   if(rz)riftAcc(e);else{dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e))}
   if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(oT(S.tier)));
@@ -5233,7 +5244,7 @@ const RR_MAX=999,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
-  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
+  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
@@ -5242,7 +5253,7 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
 const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
 const SEAL_P=.1,sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
-const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
+const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*mutM()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
 const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
@@ -5399,7 +5410,7 @@ function lootMesh(it){const g=new THREE.Group(),inner=new THREE.Group();inner.po
   g.userData.inner=inner;g.userData.rar=it.rar;g.userData.sp=sp;return g}
 /* 특수 능력치 장비 빛기둥: 특수 능력치 배지와 같은 청록색 */
 const beamSpMat=new THREE.MeshBasicMaterial({color:0x5ae0d0,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending});
-function dropItem(p,boss,rar){
+function dropItem(p,boss,rar,_m){if(!_m&&mutZone()){const n=rollN(mutM());for(let i=0;i<n;i++)dropItem(p,boss,rar,1);return}/* v624 변이 보상: 아이템 수 × 배율 */
   const it=makeItem(rollSlot(),dropLvl(),rar!==undefined?rar:rollRarity(boss));
   const q=scatter(p),g=lootMesh(it);
   g.position.set(q.x,0,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'item',item:it,ph:Math.random()*6});
@@ -5687,7 +5698,7 @@ function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpW
 function nsPotTick(dt){if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k]>0))continue;const t=Math.min(dt,P.hot[k]);P.hot[k]-=dt;const f=NPOT[k].p*t/NPOT_T;
   if(k==='hp'){P.hp=Math.min(P.mhp,P.hp+P.mhp*f);if(P.esMax>0)P.es=Math.min(P.esMax,(P.es||0)+P.esMax*f)}else P.mp=Math.min(P.mmp,P.mp+P.mmp*f)}}
 const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(),P.pch[k]+n)};
-function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=e.rank>=2?10:e.rank===1?3:1;while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
+function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*(mutA('pot')?.5:1);while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
 function nsPotBoss(e,amt){if(!e.duel||e.dummy)return;e.potAcc=(e.potAcc||0)+amt/e.mhp;while(e.potAcc>=.2){e.potAcc-=.2;nsPotAdd(1)}}
 /* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
 const potFlask=f=>`<svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" style="clip-path:inset(${(1-f)*100}% 0 0 0)" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg>`;
@@ -6259,7 +6270,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v624';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v625';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6322,7 +6333,7 @@ function hud(){placeEnv();placePort();
     const t=envMin?`${envName()} ${bad?'⚠ ':''}▸ 보기`:`${envName()} 초당 −${d.toFixed(1)} · 재생 +${rg.toFixed(1)}${bad?' · 재생이 부족합니다':''}  ▾ 숨기기`;if(el.textContent!==t)el.textContent=t}else el.hidden=true}
   $('qenv').onclick=()=>{envMin=!envMin;try{localStorage.setItem('envMin',envMin?'1':'')}catch(e){}hud()};
   {const qb=document.querySelector('.quest');const sh=!!S.tutor&&!inTown;if(qb.hidden===sh)qb.hidden=!sh}
-  if(S.ch>=NCH){const gp=gatePending();$('qtag').textContent='Endgame · 파밍';$('qtitle').textContent=gp?`관문 보스 처치 · 위험도 ${S.tier}`:`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`;$('qprog').textContent=gp?'★':S.tier<S.maxTier?`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)} · 해금됨`:`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)}`}
+  if(S.ch>=NCH){const gp=gatePending();$('qtag').textContent='Endgame · 파밍';$('qtitle').textContent=gp?`관문 보스 처치 · 위험도 ${S.tier}`:`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}${mutZone()&&mutPts()?` · 변이 ×${mutM().toFixed(2)}`:''}`;$('qprog').textContent=gp?'★':S.tier<S.maxTier?`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)} · 해금됨`:`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)}`}
   if(S.duel&&!inTown){const b=enemies.find(x=>x.duel);$('qtag').textContent=`Duel · 위험도 ${S.duel.tier}`;$('qtitle').textContent=`${duelMapN()} · ${duelDef().n} 처치`+(curseOn()?' · ☠ 최종 피해 −20%':'');$('qprog').textContent=b?`${Math.ceil(b.hp/b.mhp*100)}%`:'완료'}
   if(S.tutor&&!inTown){const st=S.tutStep||0,T=['첫 무리 처치','레벨업 · 스탯 찍기','「스킬」 창 열어 보기','두 번째 무리 처치','훈련 교관 처치','완료'][st]||'';$('qtag').textContent='Tutorial · 훈련장';$('qtitle').textContent=`${Math.min(st+1,5)}/5 · ${T}`;
     $('qprog').textContent=st===0?`${enemies.filter(x=>x.tp===1).length}마리 남음`:st===3?`${enemies.filter(x=>x.tp===2).length}마리 남음`:st===4?`끝까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`:''}
@@ -7212,10 +7223,19 @@ function renderStage(){
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
-  <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(위험도 1~5는 300마리 · 6~10은 500 · 11~15는 700 · 16~20은 1,000)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
+  <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(위험도 1~5는 300마리 · 6~10은 500 · 11~15는 700 · 16~20은 1,000)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>${mutUI()}`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">구간이 끝나는 위험도 4·9·14·19와 20에서 관문 보스를 쓰러뜨려야 합니다. 구간이 바뀌면 지역과 나오는 최고 아이템 티어가 올라갑니다.<br>위험도 9·14·19는 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 구간이 열립니다.</small></div>`}
+function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이 · 위험도 20 전용</div>';
+  if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">위험도 20 관문지기를 처음 쓰러뜨리면 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
+  const pts=mutPts();
+  return `<div class="mutbox">${H}<div class="muthd"><span>점수 <b>${pts}</b> / 200</span><span>보상 <b>×${(1+pts/100).toFixed(2)}</b></span></div>
+  <div class="mutl">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="mutr${on?' on':''}" data-mut="${k}"><span class="mc">${on?'✓':''}</span><span class="mn"><b>${m.n}</b><small>${m.d}</small></span><em>+${m.p}</em></button>`}).join('')}</div>
+  <div class="mutft"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div>
+  <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. ${S.tier>=D_MAX?'바꾼 변이는 새로 나오는 몬스터부터 적용됩니다.':'위험도 20에서만 적용됩니다.'}</p></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+  if(b.dataset.mut){S.mut=S.mut||{};S.mut[b.dataset.mut]=!S.mut[b.dataset.mut];save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
+  if(b.dataset.mutall!==undefined){S.mut={};if(b.dataset.mutall==='1')for(const k in MUT)S.mut[k]=true;save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
@@ -7828,11 +7848,11 @@ function update(dt){packTick();
     spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&oT(S.tier)<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
     let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-(Math.random()<.85?rand(14,26):-rand(12,18)),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
-    const q=Math.random(),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<.70?'grunt':q<.86?'shooter':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute';
+    const q=Math.random(),ms=mutA('shot'),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<(ms?.54:.70)?'grunt':q<.86?'shooter':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute';/* v624 사수 군단: 원거리 16% → 32% */
     const pack=Math.random()<.25+chE()*.06?3+(Math.random()*3|0):1;
     for(let i=0;i<pack;i++){if(egLim()&&egRoom()<=0)break;const q2=Math.random(),uniq=enemies.filter(e=>e.rank===2).length;
       /* 레어 6%→20%, 유니크 0.8%→4% (1~5장 선형, 이후 고정) */
-      const ci=chF(S.ch),pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=q2<pu?2:q2<pu+pr?1:0;/* 레어 18%→60%, 유니크 2.4%→12%, 마릿수 제한 없음 */
+      const ci=chF(S.ch),me=mutA('elite'),pu=(.008+.008*ci)*3*(me?2:1),pr=Math.min(1-pu,(.06+.035*ci)*3*(me?2:1)),rk=q2<pu?2:q2<pu+pr?1:0;/* v624 정예 행렬: 유니크 2배 · 정예 2배(남는 칸까지) *//* 레어 18%→60%, 유니크 2.4%→12%, 마릿수 제한 없음 */
       spawnEnemy(type,x+rand(-2,2),z+rand(-2,2),rk)}
   }
 
@@ -7859,8 +7879,8 @@ function update(dt){packTick();
         const st=clamp(e.tv*dt,-Math.abs(d),Math.abs(d));e.g.rotation.y+=d*st>0?st:0;e.spdK=Math.max(.12,Math.cos(Math.min(1.5,Math.abs(d))))}
       else e.g.rotation.y=ta}
     e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob);
-    if(e.rng&&!ob){if(!frz){e.acd-=dt;if(dd<e.rng+.5&&e.acd<=0){e.acd=2.2;e.atk=.35;nsShoot(e)}}}
-    else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=e.boss?1.3:1.05;e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
+    if(e.rng&&!ob){if(!frz){e.acd-=dt;if(dd<e.rng+.5&&e.acd<=0){e.acd=2.2/(e.asp||1);e.atk=.35;nsShoot(e)}}}
+    else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=(e.boss?1.3:1.05)/(e.asp||1);e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
     if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
     if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;const pk=e.patN%3;if(pk===1)bossCharge(e);else if(pk===2)bossSlam(e);else bossBreath(e)/* v563: 전방 브레스 추가 — 돌진 → 내려찍기 → 브레스 순 */}
       if(e.brW>0)e.brW-=dt;if(e.brT>0){e.brT-=dt;breathFx(e,dt)}}
