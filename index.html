@@ -5495,7 +5495,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);setTimeout(showRes,900)}
 function riftResClose(){if($('riftRes').hidden)return;$('riftRes').hidden=true;last=performance.now()}
 $('riftRes').addEventListener('click',e=>{if(e.target.id==='riftResOk'||e.target.id==='riftRes')riftResClose()});
-function riftTick(dt){
+function riftTick(dt){if(testMap)return;/* v646 */
   if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
   if(!riftOk()){if(RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();return}
@@ -6473,7 +6473,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v645';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v646';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7446,14 +7446,14 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
     `<div class="stmut"><div class="stmh"><span>변이</span><span>점수<b>${pts}</b> · 보상<b>×${(1+pts/100).toFixed(2)}</b></span></div>
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
-  const busy=!inTown&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?`위험도 <b>${t}</b> 입장`:t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
+  const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?`위험도 <b>${t}</b> 입장`:t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
   <div class="sttrk">${trk}</div><div class="sttl"><span>1</span><span>6</span><span>11</span><span>16</span><span>20</span></div>
   <div class="stdet"><div><div>${stTxt}</div><small>1,000마리 + 관문 보스</small></div><div class="r">적정 <b>${fmtN(req)}</b> · 내 <b style="color:${r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a'}">${fmtN(me)}</b></div></div>
   ${mut}<div class="stsp"></div>
-  <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${(1+pts/100).toFixed(2)}</span>`:''}</button>`}
+  <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${(1+pts/100).toFixed(2)}</span>`:''}</button>${S.test?`<button class="rrgo stgo" id="tmGo" style="margin-top:8px;background:#2a2a30;color:#e8e2d6" ${testMap?'disabled':''}>${testMap?'지금 테스트 맵에 있음':'테스트 맵으로 이동'}<span class="stsub">· 몬스터 없음</span></button>`:''}`}
 function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이 · 위험도 20 전용</div>';
   if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">위험도 20 관문지기를 처음 쓰러뜨리면 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
   const pts=mutPts();
@@ -7468,11 +7468,16 @@ $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.dataset.mutall!==undefined){S.mut={};if(b.dataset.mutall==='1')for(const k in MUT)S.mut[k]=true;save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
+  if(b.id==='tmGo'){testMapGo();return}/* v646 */
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
   if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t!==S.tier||S.runClr){if(!runPay(t))return;S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.fld=null;save()}closeStage();leaveTown()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(!runPay(t))return;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
+/* v646: 테스트 맵 — 테스트 캐릭터 전용. 몬스터·균열·관문이 전혀 나오지 않는 빈 맵에서 스킬만 써 봄. 다음 resetWorld(위험도 이동·마을 다녀오기 등) 때 자동으로 풀림 */
+let testMap=false,testMapK=0;
+function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;if(S.ch<NCH){S.ch=NCH;S.phase=0}riftNow=0;testMapK=1;
+  mapLoad('테스트 맵','몬스터 없음 · 스킬 시험',()=>{setMap(true);applyTheme();resetWorld()},()=>toast('테스트 맵','몬스터가 나오지 않습니다 · 사냥터에서 위험도를 고르면 돌아갑니다'))}
 function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
   else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.mutRun={...(S.mut||{})}}
@@ -7935,7 +7940,7 @@ function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;
 }
 
 let storyProg=0;
-function resetWorld(){clearPools();if(RZ&&RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();wipeFx();packQ=[];
+function resetWorld(){testMap=!!testMapK;testMapK=0;clearPools();if(RZ&&RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();wipeFx();packQ=[];
   for(const e of [...enemies])dropEnemy(e);
   for(const p of pickups)scene.remove(p.m);pickups.length=0;
   timers.length=0;P.cd={atk:0,s1:0,s2:0,pot:0,mv:0};
@@ -7943,6 +7948,7 @@ function resetWorld(){clearPools();if(RZ&&RZ.st==='on')riftEnd(false,'균열을 
   if(inArena())P.pos.set(FB_START.x,0,FB_START.z);camT.copy(P.pos);
   if(S.ch<NCH&&S.phase===0){S.phase=1;S.kills=0}/* v75: 처치 목표 없음 — 처음부터 길 끝 보스 */
   storyProg=0;
+  if(testMap){riftClear();save();return}/* v646: 테스트 맵 — 보스·몬스터 무리·관문 없음 */
   if(S.tutor&&mapKind==='story')tutSeed();
   else{if(S.ch<NCH&&S.phase===1)spawnBoss();
   if(mapKind==='story'&&S.phase===1)seedPacks()}
@@ -8074,7 +8080,7 @@ function update(dt){packTick();
   /* spawner: 장마다 수와 속도가 일정하게 증가 */
   const d=diff();
   spawnT-=dt;demoTick(dt);riftTick(dt);/* v398 잿불 균열 */
-  if(!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<d.cap*EGM()*egR()&&!(egLim()&&egRoom()<=0)){
+  if(!testMap&&!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<d.cap*EGM()*egR()&&!(egLim()&&egRoom()<=0)){
     spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&oT(S.tier)<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
     let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-(Math.random()<.85?rand(14,26):-rand(12,18)),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
