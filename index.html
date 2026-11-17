@@ -6249,7 +6249,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v621';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v622';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7657,9 +7657,11 @@ function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   if(!S.eq.weapon)S.eq.weapon=makeItem('weapon',1,0);if(!S.eq.armor)S.eq.armor=makeItem('armor',1,0);
   offer=null;lvlSkill=null;$('lvl').hidden=true;$('clear').hidden=true;
+  let fbWake=0;if(S.ch===LAST&&S.phase===4){/* v622: 아쉬카르 결말(80% 이후) 도중에 앱을 닫았다면 — 다시 싸우지 않고 바로 성역 아래(끝없는 심연)에서 시작 */S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.fld=null;egMapFor(S.tier);fbWake=1;save()}
   setMap(true);applyTheme();labelButtons();resetWorld();refreshUpBtn();
   if(!S.tutor&&!S.noGuide&&otherChars())S.noGuide=1;/* v451: 다른 슬롯에 캐릭터가 있으면 안내 없음 */
-  if(FLD&&FLD.bf&&!S.tutor&&!S.test&&!S.demo){S.fld=FLD;mapLoad(mapTitle(),'전투를 불러옵니다',()=>{applyFld(FLD,true);fldHold=false;showResume()},null);return}
+  if(FLD&&FLD.bf&&!fbWake&&!S.tutor&&!S.test&&!S.demo){S.fld=FLD;mapLoad(mapTitle(),'전투를 불러옵니다',()=>{applyFld(FLD,true);fldHold=false;showResume()},null);return}
+  if(fbWake){toast('성역 아래','여기서부터 다시, 저 불을 향해 올라가야 한다');stageBanner();return}
   if(townStart())return;fldHold=false;
   if(S.ch<NCH&&S.phase===2)showClear();
   else if(S.ch===LAST&&S.phase===4)showFinalClear();
