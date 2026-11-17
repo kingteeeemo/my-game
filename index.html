@@ -5714,7 +5714,7 @@ function basicFire(){
    전사 「검기」(wave)      : 검을 휘둘러 초승달 검기를 앞으로 날림 — 길을 따라 적을 모두 벰
    궁수 「폭발 사격」(boom) : 화살이 바로 앞 짧은 거리에 꽂히며 크게 폭발 — 2차 「연발 폭격」으로 최대 4발
    마법사 「사술 폭발」(pillar): 적의 자리에 긴 사술 기둥이 내리꽂히며 폭발 — 2차 「연쇄 작렬」로 폭발이 근처 적에게 번짐 */
-const PAL_WAVE={c:[0xffffff,0xf5607f,0x4a0818],core:[0xffffff,0xffd0d8,0xf5607f],ring:0xf8a0b0,fl:0xf57090,st:[0xffffff,0xf03a62],sp:[0xffffff,0xf56a88],smoke:0,ember:0,fast:1}/* v645: 매화색 */,
+const PAL_WAVE={c:[0xffffff,0xf04a50,0x4a0810],core:[0xffffff,0xffd4d6,0xf04a50],ring:0xff8890,fl:0xf05058,st:[0xffffff,0xff2a3a],sp:[0xffffff,0xff5a64],smoke:0,ember:0,fast:1}/* v645: 매화색 */,
   PAL_ARC={c:[0xfff0ff,0xd060ff,0x2a0a40],core:[0xffffff,0xf0c0ff,0xb050ff],ring:0xe0a0ff,fl:0xd080ff,st:[0xffffff,0xb050ff],sp:[0xffffff,0xd090ff],smoke:0,ember:0xc070ff,fast:1};
 /* 수치 */
 const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m:.6}),/* 연속 참격: 5·10단계에 +1번 */
@@ -5722,7 +5722,7 @@ const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m
 /* v645: 검기 크기·퍼짐 — 검기는 시전자를 중심으로 한 부채꼴 호(초승달)로 날아감. 강화 진행도 k(0~1)가 오를수록 부채꼴 각도가 커지고, 날아가는 동안 더 벌어짐
    k = 0.3 × (참격 연장 + 연속 참격)/20 + 0.7 × 검기 확장/5 · 최대 강화(k=1): 발사 30° → 사거리 끝 50° (시전자 기준 부채꼴 각도) */
 const WV_SPD=20.8,/* v650: 검기 속도 16 → 20.8 (+30%) */WV_A0=[12,72],/* 발사 순간 부채꼴 각도(°) [k=0, k=1] */WV_A1=[20,120],/* v651: 검기 확장 최대 시 120° (v649 140°) */WV_TC=.72,WV_TP=.45,/* v649: 두께 = 가운데 ×.72(얇게), 끝으로 갈수록 천천히 줄어듦(가장자리 두껍게) *//* 사거리 끝 각도(°) */WV_B=[1.1,1.9],/* 검기 기본 두께(m) */WV_BD=.12,/* 멀어질수록 두꺼워짐(거리 1m당 +.12m) */WV_SO=.7,/* 초승달 바깥 곡선 휨 = 반폭 × .7 (Austin 스케치) */WV_CT=.22,/* 가운데 두께 = 반폭 × .22 */WV_D0=1.6,/* 호 중심을 시전 지점보다 이만큼 뒤에 둠(발사 순간 호 반지름) */
-  WV_C={body:0xf22a62,core:0xffc4d0,pale:0xff7f9c,under:0xa01038,under2:0xf06080,glow:0xf23a68,trail:0xf04870,spark:0xf02a58,petal:0xff9fb4,hit:0xf56a88,ring:0xf88aa0}/* v656: 벚꽃빛 → 홍매(더 붉게) */;/* 매화색(홍매 몸·연분홍·백매 심지) */
+  WV_C={body:0xe61833,core:0xffd4d6,pale:0xff6a6e,under:0x9a0a1a,under2:0xf04450,glow:0xf02a3c,trail:0xf03040,spark:0xff2a3a,petal:0xff9fb4,hit:0xff5a64,ring:0xff8890}/* v657: 참고 이미지의 칼 색 — 진한 홍색(#e61833) + 흰빛 분홍 심지 */;/* 매화색(홍매 몸·연분홍·백매 심지) */
 const wvProg=(l,e,x)=>Math.min(1,.3*(l+e)/20+.7*x/g2Max('wfan')),/* v645: 크기는 추가 강화 「검기 확장」이 70%, 1차 강화(참격 연장·연속 참격)가 30% */
   wvShape=(k,u,d,as=1)=>{const lp=(a,b)=>a+(b-a)*k,sp=1-(1-u)*(1-u),d0=lp(WV_A0[0],WV_A0[1]),deg=(d0+(lp(WV_A1[0],WV_A1[1])-d0)*sp)*as,half=deg*Math.PI/360;
     const band=lp(WV_B[0],WV_B[1])+WV_BD*d,hw=d*Math.sin(half),so=hw*WV_SO+.35,si=Math.max(0,so-(hw*WV_CT+.35*(1+k)));/* v645: 두께는 초승달 폭에만 비례 */return {deg,half,R:d,band,off:-d,hw,so,si,zt:-(so+si)/2}};/* so·si: 바깥·안쪽 곡선이 앞으로 휜 정도, zt: 양 끝 위치(투사체 기준) *//* R: 호 반지름(=시전 중심에서의 거리), off: 투사체 위치 기준 호 중심 */
@@ -5848,11 +5848,11 @@ function shootWave(a,o){const DIR=o.dir||WV_SW.dir,ROLL=o.roll||0,YAW=o.yaw||0,A
   const gl_=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:WV_C.glow,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending}));gl_.position.z=0;g.add(m1,m2,m3,gl_);p.m.add(g);
   for(const x of [m1,m2,m3])x.frustumCulled=false;/* 모양이 매 프레임 바뀌므로 */let trD=0;const trCx=p.ox,trCz=p.oz;
   const fill=sh=>{sh.asy=ASY;shN=sh;g.rotation.y=YAW*(sh.e||0);wvFillQ(geo,sh,1,1,0,SEG);wvFillQ(geo2,sh,.82,.85,-.05,SEG);wvFillQ(geo3,sh,1.02,1.12,.1,SEG);gl_.scale.set(.001,.001,1);/* 가운데 빛 덩어리 끔(오목한 안쪽을 채워서) */gl_.position.z=sh.zt+sh.so*.7;p.hr=sh.hw+sh.so};/* v645: 초승달 */fill(wvSwing(S0,0,0,H0));/* v656: 휘두른 방향대로 비스듬히(yaw) 날아가고 칼이 끝난 쪽이 두꺼움 */for(const x of [m1,m2,m3]){x.material.uniforms.uSw.value=0;x.material.uniforms.uDir.value=DIR}
-  const rollAt=hw=>{const lim=Math.asin(Math.min(1,2.4/Math.max(.1,hw)));return Math.sign(ROLL)*Math.min(Math.abs(ROLL),lim)};g.rotation.z=rollAt(S0.hw);/* v653: 대각선 베기 — 검기 끝이 땅·하늘로 너무 멀리 가지 않게 끝 높이 1.6m까지만 기울임 */
+  const rollAt=hw=>{const lim=Math.asin(Math.min(1,2.4/Math.max(.1,hw)));return Math.sign(ROLL)*Math.min(Math.abs(ROLL),lim)};const setRoll=hw=>{const r=rollAt(hw);g.rotation.z=r;g.position.y=Math.max(0,hw*1.12*Math.abs(Math.sin(r))-.7)};setRoll(S0.hw);/* v657: 대각선으로 기울면 아래쪽 끝이 땅에 묻히지 않게 그만큼 띄움 *//* v653: 대각선 베기 — 검기 끝이 땅·하늘로 너무 멀리 가지 않게 끝 높이 1.6m까지만 기울임 */
   const rb=null;/* v645: 호 끝 꼬리선 제거(참고 영상엔 없음) */if(rb)rb.mat.uniforms.cw.value=.2;let tt=0;
   p.upd=dt=>{tt+=dt;const pp=p.m.position,sh=wvSwing(wvShape(K,Math.min(1,tt/L0),Math.hypot(pp.x-cx,pp.z-cz),AS),tt,Math.hypot(pp.x-p.ox,pp.z-p.oz),H0);fill(sh);const ry=p.m.rotation.y+YAW*(sh.e||0),cy=Math.cos(ry),sy=Math.sin(ry);
     const wp=(lx,lz)=>[pp.x+lx*cy+lz*sy,pp.z-lx*sy+lz*cy];/* 호의 국소 좌표 → 월드 */
-    for(const x of [m1,m2,m3]){x.material.uniforms.uOp.value=(x===m3?1:x===m2?.6:1)*Math.min(1,p.life/.15);x.material.uniforms.uT.value=tt;x.material.uniforms.uSw.value=sh.sw;x.material.uniforms.uDir.value=DIR}g.rotation.z=rollAt(sh.hw);
+    for(const x of [m1,m2,m3]){x.material.uniforms.uOp.value=(x===m3?1:x===m2?.6:1)*Math.min(1,p.life/.15);x.material.uniforms.uT.value=tt;x.material.uniforms.uSw.value=sh.sw;x.material.uniforms.uDir.value=DIR}setRoll(sh.hw);
     if(rb){for(const [h,s] of [[rb.h,1],[rb.h2,-1]]){const [tx,tz]=wp(s*sh.hw,sh.zt);h.unshift([tx,1+.1*s,tz]);if(h.length>12)h.length=12}
       if(rb.h.length>=3){const paths=[{p:rb.h,w:.3,w1:.1},{p:rb.h2,w:.3,w1:.1}];if(!rb.m){rb.m=p.rbm=new THREE.Mesh(boltGeo(paths),rb.mat);rb.m.frustumCulled=false;scene.add(rb.m)}else if(rb.m.geometry.attributes.position.count!==rb.h.length*4){rb.m.geometry.dispose();rb.m.geometry=boltGeo(paths)}else boltGeo(paths,rb.m.geometry);rb.mat.uniforms.t.value=tt;rb.mat.uniforms.fade.value=Math.min(1,p.life/.2)}}
     const q=QM(),sz=sh.hw/1.2;
@@ -6512,7 +6512,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v656';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v657';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
