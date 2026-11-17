@@ -159,6 +159,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .riftbig{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:46;pointer-events:none;text-align:center;animation:riftIn 3s ease-out forwards}.riftbig small{display:block;font:800 13px var(--en);letter-spacing:.3em;color:#ff9a4a}.riftbig b{display:block;font:900 clamp(28px,7.5vmin,54px)/1.15 var(--ko);background:linear-gradient(180deg,#fff2d0,#ff9a4a 55%,#a83a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,40,.6))}.riftbig span{display:block;margin-top:4px;font:900 clamp(26px,7vmin,52px) var(--en);color:#ffe0b0;text-shadow:0 0 12px rgba(255,120,40,.8),0 2px 4px #000;animation:riftNum .9s ease-out}.riftbig p{margin:8px 0 0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font:800 clamp(13px,3.2vmin,18px) var(--ko);color:#f2e6d0;text-shadow:0 1px 3px #000}.riftbig p em{font-style:normal}
 @keyframes riftIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}14%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0}}@keyframes riftNum{0%{transform:scale(1.8);opacity:0}30%{transform:scale(1);opacity:1}}
 #riftHud{font:700 13px var(--ko);color:#ffd9b0;background:rgba(40,12,6,.82);border:1px solid rgba(255,110,40,.75);border-radius:12px;padding:6px 12px;text-align:center;white-space:nowrap;box-shadow:0 0 16px rgba(255,90,20,.35)}#riftHud b{color:#ffb070;margin-right:4px}#riftHud small{margin-left:6px;color:#ffcf9a;font-weight:800}
+#bossbar.gold #bossb{background:linear-gradient(90deg,#b8862a,#ffe08a,#c99a3a)!important;box-shadow:0 0 12px rgba(255,210,120,.7)}#bossbar.gold #bossname{color:#ffe7a8}
 #bossExit .xic{width:1.3em;height:1.3em;vertical-align:-.2em;display:inline-block}#bossExit{pointer-events:auto;padding:6px 14px;border-radius:16px;border:1px solid rgba(255,138,58,.6);background:rgba(14,12,16,.85);color:#ffd9b0;font:700 13px var(--ko)}#bossExit.arm{background:#8a2a1a;color:#fff;border-color:#ff8a6a}@media (orientation:landscape){#topStack .bossbar{width:90%}}/* v343: 가로 화면 보스 체력바 좌우 -10% */@media (orientation:landscape) and (max-height:520px){#topStack{top:calc(env(safe-area-inset-top,0px) + 52px);width:min(224px,32vw)}#bossExit{padding:3px 12px;font-size:12px}}
 .stagechip{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border-radius:22px;background:rgba(14,12,16,.82);border:1px solid rgba(255,138,58,.45);pointer-events:auto;cursor:pointer;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,.5)}
 .stagechip{flex-direction:column;gap:2px;padding:6px 16px 6px 8px;border-radius:16px}.scrow{display:flex;align-items:center;gap:10px}
@@ -2656,7 +2657,7 @@ function thBreak(now){if(!thSet)return;const U=thSet.userData;if(!U.brk.visible)
   shake=1;const g=new THREE.Group(),ch=[],geo=new THREE.BoxGeometry(1,1,1);for(let i=0;i<26;i++){const m=new THREE.Mesh(geo,U.stoneT),sx=i%2?1:-1,col=i<8;m.position.set(col?sx*(10.5+rnd(-1,1)):rnd(-8,8),col?rnd(2,12):rnd(.5,9),col?-19.2+rnd(-1,1):rnd(-25,-21));m.scale.set(rnd(.8,2.6),rnd(.6,2),rnd(.8,2.4));m.rotation.set(rnd(0,6),rnd(0,6),rnd(0,6));g.add(m);ch.push({m,vx:(col?sx*rnd(1,5):rnd(-4,4)),vy:rnd(2,9),vz:col?rnd(-6,-1):rnd(-7,-2),rx:rnd(-3,3),rz:rnd(-3,3)})}
   scene.add(g);fx.push({m:g,t:0,dur:2.6,keep:1,geo,upd(k,dt){for(const c of ch){c.vy-=26*dt;c.m.position.x+=c.vx*dt;c.m.position.y+=c.vy*dt;c.m.position.z+=c.vz*dt;c.m.rotation.x+=c.rx*dt;c.m.rotation.z+=c.rz*dt}}});
   for(const p of [{x:-10.5,z:-19.2},{x:10.5,z:-19.2},{x:-4,z:-21},{x:4,z:-21},{x:0,z:-22}]){spray(PNRM,p,26,{r0:3,sp:[2,8],up:[2,9],y:[.3,5],life:[1,2],s0:[1.4,2.4],s1:[3.5,5.5],c0:0x6a5a50,c1:0x1a1210,a:.6,drag:1.6,grav:-1.5,tex:0});spray(PADD,p,18,{r0:2.5,sp:[2,9],up:[4,12],y:[.2,3],life:[.6,1.3],s0:[.25,.5],s1:[.05,.1],c0:0xffa040,c1:0x8a1a04,a:.9,drag:.8,grav:-14,tex:1})}}
-function thMend(){thGateSet(0);if(!thSet)return;const U=thSet.userData;U.brk.visible=true;U.rub.visible=false}
+function thMend(){thGateSet(0);if(!thSet)return;const U=thSet.userData;U.brk.visible=true;U.rub.visible=false;U.floor.visible=true;U.floor.material.emissiveIntensity=1}
 function thGateSet(v){thGate=v;const g=thSet&&thSet.userData.gate;if(g){g.visible=v>0;g.material.opacity=v===2?.95:.35}}
 const thStepY=z=>{const z0=THR.hz-.6;return z<=z0?0:-.2-.4*Math.min(21,Math.floor((z-z0)/1.25))};
 /* v603: 왕좌로 오르는 계단 — 아래에서 시작해 올라오면 등장 연출(소개 화면)이 시작됨 */
@@ -2672,8 +2673,8 @@ function thTick(dt,t){const U=thSet.userData;if(knAppr===1&&U.ap){P.pos.y+=(thSt
 /* ===== v603: 거대한 아쉬카르 — 왕좌 뒤 절벽에서 올라와 앞발로 단상을 짚고 상반신만 보이는 자세(perch). 앞발을 축으로 몸 전체를 뒤로 세워 하반신은 절벽 아래로 내림.
    1페이즈 패턴: 내려찍기 · 불씨 비 · 물어뜯기(뒤에 머리가 내려와 약점 노출) ===== */
 const ASH={sc:12,a:-.6,pz:-13,/* v609: 밀려나던 것을 없애고 자리를 직접 정함 — 가슴이 무너진 북쪽 가장자리에서 올라오는 위치(v611: 네모 단상에 맞춰 -13) */zp:-.274,dy:5,dz:2.5,arm:1,/* v612 앞발: 손목 높이 보정 hy(월드 단위, 음수=더 낮게), 손바닥 기울기 hp, 상체 들기 세기 rear */hy:-.6,hp:-.12,rear:.4,/* v613: 앞발을 몸 쪽으로 hb 만큼 당기고 팔 길이를 줄여 팔꿈치를 굽힘(pole = 팔꿈치가 향하는 쪽: 바깥·위·뒤) */hb:2.4,pole:[1.4,.3,-.2],r:7.5,rise:1.5,roar:1.7,/* v608 등장: 먼 봉우리에 앉아 있다가(far) 날아와(fly) 왕좌에 내려앉음(land) */far:2.1,fly:4.8,land:.6,hov:[0,10,-28],c1:[58,30,-58],c2:[0,27,-76],cd:4.4,cd2:3.9,weak:2.6,wk:1.5,
-  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-16.2,shZ:4.4,shR:3.3,p1:.9};
-function ashSetup(e,intro){e.perch=1;e.g.scale.setScalar(ASH.sc);e.pos.set(0,0,ASH.pz);e.r=ASH.r;e.spd=0;e.h=7;e.py=0;e.pat=3.2;e.patN=0;e.weakT=0;e.holdT=0;e.p2=0;ashItlDrop();e.itl=null;e.brW=0;e.brT=0;e.chg=null;e.g.rotation.order='YXZ';e.g.rotation.set(0,0,0);e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});
+  /* v606 사이페(90%): 예고 itT초 동안 한쪽 앞발 뒤(그림자)에 안전 구역 → 단상 전체가 불바다 itF초(itN번 피해) */itT:4.6,itF:2.4,itN:6,itD:1.3,pawX:6.6,pawZ:-16.2,shZ:4.4,shR:3.3,p1:.9,/* v614 2막(80%): fill 체력이 금빛으로 다시 차오름 → storm 단상이 무너지며 불비 → breath 화면 전체 숨결 → fall 추락·암전 */p2:.8,aFill:3,aStorm:7,aBreath:2.6,aFall:2.4,aEnd:4.2};
+function ashSetup(e,intro){e.perch=1;e.g.scale.setScalar(ASH.sc);e.pos.set(0,0,ASH.pz);e.r=ASH.r;e.spd=0;e.h=7;e.py=0;e.pat=3.2;e.patN=0;e.weakT=0;e.holdT=0;e.p2=0;e.a2=null;ashItlDrop();e.itl=null;e.brW=0;e.brT=0;e.chg=null;e.g.rotation.order='YXZ';e.g.rotation.set(0,0,0);e.g.children.forEach(c=>{if(c!==e.M.root)c.visible=false});
   e.py=0;e.aimT=0;if(intro){thMend();e.air={st:'fly',t:0,intro:1};/* v611: 앉아 있지 않고 이미 날아오는 중 */e.aggro=false;e.pk=0;const F=ashPeak();e.fw=new THREE.Vector3(F.x,F.y,F.z);e.fy=Math.atan2(ASH.c1[0]-F.x,ASH.c1[2]-F.z);e.g.position.set(0,0,ASH.pz);ashFog(e,false);enemyAnim(e,0,false)}else{thBreak(1);thGateSet(P.pos.z<THR.gz?2:1);e.air=null;e.fw=null;e.aggro=true;e.pk=1;e.g.position.set(0,0,ASH.pz);ashFog(e,true)}}
 /* v605: 몸을 dy 만큼 내리고 dz 만큼 뒤로 — 허리 아래는 절벽 밑으로. 앞발은 그만큼 위·앞으로 뻗어 단상을 그대로 짚음(ashArm), 뒷다리는 숨김 */
 function ashPose(e){const R=e.M.root,a=ASH.a,z=ASH.zp,k=e.pk===undefined?1:e.pk;/* pk 0=자유(앉기·비행) → 1=왕좌에 걸친 자세 */const f=e.fw,sc=ASH.sc;/* v609: e.pos(=그룹 위치)는 왕좌에 둔 채, 비행 중 위치·방향(e.fw·e.fy)은 모델 뿌리에만 줌 — 판정·이름표·카메라 기준이 흔들리지 않게 */R.rotation.order='YXZ';R.rotation.x=a*k;R.rotation.y=f?e.fy||0:0;R.position.set(f?(f.x-e.pos.x)/sc:0,(z*Math.sin(a)-ASH.dy/sc)*k+(f?f.y/sc:0),(-z*Math.cos(a)-ASH.dz/sc)*k+(f?(f.z-e.pos.z)/sc:0))}
@@ -2693,7 +2694,7 @@ function ashIntroStep(e,dt){const A=e.air,T=A.t,I=ASH,paws=[{x:-6.6,z:I.pz},{x:6
   else{e.pk=1;e.fy=0;W.set(0,0,I.pz);if(T<1.2){shake=Math.max(shake,.25);if(Math.floor(T/.3)!==Math.floor((T-dt)/.3))ringFx({x:0,z:I.pz+2},8+T*8,0xff6a2a,.5)}if(T>=I.roar){e.air=null;e.fw=null;e.aggro=true;e.pat=3;ashFog(e,true);thGateSet(1)}}
   enemyAnim(e,dt,false)}
 function ashFog(e,on){const m=e.M&&e.M.mdl&&e.M.mdl.mat;if(m&&m.fog!==on){m.fog=on;m.needsUpdate=true}}/* 멀리 봉우리에 있을 땐 안개에 묻히지 않게 */
-function ashStep(e,dt){const I=ASH;if(e.itl)return ashInterStep(e,dt);ashFace(e,dt);e.weakT=Math.max(0,(e.weakT||0)-dt);e.holdT=Math.max(0,(e.holdT||0)-dt);e.brW=Math.max(0,(e.brW||0)-dt);e.brT=Math.max(0,(e.brT||0)-dt);if(e.weakT>0)e.brT=Math.max(e.brT,.1);/* 물어뜯은 뒤엔 머리를 내린 채 */
+function ashStep(e,dt){const I=ASH;if(e.a2)return ashAct2Step(e,dt);if(e.itl)return ashInterStep(e,dt);ashFace(e,dt);e.weakT=Math.max(0,(e.weakT||0)-dt);e.holdT=Math.max(0,(e.holdT||0)-dt);e.brW=Math.max(0,(e.brW||0)-dt);e.brT=Math.max(0,(e.brT||0)-dt);if(e.weakT>0)e.brT=Math.max(e.brT,.1);/* 물어뜯은 뒤엔 머리를 내린 채 */
   if(!e.aggro){if(Math.hypot(P.pos.x-e.pos.x,P.pos.z-e.pos.z)<26)e.aggro=true}
   else if(P.hp>0){e.pat-=dt;if(e.pat<=0){e.pat=e.p2?I.cd2:I.cd;const n0=(e.patN=(e.patN||0)+1),k=e.p2?[1,2,3,0,4,5][n0%6]:n0%3,D=e.dmg,T=1.1*TELE_S;
       const G=THR,X0=-G.px+1,X1=G.px-1,Z0=G.pzn+1,Z1=thGateZ()-1,pz=I.pawZ,hz=pz+7;/* 패턴이 떨어지는 곳 = 캐릭터가 다닐 수 있는 북쪽 절반 */
@@ -2720,6 +2721,27 @@ function ashInterStep(e,dt){const I=ASH,L=e.itl,T=(L.t+=dt),c=L.c;e.g.position.s
     const tk=Math.floor((T-I.itT)/(I.itF/I.itN));if(tk>=L.n&&L.n<I.itN){L.n=tk+1;if(Math.hypot(P.pos.x-c.x,P.pos.z-c.z)>I.shR)hurtPlayer(e.dmg*I.itD);if(L.n%2)lavaFloor({x:rnd(-12,12),z:rnd(-4,14)},5,0)}}
   else{ashItlDrop();e.itl=null;e.p2=1;e.pat=2.4;e.patN=0;toast('2페이즈','아쉬카르가 더 거세게 몰아친다')}
   enemyAnim(e,dt,false)}
+/* ===== v614 2막 「꺼지지 않는 불」 — 80%에 닿으면 스토리 클리어. 체력이 금빛으로 다시 차오르고(피해 0), 단상이 무너지며 불비, 화면 전체를 덮는 숨결, 추락·암전 → 성역 아래 엔드게임 사냥터에서 깨어남 ===== */
+function ashOv(){let o=$('ashOv');if(!o){o=document.createElement('div');o.id='ashOv';o.style.cssText='position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;font-weight:600;letter-spacing:.04em;color:#f3e2c8;text-shadow:0 2px 12px #000';document.body.appendChild(o)}return o}
+function ashAct2(e){if(e.a2)return;ashItlDrop();e.itl=null;e.holdT=0;e.brW=0;e.brT=0;e.weakT=0;e.a2={t:0,st:'fill',h0:e.hp,rk:0,ck:0,br:0};e.name0=e.name;e.name='아쉬카르';if(e.lab&&e.lab.firstChild){e.lab.firstChild.textContent='아쉬카르';e.lab.firstChild.style.color='#ffe08a'}/* 결정적 순간에 이름 공개 */$('bossbar').classList.add('gold');
+  if(S.ch===LAST&&S.phase===3){S.phase=4;save()}/* 여기까지 오면 스토리 클리어 — 도중에 나가도 다시 싸우지 않음 */tele('fbclear');
+  shake=1;ringFx({x:0,z:ASH.pawZ+3},12,0xffd27a,.9);toast('아쉬카르','상처가 아문다 — 꺼지지 않는 불')}
+function ashA2Go(e,st){const A=e.a2;if(!A||A.st===st)return;A.st=st;A.t=0;if(st==='breath'){P.inv=99;knActs(false);document.body.classList.add('cineui');e.brT=99;ashOv().style.background='radial-gradient(circle at 50% 30%,#fff3c8 0%,#ff8a2a 45%,#6a1204 100%)';}}
+function ashAct2Step(e,dt){const A=e.a2,I=ASH,T=(A.t+=dt),U=thSet.userData;ashFace(e,dt);e.brT=Math.max(0,(e.brT||0)-dt);
+  if(A.st==='fill'){const k=Math.min(1,T/I.aFill);e.hp=A.h0+(e.mhp-A.h0)*k*k*(3-2*k);if(Math.random()<dt*14)spray(PADD,{x:rnd(-9,9),z:I.pawZ+rnd(-2,3)},3,{sp:[.3,1.5],up:[3,8],y:[.5,6],life:[.6,1.2],s0:[.3,.6],s1:[.05,.1],c0:0xfff0b0,c1:0xd08a10,a:.95,drag:.6,grav:-2,tex:1});if(T>I.aFill)ashA2Go(e,'storm')}
+  else if(A.st==='storm'){const k=T/I.aStorm;U.floor.material.emissiveIntensity=1+k*2.2;shake=Math.max(shake,.12+k*.3);
+    A.rk-=dt;while(A.rk<=0){A.rk+=.32-k*.12;telegraph({x:rnd(-THR.px+1,THR.px-1),z:rnd(THR.pzn+1,THR.gz-1)},2.6,e.dmg*1.1,true)}
+    A.ck-=dt;while(A.ck<=0){A.ck+=.28;thCrumble(k)}
+    if(T>I.aStorm*.55&&!A.br){A.br=1;e.brW=1.2;toast('아쉬카르','숨을 깊이 들이쉰다')}
+    if(T>I.aStorm)ashA2Go(e,'breath')}
+  else if(A.st==='breath'){const o=ashOv(),k=Math.min(1,T/I.aBreath);o.style.opacity=k*k;shake=Math.max(shake,.6);for(let j=0;j<4;j++)spray(PADD,{x:P.pos.x+rnd(-8,8),z:P.pos.z+rnd(-8,4)},3,{sp:[2,6],up:[1,5],y:[.2,3],life:[.4,.8],s0:[.7,1.2],s1:[.2,.3],c0:0xfff0b0,c1:0xff4a00,a:.95,drag:.6,grav:-2,tex:1});if(T>I.aBreath)ashA2Go(e,'fall')}
+  else if(A.st==='fall'){const o=ashOv(),k=Math.min(1,T/I.aFall);P.vy=(P.vy||0)-30*dt;P.pos.y+=P.vy*dt;if(T<.05){U.floor.visible=false;thCrumble(1,1)}o.style.background=`rgb(${Math.round(255*(1-k))*.9|0},${Math.round(150*(1-k))},${Math.round(60*(1-k))})`;o.style.opacity=1;if(T>I.aFall){ashA2Go(e,'end');o.style.background='#000';o.innerHTML='<div style="font-size:15px;opacity:.6">…</div><div id="ashLine" style="font-size:22px;opacity:0;transition:opacity 1.6s">아직은 닿을 수 없는 불이다.</div>';later(1.1,()=>{const l=$('ashLine');if(l)l.style.opacity=1})}}
+  else if(A.st==='end'){if(T>I.aEnd&&!A.done){A.done=1;ashEnding()}}
+  enemyAnim(e,dt,false)}
+function thCrumble(k,all){/* 단상 가장자리(남쪽 절반·양옆)부터 돌판이 떨어져 나감 */const U=thSet.userData,n=all?40:1+(k*2|0);for(let i=0;i<n;i++){const sd=Math.random(),x=sd<.5?rnd(-THR.hw,THR.hw):(Math.random()<.5?-1:1)*rnd(THR.hw-4,THR.hw),z=sd<.5?rnd(THR.gz+2,THR.hz):rnd(-THR.hz,THR.hz),m=new THREE.Mesh(U.cg||(U.cg=new THREE.BoxGeometry(1,1,1)),U.stoneT);m.position.set(x,-.2,z);m.scale.set(rnd(1.4,3),rnd(.5,1),rnd(1.4,3));m.rotation.y=rnd(0,6);scene.add(m);const vx=rnd(-1,1),rx=rnd(-1.5,1.5),rz=rnd(-1.5,1.5);let vy=rnd(0,2);fx.push({m,t:0,dur:2.4,upd(q,dt){vy-=22*dt;m.position.y+=vy*dt;m.position.x+=vx*dt;m.rotation.x+=rx*dt;m.rotation.z+=rz*dt}});if(!all&&Math.random()<.5)spray(PNRM,{x,z},8,{r0:1.5,sp:[1,3],up:[1,4],y:[.1,.5],life:[.6,1.2],s0:[.8,1.4],s1:[1.8,2.6],c0:0x6a5a50,c1:0x1a1210,a:.5,drag:1.6,grav:-1,tex:0})}}
+function ashEnding(){/* 성역 아래 엔드게임 사냥터에서 깨어남 */const o=ashOv();P.inv=1;P.vy=0;P.pos.y=0;knActs(true);document.body.classList.remove('cineui');$('bossbar').classList.remove('gold');thGateSet(0);if(thSet){thSet.userData.floor.visible=true;thSet.userData.floor.material.emissiveIntensity=1}
+  S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();
+  mapLoad('끝없는 심연','성역 아래로 떨어졌습니다',()=>{setMap(true);applyTheme();resetWorld();o.style.transition='opacity 1.6s';o.style.opacity=0;later(1.8,()=>{o.innerHTML='';o.style.transition='';o.style.background=''})},()=>{toast('끝없는 심연','…정신을 차리니 성역 아래였다. 더 강해져야 한다');stageBanner()})}
 function knApprStart(e){knAppr=1;knActs(false);P.pos.set(0,0,KNB.z1+5);P.mv=null;camT.copy(P.pos);P.face=Math.PI;hero.rotation.y=Math.PI}
 function knApprEnd(){knAppr=0;knActs(true);const f=document.getElementById('knFade');if(f)f.style.opacity=0}
 function knApprTick(){if(knAppr!==1||Math.hypot(P.pos.x,P.pos.z)>ARENA_R-1)return;knAppr=2;knFadeEl().style.opacity=1;
@@ -3866,6 +3888,7 @@ function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.
     else if(s==='up'){fly=T>.18?1:0;cr=T<.18?1:0;sp=1;fs=11}
     else if(s==='land'){fly=T<.72?1:.15;wup=T>.45?1:0;sp=1;fs=7;rch=T>.4?1:0}
     else{fly=1;fs=s==='fly'?10:7.5;bre=s==='fly'?1:0}}
+  else if(e.a2){/* v614 2막: 금빛으로 아물며 날개를 치켜듦 → 숨결 */const A=e.a2;sp=1;if(A.st==='fill'){wup=.9;fs=4}else if(A.st==='storm'){wup=.5;fs=6;bre=A.br>0?1:0}else{bre=1;wup=.3;fs=10}}
   else if(e.itl){/* v606 사이페: 날개를 활짝 펴 치켜들고 → 불바다 동안 머리를 숙여 뿜음 */sp=1;const it=e.itl.t<ASH.itT;wup=it?.9:.35;bre=it?0:1;fs=it?3:14}
   else if(c){if(c.w>0){cr=1;chg=.45;sp=.55;wup=.3}else chg=1}/* v559: 돌진 준비 — 웅크린 채 몸을 앞으로 숙이고 날개를 반쯤 들어 노려봄 */
   else if(e.brW>0){/* v563 브레스 준비: 상체를 살짝 들고 숨을 들이쉼 */rear=.5;sp=.6;wup=.25}
@@ -5019,6 +5042,7 @@ function hurt(e,amt,quiet,so){
   if(knAppr&&e.duel)return;/* v588: 다리를 건너는 동안 검귀는 피해 없음 */
   if(e.maw&&e.introT!==undefined&&e.introT<MWI.up)return;/* v575: 물속에서 올라오기 전엔 피해 없음 */
   if(e.perch&&e.itl){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v606 사이페 동안 무적 */
+  if(e.perch&&e.a2){if(!(e.invN>time)){e.invN=time+.35;dmgNum(e.pos,0,'',e.h)}return}/* v614 2막: 어떤 공격도 피해 0 */
   if(e.perch&&e.weakT>0)amt*=ASH.wk;/* v603: 아쉬카르 — 머리가 내려와 있는 동안 약점(피해 1.5배) */
   if(e.duel&&e.dA&&e.dA.k==='sipe'&&!(e.dA.t<.8)){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 잿불 검귀 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 · v266: 검귀·아귀 모두 사이페 진입 후 0.8초는 피해가 들어가고, 그 사이 체력 0이면 처치 */
   if(e.chBoss)amt*=STORY_BOSS_DR;
@@ -5028,7 +5052,8 @@ function hurt(e,amt,quiet,so){
   const crit=(!quiet||quiet>=2)&&Math.random()<critCh()+(so?so.crit:0);
   let v=Math.max(1,Math.round(amt*(crit?(NS()?nsCritMul():1.8):1)*((!quiet||quiet>=2)&&critNew()?critComp(S.lv):1)*rand(.9,1.1)));/* v445 시험: 레벨 보정은 치명타 판정을 받는 타격에만(치명타 없는 지속·장판 피해는 원래도 손실이 없으므로 제외) */
   let itl=0;if(e.perch&&!e.p2&&e.hp-v<=e.mhp*ASH.p1){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p1));itl=1}/* v606: 90%에서 멈추고 사이페 */
-  e.hp-=v;e.flash=.08;if(itl)ashInter(e);if(NS()&&e.duel)nsPotBoss(e,v);
+  else if(e.perch&&e.p2&&e.hp-v<=e.mhp*ASH.p2){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p2));itl=2}/* v614: 80%에서 멈추고 2막 = 스토리 클리어 */
+  e.hp-=v;e.flash=.08;if(itl===1)ashInter(e);else if(itl===2)ashAct2(e);if(NS()&&e.duel)nsPotBoss(e,v);
   if(!quiet||quiet===2||Math.random()<.35)dmgNum(/* v200: quiet 2=치명타O·숫자 항상, 3=치명타O·숫자 35% */e.pos,v,crit?'crit':'',e.h);
   if(e.boss)e.aggro=true;
   if(e.hp<=0)kill(e);
@@ -5092,7 +5117,7 @@ function nsHurt(d,raw){const D=nsDef();
   P.inv=.15;P.flinch=true;if(d>0){P.hp-=d;dmgNum(P.pos,d,'hurt')}
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);
   if(P.hp<=0)die()}
-function die(){tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
+function die(){{const fb=thOn&&enemies.find(e=>e.perch&&e.a2);if(fb){/* v614: 2막에서 쓰러지면 패배 화면 없이 바로 추락 결말로 */P.hp=1;P.inv=99;ashA2Go(fb,'breath');return}}tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
   if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z);e.introT=undefined;e.holdT=0}}S.duel.fail=1;/* v582: 지고 나서 「다시 도전」을 누를 때만 등장 연출 생략 */later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`성역 중앙에서 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
