@@ -2760,22 +2760,33 @@ function ashStep(e,dt){const I=ASH;if(e.a2)return ashAct2Step(e,dt);if(e.itl)ret
       else if(k===5){/* v606 두 앞발 연속 내려찍기 → v613: 왼쪽 앞발 앞, 0.9초 뒤 오른쪽 앞발 앞(순서 무작위) */e.holdT=T+.4;const sd=Math.random()<.5?1:-1;telegraph({x:sd*I.pawX,z:pz+6.5},6,D*1.4,true);later(.9,()=>{if(e.hp>0&&e.perch&&!e.itl){e.holdT=T+.4;telegraph({x:-sd*I.pawX,z:pz+6.5},6,D*1.4,true)}})}
       else{/* 물어뜯기: 머리가 정면 가운데 줄로 내려꽂힘 → 잠시 머리가 낮게 남아 약점 */e.brT=T+.3;for(let z=pz+4;z<=Z1+1;z+=3.6)telegraph({x:0,z},3,D*1.3,true);later(T,()=>{if(e.hp>0&&e.perch){e.weakT=I.weak;e.pat=Math.max(e.pat,I.weak+.8)}})}}}
   enemyAnim(e,dt,false)}
-const ashSq=new THREE.PlaneGeometry(2,2);let ashItlG=null;function ashItlDrop(){const g=ashItlG;if(!g)return;ashItlG=null;scene.remove(g);g.traverse(o=>{if(o.material)mfree(o.material)})}
+const ashSq=new THREE.PlaneGeometry(2,2);let ashItlG=null;function ashItlDrop(){if(typeof ashGuide==='function'&&ASHA.g)ashGuide(null,0);ashWarnOff();const g=ashItlG;if(!g)return;ashItlG=null;scene.remove(g);g.traverse(o=>{if(o.material)mfree(o.material)})}
 /* v606 사이페 「앞발 뒤에 숨기」 → v629: 불을 두 번 — 한쪽 앞발 뒤가 안전, 다음엔 반대쪽. 못 피하면 즉사. 안전 구역은 끝까지 푸르게(붉은 장판보다 위에 그림) */
 function ashPct(pct){/* 방어·회피·에너지 보호막을 무시하고 최대 생명력의 pct 만큼 그대로 */if(P.hp<=0||S.testGod)return;const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=Math.max(P.inv,.15);P.flinch=true;dmgNum(P.pos,d,'hurt');const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
 const ashNm=(e,a,b)=>e.name+(e.name==='아쉬카르'?b:a);/* v637: 이름이 공개되기 전에는 「잿불 성역의 주인」으로 — 조사도 맞춤 */
 function ashKill(){ashPct(1.01)}
+/* v640 사이페 A 알림: ① 포효+흔들림+잠깐 느리게+화면 가장자리 붉은 맥동+가운데 큰 경고 ② 남은 장판·낙하물·마그마를 모두 지움 ③ 발밑에서 안전 원까지 화살표+원 위 카운트다운 */
+function ashClearFx(){for(let i=fx.length-1;i>=0;i--){const f=fx[i];if(!f.tg)continue;fx.splice(i,1);scene.remove(f.m);if(f.kill)f.kill();else if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)})}}
+function ashWarn(big,small,dur){let w=$('ashWarn');if(!w){const c=document.createElement('style');c.textContent='#ashWarn{position:fixed;inset:0;z-index:58;pointer-events:none;opacity:0;transition:opacity .35s}#ashWarn.on{opacity:1}#ashWarn .vg{position:absolute;inset:0;box-shadow:inset 0 0 90px 30px rgba(255,40,10,.75);animation:ashVg .55s ease-in-out infinite alternate}#ashWarn .bx{position:absolute;left:0;right:0;top:30%;text-align:center;padding:0 16px}#ashWarn b{display:block;font-size:clamp(26px,6.5vw,52px);font-weight:800;color:#ffe2b0;letter-spacing:.06em;text-shadow:0 0 18px #ff5a10,0 0 40px #ff3000,0 2px 8px #000;animation:ashWb .5s cubic-bezier(.2,1.5,.4,1) both}#ashWarn small{display:block;margin-top:10px;font-size:clamp(14px,3.4vw,20px);font-weight:600;color:#9ae4ff;text-shadow:0 2px 8px #000}@keyframes ashVg{from{opacity:.45}to{opacity:1}}@keyframes ashWb{from{transform:scale(1.8);opacity:0}to{transform:scale(1);opacity:1}}';document.head.appendChild(c);w=document.createElement('div');w.id='ashWarn';document.body.appendChild(w)}
+  w.innerHTML='<div class="vg"></div><div class="bx"><b>'+big+'</b><small>'+small+'</small></div>';void w.offsetWidth;w.classList.add('on');clearTimeout(w._t);w._t=setTimeout(()=>w.classList.remove('on'),dur*1000)}
+function ashWarnOff(){const w=$('ashWarn');if(w){clearTimeout(w._t);w.classList.remove('on')}const c=$('ashCnt');if(c)c.hidden=true}
+const ASHA={g:null};function ashGuide(L,on){/* 바닥 화살표(캐릭터 → 안전 원) + 원 위 카운트다운 */let g=ASHA.g;if(!g){const sh=new THREE.Shape();sh.moveTo(-.28,0);sh.lineTo(.28,0);sh.lineTo(.28,.78);sh.lineTo(.62,.78);sh.lineTo(0,1);sh.lineTo(-.62,.78);sh.lineTo(-.28,.78);sh.closePath();const geo=new THREE.ShapeGeometry(sh);geo.rotateX(Math.PI/2);g=ASHA.g=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x9ae4ff,transparent:true,opacity:.8,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));g.renderOrder=7;scene.add(g)}
+  let c=$('ashCnt');if(!c){c=document.createElement('div');c.id='ashCnt';c.style.cssText='position:fixed;left:0;top:0;z-index:57;pointer-events:none;font-weight:800;font-size:clamp(34px,7vw,56px);color:#c8f2ff;text-shadow:0 0 14px #2aa8ff,0 2px 8px #000;transform:translate(-50%,-50%)';document.body.appendChild(c)}
+  if(!on||!L){g.visible=false;c.hidden=true;return}
+  const I=ASH,dx=L.c.x-P.pos.x,dz=L.c.z-P.pos.z,d=Math.hypot(dx,dz),len=d-I.shR+.3,left=(L.pre>0?L.pre:0)+Math.max(0,L.tt-L.t);
+  g.visible=len>.8&&!L.f;if(g.visible){g.position.set(P.pos.x+dx/d*.6,.12,P.pos.z+dz/d*.6);g.rotation.y=Math.atan2(dx,dz);g.scale.set(1.5,1,Math.max(1,len-.6));g.material.opacity=.55+.3*Math.sin(time*10)}
+  if(L.f){c.hidden=true;return}const v=new THREE.Vector3(L.c.x,3.2,L.c.z).project(camera),off=v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05;c.hidden=off;if(!off){c.textContent=Math.max(1,Math.ceil(left));c.style.left=((v.x+1)/2*innerWidth)+'px';c.style.top=((1-v.y)/2*innerHeight)+'px';c.style.color=left<1.5?'#ffd27a':'#c8f2ff'}}
 /* v633 하늘에서 떨어지는 종유석·불덩이 — 바닥 예고(붉은 원 / 불덩이는 주황) → 떨어져 부딪힘 */
 const ASHG={st:new THREE.ConeGeometry(.55,3.4,7),stM:new THREE.MeshStandardMaterial({color:0x6a5248,roughness:.85,flatShading:true,emissive:0x2a0c04,emissiveIntensity:.6})};
 function ashDrop(p,fire){const I=ASH,r=I.drR,col=fire?0xff8a2a:0xd04a3a,T=1.1*TELE_S,ring=flatMesh(ringThin(r),col,.85),fill=flatMesh(discGeo,col,.25);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);fill.position.set(p.x,.06,p.z);
   let m;if(fire){m=new THREE.Group();const a=new THREE.Sprite(flameMatA),b=new THREE.Sprite(flameMatB);a.scale.set(2.6,2.6,1);b.scale.set(1.5,1.5,1);m.add(a,b)}else{m=new THREE.Mesh(ASHG.st,ASHG.stM);m.rotation.set(Math.PI+rnd(-.12,.12),rnd(0,6),rnd(-.12,.12));m.castShadow=true}
   const grp=new THREE.Group();grp.add(ring,fill,m);m.position.set(p.x,40,p.z);scene.add(grp);
-  fx.push({m:grp,t:0,dur:T,keep:1/* 종유석·불꽃 재질은 공용 — 예고 원 재질만 따로 돌려줌 */,upd(k){const s_=Math.max(.01,r*k);fill.scale.set(s_,s_,1);const f=Math.max(0,(k-.45)/.55);m.position.y=f>0?1.4+24*(1-f*f):60;if(fire&&f>0&&Math.random()<.6)emit(PADD,{x:p.x+rnd(-.3,.3),y:m.position.y+.6,z:p.z+rnd(-.3,.3),vy:rnd(1,3),life:rnd(.3,.6),s0:rnd(.5,.8),s1:.1,c0:0xffd080,c1:0xff3000,a:.9,drag:1})},
+  fx.push({m:grp,t:0,dur:T,keep:1,tg:1,kill(){mfree(ring.material);mfree(fill.material)}/* 종유석·불꽃 재질은 공용 — 예고 원 재질만 따로 돌려줌 */,upd(k){const s_=Math.max(.01,r*k);fill.scale.set(s_,s_,1);const f=Math.max(0,(k-.45)/.55);m.position.y=f>0?1.4+24*(1-f*f):60;if(fire&&f>0&&Math.random()<.6)emit(PADD,{x:p.x+rnd(-.3,.3),y:m.position.y+.6,z:p.z+rnd(-.3,.3),vy:rnd(1,3),life:rnd(.3,.6),s0:rnd(.5,.8),s1:.1,c0:0xffd080,c1:0xff3000,a:.9,drag:1})},
     end(){mfree(ring.material);mfree(fill.material);shake=Math.max(shake,.2);ringFx(p,r,fire?0xff8a2a:0xb08a70,.35);const hit=Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r;
       if(fire){spray(PADD,p,16,{sp:[2,5],up:[2,7],y:[.2,.6],life:[.4,.8],s0:[.4,.7],s1:[.1,.15],c0:0xffe0a0,c1:0xff3a00,a:.95,drag:1.2,grav:-8,tex:1,r0:1});ashMagma(p)}
       else{if(hit)ashPct(I.drD);spray(PNRM,p,12,{sp:[2,6],up:[2,6],y:[.2,.8],life:[.5,.9],s0:[.3,.6],s1:[.08,.15],c0:0x8a7a70,c1:0x3a3230,a:.85,drag:1,tex:2,r0:.8});decalFx(p,crackTex,0x6a5040,r*.9,2.4,.7,true)}}})}
 function ashMagma(p){const I=ASH,r=I.mgR,g=new THREE.Group(),m1=flatMesh(discGeo,0xff4a10,.85),m2=flatMesh(discGeo,0xffc060,.6);m1.scale.set(r,r,1);m2.scale.set(r*.7,r*.7,1);m1.position.y=.08;m2.position.y=.09;g.add(m1,m2);g.position.set(p.x,0,p.z);scene.add(g);decalFx(p,crackTex,0xff7a2a,r*1.05,I.mgT+.4,.8,true);let tk=0;
-  fx.push({m:g,t:0,dur:I.mgT,upd(k,dt){const f=k<.85?1:1-(k-.85)/.15,pu=.85+.15*Math.sin(time*7+p.x);m1.material.opacity=.85*f*pu;m2.material.opacity=.6*f*(1.15-pu);if(Math.random()<.5)emit(PADD,{x:p.x+rnd(-r,r)*.8,y:.15,z:p.z+rnd(-r,r)*.8,vy:rnd(.8,2.2),life:rnd(.4,.8),s0:rnd(.3,.55),s1:.08,c0:0xffc060,c1:0xa01a04,a:.9,drag:.6});
+  fx.push({m:g,t:0,dur:I.mgT,tg:1,upd(k,dt){const f=k<.85?1:1-(k-.85)/.15,pu=.85+.15*Math.sin(time*7+p.x);m1.material.opacity=.85*f*pu;m2.material.opacity=.6*f*(1.15-pu);if(Math.random()<.5)emit(PADD,{x:p.x+rnd(-r,r)*.8,y:.15,z:p.z+rnd(-r,r)*.8,vy:rnd(.8,2.2),life:rnd(.4,.8),s0:rnd(.3,.55),s1:.08,c0:0xffc060,c1:0xa01a04,a:.9,drag:.6});
       tk-=dt||0;if(tk<=0&&Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r){tk=.5;ashPct(I.mgD)}else if(tk>0&&Math.hypot(P.pos.x-p.x,P.pos.z-p.z)>=r)tk=Math.min(tk,0)}})}
 function ashInter(e){if(e.itl)return;const I=ASH,s=Math.random()<.5?1:-1;
   e.holdT=0;e.brW=0;e.brT=0;e.weakT=0;
@@ -2783,22 +2794,23 @@ function ashInter(e){if(e.itl)return;const I=ASH,s=Math.random()<.5?1:-1;
   const big=mk(.22);big.position.set(0,.05,-THR.hz);big.scale.set(THR.hw,.01,1);big.renderOrder=1;const rim=mk(.1);rim.position.set(0,.045,0);rim.scale.set(THR.hw,THR.hz,1);rim.renderOrder=0;
   const safe=flatMesh(discGeo,0x1a5a8a,0);safe.visible=false;/* v633: 채우기 없이 원만 */const sr=flatMesh(ringThin(I.shR),0x9ae4ff,1);sr.renderOrder=6;/* v633: 바닥에 그림(캐릭터·앞발에 가려짐) */
   const grp=new THREE.Group();grp.add(big,rim,safe,sr);ashItlDrop();scene.add(grp);ashItlG=grp;
-  e.itl={k:'paw',t:0,s,n:0,grp,big,safe,sr,br:0,hu};ashPawSide(e,s,I.itT);e.itl.pre=I.itG;shake=Math.max(shake,.5);ringFx({x:0,z:I.pawZ},10,0xff6a2a,.6)}
+  e.itl={k:'paw',t:0,s,n:0,grp,big,safe,sr,br:0,hu};ashPawSide(e,s,I.itT);e.itl.pre=I.itG;
+  ashClearFx();shake=1.3;slowT=.35;ashWarn('숨을 들이쉰다!',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 푸른 원으로 피하라',I.itG+.6);shake=Math.max(shake,.5);ringFx({x:0,z:I.pawZ},10,0xff6a2a,.6)}
 function ashPawSide(e,s,tt){const I=ASH,L=e.itl,c={x:s*I.pawX,z:I.pawZ+I.shZ};L.s=s;L.c=c;L.t=0;L.tt=tt;L.f=0;L.chk=0;L.br=0;L.safe.position.set(c.x,.09,c.z);L.safe.scale.set(I.shR,I.shR,1);L.sr.position.set(c.x,.11,c.z);L.hu.value.set(c.x,c.z,I.shR-.05);L.sr.scale.set(I.shR,I.shR,1);L.big.material.opacity=.22;
   toast(L.n?'다시 숨을 들이쉰다':ashNm(e,'이','가')+' 숨을 들이쉰다',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 그림자로 숨어라 — 불길에 닿으면 즉사')}
-function ashInterStep(e,dt){if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
+function ashInterStep(e,dt){if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(!(L.pre>0))ashGuide(L,1);if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);ashGuide(L,1);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
   if(T<L.tt){const k=T/L.tt,sz=Math.max(.01,THR.hz*k);L.big.scale.set(THR.hw,sz,1);L.big.position.z=-THR.hz+sz;const pu=1+Math.sin(T*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);if(T>L.tt-1.2)shake=Math.max(shake,.15)}
   else if(T<L.tt+I.itF){if(!L.f){L.f=1;L.br=1;L.big.material.opacity=.42;shake=.8}shake=Math.max(shake,.35);
     for(let j=0;j<3;j++){const p={x:rnd(-THR.hw,THR.hw),z:rnd(-THR.hz,THR.hz)};if(Math.hypot(p.x-c.x,p.z-c.z)<I.shR+.4)continue;spray(PADD,p,4,{sp:[1,4],up:[3,9],y:[.1,.5],life:[.4,.9],s0:[.5,.9],s1:[.1,.2],c0:0xffd080,c1:0xff3000,a:.95,drag:1,grav:-6,tex:1,r0:1.2})}
     L.chk-=dt;if(L.chk<=0){L.chk=.2;if(Math.hypot(P.pos.x-c.x,P.pos.z-c.z)>I.shR)ashKill()}}
-  else if(L.n===0){L.n=1;ashPawSide(e,-L.s,I.itT2)}
-  else{ashItlDrop();e.itl=null;e.p2=1;e.pat=2.4;e.patN=0;toast('2페이즈',ashNm(e,'이','가')+' 더 거세게 몰아친다')}
+  else if(L.n===0){L.n=1;ashPawSide(e,-L.s,I.itT2);ashWarn('반대쪽으로!',(L.s>0?'오른쪽':'왼쪽')+' 앞발 뒤로 건너가라',1.4)}
+  else{ashItlDrop();ashGuide(null,0);e.itl=null;e.p2=1;e.pat=2.4;e.patN=0;toast('2페이즈',ashNm(e,'이','가')+' 더 거세게 몰아친다')}
   enemyAnim(e,dt,false)}
 /* v629 사이페 B 「앞뒤로 번지는 불」: 싸우는 공간을 앞(용 쪽)·뒤 두 구역으로 — 한 구역이 먼저, 다른 구역이 이어서 붉어짐(켜지는 순서 = 터지는 순서) → 먼저 붉어진 곳이 먼저 타오르고 이어서 다른 곳. 세 번 반복, 맞으면 최대 생명력의 70% */
 function ashHalfZ(){const T=THR,m=(T.pzn+T.gz)/2,back=T.gz+.3;/* v630: 전투는 항상 불의 선 북쪽 */return{f:[T.pzn-1.6,m],b:[m,back]}}
 function ashInterB(e){if(e.itl)return;e.holdT=0;e.brW=0;e.brT=0;e.weakT=0;const Z=ashHalfZ(),grp=new THREE.Group(),mk=(z0,z1)=>{const m=flatMesh(ashSq,0xd04a3a,0);m.position.set(0,.06,(z0+z1)/2);m.scale.set(THR.hw,(z1-z0)/2,1);m.renderOrder=2;grp.add(m);return m};
   const fm=mk(...Z.f),bm=mk(...Z.b);ashItlDrop();scene.add(grp);ashItlG=grp;
-  e.itl={k:'half',ph:'up',t:0,r:0,Z,m:{f:fm,b:bm},br:0,fl:1,o:['f','b'],hit:{},dn:{}};e.fw=new THREE.Vector3(0,0,ASH.pz);e.fy=0;shake=Math.max(shake,.6);ringFx({x:0,z:ASH.pawZ},10,0xff6a2a,.6);toast(ashNm(e,'이','가')+' 날아오른다','하늘에서 불이 쏟아진다 — 먼저 붉어진 곳이 먼저 타오른다')}
+  e.itl={k:'half',ph:'up',t:0,r:0,Z,m:{f:fm,b:bm},br:0,fl:1,o:['f','b'],hit:{},dn:{}};e.fw=new THREE.Vector3(0,0,ASH.pz);e.fy=0;ashClearFx();shake=Math.max(shake,.6);ringFx({x:0,z:ASH.pawZ},10,0xff6a2a,.6);toast(ashNm(e,'이','가')+' 날아오른다','하늘에서 불이 쏟아진다 — 먼저 붉어진 곳이 먼저 타오른다')}
 function ashHalfRound(e){const L=e.itl;L.t=0;L.o=Math.random()<.5?['f','b']:['b','f'];L.hit={};L.dn={};for(const k of['f','b'])L.m[k].material.opacity=0}
 function ashInterBStep(e,dt){const I=ASH,L=e.itl,T=(L.t+=dt),Z=L.Z,W=e.fw,TOP=[0,85,I.pz-10],H=[0,10,I.pz-13];e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
   if(L.ph==='up'){/* 앞발을 떼고 날개를 쳐 하늘 높이 — 화면 밖으로 사라짐 */const k=Math.min(1,T/I.hUp),q=k*k;e.pk=Math.max(0,1-T/.45);W.set(0,TOP[1]*q,I.pz+(TOP[2]-I.pz)*k);shake=Math.max(shake,.25*(1-k));if(T<.5&&Math.random()<.5)spray(PNRM,{x:rnd(-9,9),z:I.pawZ+rnd(-1,3)},4,{r0:1.5,sp:[2,6],up:[1,4],y:[.1,.5],life:[.6,1.2],s0:[.9,1.5],s1:[2,3],c0:0x6a5a50,c1:0x1a1210,a:.5,drag:2,grav:-1,tex:0});
@@ -4024,7 +4036,7 @@ function drgAnimG(e,dt,moving){const M=e.M,D=M.mdl,A=e.air,c=e.chg,S2=D.S,G=DRK.
     else if(s==='land'){fly=T<.72?1:.15;wup=T>.45?1:0;sp=1;fs=7;rch=T>.4?1:0}
     else{fly=1;fs=s==='fly'?10:7.5;bre=s==='fly'?1:0}}
   else if(e.a2){/* v614 2막: 금빛으로 아물며 날개를 치켜듦 → 숨결. v616: 보호막이 씌워지면 고개를 들고, 떠나갈 때 포효 */const A=e.a2;sp=1;if(A.st==='hold'){wup=.2;fs=2}else if(A.st==='name'){const t0=ASH.nmShow+ASH.nmBurn+ASH.nmGap;rear=A.t>t0&&A.t<t0+1.4?1:0;wup=.7;fs=A.t>t0?12:3}else if(A.st==='fill'){wup=.9;fs=4}else if(A.st==='storm'){wup=.5;fs=6;bre=A.br>0?1:0}else if(A.st==='save'){bre=A.t<1.9?1:0;wup=.4;fs=A.t<1.9?10:3}else if(A.st==='carry'){rear=e.brW>0?1:0;wup=.7;fs=e.brW>0?14:3}else{bre=1;wup=.3;fs=10}}
-  else if(e.itl){/* v606 사이페: 날개를 활짝 펴 치켜들고 → 불바다 동안 머리를 숙여 뿜음 */sp=1;const it=!e.itl.br;wup=it?.9:.35;bre=it?0:1;fs=it?3:14;if(e.itl.k==='half'){/* v636: 날아오름·내려앉음 */const ph=e.itl.ph;bre=0;if(ph==='down'&&e.itl.t>ASH.hDown){fly=.4;wup=1;rch=1;fs=3}else{fly=1;fs=7.5;wup=0}}}
+  else if(e.itl){/* v606 사이페: 날개를 활짝 펴 치켜들고 → 불바다 동안 머리를 숙여 뿜음 */sp=1;const it=!e.itl.br;wup=it?.9:.35;bre=it?0:1;fs=it?3:14;if(e.itl.k==='paw'&&e.itl.n===0&&e.itl.pre>ASH.itG-1.3){rear=1;fs=14}/* v640: 시작할 때 고개를 치켜들고 포효 */if(e.itl.k==='half'){/* v636: 날아오름·내려앉음 */const ph=e.itl.ph;bre=0;if(ph==='down'&&e.itl.t>ASH.hDown){fly=.4;wup=1;rch=1;fs=3}else{fly=1;fs=7.5;wup=0}}}
   else if(c){if(c.w>0){cr=1;chg=.45;sp=.55;wup=.3}else chg=1}/* v559: 돌진 준비 — 웅크린 채 몸을 앞으로 숙이고 날개를 반쯤 들어 노려봄 */
   else if(e.brW>0){/* v563 브레스 준비: 상체를 살짝 들고 숨을 들이쉼 */rear=.5;sp=.6;wup=.25}
   else if(e.brT>0){/* 브레스: 몸을 낮추고 머리를 앞으로 내밀어 뿜음 */bre=.8;cr=.5;sp=.85;fs=14}
@@ -4720,7 +4732,7 @@ function telegraph(p,r,dmg,noLava){
   const ring=flatMesh(ringThin(r),0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
   const fill=flatMesh(discGeo,0xd04a3a,.25);fill.position.set(p.x,.06,p.z);
   const grp=new THREE.Group();grp.add(ring,fill);scene.add(grp);
-  fx.push({m:grp,t:0,dur:1.1*TELE_S,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
+  fx.push({m:grp,t:0,dur:1.1*TELE_S,tg:1/* v640: 사이페 시작 때 지울 수 있게 표시 */,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
 }
 /* v236: 스토리 보스 원형 장판 — 예고만 있던 타격에 용암 바닥이 깔렸다 빠르게 식는 이펙트 (피해 판정은 그대로 순간 1회) */
 function lavaFloor(p,r){duelLava(p,0,Math.PI,r);decalFx(p,crackTex,0xff7a2a,r*1.05,1.4,.8,true);
@@ -6341,7 +6353,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v639';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v640';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8206,12 +8218,13 @@ let fxWarm=0;function prewarmFx(){fxWarm=1;const g=new THREE.Group(),ms=[],tk=[]
 let _lpErrT=0,_vwW=innerWidth,_vwH=innerHeight;addEventListener('resize',()=>{_vwW=innerWidth;_vwH=innerHeight},true);
 /* v594: 회전 직후 iOS가 크기 확정 전에 resize를 보내 화면이 늘어진 채 남던 문제 → 몇 차례 다시 맞추고, 매 프레임 크기를 확인 */
 const _rsKick=()=>{[60,200,450,900].forEach(t=>setTimeout(()=>dispatchEvent(new Event('resize')),t))};addEventListener('orientationchange',_rsKick);try{screen.orientation&&screen.orientation.addEventListener('change',_rsKick)}catch(e){}try{visualViewport&&visualViewport.addEventListener('resize',()=>{if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'))})}catch(e){}
+let slowT=0;
 function loop(now){
   requestAnimationFrame(loop);/* v594: 다음 프레임을 먼저 예약 — 한 프레임에서 오류가 나도 게임이 멈추지 않음 */
   if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'));
   try{
   if(!fxWarm)prewarmFx();
-  const dt=Math.min(.05,(now-last)/1000);last=now;
+  let dt=Math.min(.05,(now-last)/1000);last=now;if(slowT>0){slowT-=dt;dt*=.3}/* v640: 잠깐 느리게(사이페 시작 신호) */
   const fo=paused()&&fxOnly();
   if(!paused()){update(dt);updDmg(dt);hud();cdLabels(dt);if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);else if(cineFocus)drgCineTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
