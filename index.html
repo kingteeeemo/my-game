@@ -3819,7 +3819,7 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   else if(K.hitT>0){st='hit';t=.45*(1-K.hitT/.35)}
   else if(spd>.6){st='run';rate=clamp(spd/5.5,.6,1.7)*(mage?1.15:1)}
   else st='idle';
-  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='slash2'||st==='slash3'||st==='cast'||st==='orb'||st==='chain'||st==='shot'||st==='sky')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
+  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='slash2'||st==='slash3'||st==='slash4'||st==='cast'||st==='orb'||st==='chain'||st==='shot'||st==='sky')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
   const A=K.acts,dur=k=>A[k]._clip.duration;
   if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
   K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
@@ -5714,7 +5714,7 @@ function basicFire(){
    전사 「검기」(wave)      : 검을 휘둘러 초승달 검기를 앞으로 날림 — 길을 따라 적을 모두 벰
    궁수 「폭발 사격」(boom) : 화살이 바로 앞 짧은 거리에 꽂히며 크게 폭발 — 2차 「연발 폭격」으로 최대 4발
    마법사 「사술 폭발」(pillar): 적의 자리에 긴 사술 기둥이 내리꽂히며 폭발 — 2차 「연쇄 작렬」로 폭발이 근처 적에게 번짐 */
-const PAL_WAVE={c:[0xffffff,0xff9bbd,0x4a1030],core:[0xffffff,0xffe8f0,0xff9bbd],ring:0xffd0e0,fl:0xffb0c8,st:[0xffffff,0xff6f9c],sp:[0xffffff,0xffa0c0],smoke:0,ember:0,fast:1}/* v645: 매화색 */,
+const PAL_WAVE={c:[0xffffff,0xf5607f,0x4a0818],core:[0xffffff,0xffd0d8,0xf5607f],ring:0xf8a0b0,fl:0xf57090,st:[0xffffff,0xf03a62],sp:[0xffffff,0xf56a88],smoke:0,ember:0,fast:1}/* v645: 매화색 */,
   PAL_ARC={c:[0xfff0ff,0xd060ff,0x2a0a40],core:[0xffffff,0xf0c0ff,0xb050ff],ring:0xe0a0ff,fl:0xd080ff,st:[0xffffff,0xb050ff],sp:[0xffffff,0xd090ff],smoke:0,ember:0xc070ff,fast:1};
 /* 수치 */
 const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m:.6}),/* 연속 참격: 5·10단계에 +1번 */
@@ -5722,25 +5722,25 @@ const wvLen=L=>7+.7*L,/* 사거리 7m → 14m */wvEcho=L=>({n:L>=10?2:L>=5?1:0,m
 /* v645: 검기 크기·퍼짐 — 검기는 시전자를 중심으로 한 부채꼴 호(초승달)로 날아감. 강화 진행도 k(0~1)가 오를수록 부채꼴 각도가 커지고, 날아가는 동안 더 벌어짐
    k = 0.3 × (참격 연장 + 연속 참격)/20 + 0.7 × 검기 확장/5 · 최대 강화(k=1): 발사 30° → 사거리 끝 50° (시전자 기준 부채꼴 각도) */
 const WV_SPD=20.8,/* v650: 검기 속도 16 → 20.8 (+30%) */WV_A0=[12,72],/* 발사 순간 부채꼴 각도(°) [k=0, k=1] */WV_A1=[20,120],/* v651: 검기 확장 최대 시 120° (v649 140°) */WV_TC=.72,WV_TP=.45,/* v649: 두께 = 가운데 ×.72(얇게), 끝으로 갈수록 천천히 줄어듦(가장자리 두껍게) *//* 사거리 끝 각도(°) */WV_B=[1.1,1.9],/* 검기 기본 두께(m) */WV_BD=.12,/* 멀어질수록 두꺼워짐(거리 1m당 +.12m) */WV_SO=.7,/* 초승달 바깥 곡선 휨 = 반폭 × .7 (Austin 스케치) */WV_CT=.22,/* 가운데 두께 = 반폭 × .22 */WV_D0=1.6,/* 호 중심을 시전 지점보다 이만큼 뒤에 둠(발사 순간 호 반지름) */
-  WV_C={body:0xff5c95,core:0xffd6e5,pale:0xff9fc0,under:0xc8306a,under2:0xff8fb5,glow:0xff7aa8,trail:0xff6f9c,spark:0xff4f8a,petal:0xffc2d6,hit:0xff8fb0,ring:0xffb0c8};/* 매화색(홍매 몸·연분홍·백매 심지) */
+  WV_C={body:0xf22a62,core:0xffc4d0,pale:0xff7f9c,under:0xa01038,under2:0xf06080,glow:0xf23a68,trail:0xf04870,spark:0xf02a58,petal:0xff9fb4,hit:0xf56a88,ring:0xf88aa0}/* v656: 벚꽃빛 → 홍매(더 붉게) */;/* 매화색(홍매 몸·연분홍·백매 심지) */
 const wvProg=(l,e,x)=>Math.min(1,.3*(l+e)/20+.7*x/g2Max('wfan')),/* v645: 크기는 추가 강화 「검기 확장」이 70%, 1차 강화(참격 연장·연속 참격)가 30% */
   wvShape=(k,u,d,as=1)=>{const lp=(a,b)=>a+(b-a)*k,sp=1-(1-u)*(1-u),d0=lp(WV_A0[0],WV_A0[1]),deg=(d0+(lp(WV_A1[0],WV_A1[1])-d0)*sp)*as,half=deg*Math.PI/360;
     const band=lp(WV_B[0],WV_B[1])+WV_BD*d,hw=d*Math.sin(half),so=hw*WV_SO+.35,si=Math.max(0,so-(hw*WV_CT+.35*(1+k)));/* v645: 두께는 초승달 폭에만 비례 */return {deg,half,R:d,band,off:-d,hw,so,si,zt:-(so+si)/2}};/* so·si: 바깥·안쪽 곡선이 앞으로 휜 정도, zt: 양 끝 위치(투사체 기준) *//* R: 호 반지름(=시전 중심에서의 거리), off: 투사체 위치 기준 호 중심 */
 /* 갈래는 없음(하나의 파동) — as=1 */
 const wvFanLayout=(n,sp0)=>({sp:sp0,as:1});
 /* v645: 진짜 초승달 — 바깥·안쪽 가장자리가 모두 앞으로 볼록, 바깥이 더 휨(so>si) → 가운데 두껍고 양 끝 뾰족. 국소 좌표: x 좌우, z 앞 */
-const wvIn=(sh,q)=>sh.so*q-(sh.so-sh.si)*WV_TC*Math.pow(q,WV_TP),wvCres=(sh,f)=>{const q=1-f*f,z=sh.zt+(sh.dz||0);return [z+sh.so*q,z+wvIn(sh,q)]};/* [바깥 z, 안쪽 z] */
+const wvIn=(sh,q,f)=>sh.so*q-(sh.so-sh.si)*WV_TC*Math.pow(q,WV_TP)*(1+(sh.asy||0)*(f||0)),/* v656: asy = 칼이 끝나는 쪽이 두꺼움 */wvCres=(sh,f)=>{const q=1-f*f,z=sh.zt+(sh.dz||0);return [z+sh.so*q,z+wvIn(sh,q,f)]};/* [바깥 z, 안쪽 z] */
 /* v648: 휘두르기 단계 — 검기는 캐릭터를 감싸는 큰 초승달(칼이 지나간 궤적)로 한쪽 끝부터 그어지고(WV_SW.t초), 그대로 떨어져 나가며 날아가는 초승달 모양으로 바뀜(WV_SW.m초) */
 /* v653: 휘두를 때마다 방향(dir: 칼이 지나가는 쪽)과 기울기(roll, 라디안: 대각선 베기)가 바뀜 — 순서대로 반복 */
-const WV_PAT=[{clip:'slash',dir:-1,roll:-.5},{clip:'slash2',dir:1,roll:.15},{clip:'slash3',dir:1,roll:-.55}];let wvSeq=0;
+const WV_PAT=[{clip:'slash',dir:-1,roll:-.6,yaw:.32},{clip:'slash2',dir:1,roll:.2,yaw:-.32},{clip:'slash4',dir:-1,roll:-.2,yaw:.32},{clip:'slash3',dir:1,roll:-.6,yaw:-.32}];let wvSeq=0;
 /* v655: 전사 베기 동작 3종(warrior.glb) — slash: 오른쪽 위→왼쪽 아래 내려베기 · slash2(Great Sword Slash): 몸을 숙이며 왼쪽→오른쪽 수평 · slash3(Great Sword Slash 1): 왼쪽→오른쪽 올려베기.
    c = 시전(들어올림) 구간, p = 휘두르기 구간(검기가 나가는 순간이 p[0]) — 클립 시간(초) */
-const WVCL={slash:{c:[.1,.52],p:[.3,1.1]},slash2:{c:[.4,.85],p:[.85,1.2]},slash3:{c:[.35,.72],p:[.72,1.25]}};
+const WVCL={slash:{c:[.1,.52],p:[.3,1.1]},slash2:{c:[.4,.85],p:[.85,1.2]},slash4:{c:[.4,.85],p:[.85,1.2]},/* slash4 = slash2 좌우 반전(오른쪽→왼쪽) */slash3:{c:[.35,.72],p:[.72,1.25]}};
 const WV_SW={t:.09,m:.16,hw:2.5,so:2.7,th:1.15,zt:-.5,dir:-1};
 function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_SW.m)),e=e0*e0*(3-2*e0),lp=(a,b)=>a+(b-a)*e,W=WV_SW,r=h0/W.hw,so0=W.so*r,th0=W.th*Math.max(.6,r);
   /* v650: 휘두르기 크기 h0은 떨어져 나간 직후의 검기 폭에 맞춤 — 폭·휨이 한 번도 줄지 않고 커지기만 함(나갈 때 움츠러드는 느낌 제거) */
-  const so=lp(so0,Math.max(so0,sh.so));return {...sh,hw:lp(h0,Math.max(h0,sh.hw)),so,si:so-lp(th0,sh.so-sh.si),zt:lp(W.zt,sh.zt),dz:-(trav+.8)*(1-e),sw:Math.min(1,tt/W.t)}}
-function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
+  const so=lp(so0,Math.max(so0,sh.so));return {...sh,hw:lp(h0,Math.max(h0,sh.hw)),so,si:so-lp(th0,sh.so-sh.si),zt:lp(W.zt,sh.zt),e,dz:-(trav+.8)*(1-e),sw:Math.min(1,tt/W.t)}}
+function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q,f)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
 const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
@@ -5802,7 +5802,7 @@ function wvSlit(c,a,len,wid,dur){const g=new THREE.Group(),dk=new THREE.MeshBasi
   fx.push({m:g,t:0,dur,upd(k){const o=Math.min(1,k/.04);dk.opacity=.9*o*(k<.6?1:1-(k-.6)/.4);hot.opacity=Math.min(1,1.6*o*Math.max(0,1-k/.6));glw.opacity=.55*o*Math.max(0,1-k/.3)},end(){dk.dispose();hot.dispose();glw.dispose()}})}
 /* v651: 매화 꽃잎 — 끝이 살짝 패인 둥근 꽃잎(평면, 양면). 날아가는 검기 자리에 흩날리며 천천히 떨어지고 나풀거림 */
 const petalGeo=(()=>{const sh=new THREE.Shape();sh.moveTo(0,0);sh.bezierCurveTo(.42,.18,.62,.62,.38,.92);sh.quadraticCurveTo(.2,1.04,0,.88);sh.quadraticCurveTo(-.2,1.04,-.38,.92);sh.bezierCurveTo(-.62,.62,-.42,.18,0,0);
-  const g=new THREE.ShapeGeometry(sh,10);g.translate(0,-.45,0);return g})(),PETAL_C=[0xffc2d6,0xffe3ec,0xff9ec0,0xfff4f8,0xff86ae];
+  const g=new THREE.ShapeGeometry(sh,10);g.translate(0,-.45,0);return g})(),PETAL_C=[0xf0456f,0xff8ea6,0xd8244f,0xffc0cc,0xe8325e];
 function wvPetals(c,n,r,up){const q=QM(),f=n*q*.6;n=Math.floor(f)+(Math.random()<f%1?1:0);/* v652: 양 40% 감소 */if(n<=0)return;const P=ipool('petal',petalGeo,()=>new THREE.MeshLambertMaterial({color:0xffffff,emissive:0x000000,transparent:true,opacity:1,side:THREE.DoubleSide,depthWrite:false}),1024,true);
   const ps=[];for(let i=0;i<n;i++){const id=ipAlloc(P,PETAL_C[Math.random()*PETAL_C.length|0]);if(id<0)break;const a=rand(0,Math.PI*2),sp=rand(.4,1.8),rr=(r||0)*Math.random();
     ps.push({id,x:c.x+Math.sin(a)*rr,y:rand(.6,1.5),z:c.z+Math.cos(a)*rr,vx:Math.sin(a)*sp,vz:Math.cos(a)*sp,vy:rand(up*.4,up),ex:rand(0,6),ey:rand(0,6),ez:rand(0,6),rx:rand(-5,5),ry:rand(-3,3),rz:rand(-5,5),s:rand(.2,.34),ph:rand(0,6),dur:rand(1.2,2)})}/* v652: 2초 안에 모두 사라짐 */
@@ -5837,20 +5837,20 @@ function waveMat(col,edge){return new THREE.ShaderMaterial({uniforms:{uOp:{value
 const pillarGeo=new THREE.CylinderGeometry(1,1,1,24,1,true);pillarGeo.translate(0,.5,0);
 function pillarMat(col,core){return new THREE.ShaderMaterial({uniforms:{uT:{value:0},uOp:{value:0},uCol:{value:new THREE.Color(col)},uCore:{value:new THREE.Color(core)}},vertexShader:PILLAR_VS,fragmentShader:PILLAR_FS,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending})}
 /* ---------- 전사: 검기 ---------- */
-function shootWave(a,o){const K=o.k||0,AS=o.as||1,L0=o.life,S0=wvShape(K,0,WV_D0,AS),SEG=48,tE=WV_SW.t+WV_SW.m,H0=Math.min(WV_SW.hw,Math.max(1.1,wvShape(K,Math.min(1,tE/L0),WV_D0+o.speed*tE,AS).hw));/* v645: 크기·퍼짐(wvShape) · 매화색(WV_C) */
+function shootWave(a,o){const DIR=o.dir||WV_SW.dir,ROLL=o.roll||0,YAW=o.yaw||0,ASY=-.45*DIR;const K=o.k||0,AS=o.as||1,L0=o.life,S0=wvShape(K,0,WV_D0,AS),SEG=48,tE=WV_SW.t+WV_SW.m,H0=Math.min(WV_SW.hw,Math.max(1.1,wvShape(K,Math.min(1,tE/L0),WV_D0+o.speed*tE,AS).hw));/* v645: 크기·퍼짐(wvShape) · 매화색(WV_C) */
   shoot(a,{size:1,coreS:.001,color:WV_C.body,speed:o.speed,life:o.life,dmg:o.dmg,pierce:999,hr:S0.hw+S0.band,nofx:true,thru:true,so:o.so});const p=projs[projs.length-1];p.m.position.y=1;p.m.geometry=NOGEO;p.m.remove(...p.m.children);
   const cx=p.ox-Math.sin(a)*WV_D0,cz=p.oz-Math.cos(a)*WV_D0;let shN=S0;/* 호 중심(시전자 쪽) */
-  p.hitT=e=>{const pp=p.m.position,dx=e.pos.x-pp.x,dz=e.pos.z-pp.z,ca=Math.cos(a),sa=Math.sin(a),lx=dx*ca-dz*sa,lz=dx*sa+dz*ca;if(Math.abs(lx)>shN.hw+e.r)return false;const f=Math.min(1,Math.abs(lx)/shN.hw),[zo,zi]=wvCres(shN,f);return lz<zo+e.r&&lz>zi-e.r}/* 초승달 판정: 각도별 두께 */
+  p.hitT=e=>{const pp=p.m.position,dx=e.pos.x-pp.x,dz=e.pos.z-pp.z,ay=a+YAW*(shN.e||0),ca=Math.cos(ay),sa=Math.sin(ay),lx=dx*ca-dz*sa,lz=dx*sa+dz*ca;if(Math.abs(lx)>shN.hw+e.r)return false;const f=Math.max(-1,Math.min(1,lx/shN.hw)),[zo,zi]=wvCres(shN,f);return lz<zo+e.r&&lz>zi-e.r}/* 초승달 판정: 각도별 두께 */
   const g=new THREE.Group(),geo=arcGeo(1,2,-1,1,SEG),geo2=arcGeo(1,2,-1,1,SEG);
   const geo3=arcGeo(1,2,-1,1,SEG);/* 빛 번짐 */
   const m1=new THREE.Mesh(geo,wave2Mat(WV_C.body,0xffffff)),m2=new THREE.Mesh(geo2,wave2Mat(WV_C.under,WV_C.pale));m2.visible=false;/* v650: 높이가 다른 겹이 끝에서 따로 보이던 줄 제거 — 칼날 하나 + 같은 자리의 빛 번짐 */
   const m3=new THREE.Mesh(geo3,wave2Mat(WV_C.glow,WV_C.glow,1));m3.position.y=0;/* v645: 참고 영상 — 날카로운 흰 날 + 붉은 몸 + 큰 빛 번짐 */
   const gl_=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:WV_C.glow,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending}));gl_.position.z=0;g.add(m1,m2,m3,gl_);p.m.add(g);
   for(const x of [m1,m2,m3])x.frustumCulled=false;/* 모양이 매 프레임 바뀌므로 */let trD=0;const trCx=p.ox,trCz=p.oz;
-  const fill=sh=>{shN=sh;wvFillQ(geo,sh,1,1,0,SEG);wvFillQ(geo2,sh,.82,.85,-.05,SEG);wvFillQ(geo3,sh,1.02,1.12,.1,SEG);gl_.scale.set(.001,.001,1);/* 가운데 빛 덩어리 끔(오목한 안쪽을 채워서) */gl_.position.z=sh.zt+sh.so*.7;p.hr=sh.hw+sh.so};/* v645: 초승달 */fill(wvSwing(S0,0,0,H0));const DIR=o.dir||WV_SW.dir,ROLL=o.roll||0;for(const x of [m1,m2,m3]){x.material.uniforms.uSw.value=0;x.material.uniforms.uDir.value=DIR}
-  const rollAt=hw=>{const lim=Math.asin(Math.min(1,1.6/Math.max(.1,hw)));return Math.sign(ROLL)*Math.min(Math.abs(ROLL),lim)};g.rotation.z=rollAt(S0.hw);/* v653: 대각선 베기 — 검기 끝이 땅·하늘로 너무 멀리 가지 않게 끝 높이 1.6m까지만 기울임 */
+  const fill=sh=>{sh.asy=ASY;shN=sh;g.rotation.y=YAW*(sh.e||0);wvFillQ(geo,sh,1,1,0,SEG);wvFillQ(geo2,sh,.82,.85,-.05,SEG);wvFillQ(geo3,sh,1.02,1.12,.1,SEG);gl_.scale.set(.001,.001,1);/* 가운데 빛 덩어리 끔(오목한 안쪽을 채워서) */gl_.position.z=sh.zt+sh.so*.7;p.hr=sh.hw+sh.so};/* v645: 초승달 */fill(wvSwing(S0,0,0,H0));/* v656: 휘두른 방향대로 비스듬히(yaw) 날아가고 칼이 끝난 쪽이 두꺼움 */for(const x of [m1,m2,m3]){x.material.uniforms.uSw.value=0;x.material.uniforms.uDir.value=DIR}
+  const rollAt=hw=>{const lim=Math.asin(Math.min(1,2.4/Math.max(.1,hw)));return Math.sign(ROLL)*Math.min(Math.abs(ROLL),lim)};g.rotation.z=rollAt(S0.hw);/* v653: 대각선 베기 — 검기 끝이 땅·하늘로 너무 멀리 가지 않게 끝 높이 1.6m까지만 기울임 */
   const rb=null;/* v645: 호 끝 꼬리선 제거(참고 영상엔 없음) */if(rb)rb.mat.uniforms.cw.value=.2;let tt=0;
-  p.upd=dt=>{tt+=dt;const pp=p.m.position,sh=wvSwing(wvShape(K,Math.min(1,tt/L0),Math.hypot(pp.x-cx,pp.z-cz),AS),tt,Math.hypot(pp.x-p.ox,pp.z-p.oz),H0);fill(sh);const ry=p.m.rotation.y,cy=Math.cos(ry),sy=Math.sin(ry);
+  p.upd=dt=>{tt+=dt;const pp=p.m.position,sh=wvSwing(wvShape(K,Math.min(1,tt/L0),Math.hypot(pp.x-cx,pp.z-cz),AS),tt,Math.hypot(pp.x-p.ox,pp.z-p.oz),H0);fill(sh);const ry=p.m.rotation.y+YAW*(sh.e||0),cy=Math.cos(ry),sy=Math.sin(ry);
     const wp=(lx,lz)=>[pp.x+lx*cy+lz*sy,pp.z-lx*sy+lz*cy];/* 호의 국소 좌표 → 월드 */
     for(const x of [m1,m2,m3]){x.material.uniforms.uOp.value=(x===m3?1:x===m2?.6:1)*Math.min(1,p.life/.15);x.material.uniforms.uT.value=tt;x.material.uniforms.uSw.value=sh.sw;x.material.uniforms.uDir.value=DIR}g.rotation.z=rollAt(sh.hw);
     if(rb){for(const [h,s] of [[rb.h,1],[rb.h2,-1]]){const [tx,tz]=wp(s*sh.hw,sh.zt);h.unshift([tx,1+.1*s,tz]);if(h.length>12)h.length=12}
@@ -6185,7 +6185,7 @@ function castFire(slot,id){
     return}
   if(b.kind==='wave'){aim(16);poseStart('sweep',.46,{pre:P.castPre});const a=P.face,fan=st.fan;
     const one=(mul,delay)=>{const f=()=>{if(P.hp<=0)return;P.swing=.2;/* v650: 휘두를 때 화면 흔들림 없음(검기 폭발 때만) *//* v648: 휘두르는 궤적 = 검기(shootWave가 그림) */
-      const FL=wvFanLayout(fan.n,fan.sp,st.wk),PT=WV_PAT[wvSeq++%WV_PAT.length];P.wvClip=PT.clip;for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{dir:PT.dir,roll:PT.roll,k:st.wk,as:FL.as,speed:WV_SPD,life:st.len/WV_SPD,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
+      const FL=wvFanLayout(fan.n,fan.sp,st.wk),PT=WV_PAT[wvSeq++%WV_PAT.length];P.wvClip=PT.clip;for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{dir:PT.dir,roll:PT.roll,yaw:PT.yaw,k:st.wk,as:FL.as,speed:WV_SPD,life:st.len/WV_SPD,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(16);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
     for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7;/* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
@@ -6512,7 +6512,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v655';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v656';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
