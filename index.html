@@ -1498,7 +1498,13 @@ const RANK=[
   {n:'고유',c:'#ff8a3a',hex:0xff8a3a,hp:1,dmg:1,xp:1,sc:1}
 ];
 const RARE_PRE=['광폭한','교활한','단단한','재빠른','굶주린'],UNI_PRE=['피에 굶주린','저주받은','불멸의','잔혹한','고대의'];
-const tkFor=t=>t>=80?900:t>=70?700:t>=50?400:300,/* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+/* v621 위험도 20단계 — 1~4 · 5~9 · 10~14 · 15~19 · 20 다섯 구간(구간마다 지역·최고 아이템 티어). oT = 대응하는 옛 위험도(0~100), 골드·경험치·지역 효과는 옛 곡선을 이 값으로 따름 */
+const D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d>=15?3:d>=10?2:d>=5?1:0,D_BANDS=[[1,4],[5,9],[10,14],[15,19],[20,20]],dTop=d=>5-dBand(d),D_GATES=[4,9,14,19,20];
+/* 구울 체력(적정 DPS × 0.12) · 유니크 브루트 1타(감소 전) 목표 — 설계 문서 10장 표 */
+const D_GH=[781,1457,2857,5897,11520,17640,26280,37800,49320,55560,62640,70800,80160,90600,102240,116880,133680,153120,175440,201000],
+  D_BR=[195,211,235,266,303,336,370,409,519,760,1053,1404,1809,2279,2764,3366,4094,4967,5982,7169];
+const dI=d=>Math.min(D_MAX,Math.max(1,Math.round(d)))-1;
+const tkFor=t=>t>=16?1000:t>=11?700:t>=6?500:300,/* v621: 다음 위험도까지 처치 수 — 1~5 300 · 6~10 500 · 11~15 700 · 16~20 1000 *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이']};
@@ -1557,7 +1563,7 @@ const dropLvl=()=>Math.max(1,S.lv);/* v76: 드롭 아이템 레벨 = 내 레벨 
 const ENH_MAX0=Infinity,ENH_B=.06,ENH_O=.05;/* v44: 강화 단계 제한 없음 */
 const enhL=k=>(S.enh&&S.enh[k])||0;
 /* v603: 강화 비용 — 계정 최고 위험도의 골드 수입에 비례 × 1.15^단계 (9부위 15강 ≈ 위험도 20 변이 파밍 30시간 목표, 3단계에서 보정) */
-const nsEnhCost=L=>{const t=Math.max(1,S.maxTier||S.tier||1);return Math.max(1,Math.round(30*egHp(t)*goldAdjT(t)/(egHp(0)*goldAdjT(0))*Math.pow(1.15,L)))};
+const nsEnhCost=L=>{const t=oT(Math.max(1,S.maxTier||S.tier||1));return Math.max(1,Math.round(30*egHp(t)*goldAdjT(t)/(egHp(0)*goldAdjT(0))*Math.pow(1.15,L)))};
 const enhCost=(L,k)=>NS()?nsEnhCost(L):Math.max(1,Math.round(20*Math.pow(1.418,L)*1.3*(L>=30&&L<40?1.15:1)));/* v444: 30→31 ~ 39→40 시도 비용 +15% *//* v411: 골드 1/10 *//* v372: 전 부위 강화 비용 동일 — 무기 기준(+30%)에 방어구·장신구를 맞춤 *//* v126: 무기 강화 비용 전 구간 +30% · v150: 단계당 상승률 38% → 41.8%(10% 상향) · v151에서 25강 이후 +5%를 시도했다가 v152에서 되돌림 */
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
 const enhRate=L=>NS()?(L<NS_ENH_MAX?NS_RATE[Math.max(0,L|0)]:0):L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:L<35?.05:L<40?.04:.03;/* v378: 35강~ 4% · 40강~ 3% *//* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
@@ -1657,6 +1663,8 @@ const NLT_W=[.30,.30,.20,.12,.05,.03];
 function nLineTier(t){let r=Math.random(),o=0;for(;o<5;o++){r-=NLT_W[o];if(r<=0)break}return Math.min(6,t+o)}
 /* 위험도별 티어 확률 (스토리: 5티어 20% · 6티어 80%) */
 function nTierW(t){if(S.ch<NCH)return[0,0,0,0,20,80];
+  /* v621: 구간 최고 티어 m부터 m+2까지 — 최고 티어 비중은 구간 안에서 15% → 35%, 다음 티어 50%, 나머지 그 아래 */
+  {const m=dTop(t),[lo,hi]=D_BANDS[dBand(t)],a=hi>lo?.15+.2*(Math.min(D_MAX,t)-lo)/(hi-lo):.2,w=[0,0,0,0,0,0];w[m-1]+=a;w[Math.min(5,m)]+=.5;w[Math.min(5,m+1)]+=.5-a;return w.map(x=>x*100)}
   const lerp=(x,p)=>{if(x<=p[0][0])return p[0][1];for(let i=1;i<p.length;i++)if(x<=p[i][0]){const[a,b]=p[i-1],[c,d]=p[i];return b+(d-b)*(x-a)/(c-a)}return p[p.length-1][1]};
   const w1=t>=100?Math.min(4,2+.04*(t-100)):0,w2=t>=70?Math.min(12,3+.15*(t-70)):0,w3=t>=40?Math.min(25,3+.3*(t-40)):0;
   const w4=lerp(t,[[1,10],[39,30],[70,35],[100,40]]),w6=t>=100?0:lerp(t,[[1,55],[39,25],[99,5]]);
@@ -1757,10 +1765,10 @@ const nLerpLog=(x,pts)=>{if(x<=pts[0][0])return pts[0][1];for(let i=1;i<pts.leng
 const NS_HPM=[[0,.65],[10,.45],[20,.36],[30,.19],[40,.067],[50,.032],[60,.017],[70,.010],[80,.0067],[90,.0046],[100,.004]];
 const NS_DMM=[[0,.67],[10,.33],[20,.16],[30,.13],[40,.097],[50,.108],[60,.118],[70,.092],[80,.099],[90,.088],[100,.105],[110,.142],[120,.162]];
 const NS_STHP=[1,1,.95,.9,.8,.7,.65],NS_STDM=[1,1,1,1,.7,.55,.45];
-const nsHpMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STHP[ch]:nLerpLog(t,NS_HPM);
-const nsDmMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STDM[ch]:nLerpLog(t,NS_DMM);
+const nsHpMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STHP[ch]:S.duel?nLerpLog(S.duel.tier,NS_HPM):D_GH[dI(t)]/(ETYPES.grunt.hp*egHp(oT(t)));/* v621: 구울 체력을 표에 맞춤 */
+const nsDmMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STDM[ch]:S.duel?nLerpLog(S.duel.tier,NS_DMM):D_BR[dI(t)]/(ETYPES.brute.dmg*RANK[2].dmg*1.2*egDmg(oT(t)));/* v621: 유니크 브루트 1타를 표에 맞춤 */
 /* 보스 체력·기준 수치 (기준 강화: 검귀 +20 · 아귀 +32 · 우버 검귀 +35 · 우버 아귀 +43) */
-const NS_BOSS={knight:{n:{hp:650000,K:4500},u:{hp:6400000,K:9000}},maw:{n:{hp:3450000,K:6400},u:{hp:21500000,K:13700}}};/* v603: 기준 수치를 방어 상수 3,000 스케일로 (담당 위험도 5·10·15·20 표준 스펙 = 50%) — 체력은 3단계(위험도 20단계)에서 */
+const NS_BOSS={knight:{n:{hp:4340000,K:4500},u:{hp:63900000,K:9000}},maw:{n:{hp:24300000,K:6400},u:{hp:87900000,K:13700}}};/* v621: 체력 = 목표 처치 시간 × 담당 위험도(5·10·15·20) 적정 DPS × 0.75 *//* v603: 기준 수치를 방어 상수 3,000 스케일로 (담당 위험도 5·10·15·20 표준 스펙 = 50%) — 체력은 3단계(위험도 20단계)에서 */
 const nsBossCfg=()=>S.duel?NS_BOSS[S.duel.b==='maw'?'maw':'knight'][S.duel.uber?'u':'n']:null;
 /* 원거리 몬스터(사수) 투사체 — 이동·구르기로 피할 수 있음, 회피 판정 */
 const nsShots=[];const shotMat=new THREE.MeshBasicMaterial({color:0xff9a4a}),shotGeo=new THREE.SphereGeometry(.18,8,6);
@@ -1840,6 +1848,7 @@ function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;
   for(const k of v)for(const g in (s.sk[k]||{}))if(s.sk[k][g]>GMAX){s.skp[k]=(s.skp[k]||0)+s.sk[k][g]-GMAX;s.sk[k][g]=GMAX}
   if(s.egK===undefined)s.egK=0;
   if(s.maxTier===undefined){s.maxTier=s.tier||0;s.gates=[];for(let t=5;t<(s.tier||0);t+=5)s.gates.push(t)}
+  if(s.maxTier>D_MAX||s.tier>D_MAX){s.maxTier=Math.min(D_MAX,s.maxTier||0);s.tier=Math.min(D_MAX,s.tier||0);s.gates=(s.gates||[]).filter(t=>D_GATES.includes(t)&&t<s.maxTier)}/* v621: 옛 위험도(최대 100+)는 20으로 */
   if(s.pots)for(const k of ['hp','mp']){if(!s.pots[k])s.pots[k]={};for(const z of ['s','m','l','x'])if(!(s.pots[k][z]>=0))s.pots[k][z]=0}/* v131 물약 크기 추가 */
   if(s.autoTier===undefined)s.autoTier=true;if(s.autoGem==='g:burn')s.autoGem='g:vortex';if(!s.sk2)s.sk2={};if(!(s.ess>=0))s.ess=0;if(!s.gates)s.gates=[];if(!s.enh)s.enh={};if(s.autoGem===undefined||s.autoGem==='seq')s.autoGem=s.autoGem?'bal':null;
   /* v40: 1차 강화 3종으로 축소(관통·폭발(법사)·소용돌이 삭제 → 위에서 포인트 반환), 2차 강화 단계 축소 → 넘친 정수 반환 */
@@ -1886,7 +1895,7 @@ function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}
     a.gates.sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
   if(!a.g10){a.g10=1;a.gold=Math.round((a.gold||0)/10);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v411: 기존 계정 골드 1/10 (새로 만든 계정도 같은 표식) */
   if(!Array.isArray(a.gates))a.gates=[];if(!a.bclr||typeof a.bclr!=='object'){a.bclr={};const g={20:'kn',40:'mn',50:'ku',60:'mu'};for(const t in g)if((a.maxTier||0)>+t)a.bclr[g[t]]=1;/* v369: 이미 넘어선 봉인은 처치한 것으로 */try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}if((a.maxTier||0)>60&&!a.bclr.mu){a.bclr.mu=1;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v374: 우버 아귀 봉인 70→60 — 이미 61 이상이면 해제 처리 */return a}
-function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&s.lvConv.rs){delete s.lvConv.rs;const t0=s.lvConv.tier[0];if((a.maxTier||0)<t0)a.maxTier=t0;const G=new Set(a.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);a.gates=[...G].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v438 */if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.max(s.maxTier||0,a.maxTier||0);const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
+function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&s.lvConv.rs){delete s.lvConv.rs;const t0=s.lvConv.tier[0];if((a.maxTier||0)<t0)a.maxTier=t0;const G=new Set(a.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);a.gates=[...G].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v438 */if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.min(D_MAX,Math.max(s.maxTier||0,a.maxTier||0));const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
 function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);a.bclr={...a.bclr,...(S.bclr||{})};try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
 function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if(!fldHold&&!inTown)try{S.fld=fldSnap()}catch(e){}/* v452 */S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
@@ -1961,7 +1970,7 @@ function critComp(l){if(NS())return 1;if(CC_MEMO[l])return CC_MEMO[l];const P=CC
 const dr=()=>{if(NS())return nsDef().def;const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
-  const t=S.duel?S.duel.tier:S.tier,last=CH[LAST];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
+  const t=S.duel?S.duel.tier:oT(S.tier),last=CH[LAST];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
   return {...last,n:'끝없는 심연',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:(last.xp+.3*t)*(t>=100?.85:1)/* v380: 위험도 100~ 경험치 -15% */,drain:Math.min(.015,last.drain+.001*t)};
 }
 /* 엔드게임 위험도별 배율 (v29): 체력은 단계마다 약 12%씩 복리 + 선형 4% → 위험도 10 ≈ 5장의 4.4배, 20 ≈ 17배, 30 ≈ 66배
@@ -1971,7 +1980,7 @@ const egUp=t=>1.2+.01*t;
 /* v131: 위험도 40부터 몬스터 체력 +30% · 골드는 그 30%를 빼고 계산 · 위험도 50부터 체력 증가에 따른 골드 증가폭 절반 */
 const egHp0=t=>CH[LAST].hp*Math.pow(1.12,t)*(1+.04*t)*egUp(t);
 const goldAdjT=t=>{let f=(t>=40?1/1.3:1)*(t>=100?1/1.15:1)*(t>=110?1/1.2:1);/* v382: 위험도 100~ 체력 +15%만큼 골드 보정 */if(t>=50){const r=egHp0(t)/egHp0(50);f*=(1+.5*(r-1))/r}return f};
-const goldAdj=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?goldAdjT(S.tier):1;
+const goldAdj=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?goldAdjT(oT(S.tier)):1;
 const egHp=t=>egHp0(t)*(t>=40?1.3:1)*(t>=100?1.15:1)*(t>=110?1.2:1),/* v386: 위험도 110~ 추가로 몬스터 체력 +20% */ /* v380: 위험도 100~ 몬스터 체력 +15% */egDmg=t=>CH[LAST].dmg*Math.pow(1.07,t)*egUp(t);
 const GATE_EVERY=5;/* 위험도 5·10·15…를 넘어가려면 관문 보스를 쓰러뜨려야 함 */
 
@@ -2137,7 +2146,7 @@ const EGMAPS=[
   {n:'공허 신전',ground:[42,34,58],fog:0x110c1c,sty:{s:'flag',glow:0x9a4aff,gl:.3},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
 /* 지역 순서: 한 사이클(5개) 안에서는 겹치지 않게 무작위, 사이클이 끝나면 다시 무작위 (이전 지역 바로 반복 금지). 첫 지역은 1번 */
 const MAP_EVERY=10;
-function egMapFor(t){if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/MAP_EVERY));/* v392: 지역(맵)은 위험도 10단계마다 바뀜 */
+function egMapFor(t){return dBand(t);/* v621: 지역은 구간마다 고정 — 심연 · 황무지 · 서리 무덤 · 용암 분지 · 공허 신전 */if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/MAP_EVERY));/* v392: 지역(맵)은 위험도 10단계마다 바뀜 */
   while(S.egMaps.length<=blk){const i=S.egMaps.length,cs=i-i%5,used=S.egMaps.slice(cs,i);let pool=[0,1,2,3,4].filter(x=>!used.includes(x));if(i%5===0)pool=pool.filter(x=>x!==S.egMaps[i-1]);S.egMaps.push(pool[Math.random()*pool.length|0])}
   return S.egMaps[blk]}
 const GSTY=[{s:'dirt',st:.22},{s:'dirt',st:.42},{s:'dirt',st:.5,rough:.7},{s:'flag',rough:.62},{s:'flag',glow:0xff5a1a,gl:.3},{s:'dirt',st:.35},{s:'flag',glow:0x8a3aff,gl:.32}],GPT=['ash','ash','ash','snow','ember','ash','void'];
@@ -3784,7 +3793,7 @@ function spawnEnemy(type,x,z,rank=0,o={}){
   const xpCh=(S.ch===0?1.3:S.ch===1?1:.6)*.7;/* 1장 +30%, 2장 그대로, 3장~엔드게임 -40%, 전 구간 추가 -30% */
   const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()?nsHpMul():1),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
   const lab=document.createElement('div');lab.className='nm r'+rank;lab.innerHTML=`<span style="color:${R.c}"></span><i><b></b></i>`;lab.firstChild.textContent=name;namesEl.appendChild(lab);
-  const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=30?2:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1),r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
+  const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&oT(S.tier)>=30?2:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1),r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
     boss:rank===3,chBoss:!!o.chBoss,aggro:rank!==3||!!o.aggro,skill:3.5,M,wk:Math.random()*6,atk:0};
   enemies.push(e);return e;
 }
@@ -4548,9 +4557,9 @@ function spawnFinalBoss(){if(enemies.some(e=>e.final))return;const e=spawnEnemy(
    - 위험도마다 200마리 처치 → 다음 위험도 해금. 「자동 상승」이 켜져 있으면 바로 다음 위험도로 이동
    - 위험도 5·10·15…의 끝에는 관문 보스. 쓰러뜨려야 다음 위험도가 열림 (첫 처치 보상: 전설 2개 + 골드)
    - 「단계」 창에서 해금된 위험도 중 아무 곳이나 골라 사냥할 수 있음 (낮은 단계로 돌아가 성장 가능) */
-const gateNeed=t=>t>0&&t%GATE_EVERY===0&&!(S.gates||[]).includes(t);
+const gateNeed=t=>D_GATES.includes(t)&&!(S.gates||[]).includes(t);/* v621: 관문은 구간 끝(4·9·14·19)과 위험도 20 */
 /* v369 보스 봉인: 위험도 20→21 일반 잿불 검귀 · 40→41 일반 심연의 아귀 · 50→51 우버 잿불 검귀 · 60→61 우버 심연의 아귀를 처치해야 다음 위험도가 열림 (우버 처치는 일반 조건도 충족, 계정 공유) */
-const BLK={20:{b:'knight',m:'n'},40:{b:'maw',m:'n'},50:{b:'knight',m:'u'},60:{b:'maw',m:'u'}};
+const BLK={9:{b:'knight',m:'n'},14:{b:'maw',m:'n'},19:{b:'knight',m:'u'}};/* v621: 구간을 넘어갈 때 — 9→10 일반 검귀 · 14→15 일반 아귀 · 19→20 우버 검귀 (우버 아귀는 위험도 20 담당) */
 const bkKey=(b,m)=>(b==='maw'?'m':'k')+m,blkName=o=>`${o.m==='u'?'우버':'일반'} ${o.b==='maw'?MAW.n:DUEL.n}`;
 const lockNeed=t=>{const o=BLK[t];if(!o||(o.b==='maw'&&S.noMaw))return false;const c=S.bclr||{};return !(c[bkKey(o.b,o.m)]||(o.m==='n'&&c[bkKey(o.b,'u')]))};
 let lockAsked={};
@@ -4561,11 +4570,11 @@ function lockWin(b,m){S.bclr=S.bclr||{};S.bclr[bkKey(b,m)]=1;
   acctSave()}
 const gatePending=()=>S.ch>=NCH&&S.tier===S.maxTier&&gateNeed(S.tier)&&S.tierKills>=tkFor(S.tier);
 /* v409: 캐릭터별 클리어 최대 위험도(S.clr) — 클리어 이후엔 clr-3 미만으로 내려갈 수 없음(위로는 자유). 미클리어 캐릭터·테스트는 제한 없음 */
-const tierMin=()=>S.test||!(S.clr>0)?1:Math.max(1,S.clr-3),tierMovable=t=>(t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP))&&t>=tierMin();
+const tierMin=()=>1,/* v621: 낮은 위험도 이동 제한 해제 */tierMovable=t=>(t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP))&&t>=tierMin();
 function tierCheck(){if(S.ch<NCH||S.tierKills<tkFor(S.tier))return;S.tierKills=tkFor(S.tier);if(!S.test&&S.tier>(S.clr||0))S.clr=S.tier;
-  if(S.tier===S.maxTier){if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}if(lockNeed(S.tier)){lockAsk(S.tier);return}S.maxTier++;tele('tier');toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
+  if(S.tier===S.maxTier){if(S.tier>=D_MAX){if(gateNeed(S.tier)&&!enemies.some(x=>x.gate))spawnGate();return}if(gateNeed(S.tier)){if(!enemies.some(x=>x.gate))spawnGate();return}if(lockNeed(S.tier)){lockAsk(S.tier);return}S.maxTier++;tele('tier');toast('위험도 해금',`위험도 ${S.maxTier}이(가) 열렸습니다`)}
   if(S.autoTier&&S.tier<S.maxTier)setTier(S.tier+1,true)}
-const TEST_TOP=140;/* v403: 테스트 캐릭터는 해금 없이 위험도 140까지 이동 가능 */
+const TEST_TOP=D_MAX;/* v403: 테스트 캐릭터는 해금 없이 위험도 140까지 이동 가능 */
 function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tierKills=0;S.egK=0;save();if(S.test){riftClear();riftNow=1}/* v403: 테스트 캐릭터는 위험도에 들어가면 바로 균열 시작 */
   if(m0!==m1){if(!inTown){const f=$('regionFade');f.innerHTML=`<div><small>다음 지역으로 이동합니다</small><b>${EGMAPS[m1].n}</b><span>위험도 ${t}</span></div>`;f.className='rfade hold';P.inv=99;
       /* 이동 화면을 먼저 띄운 뒤 다음 프레임에 지역 생성 (생성 중 끊김을 화면 뒤로 숨김) */
@@ -4578,6 +4587,7 @@ function spawnGate(){const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*12,-B
   const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:true});e.gate=S.tier;e.hp=e.mhp=e.mhp*4;e.dmg*=1.2;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
   toast('관문 보스 출현',`${e.name} · 쓰러뜨려야 다음 위험도가 열립니다`)}
 function gateClear(e){const t=e.gate;if(!(S.gates||[]).includes(t)){S.gates=(S.gates||[]).concat(t);for(let i=0;i<2;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2);toast('관문 돌파',`위험도 ${t} 관문지기 처치 · 전설 장비 2개`)}
+  if(t>=D_MAX){S.d20=1;tele('gate',{g:t});toast('위험도 20 돌파',`최고 위험도의 관문지기를 쓰러뜨렸습니다`,'#7fe07a');return}/* v621: 위험도 20 첫 돌파(변이 해금 조건) */
   if(lockNeed(t)){S.maxTier=Math.max(S.maxTier,t);tele('gate',{g:t});later(2,()=>lockAsk(t,true));return}S.maxTier=Math.max(S.maxTier,t+1);tele('gate',{g:t});if(egMapFor(t+1)!==egMapFor(t))warmRegion(egMapFor(t+1));if(S.autoTier){toast('관문 돌파',`잠시 후 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`);later(3,()=>{if(S.ch>=5&&S.tier===t)setTier(t+1,true)})}else toast('관문 돌파',`「단계」 창에서 위험도 ${t+1}을 고르면 다음 지역(${EGMAPS[egMapFor(t+1)].n})으로 이동합니다`)}
 function spawnEchoBoss(){if(RZ&&RZ.st==='on'){riftEcho();return}/* v405: 균열 중엔 균열 우두머리로 */
   const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*14,-B,B),z=clamp(P.pos.z+Math.sin(a)*14,-B,B);
@@ -5124,11 +5134,11 @@ function kill(e){
   if(NS())nsPotKill(e);
   if(rz)riftAcc(e);else{dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e))}
-  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(S.tier));
-  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(oT(S.tier)));
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(oT(S.tier))*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
   const MD=S.ch<4?2:1,M3=S.ch<NCH?3:1;/* v115: 1~4장 마나 물약 드롭 ×2 / v124: 1~7장은 추가로 ×3 */
-  const PD=NS()?0:S.ch>=NCH?(S.tier>=31?0:.054):.3;/* v358: 엔드게임은 등급별 물약 판정 폐지 → 아래 고정 0.7% *//* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
+  const PD=NS()?0:S.ch>=NCH?(oT(S.tier)>=31?0:.054):.3;/* v358: 엔드게임은 등급별 물약 판정 폐지 → 아래 고정 0.7% *//* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
   if(e.final){for(let i=0;i<3;i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2)}
   else if(e.rank===3){for(let i=0;i<2;i++)if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD*2)potDrop(e.pos,'hp');if(Math.random()<PD*2*MD*M3)potDrop(e.pos,'mp')}
   else if(e.rank===2){if(Math.random()<.5)dropItem(e.pos,true);if(Math.random()<PD)potDrop(e.pos,Math.random()<.5?'hp':'mp');if(MD>1&&Math.random()<PD*.5)potDrop(e.pos,'mp');if(M3>1&&Math.random()<(PD*.5+(MD>1?PD*.5:0))*(M3-1))potDrop(e.pos,'mp')}
@@ -5138,7 +5148,7 @@ function kill(e){
     else if(q<ic+(S.ch===0?.035:.025)*PD)potDrop(e.pos,'hp');
     else if(q<ic+((S.ch===0?.035:.025)+.02*MD*M3)*PD)potDrop(e.pos,'mp')}
   /* v358: 신속 물약 드랍 폐지(상점 구매만) · 엔드게임 체력·마나 물약은 등급 무관 각각 0.7% */
-  if(S.ch>=NCH&&S.tier>=31&&!e.final){if(Math.random()<POT_DROP_X)dropPot(e.pos,'hp');if(Math.random()<POT_DROP_X)dropPot(e.pos,'mp')}
+  if(S.ch>=NCH&&oT(S.tier)>=31&&!e.final){if(Math.random()<POT_DROP_X)dropPot(e.pos,'hp');if(Math.random()<POT_DROP_X)dropPot(e.pos,'mp')}
   gainXp(e.xp);progress(e);
 }
 /* v75: 최종 보스 직선 장판·돌진·브레스는 방어력과 무관하게 최대 체력의 일정 비율 */
@@ -5204,7 +5214,7 @@ function potDrop(p,k){if(k==='hp'){if(Math.random()<.5)dropPot(p,k)}else{dropPot
 /* 신속 물약 드롭: 기본 0.4% · 레어 2% · 유니크 6% · 고유 30% */
 const spdGeo=new THREE.CylinderGeometry(.13,.17,.32,8),spdMat=new THREE.MeshBasicMaterial({color:0x4ad06a});
 function dropSpd(p){const q=scatter(p),m=new THREE.Mesh(spdGeo,spdMat);m.position.set(q.x,.4,q.z);scene.add(m);pickups.push({m,t:0,kind:'spd'})}
-function dropPot(p,k){const q=scatter(p),c=chE(),r=Math.random(),z=S.ch>=NCH?(S.tier>=31?'x':'l')/* v357: 위험도 1~30 대형만 · 31~ 초대형만 */:c<=1?(r<.85?'s':'m'):c<=3?(r<.3?'s':r<.9?'m':'l'):(r<.4?'m':'l');
+function dropPot(p,k){const q=scatter(p),c=chE(),r=Math.random(),z=S.ch>=NCH?(oT(S.tier)>=31?'x':'l')/* v357: 위험도 1~30 대형만 · 31~ 초대형만 */:c<=1?(r<.85?'s':'m'):c<=3?(r<.3?'s':r<.9?'m':'l'):(r<.4?'m':'l');
   const m=new THREE.Mesh(potGeo,potMat[k]);m.scale.setScalar(z==='s'?.8:z==='m'?1:z==='x'?1.6:1.3);m.position.set(q.x,.4,q.z);scene.add(m);pickups.push({m,t:0,kind:k,size:z})}
 /* 골드: 몬스터 최대 체력에 비례해서 떨어짐 (자동 습득) */
 const coinGeo=new THREE.CylinderGeometry(.2,.2,.06,12),coinMat=new THREE.MeshBasicMaterial({color:0xffd24a});
@@ -5221,17 +5231,17 @@ function capAdd(k,n,nm){if(!n||n<=0)return;const o=S[k]||0;if(S.test){S[k]=o+n;r
 function essAdd(n){capAdd('ess',n,'잿불 정수')}
 const RR_MAX=999,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
-function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(S.tier,30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
+function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
   const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
-  if(S.tier>=RR_TIER){const r=rollN(ex*nsGain('gReroll'));if(r>0)rrAdd(r)}
-  if(S.tier>=SEAL_TIER){const q=rollN(ex*SEAL_P);if(q>0)sealAdd(q)}}
+  {const r=rollN(ex*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v621: 윤회의 불씨는 위험도 1부터 */
+  {const q=rollN(ex*SEAL_P*sealD());if(q>0)sealAdd(q)}}/* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
-const SEAL_TIER=74,SEAL_P=.1;function sealAdd(n){capAdd('seal',n,'성역의 인장')}
+const SEAL_P=.1,sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
@@ -5264,7 +5274,7 @@ const RIFT={gap:[90,180],first:[90,180]/* v406: 2~3분마다 */,minTier:10/* v40
 const RGC={S:'#ffd24a',A:'#ff9a4a',B:'#c8b8a8'};
 let RZ=null,riftT=rand(...RIFT.first),riftNow=0;
 const RIFT_ON=true;/* v412: 일반 캐릭터에도 적용 (v399 이후 꺼 뒀던 것) */
-const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&S.tier>=RIFT.minTier&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
+const riftOk=()=>S&&(RIFT_ON||S.test)&&S.ch>=NCH&&oT(S.tier)>=RIFT.minTier&&mapKind==='field'&&!S.duel&&!inTown&&!S.demo&&!S.tutor;
 const riftBusy=()=>!!(RZ&&(RZ.st==='count'||RZ.st==='on'));/* 필드 생성 제한 */
 function riftHud(h){const el=$('riftHud');if(!el)return;if(h==null){el.hidden=true;return}el.hidden=false;if(el._h!==h){el._h=h;el.innerHTML=h}}
 function riftBig(html,dur=3){const el=document.createElement('div');el.className='riftbig';el.innerHTML=html;el.style.animationDuration=dur+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),dur*1000);return el}
@@ -5298,9 +5308,9 @@ function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W
   Z.wT=0;Z.sp=list.length;list.forEach((rk,i)=>later(i/list.length*4,()=>{Z.sp--;if(RZ===Z&&Z.st==='on'){const e=riftMob(Z.gates[i%Z.gates.length],rk,W.hp);e.rw=n}}));/* v459: 모든 웨이브 몹은 4초에 걸쳐 등장 */
   for(const q of Z.gates)ringFx(q,2,0xc060ff,.4);
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
-function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(S.tier,30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;{const n=rollN(ex);A.e+=rollN(ex*nsGain('gEss'));A.l=(A.l||0)+n;if(S.tier>=RR_TIER)A.r=(A.r||0)+rollN(ex*nsGain('gReroll'))}
-  if(Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(S.tier),false,'acc');/* v407: 주머니는 빛기둥·끌려오는 연출 그대로, 알림 없이 정산에만 합산 */
-  if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(S.tier)*POUCH_LX,true,'acc');
+function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(oT(S.tier),30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;{const n=rollN(ex);A.e+=rollN(ex*nsGain('gEss'));A.l=(A.l||0)+n;A.r=(A.r||0)+rollN(ex*nsGain('gReroll'))}
+  if(Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(oT(S.tier)),false,'acc');/* v407: 주머니는 빛기둥·끌려오는 연출 그대로, 알림 없이 정산에만 합산 */
+  if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(oT(S.tier))*POUCH_LX,true,'acc');
   emit(PADD,{x:e.pos.x,y:1,z:e.pos.z,vy:2.5,life:.5,s0:.6,s1:.15,c0:0xffe080,c1:0xffa020,a:.9,tex:1})}/* 처치 시 금빛 불티만 — 실제 지급은 끝날 때 한 번에 */
 function riftPouch(p){const A=RZ.acc;if(p.leg){A.ln++;A.lg+=p.amt}else{A.pn++;A.pg+=p.amt}}/* 먹은 주머니를 정산에 합산 */
 function riftEcho(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0],W=RIFT.wave[Math.max(0,Z.wave-1)],e=riftMob(q,2,W.hp*3);e.name='균열 우두머리';e.lab.firstChild.textContent=e.name;e.M.root.scale.multiplyScalar(1.3);e.h*=1.3;e.r*=1.3;ringFx(q,3,0xff5a20,.6);toast('균열 우두머리 출현','균열에서 우두머리가 나타났습니다','#ff9a4a')}
@@ -5315,7 +5325,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   riftClear();riftT=rand(...RIFT.gap);if(S.ch>=NCH)later(3.3,()=>{if(!riftBusy()&&mapKind==='field')tierCheck()});tele('rift',{win:win?1:0,g:win?gr:'-',t:Math.round(T),tier:S.tier});
   /* v406 정산: 처치한 균열 몹의 골드·정수 × 등급 배수(실패 .6 · B .8 · A 1 · S 1.3) + 그동안 나온 골드 주머니(그대로) + S등급 확정 강화 주문서(위험도/10개) */
   for(let i=pickups.length-1;i>=0;i--){const q=pickups[i];if(q.kind==='pouch'&&q.acc){keepBeam(q);scene.remove(q.m);pickups.splice(i,1);if(q.leg){Z.acc.ln++;Z.acc.lg+=q.amt}else{Z.acc.pn++;Z.acc.pg+=q.amt}}}/* 못 먹은 주머니도 정산에 포함 */
-  const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(S.tier/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */;/* v428: 장비 지급 없음 */
+  const A=Z.acc,m=win?RIFT.mul[gr]:RIFT.mul.F,kg=Math.round(A.g*m),ke=Math.round(A.e*m),tkS=Math.max(1,Math.floor(oT(S.tier)/10)),tk=win&&gr==='S'?tkS:win&&gr==='A'?Math.ceil(tkS/2):0/* v416: A등급은 S의 절반(홀수는 올림) */;/* v428: 장비 지급 없음 */
   S.gold+=kg+A.pg+A.lg;essAdd(ke);const kl=Math.round((A.l||0)*m),kr=Math.round((A.r||0)*m);if(kl)lumiAdd(kl);if(kr)rrAdd(kr);if(tk)S.tickets=(S.tickets||0)+tk;save();
   /* v427: 정산 창(일시정지) — 글자만 뜨던 팝업을 별도 창으로: 성공/실패·시간·항목별 보상·총 골드 */
   const R=[['몬스터 골드',`+${fmtG(kg)} G`,'#ffd24a',`×${m}`],['잿불 정수',`+${fmtG(ke)}`,'#ff8a6a',`×${m}`]];if(kr)R.push(['윤회의 불씨',`+${fmtG(kr)}`,'#ff9a4a',`×${m}`]);if(kl)R.push(['광휘의 파편',`+${fmtG(kl)}`,'#c890ff',`×${m}`]);
@@ -6498,7 +6508,7 @@ $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&
 /* 테스트 캐릭터: 70레벨, 강화 포인트·잿불 정수·골드 충분, 좋은 장비, 강화를 자유롭게 올리고 내림. 슬롯에 저장되지 않음 */
 /* v251 테스트 캐릭터 = 성능 비교용 고정 세팅: 90레벨(균형 자동 배분) · 1차·2차 강화 만렙 · 피해 증가(무한) 10 · 전 부위 90레벨 전설(옵션 고정, 특수 능력치 8%) +30 · 위험도 60.
    장비·지역은 고정 시드로 만들어 매번 같음. 레벨·강화 조절 등 기존 테스트 기능은 그대로 */
-const TSPECS={90:{tier:80,lv:90,ilvl:90,enh:30,wenh:35,sp:8,inf:10,ntier:3,nenh:12},110:{tier:93,lv:110,ilvl:110,enh:35,wenh:45,sp:11,inf:30,ntier:2,nenh:15}};/* v484: ntier = 새 장비 티어(테스트 캐릭터 전용) *//* v269: 테스트 스펙 선택 — 90레벨(장비 90·30강·무기 35강·특수 8%·피해증가 10) / 110레벨(장비 110·방어구 35강·무기 45강·특수 11%(상급 각인)·피해증가 30) */
+const TSPECS={90:{tier:16,lv:90,ilvl:90,enh:30,wenh:35,sp:8,inf:10,ntier:3,nenh:12},110:{tier:19,lv:110,ilvl:110,enh:35,wenh:45,sp:11,inf:30,ntier:2,nenh:15}};/* v484: ntier = 새 장비 티어(테스트 캐릭터 전용) *//* v269: 테스트 스펙 선택 — 90레벨(장비 90·30강·무기 35강·특수 8%·피해증가 10) / 110레벨(장비 110·방어구 35강·무기 45강·특수 11%(상급 각인)·피해증가 30) */
 let testSpec=90;const TS=()=>TSPECS[testSpec]||TSPECS[90];
 function testItem(slot){const it={id:++uid,slot,ilvl:TS().ilvl,rar:3,name:'잿불 왕의 '+itemName(slot,4),base:Math.round(itemBase(slot,TS().ilvl)*RAR_M[3]),opts:[]};
   const ok=Object.keys(OPT).filter(k=>OPT[k].slots.includes(slot)),sp=ok.find(k=>RARE_OPT.includes(k)),nm=ok.filter(k=>!RARE_OPT.includes(k));
@@ -6508,7 +6518,7 @@ function applyTest(){const sk=C().skills[0];S.test=true;P.pch=null;P.hot=null;S.
   S.sk[sk]={};for(const g of gemsFor(sk))S.sk[sk][g]=GMAX;S.skp[sk]=0;S.sk2={};for(const g of gems2For(sk))S.sk2[g]=g2Max(g);S.sk2dmg=TS().inf;
   S.stats={str:0,agi:0,int:0};S.statPts=(TS().lv-1)*STAT_PER_LV;S.autoStat='bal';spendAutoStat();
   S.enh={};for(const k of EQS){S.eq[k]=testItem(kSlot(k));S.enh[k]=NS()?TS().nenh:k==='weapon'?TS().wenh:TS().enh}nsTestGear();S.sk2dmg=0;S.stats={str:0,agi:0,int:0};S.statPts=0;S.autoStat=null;/* v484: 새 장비(티어 표준 빌드) · 무한 피해 증가·스탯 삭제 */S.pots={hp:{s:0,m:0,l:30},mp:{s:0,m:0,l:30}};S.ch=NCH;S.phase=0;S.kills=0;
-  S.gates=[];for(let t=GATE_EVERY;t<TS().tier;t+=GATE_EVERY)S.gates.push(t);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TS().tier+MAP_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
+  S.gates=D_GATES.filter(t=>t<TS().tier);S.egMaps=[];{let q=7;const r0=Math.random;Math.random=()=>(q=(q*16807)%2147483647)/2147483647;try{egMapFor(TS().tier+MAP_EVERY*2)}finally{Math.random=r0}}/* 지역 순서도 고정 */
   S.tier=TS().tier;S.maxTier=TS().tier;S.tierKills=0;S.egK=0;refreshMax();P.hp=P.mhp;P.mp=P.mmp}
 setInterval(()=>{if(S&&S.test&&P){S.gold=1e30;S.ess=1e30;if(S.testMp)P.mp=P.mmp;if(S.testGod)P.hp=Math.max(P.hp,P.mhp)}},150);
 /* v346: 직업 선택 초상화를 좌우로 드래그하면 캐릭터가 돌아감(세로 스크롤은 그대로) · 드래그한 뒤에는 카드 선택 클릭을 무시 */
@@ -6743,14 +6753,14 @@ function basicDps0(){const b=C().basic,crit=NS()?nsCritF():(1+Math.min(1,critCh(
 /* 장별 적정 DPS (적 1명 기준)
    = 그 장에서 몬스터가 생겨나는 체력 총량(초당)을 따라잡는 데 필요한 DPS ÷ 4 (스킬이 평균 4명을 동시에 맞힌다고 가정)
    몬스터 체력 = 종류 비율(러너 30%·구울 56%·브루트 14%) × 장 체력 배율 × 등급 비율(레어·유니크 확률) × 무리 크기 ÷ 생성 간격 */
-function stageReq(ch,tier=0){const c=ch<NCH?CH[ch]:{...CH[LAST],hp:egHp(tier)},ci=ch<NCH?chF(ch):4,E=ETYPES;
+function stageReq(ch,tier=1){const c=ch<NCH?CH[ch]:{...CH[LAST],hp:egHp(oT(tier))},ci=ch<NCH?chF(ch):4,E=ETYPES;
   const typeHp=c.brute?.3*E.runner.hp+.56*E.grunt.hp+.14*E.brute.hp:.3*E.runner.hp+.7*E.grunt.hp;
   const pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=(1-pu-pr)+pr*RANK[1].hp+pu*RANK[2].hp,pack=1+(.25+(ch<NCH?chF(ch):5)*.06)*3;
   return typeHp*c.hp*rk*pack/c.spawn/4*1.3*(NS()?nsHpMul(ch,tier):1)}/* v58: 적정 DPS +30% */
 function dpsCmpHtml(id){const me=skillDps(id).main,cur=S.ch<NCH?S.ch:NCH,req=stageReq(cur,S.tier),r=me/req;
   const tone=r=>r>=1?['여유','#7fe07a']:r>=.7?['빠듯','#f0d040']:['부족','#ff7a6a'],[tt,tc]=tone(r);
   const rows=CH.map((c,i)=>({n:`${i+1}장 ${c.n}`,v:stageReq(i),cur:cur===i}));
-  const tiers=[...new Set([0,10,20,S.ch>=NCH?S.tier:0])].sort((a,b)=>a-b);
+  const tiers=[...new Set([1,10,20,S.ch>=NCH?S.tier:1])].sort((a,b)=>a-b);
   for(const t of tiers)rows.push({n:`엔드게임 위험도 ${t}`,v:stageReq(NCH,t),cur:cur===NCH&&S.tier===t});
   return `<div class="cmp2"><div class="hd"><span>${cur<NCH?`${cur+1}장`:`위험도 ${S.tier}`} 적정 DPS <b>${fmtN(req)}</b></span><span style="color:${tc};font-weight:700">내 DPS ${Math.round(r*100)}% · ${tt}</span></div>
   <div class="track"><i style="width:${Math.min(100,r*50)}%;background:${tc}"></i><u></u></div>
@@ -7190,20 +7200,20 @@ function renderStage(){
   const eg=S.ch>=NCH,cur=eg?stageReq(NCH,S.tier):S.ch===LAST&&S.phase>=3?fbReq():stageReq(Math.min(S.ch,LAST)),r=me/cur,[tt,tc]=tone(r);
   const row=(n,v,o={})=>`<tr class="${o.cur?'cur':''}"><td>${n}${o.note?`<small class="tnote">${o.note}</small>`:''}</td><td>${o.btn||''}</td></tr>`;
   let rows=[];/* v365: 스토리 장·최종 보스 행 삭제 — 위험도 1부터 */
-  const top=Math.max(5,(S.maxTier||0)+1,S.test?TEST_TOP:0);/* v403: 테스트 캐릭터는 140까지 */
-  for(let g0=0;g0*10<top;g0++){const lo=g0*10+1,hi=Math.min(g0*10+10,top),ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
-    rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n}</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
+  /* v621: 위험도 20단계 — 구간(지역·최고 아이템 티어)별로 묶음 */
+  for(let g0=0;g0<D_BANDS.length;g0++){const [lo,hi]=D_BANDS[g0],ex=stageExp.has(g0),hasCur=eg&&S.tier>=lo&&S.tier<=hi;
+    rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n} · 최고 ${dTop(lo)}티어</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
     if(!ex)continue;
-  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),low=open&&t<tierMin(),g=t%GATE_EVERY===0,gc=(S.gates||[]).includes(t);
+  for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),low=open&&t<tierMin(),g=D_GATES.includes(t),gc=(S.gates||[]).includes(t);
     const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
-  <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(기본 300마리 · 50부터 400 · 70부터 700 · 80부터 900)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
+  <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(위험도 1~5는 300마리 · 6~10은 500 · 11~15는 700 · 16~20은 1,000)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
-  <small class="dpssub">위험도 ${GATE_EVERY}·${GATE_EVERY*2}·… 끝의 관문 보스를 쓰러뜨려야 다음 위험도가 열리고, 첫 돌파 때 전설 장비 2개를 줍니다.<br>위험도 20·40·50·70은 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 위험도가 열립니다.${!S.test&&S.clr>0?`<br>이 캐릭터가 클리어한 최고 위험도는 ${S.clr} — 위험도 ${tierMin()} 미만으로는 내려갈 수 없습니다(위로는 자유).`:''}</small></div>`}
+  <small class="dpssub">구간이 끝나는 위험도 4·9·14·19와 20에서 관문 보스를 쓰러뜨려야 합니다. 구간이 바뀌면 지역과 나오는 최고 아이템 티어가 올라갑니다.<br>위험도 9·14·19는 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 구간이 열립니다.</small></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
@@ -7218,7 +7228,7 @@ function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();if(k==='fb'){drgLoad();enterArena2()}/* v607: 테스트 이동도 실제와 같이 계단 → 등장 연출 */
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
-function openStage(){closeAllSheets();stageOpen=true;stageExp=new Set([Math.floor((Math.max(1,S.ch>=NCH?S.tier:1)-1)/10)]);renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
+function openStage(){closeAllSheets();stageOpen=true;stageExp=new Set([dBand(Math.max(1,S.ch>=NCH?S.tier:1))]);renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
 function closeStage(){stageOpen=false;$('stage').hidden=true}
 $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 /* v318: 「보스」 창 — 왼쪽 잿불 검귀 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
@@ -7814,7 +7824,7 @@ function update(dt){packTick();
   const d=diff();
   spawnT-=dt;demoTick(dt);riftTick(dt);/* v398 잿불 균열 */
   if(!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<d.cap*EGM()*egR()&&!(egLim()&&egRoom()<=0)){
-    spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&S.tier<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
+    spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&oT(S.tier)<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
     let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-(Math.random()<.85?rand(14,26):-rand(12,18)),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
     const q=Math.random(),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<.70?'grunt':q<.86?'shooter':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute';
