@@ -5831,8 +5831,8 @@ function wvXLine(c,b,L){const mk=(col,op)=>new THREE.MeshBasicMaterial({map:dotT
   g.position.set(c.x,0,c.z);g.rotation.y=b;scene.add(g);
   fx.push({m:g,t:0,dur:.5,upd(k){const d=Math.min(1,k/.16),f=k<.3?1:Math.max(0,1-(k-.3)/.7);for(const q of ms){q.scale.set(q.userData.w*(1+.4*(1-f)),1,L*(.15+.85*d));q.material.opacity=Math.min(1,q.userData.o*f)}},end(){c1.dispose();c2.dispose();c3.dispose()}})}
 /* 검기 폭발: X자로 바닥을 가르며 결정 파편이 길을 따라 솟음 */
-function wvCross(c,a,R){const q=QM(),L=R*2.6;/* v664: 매화만개 — 결정 파편과 함께 꽃잎이 터져 흩날림 */wvPetals(c,Math.round(4+R*2.2),R*.75,5.5);later(.08,()=>wvPetals(c,Math.round(2+R*1.2),R*.45,7));for(const s of [-1,1]){const b=a+s*.62;wvXLine(c,b,L*1.05);later(.05,()=>wvSlit(c,b,L,R*.9,1.8));
-    const n=Math.round(7*q);for(let i=0;i<n;i++){const t=(i/(n-1||1)-.5)*L*.9,p={x:c.x+Math.sin(b)*t,z:c.z+Math.cos(b)*t};later(Math.abs(t)/L*.18,()=>{wvShards(p,Math.max(1,Math.round(3*q)),.35,4.5);if(Math.random()<.6)wvPetals(p,3,.4,4.5)})}
+function wvCross(c,a,R){const q=QM(),L=R*2.6;{const k=Math.round(Math.max(0,R-3)*1.6*q);for(let i=0;i<k;i++){const r=R*Math.sqrt(Math.random())*.85,t=Math.random()*6.283,p={x:c.x+Math.sin(t)*r,z:c.z+Math.cos(t)*r};later(.04+r/R*.2,()=>wvShards(p,1,.3,3.5))}}/* v665: 넓은 범위는 X자 선 사이도 파편이 채움 *//* v664: 매화만개 — 결정 파편과 함께 꽃잎이 터져 흩날림 */wvPetals(c,Math.round(4+R*2.2),R*.75,5.5);later(.08,()=>wvPetals(c,Math.round(2+R*1.2),R*.45,7));for(const s of [-1,1]){const b=a+s*.62;wvXLine(c,b,L*1.05);later(.05,()=>wvSlit(c,b,L,R*.9,1.8));
+    const n=Math.max(3,Math.round((1+1.25*R)*q)),m=Math.max(1,Math.round((1.4+.2*R)*q));/* v665: 파편 수가 범위에 비례 — 반경 3.5m: 선마다 5곳×2개 · 9.6m: 13곳×3개 */for(let i=0;i<n;i++){const t=(i/(n-1||1)-.5)*L*.9,p={x:c.x+Math.sin(b)*t,z:c.z+Math.cos(b)*t};later(Math.abs(t)/L*.18,()=>{wvShards(p,m,.35+R*.04,4.5);if(Math.random()<.6)wvPetals(p,3,.4,4.5)})}
     streaks(c,Math.round(10*q),{dir:b,cone:.12,sp:[10,18],up:[0,1.2],y:[.4,1],life:[.18,.35],w:.08,len:1.4,c0:0xffffff,c1:WV_C.spark,drag:3});
     streaks(c,Math.round(10*q),{dir:b+Math.PI,cone:.12,sp:[10,18],up:[0,1.2],y:[.4,1],life:[.18,.35],w:.08,len:1.4,c0:0xffffff,c1:WV_C.spark,drag:3})}
   popFx(c.x,1,c.z,R*.4,R*1.3,.25,WV_C.glow,.45);flash(c,WV_C.spark,2.2)}
@@ -6515,7 +6515,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v664';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v665';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
