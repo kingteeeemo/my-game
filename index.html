@@ -738,6 +738,15 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .sgx{flex:1 1 150px;min-width:0;font-size:11.5px;color:#cfc8d6;white-space:pre-line;line-height:1.45}.sgc{flex:none;display:flex;gap:4px;align-items:center}
 #verBox{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 18px);transform:translateX(-50%);z-index:9999;width:min(340px,calc(100vw - 28px));box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:rgba(24,24,32,.97);border:1px solid #ff8a3a;box-shadow:0 8px 30px rgba(0,0,0,.6);color:var(--ink);font:14px var(--ko)}#verBox b{font:800 16px var(--ko);color:#ffb070}#verBox span{color:#d8d0c0;font-size:13px;line-height:1.4}#verBox .vc{color:#8ae08a;font-weight:700}#verBox button{margin-top:4px;min-height:42px;border:0;border-radius:12px;background:#ff8a3a;color:#1a1008;font:800 15px var(--ko)}
 .rrwrap{margin:8px 0}.rrbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}.rrbar button{min-height:48px}.rrcoin{display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:12px;background:#202028;border:1px solid #3a3a46;color:var(--ink);font:700 13px var(--ko);min-width:0}.rrcoin i{flex:none;width:12px;height:12px;border-radius:2px;background:linear-gradient(135deg,#ffb060,#ff5a3a);transform:rotate(45deg)}.rrcoin .cn{color:#d8d0c0;white-space:nowrap}.rrcoin b{margin-left:auto;font:800 15px var(--en);font-stretch:87%}.rrcoin small{display:none}.rrwrap .ivc{width:100%;box-sizing:border-box}.rrl{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:13px;padding:2px 0}
+/* v614 옵션 조율 — 아래 서랍: 고르기 전엔 크게 올라와 있고, 고르면 내려가며 조율 화면 */
+#nsBody.rrmode{position:relative;height:88%;overflow:hidden;gap:10px;padding-bottom:0}.scrim>#nsBody.rrmode{height:calc(100% - 20px);max-height:760px}
+.rrmode .rrmain{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:0 -4px;padding:0 4px}.rrmode .rrfoot{position:static;margin:0;padding:0;background:none}.rrmode .rrpk{flex:none;height:46px}
+.rrempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px;gap:12px;text-align:center}.rrempty .slotx{width:78px;height:78px;border-radius:16px;border:2px solid rgba(232,220,196,.45);background:#111116;box-shadow:inset 0 0 0 6px #17171c,inset 0 0 0 7px rgba(232,220,196,.12)}.rrempty p{margin:0;color:#c9bfa9;font-size:13.5px;line-height:1.6}.rrempty small{color:#8a8577;font-size:11.5px}
+.rrdr{position:absolute;left:0;right:0;bottom:0;height:70%;display:flex;flex-direction:column;background:#1d1d23;border-top:1px solid rgba(232,220,196,.18);border-radius:18px 18px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.45);transform:translateY(calc(100% - 46px));transition:transform .32s cubic-bezier(.3,.8,.3,1);z-index:3}.rrdr.up{transform:none}
+.rrdh{flex:none;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;color:#a59f90;font:600 12px var(--ko);padding:0 16px}.rrdh i{width:38px;height:4px;border-radius:2px;background:#4a4840}.rrdh span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rrdh b{color:var(--ink)}
+.rrdl{flex:1;min-height:0;overflow-y:auto;padding:2px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}.rrdl .tag{color:#8a8577}.rrdl .tag em{font-style:normal;color:#5f5b52;margin-left:4px}
+.rrbag{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 8px}@media (orientation:landscape){.scrim>#nsBody.rrmode{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;column-gap:16px;row-gap:8px;max-width:min(980px,calc(100vw - 24px));padding-bottom:12px}.rrmode>.shead{grid-column:1;grid-row:1}.rrmode .rrmain{grid-column:1;grid-row:2}.rrmode .rrmain:last-of-type,.rrmode .rrmain:has(.rrempty){grid-row:2/4}.rrmode .rrfoot{grid-column:1;grid-row:3}.rrmode .rrpk{display:none}.rrmode .rrdr{position:static;grid-column:2;grid-row:1/4;height:auto;min-height:0;transform:none;transition:none;border:1px solid rgba(232,220,196,.12);border-radius:16px;box-shadow:none;background:#111116;margin:-2px -4px -4px 0}.rrmode .rrdh{display:none}.rrmode .rrdl{padding:12px 12px 12px}.rrempty{justify-content:center;padding-top:0}.rrempty .slotx{width:64px;height:64px}}@media (orientation:landscape) and (max-height:520px){#nsBody.rrmode{gap:6px}.rrmode .shead .chap{display:none}.rrmode .shead h2{font-size:17px}.rrmode .rri{padding:5px 10px}.rrmode .rri .ii{width:34px;height:34px}.rrmode .rri .ii .ico{width:30px;height:30px}.rrmode .rri b{font-size:14px;display:inline;margin-right:6px}.rrmode .rri small{display:none}.rrmode .rrseg button{height:30px}.rrmode .rrsd{display:none}.rrmode .rln{height:38px}.rrmode .rrfoot{flex-direction:row;align-items:center;gap:12px}.rrmode .rrct{flex:1;min-width:0}.rrmode .rrgo{height:40px;padding:0 22px;flex:none}}.rrt{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}.rrt span{font-size:10.5px;color:#a59f90;white-space:nowrap}.rrt .tile.sel{box-shadow:0 0 0 2px #e8dcc4}.rrnone{grid-column:1/-1;margin:4px 0;color:#77736a;font-size:12px}
+.rln{position:relative;overflow:hidden}.rln.rfx::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(232,220,196,.42) 50%,transparent 65%) no-repeat,rgba(232,220,196,.16);background-size:250% 100%,100% 100%;animation:rfx .9s ease-out var(--d,0ms) both}.rln.dimx{animation:rdim .9s ease-in .5s both}@keyframes rdim{to{opacity:.45}}@keyframes rfx{0%{background-position:120% 0,0 0;opacity:1}70%{opacity:1}100%{background-position:-20% 0,0 0;opacity:0}}
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -5609,7 +5618,7 @@ function stashSave(){try{localStorage.setItem(STASH_KEY(),JSON.stringify(stashD)
 const stashCost=cap=>1e8*Math.pow(2,(cap-30)/5);
 function nsSheet(){let el=$('nsSheet');if(!el){el=document.createElement('div');el.className='scrim';el.id='nsSheet';el.hidden=true;el.innerHTML='<div class="sheet" id="nsBody"></div>';document.body.appendChild(el);
   el.addEventListener('click',e=>{if(e.target.id==='nsSheet')nsClose();const b=e.target.closest('button');if(b)nsClick(b)})}return el}
-function nsClose(){stashOpen=false;rrOpen=false;nsKind=null;const el=$('nsSheet');if(el)el.hidden=true}
+function nsClose(){stashOpen=false;rrOpen=false;nsKind=null;const el=$('nsSheet');if(el)el.hidden=true;const bd=$('nsBody');if(bd)bd.classList.remove('rrmode')}
 const nsTile=(it,sel,src)=>`<button class="tile${sel?' sel':''}" data-pick="${src},${it.id}" style="border-color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot))}<small>${it.ns?it.tier+'티어':'iLv '+it.ilvl}</small></button>`;
 /* v507: 창고 — 넣기(가방→창고) ⇄ 빼내기(창고→가방) 전환, 「선택」을 켜면 여러 개 골라 한 번에 옮김 */
 let stashMulti=false,stashPicks=[],stashSide=null;
@@ -5656,7 +5665,7 @@ function nsConvert(it,i){const l=it.lines[i];if(!l||l.b)return false;const pool=
   const k=c[Math.random()*c.length|0];l.k=k;l.v=nRoll(NSO[k].r[(l.t||it.tier)-1],NSO[k].dp);return true}
 function nsUpgrade(it,i){const l=it.lines[i];if(!l||l.b)return false;const t=l.t||it.tier;if(t<=it.tier)return false;l.t=t-1;l.v=nRoll(NSO[l.k].r[l.t-1],NSO[l.k].dp);return true}
 /* v609: 옵션 조율 창 (C안) — 탭: 수치 조정 · 옵션 변환 · 티어 승급, 실행 버튼은 세 탭 모두 맨 아래 */
-let rrTab='rr';
+let rrTab='rr',rrDrUp=true;
 const nsDeadK=k=>{const own=NS_CDMG[S.cls],spd=S.cls==='mage'?'cspd':'aspd';return (['mdmg','pdmg','sdmg'].includes(k)&&k!==own)||((k==='aspd'||k==='cspd')&&k!==spd)};
 const rrN=(v,dp)=>Math.abs(v)>=1000?Math.round(v).toLocaleString('ko-KR'):String(+(+v).toFixed(dp));
 function rrRow(it,l,i,L){const t=l.t||it.tier,m=nLineMul(l,L),dead=nsDeadK(l.k),tag=l.b?'<em>기본</em>':l.o?'':'<em>접미</em>',kc=rrPrev&&rrPrev.id===it.id&&rrPrev.k[i]!==l.k,tc=rrPrev&&rrPrev.id===it.id&&!kc&&rrPrev.t[i]!==l.t,fl=(rrFlash===1&&rrTab==='rr')||rrFlash===i+2?' rrfl':'';
@@ -5666,9 +5675,9 @@ function rrRow(it,l,i,L){const t=l.t||it.tier,m=nLineMul(l,L),dead=nsDeadK(l.k),
   else if(rrTab==='cv'){right=`<span class="cost">${ci('r')}${convCost(t)}</span>`;click=true}
   else if(t<=it.tier){right='<span class="lock">최고 티어</span>';cls=' dim'}
   else{right=`<span class="cost">${ci('s')}${SEAL_COST}</span>`;click=true}
-  const chg=kc?'<span class="chg">변환됨</span>':tc?'<span class="chg">승급</span>':'';
-  const inner=`<span class="tl${t===1?' t1':''}">${t}티어</span><span class="rnm">${tag}${ivName(l.k,it.slot,it)}${dead?'<span class="ddt">효과 없음</span>':''}${chg}</span><b class="v${fl}">${nFmt(l.k,l.v*m)}</b>${right}`;
-  return click?`<button class="rln${dead?' dead':''}${rrLine===i?' sel':''}" data-rl="${i}">${inner}</button>`:`<div class="rln${dead?' dead':''}${cls}">${inner}</div>`}
+  const fx=(rrFlash===1&&rrTab==='rr')||rrFlash===i+2,fxa=fx?` rfx" style="--d:${rrFlash===1?i*55:0}ms`:'';
+  const inner=`<span class="tl${t===1?' t1':''}">${t}티어</span><span class="rnm">${tag}${ivName(l.k,it.slot,it)}${dead?'<span class="ddt">효과 없음</span>':''}</span><b class="v${fl}">${nFmt(l.k,l.v*m)}</b>${right}`;
+  return click?`<button class="rln${dead?' dead':''}${rrLine===i?' sel':''}${fxa}" data-rl="${i}">${inner}</button>`:`<div class="rln${dead?' dead':''}${fx?cls.replace(' dim',' dimx'):cls}${fxa}">${inner}</div>`}
 function rrCard(it){const L=enhL(nsItSlot(it));
   return `<div class="rri"><span class="ii">${ico(icoSlot(it.slot))}</span><div><small>${SLOTEN[it.slot].toUpperCase()} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</small><b>${it.name}</b><span>${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}</span></div></div>
   <div class="rrseg">${[['rr','수치 조정'],['cv','옵션 변환'],['up','티어 승급']].map(([k,n])=>`<button class="${rrTab===k?'on':''}" data-rt="${k}">${n}</button>`).join('')}</div>
@@ -5682,12 +5691,18 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   else if(rrTab==='cv'){const pool=ln&&!ln.b?NSLOT[sel.slot][ln.o?'o':'x'].filter(k=>!sel.lines.some(x=>x.k===k)):[],c=convCost(lt),ok=ln&&!ln.b&&pool.length&&(T||(S.rr||0)>=c);
     ct=ln&&!ln.b?(pool.length?`<b>${ivName(ln.k,sel.slot,sel)}</b>를 다른 옵션으로 바꿉니다 · ${lt}티어 유지`:'바꿀 수 있는 다른 옵션이 없습니다'):'바꿀 줄을 고르세요';btn=`<button class="rrgo" data-ns="conv" ${ok?'':'disabled'}>${ci('r')}<b>${ln&&!ln.b?c:'—'}</b>옵션 변환</button>`}
   else{const can=ln&&!ln.b&&lt>sel.tier,ok=can&&(T||(S.seal||0)>=SEAL_COST);ct=can?`<b>${ivName(ln.k,sel.slot,sel)}</b> · ${lt}티어 → <b>${lt-1}티어</b>`:'올릴 줄을 고르세요';btn=`<button class="rrgo" data-ns="up" ${ok?'':'disabled'}>${ci('s')}<b>${SEAL_COST}</b>티어 승급</button>`}
+  const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=S.inv.filter(x=>x.ns),up=rrDrUp||!sel;
+  const tl=(it,src)=>`<div class="rrt">${nsTile(it,it.id===rrSel,src)}<span>${SLOTN[it.slot]}${src==='e'&&enhL(nsItSlot(it))?` +${enhL(nsItSlot(it))}`:''}</span></div>`;
+  const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
   let h=`<div class="shead"><div><div class="chap" style="color:#8a8577">Craft · 조율사 카엘</div><h2>옵션 조율</h2></div><button class="close" data-ns="close">닫기</button></div>
-  <div class="rrwrap2">${sel?rrCard(sel):'<div class="rri empty">조율할 아이템을 아래에서 고르세요</div>'}</div>
-  <div class="tag">장착 중</div><div class="bag">${EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns).map(it=>nsTile(it,it.id===rrSel,'e')).join('')}</div>
-  <div class="tag">가방</div><div class="bag">${S.inv.filter(x=>x.ns).map(it=>nsTile(it,it.id===rrSel,'b')).join('')}</div>
-  <div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${btn}</div>`;
-  $('nsBody').innerHTML=h}
+  <div class="rrmain">${sel?`<div class="rrwrap2">${rrCard(sel)}</div>`:`<div class="rrempty"><span class="slotx"></span><p>조율할 아이템을 ${matchMedia('(orientation:landscape)').matches?'오른쪽':'아래'}에서 고르세요<br><small>수치 조정 · 옵션 변환 · 티어 승급</small></p></div>`}</div>
+  ${sel?`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${btn}</div>`:''}
+  <div class="rrpk"></div>
+  <div class="rrdr${wasUp?' up':''}"><button class="rrdh" data-ns="drw"><i></i><span>${sel?(up?'아이템 선택 · 탭해서 닫기':`<b>${sel.name}</b> · 다른 아이템 고르기`):'아이템 선택'}</span></button>
+    <div class="rrdl"><div class="tag">장착 중</div><div class="bag rrbag">${eqI.map(it=>tl(it,'e')).join('')}</div>
+    <div class="tag">가방 <em>${bgI.length}</em></div><div class="bag rrbag">${bgI.length?bgI.map(it=>tl(it,'b')).join(''):'<p class="rrnone">가방에 장비가 없습니다</p>'}</div></div></div>`;
+  body.classList.add('rrmode');body.innerHTML=h;const dl=body.querySelector('.rrdl');dl.scrollTop=sc;
+  const dr=body.querySelector('.rrdr');if(wasUp!==up){void dr.offsetHeight;dr.classList.toggle('up',up)}}
 /* v508: 재단사 세라 — 외형 장비(능력치 없음). 재화 구매는 추후, 지금은 테스트 캐릭터에서 무료로 착용·해제 */
 let nsKind=null;
 /* 외형 미리보기 — 장비창 전용 공간에서 캐릭터 뒷모습 3/4 각도를 한 번에 그려 이미지로 저장(직업별 캐시). 날개 모양을 고쳐도 항상 최신 모습 */
@@ -5711,14 +5726,15 @@ function renderLooks(){lookShots();
       <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}">${on?'해제':'착용'}</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';renderLooks();$('nsSheet').hidden=false;releaseAll()}
-function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';renderRR();$('nsSheet').hidden=false;releaseAll()}
+function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
   if(b.dataset.sc&&stashOpen){const [d,k]=b.dataset.sc.split(',');stashCurMove(d,k);return}
+  if(a==='drw'&&rrOpen){if(rrSpin||!rrSel)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
   if(b.dataset.rl!==undefined&&rrOpen){if(rrSpin)return;const i=+b.dataset.rl;rrLine=rrLine===i?null:i;renderRR();return}
-  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,+id)}else{if(rrSpin)return;rrSel=+id;rrPrev=null;rrLine=null;renderRR()}return}
+  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,+id)}else{if(rrSpin)return;rrSel=+id;rrPrev=null;rrLine=null;rrDrUp=false;renderRR()}return}
   if(stashOpen&&NS()&&(a==='move'||a==='multi')){
     if(a==='multi'){stashMulti=!stashMulti;if(!stashMulti)stashPicks=stashPicks.slice(0,1);renderStash();return}
     const inM=stashSide!=='s',from=inM?S.inv:stashD.items,to=inM?stashD.items:S.inv,cap=inM?stashD.cap:bagCap();let n=0;
@@ -6159,7 +6175,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v613';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v614';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
