@@ -5882,11 +5882,11 @@ const PAL_BOOM={ring:0xffc040,ring2:0xfff0c0,spoke0:0xffffff,spoke1:0xffa020,dus
 const KIN_C={rim:0xbcd4ff,body:0x4a6ad8,core:0xffffff,glow:0x9ab8ff,spark:[0xffffff,0x8fb0ff]};
 const kinGeo=new THREE.IcosahedronGeometry(1,5);
 const KIN_MAT=()=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-  uniforms:{uT:{value:0},uK:{value:0},uOp:{value:1},uSeed:{value:Math.random()*50},uRim:{value:new THREE.Color(KIN_C.rim)},uBody:{value:new THREE.Color(KIN_C.body)}},
+  uniforms:{uT:{value:0},uK:{value:0},uB:{value:0},uOp:{value:1},uSeed:{value:Math.random()*50},uRim:{value:new THREE.Color(KIN_C.rim)},uBody:{value:new THREE.Color(KIN_C.body)}},
   vertexShader:`uniform float uT,uSeed;varying vec3 vN,vV,vP;
     float w3(vec3 p){return sin(p.x*3.1+uSeed+uT*2.6)*sin(p.y*2.7-uT*2.1+uSeed*.7)*sin(p.z*3.3+uT*2.9)+.5*sin(p.x*6.3-uT*3.7+uSeed)*sin(p.z*5.9+uT*3.1)*sin(p.y*6.1+uSeed*.3);}
     void main(){vec3 q=position*(1.+.075*w3(position*1.3));vP=position;vec4 mv=modelViewMatrix*vec4(q,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}`,
-  fragmentShader:`uniform float uT,uK,uOp,uSeed;uniform vec3 uRim,uBody;varying vec3 vN,vV,vP;
+  fragmentShader:`uniform float uT,uK,uOp,uSeed,uB;uniform vec3 uRim,uBody;varying vec3 vN,vV,vP;
     float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
     float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
     void main(){float fr=1.-abs(dot(normalize(vN),normalize(vV)));float rim=pow(fr,2.6);
@@ -5895,26 +5895,33 @@ const KIN_MAT=()=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,bl
       float rn=.55+.9*n3(vP*6.+vec3(uT*1.7,uSeed,0.));/* 테두리 밝기도 얼룩지게 — 너덜거리는 막 */
       float haze=(.16+.22*m)*(1.-fr*.4);/* 속이 뿌옇게 차 있음 */
       float al=(rim*.95*rn+vein*(.3+fr*.5)+haze)*uOp;
-      vec3 col=mix(uBody,uRim,clamp(rim*1.2*rn+vein*.8,0.,1.));gl_FragColor=vec4(col*al,al);}`});
+      /* v670: 터짐 — 노이즈 문턱으로 막에 구멍이 뚫리며 찢어지고, 찢어진 가장자리는 희게 빛남 */float nz=n3(vP*3.2+vec3(uSeed*1.3,0.,uSeed)),th=uB*1.5-.25,keep=smoothstep(th,th+.1,nz),edge=keep*(1.-smoothstep(th+.1,th+.28,nz))*step(.001,uB);al=al*keep+edge*.8*uOp*(1.-uB);
+      vec3 col=mix(mix(uBody,uRim,clamp(rim*1.2*rn+vein*.8,0.,1.)),vec3(1.),edge*.8);gl_FragColor=vec4(col*al,al);}`});
 const kinStarTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),r=64;
   const rg=g.createRadialGradient(r,r,0,r,r,r);rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(.1,'rgba(200,220,255,.85)');rg.addColorStop(.3,'rgba(120,150,255,.22)');rg.addColorStop(1,'rgba(80,110,255,0)');g.fillStyle=rg;g.fillRect(0,0,128,128);
   g.globalCompositeOperation='lighter';for(const [a,l,w] of [[0,62,3.2],[Math.PI/2,62,3.2],[Math.PI/4,40,2],[-Math.PI/4,40,2]]){g.save();g.translate(r,r);g.rotate(a);const lg=g.createLinearGradient(-l,0,l,0);lg.addColorStop(0,'rgba(255,255,255,0)');lg.addColorStop(.5,'rgba(255,255,255,1)');lg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=lg;g.beginPath();g.ellipse(0,0,l,w,0,0,Math.PI*2);g.fill();g.restore()}
   const t=new THREE.CanvasTexture(c);return t})();
-/* 거품 하나: 0.12초 만에 부풀고 출렁이며 0.75초에 걸쳐 흐려짐 */
-function kinBubble(c,y,R,del,FK){const m=new THREE.Mesh(kinGeo,KIN_MAT());m.position.set(c.x,y,c.z);m.scale.setScalar(.01);m.rotation.set(Math.random()*6,Math.random()*6,0);m.renderOrder=3;const u=m.material.uniforms,dur=.85;
-  later(del,()=>{scene.add(m);fx.push({m,t:0,dur,upd(k,dt){u.uT.value+=dt;const e=1-Math.pow(1-Math.min(1,k/.16),3),s=R*(.25+.75*e+.12*k);m.scale.set(s,s*.86,s);u.uOp.value=FK*(k<.16?.6+.4*k/.16:1-Math.pow((k-.16)/.84,1.4))},end(){m.material.dispose()}})})}
+/* v670: 거품 하나 — 가운데 한 점에서 생겨 KIN_G초 동안 커지고, 다 커진 순간 터짐(막이 찢어지며 바깥으로 튕겨 나감) */
+const KIN_G=.2,KIN_P=.26;
+function kinBubble(c,y,R,del,FK,pop){const m=new THREE.Mesh(kinGeo,KIN_MAT());m.position.set(c.x,y,c.z);m.scale.setScalar(.01);m.rotation.set(Math.random()*6,Math.random()*6,0);m.renderOrder=3;const u=m.material.uniforms,dur=KIN_G+KIN_P,G=KIN_G/dur;let done=0;
+  later(del,()=>{scene.add(m);fx.push({m,t:0,dur,upd(k,dt){u.uT.value+=dt;
+    if(k<G){const g=k/G,e=g*g*(3-2*g),s=R*(.04+.96*e);m.scale.set(s,s*.86,s);u.uOp.value=FK*(.45+.75*g);u.uB.value=0}
+    else{if(!done){done=1;pop&&pop()}const b=(k-G)/(1-G),s=R*(1+.45*(1-Math.pow(1-b,3)));m.scale.set(s,s*.86,s);u.uB.value=Math.max(.001,b);u.uOp.value=FK*(1.25-.85*b)}},end(){m.material.dispose()}})})}
 function kinStar(c,y,S,dur,op){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:kinStarTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));sp.position.set(c.x,y,c.z);sp.material.rotation=Math.random()*.6-.3;scene.add(sp);
   fx.push({m:sp,t:0,dur,upd(k){const e=k<.15?k/.15:1-(k-.15)/.85;sp.scale.setScalar(S*(.6+.6*Math.min(1,k/.15))*(1-.25*k));sp.material.opacity=op*Math.max(0,e)},end(){sp.material.dispose()}})}
-function boomFx(c,R,FK){const q=QM(),Y=1.1;shake=Math.max(shake,Math.min(.3,.12+R*.03));flash(c,KIN_C.glow,Math.min(2.6,1+R*.3)*FK);
-  kinBubble(c,Y,R*.95,0,FK);
-  /* 옆으로 작은 거품 1~2개가 조금 늦게 */
-  {const n=1+(Math.random()<.6*q?1:0),a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*2.4+rnd(-.4,.4),d=R*rnd(.55,.75);kinBubble({x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},Y*rnd(.8,1.2),R*rnd(.4,.55),rnd(.05,.12),FK*.8)}}
-  kinStar(c,Y,R*.95,.3,.9*FK);kinStar(c,Y,R*.5,.55,.8*FK);popFx(c.x,Y,c.z,.3,R*.8,.14,0xdfe8ff,.5*FK);popFx(c.x,Y,c.z,R*.4,R*1.6,.3,KIN_C.glow,.35*FK);
-  /* 흰 빛살: 사방으로 휘며 퍼짐 */
-  streaks({x:c.x,z:c.z},Math.round(12*q*FK),{sp:[R*3,R*6],up:[-2,4],y:[Y-.3,Y+.4],life:[.18,.34],w:.06,len:R*.35,c0:0xffffff,c1:KIN_C.glow,drag:4});
-  /* 거품 속 반짝이 */
-  const ns=Math.round(26*q*FK);for(let i=0;i<ns;i++){const a=Math.random()*6.28,b=Math.acos(rnd(-1,1)),rr=R*Math.cbrt(Math.random())*.85,sp=rnd(.3,1.6);
-    emit(PADD,{x:c.x+Math.sin(b)*Math.sin(a)*rr,y:Y+Math.cos(b)*rr*.8,z:c.z+Math.sin(b)*Math.cos(a)*rr,vx:Math.sin(a)*sp,vy:rnd(-.3,.6),vz:Math.cos(a)*sp,life:rnd(.35,.8),s0:rnd(.08,.16),s1:.02,c0:KIN_C.spark[0],c1:KIN_C.spark[1],a:.95,drag:2,tex:1})}}
+function boomFx(c,R,FK){const q=QM(),Y=1.1;
+  /* 가운데 별빛이 먼저 켜지고 거품이 거기서 자라남 */
+  kinStar(c,Y,R*.7,KIN_G+.12,.9*FK);popFx(c.x,Y,c.z,.2,R*.5,KIN_G,0xdfe8ff,.5*FK);
+  kinBubble(c,Y,R*.95,0,FK,()=>{/* 터지는 순간 */shake=Math.max(shake,Math.min(.3,.12+R*.03));flash(c,KIN_C.glow,Math.min(1.8,.8+R*.2)*FK);
+    kinStar(c,Y,R*1.1,.2,.8*FK);popFx(c.x,Y,c.z,R*1.2,R*2.6,.18,0xdfe8ff,.28*FK);popFx(c.x,Y,c.z,R*.9,R*3.2,.3,KIN_C.glow,.18*FK);
+    /* 찢어진 막 조각: 구 표면에서 바깥으로 튕겨 나가는 빛줄기·반짝이 */
+    const n1=Math.round(18*q*FK);for(let i=0;i<n1;i++){const a=Math.random()*6.28,bb=Math.acos(rnd(-.5,1)),sx=Math.sin(bb)*Math.sin(a),sy=Math.cos(bb)*.86,sz=Math.sin(bb)*Math.cos(a),sp=R*rnd(4,8);
+      streak({x:c.x+sx*R*.9,y:Math.max(.15,Y+sy*R*.9),z:c.z+sz*R*.9,vx:sx*sp,vy:sy*sp*.6,vz:sz*sp,life:rnd(.14,.28),w:.07,len:R*.3,c0:0xffffff,c1:KIN_C.glow,drag:5})}
+    const n2=Math.round(34*q*FK);for(let i=0;i<n2;i++){const a=Math.random()*6.28,bb=Math.acos(rnd(-.5,1)),sx=Math.sin(bb)*Math.sin(a),sy=Math.cos(bb)*.86,sz=Math.sin(bb)*Math.cos(a),sp=R*rnd(1.5,4.5);
+      emit(PADD,{x:c.x+sx*R*.95,y:Math.max(.1,Y+sy*R*.95),z:c.z+sz*R*.95,vx:sx*sp,vy:sy*sp*.7+rnd(0,1),vz:sz*sp,life:rnd(.3,.75),s0:rnd(.09,.2),s1:.02,c0:KIN_C.spark[0],c1:KIN_C.spark[1],a:.95,drag:3,grav:-3,tex:1})}});
+  /* 옆의 작은 거품 1~2개: 조금 늦게 자라 따라 터짐 */
+  {const n=1+(Math.random()<.6*q?1:0),a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*2.4+rnd(-.4,.4),d=R*rnd(.55,.75),cc={x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},yy=Y*rnd(.8,1.2),rr=R*rnd(.4,.55);
+    kinBubble(cc,yy,rr,rnd(.06,.14),FK*.8,()=>{popFx(cc.x,yy,cc.z,rr,rr*2.4,.18,0xffffff,.4*FK);streaks(cc,Math.round(5*q*FK),{sp:[rr*4,rr*7],up:[-1,3],y:[yy-.2,yy+.3],life:[.12,.24],w:.05,len:rr*.4,c0:0xffffff,c1:KIN_C.glow,drag:5})})}}}
 function kinField(p,r,dmg,dur){let tick=0;const q=QM(),g=new THREE.Object3D();scene.add(g);
   fx.push({m:g,t:0,dur,upd(k,dt){tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}
     if(Math.random()<dt*r*4*q*(1-k)){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:rnd(.2,1.4),z:p.z+Math.cos(a)*rr,vx:rnd(-.3,.3),vy:rnd(.2,.9),vz:rnd(-.3,.3),life:rnd(.4,.8),s0:rnd(.06,.12),s1:.02,c0:0xffffff,c1:KIN_C.spark[1],a:.8,drag:1,tex:1})}}})}
@@ -6547,7 +6554,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v669';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v670';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
