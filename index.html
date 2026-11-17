@@ -788,6 +788,11 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 /* v639: 아이템 칸 배경을 티어 색으로 — 테두리만이 아니라 칸 전체가 은은하게 물들어 티어가 한눈에 */
 @media (orientation:portrait){.rrmode .rrbag{gap:16px 12px}}.rrt .tile{width:90%}/* v639: 조율·대장장이 서랍 칸 간격 2배 */
 .tile.etcn{border:1.5px solid rgba(232,220,196,.28);background:#1b1b21;box-shadow:none}.tile.etcn small{color:#e8dcc4}/* v639: 기타 아이템은 티어 색 없이 중립 */
+.nst .ndn{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:#111116}.nst .ndn svg{flex:none}.nst .ndv{fill:#e8dcc4;font:800 15px var(--en);font-stretch:87%}.nst .ndl{fill:#8a8577;font:600 8.5px var(--ko)}
+.nst .ndg{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;font-size:12.5px}.nst .ndg>div{display:flex;justify-content:space-between;align-items:center;gap:6px}.nst .ndg span{display:flex;align-items:center;gap:6px;white-space:nowrap}.nst .ndg em{font-style:normal;color:#8a8577;font:600 11.5px var(--en);font-stretch:87%}.nst .ndg i{width:8px;height:8px;border-radius:2px;flex:none}.nst .ndg b{font:800 13px var(--en);font-stretch:87%;white-space:nowrap}.nst .ndg small{font-size:10.5px;color:#8a8577}
+.nst .nls{display:flex;flex-direction:column}.nst .nlt{font-size:11.5px;color:#8a8577;letter-spacing:.04em;margin:6px 2px 5px}.nst .nlr{display:flex;justify-content:space-between;align-items:center;min-height:32px;padding:0 10px;border-radius:7px;font-size:13.5px}.nst .nlr:nth-child(even){background:#1d1d23}.nst .nlr b{font:800 15px var(--en);font-stretch:87%;color:var(--ink)}.nst .nlr b small{font-size:11px;color:#8a8577;margin-left:1px}
+.nst .nlr b.tH{color:#ff7a6a}.nst .nlr b.tM{color:#6aa8ff}.nst .nlr b.tS{color:#58b4ff}
+/* v645 상태창 */
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -7201,22 +7206,19 @@ function nsRenderStat(){const g=gear(),am=k=>1+(auraOn(k)?.03*auraL(k):0)+(g[k+'
   const rg=v=>v<10?v.toFixed(1):n(v),esP=D.es>0?D.es/(1-D.es):0;
   $('statSheet').innerHTML=`<div class="nst"><div class="nhd"><div class="nid"><span class="lvt"><small>LV</small>${S.lv}</span><i></i><span class="cl">${cn}</span><b>${nk.replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';')}</b></div><button class="nx" id="sClose" aria-label="닫기">✕</button></div>
   <div class="nbig"><div class="ncd"><small>DPS</small><em>초당 피해</em><b>${fmtG4(skillDpsCache())}</b></div><div class="ncd iv"><small>EHP</small><em>유효 체력</em><b>${n(ehp)}</b></div></div>
-  <div class="nsec"><div class="nst2">공격 · 이동</div><div class="ntwo">
-   <div class="nr"><span>치명타 확률</span><b>${pc(Math.min(1,nsCritCh())*100)}</b></div><div class="nr"><span>치명타 피해</span><b>${pc(nsCritMul()*100,0)}</b></div>
-   <div class="nr"><span>${S.cls==='mage'?'시전 속도':'공격 속도'}</span><b>${sp(g.aspd||0)}</b></div><div class="nr"><span>이동 속도</span><b>${sp(spdEff(spdRaw()))}</b></div></div></div>
-  <div class="nsec"><div class="nst2">자원</div><div class="ntwo">
-   <div class="nr"><span>생명력</span><b class="tH">${n(P.mhp)}</b></div><div class="nr"><span>마나</span><b class="tM">${n(P.mmp)}</b></div>
-   <div class="nr"><span>생명력 재생</span><b class="tH">${rg(hpRegen())}<small>/초</small></b></div><div class="nr"><span>마나 재생</span><b class="tM">${rg(mpRegen())}<small>/초</small></b></div>
-   <div class="nr"><span>에너지 쉴드</span><b class="tS">${n(sh)}</b></div></div></div>
-  ${(()=>{const X=[['보스 피해 증가',g.bossd,'+'],['스킬 범위 증가',g.area,'+'],['투사체 피해 감소',Math.min(40,g.projr),'−'],['처치 시 생명력 회복',g.killH,'+'],['처치 시 마나 회복',g.killM,'+'],['보호막 재충전 속도',g.esrc,'+'],['스킬 마나 소모 감소',g.mcr,'−'],['마나 점유 효율',g.res,'+']].filter(x=>x[1]>0);return X.length?`<div class="nsec"><div class="nst2">보조</div><div class="ntwo">${X.map(([a,v,sg])=>`<div class="nr"><span>${a}</span><b>${sg}${(+v).toFixed(v<10?1:0)}%</b></div>`).join('')}</div></div>`:''})()}
-  <div class="nsec"><div class="nst2">방어</div><div class="nd3"><div class="h">유형</div><div class="h">총합</div><div class="h">효과</div>
-   <span><i class="cD"></i>방어력</span><b>${n(raw.def)}</b><u class="tH">피해 −${pc(D.def*100)}</u>
-   <span><i class="cE"></i>회피</span><b>${n(raw.eva)}</b><u class="tE">회피 ${pc(D.eva*100)}</u>
-   <span><i class="cS"></i>에너지 쉴드</span><b>${n(raw.es)}</b><u class="tS">보호막 +${pc(esP*100)}</u></div>
-   <div class="nmb"><i class="cD" style="width:${D.def*100}%"></i><i class="cE" style="width:${D.eva*100}%"></i><i class="cS" style="width:${D.es*100}%"></i></div>
-   <div class="nml"><span>종합 방어 <b>${pc(D.total*100)}</b></span><span>상한 ${Math.round(NS_DCAP*100)}%</span></div>
-   <div class="nehp"><span>생명력 ${n(P.mhp)} + 쉴드 ${n(sh)} → 방어·회피 반영</span><b>EHP ${n(ehp)}</b></div>
-   ${S.duel?'<p class="nhint">보스전 기준(보스 방어 상수) 수치입니다</p>':''}</div></div>`}
+  ${nstDonut(D,raw,esP,P.mhp,sh,n,pc)}
+  ${nstList('공격 · 이동',[['치명타 확률',pc(Math.min(1,nsCritCh())*100)],['치명타 피해',pc(nsCritMul()*100,0)],[S.cls==='mage'?'시전 속도':'공격 속도',sp(g.aspd||0)],['이동 속도',sp(spdEff(spdRaw()))]])}
+  ${nstList('자원',[['생명력',n(P.mhp),'tH'],['마나',n(P.mmp),'tM'],['에너지 쉴드',n(sh),'tS'],['생명력 재생',rg(hpRegen())+'<small>/초</small>','tH'],['마나 재생',rg(mpRegen())+'<small>/초</small>','tM']])}
+  ${(()=>{const X=[['보스 피해 증가',g.bossd,'+'],['스킬 범위 증가',g.area,'+'],['투사체 피해 감소',Math.min(40,g.projr),'−'],['처치 시 생명력 회복',g.killH,'+'],['처치 시 마나 회복',g.killM,'+'],['보호막 재충전 속도',g.esrc,'+'],['스킬 마나 소모 감소',g.mcr,'−'],['마나 점유 효율',g.res,'+']].filter(x=>x[1]>0);return X.length?nstList('보조',X.map(([a,v,sg])=>[a,sg+(+v).toFixed(v<10?1:0)+'%'])):''})()}
+  ${S.duel?'<p class="nhint">보스전 기준(보스 방어 상수) 수치입니다</p>':''}</div>`}
+/* v645 상태창 — 한 줄 목록(라벨 왼쪽 · 값 오른쪽 끝) + 방어 원그래프 */
+function nstList(t,rows){return `<div class="nls"><div class="nlt">${t}</div>${rows.map(([a,v,c])=>`<div class="nlr"><span>${a}</span><b${c?` class="${c}"`:''}>${v}</b></div>`).join('')}</div>`}
+function nstDonut(D,raw,esP,hp,sh,n,pc){const R=34,C=2*Math.PI*R;let o=0,seg='';
+  for(const [v,c] of [[D.def,'#e0554a'],[D.eva,'#7ed08a'],[D.es,'#58b4ff']]){if(v<=0)continue;const L=C*v;seg+=`<circle cx="44" cy="44" r="${R}" fill="none" stroke="${c}" stroke-width="10" stroke-dasharray="${L} ${C}" stroke-dashoffset="${-o}" transform="rotate(-90 44 44)"/>`;o+=L}
+  const cap=C*NS_DCAP;
+  return `<div class="ndn"><svg width="96" height="96" viewBox="0 0 88 88"><circle cx="44" cy="44" r="${R}" fill="none" stroke="#2c2b28" stroke-width="10"/>${seg}<line x1="${44+Math.sin(NS_DCAP*2*Math.PI)*28}" y1="${44-Math.cos(NS_DCAP*2*Math.PI)*28}" x2="${44+Math.sin(NS_DCAP*2*Math.PI)*40}" y2="${44-Math.cos(NS_DCAP*2*Math.PI)*40}" stroke="#e8dcc4" stroke-width="1.6"/>
+   <text x="44" y="45" text-anchor="middle" class="ndv">${pc(D.total*100)}</text><text x="44" y="58" text-anchor="middle" class="ndl">종합 방어</text></svg>
+   <div class="ndg"><div><span><i class="cD"></i>방어력 <em>${n(raw.def)}</em></span><b class="tH">피해 −${pc(D.def*100)}</b></div><div><span><i class="cE"></i>회피 <em>${n(raw.eva)}</em></span><b class="tE">회피 ${pc(D.eva*100)}</b></div><div><span><i class="cS"></i>에너지 쉴드 <em>${n(raw.es)}</em></span><b class="tS">보호막 +${pc(esP*100,0)}</b></div><small>상한 ${Math.round(NS_DCAP*100)}% · 생명력 ${n(hp)} + 쉴드 ${n(sh)}</small></div></div>`}
 function openStat(){closeAllSheets();statOpen=true;if(NS())nsRenderStat();else renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
