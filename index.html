@@ -2773,6 +2773,7 @@ function ashWarnOff(){const w=$('ashWarn');if(w){clearTimeout(w._t);w.classList.
 const ASHA={g:null};function ashGuide(L,on){/* 바닥 화살표(캐릭터 → 안전 원) + 원 위 카운트다운 */let g=ASHA.g;if(!g){const sh=new THREE.Shape();sh.moveTo(-.28,0);sh.lineTo(.28,0);sh.lineTo(.28,.78);sh.lineTo(.62,.78);sh.lineTo(0,1);sh.lineTo(-.62,.78);sh.lineTo(-.28,.78);sh.closePath();const geo=new THREE.ShapeGeometry(sh);geo.rotateX(Math.PI/2);g=ASHA.g=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x9ae4ff,transparent:true,opacity:.8,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));g.renderOrder=7;scene.add(g)}
   let c=$('ashCnt');if(!c){c=document.createElement('div');c.id='ashCnt';c.style.cssText='position:fixed;left:0;top:0;z-index:57;pointer-events:none;font-weight:800;font-size:clamp(34px,7vw,56px);color:#c8f2ff;text-shadow:0 0 14px #2aa8ff,0 2px 8px #000;transform:translate(-50%,-50%)';document.body.appendChild(c)}
   if(!on||!L){g.visible=false;c.hidden=true;return}
+  g.visible=false;c.hidden=true;return;/* v641: 화살표·카운트다운은 쓰지 않음 */
   const I=ASH,dx=L.c.x-P.pos.x,dz=L.c.z-P.pos.z,d=Math.hypot(dx,dz),len=d-I.shR+.3,left=(L.pre>0?L.pre:0)+Math.max(0,L.tt-L.t);
   g.visible=len>.8&&!L.f;if(g.visible){g.position.set(P.pos.x+dx/d*.6,.12,P.pos.z+dz/d*.6);g.rotation.y=Math.atan2(dx,dz);g.scale.set(1.5,1,Math.max(1,len-.6));g.material.opacity=.55+.3*Math.sin(time*10)}
   if(L.f){c.hidden=true;return}const v=new THREE.Vector3(L.c.x,3.2,L.c.z).project(camera),off=v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05;c.hidden=off;if(!off){c.textContent=Math.max(1,Math.ceil(left));c.style.left=((v.x+1)/2*innerWidth)+'px';c.style.top=((1-v.y)/2*innerHeight)+'px';c.style.color=left<1.5?'#ffd27a':'#c8f2ff'}}
@@ -2797,13 +2798,13 @@ function ashInter(e){if(e.itl)return;const I=ASH,s=Math.random()<.5?1:-1;
   e.itl={k:'paw',t:0,s,n:0,grp,big,safe,sr,br:0,hu};ashPawSide(e,s,I.itT);e.itl.pre=I.itG;
   ashClearFx();shake=1.3;slowT=.35;ashWarn('숨을 들이쉰다!',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 푸른 원으로 피하라',I.itG+.6);shake=Math.max(shake,.5);ringFx({x:0,z:I.pawZ},10,0xff6a2a,.6)}
 function ashPawSide(e,s,tt){const I=ASH,L=e.itl,c={x:s*I.pawX,z:I.pawZ+I.shZ};L.s=s;L.c=c;L.t=0;L.tt=tt;L.f=0;L.chk=0;L.br=0;L.safe.position.set(c.x,.09,c.z);L.safe.scale.set(I.shR,I.shR,1);L.sr.position.set(c.x,.11,c.z);L.hu.value.set(c.x,c.z,I.shR-.05);L.sr.scale.set(I.shR,I.shR,1);L.big.material.opacity=.22;
-  toast(L.n?'다시 숨을 들이쉰다':ashNm(e,'이','가')+' 숨을 들이쉰다',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 그림자로 숨어라 — 불길에 닿으면 즉사')}
+  if(!L.n)toast(ashNm(e,'이','가')+' 숨을 들이쉰다',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 그림자로 숨어라 — 불길에 닿으면 즉사')}
 function ashInterStep(e,dt){if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(!(L.pre>0))ashGuide(L,1);if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);ashGuide(L,1);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
   if(T<L.tt){const k=T/L.tt,sz=Math.max(.01,THR.hz*k);L.big.scale.set(THR.hw,sz,1);L.big.position.z=-THR.hz+sz;const pu=1+Math.sin(T*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);if(T>L.tt-1.2)shake=Math.max(shake,.15)}
   else if(T<L.tt+I.itF){if(!L.f){L.f=1;L.br=1;L.big.material.opacity=.42;shake=.8}shake=Math.max(shake,.35);
     for(let j=0;j<3;j++){const p={x:rnd(-THR.hw,THR.hw),z:rnd(-THR.hz,THR.hz)};if(Math.hypot(p.x-c.x,p.z-c.z)<I.shR+.4)continue;spray(PADD,p,4,{sp:[1,4],up:[3,9],y:[.1,.5],life:[.4,.9],s0:[.5,.9],s1:[.1,.2],c0:0xffd080,c1:0xff3000,a:.95,drag:1,grav:-6,tex:1,r0:1.2})}
     L.chk-=dt;if(L.chk<=0){L.chk=.2;if(Math.hypot(P.pos.x-c.x,P.pos.z-c.z)>I.shR)ashKill()}}
-  else if(L.n===0){L.n=1;ashPawSide(e,-L.s,I.itT2);ashWarn('반대쪽으로!',(L.s>0?'오른쪽':'왼쪽')+' 앞발 뒤로 건너가라',1.4)}
+  else if(L.n===0){L.n=1;ashPawSide(e,-L.s,I.itT2)}
   else{ashItlDrop();ashGuide(null,0);e.itl=null;e.p2=1;e.pat=2.4;e.patN=0;toast('2페이즈',ashNm(e,'이','가')+' 더 거세게 몰아친다')}
   enemyAnim(e,dt,false)}
 /* v629 사이페 B 「앞뒤로 번지는 불」: 싸우는 공간을 앞(용 쪽)·뒤 두 구역으로 — 한 구역이 먼저, 다른 구역이 이어서 붉어짐(켜지는 순서 = 터지는 순서) → 먼저 붉어진 곳이 먼저 타오르고 이어서 다른 곳. 세 번 반복, 맞으면 최대 생명력의 70% */
@@ -6353,7 +6354,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v640';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v641';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
