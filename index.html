@@ -761,7 +761,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .sm2 .smnm{margin:6px 0 2px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}.sm2 .smopts.smbase{padding-bottom:6px;margin-bottom:6px!important;border-bottom:1px solid rgba(232,220,196,.35)}.sm2 .smopts.smbase div{border-bottom:0}.sm2 .smopts:not(.smbase) b{color:#a59f90}.sm2 .smnm b{font-size:15px}.sm2 .smopts.smbase{border-top:0;margin:0}.sm2 .smopts .arr{color:#7fe07a;font-size:12px}.sm2 .smopts b.p{color:#7fe07a}.sm2 .smopts.smbase+.smopts{border-top:0;margin-top:0}
 .sm2 .smtop{display:flex;align-items:center;justify-content:space-between;gap:10px}.sm2 .smtop .smrate small{width:auto}.sm2 .smpity{margin:4px 0 6px;gap:8px;display:flex;align-items:center}.sm2 .smpity .pl{width:60px;flex:none;font-size:12px;color:#8a8577;white-space:nowrap;letter-spacing:-.02em}.sm2 .pnote{margin-left:68px}
 #smith .smhr{display:flex;align-items:center;gap:12px}#smith .smhr .goldbar{position:relative;top:auto;padding:0;margin:0;border:0;background:none;gap:0}#smith .smhr .goldbar b{font-size:14px;display:inline-flex;align-items:center;gap:5px}#smith .smhr .gdelta{position:absolute;right:0;top:100%}
-.mutbox{display:flex;flex-direction:column;gap:8px}.muthd{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid rgba(232,220,196,.22);border-radius:12px;background:#111116;font-size:12.5px;color:#8a8577}.muthd b{color:var(--ink);font:800 16px var(--en);font-stretch:87%;margin-left:4px}
+.mutbox{display:flex;flex-direction:column;gap:8px}.muthd{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 12px;border:1px solid rgba(232,220,196,.22);border-radius:12px;background:#111116;font-size:12.5px;color:#8a8577}.muthd b{color:var(--ink);font:800 16px var(--en);font-stretch:87%;margin-left:4px}
 .mutl{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}.mutr{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 6px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer}.mutr+.mutr{border-top:1px solid rgba(255,255,255,.05)}
 .mutr .mc{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid #4a4840;display:grid;place-items:center;font:800 12px var(--en);color:#141417}.mutr.on .mc{background:#e8dcc4;border-color:#e8dcc4}.mutr .mn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.mutr .mn b{font-size:13.5px}.mutr .mn small{font-size:11px;color:#8a8577}.mutr em{flex:none;font-style:normal;font:800 13px var(--en);font-stretch:87%;color:#8a8577}.mutr.on em{color:var(--ink)}.mutr:not(.on) .mn b{color:#a59f90}
 .mutft{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mutft button{height:38px;border-radius:10px;border:1px solid rgba(232,220,196,.3);background:#1d1d23;color:#e8dcc4;font:700 13px var(--ko)}
@@ -1116,7 +1116,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <div class="btns"><button class="ghost" id="rCancel">취소</button><button class="primary" id="rOk">처음부터 시작</button></div>
 </div></div>
 <div class="scrim center" id="pause" hidden><div class="sheet modal" style="text-align:center;align-items:center">
-  <div><div class="chap">Settings</div><h2>설정</h2></div>
+  <div><h2>설정</h2></div>
   <p class="hint">설정을 여는 동안 게임이 멈춥니다. PC는 Esc로도 열고 닫을 수 있어요.</p>
   <div class="gfx"><span>화질</span><div class="seg" id="gfxSeg"><button data-q="0">하</button><button data-q="1">중</button><button data-q="2">상</button></div></div>
   <p class="hint" id="gfxHint" style="width:100%;text-align:left"></p>
@@ -1513,7 +1513,10 @@ const dI=d=>Math.min(D_MAX,Math.max(1,Math.round(d)))-1;
 const MUT={hp:{n:'강인함',d:'몬스터 체력 +60%',p:25},dmg:{n:'흉포함',d:'몬스터 피해 +40%',p:25},spd:{n:'신속',d:'몬스터 이동·공격 속도 +25%',p:25},def:{n:'방어 약화',d:'방어력·회피·에너지 쉴드 −50%',p:30},
   shot:{n:'사수 군단',d:'원거리 몬스터 2배',p:20},elite:{n:'정예 행렬',d:'정예·유니크 몬스터 2배',p:20},reg:{n:'재생 봉인',d:'생명력·마나 재생 −50%',p:20},burst:{n:'유언의 탄막',d:'몬스터가 죽을 때 사방으로 투사체',p:20},pot:{n:'물약 봉인',d:'물약 충전 −50%',p:15}};
 const mutOpen=()=>!!(S&&(S.d20||S.test)),mutZoneAt=()=>!!(S&&S.tier>=D_MAX&&mutOpen()&&mutPts()>0),mutZone=()=>!!(S&&S.ch>=NCH&&S.tier>=D_MAX&&!S.duel&&!inTown&&mapKind!=='story'&&mutOpen()),
-  mutA=k=>mutZone()&&!!(S.mut&&S.mut[k]),mutPts=()=>Object.keys(MUT).reduce((a,k)=>a+(S.mut&&S.mut[k]?MUT[k].p:0),0),mutM=()=>mutZone()?1+mutPts()/100:1;
+  mutA=k=>mutZone()&&!!(S.mutRun&&S.mutRun[k]),mutPts=(o=S.mut)=>Object.keys(MUT).reduce((a,k)=>a+(o&&o[k]?MUT[k].p:0),0),mutM=()=>mutZone()?1+mutPts(S.mutRun||{})/100:1,
+  /* v629: 변이 입장 비용 — 잿불 정수, 점수가 클수록 가파르게 (50점 50 · 100점 200 · 200점 800). 고른 변이는 입장할 때 확정되고 그 판 동안 유지 */
+  mutCost=(o=S.mut)=>{const p=mutPts(o);return p?Math.ceil(p*p/50):0};
+function runPay(t){if(!(t>=D_MAX&&mutOpen())){S.mutRun={};return true}const c=mutCost();if(c&&!S.test){if((S.ess||0)<c){toast('잿불 정수 부족',`변이 입장에 잿불 정수 ${c}개가 필요합니다`);return false}S.ess-=c;toast('변이 입장',`잿불 정수 ${c}개 사용 · 보상 ×${(1+mutPts()/100).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
 const tkFor=t=>1000,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
@@ -4580,13 +4583,13 @@ function victory(title,sub,col,fn){const el=document.createElement('div');el.cla
   setTimeout(()=>el.addEventListener('click',go),400);setTimeout(go,2400)}
 function dropGiven(p,it){const q=scatter(p),g=lootMesh(it);g.position.set(q.x,0,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'item',item:it,ph:Math.random()*6});ringFx(q,2.4,it.mx?0x5ae0d0:0xff8a3a,.7);flash(q,it.mx?0x5ae0d0:0xff8a3a,2)}
 function showDummyClear(sec,dps,hp){collectAll();
-  $('clearSheet').innerHTML=`<div><div class="chap">Test · Dummy</div><h2>허수아비 처치</h2></div><div class="kv"><span>걸린 시간</span><b style="color:#5ad1c8">${sec.toFixed(1)}초</b><span>평균 DPS</span><b>${fmtN(dps)}</b><span>허수아비 체력</span><b>${fmtN(hp)}</b><span>주력 스킬</span><b>${SK[C().skills[0]].n}</b></div><p class="hint">첫 타격부터 처치까지의 시간입니다 · 보상 없음</p><button class="primary" id="dummyAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
+  $('clearSheet').innerHTML=`<div><h2>허수아비 처치</h2></div><div class="kv"><span>걸린 시간</span><b style="color:#5ad1c8">${sec.toFixed(1)}초</b><span>평균 DPS</span><b>${fmtN(dps)}</b><span>허수아비 체력</span><b>${fmtN(hp)}</b><span>주력 스킬</span><b>${SK[C().skills[0]].n}</b></div><p class="hint">첫 타격부터 처치까지의 시간입니다 · 보상 없음</p><button class="primary" id="dummyAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]};
   $('clearSheet').innerHTML=`<div><div class="chap">Duel Clear · ${S.duel&&S.duel.uber?'우버':'일반'} · 위험도 ${S.duel?S.duel.tier:10}</div><h2>${duelDef().n} 격파!</h2></div>
   <p class="hint">기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p>
   ${b.rolled?(b.res.length?`<div class="dlist">${b.res.map(r=>`<div>${bonusLine(r)}</div>`).join('')}</div>`:`<p class="hint">추가 보상: 이번에는 나오지 않았습니다</p>`):`<button class="primary bonusbtn" id="bonusGo">추가 보상 획득<small>${b.mb?`<span style="color:#ffd24a">✦ 확정 강화 주문서 ${b.U?'3~5':1}개</span> ${Math.round(TK_P*100)}%`:b.U?`<span style="color:#c890ff">★ 상급 각인의 서</span> ${Math.round(scrP('u')*100)}%`:`<span style="color:#5ae0d0">★ 각인의 서</span> ${Math.round(scrP('n')*100)}%`}</small></button>`}
   <button class="primary" id="duelAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
-function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('clearSheet').innerHTML=`<div><div class="chap">Duel</div><h2>결투에서 패배했습니다</h2></div>
+function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('clearSheet').innerHTML=`<div><h2>결투에서 패배했습니다</h2></div>
   <p class="hint">${duelDef().n}의 체력이 모두 회복되었습니다.</p>
   <p class="hint">${S.duel&&S.duel.b==='maw'?'브레스는 구르기로 못 피하니 회전 방향 앞으로 달리세요. 흡입은 멀리, 파동은 초록 원 안으로. 잠수 뒤 6칸 공격은 마지막 칸에서 시작해 먼저 터진 칸으로 옮기세요.':'바닥의 빨간 경고 장판이 다 차기 전에 밖으로 피하세요. 점프 내려찍기는 원 밖으로, 검기는 부채꼴 옆으로 비켜서면 됩니다.'}</p>
   <button class="primary" id="duelAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
@@ -4629,7 +4632,7 @@ function gateClear(e){const t=e.gate;if(S.runClr)return;S.runClr=1;const first=!
   let msg='';if(t>=D_MAX){if(!S.d20){S.d20=1;msg='최고 위험도를 처음 돌파했습니다. 위험도 창에서 변이를 켤 수 있습니다.'}}
   else if(lockNeed(t)){S.maxTier=Math.max(S.maxTier,t);msg=`위험도 ${t+1}은(는) <b style="color:${BLK[t].m==='u'?'#c890ff':'#ffd24a'}">${blkName(BLK[t])}</b>를 처치하면 열립니다.`}
   else if(S.maxTier<t+1){S.maxTier=t+1;msg=`위험도 ${t+1}이(가) 열렸습니다.`}
-  save();later(1.6,()=>{if(S.ch>=NCH&&!inTown&&S.tier===t)askConfirm(`위험도 ${t} 클리어`,`${msg?msg+'<br>':''}마을로 이동하시겠습니까?`,'마을로 이동',()=>goTown(),'계속 사냥')})}/* v628: 클리어하면 마을로 돌아갈지 물어봄 — 계속 사냥하면 같은 위험도에서 제한 없이 */
+  save();later(1.6,()=>{if(S.ch>=NCH&&!inTown&&S.tier===t)askConfirm(`위험도 ${t} 클리어`,`${msg?msg+'<br>':''}재도전하거나 마을로 이동할 수 있습니다.`,'마을로 이동',()=>goTown(),'재도전',()=>{if(runPay(t))setTier(t,false)})})}/* v628: 클리어하면 재도전(처음부터 다시, 보상 다시) 또는 마을로 이동 */
 function spawnEchoBoss(){if(RZ&&RZ.st==='on'){riftEcho();return}/* v405: 균열 중엔 균열 우두머리로 */
   const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*14,-B,B),z=clamp(P.pos.z+Math.sin(a)*14,-B,B);
   const src=CH[Math.random()*5|0];spawnEnemy('boss',x,z,3,{name:`${src.boss}의 메아리`,aggro:true});
@@ -6367,7 +6370,7 @@ function hud(){placeEnv();placePort();
     const t=envMin?`${envName()} ${bad?'⚠ ':''}▸ 보기`:`${envName()} 초당 −${d.toFixed(1)} · 재생 +${rg.toFixed(1)}${bad?' · 재생이 부족합니다':''}  ▾ 숨기기`;if(el.textContent!==t)el.textContent=t}else el.hidden=true}
   $('qenv').onclick=()=>{envMin=!envMin;try{localStorage.setItem('envMin',envMin?'1':'')}catch(e){}hud()};
   {const qb=document.querySelector('.quest');const sh=!!S.tutor&&!inTown;if(qb.hidden===sh)qb.hidden=!sh}
-  if(S.ch>=NCH){const gp=gatePending();$('qtag').textContent='Endgame · 파밍';$('qtitle').textContent=gp?`관문 보스 처치 · 위험도 ${S.tier}`:`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}${mutZone()&&mutPts()?` · 변이 ×${mutM().toFixed(2)}`:''}`;$('qprog').textContent=gp?'★':S.runClr?'클리어':`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)}`}
+  if(S.ch>=NCH){const gp=gatePending();$('qtag').textContent='Endgame · 파밍';$('qtitle').textContent=gp?`관문 보스 처치 · 위험도 ${S.tier}`:`${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}${mutZone()&&mutPts(S.mutRun||{})?` · 변이 ×${mutM().toFixed(2)}`:''}`;$('qprog').textContent=gp?'★':S.runClr?'클리어':`${Math.min(S.tierKills,tkFor(S.tier))} / ${tkFor(S.tier)}`}
   if(S.duel&&!inTown){const b=enemies.find(x=>x.duel);$('qtag').textContent=`Duel · 위험도 ${S.duel.tier}`;$('qtitle').textContent=`${duelMapN()} · ${duelDef().n} 처치`+(curseOn()?' · ☠ 최종 피해 −20%':'');$('qprog').textContent=b?`${Math.ceil(b.hp/b.mhp*100)}%`:'완료'}
   if(S.tutor&&!inTown){const st=S.tutStep||0,T=['첫 무리 처치','레벨업 · 스탯 찍기','「스킬」 창 열어 보기','두 번째 무리 처치','훈련 교관 처치','완료'][st]||'';$('qtag').textContent='Tutorial · 훈련장';$('qtitle').textContent=`${Math.min(st+1,5)}/5 · ${T}`;
     $('qprog').textContent=st===0?`${enemies.filter(x=>x.tp===1).length}마리 남음`:st===3?`${enemies.filter(x=>x.tp===2).length}마리 남음`:st===4?`끝까지 ${Math.round(Math.hypot(P.pos.x-ALTAR.x,P.pos.z-ALTAR.z))}m`:''}
@@ -6543,7 +6546,7 @@ function sha256(str){const u=new TextEncoder().encode(str),K=[],H=[];let p=2,n=0
     H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0}
   return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
 function startTestFlow(){$('notice').style.zIndex='';testPick=true;curSlot=null;S=fresh();for(const e of [...enemies])dropEnemy(e);$('title').hidden=true;$('slots').hidden=true;$('notice').hidden=true;showClassSel()}
-function devAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Developer</div><h2>암호</h2></div><input id="devPw" type="password" autocomplete="off" autocapitalize="off" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px"><p class="hint" id="devMsg" style="color:#ff8a70;min-height:1.2em;margin:4px 0 0"></p><div class="btns"><button class="ghost" id="devNo">취소</button><button class="primary" id="devOk">확인</button></div>`;$('notice').style.zIndex=60;/* 제목 화면(z 30) 위로 */$('notice').hidden=false;setTimeout(()=>{const i=$('devPw');i&&i.focus()},50)}
+function devAsk(){$('noticeSheet').innerHTML=`<div><h2>암호</h2></div><input id="devPw" type="password" autocomplete="off" autocapitalize="off" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:16px"><p class="hint" id="devMsg" style="color:#ff8a70;min-height:1.2em;margin:4px 0 0"></p><div class="btns"><button class="ghost" id="devNo">취소</button><button class="primary" id="devOk">확인</button></div>`;$('notice').style.zIndex=60;/* 제목 화면(z 30) 위로 */$('notice').hidden=false;setTimeout(()=>{const i=$('devPw');i&&i.focus()},50)}
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='devNo'){$('notice').hidden=true;$('notice').style.zIndex=''}else if(e.target.id==='devOk'){const pw=($('devPw').value||'').trim();
   if(sha256('ember-sanctum:'+pw)===DEV_H){try{localStorage.setItem('dev_ok',DEV_H)}catch(err){}startTestFlow()}else $('devMsg').textContent='암호가 다릅니다'}});
 $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&e.target.id==='devPw')$('devOk').click()});
@@ -6674,9 +6677,9 @@ $('lvlSheet').addEventListener('click',e=>{const b=e.target.closest('button');if
 
 /* ================= chapter clear ================= */
 /* v131 확인 창: 보스 전투 중 마을 이동·나가기. 창이 떠 있는 동안 게임 일시정지(#notice) */
-let cfFn=null;
-function askConfirm(title,msg,yes,fn,no){$('noticeSheet').innerHTML=`<div><div class="chap">Confirm</div><h2>${title}</h2></div><p class="hint">${msg}</p><p class="hint" style="color:#ffb070;margin:0">확인 창이 떠 있는 동안 게임이 일시정지됩니다.</p><div class="btns"><button class="ghost" id="cfNo">${no||'취소'}</button><button class="primary" id="cfYes">${yes}</button></div>`;cfFn=fn;$('notice').hidden=false;releaseAll()}
-$('noticeSheet').addEventListener('click',e=>{if(e.target.id==='cfYes'){$('notice').hidden=true;const f=cfFn;cfFn=null;f&&f()}else if(e.target.id==='cfNo'){$('notice').hidden=true;cfFn=null}});
+let cfFn=null,cfNf=null;
+function askConfirm(title,msg,yes,fn,no,nf){cfNf=nf||null;$('noticeSheet').innerHTML=`<div><h2>${title}</h2></div><p class="hint">${msg}</p><p class="hint" style="color:#ffb070;margin:0">확인 창이 떠 있는 동안 게임이 일시정지됩니다.</p><div class="btns"><button class="ghost" id="cfNo">${no||'취소'}</button><button class="primary" id="cfYes">${yes}</button></div>`;cfFn=fn;$('notice').hidden=false;releaseAll()}
+$('noticeSheet').addEventListener('click',e=>{if(e.target.id==='cfYes'){$('notice').hidden=true;const f=cfFn;cfFn=null;f&&f()}else if(e.target.id==='cfNo'){$('notice').hidden=true;cfFn=null;const g=cfNf;cfNf=null;g&&g()}});
 const bossFight=()=>!inTown&&(inArena()||enemies.some(e=>e.boss&&e.aggro&&e.hp>0));
 function townAsk(){if(!inTown&&bossFight())askConfirm('마을로 이동할까요?','정말 마을로 이동하시겠습니까? 진행 중인 보스 전투는 끝납니다.','마을로 이동',toggleTown);else toggleTown()}
 function showEnhDone(){$('noticeSheet').innerHTML=`<div><div class="chap">Level ${ESS_LV}</div><h2>모든 강화 완료</h2></div>
@@ -6694,7 +6697,7 @@ function showClear(){
 }
 /* 최종 보스 패배 (v29): 바로 재도전하거나, 5장으로 돌아가 성장한 뒤 재도전 */
 function showArenaFail(){const me=skillDps(C().skills[0]).main,req=fbReq(),r=me/req;
-  $('clearSheet').innerHTML=`<div><div class="chap">Defeated</div><h2>${FINAL.boss}에게 패배</h2></div>
+  $('clearSheet').innerHTML=`<div><h2>${FINAL.boss}에게 패배</h2></div>
     <p class="hint">보스 체력이 모두 회복되었습니다.</p>
     <p class="hint">${NCH}장으로 돌아가면 몬스터를 사냥하며 장비를 모으고, 마을 대장장이에서 강화한 뒤 언제든 「최종 결전 재도전」으로 돌아올 수 있습니다.</p>
     <div class="btns"><button class="ghost" id="fbBack">${NCH}장으로 돌아가 성장</button><button class="primary" id="fbRetry">바로 재도전</button></div>`;
@@ -6950,7 +6953,7 @@ $('openMenu').onclick=openMenu;
 let statOpen=false;
 function renderStat(){
   const pts=S.statPts,auto=S.autoStat;
-  let h=`<div class="shead"><div><div class="chap">Attributes · Lv ${S.lv}</div><h2>스탯</h2></div><button class="close" id="sClose">닫기</button></div>
+  let h=`<div class="shead"><div><h2>스탯</h2></div><button class="close" id="sClose">닫기</button></div>
   <p class="hint">레벨이 오를 때마다 ${STAT_PER_LV}포인트를 받습니다. 「전부」는 남은 포인트를 그 스탯에 한 번에 넣습니다. 찍은 포인트는 ${RESET_LV}레벨부터 골드로 초기화할 수 있어요. 수치는 1포인트당 효과입니다.</p>
   <div class="ptsline"><span>남은 스탯 포인트</span><b>${pts}</b></div>${S.test?`<div class="testlv"><span>테스트 레벨</span><button class="pm" data-tlv="-10">−10</button><button class="pm" data-tlv="-1">−1</button><b>${S.lv}</b><button class="pm" data-tlv="1">+1</button><button class="pm" data-tlv="10">+10</button></div>`:''}<div class="gems">`;
   for(const k in STATS){const v=stN(k);
@@ -7114,7 +7117,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
 function renderInvOld(){
   const g=gear(),mode=invMode(),sh=$('invSheet');sh.className='sheet inv-'+mode;$('inv').classList.remove('iv2on');$('inv').classList.toggle('center',mode!=='p');
   const sel=S.inv.find(x=>x.id===invSel),cur=sel?eqCur(sel):eqSel?S.eq[eqSel]:null;
-  const head=`<div class="shead"><div><div class="chap">Equipment · Bag</div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
+  const head=`<div class="shead"><div><h2>장비와 가방</h2></div><button class="close" id="iClose">닫기</button></div>`;
   const cmp=`<div class="ivcmp">${ivCard(cur,'cur')}${ivCard(sel,'sel',cur)}</div>`,act=sel?ivAct(sel,cur):(mode==='l'?'<div class="ivact ph"></div>':'');
   const foot=lookRow()+`<div class="foot" style="font-size:12px"><span class="tag" style="color:var(--muted)">가방 ${S.inv.length} / ${BAG} · 자동 습득</span><span class="footr">${upgrades().length&&!S.hideUp?`<button id="iAuto" style="color:#7fe07a;border-color:#7fe07a">더 좋은 장비 ${upgrades().length}개 자동 장착</button>`:''}<button id="iHideUp" class="hideup${S.hideUp?' on':''}">${S.hideUp?'자동 장착 버튼 보이기':'🙈 숨기기'}</button></span></div>
   <div class="btns"><button class="ghost" id="iSellLow">일반·마법 판매 <span class="gp">+${fmtG(S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button class="ghost" id="iSellAll">${clearArm?'한 번 더 누르면 모두 판매':'모두 판매'}${S.inv.some(x=>x.lock)?' (잠금 제외)':''} <span class="gp">+${fmtG(S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0))}G</span></button></div>`;
@@ -7254,8 +7257,8 @@ function renderStage(){
     const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:inTown?`<button class="pm wide${t===S.tier?' on':''}" data-tier="${t}">입장</button>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${gc?' <span class="gate ok">클리어</span>':''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
-  $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
-  ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${(1+mutPts()/100).toFixed(2)}`:''}</button>`:''}
+  $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
+  ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${(1+mutPts()/100).toFixed(2)} · 정수 ${mutCost()}`:''}</button>`:''}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<p class="hint">위험도마다 1,000마리를 처치하면 관문 보스가 나오고, 쓰러뜨리면 클리어입니다. 처음 클리어하면 다음 위험도가 열립니다.</p>${mutUI()}`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
@@ -7263,23 +7266,24 @@ function renderStage(){
 function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이 · 위험도 20 전용</div>';
   if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">위험도 20 관문지기를 처음 쓰러뜨리면 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
   const pts=mutPts();
-  return `<div class="mutbox">${H}<div class="muthd"><span>점수 <b>${pts}</b> / 200</span><span>보상 <b>×${(1+pts/100).toFixed(2)}</b></span></div>
+  return `<div class="mutbox">${H}<div class="muthd"><span>점수 <b>${pts}</b> / 200</span><span>보상 <b>×${(1+pts/100).toFixed(2)}</b></span><span>입장 ${ci('e')}<b>${mutCost()}</b></span></div>
   <div class="mutl">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="mutr${on?' on':''}" data-mut="${k}"><span class="mc">${on?'✓':''}</span><span class="mn"><b>${m.n}</b><small>${m.d}</small></span><em>+${m.p}</em></button>`}).join('')}</div>
   <div class="mutft"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div>
-  <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. ${S.tier>=D_MAX?'바꾼 변이는 새로 나오는 몬스터부터 적용됩니다.':'위험도 20에서만 적용됩니다.'}</p></div>`}
+  <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. 위험도 20에 입장할 때마다 잿불 정수를 내고, 고른 변이는 그 판이 끝날 때까지 유지됩니다.</p></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+  if((b.dataset.mut||b.dataset.mutall!==undefined)&&!inTown&&S.ch>=NCH&&S.tier>=D_MAX&&!S.duel){toast('사냥 중에는 변이를 바꿀 수 없습니다','마을에서 바꾼 뒤 다시 입장하면 적용됩니다');return}
   if(b.dataset.mut){S.mut=S.mut||{};S.mut[b.dataset.mut]=!S.mut[b.dataset.mut];save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
   if(b.dataset.mutall!==undefined){S.mut={};if(b.dataset.mutall==='1')for(const k in MUT)S.mut[k]=true;save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
   if(b.id==='stClose'){closeStage();return}
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
-  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t!==S.tier||S.runClr){S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.fld=null;save()}closeStage();leaveTown()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
-  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;closeStage();setTier(t,false)}return}});
+  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t!==S.tier||S.runClr){if(!runPay(t))return;S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.fld=null;save()}closeStage();leaveTown()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
+  if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(!runPay(t))return;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
 function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
-  else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0}
+  else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.mutRun=t>=D_MAX?{...(S.mut||{})}:{}}
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();if(k==='fb'){drgLoad();enterArena2()}/* v607: 테스트 이동도 실제와 같이 계단 → 등장 연출 */
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
@@ -7311,13 +7315,13 @@ function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
   if(bs.m){const U=bs.m==='u',isMaw=bs.b==='maw',D=duelCfg(bs.m,isMaw?'maw':undefined),nm=(isMaw?MAW:DUEL).n;
     const rw=isMaw?`<span style="color:#ffd24a">✦ 확정 강화 주문서 ${U?'3~5':1}개</span> ${Math.round(TK_P*100)}%${U?'<br><small>(3개 50% · 4개 30% · 5개 20%)</small>':''}`:`<span style="color:${U?'#c890ff':'#5ae0d0'}">★ ${U?'상급 각인의 서':'각인의 서'}</span> ${Math.round(scrP(bs.m)*100)}% <small>(수치 ${D.v}%)</small>`;
     const dis=!eg||S.duel||(isMaw&&mawOff);
-    info=`<div class="cmp2 binfo${U?' uber':''}"><div class="chap">Reward</div><h3>${U?'우버 ':'일반 '}${nm}</h3>
+    info=`<div class="cmp2 binfo${U?' uber':''}"><h3>${U?'우버 ':'일반 '}${nm}</h3>
       <p class="brw">보상: ${rw}</p>${U?'<p class="hint" style="color:#c890ff;margin:4px 0">☠ 입장 시 저주 — 최종 피해 −20%</p>':''}
       ${isMaw&&mawOff?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}${!eg?'<small class="hint" style="color:#ff8a6a">엔드게임에서 입장할 수 있습니다</small>':''}
       <button class="primary" data-enter="1" ${dis?'disabled':''}>${S.duel&&S.duel.m===bs.m&&((S.duel.b==='maw')===isMaw)?'도전 중':'입장'}</button></div>`}
   else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
   const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div><div class="cmp2 duelc" style="border-color:#5ad1c8;margin-top:8px"><div class="dt"><b>${FINAL.boss} (테스트)</b><small>최종 보스 용 · 체력 우버 ${MAW.n}와 같음 · 등장 연출 포함 · 보상 없음</small></div><button class="primary" data-drg="1">${S.ch===LAST&&S.phase>=3&&!S.duel&&enemies.some(e=>e.final&&e.hp>0)?'다시 도전':'도전'}</button></div>`:'';/* v545: 테스트 — 최종 보스 바로 도전 */
-  $('bossSheet').innerHTML=`<div class="shead"><div><div class="chap">Boss</div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
+  $('bossSheet').innerHTML=`<div class="shead"><div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
   <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'잿불 성채')}${card('maw',MAW.n,'심연의 밑바닥')}</div>
   <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div></div><div class="bright">${info}${test}</div></div>`}
 function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
@@ -7359,7 +7363,7 @@ function renderMap(){
   const info=eg?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n}`:`${S.ch+1}장 · ${CH[S.ch].n}`;
   const sub=S.tutor?'훈련장 · 여정을 떠나기 전 튜토리얼':eg?`위험도 ${S.tier} · 여정의 끝, 엔드게임 영역`:S.phase===0?'출발':S.phase===1?`길 끝 제단의 보스가 기다립니다 · 길 ${Math.round(storyProg*100)}% 지남`:S.phase===2?'다음 길이 열렸습니다':(S.ch===LAST?'최종 결전':'다음 길로');
   const pct=eg?100:Math.round(v/NCH*100);
-  $('wmapSheet').innerHTML=`<div class="shead"><div><div class="chap">World Map</div><h2>월드맵</h2></div><button class="close" id="wmClose">닫기</button></div>
+  $('wmapSheet').innerHTML=`<div class="shead"><div><h2>월드맵</h2></div><button class="close" id="wmClose">닫기</button></div>
    <div class="wmwrap"><svg class="wm" viewBox="0 0 380 600" role="img" aria-label="월드맵">${g}${lines}${nodes}${mk}</svg>
    <div class="wminfo"><span class="chap">현재 위치</span><b class="cur">${info}</b><span class="hint" style="margin:0">${sub}</span>
    <div class="wmbar"><i style="width:${pct}%"></i></div><span class="hint" style="margin:0">여정 ${eg?'완주 · 엔드게임 진행 중':`${S.ch+1} / ${NCH}단계`}</span>
@@ -7679,7 +7683,7 @@ let pendNick='',nickCb=null;
 let bossWas=false,bossAskId=null;
 function bossAskTick(){const ib=!!(S.cls&&!S.demo&&inBossFight());if(ib&&!bossWas){const id=C().skills.find(k=>BOSS_IDS.includes(k));if(id)bossAskOpen(id)}bossWas=ib}
 function bossAskOpen(id){bossAskId=id;releaseAll();
-  $('bossAskSheet').innerHTML=`<div><div class="chap">Boss Mode</div><h2>보스 모드</h2></div><p style="margin:0;line-height:1.55">「${SK[id].n}」은(는) 보스 모드로 변경할 수 있는 스킬입니다.<br>하시겠습니까?</p><p class="hint" style="margin:0">${BOSS_D[id]}<br>보스 전투 시 스킬창에서 언제든 변경 가능합니다.</p><div class="btns"><button class="ghost" id="baNo">아니오</button><button class="primary" id="baYes">예</button></div>`;
+  $('bossAskSheet').innerHTML=`<div><h2>보스 모드</h2></div><p style="margin:0;line-height:1.55">「${SK[id].n}」은(는) 보스 모드로 변경할 수 있는 스킬입니다.<br>하시겠습니까?</p><p class="hint" style="margin:0">${BOSS_D[id]}<br>보스 전투 시 스킬창에서 언제든 변경 가능합니다.</p><div class="btns"><button class="ghost" id="baNo">아니오</button><button class="primary" id="baYes">예</button></div>`;
   $('bossAsk').hidden=false}
 $('bossAskSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!bossAskId)return;const id=bossAskId;S.bossOff=S.bossOff||{};
   if(b.id==='baYes'){delete S.bossOff[id];feed(`${SK[id].n}: 보스 모드`,'#ff9a6a')}else if(b.id==='baNo'){S.bossOff[id]=1;feed(`${SK[id].n}: 일반 모드`,'#9ab')}else return;
