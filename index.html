@@ -1542,7 +1542,7 @@ function runPay(t){if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,
 const tkFor=t=>1000,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
-const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이']};
+const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이'],musa:['낡은 대검','강철 대검','무사의 대검','룬 대검','매화 대검']};
 const ANAME=['누더기 옷','가죽 갑옷','사슬 갑옷','판금 갑옷','잿불 갑옷'];
 const HNAME=['가죽 두건','철 투구','기사 투구','룬 투구','잿불 투구'],BNAME=['헌 신발','가죽 장화','사슬 장화','판금 장화','잿불 장화'],NNAME=['나무 부적','은 목걸이','마력 목걸이','룬 목걸이','잿불 목걸이'],RNAME=['구리 반지','은 반지','마력 반지','룬 반지','잿불 반지'];
 const EQS=['weapon','helm','armor','gloves','boots','amulet','ring','ring2','belt'];/* v603: 9부위 — 장갑·허리띠·두 번째 반지 */
@@ -1712,7 +1712,7 @@ const nLineDp=l=>l.b&&(l.k==='def'||l.k==='eva'||l.k==='es'||l.k==='wd'||l.k==='
 /* 아이템 생성 — opt: {wc, bt, o:[키…], x:[키…], q:0~1(수치 위치), lt:줄 티어 고정} */
 function nsMakeItem(slot,tier,opt={}){tier=Math.max(1,Math.min(6,tier||6));const C_=NSLOT[slot],q=opt.q,B=NSB[slot];
   const it={id:++uid,ns:1,nv:2,slot,tier,rar:NT_RAR[tier],ilvl:S.lv||1,base:0,opts:[],lines:[]};
-  if(slot==='weapon'){const r=Math.random();it.wc=opt.wc||(r<.8?S.cls:['warrior','archer','mage'].filter(c=>c!==S.cls)[r<.9?0:1])}
+  if(slot==='weapon'){const r=Math.random();it.wc=opt.wc||(r<.8?bc(S.cls):['warrior','archer','mage'].filter(c=>c!==bc(S.cls))[r<.9?0:1])}
   let bk=B.k;if(!bk){it.bt=opt.bt||['def','eva','es'][Math.random()*3|0];bk=it.bt}
   it.lines.push({k:bk,o:1,b:1,t:tier,v:nRoll(B.r[tier-1],bk==='inc'?1:0,q)});
   let [no,nx]=opt.o?[opt.o.length+1,(opt.x||[]).length]:nLines();
@@ -1722,9 +1722,9 @@ function nsMakeItem(slot,tier,opt={}){tier=Math.max(1,Math.min(6,tier||6));const
   for(const k of xs){const t=lt();it.lines.push({k,o:0,t,v:nRoll(NSO[k].r[t-1],NSO[k].dp,q)})}
   it.name=nItemName(it);return it}
 /* 장비 합산 — 기본옵만 강화 반영. 직업 전용 옵션은 해당 직업만 */
-const NS_CDMG={warrior:'mdmg',archer:'pdmg',mage:'sdmg'};
+const NS_CDMG={warrior:'mdmg',archer:'pdmg',mage:'sdmg',musa:'mdmg'};
 function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,mdmg:0,pdmg:0,sdmg:0,amp:0,bcrit:0,cdr:0,hp:0,mp:0,hpp:0,defp:0,evap:0,esp:0,mspd:0,regen:0,mreg:0,mcr:0,res:0,bossd:0,area:0,killH:0,killM:0,esrc:0,projr:0};
-  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it||!it.ns)continue;if(it.slot==='weapon'&&it.wc&&it.wc!==S.cls)continue;const L=enhL(k);for(const l of it.lines)if(l.k in g)g[l.k]+=l.v*nLineMul(l,L)}
+  for(const k of EQS){const it=S.eq&&S.eq[k];if(!it||!it.ns)continue;if(it.slot==='weapon'&&it.wc&&it.wc!==bc(S.cls))continue;const L=enhL(k);for(const l of it.lines)if(l.k in g)g[l.k]+=l.v*nLineMul(l,L)}
   /* 공격/시전 속도: 마법사는 시전 속도, 전사·궁수는 공격 속도만 · 직업 피해(근접·투사체·주문)는 피해 증가와 같은 묶음 */
   g.aspd=S.cls==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
@@ -1755,16 +1755,16 @@ const nLineTxt=(l,L,it)=>{const v=l.v*nLineMul(l,L);return `${nName(l.k,it)} ${n
 const nTT=(l,it)=>{const t=l.t||it.tier;return `<i class="ltt" style="--tc:${NT_C[t]}">${t}T</i>`};
 /* 아이템이 장착된 칸(반지는 두 칸 중 하나) — 가방 아이템은 같은 종류의 첫 칸 */
 const nsItSlot=it=>EQS.find(k=>S.eq&&S.eq[k]===it)||it.slot;
-function nsItemList(it,L=0){return `<ul><li class="spopt"><span>${it.tier}티어</span>${it.slot==='weapon'?NWC[it.wc]+(it.wc!==S.cls?' (착용 불가)':''):it.bt?NBT[it.bt]+' 베이스':SLOTN[it.slot]}</li>${it.lines.map(l=>`<li class="${l.b?'nsb':l.o?'':'nsx'}">${nTT(l,it)}${l.b?'<i class="nsxi nsbi">기본</i> ':l.o?'':'<i class="nsxi">접미</i> '}${nLineTxt(l,L,it)}</li>`).join('')}</ul>`}
+function nsItemList(it,L=0){return `<ul><li class="spopt"><span>${it.tier}티어</span>${it.slot==='weapon'?NWC[it.wc]+(it.wc!==bc(S.cls)?' (착용 불가)':''):it.bt?NBT[it.bt]+' 베이스':SLOTN[it.slot]}</li>${it.lines.map(l=>`<li class="${l.b?'nsb':l.o?'':'nsx'}">${nTT(l,it)}${l.b?'<i class="nsxi nsbi">기본</i> ':l.o?'':'<i class="nsxi">접미</i> '}${nLineTxt(l,L,it)}</li>`).join('')}</ul>`}
 function nsVals(it){const L=enhL(nsItSlot(it)),m={};for(const l of it.lines)m[l.k]=(m[l.k]||0)+l.v*nLineMul(l,L);return m}
 const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','amp','bcrit'].includes(l.k));
 /* 종합 평가: 줄마다 1티어 최상 대비 비율 (기본옵 ×2, 접두어 ×1.5) · 다른 직업 전용 옵션은 0 */
 function nsScore(it){let s=0;const own=NS_CDMG[S.cls],spd=S.cls==='mage'?'cspd':'aspd';for(const l of it.lines){if(['mdmg','pdmg','sdmg'].includes(l.k)&&l.k!==own)continue;if((l.k==='aspd'||l.k==='cspd')&&l.k!==spd)continue;const r=l.b?NSB[it.slot].r[0][1]:NSO[l.k]&&NSO[l.k].r?NSO[l.k].r[0][1]:1;s+=l.v/r*(l.b?2:l.o?1.5:1)}return s}
 /* 테스트 캐릭터 장비 (표준 빌드, 범위 가운데 값) */
-function nsTestGear(){const t=TS().ntier||2,bt={warrior:'def',archer:'eva',mage:'es'}[S.cls]||'def',q=.5,dp=bt+'p',sp=S.cls==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
+function nsTestGear(){const t=TS().ntier||2,bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=S.cls==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
   const L={weapon:{o:['cc','cdm',sp],x:['bcrit','amp']},helm:{o:['cdr','hp',dp],x:['res','projr']},armor:{o:['cdr','hp','hpp'],x:['regen','mreg']},gloves:{o:['cc','cdm',cd],x:['bossd','killM']},
     boots:{o:['mspd','hp',dp],x:['regen','mreg']},amulet:{o:['cc','cdm',cd],x:['mcr','res']},ring:{o:['cdm',cd,'inc'],x:['mcr','res']},ring2:{o:['cdm',cd,'inc'],x:['mcr','res']},belt:{o:['hp','hpp',dp],x:['regen','killH']}};
-  for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:S.cls,lt:t})}
+  for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(S.cls),lt:t})}
 /* ===== v484 NS 오라 — 잿불 정수로 0→10단계, 스킬 창 「오라」 탭에서 켜고 끔 ===== */
 const AURA_COST=[24,28,33,38,44,51,60,69,81,94];
 const auraCritAdd=L=>6*L+L*(L-1);/* 단계별 +6, +8, … +24 → 10단계 150 */
@@ -1850,9 +1850,9 @@ function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp
 function pwWith(k,it){const key=pwSig()+'#'+k+'='+(it?it.id:'-');let v=_pwM.get(key);if(v)return v;const old=S.eq[k];S.eq[k]=it;try{v=pwParts()}finally{S.eq[k]=old}if(_pwM.size>4000)_pwM.clear();_pwM.set(key,v);return v}
 const pwNow=()=>pwWith(EQS[0],S.eq[EQS[0]]),pwV=x=>x.d*x.e;
 /* 이 아이템을 낄 때 가장 이득인 칸과 전투력 변화율 (반지는 두 칸 중 나은 쪽) */
-function pwGain(it){if(!it||(it.ns&&it.slot==='weapon'&&it.wc!==S.cls))return {k:null,g:-1};const ks=it.slot==='ring'?['ring','ring2']:[it.slot],b=pwV(pwNow());let best={k:null,g:-1};
+function pwGain(it){if(!it||(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)))return {k:null,g:-1};const ks=it.slot==='ring'?['ring','ring2']:[it.slot],b=pwV(pwNow());let best={k:null,g:-1};
   for(const k of ks){if(S.eq[k]===it)continue;const w=pwWith(k,it),g=pwV(w)/b-1;if(g>best.g)best={k,g,w}}return best}
-function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return true;return pwGain(it).g>.001}if(!cur)return true;if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls)return false;if(it.ns&&!cur.ns)return true;
+function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return true;return pwGain(it).g>.001}if(!cur)return true;if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls))return false;if(it.ns&&!cur.ns)return true;
   if((dpsRel(it)||dpsRel(cur))&&it.slot===cur.slot){const a=dpsWith(it),b=dpsWith(cur);if(Math.abs(a-b)>b*1e-4)return a>b}
   return score(it)>score(cur)}
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
@@ -1866,7 +1866,7 @@ function nsMigItem(it,cls){if(!it||!it.ns||it.nv===2||!NSLOT[it.slot])return it;
   const map=k=>k==='aspd'&&it.slot==='weapon'&&it.wc==='mage'?'cspd':k;
   const oo=(it.lines||[]).filter(l=>l.o&&!['wd','def','eva','es'].includes(l.k)).map(l=>map(l.k)),xx=(it.lines||[]).filter(l=>!l.o).map(l=>l.k);
   const fill=(have,pool,n)=>{const o=[...new Set(have.filter(k=>pool.includes(k)))];for(const k of shuffle(pool.slice()))if(o.length<n&&!o.includes(k))o.push(k);return o.slice(0,n)};
-  const nw=nsMakeItem(it.slot,it.tier,{wc:it.wc||cls,bt:it.bt,o:fill(oo,P_.o,Math.max(2,Math.min(3,oo.length))),x:fill(xx,P_.x,Math.max(1,Math.min(2,xx.length))),lt:it.tier});
+  const nw=nsMakeItem(it.slot,it.tier,{wc:it.wc||bc(cls),bt:it.bt,o:fill(oo,P_.o,Math.max(2,Math.min(3,oo.length))),x:fill(xx,P_.x,Math.max(1,Math.min(2,xx.length))),lt:it.tier});
   nw.id=it.id;if(it.lock)nw.lock=it.lock;return nw}
 function nsMigSave(s){if(s.nv2)return;s.nv2=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
 function migrate(s){
@@ -1947,6 +1947,9 @@ function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
 try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0))&&parseSave(old))localStorage.setItem(slotKey(0),old);localStorage.removeItem(KEY)}catch(e){}
 
+/* v662: 무사 — 전사에서 분리한 새 직업(매화 검객 모델·매화참). base:'warrior' = 기본 공격·장비·동작은 전사 것을 그대로 씀(bc()). 아직 테스트 캐릭터 전용 */
+CLS.musa={base:'warrior',testOnly:1,n:'무사',en:'Blade',d:'매화 가면을 쓴 검객. 대검을 크게 휘둘러 붉은 검기를 날리는 매화참으로 길 위의 적을 모두 벱니다.',opts:['wave'],get skills(){return [mainOf(this)]},basic:'melee',bn:'베기',mpm:.8,hp:1.3,dmg:1,spd:6.2,body:0x7a1420,hood:0x1a1618,c:'#e61833'};
+function bc(c){return (CLS[c]&&CLS[c].base)||c}
 const C=()=>CLS[S.cls]||CLS.warrior;
 function mainOf(c){const m=typeof S!=='undefined'&&S&&S.main;return m&&c.opts.includes(m)?m:c.opts[0]}/* v82: 시작할 때 고른 주력 스킬 */
 const stN=k=>NS()?0:(S.stats&&S.stats[k])||0;
@@ -3181,7 +3184,7 @@ const NM=(()=>{
     const hand=G(fore,0,-.44,0);const f=M(sph(.075,12,10),skinM,0,0,0,hand);f.scale.set(1,1.1,1.15);const sx=Math.sign(x);M(capsule(.025,.025,.07),skinM,-sx*.06,0,.04,hand).rotation.z=sx*1.2;return {piv,arm,fore,hand}}
   function hero(cls){const k=CLS[cls],g=new THREE.Group(),U={cls};const body=PV(G(g));g.add(blob(.75));U.body=body;
     const skinM=mat(0xe0b896,{t:'skin',r:.55});
-    if(cls==='warrior'){
+    if(bc(cls)==='warrior'){
       const steel=mat(0x9aa2b2,{r:.32,m:.75,t:'metal'}),dsteel=mat(0x4a4f5c,{r:.42,m:.7,t:'metal'}),cloth=mat(k.body,{t:'cloth',r:.9}),leather=mat(0x5a3a22,{t:'leather'}),black=mat(0x0a0808);
       const trim=new THREE.MeshStandardMaterial({color:0x8a8680,roughness:.3,metalness:.8});skin(trim,'metal');U.trim=trim;
       legs(body,U,leather,dsteel,steel);
@@ -3366,16 +3369,10 @@ const NM=(()=>{
     return M_}
   return {hero,mob,tex,flatten}})();
 
-function makeHero(cls){if(cls==='warrior')skBlossom(!!(typeof S!=='undefined'&&S&&S.test));return NM.hero(cls)}
-/* v658: 새 전사 모델(매화 검객) — 테스트 캐릭터에서만 사용. 전사 뼈대에 직접 리깅해 기존 전사 동작을 그대로 씀 */
-const SKC_BL={file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:1.6,bl:1};let SKC_W=null;
-function skBlossom(on){if(!SKC_W)SKC_W=SKC.warrior;if(on===!!SKC.warrior.bl)return;SKC.warrior=on?SKC_BL:SKC_W;delete SKN.warrior;skMk('warrior');if(typeof portOk!=='undefined')portOk.warrior=0}
-/* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
-   기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
-/* ===== v330~v337 스킨 3D 캐릭터(전사·마법사) — AI 생성 모델 + Mixamo 뼈대. 절차적 몸(u.body)은 숨기고 애니메이션만 유지해 기존 코드가 그대로 돌아가게 함 ===== */
-const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90},archer:{file:'models/archer.glb',S:1.76,wp:/bow/i,tip:[.05,0,0],lift:0}};/* v380: 궁수 3D 모델 */
+function makeHero(cls){return NM.hero(cls)}
+const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90},archer:{file:'models/archer.glb',S:1.76,wp:/bow/i,tip:[.05,0,0],lift:0},musa:{file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:1.6,bl:1}/* v662: 무사 — 매화 검객 모델(전사 뼈대에 직접 리깅, 전사 동작 공유) */};/* v380: 궁수 3D 모델 */
 const SKN={};function skMk(cls){return SKN[cls]||(SKN[cls]={cls,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:SKC[cls].S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null})}
-const SKW=skMk('warrior');skMk('mage');skMk('archer');/* SKW: 전사 상태(기존 이름 유지) */
+const SKW=skMk('warrior');skMk('mage');skMk('archer');skMk('musa');/* SKW: 전사 상태(기존 이름 유지) */
 function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
   new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(K.S);let sw=null;
     r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(C.col||(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9));/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
@@ -3385,7 +3382,7 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
       const c=new THREE.Vector3(0,.05,.03).applyMatrix4(new THREE.Matrix4().copy(o.skeleton.boneInverses[bi]).invert()),P=o.geometry.attributes.position,N=o.geometry.attributes.normal,a=new Float32Array(P.count),d=new THREE.Vector3(),n=new THREE.Vector3();
       for(let i=0;i<P.count;i++){d.set(c.x-P.getX(i),(c.y-P.getY(i))*.85,c.z-P.getZ(i));const l=d.length();n.set(N.getX(i),N.getY(i),N.getZ(i));if(l<.2&&Math.abs(d.x)<.115&&P.getY(i)>c.y-.1&&d.dot(n)/l>.15)a[i]=1}
       o.geometry.setAttribute('aIn',new THREE.BufferAttribute(a,1));const ob=o.material.onBeforeCompile;
-      o.material.onBeforeCompile=(s,rr)=>{if(ob)ob(s,rr);s.vertexShader='attribute float aIn;varying float vIn;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvIn=aIn;');s.fragmentShader='varying float vIn;\n'+s.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\ngl_FragColor.rgb*=1.-smoothstep(.15,.7,vIn)*.97;')};o.material.needsUpdate=true});if(cls==='warrior'&&sw&&!C.bl)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
+      o.material.onBeforeCompile=(s,rr)=>{if(ob)ob(s,rr);s.vertexShader='attribute float aIn;varying float vIn;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvIn=aIn;');s.fragmentShader='varying float vIn;\n'+s.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\ngl_FragColor.rgb*=1.-smoothstep(.15,.7,vIn)*.97;')};o.material.needsUpdate=true});if(bc(cls)==='warrior'&&sw&&!C.bl)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
     if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;/* v338: 지팡이가 몸통+보석 두 메시로 나뉘면 묶음(Group)을 지팡이로 */K.sw=sw;
     if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
       try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
@@ -3399,7 +3396,7 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLT
 function swStraight(sw){let mm=null;sw.traverse(o=>{if(o.isMesh&&!mm)mm=o});if(mm){const pa=mm.geometry.attributes.position,gy=.063*.536,gx=.017*.536;for(let i=0;i<pa.count;i++){const z=pa.getZ(i),t=clamp((.1-z)/.28,0,1);pa.setX(i,pa.getX(i)-.017*t+gx);pa.setY(i,pa.getY(i)+.063*t-gy)}pa.needsUpdate=true;mm.geometry.computeBoundingBox();mm.geometry.computeBoundingSphere()}}
 /* v349: 시작 시 미리 불러오기 — 제목 화면이 뜬 뒤 저장 슬롯의 직업부터 하나씩 순서대로 GLB를 받고, 받은 직후 셰이더 컴파일·텍스처 업로드(skwWarm)를 끝내 둠 → 게임에 들어갈 때·직업 선택창에서 멈춤이 없음 */
 const skwQ=[];function skwNext(){while(skwQ.length){const c=skwQ.shift();const K=skMk(c);if(!K.st){skwLoad(c);return}}}
-function skwPreload(){const seen=new Set();try{for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&SKC[d.cls]&&!seen.has(d.cls)){seen.add(d.cls);skwQ.push(d.cls)}}}catch(e){}for(const c in SKC)if(!seen.has(c))skwQ.push(c);skwNext()}
+function skwPreload(){const seen=new Set();try{for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&SKC[d.cls]&&!seen.has(d.cls)){seen.add(d.cls);skwQ.push(d.cls)}}}catch(e){}for(const c in SKC)if(!seen.has(c)&&!(CLS[c]&&CLS[c].testOnly))skwQ.push(c);skwNext()}
 function skwWarm(K){if(K.warm||!K.root||K.root.parent)return;K.warm=1;try{const r=K.root,g=new THREE.Group();g.position.set(camT.x,0,camT.z);g.add(r);scene.add(g);
   const rt=new THREE.WebGLRenderTarget(4,4),prev=renderer.getRenderTarget();renderer.compile(scene,camera);renderer.setRenderTarget(rt);renderer.render(scene,camera);renderer.setRenderTarget(prev);rt.dispose();
   scene.remove(g);g.remove(r)}catch(e){}}
@@ -3783,7 +3780,7 @@ function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.
   if(K.gemG.parent!==K.tip)K.tip.add(K.gemG);K.gemG.material.color.setHex(c);K.gemG.material.opacity=.35+.5*k;K.gemG.scale.setScalar((.25+1.1*k)*pl*(1+.6*boost))}
 /* v380: 궁수 활 — 마을에서 서 있을 때·직업 선택 초상화는 등에 멤(archer_bow_back, Spine2 아래). 그 외에는 왼손.
    손에 든 활: 쏘기·화살비·구르기·사망은 손을 그대로 따라가고(GLB에 맞춘 쏘는 방향), 평소(대기·달리기·피격)에는 세계 기준으로 세워 듦(활대 수직, 배가 앞쪽) — 둘 사이는 부드럽게 전환 */
-const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415}/* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
+const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415,musa:1.4}/* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
 function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;
   if(mode==='back'&&K.bowBk){if(sw.parent!==K.bowBk){K.bowBk.add(sw);sw.position.set(0,0,0);sw.quaternion.identity()}return}
   if(sw.parent!==K.hand){K.hand.add(sw);sw.position.copy(K.bowP0);sw.quaternion.copy(K.bowQ0);K.bowA=1}
@@ -3794,8 +3791,8 @@ function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;
   sw.quaternion.copy(qc).slerp(K.bowQ0,K.bowA)}
 function skaBack(K){const sw=K.sw;if(!sw||!K.bowBk)return null;const sv={par:sw.parent,p:sw.position.clone(),q:sw.quaternion.clone()};skaBow(K,'back',1);return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q)}}
 function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
-  if(K.cls==='warrior'&&SKC.warrior.bl){/* v658: 매화 검객 대검 — v659: 칼 전체가 아니라 칼의 붉은 무늬만 어둡게 빛남(발광 맵 = 색 텍스처), 검은 쇠 느낌 유지 */if(m.emissiveMap!==m.map){m.emissiveMap=m.map;m.needsUpdate=true}const k=gemLv();m.emissive.setHex(0xfff0ec);/* v660: 붉은 색 대신 텍스처 본래 색으로 빛남 — 매화 문양·꽃 장식이 어두운 곳에서도 보이게 */m.emissiveIntensity=(.3+.3*k)*(1+.1*Math.sin(time*3.2));return}
-  if(K.cls==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
+  if(SKC[K.cls].bl){/* v658: 매화 검객 대검 — v659: 칼 전체가 아니라 칼의 붉은 무늬만 어둡게 빛남(발광 맵 = 색 텍스처), 검은 쇠 느낌 유지 */if(m.emissiveMap!==m.map){m.emissiveMap=m.map;m.needsUpdate=true}const k=gemLv();m.emissive.setHex(0xfff0ec);/* v660: 붉은 색 대신 텍스처 본래 색으로 빛남 — 매화 문양·꽃 장식이 어두운 곳에서도 보이게 */m.emissiveIntensity=(.3+.3*k)*(1+.1*Math.sin(time*3.2));return}
+  if(bc(K.cls)==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
   if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
   if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
@@ -3833,12 +3830,12 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(mage){const free=st==='roll'||st==='hit'||st==='die'||!!ASHC.lie;/* v621: 쓰러진 동안은 지팡이를 하늘로 세우지 않고 손에 쥔 그대로 */skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
-  if(K.swM){const on=K.cls==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:SKC.warrior.bl?0xb01c28:0xa8c0ff);else skwGear()}
+  if(K.swM){const on=bc(K.cls)==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:SKC[K.cls].bl?0xb01c28:0xa8c0ff);else skwGear()}
   if(mage&&K.gemM)skwGem(K,u.wRar||0,gemLv(),aim*.6)}
 /* 착용 장비 → 외형: 갑옷 등급 = 금속 테두리 색, 투구 = 투구/두건 표시, 무기 등급 = 날·수정 빛, 신발 = 신발 색 */
 function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar=eq.armor?eq.armor.rar:0,wr=eq.weapon?eq.weapon.rar:0;
   u.trim.color.setHex(RARC[ar]);u.trim.emissive.setHex(ar>=2?RARC[ar]:0);u.trim.emissiveIntensity=ar>=3?.55:ar>=2?.25:0;
-  if(u.helm)u.helm.visible=!!eq.helm||u.cls!=='warrior';
+  if(u.helm)u.helm.visible=!!eq.helm||bc(u.cls)!=='warrior';
   for(const b of u.boots||[])b.material=lam(eq.boots?[0x4a3a2a,0x3a3a5a,0x6a5a2a,0x6a2a1a][eq.boots.rar]:0x3a2a1a);
   u.wRar=wr;u.bladeBase=wr>=3?0x5a2a08:wr>=2?0x3a3008:wr>=1?0x10203a:0x221a10;
   const gc=[0,0x4a7aff,0xffd24a,0xff7a2a][wr];u.wGlow.material.color.setHex(gc||0xffffff);u.wGlow.scale.setScalar(wr>=1?[0,.35,.55,.8][wr]:0);u.wGlow.material.opacity=.65;
@@ -3856,7 +3853,7 @@ function heroAnim(dt,moving){const u=hero.userData;if(!u.body)return;u.walk+=dt*
   /* v234: 매 프레임 기본 자세로 되돌린 뒤 걷기·숨쉬기·동작(포즈)을 얹음 */
   const amp=moving?.62:0;u.legL.rotation.x=w*amp;u.legR.rotation.x=-w*amp;u.body.position.y=moving?Math.abs(cw)*.07:br*.012;
   u.body.rotation.set(moving?.08:0,moving?-w*.07:0,moving?cw*.035:br*.012);
-  u.piv.rotation.set(moving&&u.cls!=='archer'?w*.16:0,R.py+(moving&&u.cls==='warrior'?-w*.1:0),0);u.piv.position.z=R.pz;
+  u.piv.rotation.set(moving&&u.cls!=='archer'?w*.16:0,R.py+(moving&&bc(u.cls)==='warrior'?-w*.1:0),0);u.piv.position.z=R.pz;
   u.armR.rotation.set(R.ax,0,0);u.fore.rotation.x=R.fx;
   const lsw=moving?(u.cls==='archer'?-Math.abs(w)*.12:-w*.38):0;u.armL.rotation.set(R.lx+lsw,0,R.lz+(moving?.06:0));
   if(u.head){u.head.rotation.set(moving?.06+Math.abs(cw)*.05:br*.025,moving?w*.05:Math.sin(time*.7)*.1+Math.sin(time*.23)*.06,moving?-w*.03:0)}
@@ -3909,7 +3906,7 @@ const PZ={
     return {tp:.25,keys:[[0,A],[.25,A],[.45,B,'snap'],[.62,B,'es'],[1,REST[cls],'es']]}}
 };
 /* 시전(예비 동작) 상태: 시전 진행도에 따라 기본 자세 → 이 상태로 */
-const WIND={atk:cls=>cls==='warrior'?PZ.slash(cls,{d:-P.swingDir}).keys[0][1]:cls==='archer'?PZ.drawSt(cls):PZ.bolt(cls,{}).keys[0][1],
+const WIND={atk:cls=>bc(cls)==='warrior'?PZ.slash(cls,{d:-P.swingDir}).keys[0][1]:cls==='archer'?PZ.drawSt(cls):PZ.bolt(cls,{}).keys[0][1],
   crush:cls=>PZ.crush(cls,{}).keys[0][1],volley:cls=>PZ.drawSt(cls),snipe:cls=>PZ.drawSt(cls),frost:cls=>PZ.orb(cls,{}).keys[0][1],
   chainl:cls=>PZ.chain(cls,{}).keys[0][1],meteor:cls=>PZ.meteor(cls,{}).keys[0][1],pillar:cls=>PZ.pillar(cls,{}).keys[0][1],boom:cls=>PZ.sweep(cls,{}).keys[0][1],wave:cls=>PZ.sweep(cls,{}).keys[0][1]};
 function poseStart(id,T,o){const f=PZ[id];if(!f)return;if(id!=='whirl')T*=P.castF||1;/* v343: 시전시간이 줄어든 만큼 발사 동작도 짧게 */const p=Object.assign({id,T,t:T},o||{}),def=f(S.cls,p);if(!def)return;Object.assign(p,def);if(p.pre)p.tp0=p.tp;else p.tp0=0;P.pose=p}
@@ -3925,7 +3922,7 @@ function poseTick(u,dt){const p=P.pose;if(!p)return;p.t-=dt;
   if(p.relax){const w=EZ.es(Math.max(0,p.t/p.T));applyState(u,p.last,w);if(p.t<=0)P.pose=null;return}
   const k0=Math.max(0,1-p.t/p.T),k=p.tp0+(1-p.tp0)*k0,w=p.tp>0&&!p.pre?EZ.es(Math.min(1,k/p.tp)):1,s=poseState(p,k);applyState(u,s,w);
   if(p.t<=0){if(p.hold)P.pose={relax:1,T:.4,t:.4,last:s};else P.pose=null}}
-let hero=makeHero(S.cls||'warrior');scene.add(hero);skwAttach(hero);
+REST.musa=REST.warrior;let hero=makeHero(S.cls||'warrior');scene.add(hero);skwAttach(hero);
 const P={pos:new THREE.Vector3(),face:0,hp:0,mhp:0,mp:0,mmp:0,inv:0,swing:0,swingDir:1,spin:0,cd:{atk:0,s1:0,s2:0,pot:0,mv:0},regen:0,mpWarn:0,mv:null,skSwing:false};
 function refreshMax(){applyGearLook();nsxUpd();try{dpsCT=0}catch(_){}P.mhp=heroMax();P.hp=Math.min(P.hp,P.mhp);P.mmp=heroMp();P.mp=Math.min(P.mp,P.mmp)}
 P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;
@@ -5707,7 +5704,7 @@ function basicFire(){
     for(const e of [...enemies]){const dx=e.pos.x-P.pos.x,dz=e.pos.z-P.pos.z,d=Math.hypot(dx,dz);
       if(d<2.6+e.r&&(dx*fx_+dz*fz)/(d||1)>Math.cos(1.0)){hitSpark(e.pos,0xfff0d0,0xff8a30,4);hurt(e,baseDmg());n++}}
     /* 전사: 베기가 적중하면 적 1명당 마나 2 회복 (한 번에 최대 8) */
-    if(S.cls==='warrior'&&n)P.mp=Math.min(P.mmp,P.mp+Math.min(8,n*2));
+    if(bc(S.cls)==='warrior'&&n)P.mp=Math.min(P.mmp,P.mp+Math.min(8,n*2));
   }else if(b==='arrow'){
     aim(16);setCd(.45*cdMul());P.swing=.12;poseStart('shot',.5,{pre:P.castPre});shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0});
   }else{
@@ -5715,7 +5712,7 @@ function basicFire(){
   }
 }
 /* ================= v172 신규 주력 스킬 3종 (초안) =================
-   전사 「검기」(wave)      : 검을 휘둘러 초승달 검기를 앞으로 날림 — 길을 따라 적을 모두 벰
+   무사 「매화참」(wave, 구 전사 검기)      : 검을 휘둘러 초승달 검기를 앞으로 날림 — 길을 따라 적을 모두 벰
    궁수 「폭발 사격」(boom) : 화살이 바로 앞 짧은 거리에 꽂히며 크게 폭발 — 2차 「연발 폭격」으로 최대 4발
    마법사 「사술 폭발」(pillar): 적의 자리에 긴 사술 기둥이 내리꽂히며 폭발 — 2차 「연쇄 작렬」로 폭발이 근처 적에게 번짐 */
 const PAL_WAVE={c:[0xffffff,0xf04a50,0x4a0810],core:[0xffffff,0xffd4d6,0xf04a50],ring:0xff8890,fl:0xf05058,st:[0xffffff,0xff2a3a],sp:[0xffffff,0xff5a64],smoke:0,ember:0,fast:1}/* v645: 매화색 */,
@@ -5751,11 +5748,11 @@ const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const SK_NEW={
-  wave:{n:'검기',role:'다수 공격',tag:'wave',en:'Slash Wave · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
+  wave:{n:'매화참',role:'다수 공격',tag:'wave',en:'Plum Blossom Slash · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살을 쏘아 바로 앞 짧은 거리에 꽂히게 하고, 그 자리에서 크게 폭발시킵니다.'},
   pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
-for(const [c,k] of [['warrior','wave'],['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
+for(const [c,k] of [['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 Object.assign(GEMS,{
   wlen:{n:'참격 연장',t:'wave',c:'#ffc080',d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
   wecho:{n:'예리한 참격',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${Math.round(((1+.04*L)*(1+e.n*e.m)-1)*100)}%${L<10?'\n5단계·10단계에 피해가 크게 오름':''}`}},/* v648: 연속 참격 → 예리한 참격 */
@@ -6113,7 +6110,7 @@ function castSkill(slot){if(knAppr)return;/* v590: 다리를 건너는 동안 �
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
   const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
   const ct0=b.kind==='whirl'?0:Math.max(Math.min(CAST_MAX,CAST_K*b.cd),Math.min(CT_MIN,b.cd*.6));
-  P.wvClip=SK[id]&&SK[id].kind==='wave'?WV_PAT[wvSeq%WV_PAT.length].clip:null;/* v655 */if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct,T0:ct0};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
+  P.wvClip=SK[id]&&SK[id].kind==='wave'?WV_PAT[wvSeq%WV_PAT.length].clip:null;/* v655 */if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct,T0:ct0};P.skSwing=true;ringFx(P.pos,1.2,bc(S.cls)==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
   P.castF=castF(ct,ct0);try{castFire(slot,id)}finally{P.castF=1}}
 const CAST_K=.25,CAST_MAX=.6;
 /* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
@@ -6516,7 +6513,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v661';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v662';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6713,7 +6710,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
   /* v395: 배경 빛 스프라이트(dotTex) 삭제 — 모바일에서 배경에 색 점이 찍히던 원인 후보. 배경은 2D 캔버스 그라데이션으로 그리고 3D는 투명 배경으로 그려 위에 합성 */
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
-    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='mage')skFootFix(K,1);if(cls==='warrior')skB.back=skwBack(r);else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!SKC[cls].bl)skB.back=skwBack(r)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
   /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
@@ -6735,9 +6732,9 @@ function portFill(){const cards=[...document.querySelectorAll('#classSheet .card
   for(const b of cards){const k=b.dataset.c,K=SKN[k],want=K&&K.st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
     if(cur&&have===want)continue;if(!cur||have!==want){const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}requestAnimationFrame(portFill);return}
   portQ=0}
-function showClassSel(){for(const c in SKC)if(!SKN[c].st)skwLoad(c);
+function showClassSel(){for(const c in SKC)if(!SKN[c].st&&(testPick||!CLS[c].testOnly))skwLoad(c);
   let h=`<div><div class="chap">Ember Sanctum</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg">`;
-  for(const k in CLS){const c=CLS[k];h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
+  for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
   for(const b of document.querySelectorAll('#classSheet .card.cls')){const k=b.dataset.c,cv=portCv[k];if(cv&&portOk[k])b.querySelector('.badge').replaceWith(cv)}/* 이미 그려 둔 초상화는 바로 끼움 */
@@ -6794,7 +6791,7 @@ $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
-const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==S.cls){it.wc=S.cls;it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
+const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
 function startGame(cls,main,skip){
   inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
@@ -7263,7 +7260,7 @@ function ivCard(it,role,other){
   if(sp)spl=`<div class="ivl"><span class="spb">특수</span><span class="spt">${optLine(sp,L,it.slot)}</span>${role==='sel'&&osp?(osp.k===sp.k?(()=>{const x=sp.v-osp.v;return x?`<span class="d ${x>0?'good':'bad'}">${x>0?'▲':'▼'} ${Math.abs(x)}</span>`:'<span class="d same">=</span>'})():`<span class="d bad">기존 ★ 대체</span>`):''}</div>`;
   else if(role==='sel'&&osp)spl=`<div class="ivl"><span class="spb off">특수</span><span style="color:var(--muted)">없음</span><span class="d bad">▼ ${OPT[osp.k].n} ${OPT[osp.k].f(osp.v)}</span></div><div class="ivhint">전승사에서 지금 장비의 특수 능력치를 옮길 수 있습니다</div>`;
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
-    <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==S.cls?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
+    <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
 function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()){const r=pwGain(it),b=pwNow(),g=r.g*100,c=Math.abs(g)<.1?'same':g>0?'good':'bad',dd=r.w?(r.w.d/b.d-1)*100:0,de=r.w?(r.w.e/b.e-1)*100:0,f=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(1)}%`;
     return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 전투력</span><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>DPS ${f(dd)} · 버티기 ${f(de)}</small></div>
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
@@ -7365,7 +7362,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.i&&lockMode){const it=S.inv.find(x=>x.id===+b.dataset.i);if(it){it.lock=!it.lock;save()}renderInv();return}
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','gloves','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:kSlot(k)}renderInv();return}
-  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
+  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
@@ -8021,7 +8018,7 @@ function pushOut(p,r){
 }
 /* ================= 구르기 (v122) =================
    전사·궁수·마법사 공통. 선딜레이 없이 즉시, 쿨타임 2.5초(레벨·재사용 감소 무관), 구르는 동안 무적. */
-const MV={warrior:{n:'구르기',c:0xffc08a},archer:{n:'구르기',c:0xb8f07a},mage:{n:'구르기',c:0xa08aff}},MV_DIST=6,MV_GO=.4;
+const MV={musa:{n:'구르기',c:0xff8a94},warrior:{n:'구르기',c:0xffc08a},archer:{n:'구르기',c:0xb8f07a},mage:{n:'구르기',c:0xa08aff}},MV_DIST=6,MV_GO=.4;
 const mvCd=()=>2.5;
 function moveDir(){let mx=input.x,mz=input.z;
   if(input.keys.KeyW||input.keys.ArrowUp)mz=-1;if(input.keys.KeyS||input.keys.ArrowDown)mz=1;
@@ -8097,7 +8094,7 @@ function update(dt){packTick();
   if(hero.userData.blade){const on=P.spin>0||P.swing>0,bm=hero.userData.blade.material;bm.emissive.setHex(on?(P.spin>0&&P.spinFire?0xff6a20:0x6a8ad0):(hero.userData.bladeBase||0x221a10))}
   heroAnim(dt,ml>.05&&!P.mv&&!P.cast);
   P.slam=(P.slam||0)-dt;
-  if(S.cls==='warrior'){const u=hero.userData;
+  if(bc(S.cls)==='warrior'){const u=hero.userData;
     if(P.slam>0){/* v131 대지 분쇄: (시전 없이 쓰면 먼저 들어 올림) → 수직 내려꽂기 → 잠깐 버팀 → 복귀 */
       const T=P.slamT||.42,el=T-P.slam,pre=P.slamK>0,up=pre?0:.18,pl=.075,hold=.16,rec=T-up-pl-hold;
       if(el<up)qPose(u,1,0,sm(el/up));
@@ -8112,10 +8109,10 @@ function update(dt){packTick();
     }
   if(P.cast){const u=hero.userData,k=1-P.cast.t/P.cast.T,id=P.cast.id;/* v131 시전 자세 세분화: 예비 동작(살짝 웅크림) → 끌어올리기(가속·감속) → 정점에서 버티며 떨림 · v234: 기술별 예비 자세(WIND) */
     const a1=sm(Math.min(1,k/.28)),a2=sm(clamp((k-.18)/.62,0,1)),hold=k>.8?(k-.8)/.2:0,tr=hold?Math.sin(time*55)*.025*hold:0,dip=a1*(1-a2);
-    if(S.cls==='warrior'&&id==='quake'){piv.rotation.y=0;qPose(u,1,0,a2,dip);piv.rotation.x+=tr;P.qRest=1}
+    if(bc(S.cls)==='warrior'&&id==='quake'){piv.rotation.y=0;qPose(u,1,0,a2,dip);piv.rotation.x+=tr;P.qRest=1}
     else if(S.cls==='archer'&&id==='rain'){const arm=piv.children[0];u.armL.rotation.x=-1.3-.25*dip-1.0*a2+tr;arm.rotation.x=-.5+.3*dip-1.9*a2;u.body.rotation.x=.1*dip-.3*a2;u.body.position.y=-.06*dip+.03*a2;u.legL.rotation.x=-.25*a2;u.legR.rotation.x=.2*a2}
     else{const W=WIND[id]||WIND.atk,wa=id==='atk'?sm(k):a2,st=W(S.cls);applyState(u,st,wa);u.body.rotation.x+=.12*dip;u.body.position.y-=.08*dip;u.legL.rotation.x-=.15*dip;u.legR.rotation.x+=.1*dip;
-      if(S.cls==='archer')u.armR.rotation.x+=tr;else if(S.cls==='warrior')piv.rotation.x+=tr;else u.armL.rotation.x+=tr}
+      if(S.cls==='archer')u.armR.rotation.x+=tr;else if(bc(S.cls)==='warrior')piv.rotation.x+=tr;else u.armL.rotation.x+=tr}
     if(id!=='atk'&&Math.random()<dt*30*QM())emit(PADD,{x:P.pos.x+rnd(-.5,.5),y:rnd(.2,1.6),z:P.pos.z+rnd(-.5,.5),vy:rnd(.5,1.6),life:.3,s0:.3,s1:.05,c0:0xffe0a8,c1:0x8a4a20,a:.7,tex:1})}
   else if(P.pose&&!(P.slam>0)&&!(P.sky>0))poseTick(hero.userData,dt);else if(P.pose&&(P.slam>0||P.sky>0))P.pose=null;
   skwTick(dt);
