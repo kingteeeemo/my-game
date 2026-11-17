@@ -742,7 +742,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 /* v614 옵션 조율 — 아래 서랍: 고르기 전엔 크게 올라와 있고, 고르면 내려가며 조율 화면 */
 .sheet.rrmode{position:relative;height:88%;overflow:hidden;gap:10px;padding-bottom:0}.scrim>.sheet.rrmode{height:calc(100% - 20px);max-height:760px}
 .rrmode .rrmain{flex:0 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:0 -4px;padding:0 4px}.rrmode .rrfoot{position:static;margin:0;padding:0;background:none}.rrmode .rrpk{flex:1 1 46px;min-height:46px}
-.rrempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:22px;gap:12px;text-align:center}.rrempty .slotx{width:78px;height:78px;border-radius:16px;border:2px solid rgba(232,220,196,.45);background:#111116;box-shadow:inset 0 0 0 6px #17171c,inset 0 0 0 7px rgba(232,220,196,.12)}.rrempty p{margin:0;color:#c9bfa9;font-size:13.5px;line-height:1.6}.rrempty small{color:#8a8577;font-size:11.5px}
+.rrempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 0 6px;gap:10px;text-align:center}.rrempty .slotx{width:78px;height:78px;border-radius:16px;border:2px solid rgba(232,220,196,.45);background:#111116;box-shadow:inset 0 0 0 6px #17171c,inset 0 0 0 7px rgba(232,220,196,.12)}.rrempty p{margin:0;color:#c9bfa9;font-size:13.5px;line-height:1.6}.rrempty small{color:#8a8577;font-size:11.5px}
 .rrdr{position:absolute;left:0;right:0;bottom:0;height:70%;display:flex;flex-direction:column;background:#1d1d23;border-top:1px solid rgba(232,220,196,.18);border-radius:18px 18px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.45);transform:translateY(calc(100% - var(--pk,46px)));transition:transform .32s cubic-bezier(.3,.8,.3,1);z-index:3}.rrdr.up{transform:none}.rrdr.drag{transition:none}
 .rrdh{touch-action:none;cursor:grab;flex:none;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;background:transparent;color:#a59f90;font:600 12px var(--ko);padding:0 16px}.rrdh i{width:38px;height:4px;border-radius:2px;background:#4a4840}.rrdh span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rrdh b{color:var(--ink)}
 .rrdl{flex:1;min-height:0;overflow-y:auto;padding:2px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}.rrdl .tag{color:#8a8577}.rrdl .tag em{font-style:normal;color:#5f5b52;margin-left:4px}
@@ -756,6 +756,11 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 #smith .rrfoot .goldbar{padding:0;border:0;background:none;justify-content:flex-start;gap:8px}#smith .rrfoot .goldbar span{font-size:12px;color:#8a8577}#smith .rrfoot .goldbar b{font-size:14px}.smbtns{display:flex;gap:8px}.smbtns .rrgo{flex:1}.smbtns .smau{flex:none;height:48px;padding:0 12px;border-radius:12px;border:1px solid rgba(232,220,196,.22);background:transparent;color:#a59f90;font:700 12px var(--ko);line-height:1.25}.smbtns .smau.on{border-color:#7fe07a;color:#7fe07a}
 .rrt .tile.emp{opacity:.4}@media (orientation:portrait){.rrmode .rln{height:41px}.rrmode .rrbag{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 6px}.rrmode .rrt span{font-size:10px}.rrmode .rrdl{gap:6px}.rrmode .rrdh{height:40px}}
 .smopts{display:flex;flex-direction:column;margin-top:2px;border-top:1px solid rgba(255,255,255,.06)}.smopts div{display:flex;align-items:center;gap:8px;height:34px;border-bottom:1px solid rgba(255,255,255,.04)}.smopts .tl{width:34px;flex:none;font:700 11px var(--ko);color:#8a8577}.smopts .n{flex:1;min-width:0;display:flex;align-items:center;gap:5px;font-size:13px;color:#c9bfa9;white-space:nowrap;overflow:hidden}.smopts em{font-style:normal;font-size:10px;color:#8a8577;border:1px solid #3a3833;border-radius:4px;padding:0 4px}.smopts i{font-style:normal;font-size:10px;color:#b06a5a}.smopts b{font:800 14px var(--en);font-stretch:87%;color:var(--ink)}
+.sm2{gap:4px;padding:12px 14px}.sm2 .smlv,.sm2 .smrate{display:flex;align-items:center;gap:8px;height:30px;margin:0}.sm2 .smlv small,.sm2 .smrate small{width:60px;flex:none;font-size:12px;color:#8a8577}.sm2 .smlv small+small{width:auto}
+.sm2 .smlv .cur,.sm2 .smlv .nx,.sm2 .smrate b{font:800 20px var(--en);font-stretch:87%;line-height:1}.sm2 .smlv .arr{font-size:13px;line-height:1}.sm2 .smpity{margin:2px 0 6px 68px;height:16px}.sm2 .smpity b{font-size:12px}.sm2 .pnote{margin-left:68px}
+.sm2 .smnm{margin:6px 0 2px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}.sm2 .smopts.smbase{padding-bottom:6px;margin-bottom:6px!important;border-bottom:1px solid rgba(232,220,196,.35)}.sm2 .smopts.smbase div{border-bottom:0}.sm2 .smopts:not(.smbase) b{color:#a59f90}.sm2 .smnm b{font-size:15px}.sm2 .smopts.smbase{border-top:0;margin:0}.sm2 .smopts .arr{color:#7fe07a;font-size:12px}.sm2 .smopts b.p{color:#7fe07a}.sm2 .smopts.smbase+.smopts{border-top:0;margin-top:0}
+.sm2 .smtop{display:flex;align-items:center;justify-content:space-between;gap:10px}.sm2 .smtop .smrate small{width:auto}.sm2 .smpity{margin:4px 0 6px;gap:8px;display:flex;align-items:center}.sm2 .smpity .pl{width:60px;flex:none;font-size:12px;color:#8a8577;white-space:nowrap;letter-spacing:-.02em}.sm2 .pnote{margin-left:68px}
+#smith .smhr{display:flex;align-items:center;gap:12px}#smith .smhr .goldbar{position:relative;top:auto;padding:0;margin:0;border:0;background:none;gap:0}#smith .smhr .goldbar b{font-size:14px;display:inline-flex;align-items:center;gap:5px}#smith .smhr .gdelta{position:absolute;right:0;top:100%}
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -5693,7 +5698,7 @@ const nsTile=(it,sel,src)=>`<button class="tile${sel?' sel':''}" data-pick="${sr
 let stashMulti=false,stashPicks=[],stashSide=null;
 function stashPick(src,id){if(stashSide&&stashSide!==src)stashPicks=[];stashSide=src;if(stashMulti){const i=stashPicks.indexOf(id);if(i<0)stashPicks.push(id);else stashPicks.splice(i,1)}else stashPicks=stashPicks[0]===id?[]:[id];if(!stashPicks.length)stashSide=null;renderStash()}
 function renderStash(){if(NS())return renderStash2();const d=stashD,sel=stashSel&&(stashSrc==='s'?d.items:S.inv).find(x=>x.id===stashSel);
-  let h=`<div class="shead"><div><div class="chap">Stash · 모든 캐릭터 공유</div><h2>창고</h2></div><button class="close" data-ns="close">닫기</button></div>
+  let h=`<div class="shead"><div><h2>창고</h2></div><button class="close" data-ns="close">닫기</button></div>
   <p class="hint">아이템을 누르고 「옮기기」를 누르면 가방 ↔ 창고로 옮깁니다. 다른 직업의 무기도 창고를 거쳐 그 직업 캐릭터에게 줄 수 있습니다.</p>
   <div class="ivcmp">${sel?ivCard(sel,'sel'):'<div class="ivc sel empty"><span class="ivlab">선택한 아이템</span></div>'}</div>
   <div class="btns"><button class="primary" data-ns="move" ${sel?'':'disabled'}>${stashSrc==='s'?'가방으로 옮기기':'창고로 옮기기'}</button><button class="ghost" data-ns="expand">창고 +5칸 <span class="gp">${fmtG(stashCost(d.cap))}G</span></button></div>
@@ -5704,7 +5709,7 @@ function renderStash2(){const d=stashD,side=stashSide,src=side==='s'?d.items:S.i
   const one=picks.length===1?src.find(x=>x.id===picks[0]):null,sd=stashSide;
   const tile=(it,s)=>{const on=picks.includes(it.id);return `<button class="tile${on?' sel':''}${sd&&sd!==s?' dim':''}" data-pick="${s},${it.id}" style="border-color:${NT_C[it.tier]||'#555'}">${ico(icoSlot(it.slot))}<small>${it.tier}티어</small>${on&&stashMulti?'<span class="chk">✓</span>':''}</button>`};
   const mv=!picks.length?'옮기기':`${picks.length}개 ${sd==='s'?'가방으로 빼내기':'창고에 넣기'}`;
-  let h=`<div class="shead"><div><div class="chap">Stash · 모든 캐릭터 공유</div><h2>창고</h2></div><div class="shbtn"><button class="ghost sx" data-ns="expand">+5칸 <span class="gp">${stashCost(d.cap)>=1e8?(stashCost(d.cap)/1e8).toLocaleString("ko-KR")+"억":fmtG(stashCost(d.cap))}G</span></button><button class="close" data-ns="close">닫기</button></div></div>
+  let h=`<div class="shead"><div><h2>창고</h2></div><div class="shbtn"><button class="ghost sx" data-ns="expand">+5칸 <span class="gp">${stashCost(d.cap)>=1e8?(stashCost(d.cap)/1e8).toLocaleString("ko-KR")+"억":fmtG(stashCost(d.cap))}G</span></button><button class="close" data-ns="close">닫기</button></div></div>
   <div class="rrwrap">${one?ivCard(one,'sel'):picks.length?`<div class="ivc sel"><span class="ivlab">선택한 아이템</span><b class="ivn">${picks.length}개 선택</b><span class="ivs">${sd==='s'?'가방으로 빼낼':'창고에 넣을'} 아이템</span></div>`:`<div class="ivc sel empty"><span class="ivlab">선택한 아이템</span><p class="hint" style="margin:4px 0 0">창고나 가방에서 아이템을 누르세요${stashMulti?' (여러 개 선택)':''}</p></div>`}</div>
   <div class="btns stb"><button class="ghost${stashMulti?' on':''}" data-ns="multi">${stashMulti?'✓ 선택 중':'선택'}</button><button class="primary" data-ns="move" ${picks.length?'':'disabled'}>${mv}</button></div>
   ${stashCurUI()}
@@ -5763,7 +5768,7 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=S.inv.filter(x=>x.ns),up=rrDrUp||!sel;
   const tl=(it,src)=>`<div class="rrt">${nsTile(it,it.id===rrSel,src)}<span>${SLOTN[it.slot]}${src==='e'&&enhL(nsItSlot(it))?` +${enhL(nsItSlot(it))}`:''}</span></div>`;
   const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
-  let h=`<div class="shead"><div><div class="chap" style="color:#8a8577">Craft · 조율사 카엘</div><h2>옵션 조율</h2></div><button class="close" data-ns="close">닫기</button></div>
+  let h=`<div class="shead"><div><h2>옵션 조율</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="rrmain">${sel?`<div class="rrwrap2">${rrCard(sel)}</div>`:`<div class="rrempty"><span class="slotx"></span><p>조율할 아이템을 ${matchMedia('(orientation:landscape)').matches?'오른쪽':'아래'}에서 고르세요<br><small>수치 조정 · 옵션 변환 · 티어 승급</small></p></div>`}</div>
   ${sel?`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${btn}</div>`:''}
   <div class="rrpk"></div>
@@ -5788,7 +5793,7 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
   for(let i=0;i<14;i++)wingTick(.1)}
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 999';
-  let h=`<div class="shead"><div><div class="chap">Tailor · ${npcName('heir')}</div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
+  let h=`<div class="shead"><div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
   for(const k of Object.keys(LOOKS)){const L=LOOKS[k],own=lookOwn(k),on=S.look===k,ok=lookCoin()>=(L.pr||0);
     h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':''}</div>
@@ -6244,7 +6249,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v619';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v620';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7115,7 +7120,7 @@ const spLegend=`<p class="hint" style="margin:0"><span class="spleg spb">특수<
 const goldBar=()=>`<div class="goldbar"><span>보유 골드</span><b id="shGold">${ci('g')} ${fmtG(S.gold)}</b>${goldFx?`<i class="gdelta" key="${goldFx.t}">−${fmtG(goldFx.v)} G</i>`:''}</div>`;
 function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
   const g=S.gold,l=gachaLv(),gp=gachaPrice(l),pot=shopKind==='pot';
-  let h=`<div class="shead"><div><div class="chap">${pot?'Potions · '+TOWN.shop:'Armory · '+TOWN.gear}</div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
+  let h=`<div class="shead"><div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
   if(pot){h+=`<div class="gems">`;
     if(NS()){nsPotInit();const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0;/* v507: 충전식 물약 — 상점에는 생명력·마나 물약(충전 횟수 확장)과 신속 물약만 */
       for(const k of ['hp','mp'])h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${NPOT[k].n} 물약<small>1회: 3초 동안 ${NPOT[k].n} ${Math.round(NPOT[k].p*100)}% 회복 · 충전 <b style="color:var(--ink)">${P.pch[k]}/${m}</b>회 · 몬스터 처치·보스 피해로 충전</small></span>
@@ -7320,7 +7325,7 @@ function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 쿨타임 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다(기본 공격·회전 베기). 그 외 스킬은 쿨타임 ${(s=>s.toFixed(2))(cdCurve(CD_U*(1-hasteP()*GMAX),x))}초(가속 10단계 기준, 0.25초에 수렴) — 쿨타임이 길어진 만큼 피해가 올라 DPS는 같습니다.</p>`}/* v149 */
 function renderSmith(){if(NS())return renderSmithNS();
-  let h=`<div class="shead"><div><div class="chap">Blacksmith · ${TOWN.smith}</div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
+  let h=`<div class="shead"><div><h2>${smithSel?`${SLOTN[smithSel]} 강화`:'대장장이'}</h2></div><button class="close" id="smClose">닫기</button></div>${goldBar()}`;
   if(!smithSel){
     h+=`<p class="hint">장비가 아니라 <b style="color:var(--ink)">부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다. 강화할 부위를 고르세요.</p><div class="smgrid">`;
     for(const k of EQS){const L=enhL(k),it=S.eq[k];
@@ -7331,7 +7336,7 @@ function renderSmith(){if(NS())return renderSmithNS();
     const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
     const tk=S.tickets||0,need=tkNeed(L,k);if(tk<need)useTk=false;const tkOn=useTk&&tk>=need,cc=tkOn?tkGold(L,k):c;
     const rc=it?(it.ns?NT_C[it.tier]:RAR[it.rar].c):'#555',
-      lv=`<div class="smlv"><small>현재</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
+      lv=`<div class="smlv"><small>강화</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
       info=it?(it.ns?(bl=>`<div class="smcmp"><span>${nName(bl.k)} (기본옵)</span><b>${nFmt(bl.k,bl.v*nsEM(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEM(L+1))}</b>`}</div><div class="smcmp"><span>기본옵 배율</span><b>×${nsEM(L).toFixed(2)}</b>${max?'':`<span class="arr">→</span><b class="p">×${nsEM(L+1).toFixed(2)}</b>`}</div>`)(it.lines.find(l=>l.b)||it.lines[0])+itemList(it,L):`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*eMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*eMB(L+1,k))}</b>`}</div>${itemList(it,L)}`):'',
       bonus='',
@@ -7345,8 +7350,10 @@ function renderSmith(){if(NS())return renderSmithNS();
     else h+=`<div class="smbig" style="--rc:${rc}">${res}${lv}${rateBig}${nm}${info}<div class="smstats">${bonus}${rate}</div>${hint}</div>${btns}`}
   {const sh=$('smithSheet'),top=sh.scrollTop,same=sh.dataset.sel===(smithSel||'');sh.dataset.sel=smithSel||'';sh.innerHTML=h;if(same)sh.scrollTop=top}goldFx=null}
 /* v615: 서랍 — 접힌 높이는 조율 화면 아래 남는 공간만큼(최소 46px), 손잡이를 끌어서 열고 닫기 */
-function drFit(sh){const dr=sh.querySelector('.rrdr'),pk=sh.querySelector('.rrpk');if(!dr||!pk||getComputedStyle(dr).position!=='absolute')return;
-  const p=Math.max(40,pk.offsetHeight),H=Math.max(sh.clientHeight*.72,p+80);dr.style.height=H+'px';dr.style.setProperty('--pk',p+'px')}
+function drFit(sh){const dr=sh.querySelector('.rrdr'),pk=sh.querySelector('.rrpk'),mn=sh.querySelector('.rrmain');if(!dr||!pk)return;if(!sh.clientHeight){requestAnimationFrame(()=>drFit(sh));return}if(getComputedStyle(dr).position!=='absolute')return;
+  /* v618: 고르기 전엔 안내 바로 아래까지 크게, 고른 뒤 펼치면 72% — 크기를 맞추는 동안은 애니메이션 없이(탭을 바꿀 때 서랍이 다시 떠오르지 않게) */
+  const p=Math.max(40,pk.offsetHeight),free=!sh.querySelector('.rrempty')?0:sh.clientHeight-(mn.offsetTop+mn.offsetHeight)-10,H=free>200?(sh._drH=free):Math.max(sh._drH||sh.clientHeight*.65,p+80);
+  dr.classList.add('drag');dr.style.height=H+'px';dr.style.setProperty('--pk',p+'px');void dr.offsetHeight;dr.classList.remove('drag')}
 let drDrag=null,drNoClick=0;
 document.addEventListener('pointerdown',e=>{const h=e.target.closest('.rrdh');if(!h)return;const dr=h.closest('.rrdr');if(getComputedStyle(dr).position!=='absolute')return;
   const H=dr.offsetHeight,pk=parseFloat(dr.style.getPropertyValue('--pk'))||46,lo=H-pk,b=dr.classList.contains('up')?0:lo;drDrag={dr,y:e.clientY,b,lo,t:b,moved:0,v:0,ly:e.clientY,lt:performance.now()};try{h.setPointerCapture(e.pointerId)}catch(_){}});
@@ -7364,15 +7371,15 @@ function renderSmithNS(){const sh=$('smithSheet'),k=smithSel,up=smDrUp||!k,old=s
   else{const L=enhL(k),it=S.eq[k],rt=enhRate(L),max=L>=enhMax(),c=enhCost(L,k),pf=pityN(k)>=pityCap(L),rc=it?NT_C[it.tier]:'#555',bl=it&&(it.lines.find(l=>l.b)||it.lines[0]);
     const res=smithRes&&!smithRes.cine?`<div class="smres ${smithRes.ok?'ok':'no'}" key="${smithRes.t}">${smithRes.ok?`<b>강화 성공!</b><span>${SLOTN[k]} +${smithRes.L}</span>`:`<b>강화 실패</b><span>+${L} 유지 · 골드 ${fmtG(smithRes.c)} 소모</span>`}</div>`:'';
     main=`<div class="smbig sm2" style="--rc:${rc}">${res}
-      <div class="smlv"><small>현재</small><b class="cur">+${L}</b>${max?'<small>최대 단계</small>':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>
-      ${max?'':`<div class="smrate"><small>성공 확률</small><b>${pf?'100':+(rt*100).toFixed(1)}%</b>${pf?'<small>(천장)</small>':''}</div>
-      <div class="smpity${pf?' full':''}"><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pf?'<small class="pnote">이번 강화 확정 성공</small>':''}`}
+      <div class="smtop"><div class="smlv"><small>현재</small><b class="cur">+${L}</b>${max?'<small>최대 단계</small>':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>
+      ${max?'':`<div class="smrate"><small>성공 확률</small><b>${pf?'100':+(rt*100).toFixed(1)}%</b></div>`}</div>
+      ${max?'':`<div class="smpity${pf?' full':''}"><small class="pl">강화 포인트</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pf?'<small class="pnote">이번 강화 확정 성공</small>':''}`}
       <div class="smnm"><b>${it?it.name:`${SLOTN[k]} 없음`}</b>${it?`<span style="color:${rc}">${it.tier}티어</span>`:''}</div>
-      ${bl?`<div class="smcmp"><span>${nName(bl.k)}<em>기본</em></span><b>${nFmt(bl.k,bl.v*nsEM(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEM(L+1))}</b>`}</div>`:'<small class="smnote">장비가 없어도 강화 단계는 부위에 남습니다</small>'}
+      ${bl?`<div class="smopts smbase"><div><span class="tl">${bl.t||it.tier}티어</span><span class="n"><em>기본</em>${nName(bl.k)}</span><b>${nFmt(bl.k,bl.v*nsEM(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEM(L+1))}</b>`}</div></div>`:'<small class="smnote">장비가 없어도 강화 단계는 부위에 남습니다</small>'}
       ${it?`<div class="smopts">${it.lines.filter(l=>l!==bl).map(l=>`<div><span class="tl">${l.t||it.tier}티어</span><span class="n">${l.o?'':'<em>접미</em>'}${ivName(l.k,it.slot,it)}${nsDeadK(l.k)?'<i>효과 없음</i>':''}</span><b>${nFmt(l.k,l.v)}</b></div>`).join('')}</div>`:''}${S.test?testSmithPanel(k,L,it):''}</div>`;
-    foot=`<div class="rrfoot">${goldBar().replace('<span>보유 골드</span>','')}<div class="smbtns">${max?'':`<button class="smau${smAuto?' on':''}" id="smAuto">자동<br>${smAuto?`ON · ${smAutoN}회`:'OFF'}</button>`}<button class="rrgo" id="smGo" ${!max&&S.gold>=c&&!smAuto?'':'disabled'}>${max?'최대 단계':`${ci('g')}<b>${fmtG(c)}</b>강화`}</button></div></div>`}
+    foot=`<div class="rrfoot"><div class="smbtns">${max?'':`<button class="smau${smAuto?' on':''}" id="smAuto">자동<br>${smAuto?`ON · ${smAutoN}회`:'OFF'}</button>`}<button class="rrgo" id="smGo" ${!max&&S.gold>=c&&!smAuto?'':'disabled'}>${max?'최대 단계':`${ci('g')}<b>${fmtG(c)}</b>강화`}</button></div></div>`}
   const tiles=EQS.map(q=>{const it=S.eq[q],L=enhL(q);return `<div class="rrt"><button class="tile${q===k?' sel':''}${it?'':' emp'}" data-sel="${q}" style="border-color:${it?NT_C[it.tier]:'#3a3833'}">${ico(icoSlot(kSlot(q)))}<small>+${L}</small></button><span>${SLOTN[q]}</span></div>`}).join('');
-  const h=`<div class="shead"><div><div class="chap" style="color:#8a8577">Blacksmith · ${TOWN.smith}</div><h2>강화</h2></div><button class="close" id="smClose">닫기</button></div>
+  const h=`<div class="shead"><div><h2>강화</h2></div><div class="smhr">${goldBar().replace('<span>보유 골드</span>','')}<button class="close" id="smClose">닫기</button></div></div>
   <div class="rrmain">${main}</div>${foot}<div class="rrpk"></div>
   <div class="rrdr${wasUp?' up':''}"><button class="rrdh" id="smDrw"><i></i><span>${k?(up?'부위 선택 · 탭해서 닫기':`<b>${SLOTN[k]} +${enhL(k)}</b> · 다른 부위 고르기`):'부위 선택'}</span></button>
     <div class="rrdl"><div class="tag">장착 중</div><div class="bag rrbag">${tiles}</div><p class="rrnone" style="margin-top:6px">강화는 장비가 아니라 부위에 남습니다. 장비를 바꿔도 강화 단계는 그대로예요.</p></div></div>`;
@@ -7455,7 +7462,7 @@ function heirCard(it,attr,note,ref){const sp=spOf(it),eq=S.eq[it.slot]===it;
     <span class="hstat"><span><small>아이템 레벨</small><b>iLv ${it.ilvl}</b>${ref?hDiff(it.ilvl,ref.ilvl):''}</span><span><small>${baseName(it.slot)}</small><b>${Math.round(it.base)}</b>${ref?hDiff(it.base,ref.base):''}</span></span>
     ${sp?`<span class="hsp">★ ${OPT[sp.k].n} ${OPT[sp.k].f(sp.v)}</span>`:'<span class="hsp off">특수 능력치 없음</span>'}${note||''}</button>`}
 function renderHeir(){const scr=S.scrolls||[];if(heirScr>=scr.length)heirScr=-1;
-  const head=(en,t,x)=>`<div class="shead"><div><div class="chap">${en} · ${TOWN.heir}</div><h2>${t}</h2></div><div class="hdbtns">${x||''}<button class="close" id="hrClose">닫기</button></div></div>${goldBar()}`;
+  const head=(en,t,x)=>`<div class="shead"><div><h2>${t}</h2></div><div class="hdbtns">${x||''}<button class="close" id="hrClose">닫기</button></div></div>${goldBar()}`;
   const msg=heirMsg?`<p class="hint" style="color:#5ae0d0;margin:0">${heirMsg}</p>`:'';
   let h;
   if(!heirMode){const nsp=allItems().filter(spOf).length,nadv=scr.filter(x=>x.v>=10).length;
