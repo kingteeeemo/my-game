@@ -58,9 +58,9 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2tab.on .iv2menu button{color:var(--ink)}.iv2menu button.on{background:#2e2e3a;color:var(--ember)}.iv2menu button i{font-style:normal;color:var(--muted);font-size:11px}
 .iv2bag{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .iv2bag::-webkit-scrollbar{display:none}.iv2bag{padding:3px}.iv2.l .iv2tab button{padding:7px 9px}.iv2.l .iv2tab .dd{padding:7px 8px 7px 0}.iv2.l .iv2tabs{gap:5px}
-.iv2bag .bag.lkmode{outline:0}.iv2bag .bag{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 8px}
+.iv2bag .bag.lkmode{outline:0}.iv2bag .bag{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px 16px}/* v639: 칸 간격 2배 */
 .iv2it{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;border:0;background:transparent;padding:0;color:var(--ink);font:inherit}
-.iv2it .tile{width:100%}
+.iv2it .tile{width:90%}
 .iv2it .inm{font-size:10.5px;line-height:1.25;color:#d8d0c0;text-align:center;width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:keep-all}
 .iv2it .tile .lv{position:absolute;left:3px;top:2px;font:800 9.5px var(--en);font-stretch:87%;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:0 4px}
 .iv2foot{flex:none;display:flex;align-items:center;gap:6px;flex-wrap:nowrap}.iv2foot .cnt,.iv2foot button{white-space:nowrap}
@@ -786,6 +786,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .tile.emp[style*="--tc"],.tile.dim[style*="--tc"]{box-shadow:none}
 .iv2slot:not(.empty){background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--rc) 62%,#15151a) 0%,color-mix(in srgb,var(--rc) 30%,#15151a) 48%,color-mix(in srgb,var(--rc) 10%,#141418) 100%);box-shadow:0 0 10px color-mix(in srgb,var(--rc) 35%,transparent),inset 0 0 12px color-mix(in srgb,var(--rc) 40%,transparent)}
 /* v639: 아이템 칸 배경을 티어 색으로 — 테두리만이 아니라 칸 전체가 은은하게 물들어 티어가 한눈에 */
+@media (orientation:portrait){.rrmode .rrbag{gap:16px 12px}}.rrt .tile{width:90%}/* v639: 조율·대장장이 서랍 칸 간격 2배 */
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -5793,6 +5794,8 @@ const stashCost=cap=>1e8*Math.pow(2,(cap-30)/5);
 function nsSheet(){let el=$('nsSheet');if(!el){el=document.createElement('div');el.className='scrim';el.id='nsSheet';el.hidden=true;el.innerHTML='<div class="sheet" id="nsBody"></div>';document.body.appendChild(el);
   el.addEventListener('click',e=>{if(e.target.id==='nsSheet')nsClose();const b=e.target.closest('button');if(b)nsClick(b)})}return el}
 function nsClose(){stashOpen=false;rrOpen=false;nsKind=null;const el=$('nsSheet');if(el)el.hidden=true;const bd=$('nsBody');if(bd)bd.classList.remove('rrmode')}
+/* v639: 가방은 티어가 높은 순(1티어부터) → 부위 순 → 새로 얻은 순 */
+const invSort=a=>[...a].sort((x,y)=>((x.ns?x.tier:9)-(y.ns?y.tier:9))||(EQS.indexOf(x.slot)-EQS.indexOf(y.slot))||((y.id||0)-(x.id||0)));
 const nsTile=(it,sel,src)=>`<button class="tile${sel?' sel':''}" data-pick="${src},${it.id}" style="border-color:${it.ns?NT_C[it.tier]:RAR[it.rar].c};--tc:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot,it))}<small>${it.ns?it.tier+'티어':'iLv '+it.ilvl}</small></button>`;
 /* v507: 창고 — 넣기(가방→창고) ⇄ 빼내기(창고→가방) 전환, 「선택」을 켜면 여러 개 골라 한 번에 옮김 */
 let stashMulti=false,stashPicks=[],stashSide=null;
@@ -5865,7 +5868,7 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   else if(rrTab==='cv'){const pool=ln&&!ln.b?NSLOT[sel.slot][ln.o?'o':'x'].filter(k=>!sel.lines.some(x=>x.k===k)):[],c=convCost(lt),ok=ln&&!ln.b&&pool.length&&(T||(S.rr||0)>=c);
     ct=ln&&!ln.b?(pool.length?`<b>${ivName(ln.k,sel.slot,sel)}</b>를 다른 옵션으로 바꿉니다 · ${lt}티어 유지`:'바꿀 수 있는 다른 옵션이 없습니다'):'바꿀 줄을 고르세요';btn=`<button class="rrgo" data-ns="conv" ${ok?'':'disabled'}>${ci('r')}<b>${ln&&!ln.b?c:'—'}</b>옵션 변환</button>`}
   else{const can=ln&&!ln.b&&lt>sel.tier,ok=can&&(T||(S.seal||0)>=SEAL_COST);ct=can?`<b>${ivName(ln.k,sel.slot,sel)}</b> · ${lt}티어 → <b>${lt-1}티어</b>`:'올릴 줄을 고르세요';btn=`<button class="rrgo" data-ns="up" ${ok?'':'disabled'}>${ci('s')}<b>${SEAL_COST}</b>티어 승급</button>`}
-  const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=S.inv.filter(x=>x.ns),up=rrDrUp||!sel;
+  const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=invSort(S.inv.filter(x=>x.ns)),up=rrDrUp||!sel;
   const tl=(it,src)=>`<div class="rrt">${nsTile(it,it.id===rrSel,src)}<span>${SLOTN[it.slot]}${src==='e'&&enhL(nsItSlot(it))?` +${enhL(nsItSlot(it))}`:''}</span></div>`;
   const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
   let h=`<div class="shead"><div><h2>옵션 조율</h2></div><button class="close" data-ns="close">닫기</button></div>
@@ -7140,7 +7143,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
   const tabs=`<div class="iv2tabs">${tab('weapon','무기')}${tab('armor','방어구',1)}${tab('acc','장신구',1)}${tab('etc','기타')}<button id="iLockMode" class="lkm${lockMode?' on':''}">${LKI()}</button></div>`;
   let bag=`<div class="bag${lockMode?' lkmode':''}">`;
   if(invFilter==='etc'){const L=etcList();for(const e of L)bag+=e.pot?`<div class="iv2it"><div class="tile etc ${e.pot==='hp'?'ph':'mpot'}" style="border-color:${e.c};--tc:${e.c}"><span class="pot2">${potFlask(1)}</span></div><span class="inm">${e.n}</span></div>`:`<div class="iv2it"><div class="tile etc" style="border-color:${e.c};--tc:${e.c}">${e.h||ico(e.i)}<small style="color:${e.c}">${e.kt!=null?e.kt:'×'+e.k}</small></div><span class="inm">${e.n}</span></div>`;if(!L.length)bag+=`<div class="iv2empty">기타 아이템이 없습니다</div>`}
-  else{const shown=S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x));
+  else{const shown=invSort(S.inv.filter(x=>FG[invFilter].includes(x.slot)&&subOk(x)));
     for(const it of shown){const up=isBetter(it,eqCur(it)),c=it.ns?NT_C[it.tier]:RAR[it.rar].c;
       bag+=`<button class="iv2it" data-i="${it.id}"><span class="tile${invSel===it.id?' sel':''}${it.lock?' locked':''}" style="border-color:${c};--tc:${c}">${up?'<span class="up">▲</span>':''}${spOf(it)?'<span class="spk">★</span>':''}${it.lock?'<span class="lk">'+LKI()+'</span>':''}<span class="lv">${it.ns?it.tier+'T':it.ilvl}</span>${ico(icoSlot(it.slot,it))}</span><span class="inm" style="color:${c}">${it.name}</span></button>`}
     if(!shown.length)bag+=`<div class="iv2empty">${invSub?SLOTN[invSub]:({weapon:'무기',armor:'방어구',acc:'장신구'})[invFilter]}이(가) 가방에 없습니다</div>`}
