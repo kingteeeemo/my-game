@@ -3366,7 +3366,10 @@ const NM=(()=>{
     return M_}
   return {hero,mob,tex,flatten}})();
 
-function makeHero(cls){return NM.hero(cls)}
+function makeHero(cls){if(cls==='warrior')skBlossom(!!(typeof S!=='undefined'&&S&&S.test));return NM.hero(cls)}
+/* v658: 새 전사 모델(매화 검객) — 테스트 캐릭터에서만 사용. 전사 뼈대에 직접 리깅해 기존 전사 동작을 그대로 씀 */
+const SKC_BL={file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:2.4,bl:1};let SKC_W=null;
+function skBlossom(on){if(!SKC_W)SKC_W=SKC.warrior;if(on===!!SKC.warrior.bl)return;SKC.warrior=on?SKC_BL:SKC_W;delete SKN.warrior;skMk('warrior');if(typeof portOk!=='undefined')portOk.warrior=0}
 /* v330: 전사 3D 모델 — AI로 만든 모델 + Mixamo 뼈대·동작(models/warrior.glb). 불러오기 전·실패 시엔 기존 절차적 모델 그대로.
    기존 절차적 몸체(u.body)는 숨긴 채 계속 움직여 기존 코드(칼끝 위치·자세 등)가 그대로 동작하게 하고, 보이는 건 새 모델 */
 /* ===== v330~v337 스킨 3D 캐릭터(전사·마법사) — AI 생성 모델 + Mixamo 뼈대. 절차적 몸(u.body)은 숨기고 애니메이션만 유지해 기존 코드가 그대로 돌아가게 함 ===== */
@@ -3375,14 +3378,14 @@ const SKN={};function skMk(cls){return SKN[cls]||(SKN[cls]={cls,st:0,root:null,m
 const SKW=skMk('warrior');skMk('mage');skMk('archer');/* SKW: 전사 상태(기존 이름 유지) */
 function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
   new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(K.S);let sw=null;
-    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9);/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(C.col||(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9));/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
       if(mn==='mage_eye'){/* v339: 두건 속 눈 — 푸른 점광 */o.material.emissiveIntensity=3;o.castShadow=false;const g=new THREE.Sprite(glowMat(0x8ad8ff));g.scale.setScalar(.055);o.add(g);o.position.z=.103;/* v530: 눈을 두건 안쪽 벽에서 검은 얼굴 앞면으로 당김 */if(!o.parent.userData.face){/* v530: 두건 속 검은 얼굴 — 옆에서 봐도 속이 비어 보이지 않게 */const f=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:0x020203}));f.scale.set(.088,.105,.078);f.position.set(0,.05,.02);f.frustumCulled=false;o.parent.userData.face=f;K.faceAdd=[o.parent,f]}}
       if(mn==='mage_gem'){o.material=o.material.clone();K.gemM=o.material}else if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone)){o.material=o.material.clone();K.swM=o.material;sw=o}}});
     if(K.faceAdd){K.faceAdd[0].add(K.faceAdd[1]);K.faceAdd=null}if(cls==='mage')r.traverse(o=>{/* v531: 두건 안쪽 면(얼굴 쪽을 향한 면)을 검게 — 옆에서 봐도 두건 입구까지 검은 얼굴로 보이게 */if(!o.isSkinnedMesh||o.geometry.attributes.aIn)return;const bi=o.skeleton.bones.findIndex(b=>/Head$/.test(b.name));if(bi<0)return;
       const c=new THREE.Vector3(0,.05,.03).applyMatrix4(new THREE.Matrix4().copy(o.skeleton.boneInverses[bi]).invert()),P=o.geometry.attributes.position,N=o.geometry.attributes.normal,a=new Float32Array(P.count),d=new THREE.Vector3(),n=new THREE.Vector3();
       for(let i=0;i<P.count;i++){d.set(c.x-P.getX(i),(c.y-P.getY(i))*.85,c.z-P.getZ(i));const l=d.length();n.set(N.getX(i),N.getY(i),N.getZ(i));if(l<.2&&Math.abs(d.x)<.115&&P.getY(i)>c.y-.1&&d.dot(n)/l>.15)a[i]=1}
       o.geometry.setAttribute('aIn',new THREE.BufferAttribute(a,1));const ob=o.material.onBeforeCompile;
-      o.material.onBeforeCompile=(s,rr)=>{if(ob)ob(s,rr);s.vertexShader='attribute float aIn;varying float vIn;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvIn=aIn;');s.fragmentShader='varying float vIn;\n'+s.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\ngl_FragColor.rgb*=1.-smoothstep(.15,.7,vIn)*.97;')};o.material.needsUpdate=true});if(cls==='warrior'&&sw)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
+      o.material.onBeforeCompile=(s,rr)=>{if(ob)ob(s,rr);s.vertexShader='attribute float aIn;varying float vIn;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvIn=aIn;');s.fragmentShader='varying float vIn;\n'+s.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\ngl_FragColor.rgb*=1.-smoothstep(.15,.7,vIn)*.97;')};o.material.needsUpdate=true});if(cls==='warrior'&&sw&&!C.bl)swStraight(sw);/* v348 대검 칼자루 일직선 — v396: 함수로 분리(잿불 검귀도 사용) */
     if(sw&&!sw.parent.isBone&&C.wp.test(sw.parent.name))sw=sw.parent;/* v338: 지팡이가 몸통+보석 두 메시로 나뉘면 묶음(Group)을 지팡이로 */K.sw=sw;
     if(K.swM&&K.swM.emissiveMap){/* v332: 무기 등급 빛 — 무기 전체가 은은하게(균열·수정은 더 밝게) */const em=K.swM.emissiveMap,im=em.image;K.swCrack=em;
       try{const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';g2.fillStyle=`rgb(${C.lift},${C.lift},${C.lift})`;g2.fillRect(0,0,cv.width,cv.height);
@@ -3791,6 +3794,7 @@ function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;
   sw.quaternion.copy(qc).slerp(K.bowQ0,K.bowA)}
 function skaBack(K){const sw=K.sw;if(!sw||!K.bowBk)return null;const sv={par:sw.parent,p:sw.position.clone(),q:sw.quaternion.clone()};skaBow(K,'back',1);return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q)}}
 function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
+  if(K.cls==='warrior'&&!K.swCrack){/* v658: 매화 검객 대검(발광 맵 없음) — 검붉은 빛만 은은하게, 강화할수록 밝게 */const k=gemLv();m.emissive.setHex(0xe61833);m.emissiveIntensity=(.12+.35*k)*(1+.1*Math.sin(time*3.2));return}
   if(K.cls==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
   if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
   if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
@@ -3829,7 +3833,7 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(mage){const free=st==='roll'||st==='hit'||st==='die'||!!ASHC.lie;/* v621: 쓰러진 동안은 지팡이를 하늘로 세우지 않고 손에 쥔 그대로 */skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
-  if(K.swM){const on=K.cls==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:0xa8c0ff);else skwGear()}
+  if(K.swM){const on=K.cls==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:K.swCrack?0xa8c0ff:0xff3a4a);else skwGear()}
   if(mage&&K.gemM)skwGem(K,u.wRar||0,gemLv(),aim*.6)}
 /* 착용 장비 → 외형: 갑옷 등급 = 금속 테두리 색, 투구 = 투구/두건 표시, 무기 등급 = 날·수정 빛, 신발 = 신발 색 */
 function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar=eq.armor?eq.armor.rar:0,wr=eq.weapon?eq.weapon.rar:0;
@@ -6512,7 +6516,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v657';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v658';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
