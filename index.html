@@ -1516,7 +1516,7 @@ const RANK=[
 ];
 const RARE_PRE=['광폭한','교활한','단단한','재빠른','굶주린'],UNI_PRE=['피에 굶주린','저주받은','불멸의','잔혹한','고대의'];
 /* v621 위험도 20단계 — 1~4 · 5~9 · 10~14 · 15~19 · 20 다섯 구간(구간마다 지역·최고 아이템 티어). oT = 대응하는 옛 위험도(0~100), 골드·경험치·지역 효과는 옛 곡선을 이 값으로 따름 */
-const D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d>=15?3:d>=10?2:d>=5?1:0,D_BANDS=[[1,4],[5,9],[10,14],[15,19],[20,20]],dTop=d=>5-dBand(d),D_GATES=[4,9,14,19,20];
+const NS_ITEM_K=.0036,D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d>=15?3:d>=10?2:d>=5?1:0,D_BANDS=[[1,4],[5,9],[10,14],[15,19],[20,20]],dTop=d=>5-dBand(d),D_GATES=[4,9,14,19,20];
 /* 구울 체력(적정 DPS × 0.12) · 유니크 브루트 1타(감소 전) 목표 — 설계 문서 10장 표 */
 const D_GH=[781,1457,2857,5897,11520,17640,26280,37800,49320,55560,62640,70800,80160,90600,102240,116880,133680,153120,175440,201000],
   D_BR=[195,211,235,266,303,336,370,409,519,760,1053,1404,1809,2279,2764,3366,4094,4967,5982,7169];
@@ -1588,7 +1588,7 @@ const dropLvl=()=>Math.max(1,S.lv);/* v76: 드롭 아이템 레벨 = 내 레벨 
 const ENH_MAX0=Infinity,ENH_B=.06,ENH_O=.05;/* v44: 강화 단계 제한 없음 */
 const enhL=k=>(S.enh&&S.enh[k])||0;
 /* v603: 강화 비용 — 계정 최고 위험도의 골드 수입에 비례 × 1.15^단계 (9부위 15강 ≈ 위험도 20 변이 파밍 30시간 목표, 3단계에서 보정) */
-const nsEnhCost=L=>{const t=oT(Math.max(1,S.maxTier||S.tier||1));return Math.max(1,Math.round(30*egHp(t)*goldAdjT(t)/(egHp(0)*goldAdjT(0))*Math.pow(1.15,L)))};
+const nsEnhCost=L=>{const d=Math.max(1,S.maxTier||S.tier||1),v=.2727*runGold(d)*Math.pow(1.15,L),u=v>=1e6?1e4:v>=1e3?10:1;return Math.max(1,Math.round(v/u)*u)};/* v632: 1회 비용 = 0.2727 × 최고 위험도 한 판 기본 골드 × 1.15^단계 — 위험도 20 변이 전부 기준 9부위 15강 ≈ 10시간 골드(측정: 순수입 1,254억/시간), 16~20강은 약 100시간 */
 const enhCost=(L,k)=>NS()?nsEnhCost(L):Math.max(1,Math.round(20*Math.pow(1.418,L)*1.3*(L>=30&&L<40?1.15:1)));/* v444: 30→31 ~ 39→40 시도 비용 +15% *//* v411: 골드 1/10 *//* v372: 전 부위 강화 비용 동일 — 무기 기준(+30%)에 방어구·장신구를 맞춤 *//* v126: 무기 강화 비용 전 구간 +30% · v150: 단계당 상승률 38% → 41.8%(10% 상향) · v151에서 25강 이후 +5%를 시도했다가 v152에서 되돌림 */
 /* v58: +3 미만 100%, 이후 일정하게 내려가 +30(30→31)에서 15%, 그 뒤 15% 고정 */
 const enhRate=L=>NS()?(L<NS_ENH_MAX?NS_RATE[Math.max(0,L|0)]:0):L<20?1-.7*L/20:L<25?.30-.15*(L-20)/5:L<30?.15-.10*(L-25)/5:L<35?.05:L<40?.04:.03;/* v378: 35강~ 4% · 40강~ 3% *//* v101: 20→21 30% · 25→26 15% · 30→31 이후 5% */
@@ -1689,7 +1689,7 @@ function nLineTier(t){let r=Math.random(),o=0;for(;o<5;o++){r-=NLT_W[o];if(r<=0)
 /* 위험도별 티어 확률 (스토리: 5티어 20% · 6티어 80%) */
 function nTierW(t){if(S.ch<NCH)return[0,0,0,0,20,80];
   /* v621: 구간 최고 티어 m부터 m+2까지 — 최고 티어 비중은 구간 안에서 15% → 35%, 다음 티어 50%, 나머지 그 아래 */
-  {const m=dTop(t),[lo,hi]=D_BANDS[dBand(t)],a=hi>lo?.15+.2*(Math.min(D_MAX,t)-lo)/(hi-lo):.2,w=[0,0,0,0,0,0];w[m-1]+=a;w[Math.min(5,m)]+=.5;w[Math.min(5,m+1)]+=.5-a;if(m===1)w[0]*=mutM();/* v624 변이: 1티어 확률 × 배율 */return w.map(x=>x*100)}
+  {const m=dTop(t),[lo,hi]=D_BANDS[dBand(t)],a=hi>lo?.15+.2*(Math.min(D_MAX,t)-lo)/(hi-lo):.04,/* v632: 위험도 20의 1티어 4% (변이 ×3이면 약 11% · 시간당 약 20개) */w=[0,0,0,0,0,0];w[m-1]+=a;w[Math.min(5,m)]+=.5;w[Math.min(5,m+1)]+=.5-a;if(m===1)w[0]*=mutM();/* v624 변이: 1티어 확률 × 배율 */return w.map(x=>x*100)}
   const lerp=(x,p)=>{if(x<=p[0][0])return p[0][1];for(let i=1;i<p.length;i++)if(x<=p[i][0]){const[a,b]=p[i-1],[c,d]=p[i];return b+(d-b)*(x-a)/(c-a)}return p[p.length-1][1]};
   const w1=t>=100?Math.min(4,2+.04*(t-100)):0,w2=t>=70?Math.min(12,3+.15*(t-70)):0,w3=t>=40?Math.min(25,3+.3*(t-40)):0;
   const w4=lerp(t,[[1,10],[39,30],[70,35],[100,40]]),w6=t>=100?0:lerp(t,[[1,55],[39,25],[99,5]]);
@@ -5315,15 +5315,15 @@ const RR_MAX=999,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
-  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
+  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),RR_K=.0016,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
-  {const r=rollN(ex*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v621: 윤회의 불씨는 위험도 1부터 */
+  {const r=rollN(ex*RR_K*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
   {const q=rollN(ex*SEAL_P*sealD());if(q>0)sealAdd(q)}}/* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
-const SEAL_P=.1,sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
+const SEAL_P=.000168,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*mutM()*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
@@ -5481,7 +5481,7 @@ function lootMesh(it){const g=new THREE.Group(),inner=new THREE.Group();inner.po
   g.userData.inner=inner;g.userData.rar=it.rar;g.userData.sp=sp;return g}
 /* 특수 능력치 장비 빛기둥: 특수 능력치 배지와 같은 청록색 */
 const beamSpMat=new THREE.MeshBasicMaterial({color:0x5ae0d0,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending});
-function dropItem(p,boss,rar,_m){if(!_m&&mutZone()){const n=rollN(mutM());for(let i=0;i<n;i++)dropItem(p,boss,rar,1);return}/* v624 변이 보상: 아이템 수 × 배율 */
+function dropItem(p,boss,rar,_m){if(!_m&&NS()&&S.ch>=NCH&&rar===undefined&&!S.duel&&Math.random()>NS_ITEM_K)return;/* v632: 필드 장비 드랍 ×0.0036 — 관문 보스 보상은 그대로 */if(!_m&&mutZone()){const n=rollN(mutM());for(let i=0;i<n;i++)dropItem(p,boss,rar,1);return}/* v624 변이 보상: 아이템 수 × 배율 */
   const it=makeItem(rollSlot(),dropLvl(),rar!==undefined?rar:rollRarity(boss));
   const q=scatter(p),g=lootMesh(it);
   g.position.set(q.x,0,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'item',item:it,ph:Math.random()*6});
