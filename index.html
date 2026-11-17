@@ -3814,12 +3814,12 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   else if(mage&&P.cast){/* v337 마법사 시전(예비): 얼음 보주=두 손 모으기(orb 0→.8) · 연쇄 번개/마력탄=한 손 들기(chain 0→.75) */const k=sm(clamp(1-P.cast.t/P.cast.T,0,1));aim=k;if(P.cast.id==='frost'){st='orb';t=.8*k}else{st='chain';t=.75*k}}
   else if(mage&&P.pose&&!P.pose.relax&&P.pose.T){/* v337 마법사 발사: 보주=내밀고 버티다 거둠(orb .8→1.3, 2.7→3.3) · 번개/마력탄=찌르고 거둠(chain .75→1.3→1.7) */const k=clamp(1-P.pose.t/P.pose.T,0,1),id=P.pose.id;aim=1-sm(Math.max(0,(k-.6)/.4));
     if(id==='orb'){st='orb';t=k<.55?.8+.5*(k/.55):2.7+.6*((k-.55)/.45)}else{st='chain';t=k<.45?.75+.55*(k/.45):1.3+.4*((k-.45)/.55)}}
-  else if(!mage&&P.cast){st='slash';t=.1+.42*sm(clamp(1-P.cast.t/P.cast.T,0,1))}
-  else if(!mage&&P.pose&&!P.pose.relax&&P.pose.T){st='slash';t=.3+.8*clamp(1-P.pose.t/P.pose.T,0,1)}
+  else if(!mage&&P.cast){const W=P.wvClip&&K.acts[P.wvClip]&&WVCL[P.wvClip];/* v655: 검기는 휘두를 때마다 다른 베기 동작 */if(W){st=P.wvClip;t=W.c[0]+(W.c[1]-W.c[0])*sm(clamp(1-P.cast.t/P.cast.T,0,1))}else{st='slash';t=.1+.42*sm(clamp(1-P.cast.t/P.cast.T,0,1))}}
+  else if(!mage&&P.pose&&!P.pose.relax&&P.pose.T){const W=P.pose.id==='sweep'&&P.wvClip&&K.acts[P.wvClip]&&WVCL[P.wvClip];if(W){st=P.wvClip;t=W.p[0]+(W.p[1]-W.p[0])*clamp(1-P.pose.t/P.pose.T,0,1)}else{st='slash';t=.3+.8*clamp(1-P.pose.t/P.pose.T,0,1)}}
   else if(K.hitT>0){st='hit';t=.45*(1-K.hitT/.35)}
   else if(spd>.6){st='run';rate=clamp(spd/5.5,.6,1.7)*(mage?1.15:1)}
   else st='idle';
-  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='cast'||st==='orb'||st==='chain'||st==='shot'||st==='sky')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
+  if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='slash2'||st==='slash3'||st==='cast'||st==='orb'||st==='chain'||st==='shot'||st==='sky')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
   const A=K.acts,dur=k=>A[k]._clip.duration;
   if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
   K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
@@ -5691,7 +5691,7 @@ function basicAttack(){
   if(P.cast||P.mv||knAppr)return;
   const b=C().basic,cd0=b==='melee'?.42:b==='arrow'?.45:.55,cd=cd0*cdMul(),ct=Math.min(.3,CAST_K*cd),ct0=Math.min(.3,CAST_K*cd0);
   P.cd.atk=cd;
-  if(ct>=.04){aim(b==='melee'?4:16);P.cast={slot:'atk',id:'atk',t:ct,T:ct,T0:ct0};P.skSwing=false;return}
+  P.wvClip=null;if(ct>=.04){aim(b==='melee'?4:16);P.cast={slot:'atk',id:'atk',t:ct,T:ct,T0:ct0};P.skSwing=false;return}
   P.castF=castF(ct,ct0);try{basicFire()}finally{P.castF=1}}
 /* v343: 발사 동작 배율 = 지금 시전시간 / 강화 전 기본 시전시간 (0.3~1) */
 const castF=(ct,ct0)=>ct0>0?clamp(ct/ct0,.3,1):1;
@@ -5732,7 +5732,10 @@ const wvFanLayout=(n,sp0)=>({sp:sp0,as:1});
 const wvIn=(sh,q)=>sh.so*q-(sh.so-sh.si)*WV_TC*Math.pow(q,WV_TP),wvCres=(sh,f)=>{const q=1-f*f,z=sh.zt+(sh.dz||0);return [z+sh.so*q,z+wvIn(sh,q)]};/* [바깥 z, 안쪽 z] */
 /* v648: 휘두르기 단계 — 검기는 캐릭터를 감싸는 큰 초승달(칼이 지나간 궤적)로 한쪽 끝부터 그어지고(WV_SW.t초), 그대로 떨어져 나가며 날아가는 초승달 모양으로 바뀜(WV_SW.m초) */
 /* v653: 휘두를 때마다 방향(dir: 칼이 지나가는 쪽)과 기울기(roll, 라디안: 대각선 베기)가 바뀜 — 순서대로 반복 */
-const WV_PAT=[{dir:-1,roll:0},{dir:1,roll:.55},{dir:-1,roll:-.45},{dir:1,roll:.2},{dir:-1,roll:.7},{dir:1,roll:-.6}];let wvSeq=0;
+const WV_PAT=[{clip:'slash',dir:-1,roll:-.5},{clip:'slash2',dir:1,roll:.15},{clip:'slash3',dir:1,roll:-.55}];let wvSeq=0;
+/* v655: 전사 베기 동작 3종(warrior.glb) — slash: 오른쪽 위→왼쪽 아래 내려베기 · slash2(Great Sword Slash): 몸을 숙이며 왼쪽→오른쪽 수평 · slash3(Great Sword Slash 1): 왼쪽→오른쪽 올려베기.
+   c = 시전(들어올림) 구간, p = 휘두르기 구간(검기가 나가는 순간이 p[0]) — 클립 시간(초) */
+const WVCL={slash:{c:[.1,.52],p:[.3,1.1]},slash2:{c:[.4,.85],p:[.85,1.2]},slash3:{c:[.35,.72],p:[.72,1.25]}};
 const WV_SW={t:.09,m:.16,hw:2.5,so:2.7,th:1.15,zt:-.5,dir:-1};
 function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_SW.m)),e=e0*e0*(3-2*e0),lp=(a,b)=>a+(b-a)*e,W=WV_SW,r=h0/W.hw,so0=W.so*r,th0=W.th*Math.max(.6,r);
   /* v650: 휘두르기 크기 h0은 떨어져 나간 직후의 검기 폭에 맞춤 — 폭·휨이 한 번도 줄지 않고 커지기만 함(나갈 때 움츠러드는 느낌 제거) */
@@ -6106,7 +6109,7 @@ function castSkill(slot){if(knAppr)return;/* v590: 다리를 건너는 동안 �
   /* v122: 시전시간 = 쿨타임의 25% (최대 0.6초). st.cd에는 가속 강화·투구 쿨감이 이미 반영돼 있어 같이 줄어듦. 회전 베기는 시전시간 없음 */
   const ct=b.kind==='whirl'?0:castTime(id,st);/* 회전 베기는 시전시간 없음 */
   const ct0=b.kind==='whirl'?0:Math.max(Math.min(CAST_MAX,CAST_K*b.cd),Math.min(CT_MIN,b.cd*.6));
-  if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct,T0:ct0};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
+  P.wvClip=SK[id]&&SK[id].kind==='wave'?WV_PAT[wvSeq%WV_PAT.length].clip:null;/* v655 */if(ct>=.04){aim(16);P.cast={slot,id,t:ct,T:ct,T0:ct0};P.skSwing=true;ringFx(P.pos,1.2,S.cls==='warrior'?0xffc08a:S.cls==='archer'?0xb8f07a:0xa08aff,ct);return}
   P.castF=castF(ct,ct0);try{castFire(slot,id)}finally{P.castF=1}}
 const CAST_K=.25,CAST_MAX=.6;
 /* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
@@ -6182,7 +6185,7 @@ function castFire(slot,id){
     return}
   if(b.kind==='wave'){aim(16);poseStart('sweep',.46,{pre:P.castPre});const a=P.face,fan=st.fan;
     const one=(mul,delay)=>{const f=()=>{if(P.hp<=0)return;P.swing=.2;/* v650: 휘두를 때 화면 흔들림 없음(검기 폭발 때만) *//* v648: 휘두르는 궤적 = 검기(shootWave가 그림) */
-      const FL=wvFanLayout(fan.n,fan.sp,st.wk),PT=WV_PAT[wvSeq++%WV_PAT.length];for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{dir:PT.dir,roll:PT.roll,k:st.wk,as:FL.as,speed:WV_SPD,life:st.len/WV_SPD,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
+      const FL=wvFanLayout(fan.n,fan.sp,st.wk),PT=WV_PAT[wvSeq++%WV_PAT.length];P.wvClip=PT.clip;for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{dir:PT.dir,roll:PT.roll,k:st.wk,as:FL.as,speed:WV_SPD,life:st.len/WV_SPD,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(16);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
     for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7;/* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffe0a0,c1:0xff6a10,a:.9,tex:1});
@@ -6509,7 +6512,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v654';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v655';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
