@@ -765,6 +765,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .mutl{display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}.mutr{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 6px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer}.mutr+.mutr{border-top:1px solid rgba(255,255,255,.05)}
 .mutr .mc{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid #4a4840;display:grid;place-items:center;font:800 12px var(--en);color:#141417}.mutr.on .mc{background:#e8dcc4;border-color:#e8dcc4}.mutr .mn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.mutr .mn b{font-size:13.5px}.mutr .mn small{font-size:11px;color:#8a8577}.mutr em{flex:none;font-style:normal;font:800 13px var(--en);font-stretch:87%;color:#8a8577}.mutr.on em{color:var(--ink)}.mutr:not(.on) .mn b{color:#a59f90}
 .mutft{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mutft button{height:38px;border-radius:10px;border:1px solid rgba(232,220,196,.3);background:#1d1d23;color:#e8dcc4;font:700 13px var(--ko)}
+.stgo{width:100%;margin-top:2px;flex:none;min-height:48px}
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -1511,7 +1512,7 @@ const dI=d=>Math.min(D_MAX,Math.max(1,Math.round(d)))-1;
 /* v624 변이 (위험도 20 전용) — 입장 전 켜고 끔. 보상 배율 = 1 + 점수 합 ÷ 100 */
 const MUT={hp:{n:'강인함',d:'몬스터 체력 +60%',p:25},dmg:{n:'흉포함',d:'몬스터 피해 +40%',p:25},spd:{n:'신속',d:'몬스터 이동·공격 속도 +25%',p:25},def:{n:'방어 약화',d:'방어력·회피·에너지 쉴드 −50%',p:30},
   shot:{n:'사수 군단',d:'원거리 몬스터 2배',p:20},elite:{n:'정예 행렬',d:'정예·유니크 몬스터 2배',p:20},reg:{n:'재생 봉인',d:'생명력·마나 재생 −50%',p:20},burst:{n:'유언의 탄막',d:'몬스터가 죽을 때 사방으로 투사체',p:20},pot:{n:'물약 봉인',d:'물약 충전 −50%',p:15}};
-const mutOpen=()=>!!(S&&(S.d20||S.test)),mutZone=()=>!!(S&&S.ch>=NCH&&S.tier>=D_MAX&&!S.duel&&!inTown&&mapKind!=='story'&&mutOpen()),
+const mutOpen=()=>!!(S&&(S.d20||S.test)),mutZoneAt=()=>!!(S&&S.tier>=D_MAX&&mutOpen()&&mutPts()>0),mutZone=()=>!!(S&&S.ch>=NCH&&S.tier>=D_MAX&&!S.duel&&!inTown&&mapKind!=='story'&&mutOpen()),
   mutA=k=>mutZone()&&!!(S.mut&&S.mut[k]),mutPts=()=>Object.keys(MUT).reduce((a,k)=>a+(S.mut&&S.mut[k]?MUT[k].p:0),0),mutM=()=>mutZone()?1+mutPts()/100:1;
 const tkFor=t=>t>=15?3000:t>=10?2000:t>=5?1500:1000,/* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
@@ -6323,11 +6324,11 @@ const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],[
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
 const HMICON={'@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
 function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=HMICON[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${HMICON[id]()}</svg>`:($(id)&&$(id).querySelector('svg')?$(id).querySelector('svg').outerHTML:'');return `<button data-hm="${id}">${sv}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
-function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?inTown:!inTown);return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
+function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?inTown:!inTown&&!(S.ch>=NCH));return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
     const d=HMDOT[id];if(d){const on=!$(d).hidden;b.querySelector('.hdot').hidden=!on;if(on)any=true}});
   $('hamDot').hidden=!any}
 function hmAct(id){if(id==='@town'){if(inTown)return toast('이미 마을에 있습니다');if(!paused())townAsk();return}
-  if(id==='@hunt'){if(!inTown)return toast('이미 사냥터에 있습니다');if(!paused())toggleTown();return}
+  if(id==='@hunt'){if(S.ch>=NCH&&!S.tutor){closeAllSheets();openStage();return}/* v628: 엔드게임이 열리면 사냥터 = 위험도 창(마을에선 고른 위험도로 입장) */if(!inTown)return toast('이미 사냥터에 있습니다');if(!paused())toggleTown();return}
   if(id==='@char'){save();closeAllSheets();showSlots();return}
   if(id==='@title'){save();closeAllSheets();showSlots();$('slots').hidden=true;$('title').hidden=false;return}
   if(id==='@fs'){toggleFs();return}
@@ -7249,10 +7250,11 @@ function renderStage(){
     rows.push(`<tr class="grp"><td colspan="2"><button class="grpb${ex?' on':''}" data-grp="${g0}"><span>위험도 ${lo===hi?lo:lo+"~"+hi} <small style="color:var(--muted)">· ${EGMAPS[egMapFor(lo)].n} · 최고 ${dTop(lo)}티어</small>${hasCur?' <small style="color:var(--ember)">· 현재</small>':''}</span><span>${ex?'숨기기 ▲':'펼치기 ▼'}</span></button></td></tr>`);
     if(!ex)continue;
   for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),low=open&&t<tierMin(),g=true,gc=(S.gates||[]).includes(t);
-    const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
+    const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:inTown?`<button class="pm wide${t===S.tier?' on':''}" data-tier="${t}">입장</button>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${g?` <span class="gate${gc?' ok':''}">${gc?'관문 돌파':'관문 보스'}</span>`:''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><div class="chap">Stages · DPS</div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
+  ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${(1+mutPts()/100).toFixed(2)}`:''}</button>`:''}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
   ${eg?`<div><div class="tag" style="margin-bottom:8px">위험도 자동 상승</div><div class="seg"><button data-at="1" class="${S.autoTier?'on':''}">켜기</button><button data-at="0" class="${S.autoTier?'':'on'}">끄기</button></div>
   <p class="hint" style="margin-top:6px">${S.autoTier?'위험도마다 정해진 수(위험도 1~4는 1,000마리 · 5~9는 1,500 · 10~14는 2,000 · 15~20은 3,000)를 처치하면 다음 위험도로 자동 이동합니다.':'다음 위험도가 열려도 지금 위험도에 머뭅니다. 낮은 단계에서 성장할 때 쓰세요.'}</p></div>${mutUI()}`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
@@ -7272,6 +7274,7 @@ $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
   if(b.dataset.at!==undefined){S.autoTier=b.dataset.at==='1';save();renderStage();return}
+  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t<S.tier)S.autoTier=false;if(t!==S.tier){S.tier=t;S.tierKills=0;S.egK=0;S.fld=null;save()}closeStage();leaveTown()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(t<S.tier)S.autoTier=false;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
