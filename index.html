@@ -2053,7 +2053,7 @@ function skillStats(id){
   if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null;if(bossOn('quake')){st.half*=.2;st.dmg*=5}/* v263 보스 모드 */}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
-  if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);st.dmg*=(1+.05*l)*(1+.04*e);st.wec=wvEcho(e);const f=g2('wfan'),bu=g2('wburst');st.fan={n:1,m:1,sp:0};/* v645: 갈래 없음 — 하나의 파동 */st.burst=bu?wvBurst(bu):null;st.wk=wvProg(l,e,f)}
+  if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);{const w=wvEcho(e);st.dmg*=(1+.05*l)*(1+.04*e)*(1+w.n*w.m)}st.wec={n:0,m:0};/* v648: 한 번 휘둘러 검기 하나 — 추가 검기 몫은 피해로 */const f=g2('wfan'),bu=g2('wburst');st.fan={n:1,m:1,sp:0};/* v645: 갈래 없음 — 하나의 파동 */st.burst=bu?wvBurst(bu):null;st.wk=wvProg(l,e,f)}
   if(b.kind==='boom'){const r=L('brad'),e=L('bember');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=e?bmEmber(e):null;st.multi=bmMulti(g2('bmulti'));const x=g2('bshrap');st.shrap=x?bmShrap(x):null}
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
@@ -5729,8 +5729,12 @@ const wvProg=(l,e,x)=>Math.min(1,.3*(l+e)/20+.7*x/g2Max('wfan')),/* v645: 크기
 /* 갈래는 없음(하나의 파동) — as=1 */
 const wvFanLayout=(n,sp0)=>({sp:sp0,as:1});
 /* v645: 진짜 초승달 — 바깥·안쪽 가장자리가 모두 앞으로 볼록, 바깥이 더 휨(so>si) → 가운데 두껍고 양 끝 뾰족. 국소 좌표: x 좌우, z 앞 */
-const wvCres=(sh,f)=>{const q=1-f*f;return [sh.zt+sh.so*q,sh.zt+sh.si*q]};/* [바깥 z, 안쪽 z] */
-function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+sh.so*sz*q+dz,zi=sh.zt+sh.si*q-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
+const wvCres=(sh,f)=>{const q=1-f*f,z=sh.zt+(sh.dz||0);return [z+sh.so*q,z+sh.si*q]};/* [바깥 z, 안쪽 z] */
+/* v648: 휘두르기 단계 — 검기는 캐릭터를 감싸는 큰 초승달(칼이 지나간 궤적)로 한쪽 끝부터 그어지고(WV_SW.t초), 그대로 떨어져 나가며 날아가는 초승달 모양으로 바뀜(WV_SW.m초) */
+const WV_SW={t:.09,m:.16,hw:2.5,so:2.7,th:1.15,zt:-.5,dir:-1};
+function wvSwing(sh,tt,trav){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_SW.m)),e=e0*e0*(3-2*e0),lp=(a,b)=>a+(b-a)*e,W=WV_SW;
+  return {...sh,hw:lp(W.hw,sh.hw),so:lp(W.so,sh.so),si:lp(W.so-W.th,sh.si),zt:lp(W.zt,sh.zt),dz:-(trav+.8)*(1-e),sw:Math.min(1,tt/W.t)}}
+function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+sh.si*q-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
 const bmRad=L=>2.6*(1+.09*L),bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
@@ -5744,7 +5748,7 @@ Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사�
 for(const [c,k] of [['warrior','wave'],['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 Object.assign(GEMS,{
   wlen:{n:'참격 연장',t:'wave',c:'#ffc080',d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
-  wecho:{n:'연속 참격',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${4*L}%${e.n?`\n검기 ${e.n}번 더 연속으로 날림 (피해 ×${e.m.toFixed(2)})`:'\n5단계·10단계에 검기를 1번씩 더 날림'}`}},
+  wecho:{n:'예리한 참격',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${Math.round(((1+.04*L)*(1+e.n*e.m)-1)*100)}%${L<10?'\n5단계·10단계에 피해가 크게 오름':''}`}},/* v648: 연속 참격 → 예리한 참격 */
   brad:{n:'대폭발',t:'boom',c:'#ff9a4a',d:L=>`폭발 반경 ${bmRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   bember:{n:'잔불',t:'boom',c:'#ff7a3a',d:L=>{const e=bmEmber(L);return `폭발 자리에 불바닥 ${e.dur.toFixed(1)}초 (초당 피해 ×${e.m.toFixed(2)})`}},
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
@@ -5769,15 +5773,15 @@ void main(){float x=vUv.x,y=vUv.y;float th=pow(sin(x*3.14159),.55);float c=.5+.1
  vec3 col=mix(uCol,uEdge,core)*st;float al=clamp((core*1.2+body)*uOp,0.,1.);gl_FragColor=vec4(col*al,al);}`;
 /* v645: 플레이어 검기 전용 셰이더(참고 영상) — 초승달: 바깥 날(앞쪽 가장자리)은 하얗게 달아오른 가는 선, 안쪽으로 갈수록 붉게 번지며 사라짐, 양 끝은 뾰족.
    uM=0 칼날, uM=1 빛 번짐(넓고 옅은 광채) */
-const WAVE2_FS=`uniform float uOp,uT,uM;uniform vec3 uCol,uEdge;varying vec2 vUv;
+const WAVE2_FS=`uniform float uOp,uT,uM,uSw,uDir;uniform vec3 uCol,uEdge;varying vec2 vUv;
 float h1(float n){return fract(sin(n)*43758.5453);}
-void main(){float x=vUv.x,y=vUv.y;float th=pow(max(0.,sin(x*3.14159)),.7);
+void main(){float x=vUv.x,y=vUv.y;float th=pow(max(0.,sin(x*3.14159)),.7);float rv=uDir>0.?1.-x:x;if(rv>uSw)discard;float hd=uSw<1.?exp(-pow((uSw-rv)/.12,2.))*1.5:0.;
  if(uM>.5){float d=abs(y-.6)/max(.05,.5*th+.12);float g=exp(-d*d*2.2)*th*1.5;gl_FragColor=vec4(uCol*g*uOp,g*uOp);return;}
  float k=y;float col_=floor(x*90.);float wl=h1(col_)*h1(col_+7.3);float wisp=step(.38-wl*.36,k)*(.55+.45*h1(col_+3.1));float solid=smoothstep(.3,.42,k);if(k<.4&&wisp<.01)discard;/* v645: 안쪽 가장자리 빗금 잔결 */
  float edge=exp(-pow((1.-k)/.09,2.));float body=mix(.3,1.,pow(k,1.2))*max(solid,wisp*.75);float tail=1.;
  float st=.88+.12*sin(x*14.+uT*30.);float br=step(.9,h1(floor(x*60.)+floor(uT*16.)))*k*.25;
- vec3 col=mix(uCol,uEdge,edge)+uEdge*br;float al=clamp((edge*2.2+body*st*1.25+br)*tail*uOp,0.,1.);gl_FragColor=vec4(col*al,al);}`;
-function wave2Mat(col,edge,mode){return new THREE.ShaderMaterial({uniforms:{uOp:{value:1},uT:{value:0},uM:{value:mode||0},uCol:{value:new THREE.Color(col)},uEdge:{value:new THREE.Color(edge)}},vertexShader:SLASH_VS,fragmentShader:WAVE2_FS,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending})}
+ vec3 col=mix(uCol,uEdge,edge)+uEdge*br;float al=clamp((edge*2.2+body*st*1.25+br+hd)*tail*uOp,0.,1.);gl_FragColor=vec4(col*al,al);}`;
+function wave2Mat(col,edge,mode){return new THREE.ShaderMaterial({uniforms:{uOp:{value:1},uT:{value:0},uSw:{value:1},uDir:{value:1},uM:{value:mode||0},uCol:{value:new THREE.Color(col)},uEdge:{value:new THREE.Color(edge)}},vertexShader:SLASH_VS,fragmentShader:WAVE2_FS,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending})}
 /* 일자 균열 텍스처(가로로 긴 갈라짐 + 잔가지) — 검기가 바닥을 가른 자국 */
 const slitTex=(()=>{const c=mkCv(256),g=c.getContext('2d');g.lineCap='round';g.strokeStyle='#fff';g.shadowColor='#fff';
   const walk=(x,y,a,n,w,d)=>{g.lineWidth=w;g.shadowBlur=w*2;g.beginPath();g.moveTo(x,y);for(let i=0;i<n;i++){a+=rand(-.25,.25);x+=Math.cos(a)*6;y+=Math.sin(a)*6;g.lineTo(x,y);if(d<1&&Math.random()<.18){g.stroke();walk(x,y,a+rand(-1.1,1.1)*(Math.random()<.5?1:-1),n*.25,w*.45,d+1);g.lineWidth=w;g.shadowBlur=w*2;g.beginPath();g.moveTo(x,y)}}g.stroke()};
@@ -5818,11 +5822,11 @@ function shootWave(a,o){const K=o.k||0,AS=o.as||1,L0=o.life,S0=wvShape(K,0,WV_D0
   const m3=new THREE.Mesh(geo3,wave2Mat(WV_C.glow,WV_C.glow,1));m3.position.y=-.05;/* v645: 참고 영상 — 날카로운 흰 날 + 붉은 몸 + 큰 빛 번짐 */
   const gl_=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:WV_C.glow,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending}));gl_.position.z=0;g.add(m1,m2,m3,gl_);p.m.add(g);
   for(const x of [m1,m2,m3])x.frustumCulled=false;/* 모양이 매 프레임 바뀌므로 */let trD=0;const trCx=p.ox,trCz=p.oz;
-  const fill=sh=>{shN=sh;wvFillQ(geo,sh,1,1,0,SEG);wvFillQ(geo2,sh,.82,.85,-.05,SEG);wvFillQ(geo3,sh,1.1,1.18,.15,SEG);gl_.scale.set(.001,.001,1);/* 가운데 빛 덩어리 끔(오목한 안쪽을 채워서) */gl_.position.z=sh.zt+sh.so*.7;p.hr=sh.hw+sh.so};/* v645: 초승달 */fill(S0);
+  const fill=sh=>{shN=sh;wvFillQ(geo,sh,1,1,0,SEG);wvFillQ(geo2,sh,.82,.85,-.05,SEG);wvFillQ(geo3,sh,1.1,1.18,.15,SEG);gl_.scale.set(.001,.001,1);/* 가운데 빛 덩어리 끔(오목한 안쪽을 채워서) */gl_.position.z=sh.zt+sh.so*.7;p.hr=sh.hw+sh.so};/* v645: 초승달 */fill(wvSwing(S0,0,0));for(const x of [m1,m2,m3]){x.material.uniforms.uSw.value=0;x.material.uniforms.uDir.value=WV_SW.dir}
   const rb=null;/* v645: 호 끝 꼬리선 제거(참고 영상엔 없음) */if(rb)rb.mat.uniforms.cw.value=.2;let tt=0;
-  p.upd=dt=>{tt+=dt;const pp=p.m.position,sh=wvShape(K,Math.min(1,tt/L0),Math.hypot(pp.x-cx,pp.z-cz),AS);fill(sh);const ry=p.m.rotation.y,cy=Math.cos(ry),sy=Math.sin(ry);
+  p.upd=dt=>{tt+=dt;const pp=p.m.position,sh=wvSwing(wvShape(K,Math.min(1,tt/L0),Math.hypot(pp.x-cx,pp.z-cz),AS),tt,Math.hypot(pp.x-p.ox,pp.z-p.oz));fill(sh);const ry=p.m.rotation.y,cy=Math.cos(ry),sy=Math.sin(ry);
     const wp=(lx,lz)=>[pp.x+lx*cy+lz*sy,pp.z-lx*sy+lz*cy];/* 호의 국소 좌표 → 월드 */
-    for(const x of [m1,m2,m3]){x.material.uniforms.uOp.value=Math.min(1,tt/.04)*(x===m3?1:x===m2?.6:1)*Math.min(1,p.life/.15);x.material.uniforms.uT.value=tt}
+    for(const x of [m1,m2,m3]){x.material.uniforms.uOp.value=(x===m3?1:x===m2?.6:1)*Math.min(1,p.life/.15);x.material.uniforms.uT.value=tt;x.material.uniforms.uSw.value=sh.sw;x.material.uniforms.uDir.value=WV_SW.dir}
     if(rb){for(const [h,s] of [[rb.h,1],[rb.h2,-1]]){const [tx,tz]=wp(s*sh.hw,sh.zt);h.unshift([tx,1+.1*s,tz]);if(h.length>12)h.length=12}
       if(rb.h.length>=3){const paths=[{p:rb.h,w:.3,w1:.1},{p:rb.h2,w:.3,w1:.1}];if(!rb.m){rb.m=p.rbm=new THREE.Mesh(boltGeo(paths),rb.mat);rb.m.frustumCulled=false;scene.add(rb.m)}else if(rb.m.geometry.attributes.position.count!==rb.h.length*4){rb.m.geometry.dispose();rb.m.geometry=boltGeo(paths)}else boltGeo(paths,rb.m.geometry);rb.mat.uniforms.t.value=tt;rb.mat.uniforms.fade.value=Math.min(1,p.life/.2)}}
     const q=QM(),sz=sh.hw/1.2;
@@ -6150,7 +6154,7 @@ function castFire(slot,id){
     const hit=new Set(),cid=++volSeq;for(let f=0;f<st.forks;f++){if(f<first.length){if(!hit.has(first[f]))chainFrom(first[f],hand,base*st.dmg,st,hit,cid)}else{const t=first[f%first.length];later(f*.08,()=>{if(t.hp>0)chainFrom(t,{x:hand.x+rnd(-.3,.3),y:hand.y+rnd(-.2,.3),z:hand.z+rnd(-.3,.3)},base*st.dmg,st,new Set(),cid)})}}/* v98: 적이 갈래 수보다 적으면 남은 갈래도 같은 적에게 */
     return}
   if(b.kind==='wave'){aim(16);poseStart('sweep',.46,{pre:P.castPre});const a=P.face,fan=st.fan;
-    const one=(mul,delay)=>{const f=()=>{if(P.hp<=0)return;P.swing=.2;P.swingDir*=-1;swingFx();shake=Math.max(shake,.05);
+    const one=(mul,delay)=>{const f=()=>{if(P.hp<=0)return;P.swing=.2;shake=Math.max(shake,.05);/* v648: 휘두르는 궤적 = 검기(shootWave가 그림) */
       const FL=wvFanLayout(fan.n,fan.sp,st.wk);for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{k:st.wk,as:FL.as,speed:16,life:st.len/16,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(16);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
@@ -6478,7 +6482,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v647';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v648';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6949,7 +6953,7 @@ function skillDps0(id){
     return {main:(per+rel+met)/cd,label:'화살비 안의 적 1명당',sub:`화살 세례 1회 ${fmtN(tk)} · 초당 ${st.rate.toFixed(1)}회 · ${st.dur.toFixed(1)}초${rel?` · 속성 폭발`:''}${met?` · 분열 파편`:''}`}}
   if(b.kind==='chainl'){const h0=base*st.dmg*crit,hit=h0*CH_HIT,stm=st.cst?h0*st.cst.m*1.5:0,ov=st.ovl?h0*st.ovl.m*(st.ovl.dur/.3)*.5:0;
     return {main:(hit+stm+ov)/cd,label:'번개에 맞은 적 1명당',sub:`번개 ${st.forks}줄 · ${st.bn}번 튕김 · 1회 ${fmtN(hit)}${stm?' · 번개 폭풍':''}${ov?' · 과부하':''}`}}
-  if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`검기 ${st.fan.n}갈래 · 사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
+  if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
   if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit,em=st.ember?hit*st.ember.m*st.ember.dur*.6:0,sh=st.shrap?hit*st.shrap.m*1.2:0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 잔불':''}${sh?' · 파편':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
