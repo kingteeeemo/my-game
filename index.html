@@ -778,6 +778,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .stcost{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:10px;background:#211c12;border:1px solid rgba(255,210,74,.3);font-size:12px;color:#c9b88a}.stcost b{font:800 15px var(--en);font-stretch:87%;color:#ffd24a}
 .stmall{display:flex;gap:6px;justify-content:flex-end}.stmall button{border:0;background:none;color:#8a8577;font:600 11.5px var(--ko);padding:2px 4px;text-decoration:underline}
 .stsp{flex:1 1 0;min-height:4px}.stsub{font-size:12px;font-weight:600;color:#a59f90;margin-left:6px}#stageSheet .stgo{flex:none;min-height:52px}
+#lvlSheet .lvsub{display:block;margin-top:3px;font:600 12px var(--ko);color:#8a8577}#lvlSheet .autog{border-color:rgba(232,220,196,.35)!important;color:#e8dcc4!important}#lvlSheet .autog small{color:#8a8577!important}/* v639: 레벨업 창 — 새 UI 톤 */
 /* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
@@ -975,7 +976,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .nhd{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .nid{display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}.nid .lvt{font:800 17px var(--en);font-stretch:87%;color:#e8dcc4}.nid .lvt small{font-size:11px;color:#a39f99;letter-spacing:.1em;margin-right:3px}
 .nid i{width:1px;height:13px;background:rgba(232,220,196,.35);align-self:center}.nid .cl{font:600 11px var(--en);font-stretch:87%;letter-spacing:.1em;color:#a39f99;text-transform:uppercase}.nid b{font:800 17px var(--ko);overflow:hidden;text-overflow:ellipsis}
-.nx{flex:none;width:34px;height:34px;border-radius:50%;background:#f0ece4;color:#16161c;border:0;display:grid;place-items:center;font:800 15px var(--en);padding:0}
+.nst .nx{flex:none;width:34px;height:34px;border-radius:50%;background:#f0ece4;color:#16161c;border:0;display:grid;place-items:center;font:800 15px var(--en);padding:0}
 .nbig{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ncd{border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116;padding:10px 12px 11px}.ncd.iv{border-color:#e8dcc4}
 .ncd small{display:block;font:700 10.5px var(--en);font-stretch:87%;letter-spacing:.14em;color:#a39f99}.ncd em{display:block;font-style:normal;font-size:11px;color:#a39f99;margin-top:1px}
@@ -6680,14 +6681,14 @@ function showLevelUp(){
   let h;
   if(!lvlSkill&&sk.length===1)lvlSkill=sk[0];
   if(!lvlSkill){
-    h=`<div class="shead"><div><div class="chap">Level ${Lv}</div><h2>강화할 스킬을 고르세요</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
+    h=`<div class="shead"><div><h2>강화할 스킬을 고르세요</h2><small class="lvsub">Lv ${Lv}</small></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     sk.forEach((s,i)=>{const n=openGems(s).length,tot=gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
       h+=`<button class="card" data-k="${s}" ${n?'':'disabled'}><span class="badge2">${i+1}</span><span><span class="en">${SK[s].role} · ${SK[s].en}</span>${SK[s].n}<small>${n?`강화 합계 ${tot}단계 · 올릴 수 있는 강화 ${n}개`:'모든 강화가 최대 단계입니다'}</small></span></button>`});
     h+=`</div><div class="btns"><button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''} 「자동 찍기」를 누르면 이후 레벨업도 균형으로 자동 분배되며, 「스킬」 메뉴에서 다시 끌 수 있습니다.</p>`;
   }else{
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
-    h=`<div class="shead"><div><div class="chap">Level ${Lv} · ${SK[s].role}</div><h2>${SK[s].n} 강화</h2></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
+    h=`<div class="shead"><div><h2>${SK[s].n} 강화</h2><small class="lvsub">Lv ${Lv} · ${SK[s].role}</small></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     offer.forEach((p,i)=>{const L=gl(s,p.g);h+=`<div class="crow"><button class="card" data-o="${i}"><span class="sw" style="background:${GEMS[p.g].c}"></span><span>${GEMS[p.g].n} <span class="lvtag">Lv ${L} → ${L+1}</span><small class="gdesc">${GEMS[p.g].d(L+1)}</small><span class="pips nx" style="--c:${GEMS[p.g].c}">${Array.from({length:GMAX},(_,i)=>`<i${i<L?' class="on"':i===L?' class="nx"':''}></i>`).join('')}</span></span></button><button class="ghost autog" data-oa="${i}" aria-label="${GEMS[p.g].n} 자동 강화">자동<small>이것만</small></button></div>`});
     h+=`</div><div class="btns">${detBtn(1)}${sk.length>1?'<button class="ghost" id="lvBack">다른 스킬 고르기</button>':''}<button class="ghost" id="lvAuto">${autoLabel()}</button></div><p class="hint">강화마다 최대 ${GMAX}단계. 고른 강화는 되돌릴 수 없습니다. 「자동」은 그 강화를 먼저 올리고, 최대가 되면 가장 낮은 강화부터 올립니다. 자동을 누르면 이후 레벨업도 자동으로 분배되며, 「스킬」 메뉴의 「레벨업 시 자동 강화」에서 다시 끌 수 있습니다.</p>`;
   }
