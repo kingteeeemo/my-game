@@ -1842,7 +1842,17 @@ function dpsWith(it){const sig=EQS.map(k=>S.eq[k]?S.eq[k].name+S.eq[k].base:'-')
   let m=_dpsM.get(it);if(m&&m.sig===sig)return m.v;
   const ek=eqKey(it),old=S.eq[ek];S.eq[ek]=it;let v=0;try{v=skillDps(C().skills[0]).main}finally{S.eq[ek]=old}
   _dpsM.set(it,{sig,v});return v}
-function isBetter(it,cur){if(!cur)return true;if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls)return false;if(it.ns&&!cur.ns)return true;
+/* v640 자동 장착 — 전투력 하나로 비교. 전투력 = DPS × 버티는 힘(생명력·에너지 쉴드 ÷ (1 − 방어·회피 감소)).
+   장비를 바꿔 껴서 전투력이 오를 때만 바꾸므로 두 장비를 번갈아 끼는 일이 생기지 않음. 결과는 장착 상태(아이템 id)로 기억 */
+const _pwM=new Map();
+function pwSig(){return EQS.map(k=>S.eq[k]?S.eq[k].id:'-').join(',')+'|'+S.lv+'|'+EQS.map(enhL).join(',')+'|'+C().skills[0]+'|'+JSON.stringify(S.sk||{})+'|'+JSON.stringify(S.aura||{})+JSON.stringify(S.auraOn||{})}
+function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp=heroMax(),D=nsDef(),sh=D.es>0?hp*D.es/(1-D.es):0;return {d:Math.max(1,d),e:(hp+sh)/Math.max(.05,1-(D.def+D.eva))}}
+function pwWith(k,it){const key=pwSig()+'#'+k+'='+(it?it.id:'-');let v=_pwM.get(key);if(v)return v;const old=S.eq[k];S.eq[k]=it;try{v=pwParts()}finally{S.eq[k]=old}if(_pwM.size>4000)_pwM.clear();_pwM.set(key,v);return v}
+const pwNow=()=>pwWith(EQS[0],S.eq[EQS[0]]),pwV=x=>x.d*x.e;
+/* 이 아이템을 낄 때 가장 이득인 칸과 전투력 변화율 (반지는 두 칸 중 나은 쪽) */
+function pwGain(it){if(!it||(it.ns&&it.slot==='weapon'&&it.wc!==S.cls))return {k:null,g:-1};const ks=it.slot==='ring'?['ring','ring2']:[it.slot],b=pwV(pwNow());let best={k:null,g:-1};
+  for(const k of ks){if(S.eq[k]===it)continue;const w=pwWith(k,it),g=pwV(w)/b-1;if(g>best.g)best={k,g,w}}return best}
+function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return true;return pwGain(it).g>.001}if(!cur)return true;if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls)return false;if(it.ns&&!cur.ns)return true;
   if((dpsRel(it)||dpsRel(cur))&&it.slot===cur.slot){const a=dpsWith(it),b=dpsWith(cur);if(Math.abs(a-b)>b*1e-4)return a>b}
   return score(it)>score(cur)}
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
@@ -5516,7 +5526,8 @@ function addItem(it){
 /* v603: 반지는 칸이 두 개 — 장착할 칸: 빈 칸 우선, 아니면 평가가 낮은 쪽 */
 function eqKey(it){if(!it||it.slot!=='ring')return it&&it.slot;if(!S.eq.ring)return 'ring';if(!S.eq.ring2)return 'ring2';return score(S.eq.ring)<=score(S.eq.ring2)?'ring':'ring2'}
 const eqCur=it=>S.eq[eqKey(it)];
-function upgrades(){const out=[],used=new Set();for(const k of EQS){const ks=kSlot(k);let best=null;for(const it of S.inv)if(it.slot===ks&&!used.has(it)&&isBetter(it,best||S.eq[k]))best=it;if(best){best._ek=k;used.add(best);out.push(best)}}return out}
+function upgrades(){if(NS()){const out=[],save={},used=new Set();try{for(let n=0;n<EQS.length;n++){let best=null;for(const it of S.inv){if(!it.ns||used.has(it))continue;const r=pwGain(it);if(r.k&&r.g>.001&&(!best||r.g>best.g))best={it,...r}}if(!best)break;used.add(best.it);if(!(best.k in save))save[best.k]=S.eq[best.k];best.it._ek=best.k;S.eq[best.k]=best.it;out.push(best.it)}}finally{for(const k in save)S.eq[k]=save[k]}return out}/* v640: 전투력이 가장 많이 오르는 것부터 하나씩 */
+  const out=[],used=new Set();for(const k of EQS){const ks=kSlot(k);let best=null;for(const it of S.inv)if(it.slot===ks&&!used.has(it)&&isBetter(it,best||S.eq[k]))best=it;if(best){best._ek=k;used.add(best);out.push(best)}}return out}
 function equipBest(){const ups=upgrades();for(const it of ups){const i=S.inv.indexOf(it),k=it._ek||it.slot,old=S.eq[k];delete it._ek;S.eq[k]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1)}
   if(ups.length){refreshMax();save();feed(`장비 ${ups.length}개 자동 장착`,'#7fe07a')}refreshUpBtn();return ups.length}/* v81: 화면 중앙 알림 없음 */
 let upSig='',upUntil=0,upTm=0;/* v126: 자동 장착 알림은 4초 후 사라짐 (장비창의 「자동 장착」으로 계속 가능) */
@@ -7075,7 +7086,7 @@ function itemList(it,L=0,fresh){if(it.ns)return nsItemList(it,L);const sp=it.opt
 function spInfo(slot,l){const k=Object.keys(OPT).find(k=>OPT[k].sp&&OPT[k].slots.includes(slot));if(!k)return '';const o=OPT[k],[a,b]=o.rng(l),rare=RARE_OPT.includes(k);
   const normal=Object.keys(OPT).filter(x=>OPT[x].slots.includes(slot)&&!RARE_OPT.includes(x)).length,p=rare?RARE_P:Math.min(1,4/normal);
   return `<span class="spi"><span class="spleg spb">특수</span><b>${o.n}</b><span class="nw"><span class="spleg rg">범위</span> <em class="rgv">${o.fr?o.fr(a,b):`${o.f(a)} ~ ${o.f(Math.round(b)).replace(/^[-+]/,'')}`}</em></span><span class="nw"><span class="spleg pr">확률</span> <em class="prv">${Math.round(p*100)}%</em></span></span>`}
-function cmpLine(it){const cur=eqCur(it);if(!cur)return '<span class="p">빈 칸에 장착</span>';if(it.ns){const up=isBetter(it,cur);return `종합 평가 <span class="${up?'p':'n'}">${up?'더 좋음':'더 약함'}</span>`}
+function cmpLine(it){const cur=eqCur(it);if(!cur)return '<span class="p">빈 칸에 장착</span>';if(it.ns){const g=pwGain(it).g*100;return `전투력 <span class="${g>.1?'p':g<-.1?'n':''}">${Math.abs(g)<.1?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</span>`}
   const up=isBetter(it,cur),bd=it.base-cur.base;
   return `${baseName(it.slot)} <span class="${bd>=0?'p':'n'}">${bd>=0?'+':''}${bd}</span> · 종합 평가 <span class="${up?'p':'n'}">${up?'더 좋음':'더 약함'}</span>`}
 /* v78 장비 화면: 세로 = 위 비교(현재 장착 | 선택) + 장착 6칸 + 가방 / 가로 = 왼쪽 비교 + 장착 목록 · 오른쪽 가방 / PC = 위 비교 + 아래 장착 · 가방 */
@@ -7101,7 +7112,10 @@ function ivCard(it,role,other){
   else if(role==='sel'&&osp)spl=`<div class="ivl"><span class="spb off">특수</span><span style="color:var(--muted)">없음</span><span class="d bad">▼ ${OPT[osp.k].n} ${OPT[osp.k].f(osp.v)}</span></div><div class="ivhint">전승사에서 지금 장비의 특수 능력치를 옮길 수 있습니다</div>`;
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
     <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==S.cls?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
-function ivAct(it,cur){if(!it)return '';const a=dpsWith(it),b=cur?dpsWith(cur):skillDps(C().skills[0]).main,p=b?(a-b)/b*100:0;
+function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()){const r=pwGain(it),b=pwNow(),g=r.g*100,c=Math.abs(g)<.1?'same':g>0?'good':'bad',dd=r.w?(r.w.d/b.d-1)*100:0,de=r.w?(r.w.e/b.e-1)*100:0,f=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(1)}%`;
+    return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 전투력</span><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>DPS ${f(dd)} · 버티기 ${f(de)}</small></div>
+  <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
+  const a=dpsWith(it),b=cur?dpsWith(cur):skillDps(C().skills[0]).main,p=b?(a-b)/b*100:0;
   const hv=x=>x?(x.slot==='ring'?x.base*eMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
   const dh=Math.round(hv(it)-hv(cur)),da=Math.round(av(it)-av(cur)),c=Math.abs(p)<.05?'same':p>0?'good':'bad';
   return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 DPS</span><b>${c==='same'?'변화 없음':`${p>0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%`}</b><small>${dh?`생명력 ${dh>0?'+':''}${dh}`:''}${dh&&da?' · ':''}${da?`방어력 ${da>0?'+':''}${da}`:''}</small></div>
@@ -7199,7 +7213,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.i&&lockMode){const it=S.inv.find(x=>x.id===+b.dataset.i);if(it){it.lock=!it.lock;save()}renderInv();return}
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','gloves','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:kSlot(k)}renderInv();return}
-  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],ek=eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
+  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==S.cls){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
