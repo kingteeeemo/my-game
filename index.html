@@ -2355,8 +2355,10 @@ function mesh(geo,mat,x,y,z){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,
 function addFire(g,x,y,z){const a=new THREE.Sprite(flameMatA),b=new THREE.Sprite(flameMatB);a.position.set(0,y+.45,0);b.position.set(0,y+.3,0);g.add(a,b);fires.push({x,z,y:y+.8,a,b,ph:rand(0,9),l:null})}
 function bowlTop(g,y){g.add(mesh(PG.bowl,PM.iron,0,y,0),mesh(PG.coal,PM.coal,0,y+.17,0))}
 const PROPSET=[{rock:3,tree:3,pillar:1.5,bones:1.2,brazier:.8},{tomb:4,tree:2,rock:1,pillar:1,bones:1.4,brazier:.8},{tree:4,rock:2,bones:1.4,tomb:1,brazier:.6},{rock:3.5,crystal:3,tree:1.2,pillar:1,brazier:.8},{pillar:3.5,rock:2.5,bones:1.6,brazier:1.2,tree:1},{rock:4,pillar:2.5,bones:2,brazier:1},{crystal:3,pillar:3,rock:2,brazier:1,bones:1}];
+/* v687: 비탈에 놓는 소품이 공중에 뜨지 않게 — 중심만이 아니라 둘레 8곳 중 가장 낮은 땅 높이에 놓음 */
+function gMin(x,z,r){let h=groundH(x,z);for(let i=0;i<8;i++){const a=i*Math.PI/4;h=Math.min(h,groundH(x+Math.cos(a)*r,z+Math.sin(a)*r))}return h}
 function addProp(x,z,kind,rot,arg,noCol){
-  const g=new THREE.Group();g.position.set(x,groundH(x,z)-(mapKind==='story'&&groundH(x,z)>0?.15:0),z);let cr=0;
+  const g=new THREE.Group(),gh=groundH(x,z);g.position.set(x,(gh>0?gMin(x,z,.9):gh)-(mapKind==='story'&&gh>0?.15:0),z);let cr=0;
   if(kind==='rock'){const s=rand(.7,1.6),m=mesh(rockGeos[Math.random()*4|0],PM.stone,0,s*.3,0);m.scale.set(s,s*rand(.6,1),s);m.rotation.y=rand(0,6);g.add(m);cr=s*.9}
   else if(kind==='pillar'||kind==='firePillar'){const fire=kind==='firePillar',h=fire?3.2:Math.random()<.55?rand(1,2.4):rand(2.8,4);
     g.add(mesh(PG.base,PM.pillar,0,.175,0));const d=mesh(PG.drum,PM.pillar,0,.35+h/2,0);d.scale.y=h;g.add(d);
@@ -3062,9 +3064,9 @@ let refA={lava:[],shroom:[]};
 const refMossTex=(()=>{const N=256,n=fbm(N,6,4),c=mkCv(N),im=new ImageData(N,N);for(let i=0;i<N*N;i++){const x=(i%N)/N-.5,y=((i/N)|0)/N-.5,r=Math.hypot(x,y)*2,a=sstep(.45,.75,n[i]+(1-r)*.28)*sstep(1,.4,r);im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=255;im.data[i*4+3]=a*255}c.getContext('2d').putImageData(im,0,0);return new THREE.CanvasTexture(c)})();
 function refMoss(x,z,r,op){const m=new THREE.Mesh(new THREE.CircleGeometry(r,24),new THREE.MeshBasicMaterial({map:refMossTex,color:0x2ad8c0,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.set(-Math.PI/2,0,rand(0,6));m.position.set(x,groundH(x,z)+.05,z);scene.add(m);propMeshes.push(m)}
 function refPool(x,z,r,col,op){const m=new THREE.Mesh(new THREE.CircleGeometry(r,28),new THREE.MeshBasicMaterial({map:refGlowTex,color:col,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(x,groundH(x,z)+.06,z);scene.add(m);propMeshes.push(m);return m}
-function refAdd(g,x,z,ry,col){g.position.set(x,groundH(x,z),z);if(ry)g.rotation.y=ry;scene.add(g);propMeshes.push(g);if(col)colliders.push({x,z,r:col});return g}
+function refAdd(g,x,z,ry,col){g.position.set(x,gMin(x,z,Math.min(1.2,col||.4)),z);if(ry)g.rotation.y=ry;scene.add(g);propMeshes.push(g);if(col)colliders.push({x,z,r:col});return g}
 const refStone=SM({color:0x55576a,map:stoneTex,bumpMap:stoneTex,bumpScale:.15,roughness:.95});
-function refRock(x,z,s,sy){const g=new THREE.Group(),m=mesh(rockGeos[Math.random()*4|0],refStone,0,s*.25,0);m.scale.set(s,s*(sy||rand(.55,.9)),s*rand(.8,1.2));m.rotation.y=rand(0,6);g.add(m);return refAdd(g,x,z,0,0)}
+function refRock(x,z,s,sy){const g=new THREE.Group(),m=mesh(rockGeos[Math.random()*4|0],refStone,0,s*.25,0);m.scale.set(s,s*(sy||rand(.55,.9)),s*rand(.8,1.2));m.rotation.y=rand(0,6);g.add(m);refAdd(g,x,z,0,0);g.position.y=Math.min(gMin(x,z,s*.45),gMin(x,z,s*.85))-s*.22;return g}
 const refMat={cap:SM({color:0x1e3a44,roughness:.55,emissive:0x0a4a5a,emissiveIntensity:.35}),gill:new THREE.MeshBasicMaterial({color:0x5ae8ff,transparent:true,opacity:.75,side:THREE.DoubleSide}),stem:SM({color:0x8a9aa0,roughness:.8}),dot:new THREE.MeshBasicMaterial({color:0xaaf6ff}),
   red:SM({color:0x6a2a2a,roughness:.95,side:THREE.DoubleSide}),blue:SM({color:0x2a3a5a,roughness:.95,side:THREE.DoubleSide}),cloth:[0x8a6a4a,0x5a6a8a,0x7a3a3a,0x4a6a4a].map(c=>SM({color:c,roughness:.95,side:THREE.DoubleSide})),
   fur:SM({color:0x2a2420,roughness:1}),glow:new THREE.MeshBasicMaterial({color:0xff8a2a}),water:SM({color:0x0a1a24,roughness:.05,metalness:.3}),bark:SM({color:0x2a2622,roughness:1})};
@@ -3182,7 +3184,7 @@ function vHouse(x,z,ry,w,d,chim){const g=new THREE.Group();w=w||4;d=d||3.4;g.add
 function vTree(x,z,s,big){const g=new THREE.Group();s=s||1;const t=mesh(new THREE.CylinderGeometry(.18*s,.32*s,3*s,8),vilMat.bark,0,1.5*s,0);t.rotation.z=rand(-.08,.08);g.add(t);
   const N=big?9:5;for(let i=0;i<N;i++){const a=i/N*6.3+rand(-.3,.3),q=i?rand(.9,1.7)*s:0,c=mesh(rockGeos[i%4],i%2?vilMat.leaf:vilMat.leaf2,Math.cos(a)*q,(3+rand(-.2,.9))*s,Math.sin(a)*q);c.scale.setScalar((big?rand(1.1,1.5):rand(.75,1.05))*s);g.add(c)}
   return refAdd(g,x,z,rand(0,6),.45*s)}
-function vBush(x,z,s){const g=new THREE.Group();for(let i=0;i<3;i++){const c=mesh(rockGeos[i],vilMat.leaf,rand(-.4,.4)*s,.35*s,rand(-.4,.4)*s);c.scale.setScalar(rand(.5,.8)*s);g.add(c)}return refAdd(g,x,z,0,0)}
+function vBush(x,z,s){const g=new THREE.Group();for(let i=0;i<3;i++){const c=mesh(rockGeos[i],vilMat.leaf,rand(-.4,.4)*s,.35*s,rand(-.4,.4)*s);c.scale.setScalar(rand(.5,.8)*s);g.add(c)}refAdd(g,x,z,0,0);g.position.y=gMin(x,z,.85*s)-.12;return g}
 function vFence(ax,az,bx,bz){const L=Math.hypot(bx-ax,bz-az),n=Math.max(1,Math.round(L/1.8)),g=new THREE.Group();for(let i=0;i<=n;i++){const t=i/n,x=ax+(bx-ax)*t,z=az+(bz-az)*t;const p=mesh(new THREE.BoxGeometry(.14,1.1,.14),vilMat.beam,x,groundH(x,z)+.55,z);g.add(p)}
   for(const y of [.45,.85]){const r=mesh(new THREE.BoxGeometry(.06,.08,L),vilMat.beam,(ax+bx)/2,groundH((ax+bx)/2,(az+bz)/2)+y,(az+bz)/2);r.rotation.y=Math.atan2(bx-ax,bz-az);g.add(r)}scene.add(g);propMeshes.push(g)}
 function buildVillage(){clearProps();propTheme='town';mapKind='town';townSync();setGround(130,130,.72);const L=STL;refA={lava:[],shroom:[],smoke:[]};
@@ -6794,7 +6796,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v686';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v687';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
