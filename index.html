@@ -2171,7 +2171,14 @@ function groundSet(key,d){
   const cc=mkCv(N),hc=mkCv(N),rc=mkCv(N),ec=sty.glow?mkCv(N):null;
   const ci=new ImageData(N,N),hi=new ImageData(N,N),ri=new ImageData(N,N),ei=ec?new ImageData(N,N):null;
   const gc=sty.glow?new THREE.Color(sty.glow):null,gth=1-(sty.gl||0),rough=sty.rough||1;
-  for(let i=0;i<N*N;i++){
+  if(sty.s==='rock'){/* v679: 동굴 암반 — 타일 없이 얼룩진 큰 무늬 + 끊어진 균열 + 자갈 + 결 (glow = 균열 없는 곳에 이끼처럼 번지는 빛) */
+    const n2=fbm(N,8,3),vr=voro(N,7),pb=voro(N,26);for(let i=0;i<N*N;i++){const nn=n[i],ff=f[i],m=n2[i],y=(i/N)|0,x=i%N;
+      const ck=(1-sstep(1,4.2,vr.edge[i]+(ff-.5)*3+(nn-.5)*6))*sstep(.5,.64,m),sr=.07*Math.sin((x*.8+y*.35)/N*36+m*7);
+      const pe=pb.edge[i],peb=sstep(5,9,pe)*(pb.id[i]<.35?1:0)*sstep(.45,.6,nn+ff*.3);
+      const c=((.34+.62*nn+.2*(ff-.5)+sr+(m-.5)*.4)*(1-.65*ck)+peb*(.18+.25*pb.id[i]))+(Math.random()-.5)*.06,h=.38+.34*nn+.14*ff+sr*.7-.4*ck+peb*.3,r=(.86+.12*ff-peb*.2)*rough,j=i*4;
+      ci.data[j]=Math.min(255,R0*c);ci.data[j+1]=Math.min(255,G0*c);ci.data[j+2]=Math.min(255,B0*c);ci.data[j+3]=255;hi.data[j]=hi.data[j+1]=hi.data[j+2]=Math.max(0,Math.min(1,h))*255;hi.data[j+3]=255;ri.data[j]=ri.data[j+1]=ri.data[j+2]=Math.min(255,r*255);ri.data[j+3]=255;
+      if(ei){const g=(1-ck)*(1-peb)*sstep(gth,gth+.12,m*.55+nn*.45)*(.55+.45*ff)*.6;ei.data[j]=gc.r*255*g;ei.data[j+1]=gc.g*255*g;ei.data[j+2]=gc.b*255*g;ei.data[j+3]=255}}}
+  else for(let i=0;i<N*N;i++){
     const e=vo.edge[i],nn=n[i],ff=f[i],id=vo.id[i];
     const isStone=sty.s==='dirt'?id<(sty.st||.3):true;
     const st=isStone?sstep(.8,3.2,e):0,bev=isStone?sstep(.8,10,e):0;
@@ -2211,7 +2218,7 @@ function curTheme(){if(inTown){townSync();return {key:TOWN.key,d:TOWN,pt:TOWN.pt
 let groundGlow=false,propTheme='',inTown=false;
 const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'창고'},TOWN_R=17;
 /* v676: 마을을 둘로 — 스토리(1~7장) = 잿불 마을, 아쉬카르에게 떨어진 뒤(S.ch>=NCH) = 추락자의 쉼터(성역 아래 동굴). 스토리를 마치면 잿불 마을로는 돌아가지 않음 */
-const TOWN0=Object.assign({key:'town'},TOWN),REF={key:'refuge',n:'추락자의 쉼터',ground:[42,44,54],fog:0x07080e,sty:{s:'flag',rough:.9},pt:'ash',shop:'약초꾼 미라',gear:'조율사 오린',smith:'외팔 대장장이 둔',heir:'재단사 이네',stash:'창고',hearth:'쉼터지기 하란'};
+const TOWN0=Object.assign({key:'town'},TOWN),REF={key:'refuge',n:'추락자의 쉼터',ground:[42,44,54],fog:0x07080e,sty:{s:'rock',rough:.95},pt:'ash',shop:'약초꾼 미라',gear:'조율사 오린',smith:'외팔 대장장이 둔',heir:'재단사 이네',stash:'창고',hearth:'쉼터지기 하란'};
 const refOn=()=>!!S&&S.ch>=NCH;
 function townSync(){const r=refOn();Object.assign(TOWN,r?REF:TOWN0);for(const n of NPCS){if(n.tx===undefined){n.tx=n.x;n.tz=n.z}const q=r&&REFP[n.id];n.x=q?q[0]:n.tx;n.z=q?q[1]:n.tz}}
 function applyTheme(){
@@ -3042,6 +3049,9 @@ const refGlowTex=(()=>{const c=mkCv(128),x=c.getContext('2d'),g=x.createRadialGr
 const refShaftTex=(()=>{const c=document.createElement('canvas');c.width=4;c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,128,0,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.25,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,1)');x.fillStyle=g;x.fillRect(0,0,4,128);return new THREE.CanvasTexture(c)})();
 const refLavaTex=(()=>{const c=mkCv(64),x=c.getContext('2d');x.fillStyle='#c83a08';x.fillRect(0,0,64,64);for(let i=0;i<70;i++){x.fillStyle=['#ffb030','#ff7a10','#ffe080','#a02a04'][i%4];x.fillRect(Math.random()*64,Math.random()*64,1+Math.random()*3,4+Math.random()*14)}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t})();
 let refA={lava:[],shroom:[]};
+/* v679: 빛이끼 — 바닥 텍스처는 반복되므로 버섯 숲에만 따로 덮는 이끼 조각(청록 발광) */
+const refMossTex=(()=>{const N=256,n=fbm(N,6,4),c=mkCv(N),im=new ImageData(N,N);for(let i=0;i<N*N;i++){const x=(i%N)/N-.5,y=((i/N)|0)/N-.5,r=Math.hypot(x,y)*2,a=sstep(.45,.75,n[i]+(1-r)*.28)*sstep(1,.4,r);im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=255;im.data[i*4+3]=a*255}c.getContext('2d').putImageData(im,0,0);return new THREE.CanvasTexture(c)})();
+function refMoss(x,z,r,op){const m=new THREE.Mesh(new THREE.CircleGeometry(r,24),new THREE.MeshBasicMaterial({map:refMossTex,color:0x2ad8c0,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.set(-Math.PI/2,0,rand(0,6));m.position.set(x,groundH(x,z)+.05,z);scene.add(m);propMeshes.push(m)}
 function refPool(x,z,r,col,op){const m=new THREE.Mesh(new THREE.CircleGeometry(r,28),new THREE.MeshBasicMaterial({map:refGlowTex,color:col,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(x,groundH(x,z)+.06,z);scene.add(m);propMeshes.push(m);return m}
 function refAdd(g,x,z,ry,col){g.position.set(x,groundH(x,z),z);if(ry)g.rotation.y=ry;scene.add(g);propMeshes.push(g);if(col)colliders.push({x,z,r:col});return g}
 const refStone=SM({color:0x55576a,map:stoneTex,bumpMap:stoneTex,bumpScale:.15,roughness:.95});
@@ -3070,6 +3080,8 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
   refShroom(-21.4,3.2,5.6,2.5,.06);refShroom(-16.2,-.8,3.8,1.6,-.1);refShroom(-23,8.6,4.2,1.8,.12);refShroom(-16.4,8.4,2.8,1.2,-.06);refShroom(-24,-1.8,3.4,1.5,.1);refShroom(-19.4,-3.2,2.4,1,-.12);
   for(let i=0;i<22;i++){const a=rand(0,6.3),q=rand(3,7.6);refShroom(-19+Math.cos(a)*q,3+Math.sin(a)*q,rand(.35,.95),rand(.18,.4),rand(-.2,.2))}
   refPool(-19.4,3.4,8.5,0x4ae0ff,.22);
+  for(let i=0;i<16;i++){const a=rand(0,6.3),q=Math.sqrt(Math.random())*7.5;refMoss(-19+Math.cos(a)*q,3+Math.sin(a)*q,rand(1.6,3.4),rand(.2,.34))}
+  for(const [x,z,r] of [[-12.6,2.2,1.6],[-10.4,1.2,1.1],[-14.4,-2.6,1.4],[-23.6,-4.6,1.8],[-22.4,10.4,1.5]])refMoss(x,z,r,.17);
   {const g=new THREE.Group();for(const sx of [-.9,.9])g.add(mesh(new THREE.BoxGeometry(.1,1.8,.1),PM.wood,sx,.9,0));g.add(mesh(new THREE.BoxGeometry(2,.08,.08),PM.wood,0,1.75,0));for(let i=0;i<5;i++)g.add(mesh(new THREE.ConeGeometry(.12,.45,6),refMat.cloth[3],-.7+i*.35,1.45,0));
     g.add(mesh(new THREE.BoxGeometry(1.3,.7,.6),PM.wood,0,.35,.7),mesh(new THREE.CylinderGeometry(.16,.12,.2,10),PM.stone,-.3,.8,.7));refAdd(g,-22,5.8,.9,.9)}
   /* 동쪽 대장간 — 벽을 타고 흐르는 용암 줄기 · 화덕 · 모루 · 물통 · 무기 걸이 */
@@ -6697,7 +6709,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v678';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v679';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
