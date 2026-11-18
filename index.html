@@ -2280,7 +2280,13 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   pools:[[98,.4,2.8],[70,-.35,3],[40,.3,2.6],[-22,-.4,3],[-40,.35,2.8],[-56,-.3,3]],pkind:'sand',
   tv:'cloak',trace:[['','모래에 반쯤 묻힌 붉은 망토. 카이렌의 것이다.'],['','망토 안쪽에 휘갈긴 글씨가 있다.'],['','「성역이 보인다. 이제 조금만 더. 누군가 이 글을 본다면 — 서둘러라.」']],
   camp:[['???','「바람이 잦아들 때, 그대는 봉우리를 보게 될 것이다. 그곳이 끝이자, 시작이다.」']],
-  wx:'sand',props:'desert',intro:'재와 모래가 뒤섞인 사막. 바람이 불면 앞이 보이지 않는다. 등대 불빛만이 길을 알려 준다.'}];
+  wx:'sand',props:'desert',intro:'재와 모래가 뒤섞인 사막. 바람이 불면 앞이 보이지 않는다. 등대 불빛만이 길을 알려 준다.'},
+  {/* 7장 루멘 성역 */
+  wk:[[129,8],[112,8],[100,13],[86,7],[72,14],[58,8],[44,13],[30,12],[18,6],[8,5],[0,5],[-10,9],[-26,14],[-44,8],[-60,13],[-76,6],[-92,12],[-104,7],[-129,9]],
+  pk:[{k:'chest',z:86,side:1,d:6,r:4},{k:'tower',z:32,side:-1,d:6.5,r:5.4,id:1},{k:'tower',z:28,side:1,d:6.5,r:5.4,id:2},{k:'elite',z:-44,side:-1,d:6.5,r:5.2}],
+  ev:[{k:'sgate',z:6},{k:'camp',z:-92}],witness:1,
+  camp:[['','봉우리 꼭대기에서 불길이 치솟는다.'],['','불길 속에서 무언가가 떨어져 내린다. 부러진 칼, 찢긴 붉은 망토.'],['','「…카이렌!」'],['???','「그는 불 앞에 섰고, 불은 그를 삼켰다. 이제 그 길을 이을 자는 그대뿐이다.」']],
+  wx:'fire',props:'sanctum',intro:'본래 빛을 모시던 루멘 성역. 지금은 꺼지지 않는 불이 차지한 곳. 왕좌가 머지않다.'}];
 function storyParams(ch){const r=srng(ch*7+3);MP={amp:8+r()*8,f1:.022+r()*.016,ph:r()*6,amp2:3+r()*4,f2:.06+r()*.03,ph2:r()*6,w0:9.5+r()*2,w1:1.5+r()*2,ph3:r()*6};
   const Z=CHZ[ch];MP.wk=Z?Z.wk:null;MP.lake=Z&&Z.lake||null;MP.pk=[];if(Z)for(const q of Z.pk){const c=pathC(q.z),w=pathW(q.z),x=c+q.side*(w+q.d);MP.pk.push(Object.assign({},q,{x,ax:c,az:q.z}))}}
 function wkW(z){const K=MP.wk;for(let i=0;i<K.length-1;i++){const [z0,w0]=K[i],[z1,w1]=K[i+1];if(z<=z0&&z>=z1){const t=(z0-z)/(z0-z1),u=(1-Math.cos(t*Math.PI))/2;return w0+(w1-w0)*u}}return K[K.length-1][1]}
@@ -2428,7 +2434,7 @@ function chzGrave(Z){const iron=SM({color:0x24262c,roughness:.5,metalness:.6}),d
   for(let n=0;n<10;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)-rand(.6,1.4)),g=chzG(x,z,0);for(let i=0;i<4;i++){const h=rand(.2,.45),cx=rand(-.3,.3),cz=rand(-.3,.3);g.add(mesh(new THREE.CylinderGeometry(.05,.05,h,6),wax,cx,h/2,cz));const f=new THREE.Sprite(fl);f.position.set(cx,h+.08,cz);f.scale.setScalar(.35);g.add(f)}}
   for(let n=0;n<14;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(1.8,9)),g=chzG(x,z,rand(0,6)),h=rand(2.6,4),t=mesh(new THREE.CylinderGeometry(.1,.24,h,7),grey,0,h/2,0);t.rotation.z=rand(-.12,.12);g.add(t);
     for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.03,.08,rand(.9,1.6),5),grey,0,0,0),q=new THREE.Group();b.position.y=.65;q.add(b);q.position.y=h*rand(.55,.85);q.rotation.set(0,rand(0,6),rand(.5,1.1));g.add(q)}}}
-function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props==='swamp')return chzSwamp(Z);if(Z.props==='canyon')return chzCanyon(Z);if(Z.props==='city')return chzCity(Z);if(Z.props==='desert')return chzDesert(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
+function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props==='swamp')return chzSwamp(Z);if(Z.props==='canyon')return chzCanyon(Z);if(Z.props==='city')return chzCity(Z);if(Z.props==='desert')return chzDesert(Z);if(Z.props==='sanctum')return chzSanctum(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
   const side=()=>Math.random()<.5?-1:1,offPt=(z,a,b)=>{const sd=side(),x=pathC(z)+sd*(pathW(z)+rand(a,b));return [x,z,sd]};
   /* 무너진 농가 — 지붕 없이 벽 일부·그을린 기둥 */
   for(const z of [97,54,-3,-41]){const sd=side(),x=pathC(z)+sd*(pathW(z)-3.6),zz=z;const g=chzG(x,zz,rand(-.4,.4)+(sd>0?Math.PI:0));{const w0=LW(x,zz);colliders.push({x:w0.x,z:w0.z,r:2.5})}const W=4.4,D=3.6;
@@ -2509,7 +2515,15 @@ function chzKairen(){/* 카이렌 — 회색 갑옷, 검붉은 망토, 긴 칼 *
   for(const sx of [-.16,.16])g.add(mesh(new THREE.BoxGeometry(.18,.9,.2),dark,sx,.45,0));g.add(mesh(new THREE.BoxGeometry(.6,.75,.36),arm,0,1.28,0),mesh(new THREE.SphereGeometry(.17,10,8),skin,0,1.82,0),mesh(new THREE.SphereGeometry(.18,10,8,0,6.3,0,1.5),SM({color:0x1a1410}),0,1.86,-.02));
   const ck=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.3),cloak);ck.position.set(0,1.05,-.22);ck.rotation.x=.12;g.add(ck);
   const sw=new THREE.Group();sw.position.set(.38,1.2,.05);const s2=new THREE.Group();s2.rotation.x=Math.PI*.55;chzSword(s2,0);s2.rotation.z=0;sw.add(s2);g.add(sw);g.userData.sw=sw;return g}
-function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];
+function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.tw=[];
+  for(const q of MP.pk){if(q.k!=='tower')continue;/* 탑 수호자 — 양옆 탑 아래의 타락한 빛의 수호자. 둘 다 쓰러뜨리면 성역 문이 열림 */const w=LW(q.x,q.z),tw=LW(q.x+q.side*2.6,q.z-1.5);addProp(tw.x,tw.z,'tower',0);refPool(w.x,w.z,q.r*.8,0xffc860,.16);
+    for(let i=0;i<4;i++){const a=i/4*6.28+.4;APL(q.x+Math.cos(a)*(q.r-.7),q.z+Math.sin(a)*(q.r-.7),'pillar',0,0,true)}CHZS.tw.push({q,w,sp:0,done:chevOn('g'+q.id)})}
+  for(const v of Z.ev){if(v.k!=='sgate'||chevOn('sgate'))continue;/* 성역 문 — 흰 돌기둥 둘 + 금빛 문짝(위를 가로지르는 들보 없음) */const c=pathC(v.z),wd=pathW(v.z)+.4,g=chzG(c,v.z,0),gold=SM({color:0xc8a040,roughness:.35,metalness:.7,emissive:0x3a2a08,emissiveIntensity:.5}),white=SM({color:0xd8d2c4,roughness:.6});
+    for(const sx of [-1,1]){g.add(mesh(new THREE.BoxGeometry(1.1,5.2,1.1),white,sx*(wd+.55),2.6,0),mesh(new THREE.ConeGeometry(.8,1,4),gold,sx*(wd+.55),5.7,0))}
+    const leaves=[];for(const sx of [-1,1]){const lf=new THREE.Group();lf.position.set(sx*wd,0,0);lf.add(mesh(new THREE.BoxGeometry(wd,3.6,.25),gold,-sx*wd/2,1.8,0));for(const y of [.8,1.8,2.8])lf.add(mesh(new THREE.BoxGeometry(wd*.8,.12,.3),white,-sx*wd/2,y,0));
+      const sun=mesh(new THREE.TorusGeometry(.45,.07,6,18),white,-sx*.25,2.2,.16);lf.add(sun);g.add(lf);leaves.push([lf,sx])}
+    const cl=[];for(let x=-wd;x<=wd;x+=1){const w2=LW(c+x,v.z),cc={x:w2.x,z:w2.z,r:.8,bar:1};colliders.push(cc);cl.push(cc)}CHZS.sg={g,leaves,cl,z:v.z}}
+
   if(Z.lh)Z.lh.forEach((z,i)=>{/* 등대 — 모래폭풍 속에서도 보이는 불빛(안개 무시) */const sd=i%2?1:-1,x=pathC(z)+sd*(pathW(z)+.2),g=chzG(x,z,0);g.add(mesh(new THREE.CylinderGeometry(.45,.7,5.2,8),PM.pillar,0,2.6,0),mesh(new THREE.CylinderGeometry(.75,.75,.3,8),PM.pillar,0,5.3,0));
     for(let k=0;k<4;k++){const a=k/4*6.28;g.add(mesh(new THREE.BoxGeometry(.1,.9,.1),PM.iron,Math.cos(a)*.55,5.9,Math.sin(a)*.55))}g.add(mesh(new THREE.ConeGeometry(.75,.6,8),PM.iron,0,6.6,0));
     const lm=new THREE.SpriteMaterial({map:refGlowTex,color:0xffd890,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}),l=new THREE.Sprite(lm);l.position.y=5.9;l.scale.setScalar(3.2);g.add(l);const l2=new THREE.Sprite(lm.clone());l2.material.color.set(0xffffff);l2.position.y=5.9;l2.scale.setScalar(1.1);g.add(l2);
@@ -2552,6 +2566,16 @@ function chzBeaconFire(B,quiet){const g=B.g,fm=new THREE.SpriteMaterial({map:fla
   fires.push({x:B.w.x,z:B.w.z,y:2.2,a:new THREE.Object3D(),b:new THREE.Object3D(),ph:B.q.id,l:null});refPool(B.w.x,B.w.z,5,0xff9a40,.35);B.ring.visible=false;if(!quiet){hitSpark(new THREE.Vector3(B.w.x,1.8,B.w.z),0xffd090,0xff6a1a,16);shake=Math.max(shake,.15)}}
 let fwHit=0;
 function chzTickX(dt,pl,Z){
+  if(CHZS.tw&&CHZS.tw.length){for(const T of CHZS.tw){if(T.done)continue;const d=Math.hypot(P.pos.x-T.w.x,P.pos.z-T.w.z);
+      if(!T.sp&&d<16){T.sp=1;const dd=diff(),e=spawnEnemy(dd.brute?'brute':'grunt',T.w.x,T.w.z,2);e.gev=1;e.twg=T.q.id;e.lab.firstChild.textContent='타락한 빛의 수호자';for(let i=0;i<2;i++){const a=i*3.1,w2=LW(T.q.x+Math.cos(a)*2,T.q.z+Math.sin(a)*2),e2=spawnEnemy('grunt',w2.x,w2.z,1);e2.gev=1}
+        if(!chevOn('twmsg')){chevSet('twmsg');toast('탑 수호자','양옆 탑의 수호자를 모두 쓰러뜨리면 성역 문이 열립니다')}}
+      else if(T.sp&&!enemies.some(e=>e.twg===T.q.id&&e.hp>0)){T.done=1;chevSet('g'+T.q.id);const n=CHZS.tw.filter(t=>t.done).length;toast('수호자가 쓰러졌다',n<CHZS.tw.length?'남은 수호자 1':'성역 문이 열린다');save();
+        if(n>=CHZS.tw.length&&CHZS.sg){const G=CHZS.sg;chevSet('sgate');for(const c of G.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}for(const [lf,sx] of G.leaves)fx.push({m:lf,t:0,dur:1.6,keep:1,upd(k){const e=1-(1-k)*(1-k);lf.rotation.y=sx*e*1.6},end(){}});
+          shake=Math.max(shake,.3);const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};CHZS.sg=null;save()}}}}
+  if(Z.witness&&CHZS.camp&&!chevOn('wit')&&Math.hypot(P.pos.x-CHZS.camp.x,P.pos.z-CHZS.camp.z)<5){chevSet('wit');/* 목격 — 봉우리에서 불덩이가 떨어져 내림 */const m=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xff7a2a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,fog:false}));
+    const tr=[];for(let i=0;i<6;i++){const s2=new THREE.Sprite(m.material.clone());s2.material.opacity=.5-i*.07;scene.add(s2);tr.push(s2)}scene.add(m);const a=LW(pathC(pl.z-11)+6,pl.z-11),b=LW(pathC(pl.z-5)+2.5,pl.z-5);
+    fx.push({m,t:0,dur:1.5,keep:1,upd(k){const e=Math.max(0,k);m.position.set(a.x+(b.x-a.x)*e,16-15*e*e,a.z+(b.z-a.z)*e);m.scale.setScalar(3.4);tr.forEach((s2,i)=>{const e2=Math.max(0,e-.04*(i+1));s2.position.set(a.x+(b.x-a.x)*e2,16-15*e2*e2,a.z+(b.z-a.z)*e2);s2.scale.setScalar(2.6-i*.3)})},end(){scene.remove(m);tr.forEach(s2=>scene.remove(s2));shake=Math.max(shake,.35);hitSpark(new THREE.Vector3(b.x,1,b.z),0xffd080,0xff5a1a,18)}})}
+
   if(CHZS.fw&&CHZS.fw.length){const t=performance.now()/1000;fwHit-=dt;for(const F of CHZS.fw){const k=(t+F.ph)%4.2,on=k>2.2,warn=k>1.5&&k<=2.2,fl=on?1+.18*Math.sin(t*14+F.ph):warn?(Math.sin(t*30)>0?.45:.2):.12;
       for(let i=0;i<F.sp.length;i++){const f=F.sp[i],j=1+.2*Math.sin(t*11+i);f.scale.set(1.1*fl*j,2.6*fl*j,1);f.position.y=.15+1.2*fl}F.gl.material.opacity=on?.6:warn?.35:.12;
       if(on&&fwHit<=0&&P.hp>0&&!P.mv&&Math.abs(pl.z-F.z)<.95&&Math.abs(pl.x-F.c)<F.wd+.4){fwHit=1.2;hurtPct(.12);hitSpark(new THREE.Vector3(P.pos.x,.8,P.pos.z),0xffd080,0xff5a1a,10)}}}
@@ -2602,6 +2626,16 @@ function wx2Tick(dt){const on=mapKind==='story'&&!inTown&&W2.cf;if(!W2.rain)retu
   if(C2.rain){const a=W2.rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=6){let y=a[i+1]-15*dt;let x=a[i],z=a[i+2];if(y<0||Math.abs(x-cx)>19||z-cz>15||z-cz<-19){x=cx+rand(-18,18);z=cz+rand(-18,14);y=rand(8,12)}a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x+.06;a[i+4]=y+.7;a[i+5]=z}W2.rain.geometry.attributes.position.needsUpdate=true}
   if(C2.pts){const a=W2.pts.geometry.attributes.position.array,k=1+W2.fk*1.4;for(let i=0,o=0;i<a.length;i+=3,o++){const ph=W2.pv[o*2],sp=W2.pv[o*2+1];a[i]+=(C2.vx*k+Math.sin(t*1.1+ph)*.5)*sp*dt;a[i+1]+=C2.vy*sp*dt;a[i+2]+=Math.cos(t*.8+ph)*.3*dt;
       if(a[i+1]<0||a[i+1]>12||a[i]-cx>19||a[i]-cx<-19||a[i+2]-cz>15||a[i+2]-cz<-19){a[i]=cx+(C2.vx>3?-18:rand(-18,18));a[i+2]=cz+rand(-18,14);a[i+1]=C2.vy>0?rand(0,1.5):C2.vy<-.5?rand(8,12):rand(.2,4)}}W2.pts.geometry.attributes.position.needsUpdate=true}}
+/* 7장 소품 — 루멘 성역: 흰 대리석 빛의 기둥(금빛 머리, 일부 쓰러짐), 훼손된 빛의 석상, 금빛 화로, 바닥의 금빛 원 문양, 그을린 금빛 깃발, 꺼진 빛의 제단 */
+function chzSanctum(Z){const white=SM({color:0xd8d2c4,roughness:.6}),gold=SM({color:0xc8a040,roughness:.35,metalness:.7}),char=SM({color:0x2a2420,roughness:1}),ban=SM({color:0xd8c890,roughness:1,side:THREE.DoubleSide}),side=()=>Math.random()<.5?-1:1;
+  for(let z=STORY_L-20;z>-STORY_L+24;z-=9)for(const sd of [-1,1]){if(Math.random()<.3)continue;const x=pathC(z)+sd*(pathW(z)+.8),g=chzG(x,z,0);if(Math.random()<.25){const c=mesh(new THREE.CylinderGeometry(.42,.48,4.6,12),white,0,.5,0);c.rotation.z=Math.PI/2;c.rotation.y=rand(0,3);g.add(c,mesh(new THREE.CylinderGeometry(.55,.6,.5,12),white,0,.25,0))}
+    else{const h=rand(4.2,6),c=mesh(new THREE.CylinderGeometry(.42,.48,h,12),white,0,h/2,0);g.add(c,mesh(new THREE.CylinderGeometry(.62,.62,.4,12),white,0,.2,0),mesh(new THREE.CylinderGeometry(.62,.42,.5,12),gold,0,h+.2,0))}{const w0=LW(x,z);colliders.push({x:w0.x,z:w0.z,r:.6})}}
+  for(const z of [104,60,-20,-64]){const sd=side();APL(pathC(z)+sd*(pathW(z)-1.2),z,'statue',sd>0?-1.2:1.2,0,false)}
+  for(let n=0;n<10;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)-.8),g=chzG(x,z,0);g.add(mesh(new THREE.CylinderGeometry(.3,.4,1.1,8),gold,0,.55,0),mesh(new THREE.CylinderGeometry(.55,.35,.3,10),gold,0,1.2,0));const w0=LW(x,z);addFire(g,w0.x,1.35,w0.z);colliders.push({x:w0.x,z:w0.z,r:.5})}
+  for(const z of [100,58,-26,-60]){const x=pathC(z),w0=LW(x,z),m=new THREE.Mesh(new THREE.RingGeometry(3,3.4,40),new THREE.MeshBasicMaterial({color:0xc8a040,transparent:true,opacity:.35,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(w0.x,.04,w0.z);scene.add(m);propMeshes.push(m);
+    const m2=new THREE.Mesh(new THREE.RingGeometry(1.6,1.75,6),m.material);m2.rotation.x=-Math.PI/2;m2.position.set(w0.x,.045,w0.z);scene.add(m2);propMeshes.push(m2)}
+  for(let n=0;n<12;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)+.3),g=chzG(x,z,0);g.add(mesh(new THREE.CylinderGeometry(.06,.07,3.6,6),gold,0,1.8,0));const f=new THREE.Mesh(new THREE.PlaneGeometry(.8,1.8),ban);f.position.set(.42,2.5,0);f.scale.y=rand(.5,1);g.add(f);const bn=new THREE.Mesh(new THREE.PlaneGeometry(.82,.5),SM({color:0x1a1210,roughness:1,side:THREE.DoubleSide}));bn.position.set(.42,1.75-(1-f.scale.y)*.9,.01);g.add(bn)}
+  for(const z of [80,-36]){const sd=side(),x=pathC(z)+sd*(pathW(z)+2),g=chzG(x,z,0);g.add(mesh(new THREE.BoxGeometry(2.4,.5,1.6),white,0,.25,0),mesh(new THREE.BoxGeometry(1.8,.9,1.1),white,0,.95,0));const cr=mesh(PG.crys,PM.stone,0,1.9,0);cr.scale.set(.4,.9,.4);g.add(cr)}}
 /* 6장 소품 — 재의 사막: 모래 언덕, 거대한 짐승의 갈비뼈, 부서진 오벨리스크, 마른 덤불, 버려진 대상 수레·천막, 해골 */
 function chzDesert(Z){const sand=SM({color:0x9a8460,roughness:1}),bone=SM({color:0xd8ccb0,roughness:.8}),dry=SM({color:0x6a5a3a,roughness:1}),stone=SM({color:0x8a7a62,roughness:1}),side=()=>Math.random()<.5?-1:1;
   for(let n=0;n<34;n++){const z=rand(-STORY_L+12,STORY_L-8),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(-.5,7)),g=chzG(x,z,rand(0,6)),m=mesh(new THREE.SphereGeometry(1,12,6),sand,0,-.5,0);m.scale.set(rand(2,4),rand(.5,.9),rand(1.4,2.6));g.add(m)}
@@ -5932,7 +5966,7 @@ function nsHurt(d,raw){const D=nsDef();
 function die(){{const fb=thOn&&enemies.find(e=>e.perch&&e.a2);if(fb){/* v614: 2막에서 쓰러지면 패배 화면 없이 바로 추락 결말로 */P.hp=1;P.inv=99;ashA2Go(fb,'breath');return}}tele('die',{duel:S.duel?1:0,arena:inArena()?1:0});if(RZ&&RZ.st==='on')riftEnd(false,'쓰러졌습니다');
   if(S.duel){P.pos.set(FB_START.x,0,FB_START.z);P.hp=P.mhp;P.mp=P.mmp;for(const e of enemies)if(e.duel){e.hp=e.mhp;e.dA=null;e.chg=null;e.jy=0;e.rage=false;if(e.maw)mawReset(e);else{e.spd=3.2;e.pt=3;e.pos.set(FB_POS.x,0,FB_POS.z);e.introT=undefined;e.holdT=0}}S.duel.fail=1;/* v582: 지고 나서 「다시 도전」을 누를 때만 등장 연출 생략 */later(.25,()=>defeatCine(`${duelDef().n}에게 패배했습니다`,showDuelFail));return}
   if(!inArena()){const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;toast('쓰러졌습니다',`${mapKind==='story'&&S.chk&&S.chk.ch===S.ch?'마지막 모닥불에서':mapKind==='story'?'길 처음에서':'성역 중앙에서'} 다시 일어섭니다 · 경험치 -${fmtG(loss)} (20%)`);save()}
-  if(mapKind==='story'){for(let i=enemies.length-1;i>=0;i--)if(enemies[i].gev)dropEnemy(enemies[i]);if(CHZS.gate)CHZS.gate.sp=0;if(CHZS.kg)CHZS.kg.sp=0;if(CHZS.beacons)for(const B of CHZS.beacons)if(!B.lit)B.sp=0}
+  if(mapKind==='story'){for(let i=enemies.length-1;i>=0;i--)if(enemies[i].gev)dropEnemy(enemies[i]);if(CHZS.gate)CHZS.gate.sp=0;if(CHZS.kg)CHZS.kg.sp=0;if(CHZS.beacons)for(const B of CHZS.beacons)if(!B.lit)B.sp=0;if(CHZS.tw)for(const T of CHZS.tw)if(!T.done)T.sp=0}
   {const sp=spawnPt();P.pos.set(sp.x,0,sp.z)}P.hp=P.mhp;P.mp=P.mmp;
   if(inArena()){P.pos.set(FB_START.x,0,FB_START.z);for(const e of enemies)if(e.final){if(e.rage){e.rage=false;e.spd/=1.3}e.air=null;e.ip=0;e.g.position.y=0;e.g.children.forEach(c=>c.visible=true);e.hp=e.mhp;e.aggro=false;e.nova=5;e.chg=null;e.pat=4;e.patN=0;e.pos.set(FB_POS.x,0,FB_POS.z);if(e.perch)ashSetup(e,0)}if(thOn){bossFailed.dragon=1;toastOff()/* v665: 사이페 문구가 패배 뒤까지 남지 않게 */}/* v624: 진 뒤 「최종 결전 재도전」은 계단·등장 연출 없이 바로 전투(검귀 카이렌·아귀와 같게) */later(.25,()=>defeatCine(`${FINAL.boss}에게 패배했습니다`,showArenaFail));return}
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.chBoss){e.hp=e.mhp;e.aggro=false;e.pos.set(ALTAR.x,0,ALTAR.z)}else if(e.boss)e.hp=e.mhp;else if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<16)dropEnemy(e)}
@@ -7154,7 +7188,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v701';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v702';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
