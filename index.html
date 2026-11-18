@@ -1431,7 +1431,7 @@ const gOrb=L=>({ex:L>0,br:(1.8+.15*L)*1.3,bm:(.4+.05*L)*1.5});
 /* 2차 강화 (v33 → v40): 1차 강화 3종을 모두 채우는 31레벨부터 해금. 「잿불 정수」+ 골드로 올림 (실패 없음)
    직업마다 위 = 3단계 강화, 아래 = 5단계 강화 */
 const ESS_LV=31,G2MAX=5;let mapOpen=false,heirOpen=false;
-const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
+const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},4:{e:[12,28,55,85],g:[4000,12000,25000,45000]}/* v674: 4단계 표(연발 폭격) */,5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>NS()&&NG2C[g2Max(g)]?NG2C[g2Max(g)][L]:Math.ceil(G2C[g2Max(g)].e[L]*1.3),/* v235: 2차 강화 정수 +30% (G2C 원본은 옛 세이브 반환 계산용으로 유지) */g2Gold=(g,L)=>Math.max(1,Math.round(G2C[g2Max(g)].g[L]/10));/* v411: 골드 1/10 */
 /* v82 새 주력 스킬 보조 수치 */
 const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v155: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[45,60,90,130,170,210]/* v155: 기본(가시 확산 0단계) 30° → 45° */,qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
@@ -1798,7 +1798,7 @@ function auraToggle(k){if(!auraL(k))return;S.auraOn=S.auraOn||{};if(S.auraOn[k])
   refreshMax();save()}
 function auraUp(k){const L=auraL(k);if(L>=10)return false;const c=AURA_COST[L];if((S.ess||0)<c)return false;S.ess-=c;S.aura=S.aura||{};S.aura[k]=L+1;return true}
 /* 추가 강화 정수(새 비용): 첫 강화 24 ~ 마지막 94 */
-const NG2C={3:[24,47,94],5:[24,34,47,67,94]};
+const NG2C={3:[24,47,94],4:[24,40,67,94],5:[24,34,47,67,94]};
 let menuTab='sk',menuAuraMeasure=false;
 /* ===== v484 NS 몬스터·보스 (설계 7-3) ===== */
 const nLerpLog=(x,pts)=>{if(x<=pts[0][0])return pts[0][1];for(let i=1;i<pts.length;i++)if(x<=pts[i][0]){const[a,b]=pts[i-1],[c,d]=pts[i],f=(x-a)/(c-a);return Math.exp(Math.log(b)+(Math.log(d)-Math.log(b))*f)}return pts[pts.length-1][1]};
@@ -5749,7 +5749,7 @@ function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_S
 function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q,f)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
 const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.16*L/* 탄속 강화(5단계): +80% */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
-  bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(3단계): 2·3·4발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
+  bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const SK_NEW={
@@ -5768,7 +5768,7 @@ Object.assign(GEMS,{
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'매영조화',/* v664: 검기 확장 → 매영조화 */c:'#ffb0c8',d:L=>{const g=(typeof S!=='undefined'&&S&&S.sk&&S.sk.wave)||{},k=wvProg(g.wlen||0,g.wecho||0,L),a=wvShape(k,0,1).deg,b=wvShape(k,1,1).deg;return `검기가 더 넓게 퍼짐 — 발사 ${Math.round(a)}° → 사거리 끝 ${Math.round(b)}°\n(매화섬·낙화검도 크기를 조금 키움 · 모두 최대 ${WV_A0[1]}° → ${WV_A1[1]}°)`}},/* v645: 부채 검기 → 검기 확장 (같은 id라 기존 투자 단계 유지) */
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
-  bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',max:3,d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
+  bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',max:4/* v674: 3→4단계, 최대 5발 */,d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
   bspd:{s:'boom',n:'가속 화살',c:'#c8d8ff',max:5,d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v672 */
   bshrap:{s:'boom',n:'파편 작렬',c:'#ffa060',d:L=>{const s=bmShrap(L);return `폭발할 때 불꽃 파편 ${s.n}개가 사방으로 튐 (파편 피해 ×${s.m.toFixed(2)})`}},
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
@@ -6229,7 +6229,7 @@ function castFire(slot,id){
     const one=(mul,delay)=>{const f=()=>{if(P.hp<=0)return;P.swing=.2;/* v650: 휘두를 때 화면 흔들림 없음(검기 폭발 때만) *//* v648: 휘두르는 궤적 = 검기(shootWave가 그림) */
       const FL=wvFanLayout(fan.n,fan.sp,st.wk),PT=WV_PAT[wvSeq++%WV_PAT.length];P.wvClip=PT.clip;for(let i=0;i<fan.n;i++){const d=i-(fan.n-1)/2,aa=a+d*FL.sp,m=d===0?1:fan.m;shootWave(aa,{dir:PT.dir,roll:PT.roll,yaw:PT.yaw,k:st.wk,as:FL.as,speed:WV_SPD,life:st.len/WV_SPD,dmg:base*st.dmg*mul*m,so:st.so,burst:st.burst?{r:st.burst.r,dmg:base*st.dmg*mul*m*st.burst.m}:null})}};delay?later(delay,f):f()};
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
-  if(b.kind==='boom'){aim(18);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.38,1.1/Math.max(1,n-1));
+  if(b.kind==='boom'){aim(18);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.418,1.21/Math.max(1,n-1));/* v674: 각도 10% 넓힘 */
     for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7*2.1;/* v671: 사거리 2.1배(가운데 화살 16m) *//* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffffff,c1:0x6a8aff,a:.9,tex:1});
       shootBoom(aa,dist,{spd:st.bspd||1,r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null,shrap:st.shrap?{n:st.shrap.n,dmg:base*st.dmg*st.multi.m*st.shrap.m}:null})}}return}
   if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;poseStart('pillar',.5,{pre:P.castPre});const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
@@ -6554,7 +6554,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v673';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v674';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
