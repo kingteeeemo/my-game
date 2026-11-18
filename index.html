@@ -1437,26 +1437,26 @@ const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},4:{e:[12,28,55,85],g:[4000,1200
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>NS()&&NG2C[g2Max(g)]?NG2C[g2Max(g)][L]:Math.ceil(G2C[g2Max(g)].e[L]*1.3),/* v235: 2차 강화 정수 +30% (G2C 원본은 옛 세이브 반환 계산용으로 유지) */g2Gold=(g,L)=>Math.max(1,Math.round(G2C[g2Max(g)].g[L]/10));/* v411: 골드 1/10 */
 /* v82 새 주력 스킬 보조 수치 */
 const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v155: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[45,60,90,130,170,210]/* v155: 기본(가시 확산 0단계) 30° → 45° */,qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
-const shkR=L=>1.8+(5-1.8)*(L-1)/2,shkN=L=>[0,3,6,10][L]||10,aftM=L=>L*(.5+.1*L),/* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:1.8,m:(2+.2*L)*(.5+.125*L)/1.8});/* v153: 지속시간 1.8초 고정, 단계는 피해만 증가 — 총 피해량(×dur×m)은 v145와 동일(10단계 7.0) *//* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
+const shkR=L=>1.8+(5-1.8)*(L-1)/4,shkN=L=>[0,3,4,6,8,10][L]||10,aftM=L=>{const x=.6*L;return x*(.5+.1*x)},/* v696: 2차 강화 5단계 통일 — 5단계 = 옛 3단계 *//* v140: 여진(×(0.5+0.1L)을 L번) → 충격파 1번(같은 총량) */magSt=L=>({dur:1.8,m:(2+.2*L)*(.5+.125*L)/1.8});/* v153: 지속시간 1.8초 고정, 단계는 피해만 증가 — 총 피해량(×dur×m)은 v145와 동일(10단계 7.0) *//* v145: 용암 균열 1차 강화 10단계 = 옛 2차 5단계(4초 · ×1.75) */
 const SHK_HALF0=.26,SHK_DEN=.7;/* v145: 충격파 수는 부채꼴 넓이에 비례 (30° 기준 옛 횟수의 70%) */
 const shkCnt=(L,half)=>Math.max(1,Math.round(shkN(L)*SHK_DEN*half/SHK_HALF0));
 const rR=L=>2.6*(1+.12*L),rDur=L=>2+.1*L,rDen=L=>({rate:6*(1+.08*L),zones:L>=10?3:L>=5?2:1});
-const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:1+L,m:.5+.37*L,d:2*(1.6+.5*L)});/* v140: 파편 거리 2배 (3단계 6.2m) */
+const relSt=L=>({rate:1.5+.5*L,r:1.4+.2*L,m:2+.5*L}),metM=L=>8+6*L,splSt=L=>({n:Math.round(1+.6*L),m:.5+.222*L,d:2*(1.6+.3*L)});/* v696: 5단계 = 옛 3단계 *//* v140: 파편 거리 2배 (3단계 6.2m) */
 const CH_HIT=1.05;/* v249: 연쇄 번개 직격 피해 +5% */
 const cBnc=L=>({n:Math.max(3,Math.round(2+1.6*L)),/* v140: 1단계 3명 → 10단계 12명 → v249: 10단계 18명 */k:1,/* v241: 튕길 때마다 피해 감소 없음 */jr:6*(1+.03*L)}),cFrk=L=>({n:L>=10?4:L>=5?3:L>=1?2:1,sl:L?.6+.06*L:0});
-const OV_R=6,/* v239: 과부하 반경 4 → 6m (×1.5) */csSt=L=>({r:(1.4+.25*L)*(1+.1*L)*1.2,/* v239: 번개 폭풍 반경 ×1.5 → v241: -20% (×1.2) */m:(.3+.12*L)*1.3/* v249: 번개 폭풍 피해 +30% */}),ovSt=L=>({dur:1.5+.5*L,m:(.25+.15*L)*1.3/* v249: 과부하 피해 +30% */});
+const OV_R=6,/* v239: 과부하 반경 4 → 6m (×1.5) */csSt=L=>({r:(1.4+.25*L)*(1+.1*L)*1.2,/* v239: 번개 폭풍 반경 ×1.5 → v241: -20% (×1.2) */m:(.3+.12*L)*1.3/* v249: 번개 폭풍 피해 +30% */}),ovSt=L=>({dur:1.5+.3*L,m:(.25+.09*L)*1.3/* v249: 과부하 피해 +30% */});
 const GEMS2={
-  aftsh:{s:'quake',n:'충격파',c:'#e0b080',max:3,d:L=>`가시가 솟는 구간 곳곳에서 작은 충격파(반경 ${shkR(L).toFixed(1)}m)가 무작위로 터짐 · 부채꼴이 넓을수록 더 많이\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
+  aftsh:{s:'quake',n:'충격파',c:'#e0b080',d:L=>`가시가 솟는 구간 곳곳에서 작은 충격파(반경 ${shkR(L).toFixed(1)}m)가 무작위로 터짐 · 부채꼴이 넓을수록 더 많이\n부채꼴 안 적 1명당 평균 피해 ×${aftM(L).toFixed(2)}`},
   qspread:{s:'quake',n:'가시 확산',c:'#ffb070',d:L=>{const f=qFork(L);return `부채꼴 ${QSP_DEG[Math.min(5,L)]}° (가장자리 피해 ×${f.m.toFixed(2)})`}},
-  meteor2:{s:'rain',n:'분열 화살',c:'#e8ffb0',max:3,d:L=>{const x=splSt(L);return `땅에 꽂힌 화살이 파편 ${x.n}개로 갈라져 튐\n최대 ${x.d.toFixed(1)}m 바깥까지 · 파편 피해 ×${x.m.toFixed(2)}`}},
+  meteor2:{s:'rain',n:'분열 화살',c:'#e8ffb0',d:L=>{const x=splSt(L);return `땅에 꽂힌 화살이 파편 ${x.n}개로 갈라져 튐\n최대 ${x.d.toFixed(1)}m 바깥까지 · 파편 피해 ×${x.m.toFixed(2)}`}},
   relem:{s:'rain',get n(){return arEl()==='fire'?'화염 화살비':'번개 화살비'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=relSt(L);return `화살비 안에서 초당 ${x.rate.toFixed(1)}회 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(1)} 화살 세례분`}},
-  overl:{s:'chainl',n:'과부하',c:'#e0d0ff',max:3,d:L=>{const o=ovSt(L);return `연쇄가 끝난 자리에 번개 구체가 ${o.dur.toFixed(1)}초 남아 반경 ${OV_R}m를 0.3초마다 감전 (피해 ×${o.m.toFixed(2)})`}},
+  overl:{s:'chainl',n:'과부하',c:'#e0d0ff',d:L=>{const o=ovSt(L);return `연쇄가 끝난 자리에 번개 구체가 ${o.dur.toFixed(1)}초 남아 반경 ${OV_R}m를 0.3초마다 감전 (피해 ×${o.m.toFixed(2)})`}},
   cstorm:{s:'chainl',n:'번개 폭풍',c:'#b8a0ff',d:L=>{const x=csSt(L);return `번개가 맞힐 때마다 반경 ${x.r.toFixed(1)}m 번개 폭발 (피해 ×${x.m.toFixed(2)})`}},
-  tri:{s:'frost',n:'오중 보주',c:'#bfe8ff',max:3,d:L=>`보주 ${TRI_N[L]}개 발사${TRI_N[L]>=3?` (사방 ${TRI_N[L]}방향${TRI_N[L]===5?' · 정오각형':''})`:''} · 보주 속도 +${Math.round(TRI_SP[L]*100)}%`},
+  tri:{s:'frost',n:'오중 보주',c:'#bfe8ff',d:L=>`보주 ${TRI_N[L]}개 발사${TRI_N[L]>=3?` (사방 ${TRI_N[L]}방향${TRI_N[L]===5?' · 정오각형':''})`:''} · 보주 속도 +${Math.round(TRI_SP[L]*100)}%`},
   fnova:{s:'frost',n:'서리 폭발',c:'#7fd0ff',d:L=>{const v=novaSt(L);return `보주마다 ${v.iv.toFixed(2)}초마다 그 자리에 얼음 폭발\n초당 ${(1/v.iv).toFixed(1)}회 · 반경 ${v.r.toFixed(1)}m · 파편 피해 ×${v.m.toFixed(2)}\n파편 난사 빈도 -${Math.min(100,L*20)}%${L>=5?' (파편 없음)':''}`}},
-  dash:{s:'whirl',n:'질주',c:'#a0e0a0',max:3,d:L=>`회전 베기 시전하는 동안 이동 속도 +${20*L}%`},
+  dash:{s:'whirl',n:'질주',c:'#a0e0a0',d:L=>`회전 베기 시전하는 동안 이동 속도 +${12*L}%`},
   flame:{s:'whirl',get n(){return whEl()==='frost'?'서리 폭발':'화염 폭발'},get c(){return whEl()==='frost'?'#7fd0ff':'#ff8a3a'},d:L=>{const f=flameSt(L);return `회전하는 동안 ${f.iv.toFixed(2)}초마다 내 자리에 ${whEl()==='frost'?'서리':'화염'} 폭발\n초당 ${(1/f.iv).toFixed(1)}회 · 회전 범위의 ${Math.round(f.rm*100)}% · 피해 ×${f.m.toFixed(2)}`}},
-  boomer:{s:'volley',n:'회귀 화살',c:'#d8f07a',max:3,d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 한꺼번에 되돌아옴 (돌아올 때 피해 ×${r.m.toFixed(2)})\n화살 속도 +${Math.round((r.sp-1)*100)}%`}},
+  boomer:{s:'volley',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 한꺼번에 되돌아옴 (돌아올 때 피해 ×${r.m.toFixed(2)})\n화살 속도 +${Math.round((r.sp-1)*100)}%`}},
   lblast:{s:'volley',get n(){return arEl()==='fire'?'화염 폭발':'번개 폭발'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=lbSt(L);return `화살이 맞은 자리에 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(2)}`}}
 };
 /* v65 궁수: 1차 「연쇄 - 관통」(10단계, 옛 2차 분열 화살을 10단계로 + 관통 최대 4명), 2차 「번개 폭발」(5단계, 옛 1차 폭발보다 강하게) */
@@ -1468,11 +1468,11 @@ const rawDps=f=>{dpsRaw++;try{return f()}finally{dpsRaw--}};
 const BOSS_IDS=['volley','rain','frost','quake'],BOSS_D={volley:'화살 8발이 일반의 1/3 각도로 뭉쳐 나갑니다',rain:'화살비가 모두 한 곳에 겹쳐 내립니다',frost:'보주가 사방 대신 정면 좁은 부채꼴로 한꺼번에 나갑니다',quake:'부채꼴을 1/5로 좁히고 피해를 5배로 압축합니다'},inBossFight=()=>typeof S!=='undefined'&&!!S&&!!S.duel/* v269: 결투장(검귀 카이렌·심연의 아귀)에 입장했을 때만 — 필드에서 만나는 보스·스토리 보스·최종 보스는 해당 없음 */,bossOn=id=>!!(!dpsRaw&&typeof S!=='undefined'&&S&&S.bossM&&BOSS_IDS.includes(id)&&g2Done(id));/* v440: 2차 강화(피해 증가 제외)를 모두 끝낸 뒤에만 *//* v439: 보스 모드는 공격 버튼 자리 토글 하나로 — 결투장·필드 어디서나 켜고 끔(기본 꺼짐) *//* v265: 보스 모드 — 보스전(결투·보스·최종 보스)에 들어가면 자동 적용, 스킬창에서 끌 수 있음(기본 켜짐) */
 const whEl=()=>(typeof S!=='undefined'&&S&&S.whEl)||'fire',whIce=()=>whEl()==='frost'?'nova':undefined;/* v515: 회전 베기 폭발 속성 — 화염/서리(모습만 다르고 피해·범위 동일) */
 const arEl=()=>(typeof S!=='undefined'&&S&&S.arEl)||'bolt',elCost=()=>Math.round(2000+S.lv*S.lv*8);/* v411: 골드 1/10 *//* v67: 10배 */
-const TRI_N=[1,3,4,5];/* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
-const TRI_SP=[0,.33,.67,1];/* 3단계 +100% */
+const TRI_N=[1,2,3,3,4,5];/* v696: 5단계 *//* v60: 오중 보주 단계별 보주 수 (1단계 3개 · 2단계 4개 · 3단계 5개) */
+const TRI_SP=[0,.2,.4,.6,.8,1];/* 3단계 +100% */
 const NOVA_DML=[0,3.31,4.17,3.78,3.53,3.0];const nDM=L=>NOVA_DML[Math.max(0,Math.min(5,L))];/* v313: 단계별 서리 폭발 피해 배율 — 파편 난사가 줄어든 만큼(단계당 -20%) 서리 폭발이 메움. 각 단계 총딜 = v311(파편 전부 + ×0.9) 총딜 (허수아비 아귀에서 파편·서리 폭발 딜을 따로 측정해 계산) *//* NOVA_DK: 표기 DPS용 서리 폭발 배율 (실제 클리어 시간이 같은 만큼 표기도 이전 총합에 맞춤) */const novaSt=L=>({iv:(.56-.06*L)/1.3/1.4,r:(2.6+.4*L)*1.26,m:(.5+.2*L)*nDM(L)});/* v306: 5단계 초당 7회(iv/1.4) · v305: 서리 폭발 빈도 2배(iv/2), 1회 피해는 NOVA_DM으로 보정해 허수아비 아귀 클리어 시간 유지 *//* v58: 초당 횟수 +30% · v60·v61: 반경 1.26배(v58의 2배 → 30% → 다시 10% 축소) *//* 5단계: 초당 3.8회 · 반경 4.6m · ×1.5 (보주 4개가 동시에 터지므로 1회 피해는 낮게) */
 const flameSt=L=>{const f5=2/(.42-.15),f1=2/(.42-.03)/2,f=f1+(f5-f1)*Math.pow((L-1)/4,1.5);return{iv:1/f,rm:1.5+.2*L,m:.9+.3*L}};/* v71: 1단계=기존 1/2(초당 2.6회), 5단계 동일(7.4회), 지수 1.5 곡선 *//* v65: 초당 횟수 2배(1회 피해 그대로) *//* 5단계: 0.27초 · 250% · ×2.4 */
-const retSt=L=>({p:[0,.3,.6,1][L],sp:1+[0,.3,.55,.8][L],m:.8+.1*(L-1)});
+const retSt=L=>({p:[0,.2,.4,.6,.8,1][L],sp:1+[0,.18,.35,.5,.65,.8][L],m:.8+.05*(L-1)});/* v696: 5단계 */
 /* v44: 2차 강화를 모두 채우면 잿불 정수·골드로 「피해 증가」를 끝없이 올림 (단계당 +3%) */
 /* v131 2차 강화 후 피해 증가(정수): 단계별 증가량이 정수 요구량에 따라 커짐 — 처음 +1%, (요구 정수/첫 요구량)^0.6 배. 마나는 피해 1%당 +0.5. 골드 전 구간 ×1.3 */
 /* v134: v131 변경 원복 — 단계당 +4% 고정, 마나 단계당 +2, 골드 30000+15000×단계 */
@@ -1865,7 +1865,7 @@ function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return t
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
+const fresh=()=>({nick:'',v696g2:1,playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 /* v603: 시즌 2 장비 개편 이전의 새 장비 → 같은 부위·티어·베이스로 다시 만듦(남아 있는 옵션 종류는 최대한 유지, 획득량 옵션은 다른 옵션으로) · 강화는 최대 +20 */
@@ -1913,6 +1913,7 @@ function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;
   if(!s.v40){s.v40=1;const O5=[9,18,30,48,72],O10=[5,9,13,18,24,31,39,48,58,70],sum=(a,n)=>a.slice(0,n).reduce((x,y)=>x+y,0);
     for(const g of Object.keys(s.sk2||{})){if(!GEMS2[g]){delete s.sk2[g];continue}const L=s.sk2[g]||0,nl=Math.min(L,g2Max(g)),r=sum(g==='flame'?O10:O5,L)-sum(G2C[g2Max(g)].e,nl);s.sk2[g]=nl;if(r>0)s.ess=(s.ess||0)+r}}
   if(s.sk2&&s.sk2.bshrap){const L=s.sk2.bshrap;for(let i=0;i<L;i++){s.ess=(s.ess||0)+(s.test?NG2C[5][i]:Math.ceil(G2C[5].e[i]*1.3));s.gold=(s.gold||0)+Math.round(G2C[5].g[i]/10)}delete s.sk2.bshrap}/* v675: 파편 작렬 삭제 → 정수·골드 반환 */
+  if(!s.v696g2){s.v696g2=1;if(s.sk2){const M3=[0,2,3,5],M4=[0,1,2,4,5];for(const g of ['aftsh','meteor2','overl','tri','dash','boomer','pecho']){const L=s.sk2[g]||0;if(L)s.sk2[g]=M3[Math.min(3,L)]}const b=s.sk2.bmulti||0;if(b)s.sk2.bmulti=M4[Math.min(4,b)]}}/* v696: 2차 강화 모두 5단계 — 3단계였던 것은 1→2·2→3·3→5, 연발 폭격(4단계) 1→1·2→2·3→4·4→5 (같은 세기 유지) */
   /* v145: 대지 분쇄 — 가시 확산(1차)·용암 균열(2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
   if(!s.v145q){s.v145q=1;const q=s.sk&&s.sk.quake;if(q&&q.qfork){s.skp.quake=(s.skp.quake||0)+q.qfork;delete q.qfork}
     const mL=(s.sk2&&s.sk2.magma)||0;if(mL){const c=G2C[5];for(let i=0;i<mL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.magma}
@@ -2060,7 +2061,7 @@ function skillStats(id){
     else{const uu=CD_U*(st.cd/b.cd)*h,nc=cdCurve(uu,gear().cdr);st.dmg*=cdCurve(uu,gear().cdr,CD_T0)/old;st.cd=nc}}/* v274: 회전 베기 외 모든 스킬 쿨타임 통일(기본 1.6초 · 가속 10단계 0.8초 · 장비 쿨감 358%(110 테스트 스펙)에서 0.28초, 무한 강화 시 0.25초 수렴 — v275). 타격 횟수가 줄어든 만큼 피해를 올려 DPS는 기존과 동일 */
   /* 2차 강화 */
   if(b.kind==='orb'){const t=g2('tri');st.proj=TRI_N[t]||1;st.osp=1+TRI_SP[t];const n=g2('fnova');st.nova=n?novaSt(n):null;st.shf=Math.max(0,1-n/5)}/* v312: 서리 폭발이 파편 난사를 대체 — 단계마다 파편 빈도 -20%, 5단계면 파편 없음 *//* v59: 오중 보주 */
-  if(b.kind==='whirl'){const sp_=st.hits*WIV*(1+st.echo),r_=sp_/Math.max(.01,st.cd);st.bossK=WHIRL_BM*Math.max(1,Math.pow(r_/WH_R0,WH_K));/* v276: 쿨감이 회전 시간 하한에 막혀 버려지는 만큼 보스 피해로 일부 보정 — 90 테스트 스펙(r≈2.25)까지 ×2.43, 이후 (r/2.25)^0.46 */st.cd=Math.max(st.cd,sp_);/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.2*d:0;st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
+  if(b.kind==='whirl'){const sp_=st.hits*WIV*(1+st.echo),r_=sp_/Math.max(.01,st.cd);st.bossK=WHIRL_BM*Math.max(1,Math.pow(r_/WH_R0,WH_K));/* v276: 쿨감이 회전 시간 하한에 막혀 버려지는 만큼 보스 피해로 일부 보정 — 90 테스트 스펙(r≈2.25)까지 ×2.43, 이후 (r/2.25)^0.46 */st.cd=Math.max(st.cd,sp_);/* v272: 쿨타임은 회전 지속시간보다 짧아지지 않음(다시 쓰면 진행 중인 회전이 끊기므로) */const d=g2('dash'),f=g2('flame');st.dash=d?1+.12*d:0;/* v696: 5단계 = 옛 3단계(+60%) */st.flame=f?(o=>({iv:o.iv/(1+2.5*(1-cdMul()))/* v149: 실제 쿨감 비율 기준 (40%→2배, 최대 3배) */,r:st.radius*o.rm,m:o.m}))(flameSt(f)):null}
   if(b.kind==='quake'){const l=L('qlen');st.len=qLen(l);st.wid=qWid(l);st.dmg*=qDmg(l);const F=g2('qspread');st.fork=qFork(F);st.half=qHalf(F);const a=g2('aftsh'),m=L('qmag');st.aft=a?{n:1,m:aftM(a),L:a}:null;st.mag=m?magSt(m):null;if(bossOn('quake')){st.half*=.2;st.dmg*=5}/* v263 보스 모드 */}
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
@@ -6158,8 +6159,8 @@ function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_S
 function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q,f)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
 const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.16*L/* 탄속 강화(5단계): +80% */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
-  bmMulti=L=>({n:1+L,m:1/(1+.15*L)}),/* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
-const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:L,m:.4+.1*L}),/* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
+  bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
+const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const SK_NEW={
   wave:{n:'매화참',role:'다수 공격',tag:'wave',en:'Plum Blossom Slash · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
@@ -6177,10 +6178,10 @@ Object.assign(GEMS,{
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'매영조화',/* v664: 검기 확장 → 매영조화 */c:'#ffb0c8',d:L=>{const g=(typeof S!=='undefined'&&S&&S.sk&&S.sk.wave)||{},k=wvProg(g.wlen||0,g.wecho||0,L),a=wvShape(k,0,1).deg,b=wvShape(k,1,1).deg;return `검기가 더 넓게 퍼짐 — 발사 ${Math.round(a)}° → 사거리 끝 ${Math.round(b)}°\n(매화섬·낙화검도 크기를 조금 키움 · 모두 최대 ${WV_A0[1]}° → ${WV_A1[1]}°)`}},/* v645: 부채 검기 → 검기 확장 (같은 id라 기존 투자 단계 유지) */
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
-  bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',max:4/* v674: 3→4단계, 최대 5발 */,d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
+  bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',/* v696: 5단계 */d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
   bspd:{s:'boom',n:'가속 화살',c:'#c8d8ff',max:5,d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v672 */
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
-  pecho:{s:'pillar',n:'여진',c:'#f0c0ff',max:3,d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
+  pecho:{s:'pillar',n:'여진',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
   PILLAR_FS=`precision mediump float;varying float vH;varying vec3 vN,vV;uniform float uT,uOp;uniform vec3 uCol,uCore;
@@ -6973,7 +6974,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v695';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v696';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
