@@ -6060,7 +6060,7 @@ const kinStarTex=(()=>{const c=document.createElement('canvas');c.width=c.height
   const t=new THREE.CanvasTexture(c);return t})();
 /* v671: 충격파 — 거품처럼 머물지 않고, 가운데서 얇은 파면이 순식간에(.24초) 퍼져 나가며 찢어져 사라짐 */
 function kinShock(c,y,R,FK){const m=new THREE.Mesh(kinGeo,KIN_MAT());m.position.set(c.x,y,c.z);m.scale.setScalar(.01);m.rotation.set(Math.random()*6,Math.random()*6,0);m.renderOrder=3;const u=m.material.uniforms;u.uHz.value=.12;scene.add(m);
-  fx.push({m,t:0,dur:.24,upd(k,dt){u.uT.value+=dt*2;const e=1-Math.pow(1-k,2.6),s=R*(.12+1.08*e);m.scale.set(s,s*.51,s);/* v675: 15% 더 납작 */u.uOp.value=FK*1.5*(1-k*.6);u.uB.value=k<.45?0:Math.max(.001,(k-.45)/.55)},end(){m.material.dispose()}})}
+  fx.push({m,t:0,dur:.24,upd(k,dt){u.uT.value+=dt*2;const e=1-Math.pow(1-k,2.6),s=R*(.12+1.08*e);m.scale.set(s,s*.552,s);/* v682: 기존(.6) 대비 8% 납작 — v675의 15%는 너무 납작했음 */u.uOp.value=FK*1.5*(1-k*.6);u.uB.value=k<.45?0:Math.max(.001,(k-.45)/.55)},end(){m.material.dispose()}})}
 function kinStar(c,y,S,dur,op,col=0xffffff){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:kinStarTex,color:col,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));sp.position.set(c.x,y,c.z);sp.material.rotation=Math.random()*.6-.3;scene.add(sp);
   fx.push({m:sp,t:0,dur,upd(k){const e=k<.15?k/.15:1-(k-.15)/.85;sp.scale.setScalar(S*(.6+.6*Math.min(1,k/.15))*(1-.25*k));sp.material.opacity=op*Math.max(0,e)},end(){sp.material.dispose()}})}
 function boomFx(c,R,FK){const q=QM(),Y=1;shake=Math.max(shake,Math.min(.2,.07+R*.025));flash(c,0x6a8cff,Math.min(.8,.35+R*.1)*FK);/* v675: 중앙 밝기 50% · 푸르게 */
@@ -6711,7 +6711,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v681';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v682';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
