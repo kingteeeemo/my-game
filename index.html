@@ -87,6 +87,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
 .iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
 .iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
+#talkL{position:fixed;inset:0;z-index:58;display:flex;align-items:flex-end;justify-content:center;padding:0 16px calc(env(safe-area-inset-bottom) + 18vh);background:linear-gradient(transparent 55%,rgba(0,0,0,.45))}#talkL[hidden]{display:none}#talkB{width:min(560px,100%);background:rgba(12,12,18,.9);border:1px solid #6a5a3a;border-radius:12px;padding:13px 16px 10px;color:#efe8da;font-size:15px;line-height:1.6;box-shadow:0 6px 24px rgba(0,0,0,.5)}#talkN{font-size:12.5px;font-weight:700;color:#ffd27a;margin-bottom:4px;letter-spacing:.02em}#talkN.vo{color:#ffe9a8;opacity:.75}#talkT.vo{color:#ffe08a;font-style:italic}#talkH{text-align:right;font-size:11px;opacity:.5;margin-top:4px}#npcAct.talkhide{display:none!important}
 body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
 <title>잿불 성역</title>
@@ -2206,9 +2207,13 @@ function egMapFor(t){return dBand(t);/* v621: 지역은 구간마다 고정 — 
   return S.egMaps[blk]}
 const GSTY=[{s:'dirt',st:.22},{s:'dirt',st:.42},{s:'dirt',st:.5,rough:.7},{s:'flag',rough:.62},{s:'flag',glow:0xff5a1a,gl:.3},{s:'dirt',st:.35},{s:'flag',glow:0x8a3aff,gl:.32}],GPT=['ash','ash','ash','snow','ember','ash','void'];
 const inArena=()=>!inTown&&(!!S.duel||S.ch===LAST&&(S.phase===3||S.phase===4));
-function curTheme(){if(inTown)return {key:'town',d:TOWN,pt:TOWN.pt};if(inArena())return {key:'final',d:FINAL,pt:S.duel&&S.duel.b==='maw'?'deep':FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
+function curTheme(){if(inTown){townSync();return {key:TOWN.key,d:TOWN,pt:TOWN.pt}}if(inArena())return {key:'final',d:FINAL,pt:S.duel&&S.duel.b==='maw'?'deep':FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
 let groundGlow=false,propTheme='',inTown=false;
 const TOWN={n:'잿불 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'창고'},TOWN_R=17;
+/* v676: 마을을 둘로 — 스토리(1~7장) = 잿불 마을, 아쉬카르에게 떨어진 뒤(S.ch>=NCH) = 추락자의 쉼터(성역 아래 동굴). 스토리를 마치면 잿불 마을로는 돌아가지 않음 */
+const TOWN0=Object.assign({key:'town'},TOWN),REF={key:'refuge',n:'추락자의 쉼터',ground:[42,44,54],fog:0x07080e,sty:{s:'flag',rough:.9},pt:'ash',shop:'약초꾼 미라',gear:'조율사 오린',smith:'외팔 대장장이 둔',heir:'재단사 이네',stash:'창고',hearth:'쉼터지기 하란'};
+const refOn=()=>!!S&&S.ch>=NCH;
+function townSync(){Object.assign(TOWN,refOn()?REF:TOWN0)}
 function applyTheme(){
   const th=curTheme(),d=th.d,gs=groundSet(th.key,d);
   groundMat.map=gs.map;groundMat.bumpMap=gs.bump;groundMat.roughnessMap=gs.rough;groundMat.emissiveMap=gs.emi;groundMat.emissiveIntensity=gs.emi?1:0;groundGlow=!!gs.emi;for(const t of [gs.map,gs.bump,gs.rough,gs.emi])if(t)t.repeat.set(groundRep[0],groundRep[1]);groundMat.needsUpdate=true;
@@ -2959,8 +2964,8 @@ function ashAct2Step(e,dt){const A=e.a2,I=ASH,T=(A.t+=dt),U=thSet.userData;if(A.
   enemyAnim(e,dt,false)}
 function ashEnding(){/* 성역 아래 엔드게임 사냥터에서 깨어남 — 보호막은 잠시 남아 있다가 스러짐 */ashShieldOff();ashTx(null,false);knAppr=0;P.inv=1;P.pos.y=0;knActs(true);$('bossbar').classList.remove('gold');thGateSet(0);if(thSet)thSet.userData.floor.material.emissiveIntensity=1;
   S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();
-  mapLoad('끝없는 심연','성역 아래로 옮겨집니다',()=>{setMap(true);applyTheme();resetWorld();const b=$('ashBg');b.style.transition='opacity 1.8s';b.style.opacity=0;later(2,()=>{b.style.transition=''})},()=>{toast('끝없는 심연','금빛이 사라진다');later(3.6,()=>toast('성역 아래','여기서부터 다시, 저 불을 향해 올라가야 한다'));stageBanner();
-    const g=ashShield();ASHC.g=null;g.visible=true;fx.push({m:g,t:0,dur:3.2,keep:1,upd(k){const U=g.userData,o=1-k*k;g.position.set(P.pos.x,P.pos.y+1.15,P.pos.z);U.a.material.opacity=.13*o;U.b.material.opacity=.24*o;U.hl.material.opacity=.22*o;U.lt.intensity=2.2*o;U.beam.material.opacity=0},end(){g.traverse(o=>{if(o.material)o.material.dispose();if(o.geometry)o.geometry.dispose()})}})})}
+  try{localStorage.setItem('ember-sanctum-story','1')}catch(e){}/* v676: 스토리를 한 번 마치면 부캐는 스토리 스킵 가능 */
+  toRefuge('fall')}
 function knApprStart(e){knAppr=1;knActs(false);P.pos.set(0,0,KNB.z1+5);P.mv=null;camT.copy(P.pos);P.face=Math.PI;hero.rotation.y=Math.PI}
 function knApprEnd(){knAppr=0;knActs(true);const f=document.getElementById('knFade');if(f)f.style.opacity=0}
 function knApprTick(){if(knAppr!==1||Math.hypot(P.pos.x,P.pos.z)>ARENA_R-1)return;knAppr=2;knFadeEl().style.opacity=1;
@@ -2981,11 +2986,11 @@ function knTick(dt,t){const LY=KNA.lavaY;KNA.lt.offset.set(t*.004,t*.0025);KNA.g
 function setMap(fresh){const want=inTown?'town':inArena()?'arena':S.ch<NCH?'story':'field';if(fresh||want!==mapKind||((want==='story'||want==='field')&&propTheme!==curTheme().key))want==='town'?buildTown():want==='arena'?buildArena():want==='story'?buildStory():buildField()}
 /* 마을 (v29): 집 · 화로 · 우물 · 상인 · 대장장이. 몬스터 없음, 이동 스킬만 사용 가능 */
 const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,roughness:.9}),clothMat=SM({color:0x7a2a2a,roughness:.95,side:THREE.DoubleSide});
-const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420}];
-const npcOn=n=>true;/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
-const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관']},NSACT={gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기'};
-const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관']};
-const npcName=id=>NS()&&NSNPC[id]?NSNPC[id][0]:(TOWN[id]||TOWN.smith),npcSub=id=>NS()&&NSNPC[id]?NSNPC[id][1]:NPCN[id][1];
+const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:1,ref:1}];
+const npcOn=n=>!n.ref||refOn();/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
+const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관']},NSACT={gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기',hearth:'금빛 화로 · 사냥터'};
+const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관'],hearth:['쉼터지기 하란','금빛 화로 · 사냥터']};
+const npcName=id=>refOn()&&REF[id]?REF[id]:NS()&&NSNPC[id]?NSNPC[id][0]:(TOWN[id]||TOWN.smith),npcSub=id=>NS()&&NSNPC[id]?NSNPC[id][1]:NPCN[id][1];
 function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창고 — 쇠띠 두른 큰 궤짝 + 상자 더미 + 통 */
   g.add(mesh(new THREE.BoxGeometry(1.9,.95,1.1),W,0,.48,0),mesh(new THREE.BoxGeometry(1.98,.16,1.18),W,0,1.02,0));
   const FE=SM({color:0x6a707c}),lid=mesh(new THREE.CylinderGeometry(.56,.56,1.94,16,1,false,0,Math.PI),W,0,1.1,0);lid.rotation.z=Math.PI/2;g.add(lid);
@@ -2993,7 +2998,7 @@ function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창
   g.add(mesh(new THREE.BoxGeometry(.26,.3,.1),FE,0,.85,.58),mesh(new THREE.BoxGeometry(.12,.12,.1),SM({color:0xd8b040}),0,.82,.64));
   g.add(mesh(new THREE.BoxGeometry(.8,.7,.8),W,-1.55,.35,.15),mesh(new THREE.BoxGeometry(.6,.55,.6),W,-1.5,.98,.12),mesh(new THREE.CylinderGeometry(.34,.38,.8,12),W,1.5,.4,.2),mesh(new THREE.CylinderGeometry(.36,.36,.07,12),FE,1.5,.62,.2),mesh(new THREE.CylinderGeometry(.4,.4,.07,12),FE,1.5,.22,.2));
   g.position.set(n.x,0,n.z);g.rotation.y=Math.atan2(-n.x,-n.z);return g}
-function npcMesh(n){if(n.id==='stash'&&NS())return stashMesh(n);const g=new THREE.Group();g.add(mesh(new THREE.CylinderGeometry(.36,.58,1.4,10),SM({color:n.c}),0,.7,0),mesh(new THREE.SphereGeometry(.27,12,10),SM({color:0xd8b090}),0,1.66,0));
+function npcMesh(n){if(n.id==='hearth')return hearthMesh(n);if(n.id==='stash'&&NS())return stashMesh(n);const g=new THREE.Group();g.add(mesh(new THREE.CylinderGeometry(.36,.58,1.4,10),SM({color:n.c}),0,.7,0),mesh(new THREE.SphereGeometry(.27,12,10),SM({color:0xd8b090}),0,1.66,0));
   if(n.id==='smith'){g.add(mesh(new THREE.BoxGeometry(.9,.12,.5),SM({color:0x3a2a20}),0,1.25,.2));const h=mesh(new THREE.BoxGeometry(.12,.7,.12),PM.wood,.55,1.1,.2);h.rotation.z=.6;g.add(h,mesh(new THREE.BoxGeometry(.3,.18,.18),PM.iron,.78,1.4,.2))}
   else if(n.id==='gear'){const hat=mesh(new THREE.CylinderGeometry(.42,.42,.06,14),SM({color:n.hat}),0,1.9,0),top=mesh(new THREE.CylinderGeometry(.22,.26,.3,12),SM({color:n.hat}),0,2.05,0);g.add(hat,top);
     const sw=mesh(new THREE.BoxGeometry(.08,1.1,.08),PM.iron,.5,1.1,.1);sw.rotation.z=-.3;g.add(sw,mesh(new THREE.BoxGeometry(.6,.08,.3),SM({color:0x6a4a2a}),0,1.05,.25))}
@@ -3004,7 +3009,64 @@ function house(x,z){const g=new THREE.Group(),r=Math.atan2(-x,-z);g.add(mesh(new
   const roof=mesh(new THREE.ConeGeometry(3.3,1.9,4),roofMat,0,3.55,0);roof.rotation.y=Math.PI/4;roof.scale.set(1,1,.88);g.add(roof);
   g.add(mesh(new THREE.BoxGeometry(.9,1.6,.1),plankMat,0,.8,1.72));const win=new THREE.Mesh(new THREE.PlaneGeometry(.7,.6),new THREE.MeshBasicMaterial({color:0xffb060}));win.position.set(1.2,1.5,1.72);g.add(win);
   g.position.set(x,0,z);g.rotation.y=r;scene.add(g);propMeshes.push(g);colliders.push({x,z,r:2.4})}
-function buildTown(){clearProps();propTheme='town';mapKind='town';setGround(96,96,96);
+/* v676: 추락자의 쉼터 — 성역 아래 동굴. 가장자리 바위벽·무너진 기둥·잿빛 천막·푸른 수정, 한가운데 금빛 화로(보호막이 남긴 불씨 = 사냥터 입구) */
+const refCloth=SM({color:0x4a4e5a,roughness:.95,side:THREE.DoubleSide}),refLampOff=SM({color:0x2a2c34,roughness:.6}),refLampOn=new THREE.MeshBasicMaterial({color:0xffd27a});
+let refH=null;
+function hearthMesh(n){const g=new THREE.Group();
+  for(let i=0;i<11;i++){const a=i/11*Math.PI*2,r=mesh(rockGeos[i%4],PM.stone,Math.cos(a)*1.25,.18,Math.sin(a)*1.25);r.scale.set(.45,.34,.45);r.rotation.y=a;g.add(r)}
+  g.add(mesh(new THREE.CylinderGeometry(1.05,1.15,.2,18),SM({color:0x2a1e10,emissive:0xffb040,emissiveIntensity:.85}),0,.1,0));
+  const ring=new THREE.Mesh(new THREE.RingGeometry(1.6,3.4,40),new THREE.MeshBasicMaterial({color:0xffc860,transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;g.add(ring);
+  const fm=new THREE.SpriteMaterial({map:flameTex,color:0xffd36a,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}),fm2=new THREE.SpriteMaterial({map:flameTex,color:0xfff2c0,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
+  const a=new THREE.Sprite(fm),b=new THREE.Sprite(fm2),c=new THREE.Sprite(fm);a.position.y=1.1;b.position.y=.8;c.position.set(.35,.9,.2);g.add(a,b,c);
+  const hr=npcMesh({id:'haran',x:0,z:0,c:0x4a4a52,hat:0x2a2a30});hr.position.set(-2.2,0,.9);hr.rotation.y=-.5;g.add(hr);
+  const dm=new THREE.Object3D();g.position.set(n.x,0,n.z);fires.push({x:n.x,z:n.z,y:1.6,a:dm,b:dm,ph:0,l:null});
+  refH={g,a,b,c,ring,t:0};return g}
+function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';setGround(96,96,96);crysKind='ice';const lv=refLv();
+  /* 가장자리 바위벽 — 남쪽(카메라 쪽)은 낮은 바위만 */
+  for(let i=0;i<40;i++){const t=i/40*Math.PI*2+rand(-.04,.04),r=rand(17.6,20.5),x=Math.cos(t)*r,z=Math.sin(t)*r,g=new THREE.Group();
+    if(z<7){const h=rand(4.5,9.5),m=mesh(new THREE.ConeGeometry(rand(1.7,2.9),h,6),PM.stone,0,h/2,0);m.rotation.y=rand(0,6);g.add(m)}
+    const b=mesh(rockGeos[i%4],PM.stone,rand(-1,1),.5,rand(-1,1));b.scale.setScalar(rand(1.3,2.3));g.add(b);g.position.set(x,0,z);scene.add(g);propMeshes.push(g)}
+  /* 잿빛 천막 · 짐 */
+  for(const [x,z,ry] of [[-11.5,-6,.4],[11.5,-6,-.4],[-4.5,-12,.1],[4.8,-12.2,-.2],[-13,1.5,.9],[13,1.5,-.9]]){const g=new THREE.Group(),t=mesh(PG.tent,refCloth,0,1.1,0);t.rotation.y=Math.PI/4;g.add(t,mesh(PG.leg,PM.wood,0,1.6,0));g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);propMeshes.push(g);colliders.push({x,z,r:1.4})}
+  for(const [x,z] of [[-8.6,-1],[8.9,-.8],[-2.8,-9.4],[9.6,-8.8]]){const g=new THREE.Group();g.add(mesh(new THREE.BoxGeometry(.8,.7,.8),PM.wood,0,.35,0),mesh(new THREE.BoxGeometry(.6,.5,.6),PM.wood,.15,.95,.1));g.position.set(x,0,z);g.rotation.y=rand(0,3);scene.add(g);propMeshes.push(g);colliders.push({x,z,r:.7})}
+  /* 무너진 기둥 · 바위 · 푸른 수정 */
+  for(const [x,z] of [[-14.5,-8],[14.5,-8.5],[-9,-13.5],[9.5,-13.8],[-15.6,5.5],[15.4,6]])addProp(x,z,'pillar');
+  for(const [x,z] of [[-12.5,10],[12,10.5],[-6,14],[6.5,14.2],[-15,-2.5],[15.2,-3]])addProp(x,z,'rock');
+  for(const [x,z] of [[-13.6,-11.5],[13.2,-11.8],[-16,1],[16.2,0.5],[0,-15.2],[-7.5,-15],[7.8,-15.1]])addProp(x,z,'crystal');
+  /* 광장 둘레 등불 — 관문을 넘을 때마다 하나씩 더 켜짐 */
+  const LP=[[-3.5,-3.2],[3.5,-3.2],[-9.6,-4.5],[9.6,-4.5],[-4,6.4],[4,6.4],[-10.4,6.6],[10.4,6.6],[-2.6,-10.6],[2.6,-10.6]],on=Math.min(LP.length,2+lv*2);
+  LP.forEach(([x,z],i)=>{const g=new THREE.Group(),lit=i<on;g.add(mesh(new THREE.CylinderGeometry(.07,.09,1.7,6),PM.iron,0,.85,0),mesh(new THREE.BoxGeometry(.32,.38,.32),lit?refLampOn:refLampOff,0,1.85,0),mesh(new THREE.ConeGeometry(.28,.2,4),PM.iron,0,2.14,0));g.position.set(x,0,z);scene.add(g);propMeshes.push(g);colliders.push({x,z,r:.3})});
+  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:n.id==='hearth'?{x:n.x,z:n.z,r:1.45}:{x:n.x,z:n.z,r:.6})}
+  if(refH){refH.lv=lv}
+  for(let i=0;i<10;i++){const t=rand(0,6.3),r=rand(3,12);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
+  altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
+/* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
+const HR='쉼터지기 하란',VO='???';
+const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 끝없는 심연부터다.']];
+const REF_ALT=[[HR,'또 한 명이 내려왔군. 금빛 화로가 너를 알아보는 걸 보니, 먼저 온 녀석과 같은 길을 걷게 될 모양이야.'],[HR,'여긴 추락자의 쉼터. 올라갈 생각이라면 화로 앞에 서라.']];
+const REF_LORE=[
+  {k:'b5',ok:()=>(S.maxTier||0)>=5,l:[[HR,'심연을 벗어났다고? …정말로 올라가고 있군.'],[HR,'그 위는 핏빛 황무지. 우리처럼 떨어진 도전자들이 끝까지 싸우다 쓰러진 땅이다.'],[HR,'그중 한 검사는 아직도 칼을 놓지 못하고 떠돈다더군. 잿불 검귀… 한때는 우리 대장이었지.']]},
+  {k:'b10',ok:()=>(S.maxTier||0)>=10,l:[[HR,'검귀를… 쉬게 해 줬군. 고맙다.'],[HR,'위는 서리 무덤. 성역의 불이 닿지 않아 모든 게 얼어붙은 곳이다.'],[HR,'그런데 요즘 화로에서 목소리가 들린다. 너도 들었나?'],[VO,'「불은 꺼지지 않는다. 다만 옮겨 갈 뿐.」']]},
+  {k:'b15',ok:()=>(S.maxTier||0)>=15,l:[[HR,'아귀가 쓰러졌다. 그 녀석이 삼킨 동료가 몇이나 될지…'],[HR,'이제 용암 분지다. 왕좌 바로 아래, 꺼지지 않는 불이 뿌리내린 곳이지.'],[HR,'거기까지 오른 자는 아무도 없었다. 화로가 이렇게 밝았던 적도 없고.']]},
+  {k:'b20',ok:()=>(S.maxTier||0)>=20,l:[[HR,'공허 신전… 성역이 세워지기 전부터 있던 옛 신전이다.'],[HR,'화로의 목소리가 거기서 들려온다. 너를 부르고 있어.'],[VO,'「거의 다 왔다. 그대의 불이 내게 닿는구나.」']]},
+  {k:'b21',ok:()=>!!S.d20,l:[[HR,'신전 깊은 곳에서 무언가를 봤다고?'],[VO,'「아직 때가 아니다. 그러나 곧, 그대는 다시 저 불 앞에 서게 될 것이다.」']]}];
+const refLv=()=>REF_LORE.filter(b=>b.ok()).length;
+function refLore(force){if(!refOn()||!inTown||(!force&&(S.test||S.demo))||talkOn())return;S.lore=S.lore||{};const L=S.lore;
+  if(!L.a){L.a=1;const got=REF_LORE.filter(b=>b.ok());got.forEach((b,i)=>{if(i<got.length-1)L[b.k]=1});save();talk(S.skipStart?REF_ALT:REF_IN,()=>refLore(force));return}
+  const b=REF_LORE.find(b=>b.ok()&&!L[b.k]);if(b){L[b.k]=1;save();talk(b.l)}}
+/* 대화창 — 화면 아무 곳이나 누르면 다음 줄 */
+let TALK=null;const talkOn=()=>!!TALK;
+function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();talkNext()})}
+  TALK={l:lines,i:-1,done};releaseAll&&releaseAll();P.mv=null;o.hidden=false;$('npcAct').classList.add('talkhide');talkNext()}
+function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL').hidden=true;$('npcAct').classList.remove('talkhide');TALK=null;if(T.done)T.done();return}
+  const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;$('talkN').className=vo?'vo':'';$('talkT').textContent=t;$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸'}
+/* 엔드게임 마을로 — 결말(fall) · 부캐 시작(alt) · 결말 도중 재접속 */
+function toRefuge(kind){if(RZ)riftClear();clearPools();collectAll();wipeFx();for(const e of [...enemies])dropEnemy(e);for(const p of pickups)scene.remove(p.m);pickups.length=0;S.duel=null;S.fld=null;inTown=true;P.mv=null;townSync();
+  mapLoad(TOWN.n,kind==='fall'?'성역 아래로 옮겨집니다':'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,kind==='fall'?4.2:8.5);camT.copy(P.pos);P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;fldHold=false;save();
+    if(kind==='fall'){const b=$('ashBg');if(b){b.style.transition='opacity 1.8s';b.style.opacity=0;later(2,()=>{b.style.transition=''})}}},
+  ()=>{if(kind==='fall'){toast('금빛이 사라진다','');refShieldFade();later(3.4,()=>{stageBanner();refLore()})}else{stageBanner();toast('스토리 스킵 · 31레벨','1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');later(2.4,()=>refLore())}})}
+function refShieldFade(){const g=ashShield();ASHC.g=null;g.visible=true;fx.push({m:g,t:0,dur:3.2,keep:1,upd(k){const U=g.userData,o=1-k*k;g.position.set(P.pos.x,P.pos.y+1.15,P.pos.z);U.a.material.opacity=.13*o;U.b.material.opacity=.24*o;U.hl.material.opacity=.22*o;U.lt.intensity=2.2*o;U.beam.material.opacity=0},end(){g.traverse(o=>{if(o.material)o.material.dispose();if(o.geometry)o.geometry.dispose()})}})}
+function buildTown(){townSync();if(refOn())return buildRefuge();clearProps();propTheme='town';mapKind='town';setGround(96,96,96);
   for(let i=0;i<9;i++){const t=-Math.PI/2+(i-4)*.36,r=13.5;house(Math.cos(t)*r,Math.sin(t)*r)}
   for(const [x,z] of [[-12,6],[12,6],[-3.5,8],[3.5,8],[-3.2,-8.6],[3.2,-8.6]])addProp(x,z,'brazier');
   {const g=new THREE.Group();g.add(mesh(new THREE.CylinderGeometry(1.1,1.2,.8,14,1,true),PM.stone,0,.4,0),mesh(new THREE.CylinderGeometry(.9,.9,.1,14),SM({color:0x10202a,roughness:.1}),0,.6,0));
@@ -3034,12 +3096,12 @@ function mapLoad(title,sub,fn,after){
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
-function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>guide('town'),900);collectAll();inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>toast(TOWN.n,NS()?'포션 상인 · 조율사 · 대장장이 · 재단사 · 창고에 다가가 말을 거세요':'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'))}
+function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'포션 상인 · 조율사 · 대장장이 · 재단사 · 창고에 다가가 말을 거세요':'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls)return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
-  const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;inTown=true;wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;S.fld=keep;fldHold=false;save()},()=>toast(TOWN.n,NS()?'포션 상인 · 조율사 · 대장장이 · 재단사 · 창고에 다가가 말을 거세요':'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요'));return true}
+  const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+  mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'포션 상인 · 조율사 · 대장장이 · 재단사 · 창고에 다가가 말을 거세요':'포션 상인 · 무기상 · 대장장이 · 전승사에게 다가가 말을 거세요');later(1.4,()=>refLore())});return true}
 /* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
 let fldHold=false;
 const fldKind=e=>e.duel?'d':e.final?'f':e.chBoss?'c':e.gate?'g':null;
@@ -3073,7 +3135,8 @@ function toggleTown(){inTown?leaveTown():goTown()}
 const TOWN_SVG='<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',HUNT_SVG='<path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5L18 3h3v3l-3.5 3.5"/><path d="M5 14l4 4"/><path d="M7 17l-3 3"/><path d="M3 19l2 2"/>';
 function townIcon(b){const sv=b.querySelector('svg');if(sv)sv.innerHTML=inTown?HUNT_SVG:TOWN_SVG}
 let npcNear=null;
-function townUpd(){let near=null;if(inTown)for(const n of NPCS)if(npcOn(n)&&Math.hypot(P.pos.x-n.x,P.pos.z-n.z)<3)near=n;
+function townUpd(){if(refH&&inTown&&mapKind==='town'&&refH.g.parent){const t=performance.now()/1000,lv=refH.lv||0,s=1.1+lv*.2,k=1+.12*Math.sin(t*9)+.07*Math.sin(t*5.3);refH.a.scale.set(1.5*s*k,2.5*s*k,1);refH.a.position.y=.9+s*.9;refH.b.scale.set(.85*s*k,1.4*s*k,1);refH.b.position.y=.7+s*.45;const k2=1+.15*Math.sin(t*11+2);refH.c.scale.set(.6*s*k2,1*s*k2,1);refH.ring.material.opacity=(.12+lv*.03)*(1+.15*Math.sin(t*2.2))}
+  let near=null;if(inTown)for(const n of NPCS)if(npcOn(n)&&Math.hypot(P.pos.x-n.x,P.pos.z-n.z)<3)near=n;
   if(near!==npcNear){npcNear=near;const b=$('npcAct');b.hidden=!near;if(near)b.innerHTML=`<b>${npcName(near.id)}</b> · ${NS()&&NSACT[near.id]?NSACT[near.id]:NPCN[near.id][1]}`}}
 /* 낮게 깔린 안개 2겹 + 떠다니는 재·불씨·눈·공허 입자 */
 const mistTex=(()=>{const N=256,n=fbm(N,4,4),c=mkCv(N),im=new ImageData(N,N);for(let i=0;i<N*N;i++){im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=255;im.data[i*4+3]=sstep(.4,.78,n[i])*255}c.getContext('2d').putImageData(im,0,0);return cvTex(c,3)})();
@@ -6555,7 +6618,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v675';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v676';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6830,7 +6893,7 @@ $('classSheet').addEventListener('pointerup',pUp);$('classSheet').addEventListen
 $('classSheet').addEventListener('click',e=>{if(Date.now()-pDragEnd<350&&e.target.closest('[data-c]')){e.stopPropagation();return}},true);
 $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
-const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&(d.duelWins||0)>0&&!d.test)return true}}catch(e){}return false};
+const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1'||localStorage.getItem('ember-sanctum-story')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&!d.test&&((d.duelWins||0)>0||(d.ch||0)>=NCH))return true}}catch(e){}return false};/* v676: 한 캐릭터라도 스토리를 마쳤으면(아쉬카르 결말) 부캐는 스토리 스킵 */
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
@@ -6838,7 +6901,7 @@ function startGame(cls,main,skip){
   inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toast('엔드게임 · 위험도 1','스토리를 건너뛰고 31레벨로 시작합니다 · 1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide)setTimeout(tutAsk,900);}
+  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide)setTimeout(tutAsk,900);}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -6866,7 +6929,7 @@ function renderSkillSel(){const c=CLS[demo.cls];
   $('skillSheet').innerHTML=`<div class="shead"><div><div class="chap">${c.en} · 주력 스킬</div><h2>${c.n}의 주력 스킬을 고르세요</h2></div></div>
    <p class="hint" style="margin:0">뒤 화면은 <b style="color:var(--ink)">1차·2차 강화를 모두 채운 최종 진화</b> 모습입니다. 시작한 뒤에는 바꿀 수 없습니다.</p>
    <div class="skcs">${c.opts.map(id=>skillCard(id,id===demo.sk)).join('')}</div>
-   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>${skipOk()?`<button class="primary" id="skGoSkip" style="width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff">☆ 스토리 스킵 · 31레벨 엔드게임으로 시작<small style="display:block;font-weight:400;opacity:.85;margin-top:2px">1차 강화 30회 직접 선택 · 스토리 클리어 수준 장비</small></button>`:''}`}
+   <div class="btns"><button class="ghost" id="skBack">직업 다시 고르기</button><button class="primary" id="skGo">${SK[demo.sk].n}(으)로 시작</button></div>${skipOk()?`<button class="primary" id="skGoSkip" style="width:100%;margin-top:6px;background:linear-gradient(180deg,#b04cff,#7a2ad0);border-color:#c88bff">☆ 스토리 스킵 · 31레벨로 추락자의 쉼터에서 시작<small style="display:block;font-weight:400;opacity:.85;margin-top:2px">1차 강화 30회 직접 선택 · 스토리 클리어 수준 장비</small></button>`:''}`}
 function openSkillSel(cls){document.body.classList.add('demo');demoSetup(cls,CLS[cls].opts[0]);renderSkillSel();$('skillSel').hidden=false;releaseAll()}
 function demoEnd(){S.demo=false;demo=null;for(const e of [...enemies])dropEnemy(e);fxReset();document.body.classList.remove('demo');$('skillSel').hidden=true}
 $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!demo)return;
@@ -7489,7 +7552,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='hearth')return openStage();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
@@ -8006,7 +8069,7 @@ function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;
   setMap(true);applyTheme();labelButtons();resetWorld();refreshUpBtn();
   if(!S.tutor&&!S.noGuide&&otherChars())S.noGuide=1;/* v451: 다른 슬롯에 캐릭터가 있으면 안내 없음 */
   if(FLD&&FLD.bf&&!fbWake&&!S.tutor&&!S.test&&!S.demo){S.fld=FLD;mapLoad(mapTitle(),'전투를 불러옵니다',()=>{applyFld(FLD,true);fldHold=false;showResume()},null);return}
-  if(fbWake){toast('성역 아래','여기서부터 다시, 저 불을 향해 올라가야 한다');stageBanner();return}
+  if(fbWake){toRefuge('fall');return}
   if(townStart())return;fldHold=false;
   if(S.ch<NCH&&S.phase===2)showClear();
   else if(S.ch===LAST&&S.phase===4)showFinalClear();
