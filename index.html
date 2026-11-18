@@ -1910,6 +1910,7 @@ function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;
     s.v59tri=1}
   if(!s.v40){s.v40=1;const O5=[9,18,30,48,72],O10=[5,9,13,18,24,31,39,48,58,70],sum=(a,n)=>a.slice(0,n).reduce((x,y)=>x+y,0);
     for(const g of Object.keys(s.sk2||{})){if(!GEMS2[g]){delete s.sk2[g];continue}const L=s.sk2[g]||0,nl=Math.min(L,g2Max(g)),r=sum(g==='flame'?O10:O5,L)-sum(G2C[g2Max(g)].e,nl);s.sk2[g]=nl;if(r>0)s.ess=(s.ess||0)+r}}
+  if(s.sk2&&s.sk2.bshrap){const L=s.sk2.bshrap;for(let i=0;i<L;i++){s.ess=(s.ess||0)+(s.test?NG2C[5][i]:Math.ceil(G2C[5].e[i]*1.3));s.gold=(s.gold||0)+Math.round(G2C[5].g[i]/10)}delete s.sk2.bshrap}/* v675: 파편 작렬 삭제 → 정수·골드 반환 */
   /* v145: 대지 분쇄 — 가시 확산(1차)·용암 균열(2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
   if(!s.v145q){s.v145q=1;const q=s.sk&&s.sk.quake;if(q&&q.qfork){s.skp.quake=(s.skp.quake||0)+q.qfork;delete q.qfork}
     const mL=(s.sk2&&s.sk2.magma)||0;if(mL){const c=G2C[5];for(let i=0;i<mL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.magma}
@@ -2062,7 +2063,7 @@ function skillStats(id){
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);{const w=wvEcho(e);st.dmg*=(1+.05*l)*(1+.04*e)*(1+w.n*w.m)}st.wec={n:0,m:0};/* v648: 한 번 휘둘러 검기 하나 — 추가 검기 몫은 피해로 */const f=g2('wfan'),bu=g2('wburst');st.fan={n:1,m:1,sp:0};/* v645: 갈래 없음 — 하나의 파동 */st.burst=bu?wvBurst(bu):null;st.wk=wvProg(l,e,f)}
-  if(b.kind==='boom'){const r=L('brad'),e=L('bember');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=e?bmEmber(e):null;st.multi=bmMulti(g2('bmulti'));const x=g2('bshrap');st.shrap=x?bmShrap(x):null;st.bspd=bmSpd(g2('bspd'))}
+  if(b.kind==='boom'){const r=L('brad'),e=L('bember');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=e?bmEmber(e):null;st.multi=bmMulti(g2('bmulti'));st.bspd=bmSpd(g2('bspd'))}
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
@@ -5770,7 +5771,6 @@ Object.assign(GEMS2,{
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
   bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',max:4/* v674: 3→4단계, 최대 5발 */,d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
   bspd:{s:'boom',n:'가속 화살',c:'#c8d8ff',max:5,d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v672 */
-  bshrap:{s:'boom',n:'파편 작렬',c:'#ffa060',d:L=>{const s=bmShrap(L);return `폭발할 때 불꽃 파편 ${s.n}개가 사방으로 튐 (파편 피해 ×${s.m.toFixed(2)})`}},
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
   pecho:{s:'pillar',n:'여진',c:'#f0c0ff',max:3,d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
@@ -5904,11 +5904,11 @@ const kinStarTex=(()=>{const c=document.createElement('canvas');c.width=c.height
   const t=new THREE.CanvasTexture(c);return t})();
 /* v671: 충격파 — 거품처럼 머물지 않고, 가운데서 얇은 파면이 순식간에(.24초) 퍼져 나가며 찢어져 사라짐 */
 function kinShock(c,y,R,FK){const m=new THREE.Mesh(kinGeo,KIN_MAT());m.position.set(c.x,y,c.z);m.scale.setScalar(.01);m.rotation.set(Math.random()*6,Math.random()*6,0);m.renderOrder=3;const u=m.material.uniforms;u.uHz.value=.12;scene.add(m);
-  fx.push({m,t:0,dur:.24,upd(k,dt){u.uT.value+=dt*2;const e=1-Math.pow(1-k,2.6),s=R*(.12+1.08*e);m.scale.set(s,s*.6,s);u.uOp.value=FK*1.5*(1-k*.6);u.uB.value=k<.45?0:Math.max(.001,(k-.45)/.55)},end(){m.material.dispose()}})}
-function kinStar(c,y,S,dur,op){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:kinStarTex,color:0xffffff,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));sp.position.set(c.x,y,c.z);sp.material.rotation=Math.random()*.6-.3;scene.add(sp);
+  fx.push({m,t:0,dur:.24,upd(k,dt){u.uT.value+=dt*2;const e=1-Math.pow(1-k,2.6),s=R*(.12+1.08*e);m.scale.set(s,s*.51,s);/* v675: 15% 더 납작 */u.uOp.value=FK*1.5*(1-k*.6);u.uB.value=k<.45?0:Math.max(.001,(k-.45)/.55)},end(){m.material.dispose()}})}
+function kinStar(c,y,S,dur,op,col=0xffffff){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:kinStarTex,color:col,transparent:true,opacity:0,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));sp.position.set(c.x,y,c.z);sp.material.rotation=Math.random()*.6-.3;scene.add(sp);
   fx.push({m:sp,t:0,dur,upd(k){const e=k<.15?k/.15:1-(k-.15)/.85;sp.scale.setScalar(S*(.6+.6*Math.min(1,k/.15))*(1-.25*k));sp.material.opacity=op*Math.max(0,e)},end(){sp.material.dispose()}})}
-function boomFx(c,R,FK){const q=QM(),Y=1;shake=Math.max(shake,Math.min(.2,.07+R*.025));flash(c,KIN_C.glow,Math.min(1.6,.7+R*.2)*FK);
-  kinShock(c,Y,R,FK);kinStar(c,Y,R*1.1,.2,.9*FK);popFx(c.x,Y,c.z,.3,R*1.5,.12,0xffffff,.6*FK);
+function boomFx(c,R,FK){const q=QM(),Y=1;shake=Math.max(shake,Math.min(.2,.07+R*.025));flash(c,0x6a8cff,Math.min(.8,.35+R*.1)*FK);/* v675: 중앙 밝기 50% · 푸르게 */
+  kinShock(c,Y,R,FK);kinStar(c,Y,R*1.1,.2,.45*FK,0x9fb8ff);popFx(c.x,Y,c.z,.3,R*1.5,.12,0x8fb0ff,.3*FK);
   /* 바닥 충격파 고리: 흰 고리가 먼저, 푸른 고리가 뒤따라 넓게 */
   for(const [col,d0,dur,s0,s1,op] of [[0xffffff,0,.2,.2,1.2,.9],[KIN_C.glow,.03,.34,.15,1.75,.7]]){const sw=new THREE.Mesh(fxPlane,SHOCK_MAT(col));sw.rotation.x=-Math.PI/2;sw.position.set(c.x,.08,c.z);later(d0,()=>{scene.add(sw);
     fx.push({m:sw,t:0,dur,upd(k){const e=1-Math.pow(1-k,2.4);sw.scale.setScalar(R*(s0+(s1-s0)*e));sw.material.uniforms.k.value=k;sw.material.uniforms.ff.value=op*FK}})})}
@@ -5918,12 +5918,12 @@ function boomFx(c,R,FK){const q=QM(),Y=1;shake=Math.max(shake,Math.min(.2,.07+R*
 function kinField(p,r,dmg,dur){let tick=0;const q=QM(),g=new THREE.Object3D();scene.add(g);
   fx.push({m:g,t:0,dur,upd(k,dt){tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}
     if(Math.random()<dt*r*4*q*(1-k)){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:rnd(.2,1.4),z:p.z+Math.cos(a)*rr,vx:rnd(-.3,.3),vy:rnd(.2,.9),vz:rnd(-.3,.3),life:rnd(.4,.8),s0:rnd(.06,.12),s1:.02,c0:0xffffff,c1:KIN_C.spark[1],a:.8,drag:1,tex:1})}}})}
+/* v675: 폭발은 겹쳐 맞음(같은 적이 한 화살의 여러 폭발에 모두 맞음) — 대신 폭발 1회 피해 ×0.25. 줄기 위의 적은 반경에 따라 보통 3~7번 맞아 단일 대상 피해 약 0.8~1.7배, 보스전에 유리 */
+const BM_OV=.25;
 function boomExplode(c,o,hit,last){const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();boomFx(c,R,Math.max(.5,1/Math.sqrt(fbT.length)));
-  {const r=R*NSX.area;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||(hit&&hit.has(e)))continue;if(Math.hypot(e.pos.x-c.x,e.pos.z-c.z)<r+e.r*.6){hit&&hit.add(e);hurt(e,o.dmg,2,o.so)}}}
+  {const r=R*NSX.area;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e)continue;if(Math.hypot(e.pos.x-c.x,e.pos.z-c.z)<r+e.r*.6)hurt(e,o.dmg*BM_OV,2,o.so)}}
   if(o.ember)kinField(c,R*.75,o.ember.dps,o.ember.dur);
-  if(o.shrap&&last){const n=o.shrap.n,a0=Math.random()*6.28;for(let i=0;i<n;i++){const a=a0+i*Math.PI*2/n;
-    shoot(a,{from:c,color:0xdfe8ff,size:.3,hr:.4,trail:1.2,tw:.1,tcol:0x8fb0ff,glow:1,gcol:0x9ab8ff,speed:14,life:.42,dmg:o.shrap.dmg,so:o.so});const p=projs[projs.length-1];p.m.position.y=.9;
-    p.onEnd=()=>{const q=p.m.position,cc={x:q.x,z:q.z};popFx(q.x,.6,q.z,.3,1.6,.14,0xdfe8ff,.8);groundFx(cc,shockTex,0x9ab8ff,.3,1.4,.2,.6,true,.07);aoe(cc,1.2,o.shrap.dmg*.5,{quiet:3,so:o.so})}}}}
+}
 /* v671: 화살이 적을 꿰뚫고 사거리 끝까지 날아가며, 일정 간격마다 지나간 자리에서 충격파가 연달아 터짐. 화살 하나당 같은 적은 한 번만 피해(hit) */
 function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set();
   /* v673: 더 불규칙 — 간격이 아주 촘촘함~크게 비는 구간까지 섞이고, 한 자리에서 1~4개가 무리 지어 엇박자로 터짐. 위치는 줄기에서 좌우로 크게 벗어나고 크기도 .55~1.3배로 들쭉날쭉 */
@@ -5933,6 +5933,7 @@ function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1
   p.upd=()=>{p.m.position.y=1;const d=(life-p.life)*sp,pp=p.m.position;let k=0;
     while(d>=next&&next<dist-step*.2&&k<3){k++;next+=gap();const r0=Math.random(),cn=r0<.45?1:r0<.75?2:r0<.93?3:4;let t=k>1?rnd(.01,.05):0;
       for(let i=0;i<cn;i++){const side=rnd(-1,1)*o.r*(i?1:.6),bk=rnd(-.6,.6)*o.r,x=pp.x+sx*side-Math.sin(a)*bk,z=pp.z+sz*side-Math.cos(a)*bk,rr=o.r*(i?rnd(.5,.95):rnd(.75,1.3));
+        /* v675: 캐릭터 가까이(5m 안)는 근처에 적이 있을 때만 터짐 */if(Math.hypot(x-P.pos.x,z-P.pos.z)<5&&!enemies.some(e=>e.hp>0&&!e.air&&Math.hypot(e.pos.x-x,e.pos.z-z)<rr+e.r+.5))continue;
         later(t,()=>boomExplode({x,z},{...o,r:rr},hit,0));t+=rnd(.025,.11)}}
     if(Math.random()<.5*QM())emit(PADD,{x:pp.x,y:pp.y,z:pp.z,life:.2,s0:.3,s1:.05,c0:0xffffff,c1:0x6a8aff,a:.8,tex:1})};
   p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o,hit,1)}}
@@ -6231,7 +6232,7 @@ function castFire(slot,id){
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(18);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.418,1.21/Math.max(1,n-1));/* v674: 각도 10% 넓힘 */
     for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7*2.1;/* v671: 사거리 2.1배(가운데 화살 16m) *//* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffffff,c1:0x6a8aff,a:.9,tex:1});
-      shootBoom(aa,dist,{spd:st.bspd||1,r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null,shrap:st.shrap?{n:st.shrap.n,dmg:base*st.dmg*st.multi.m*st.shrap.m}:null})}}return}
+      shootBoom(aa,dist,{spd:st.bspd||1,r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null})}}return}
   if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;poseStart('pillar',.5,{pre:P.castPre});const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
     const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
@@ -6554,7 +6555,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v674';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v675';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7007,7 +7008,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='rain'){parts.push(`반경 ${s.radius.toFixed(1)}m · ${s.dur.toFixed(1)}초 · 초당 ${s.rate.toFixed(1)}회`);if(s.zones>1)parts.push(`화살비 ${s.zones}곳`);if(s.rel)parts.push(`속성 폭발 초당 ${s.rel.rate.toFixed(1)}회`);if(s.spl)parts.push(`분열 파편 ${s.spl.n}개`)}
   else if(b.kind==='chainl'){parts.push(`번개 ${s.forks}줄 · ${s.bn}번 튕김`);if(s.cst)parts.push(`번개 폭풍 ${s.cst.r.toFixed(1)}m`);if(s.ovl)parts.push(`과부하 ${s.ovl.dur.toFixed(1)}초`)}
   else if(b.kind==='wave'){parts.push(`사거리 ${s.len.toFixed(1)}m`);{const w0=wvShape(s.wk||0,0,1),w1=wvShape(s.wk||0,1,1);parts.push(`검기 ${Math.round(w0.deg)}°→${Math.round(w1.deg)}°`)}if(s.wec.n)parts.push(`연속 ${1+s.wec.n}번`);if(s.fan.n>1)parts.push(`검기 ${s.fan.n}갈래`);if(s.burst)parts.push(`끝 폭발 ${s.burst.r.toFixed(1)}m`)}
-  else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ember)parts.push(`잔불 ${s.ember.dur.toFixed(1)}초`);if(s.shrap)parts.push(`파편 ${s.shrap.n}개`)}
+  else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ember)parts.push(`잔불 ${s.ember.dur.toFixed(1)}초`);}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
   else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${(s.bossK||WHIRL_BM).toFixed(2)}`);const nw=NS()&&b.kind==='whirl';if(s.hits&&!nw)parts.push(`${s.hits}회 타격`);if(s.echo&&!nw)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(nw?`${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*(1-hasteP()*gl(id,'haste')),1-hasteP()*gl(id,'haste')).toFixed(2)}초마다`:`${whEl()==='frost'?'서리':'화염'} 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
@@ -7026,7 +7027,7 @@ function skillDps0(id){
   if(b.kind==='chainl'){const h0=base*st.dmg*crit,hit=h0*CH_HIT,stm=st.cst?h0*st.cst.m*1.5:0,ov=st.ovl?h0*st.ovl.m*(st.ovl.dur/.3)*.5:0;
     return {main:(hit+stm+ov)/cd,label:'번개에 맞은 적 1명당',sub:`번개 ${st.forks}줄 · ${st.bn}번 튕김 · 1회 ${fmtN(hit)}${stm?' · 번개 폭풍':''}${ov?' · 과부하':''}`}}
   if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
-  if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit,em=st.ember?hit*st.ember.m*st.ember.dur*.6:0,sh=st.shrap?hit*st.shrap.m*1.2:0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 잔불':''}${sh?' · 파편':''}`}}
+  if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ember?hit*st.ember.m*st.ember.dur*.6:0,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 잔불':''}${sh?' · 파편':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
     return {main:hit/act+fl,label:'범위 안의 적 1명당 (누르고 있는 동안)',sub:`${act.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)}${fl?` · ${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*h,h).toFixed(2)}초마다`:''}`}}
@@ -7123,7 +7124,7 @@ const SKIGK={au_def:'shield',au_eva:'feather',au_es:'bubble',au_crit:'eye',au_ha
   barrage:'shards',orbsize:'orb',tri:'tri',fnova:'nova',
   cbounce:'bounce',cfork:'fork',overl:'over',cstorm:'storm',
   dash:'dash',flame:'flame',
-  wlen:'wave',wecho:'echo',wfan:'fan',wburst:'burst',brad:'burst',bember:'flame',bmulti:'shards',bshrap:'shards',prad:'pillar',ptwin:'pillar',pchain:'link',pecho:'echo'};
+  wlen:'wave',wecho:'echo',wfan:'fan',wburst:'burst',brad:'burst',bember:'flame',bmulti:'shards',prad:'pillar',ptwin:'pillar',pchain:'link',pecho:'echo'};
 function skIco(k,c){let g=SKIGK[k]||'gem';if(k==='flame'&&typeof whEl==='function'&&whEl()==='frost')g='snow';
   return `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:${c}">${SKIG[g]}</svg>`}
 const skSeg=(L,M)=>Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('');
