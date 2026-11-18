@@ -3107,7 +3107,7 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
     const wb=new THREE.Group();wb.add(mesh(new THREE.BoxGeometry(1.8,.12,.9),PM.wood,0,.95,0));for(const [px,pz] of [[-.8,-.35],[.8,-.35],[-.8,.35],[.8,.35]])wb.add(mesh(new THREE.BoxGeometry(.1,.95,.1),PM.wood,px,.47,pz));
     for(let i=0;i<4;i++){const c=mesh(PG.crys,PM.ice,-.6+i*.4,1.05,rand(-.2,.2)),h=rand(.3,.6);c.scale.set(.14,h,.14);wb.add(c)}wb.add(mesh(new THREE.TorusGeometry(.22,.04,6,14),PM.iron,.5,1.1,.2));refAdd(wb,14.2,-14.8,-.4,1);
     refTree(-7.2,-22);for(const [x,z] of [[-12.8,-18],[-6.4,-18.4],[-11.6,-22.8]])addProp(x,z,'crystal');refPool(-9.6,-20,4.6,0x6ab8ff,.2);
-    for(const [x,z] of [[-12.8,-9.4],[-16.6,-13.6],[-15.8,-18.6]])addProp(x,z,'pillar')}
+    for(const [x,z] of [[-13.4,-15.2],[-23,-17.6],[-19.8,-8.6]])addProp(x,z,'pillar')/* v681: 언덕길 위가 아니라 길 바깥 언덕 비탈에 */}
   /* 북동 천막촌 — 재단사 이네 */
   {for(const [x,z,ry,m] of [[15.6,-17.6,-.3,refCloth],[8.4,-18.6,.2,refMat.red],[16.8,-12,-1.1,refMat.blue],[9,-11.8,.6,refCloth]]){const g=new THREE.Group(),t=mesh(PG.tent,m,0,1.1,0);t.rotation.y=Math.PI/4;g.add(t,mesh(PG.leg,PM.wood,0,1.6,0));refAdd(g,x,z,ry,1.4)}
     const cl=new THREE.Group();for(const sx of [-1.6,1.6])cl.add(mesh(new THREE.CylinderGeometry(.05,.05,2.2,6),PM.wood,sx,1.1,0));cl.add(mesh(new THREE.BoxGeometry(3.2,.03,.03),PM.wood,0,2.1,0));
@@ -3116,8 +3116,9 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
     for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.13,.13,.9,10),refMat.cloth[i],0,.13,0);b.rotation.z=Math.PI/2;const g=new THREE.Group();g.add(b);refAdd(g,-12.4+i*.35,-19.2+i*.25,.4,0)}
     refPool(12.4,-14.6,4.6,0xffb070,.16);addProp(13.6,-10.4,'brazier')}
   /* 북쪽 무너진 성문 — 창고 */
-  {for(const sx of [-2.6,2.6]){const g=new THREE.Group(),h=sx<0?4.2:2.6;g.add(mesh(PG.base,PM.pillar,0,.18,0));const d=mesh(PG.drum,PM.pillar,0,.35+h/2,0);d.scale.y=h;g.add(d);if(sx<0)g.add(mesh(PG.cap,PM.pillar,0,.5+h,0));refAdd(g,sx,-18.4,0,.9)}
-    {const li=mesh(new THREE.BoxGeometry(5.8,.55,.9),PM.pillar,0,0,0);li.position.set(-.6,2.6,-18.4);li.rotation.z=-.42;scene.add(li);propMeshes.push(li)}
+  {/* v681: 무너진 성문 — 길 위를 가로지르던 상인방을 없애고, 기둥은 길 양옆 벽 쪽으로, 상인방은 옆에 쓰러져 누운 모양 */for(const [sx,sz,h] of [[-4.4,-17.4,4.2],[4.4,-17.6,2.4]]){const g=new THREE.Group();g.add(mesh(PG.base,PM.pillar,0,.18,0));const d=mesh(PG.drum,PM.pillar,0,.35+h/2,0);d.scale.y=h;g.add(d);if(h>3)g.add(mesh(PG.cap,PM.pillar,0,.5+h,0));refAdd(g,sx,sz,0,.9)}
+    {const li=mesh(new THREE.BoxGeometry(4.6,.55,.9),PM.pillar,0,0,0),g=new THREE.Group();li.position.y=.3;li.rotation.z=.06;g.add(li);refAdd(g,4.6,-21.6,1.25,0);colliders.push({x:4.4,z:-20.6,r:.7},{x:4.8,z:-22.6,r:.7})}
+    {const d=mesh(PG.drum,PM.pillar,0,0,0),g=new THREE.Group();d.scale.y=1.6;d.rotation.z=Math.PI/2;d.position.y=.55;g.add(d);refAdd(g,-4,-21.4,.5,.8)}
     for(const [x,z,s] of [[3.2,-16.8,.7],[1.8,-15.6,.45],[-2.2,-23.8,.8],[2.6,-23.6,.6],[-3.4,-13,.5]])refRock(x,z,s);
     for(const [x,z] of [[-2.2,-21.6],[2.4,-21.8],[3,-20.4]]){const g=new THREE.Group();g.add(mesh(new THREE.BoxGeometry(.8,.7,.8),PM.wood,0,.35,0),mesh(new THREE.BoxGeometry(.6,.5,.6),PM.wood,.1,.95,.1));refAdd(g,x,z,rand(0,3),.7)}}
   /* 벽 비탈에 바위 — 바닥 무늬가 비탈에 늘어져 보이지 않게 */
@@ -6710,7 +6711,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v680';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v681';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
