@@ -2448,7 +2448,7 @@ function chPeak(){/* 맵 북쪽 끝 너머 봉우리(안개 무시) — 꼭대�
 function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0};chevSet('intro');save();P.mv=null;window.CHCON=1;if(CHZS.peak)CHZS.peak.g.visible=true;
   const el=$('chCine')||(()=>{const d=document.createElement('div');d.id='chCine';d.innerHTML='<div class="cck"></div><div class="ccn"></div><div class="cct"></div>';document.body.appendChild(d);d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();CHC.t=Math.max(CHC.t,CHC.dur-1.2)});return d})();
   const Z=CHZ[S.ch];el.querySelector('.cck').textContent=`루멘하르 · ${S.ch+1}장`;el.querySelector('.ccn').textContent=CH[S.ch].n;el.querySelector('.cct').textContent=Z.intro||'';el.hidden=false;el.className='on'}
-function chCineCam(dt){if(!CHC.on)return;CHC.t+=Math.min(dt,.05);const t=CHC.t,D=CHC.dur;const s0=STORY_L-6,s1=STORY_L-46,u=Math.min(1,t/(D-1.6)),e=u*u*(3-2*u),lz=s0+(s1-s0)*e,cz=lz+12-6*e;
+function chCineCam(dt){if(!CHC.on)return;if(!$('notice').hidden){CHC.on=0;window.CHCON=0;if(S.chev)delete S.chev[chK('intro')];if(CHZS.peak)CHZS.peak.g.visible=false;const el0=$('chCine');if(el0){el0.className='';el0.hidden=true}return}/* v696: 공지 창이 뜨면 연출을 접고, 창을 닫은 뒤 다시 */CHC.t+=Math.min(dt,.05);const t=CHC.t,D=CHC.dur;const s0=STORY_L-6,s1=STORY_L-46,u=Math.min(1,t/(D-1.6)),e=u*u*(3-2*u),lz=s0+(s1-s0)*e,cz=lz+12-6*e;
   const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(LW(pathC(cz-104),cz-104).x,14,LW(pathC(cz-104),cz-104).z),Math.min(1,.35+e*.65));
   const b=Math.max(0,Math.min(1,(t-(D-1.6))/1.6)),bb=b*b*(3-2*b);if(bb>0){_ccP.lerp(camera.position,bb);_ccL.lerp(_ccB.set(camT.x,camT.y+1,camT.z),bb)}
   if(CHZS.peak){const pz=cz-104,pw=LW(pathC(pz),pz),G=CHZS.peak.g;G.position.set(pw.x,-8,pw.z);G.scale.setScalar(.42)}
@@ -2466,7 +2466,7 @@ function chzOpenGate(){const G=CHZS.gate;if(!G)return;chevSet('gate');for(const 
   fx.push({m:g,t:0,dur:1.4,keep:1,upd(k){g.position.y=-k*1.4;g.rotation.x=k*.08},end(){scene.remove(g)}});for(let i=0;i<5;i++){const w=LW(pathC(G.z)+rand(-4,4),G.z);hitSpark(new THREE.Vector3(w.x,.6,w.z),0xffb060,0xff5a1a,10)}
   shake=Math.max(shake,.25);toast('길이 열렸다','바리케이드가 무너졌습니다');const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};save();CHZS.gate=null}
 function chzTick(dt){const Z=CHZ[S.ch];if(!Z||S.phase!==1)return;const pl=W2L(P.pos.x,P.pos.z);
-  if(Z.intro&&!chevOn('intro')&&!CHC.on&&!ldBusy&&!S.test&&!S.demo&&!S.tutor&&$('notice').hidden&&$('guide').hidden&&pl.z>STORY_L-24)chCineStart();
+  if(Z.intro&&!chevOn('intro')&&!CHC.on&&!ldBusy&&!S.test&&!S.demo&&!S.tutor&&!window.TUTPEND&&$('notice').hidden&&$('guide').hidden&&pl.z>STORY_L-24)chCineStart();
   if(CHZS.peak){const k=1+.12*Math.sin(performance.now()/260)+.06*Math.sin(performance.now()/97);CHZS.peak.c.scale.setScalar(46*k)}
   const G=CHZS.gate;if(G){if(!G.sp&&pl.z<G.z+24&&pl.z>G.z-1){G.sp=1;const d=diff();for(let i=0;i<5;i++){const z=G.z+4+rand(0,5),x=pathC(z)+rand(-.6,.6)*pathW(z),w=LW(x,z),e=spawnEnemy(i<2?(d.brute?'brute':'grunt'):'grunt',w.x,w.z,i<2?1:0);e.gev=1}toast('길이 막혔다','바리케이드를 지키는 정예 무리를 쓰러뜨리세요')}
     else if(G.sp&&!enemies.some(e=>e.gev&&e.hp>0))chzOpenGate()}
@@ -7138,7 +7138,7 @@ const TUT_ALT=29;/* 훈련 교관 위치(길 좌표 z) */
 function tutAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Tutorial</div><h2>튜토리얼을 진행할까요?</h2></div>
   <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 스탯, 물약, 보스전을 직접 해 보며 익힙니다. 3~5분 정도 걸립니다.</p>
   <button class="primary" id="tutYes" style="width:100%">튜토리얼 시작 (추천)</button><button class="ghost" id="tutNo" style="width:100%">건너뛰고 1장으로</button>`;$('notice').hidden=false;releaseAll()}
-$('noticeSheet').addEventListener('click',e=>{if(e.target.id==='tutYes'){$('notice').hidden=true;S.tutor=1;S.tutStep=0;S.tut.intro=1;resetWorld();toast('튜토리얼 · 훈련장','길을 따라 나아가며 기본을 익히세요');setTimeout(()=>guide('t0'),900)}
+$('noticeSheet').addEventListener('click',e=>{if(e.target.id==='tutYes'||e.target.id==='tutNo')window.TUTPEND=0;if(e.target.id==='tutYes'){$('notice').hidden=true;S.tutor=1;S.tutStep=0;S.tut.intro=1;resetWorld();toast('튜토리얼 · 훈련장','길을 따라 나아가며 기본을 익히세요');setTimeout(()=>guide('t0'),900)}
   else if(e.target.id==='tutNo'){$('notice').hidden=true;S.tutor=0;save();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('intro'),700)}});
 function tutSeed(){const w=L2W(pathC(TUT_ALT),TUT_ALT);ALTAR.x=w.x;ALTAR.z=w.z;altarRing.position.set(w.x,.04,w.z);altarLight.position.set(w.x,3,w.z);
   /* v108: 경험치를 직접 지정 — 1레벨→2레벨은 첫 무리 3번째 처치에서, 튜토리얼을 마치면 3레벨이 되도록 (필요 경험치 30·42) */
@@ -7257,7 +7257,7 @@ function startGame(cls,main,skip){
   inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide)setTimeout(tutAsk,900);}
+  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTPEND=1;setTimeout(tutAsk,900)}}
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
