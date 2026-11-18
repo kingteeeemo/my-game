@@ -87,6 +87,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
 .iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
 .iv2.l .iv2pop .ivact{flex-direction:row;align-items:stretch}.iv2.l .iv2pop .ivdps{flex:1;padding:6px 10px;min-width:0}.iv2.l .iv2pop .ivdps b{font-size:14px}.iv2.l .iv2pop .ivact .btns{flex:1.6}.iv2.l .iv2pop .ivact .btns button{min-height:38px}
+#chCine{position:fixed;inset:0;z-index:57;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 20px calc(env(safe-area-inset-bottom) + 14vh);background:linear-gradient(rgba(0,0,0,.55),transparent 22%,transparent 62%,rgba(0,0,0,.6));opacity:0;transition:opacity 1.2s;pointer-events:auto;text-align:center}#chCine.on{opacity:1}#chCine[hidden]{display:none}#chCine .cck{font-size:13px;letter-spacing:.24em;color:#d8c8a8;opacity:.85}#chCine .ccn{font-size:30px;font-weight:800;color:#f2e6d0;margin:6px 0 12px;text-shadow:0 2px 12px rgba(0,0,0,.8)}#chCine .cct{font-size:15px;line-height:1.6;color:#e8dcc8;max-width:560px;text-shadow:0 1px 6px rgba(0,0,0,.9)}
 #talkL{position:fixed;inset:0;z-index:58;display:flex;align-items:flex-end;justify-content:center;padding:0 16px calc(env(safe-area-inset-bottom) + 18vh);background:linear-gradient(transparent 55%,rgba(0,0,0,.45))}#talkL[hidden]{display:none}#talkB{width:min(560px,100%);background:rgba(12,12,18,.9);border:1px solid #6a5a3a;border-radius:12px;padding:13px 16px 10px;color:#efe8da;font-size:15px;line-height:1.6;box-shadow:0 6px 24px rgba(0,0,0,.5)}#talkN{font-size:12.5px;font-weight:700;color:#ffd27a;margin-bottom:4px;letter-spacing:.02em}#talkN.vo{color:#ffe9a8;opacity:.75}#talkT.vo{color:#ffe08a;font-style:italic}#talkH{text-align:right;font-size:11px;opacity:.5;margin-top:4px}#npcAct.talkhide{display:none!important}
 body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
@@ -1512,7 +1513,7 @@ const ETYPES={
 /* 장별 난이도: 1장부터 5장까지 거의 일정한 간격으로 상승 */
 /* v44: 스토리 7장. 마지막 장(심연의 성역) 수치는 이전 5장과 같고, 1~7장 사이를 일정한 간격으로 보간 */
 const CH=[
-  {n:'재가 내리는 들판',boss:'들판의 감시자',drain:0,goal:54,hp:.5,dmg:.34,cap:16,spawn:.9,xp:1,brute:false,ground:[52,50,44],fog:0x15161a,mob:{grunt:'잿빛 구울',runner:'들개',brute:'잿더미 골렘'},pal:{grunt:0x6e7a5a,runner:0x8a7a5a,brute:0x7c6a48,boss:0x5a4a6a}},
+  {n:'재가 내리는 들판',boss:'들판의 감시자',drain:0,goal:54,hp:.5,dmg:.34,cap:16,spawn:.9,xp:1,brute:false,ground:[52,50,44],fog:0x1d1b1a,mob:{grunt:'잿빛 구울',runner:'들개',brute:'잿더미 골렘'},pal:{grunt:0x6e7a5a,runner:0x8a7a5a,brute:0x7c6a48,boss:0x5a4a6a}},
   {n:'잊힌 자들의 묘역',boss:'묘지기 거인',drain:0,goal:66,hp:.78,dmg:.526,cap:24,spawn:.75,xp:1.22,brute:true,ground:[44,46,50],fog:0x12141a,mob:{grunt:'해골 병사',runner:'묘지 박쥐',brute:'시체 거인'},pal:{grunt:0x8a8a7a,runner:0x6a6a8a,brute:0x5a5a5a,boss:0x4a4a6a}},
   {n:'썩은 물의 늪',boss:'늪의 군주',drain:0,goal:78,hp:1.07,dmg:.713,cap:32,spawn:.62,xp:1.44,brute:true,ground:[40,50,36],fog:0x10160f,mob:{grunt:'늪 구울',runner:'독두꺼비',brute:'이끼 거인'},pal:{grunt:0x5a7a4a,runner:0x7a8a3a,brute:0x3a5a3a,boss:0x4a6a2a}},
   {n:'서리바람 협곡',boss:'서리 군주',drain:0,goal:90,hp:1.35,dmg:.899,cap:40,spawn:.52,xp:1.66,brute:true,ice:1,ground:[52,60,70],fog:0x141a22,mob:{grunt:'서리 망령',runner:'얼음 늑대',brute:'빙하 트롤'},pal:{grunt:0x5a7a9a,runner:0x8ab0c8,brute:0x4a6a8a,boss:0x3a5a9a}},
@@ -2240,7 +2241,8 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   pk:[{k:'chest',z:58,side:-1,d:7,r:4},{k:'trace',z:2,side:1,d:6.5,r:4.6},{k:'elite',z:-40,side:1,d:7,r:5.2}],
   ev:[{k:'gate',z:27},{k:'camp',z:-92}],
   trace:[['','꺼진 모닥불. 재 속에 아직 온기가 남아 있다.'],['','곁의 바위에 칼끝으로 새긴 글자가 보인다.'],['','「빛을 되찾으러 간다. 내가 돌아오지 못하면, 이 불을 이어 다오. — 카이렌」'],['','누군가 나보다 먼저, 이 길을 올라갔다.']],
-  camp:[['???','「…들리는가. 이 땅의 빛은, 아직 꺼지지 않았다.」']]}];
+  camp:[['???','「…들리는가. 이 땅의 빛은, 아직 꺼지지 않았다.」']],
+  wx:'ash',props:'farm',intro:'저 멀리, 루멘 성역의 봉우리가 불타고 있다. 재는 그 불에서 내려온다.'}];
 function storyParams(ch){const r=srng(ch*7+3);MP={amp:8+r()*8,f1:.022+r()*.016,ph:r()*6,amp2:3+r()*4,f2:.06+r()*.03,ph2:r()*6,w0:9.5+r()*2,w1:1.5+r()*2,ph3:r()*6};
   const Z=CHZ[ch];MP.wk=Z?Z.wk:null;MP.pk=[];if(Z)for(const q of Z.pk){const c=pathC(q.z),w=pathW(q.z),x=c+q.side*(w+q.d);MP.pk.push(Object.assign({},q,{x,ax:c,az:q.z}))}}
 function wkW(z){const K=MP.wk;for(let i=0;i<K.length-1;i++){const [z0,w0]=K[i],[z1,w1]=K[i+1];if(z<=z0&&z>=z1){const t=(z0-z)/(z0-z1),u=(1-Math.cos(t*Math.PI))/2;return w0+(w1-w0)*u}}return K[K.length-1][1]}
@@ -2334,7 +2336,7 @@ const LW=(x,z)=>L2W(x,z);let chzMat=null;const chzMatInit=()=>chzMat||(chzMat={l
 function chzG(lx,lz,ry){const g=new THREE.Group(),w=LW(lx,lz);g.position.set(w.x,groundH(w.x,w.z),w.z);g.rotation.y=(ry||0)+SROT;scene.add(g);propMeshes.push(g);return g}
 function chzCampfire(g,lit){for(let i=0;i<9;i++){const a=i/9*6.28,r=mesh(rockGeos[i%4],PM.stone,Math.cos(a)*.75,.1,Math.sin(a)*.75);r.scale.set(.24,.18,.24);g.add(r)}
   for(let i=0;i<3;i++){const l=mesh(new THREE.CylinderGeometry(.09,.11,1,6),lit?chzMat.log:chzMat.char,0,.18,0);l.rotation.set(Math.PI/2,i*1.05,0);l.rotation.order='YXZ';g.add(l)}}
-function chzBuild(ch){CHZS={};const Z=CHZ[ch];if(!Z)return;chzMatInit();
+function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');if(!Z)return;chzMatInit();chzProps(Z);chPeak();
   /* 길 안내 불씨 — 길 가운데 은은한 점 */
   for(let z=STORY_L-16;z>-STORY_L+20;z-=8){const w=LW(pathC(z),z);refPool(w.x,w.z,.75,0xffa040,.2)}
   for(const q of MP.pk){const w=LW(q.x,q.z);
@@ -2360,11 +2362,60 @@ function chzBuild(ch){CHZS={};const Z=CHZ[ch];if(!Z)return;chzMatInit();
     if(v.k==='camp'){const g=chzG(c,v.z,0);chzCampfire(g,1);const w2=LW(c,v.z);addFire(g,w2.x,.15,w2.z);refPool(w2.x,w2.z,4.5,0xff9a40,.32);
       for(const [dx,dz,ry] of [[2.4,1.4,.6],[-2.2,1.8,-.5]]){const b=mesh(new THREE.BoxGeometry(.8,.07,1.8),SM({color:0x3a2e24,roughness:1}),dx,.04,dz);b.rotation.y=ry;g.add(b)}
       APL(c-wd*.55,v.z-2,'tent',.4);CHZS.camp={x:w2.x,z:w2.z};colliders.push({x:w2.x,z:w2.z,r:.9})}}}
+/* v692: 장 소품 세트 — 1장 불탄 농가 들판: 무너진 농가, 그을린 울타리, 불탄 나무, 허수아비, 탄 건초더미, 이정표, 농가에서 피어오르는 연기 */
+function chzProps(Z){if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
+  const side=()=>Math.random()<.5?-1:1,offPt=(z,a,b)=>{const sd=side(),x=pathC(z)+sd*(pathW(z)+rand(a,b));return [x,z,sd]};
+  /* 무너진 농가 — 지붕 없이 벽 일부·그을린 기둥 */
+  for(const z of [97,54,-3,-41]){const sd=side(),x=pathC(z)+sd*(pathW(z)-3.6),zz=z;const g=chzG(x,zz,rand(-.4,.4)+(sd>0?Math.PI:0));{const w0=LW(x,zz);colliders.push({x:w0.x,z:w0.z,r:2.5})}const W=4.4,D=3.6;
+    for(const [wx,wz,w,d,h] of [[0,-D/2,W,.3,rand(1.6,2.6)],[-W/2,0,.3,D,rand(1,2.2)],[W/2,0,.3,D*rand(.4,.8),rand(.8,1.8)],[-W*.25,D/2,W*.5,.3,rand(.6,1.4)]]){const m=mesh(new THREE.BoxGeometry(w,h,d),burnt,wx,h/2,wz);g.add(m)}
+    for(let i=0;i<3;i++){const b=mesh(new THREE.BoxGeometry(.18,3.2,.18),char,rand(-1.6,1.6),1.2,rand(-1.2,1.2));b.rotation.set(rand(-.5,.5),0,rand(-.7,.7));g.add(b)}
+    for(let i=0;i<4;i++){const r=mesh(rockGeos[i%4],burnt,rand(-1.8,1.8),.15,rand(-1.4,1.4));r.scale.setScalar(rand(.25,.45));g.add(r)}
+    const w2=LW(x,zz);for(let i=0;i<3;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0x6a6460,transparent:true,depthWrite:false,opacity:0}));scene.add(m);propMeshes.push(m);WX.smoke.push({m,x:w2.x+rand(-1,1),y:groundH(w2.x,w2.z)+1.5,z:w2.z+rand(-1,1),ph:i/3+rand(0,.2)})}}
+  /* 그을린 울타리 — 넓은 공터 가장자리를 따라, 군데군데 부러짐 */
+  for(const [z0,z1] of [[106,94],[64,50],[6,-6],[-32,-44]])for(const sd of [-1,1]){if(Math.random()<.35)continue;const g=new THREE.Group();scene.add(g);propMeshes.push(g);
+    for(let z=z0;z>z1;z-=1.7){if(Math.random()<.15)continue;const x=pathC(z)+sd*(pathW(z)+.7),w=LW(x,z),h=rand(.7,1.15),p=mesh(new THREE.BoxGeometry(.13,h,.13),char,w.x,groundH(w.x,w.z)+h/2,w.z);p.rotation.z=rand(-.15,.15);g.add(p);
+      if(Math.random()<.7){const x2=pathC(z-1.7)+sd*(pathW(z-1.7)+.7),w3=LW(x2,z-1.7),L=Math.hypot(w3.x-w.x,w3.z-w.z),r=mesh(new THREE.BoxGeometry(.06,.07,L),char,(w.x+w3.x)/2,groundH(w.x,w.z)+.55,(w.z+w3.z)/2);r.rotation.y=Math.atan2(w3.x-w.x,w3.z-w.z);r.rotation.z=rand(-.08,.08);g.add(r)}}}
+  /* 불탄 나무 */
+  for(let n=0;n<16;n++){const z=rand(-STORY_L+20,STORY_L-14),[x,zz]=offPt(z,1.8,9);const g=chzG(x,zz,rand(0,6)),h=rand(2.4,3.8),t=mesh(new THREE.CylinderGeometry(.1,.24,h,7),char,0,h/2,0);t.rotation.z=rand(-.12,.12);g.add(t);
+    for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.03,.08,rand(.9,1.5),5),char,0,0,0),q=new THREE.Group();b.position.y=.6;q.add(b);q.position.y=h*rand(.55,.85);q.rotation.set(0,rand(0,6),rand(.5,1.1));g.add(q)}}
+  /* 허수아비 · 탄 건초더미 · 이정표 */
+  for(const z of [84,30,-70]){const [x,zz]=offPt(z,1.2,3);const g=chzG(x,zz,rand(0,6));g.add(mesh(new THREE.BoxGeometry(.1,2.2,.1),M.wood,0,1.1,0),mesh(new THREE.BoxGeometry(1.4,.09,.09),M.wood,0,1.6,0),mesh(new THREE.SphereGeometry(.22,8,6),sack,0,2.25,0));
+    const c=mesh(new THREE.PlaneGeometry(1.2,.9),cloth,0,1.25,.07);g.add(c);const h=mesh(new THREE.ConeGeometry(.3,.25,8),hay,0,2.48,0);g.add(h)}
+  for(let n=0;n<8;n++){const z=rand(-STORY_L+30,STORY_L-20),[x,zz]=offPt(z,.8,6);const g=chzG(x,zz,0),hb=mesh(new THREE.CylinderGeometry(.55,.6,.9,10),Math.random()<.5?hay:burnt,0,.45,0);hb.rotation.z=Math.PI/2;hb.rotation.y=rand(0,3);g.add(hb)}
+  {const sz=STORY_L-14,x=pathC(sz)+pathW(sz)-1.4,g=chzG(x,sz,-.3);g.add(mesh(new THREE.BoxGeometry(.14,2.2,.14),M.wood,0,1.1,0));for(const [y,ry] of [[1.85,.25],[1.45,-.35]]){const b=mesh(new THREE.BoxGeometry(1.1,.26,.06),M.wood,.35,y,0);b.rotation.y=ry;g.add(b)}}}
+/* v692: 장 날씨 — 1장 재 내림: 밝은 잿빛 송이가 흔들리며 내림 + 드문 불티, 농가 연기 */
+const WX={on:'',smoke:[],flk:null,emb:null,v:null};
+function wxInit(kind){WX.on=kind;if(!WX.flk){const N=320,g=new THREE.BufferGeometry(),pos=new Float32Array(N*3);g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    WX.flk=new THREE.Points(g,new THREE.PointsMaterial({size:.22,map:dotTex,color:0xddd6cc,transparent:true,opacity:.9,depthWrite:false}));WX.flk.frustumCulled=false;scene.add(WX.flk);
+    const N2=40,g2=new THREE.BufferGeometry(),p2=new Float32Array(N2*3);g2.setAttribute('position',new THREE.BufferAttribute(p2,3));WX.emb=new THREE.Points(g2,new THREE.PointsMaterial({size:.16,map:dotTex,color:0xff8a3a,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));WX.emb.frustumCulled=false;scene.add(WX.emb);
+    WX.v=new Float32Array((N+N2)*2);for(let i=0;i<N+N2;i++){WX.v[i*2]=rand(0,6.3);WX.v[i*2+1]=rand(.35,.75)}
+    for(const P_ of [WX.flk,WX.emb]){const a=P_.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i]=camT.x+rand(-18,18);a[i+1]=rand(0,12);a[i+2]=camT.z+rand(-18,14)}}}
+  WX.flk.visible=WX.emb.visible=kind==='ash'}
+function wxTick(dt){const on=mapKind==='story'&&!inTown&&WX.on==='ash';if(WX.flk)WX.flk.visible=WX.emb.visible=on;
+  const t=performance.now()/1000;for(const q of WX.smoke){if(!q.m.parent)continue;const k=((t*.12+q.ph)%1);q.m.position.set(q.x+k*1.2,q.y+k*5,q.z-k*.6);q.m.scale.setScalar(1+k*3.2);q.m.material.opacity=.28*Math.sin(k*Math.PI)}
+  if(!on)return;let o=0;for(const P_ of [WX.flk,WX.emb]){const a=P_.geometry.attributes.position.array,em=P_===WX.emb;for(let i=0;i<a.length;i+=3,o++){const ph=WX.v[o*2],sp=WX.v[o*2+1];
+      a[i+1]+=(em?.35:-sp)*dt;a[i]+=(Math.sin(t*.9+ph)*.35+.25)*dt;a[i+2]+=Math.cos(t*.7+ph)*.2*dt;
+      if(a[i+1]<0||a[i+1]>13||Math.abs(a[i]-camT.x)>20||a[i+2]-camT.z>16||a[i+2]-camT.z<-20){a[i]=camT.x+rand(-18,18);a[i+2]=camT.z+rand(-18,14);a[i+1]=em?rand(0,1):rand(9,12)}}P_.geometry.attributes.position.needsUpdate=true}}
+/* v692: 장 시작 연출 — 처음 들어오면 카메라가 시작점 뒤 하늘에서 길을 따라 나아가며 멀리 불타는 루멘 성역 봉우리를 보여 주고 캐릭터 뒤로 돌아옴. 화면을 누르면 건너뜀 */
+let CHC={on:0,t:0,dur:7.2};const _ccP=new THREE.Vector3(),_ccL=new THREE.Vector3(),_ccA=new THREE.Vector3(),_ccB=new THREE.Vector3();
+function chPeak(){/* 맵 북쪽 끝 너머 봉우리(안개 무시) — 꼭대기에 아쉬카르의 불 */const pz=-STORY_L-120,px=pathC(-STORY_L),g=chzG(px,pz,0),mm=new THREE.MeshBasicMaterial({color:0x17131a,fog:false});
+  g.add(mesh(new THREE.ConeGeometry(62,92,7),mm,0,40,0));const r1=mesh(new THREE.ConeGeometry(40,58,6),mm,-52,22,14),r2=mesh(new THREE.ConeGeometry(36,50,6),mm,50,18,18);g.add(r1,r2);
+  const gm=new THREE.SpriteMaterial({map:refGlowTex,color:0xff7a2a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}),c=new THREE.Sprite(gm);c.position.y=88;c.scale.setScalar(46);g.add(c);
+  const c2=new THREE.Sprite(gm.clone());c2.material.color.set(0xffd080);c2.position.y=88;c2.scale.setScalar(18);g.add(c2);g.traverse(o=>o.frustumCulled=false);CHZS.peak={g,c,c2};return g}
+function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0};chevSet('intro');save();P.mv=null;camera.far=700;camera.updateProjectionMatrix();
+  const el=$('chCine')||(()=>{const d=document.createElement('div');d.id='chCine';d.innerHTML='<div class="cck"></div><div class="ccn"></div><div class="cct"></div>';document.body.appendChild(d);d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();CHC.t=Math.max(CHC.t,CHC.dur-1.2)});return d})();
+  const Z=CHZ[S.ch];el.querySelector('.cck').textContent=`루멘하르 · ${S.ch+1}장`;el.querySelector('.ccn').textContent=CH[S.ch].n;el.querySelector('.cct').textContent=Z.intro||'';el.hidden=false;el.className='on'}
+function chCineCam(dt){if(!CHC.on)return;CHC.t+=Math.min(dt,.05);const t=CHC.t,D=CHC.dur;const s0=STORY_L-6,s1=STORY_L-46,u=Math.min(1,t/(D-1.6)),e=u*u*(3-2*u),lz=s0+(s1-s0)*e,cz=lz+12-6*e;
+  const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(pk.x,26,pk.z),Math.min(1,.35+e*.65));
+  const b=Math.max(0,Math.min(1,(t-(D-1.6))/1.6)),bb=b*b*(3-2*b);if(bb>0){_ccP.lerp(camera.position,bb);_ccL.lerp(_ccB.set(camT.x,camT.y+1,camT.z),bb)}
+  camera.position.copy(_ccP);camera.lookAt(_ccL);const el=$('chCine');if(el&&t>D-1.8)el.className='';if(t>=D){CHC.on=0;camera.far=120;camera.updateProjectionMatrix();if(el)el.hidden=true;stageBanner()}}
 function chzOpenGate(){const G=CHZS.gate;if(!G)return;chevSet('gate');for(const c of G.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}const g=G.g;
   fx.push({m:g,t:0,dur:1.4,keep:1,upd(k){g.position.y=-k*1.4;g.rotation.x=k*.08},end(){scene.remove(g)}});for(let i=0;i<5;i++){const w=LW(pathC(G.z)+rand(-4,4),G.z);hitSpark(new THREE.Vector3(w.x,.6,w.z),0xffb060,0xff5a1a,10)}
   shake=Math.max(shake,.25);toast('길이 열렸다','바리케이드가 무너졌습니다');const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};save();CHZS.gate=null}
 function chzTick(dt){const Z=CHZ[S.ch];if(!Z||S.phase!==1)return;const pl=W2L(P.pos.x,P.pos.z);
-  const G=CHZS.gate;if(G){if(!G.sp&&pl.z<G.z+44&&pl.z>G.z-1){G.sp=1;const d=diff();for(let i=0;i<5;i++){const z=G.z+4+rand(0,5),x=pathC(z)+rand(-.6,.6)*pathW(z),w=LW(x,z),e=spawnEnemy(i<2?(d.brute?'brute':'grunt'):'grunt',w.x,w.z,i<2?1:0);e.gev=1}toast('길이 막혔다','바리케이드를 지키는 정예 무리를 쓰러뜨리세요')}
+  if(Z.intro&&!chevOn('intro')&&!CHC.on&&!ldBusy&&!S.test&&!S.demo&&pl.z>STORY_L-24)chCineStart();
+  if(CHZS.peak){const k=1+.12*Math.sin(performance.now()/260)+.06*Math.sin(performance.now()/97);CHZS.peak.c.scale.setScalar(46*k)}
+  const G=CHZS.gate;if(G){if(!G.sp&&pl.z<G.z+24&&pl.z>G.z-1){G.sp=1;const d=diff();for(let i=0;i<5;i++){const z=G.z+4+rand(0,5),x=pathC(z)+rand(-.6,.6)*pathW(z),w=LW(x,z),e=spawnEnemy(i<2?(d.brute?'brute':'grunt'):'grunt',w.x,w.z,i<2?1:0);e.gev=1}toast('길이 막혔다','바리케이드를 지키는 정예 무리를 쓰러뜨리세요')}
     else if(G.sp&&!enemies.some(e=>e.gev&&e.hp>0))chzOpenGate()}
   const C=CHZS.chest;if(C&&Math.hypot(P.pos.x-C.x,P.pos.z-C.z)<2.4){CHZS.chest=null;chevSet('chest');const L=C.lid;fx.push({m:L,t:0,dur:.5,keep:1,upd(k){L.rotation.x=-k*1.9},end(){}});
     const p=new THREE.Vector3(C.x,0,C.z);dropItem(p,false,1);dropItem(p,false,1);dropItem(p,false,2);toast('보물 상자','누군가 숨겨 둔 물건을 찾았다');save()}
@@ -4596,7 +4647,7 @@ function bkTick(e,dt,moving){const K=BKN,M=e.M,u=M.u,r=M.sk;if(!r||K.root!==r)re
   if(u.weaponTip&&u.weaponTip.parent){r.updateWorldMatrix(true,true);K.tip.getWorldPosition(K.tip.userData.v||(K.tip.userData.v=new THREE.Vector3()));const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K.tip.userData.v.clone()))}}
 /* v552: 보스 등장 연출 중인지 — 이때는 나가기 버튼을 숨김 */
 const bossIntroE=e=>!!(e.final&&e.air&&e.air.intro)||!!(e.maw&&e.hp>0&&e.introT!==undefined&&e.introT<MWI.up+MWI.roar+.6)||!!(e.duel&&!e.maw&&e.hp>0&&e.introT!==undefined&&e.introT<BKC.introT/BKC.introK+1.5);
-function cineUiSync(){/* v619: 등장·결말 연출 동안 UI(캐릭터 정보·미니맵 포함)를 모두 숨김 — 소개 화면이 떠 있어 HUD 갱신이 멈춘 동안에도 매 프레임 맞춤 */const ci=(bossIntroOn()&&knAppr!==1)||!!ASHC.on;if(document.body.classList.contains('cineui')!==ci)document.body.classList.toggle('cineui',ci)}
+function cineUiSync(){/* v619: 등장·결말 연출 동안 UI(캐릭터 정보·미니맵 포함)를 모두 숨김 — 소개 화면이 떠 있어 HUD 갱신이 멈춘 동안에도 매 프레임 맞춤 */const ci=(bossIntroOn()&&knAppr!==1)||!!ASHC.on||!!CHC.on;if(document.body.classList.contains('cineui')!==ci)document.body.classList.toggle('cineui',ci)}
 function bossIntroOn(){for(const e of enemies)if(bossIntroE(e))return true;return false}
 const BK_SZ=.72;/* v540: 검귀 카이렌 크기 −20% → v555: 또 −10% (몸·피격 범위·이름표 높이) — 공격 범위·장판은 그대로 */
 function spawnDuel(){if(enemies.some(e=>e.duel))return;clearPools();if(S.duel&&S.duel.b==='maw')return spawnMaw();arenaHole(0);const e=spawnEnemy('boss',FB_POS.x,FB_POS.z,3,{name:DUEL.n});
@@ -6858,7 +6909,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v691';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v692';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -6939,7 +6990,7 @@ function hud(){placeEnv();placePort();
 /* v43 현재 단계 표시: 화면 위 중앙 칩(항상) + 단계가 바뀔 때 중앙 큰 배너 */
 const duelMapN=()=>S.duel&&S.duel.b!=='maw'?'무너진 성채':'심연의 밑바닥';/* v597: 심연의 아귀 맵 이름 *//* v591: 검귀 카이렌 맵 이름 = 무너진 성채 */
 function stageInfo(){if(inTown)return {c:'town',n:'마을',t:TOWN.n,k:'Town'};if(S.tutor)return {c:'',n:'훈련장',t:'튜토리얼',k:'Tutorial'};if(S.duel)return {c:'fb',n:duelMapN(),t:duelDef().n,k:'Duel'};if(S.ch>=NCH)return {c:'eg',n:`위험도 ${S.tier}`,t:EGMAPS[egMapFor(S.tier)].n,k:'Endless Abyss'};
-  if(inArena())return {c:'fb',n:'최종 결전',t:FINAL.n,k:'Final Battle'};const c=CH[Math.min(S.ch,LAST)];return {c:'',n:`${S.ch+1}장`,t:c.n,k:`Chapter ${S.ch+1} / ${NCH}`}}
+  if(inArena())return {c:'fb',n:'최종 결전',t:FINAL.n,k:'Final Battle'};const c=CH[Math.min(S.ch,LAST)];return {c:'',n:`${S.ch+1}장`,t:c.n,k:`Lumenhar · Chapter ${S.ch+1} / ${NCH}`}}
 /* v109: 사냥 진행도(처치 수·보스까지 거리) — 칩 아래줄에 표시 */
 function chipProg(){if(inTown||S.tutor||S.duel||inArena())return '';
   if(S.ch>=NCH){if(gatePending())return '관문 보스';if(S.runClr)return '클리어';const n=Math.min(S.tierKills,tkFor(S.tier));return `${n}/${tkFor(S.tier)}`}
@@ -8389,7 +8440,7 @@ const EGM=()=>S.ch>=NCH&&mapKind!=='story'?3:1;
 /* v235: 엔드게임 몬스터 생성량 설정 50~120% (기기별 localStorage egRate) — 생성 간격과 동시 최대 수에 함께 적용 */
 let EG_RATE=100;try{const v=+localStorage.getItem('egRate');if(v)EG_RATE=Math.max(50,Math.min(120,v))}catch(e){}
 const egR=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?EG_RATE/100:1;/* v108: 엔드게임 몬스터 수·젠 속도 ×3 */
-function update(dt){packTick();if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
+function update(dt){packTick();wxTick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
   let mx=input.x,mz=input.z;
@@ -8638,6 +8689,7 @@ function frameCam(dt,target=P.pos){
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
   camera.lookAt(camT.x,camT.y+1,camT.z);
   if(mapKind==='arena')drgCam(dt);if(ASHC.cam&&thOn)ashCineCam(dt);
+  if(CHC.on)chCineCam(dt);
 }
 /* v548: 보스 등장 카메라(용 → v550 검귀 카이렌도) — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
 const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1,kn:{land:1.4,landLy:.24,/* 가로 화면: 더 멀리서 잡고 검귀를 화면 아래쪽에 — 위쪽 입장 문구와 겹치지 않게 */d0:17,d1:13.5,yaw:.32,y:2.2,ly:.55,a0:-.1,a1:.75,q0:.45,q1:1.5}},_dcP=new THREE.Vector3(),_dcL=new THREE.Vector3(),_dcQ=new THREE.Vector3();let dgCamW=0;
