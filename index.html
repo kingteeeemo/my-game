@@ -5926,10 +5926,14 @@ function boomExplode(c,o,hit,last){const R=o.r;fbT.push(time);while(fbT.length&&
     p.onEnd=()=>{const q=p.m.position,cc={x:q.x,z:q.z};popFx(q.x,.6,q.z,.3,1.6,.14,0xdfe8ff,.8);groundFx(cc,shockTex,0x9ab8ff,.3,1.4,.2,.6,true,.07);aoe(cc,1.2,o.shrap.dmg*.5,{quiet:3,so:o.so})}}}}
 /* v671: 화살이 적을 꿰뚫고 사거리 끝까지 날아가며, 일정 간격마다 지나간 자리에서 충격파가 연달아 터짐. 화살 하나당 같은 적은 한 번만 피해(hit) */
 function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set();
-  /* v672: 발마다 불규칙 — 첫 폭발 위치·간격이 화살마다 다르고, 가끔 두세 번이 몰아서 터짐(바바바방) */
-  const gap=()=>{const r=Math.random();return step*(r<.3?rnd(.2,.4):r<.8?rnd(.6,1.1):rnd(1.2,1.7))};let next=rnd(.8,2.6);
+  /* v673: 더 불규칙 — 간격이 아주 촘촘함~크게 비는 구간까지 섞이고, 한 자리에서 1~4개가 무리 지어 엇박자로 터짐. 위치는 줄기에서 좌우로 크게 벗어나고 크기도 .55~1.3배로 들쭉날쭉 */
+  const gap=()=>{const r=Math.random();return step*(r<.35?rnd(.08,.3):r<.65?rnd(.4,.9):r<.88?rnd(1,1.6):rnd(1.8,2.6))};let next=rnd(.5,3.2);
   shoot(a,{color:0xdfe8ff,size:.5,long:true,trail:2.4,tw:.16,tcol:0x8fb0ff,glow:1.8,gcol:0x9ab8ff,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0x8fb0ff,c1:0xffffff,cw:.22}});const p=projs[projs.length-1];
-  p.upd=()=>{p.m.position.y=1;const d=(life-p.life)*sp,pp=p.m.position;let k=0;while(d>=next&&next<dist-step*.3&&k<3){k++;const j=o.r*.35,x=pp.x+rnd(-j,j),z=pp.z+rnd(-j,j),bk=next;next+=gap();later(k>1?rnd(.02,.06):0,()=>boomExplode({x,z},{...o,r:o.r*rnd(.8,1.12)},hit,0))}
+  const sx=Math.cos(a),sz=-Math.sin(a);/* 진행 방향의 옆 */
+  p.upd=()=>{p.m.position.y=1;const d=(life-p.life)*sp,pp=p.m.position;let k=0;
+    while(d>=next&&next<dist-step*.2&&k<3){k++;next+=gap();const r0=Math.random(),cn=r0<.45?1:r0<.75?2:r0<.93?3:4;let t=k>1?rnd(.01,.05):0;
+      for(let i=0;i<cn;i++){const side=rnd(-1,1)*o.r*(i?1:.6),bk=rnd(-.6,.6)*o.r,x=pp.x+sx*side-Math.sin(a)*bk,z=pp.z+sz*side-Math.cos(a)*bk,rr=o.r*(i?rnd(.5,.95):rnd(.75,1.3));
+        later(t,()=>boomExplode({x,z},{...o,r:rr},hit,0));t+=rnd(.025,.11)}}
     if(Math.random()<.5*QM())emit(PADD,{x:pp.x,y:pp.y,z:pp.z,life:.2,s0:.3,s1:.05,c0:0xffffff,c1:0x6a8aff,a:.8,tex:1})};
   p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o,hit,1)}}
 /* ---------- 마법사: 사술 폭발 ---------- */
@@ -6550,7 +6554,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v672';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v673';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
