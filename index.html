@@ -6153,7 +6153,7 @@ function kinField(p,r,dmg,dur){let tick=0;const q=QM(),g=new THREE.Object3D();sc
   fx.push({m:g,t:0,dur,upd(k,dt){tick-=dt;if(tick<=0){tick=.3;for(const e of [...enemies])if(Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,dmg*.3,true)}
     if(Math.random()<dt*r*4*q*(1-k)){const a=Math.random()*6.28,rr=r*Math.sqrt(Math.random())*.9;emit(PADD,{x:p.x+Math.sin(a)*rr,y:rnd(.2,1.4),z:p.z+Math.cos(a)*rr,vx:rnd(-.3,.3),vy:rnd(.2,.9),vz:rnd(-.3,.3),life:rnd(.4,.8),s0:rnd(.06,.12),s1:.02,c0:0xffffff,c1:KIN_C.spark[1],a:.8,drag:1,tex:1})}}})}
 /* v684: 맞는 쪽 타격감 — 맞을 때마다 몬스터 몸에서 푸른 흰 섬광·불티, 짧은 전기 줄기, 몸이 푸르게 번쩍, 작은 몬스터는 살짝 밀려남. 같은 몬스터 이펙트는 .05초에 한 번(겹쳐 맞아도 하얗게 뭉개지지 않게) */
-function kinHit(e,c){e.kinF=.11;e.flash=Math.max(e.flash||0,.11);const big=e.boss||e.duel||e.perch||e.final||e.rank>=2;
+function kinHit(e,c){/* v689: 몸이 푸르게 변하는 것 삭제(Austin) — 피격 깜빡임은 원래 것만 */const big=e.boss||e.duel||e.perch||e.final||e.rank>=2;
   if(!big){const dx=e.pos.x-c.x,dz=e.pos.z-c.z,d=Math.hypot(dx,dz)||1,k=.22/(1+e.r);e.pos.x+=dx/d*k;e.pos.z+=dz/d*k}
   if(e.kinT>time-.05)return;e.kinT=time;shake=Math.max(shake,.06);const q=QM(),h=Math.min(2.4,(e.h||1.6)*.55),p={x:e.pos.x+rnd(-.3,.3)*e.r,y:h,z:e.pos.z+rnd(-.3,.3)*e.r};
   emit(PADD,{x:p.x,y:p.y,z:p.z,life:.1,s0:1.3+e.r*.4,s1:.4,c0:0xffffff,c1:0x8fb0ff,a:.85,tex:1});emit(PADD,{x:p.x,y:p.y,z:p.z,life:.13,s0:.9+e.r*.3,s1:.2,c0:0xdfe8ff,c1:0x6a8cff,a:.8,rot:Math.random(),rv:8,tex:3});
@@ -6799,7 +6799,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v688';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v689';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8448,7 +8448,7 @@ function update(dt){packTick();
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
     if(e.final&&!frz){if(!e.rage&&e.hp<e.mhp*.5){e.rage=true;e.spd*=1.3;toast('격노',`${e.name}이(가) 분노합니다`);ringFx(e.pos,6,0xff4a2a,.6);shake=.3}
       e.nova-=dt;if(e.nova<=0){e.nova=(e.rage?4.5:7)*BOSS_CD;telegraph({x:e.pos.x,z:e.pos.z},6.5,e.dmg*1.2)}}
-    if(e.kinF>0)e.kinF-=dt;if(e.flash>0){e.flash-=dt;e.mat.emissive.setHex(e.flash>0?(e.kinF>0?0x3a5cff:0x886655):(frz?0x3a78b0:e.slowT>0?0x223a55:0))}
+    if(e.flash>0){e.flash-=dt;e.mat.emissive.setHex(e.flash>0?0x886655:(frz?0x3a78b0:e.slowT>0?0x223a55:0))}
     else e.mat.emissive.setHex(frz?0x3a78b0:e.slowT>0?0x223a55:0);
   }
   for(let i=0;i<enemies.length;i++)for(let j=i+1;j<enemies.length;j++){const a=enemies[i],b=enemies[j];const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,dd=Math.hypot(dx,dz),m=a.r+b.r;if(dd<m&&dd>1e-4){const o=(m-dd)/2,ux=dx/dd,uz=dz/dd;if(!a.boss){a.pos.x-=ux*o;a.pos.z-=uz*o}if(!b.boss){b.pos.x+=ux*o;b.pos.z+=uz*o}}}
