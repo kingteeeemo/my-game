@@ -2010,7 +2010,7 @@ const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>NS()?P.mhp*(gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>NS()?.17*(S.lv-1)+gear().mspd:.5*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
-const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1);
+const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1);
 function spdCapNote(){return ''}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
@@ -2249,9 +2249,17 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   ev:[{k:'keygate',z:8},{k:'camp',z:-92}],
   trace:[['','오래된 비석에 새로 그은 칼자국이 남아 있다. 길을 잃지 않으려 남긴 표식 같다.'],['','「잠든 이들이여, 잠시 길을 빌린다. — 카이렌」'],['','칼자국은 묘역을 지나 늪 쪽으로 이어진다.']],
   camp:[['???','「두려워 말라. 잠든 이들은 그대를 막지 않는다. 그대를 막는 것은, 저 불뿐이다.」']],
-  wx:'grave',props:'grave',intro:'이름 없는 비석이 끝없이 늘어선 묘역. 안개 사이로, 잠들지 못한 것들이 서성인다.'}];
+  wx:'grave',props:'grave',intro:'이름 없는 비석이 끝없이 늘어선 묘역. 안개 사이로, 잠들지 못한 것들이 서성인다.'},
+  {/* 3장 썩은 물의 늪 */
+  wk:[[129,8],[112,8],[100,14],[86,7],[72,13],[56,8],[48,7],[44,2.6],[22,2.6],[18,8],[4,14],[-14,7],[-30,13],[-48,8],[-62,14],[-78,6],[-92,12],[-104,7],[-129,9]],
+  pk:[{k:'chest',z:72,side:-1,d:6,r:4},{k:'trace',z:4,side:1,d:6,r:4.4},{k:'elite',z:-62,side:-1,d:6.5,r:5.2}],
+  ev:[{k:'bridge',z0:46,z1:20},{k:'camp',z:-92}],lake:[49,17,15],
+  pools:[[100,.35,2.6],[96,-.45,2.2],[72,.4,2.4],[68,-.3,2],[4,.45,2.6],[-2,-.4,2.2],[-30,.35,2.4],[-60,-.4,2.6],[-66,.3,2]],
+  tv:'sword',trace:[['','늪 한가운데, 부러진 칼날이 진흙에 꽂혀 있다.'],['','칼자루에 감긴 천에 피로 쓴 글씨가 번져 있다.'],['','「칼이 부러졌다. 그래도 멈출 수는 없다. — 카이렌」'],['','발자국은 북쪽, 얼어붙은 협곡으로 이어진다.']],
+  camp:[['???','「썩은 물도 언젠가는 맑아진다. 빛이 다시 닿는다면.」']],
+  wx:'swamp',props:'swamp',intro:'썩은 물이 고인 늪. 독기가 피어오르고, 발밑의 땅은 믿을 수 없다.'}];
 function storyParams(ch){const r=srng(ch*7+3);MP={amp:8+r()*8,f1:.022+r()*.016,ph:r()*6,amp2:3+r()*4,f2:.06+r()*.03,ph2:r()*6,w0:9.5+r()*2,w1:1.5+r()*2,ph3:r()*6};
-  const Z=CHZ[ch];MP.wk=Z?Z.wk:null;MP.pk=[];if(Z)for(const q of Z.pk){const c=pathC(q.z),w=pathW(q.z),x=c+q.side*(w+q.d);MP.pk.push(Object.assign({},q,{x,ax:c,az:q.z}))}}
+  const Z=CHZ[ch];MP.wk=Z?Z.wk:null;MP.lake=Z&&Z.lake||null;MP.pk=[];if(Z)for(const q of Z.pk){const c=pathC(q.z),w=pathW(q.z),x=c+q.side*(w+q.d);MP.pk.push(Object.assign({},q,{x,ax:c,az:q.z}))}}
 function wkW(z){const K=MP.wk;for(let i=0;i<K.length-1;i++){const [z0,w0]=K[i],[z1,w1]=K[i+1];if(z<=z0&&z>=z1){const t=(z0-z)/(z0-z1),u=(1-Math.cos(t*Math.PI))/2;return w0+(w1-w0)*u}}return K[K.length-1][1]}
 const pathC=z=>MP.amp*Math.sin(z*MP.f1+MP.ph)+MP.amp2*Math.sin(z*MP.f2+MP.ph2);
 const pathW=z=>MP.wk?wkW(z):MP.w0+MP.w1*Math.sin(z*.07+MP.ph3);
@@ -2264,7 +2272,7 @@ const endPt=()=>{const q=endPtL();return L2W(q.x,q.z)},startPt=()=>{const q=star
 function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathW(z),dz=Math.max(0,Math.abs(z)-STORY_L);
   const de=Math.hypot(x-e.x,z-e.z)-ARENA_END.r,ds=Math.hypot(x-s_.x,z-s_.z)-START_R;let dp=1e9;if(MP.pk)for(const q of MP.pk)dp=Math.min(dp,Math.hypot(x-q.x,z-q.z)-q.r,segD(x,z,q.ax,q.az,q.x,q.z)-2.4);return Math.max(dz,Math.min(dc,de,ds,dp))}
 function storyOut(x,z){const q=W2L(x,z);return sOutL(q.x,q.z)}
-function groundHL(x,z){const d=sOutL(x,z);if(d<=0)return 0;const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
+function groundHL(x,z){const d=sOutL(x,z);if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
 function groundH(x,z){if(mapKind==='town'&&inTown&&TLY)return refHt(x,z);if(mapKind!=='story')return 0;const q=W2L(x,z);return groundHL(q.x,q.z)}
 function spawnPt(){if(inArena())return {x:FB_START.x,z:FB_START.z};if(mapKind==='story')return S.chk&&S.chk.ch===S.ch?{x:S.chk.x,z:S.chk.z}:startPt();return {x:0,z:0}}
 /* 바닥 메시를 맵 크기로 다시 만들고 높이(언덕)를 입힘 (스토리는 로컬 좌표로 만들고 메시를 θ만큼 회전) */
@@ -2343,7 +2351,7 @@ const LW=(x,z)=>L2W(x,z);let chzMat=null;const chzMatInit=()=>chzMat||(chzMat={l
 function chzG(lx,lz,ry){const g=new THREE.Group(),w=LW(lx,lz);g.position.set(w.x,groundH(w.x,w.z),w.z);g.rotation.y=(ry||0)+SROT;scene.add(g);propMeshes.push(g);return g}
 function chzCampfire(g,lit){for(let i=0;i<9;i++){const a=i/9*6.28,r=mesh(rockGeos[i%4],PM.stone,Math.cos(a)*.75,.1,Math.sin(a)*.75);r.scale.set(.24,.18,.24);g.add(r)}
   for(let i=0;i<3;i++){const l=mesh(new THREE.CylinderGeometry(.09,.11,1,6),lit?chzMat.log:chzMat.char,0,.18,0);l.rotation.set(Math.PI/2,i*1.05,0);l.rotation.order='YXZ';g.add(l)}}
-function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');if(!Z)return;chzMatInit();chzProps(Z);chPeak();
+function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');wx2Init(Z&&Z.wx||'');if(!Z)return;chzMatInit();chzProps(Z);chPeak();chzBuildX(Z);
   /* 길 안내 불씨 — 길 가운데 은은한 점 */
   for(let z=STORY_L-16;z>-STORY_L+20;z-=8){const w=LW(pathC(z),z);refPool(w.x,w.z,.75,0xffa040,.2)}
   for(const q of MP.pk){const w=LW(q.x,q.z);
@@ -2351,7 +2359,8 @@ function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');if
     if(q.k==='chest'&&!chevOn('chest')){const g=chzG(q.x,q.z,q.side>0?-Math.PI/2:Math.PI/2);g.add(mesh(new THREE.BoxGeometry(1.2,.7,.8),chzMat.wood,0,.35,0),mesh(new THREE.BoxGeometry(1.26,.08,.86),chzMat.gold,0,.2,0));
       const lid=new THREE.Group();lid.position.set(0,.7,-.4);lid.add(mesh(new THREE.BoxGeometry(1.24,.28,.84),chzMat.wood,0,.14,.4),mesh(new THREE.BoxGeometry(.2,.2,.06),chzMat.gold,0,.05,.83));g.add(lid);
       colliders.push({x:w.x,z:w.z,r:.8});refPool(w.x,w.z,1.6,0xffd070,.22);CHZS.chest={g,lid,x:w.x,z:w.z};for(let n=0;n<3;n++)APL(q.x+rand(-1,1)*2.6,q.z+rand(-1,1)*2.6,'rock',0,0,true)}
-    if(q.k==='trace'){const g=chzG(q.x,q.z,0);chzCampfire(g,0);const bd=mesh(new THREE.BoxGeometry(.8,.07,1.8),SM({color:0x3a2e24,roughness:1}),1.6,.04,.4);bd.rotation.y=.4;g.add(bd);
+    if(q.k==='trace'&&Z.tv){chzTraceVis(Z.tv,q,w)}
+    else if(q.k==='trace'){const g=chzG(q.x,q.z,0);chzCampfire(g,0);const bd=mesh(new THREE.BoxGeometry(.8,.07,1.8),SM({color:0x3a2e24,roughness:1}),1.6,.04,.4);bd.rotation.y=.4;g.add(bd);
       const st=chzG(q.x-q.side*1.8,q.z-2.4,0);st.add(mesh(rockGeos[1],PM.stone,0,.6,0));st.children[0].scale.set(1,1.3,.8);const rn=new THREE.Mesh(new THREE.PlaneGeometry(.9,.5),new THREE.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:.55}));rn.position.set(0,.9,.82);st.add(rn);
       /* 발자국 — 모닥불에서 길로, 길을 따라 북쪽으로 */
       const fp=[];for(let t=0;t<=1;t+=.12)fp.push([q.x+(q.ax-q.x)*t,q.z+(q.az-q.z)*t]);for(let z=q.az-2;z>q.az-26;z-=1.6)fp.push([pathC(z)+.8,z]);
@@ -2396,7 +2405,7 @@ function chzGrave(Z){const iron=SM({color:0x24262c,roughness:.5,metalness:.6}),d
   for(let n=0;n<10;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)-rand(.6,1.4)),g=chzG(x,z,0);for(let i=0;i<4;i++){const h=rand(.2,.45),cx=rand(-.3,.3),cz=rand(-.3,.3);g.add(mesh(new THREE.CylinderGeometry(.05,.05,h,6),wax,cx,h/2,cz));const f=new THREE.Sprite(fl);f.position.set(cx,h+.08,cz);f.scale.setScalar(.35);g.add(f)}}
   for(let n=0;n<14;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(1.8,9)),g=chzG(x,z,rand(0,6)),h=rand(2.6,4),t=mesh(new THREE.CylinderGeometry(.1,.24,h,7),grey,0,h/2,0);t.rotation.z=rand(-.12,.12);g.add(t);
     for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.03,.08,rand(.9,1.6),5),grey,0,0,0),q=new THREE.Group();b.position.y=.65;q.add(b);q.position.y=h*rand(.55,.85);q.rotation.set(0,rand(0,6),rand(.5,1.1));g.add(q)}}}
-function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
+function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props==='swamp')return chzSwamp(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
   const side=()=>Math.random()<.5?-1:1,offPt=(z,a,b)=>{const sd=side(),x=pathC(z)+sd*(pathW(z)+rand(a,b));return [x,z,sd]};
   /* 무너진 농가 — 지붕 없이 벽 일부·그을린 기둥 */
   for(const z of [97,54,-3,-41]){const sd=side(),x=pathC(z)+sd*(pathW(z)-3.6),zz=z;const g=chzG(x,zz,rand(-.4,.4)+(sd>0?Math.PI:0));{const w0=LW(x,zz);colliders.push({x:w0.x,z:w0.z,r:2.5})}const W=4.4,D=3.6;
@@ -2461,6 +2470,70 @@ function chzOpenKeyGate(){const K=CHZS.kg;if(!K)return;chevSet('keygate');for(co
   shake=Math.max(shake,.2);toast('묘역 문이 열렸다','열쇠지기가 떨어뜨린 열쇠로 철문을 열었습니다');const w=LW(pathC(K.z-3),K.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};save();CHZS.kg=null}
 function fleeStep(e,dt){const F=e.flee;F.d+=6.2*dt;let d=F.d,i=0;while(i<F.pts.length-2&&d>F.seg[i]){d-=F.seg[i];i++}const a=F.pts[i],b=F.pts[i+1],L=F.seg[i]||1,t=Math.min(1,d/L);
   e.pos.x=a.x+(b.x-a.x)*t;e.pos.z=a.z+(b.z-a.z)*t;e.g.position.x=e.pos.x;e.g.position.z=e.pos.z;e.g.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);enemyAnim(e,dt,true);if(F.d>=F.L){e.flee=null;e.idle=false}}
+/* v698: 장 사건 확장 — 3장 늪(나무다리·독 웅덩이), 이후 장도 여기에 */
+function chzFoot(q,len){const fp=[];for(let t=0;t<=1;t+=.12)fp.push([q.x+(q.ax-q.x)*t,q.z+(q.az-q.z)*t]);for(let z=q.az-2;z>q.az-(len||26);z-=1.6)fp.push([pathC(z)+.8,z]);
+  fp.forEach(([x,z],i)=>{const w2=LW(x+(i%2?.22:-.22),z),m=new THREE.Mesh(new THREE.CircleGeometry(.16,10),chzMat.foot);m.scale.set(.7,1.5,1);m.rotation.set(-Math.PI/2,0,SROT);m.position.set(w2.x,groundH(w2.x,w2.z)+.03,w2.z);scene.add(m);propMeshes.push(m)})}
+function chzSword(g,broken){const bl=mesh(new THREE.BoxGeometry(.12,broken?.9:1.5,.03),PM.iron,0,broken?.4:.7,0),gd=mesh(new THREE.BoxGeometry(.5,.07,.1),PM.iron,0,broken?.88:1.48,0),hd=mesh(new THREE.CylinderGeometry(.04,.04,.36,6),SM({color:0x3a2418,roughness:1}),0,broken?1.08:1.68,0);g.add(bl,gd,hd);g.rotation.z+=.18;return g}
+function chzTraceVis(tv,q,w){CHZS.trace={x:w.x,z:w.z};chzFoot(q);
+  if(tv==='sword'){const m=chzG(q.x,q.z,rand(0,3));m.add(mesh(rockGeos[2],SM({color:0x2e3424,roughness:1}),0,-.1,0));m.children[0].scale.set(1.2,.35,1);const sg=new THREE.Group();sg.position.y=.15;chzSword(sg,1);m.add(sg);
+    const cl=new THREE.Mesh(new THREE.PlaneGeometry(.18,.5),SM({color:0x7a2a22,roughness:1,side:THREE.DoubleSide}));cl.position.set(.05,1.15,.03);sg.add(cl);refPool(w.x,w.z,1.4,0xffc070,.18)}
+  else if(tv==='wall'){const m=chzG(q.x+q.side*2.4,q.z,q.side>0?-Math.PI/2:Math.PI/2);m.add(mesh(new THREE.BoxGeometry(5,3.2,.7),PM.pillar,0,1.6,0));for(const sx of [-2.3,2.3])m.add(mesh(new THREE.BoxGeometry(.8,3.8,.9),PM.pillar,sx,1.9,0));
+    const tx=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.9),new THREE.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:.6}));tx.position.set(0,1.7,.36);m.add(tx);{const w0=LW(q.x+q.side*2.4,q.z);colliders.push({x:w0.x,z:w0.z,r:2.2})}refPool(w.x,w.z,1.6,0xffc070,.16)}
+  else if(tv==='cloak'){const m=chzG(q.x,q.z,rand(0,3));m.add(mesh(rockGeos[1],SM({color:0x8a7450,roughness:1}),0,-.2,0));m.children[0].scale.set(1.6,.5,1.2);const c=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.1),SM({color:0x6a2420,roughness:1,side:THREE.DoubleSide}));c.rotation.set(-1.1,0,.3);c.position.set(.2,.25,.1);m.add(c);
+    const sg=new THREE.Group();sg.position.set(-.6,.1,.3);sg.rotation.x=.5;chzSword(sg,1);m.add(sg);refPool(w.x,w.z,1.4,0xffc070,.16)}}
+const chzPoolMat=()=>chzMat.pool||(chzMat.pool=new THREE.MeshBasicMaterial({map:refGlowTex,color:0x6aff3a,transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false}));
+function chzBuildX(Z){CHZS.pools=[];
+  if(Z.pools)for(const [z,xf,r] of Z.pools){const x=pathC(z)+xf*pathW(z),w=LW(x,z),g=new THREE.Group();g.position.set(w.x,.04,w.z);
+    const base=new THREE.Mesh(new THREE.CircleGeometry(r,24),new THREE.MeshBasicMaterial({color:0x1e3a10,transparent:true,opacity:.85,depthWrite:false}));base.rotation.x=-Math.PI/2;g.add(base);
+    const gl=new THREE.Mesh(new THREE.CircleGeometry(r*1.15,24),chzPoolMat());gl.rotation.x=-Math.PI/2;gl.position.y=.01;g.add(gl);
+    const bub=[];for(let i=0;i<4;i++){const b=mesh(new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color:0x9aff6a,transparent:true,opacity:.8}),rand(-.6,.6)*r,.05,rand(-.6,.6)*r);g.add(b);bub.push({m:b,ph:rand(0,1)})}
+    scene.add(g);propMeshes.push(g);CHZS.pools.push({x:w.x,z:w.z,r,bub,kind:Z.pkind||'poison'})}
+  for(const v of Z.ev){if(v.k==='bridge'){/* 독 늪 위 나무다리 — 판자·말뚝·밧줄, 양옆은 독물 */const za=v.z0-1,zb=v.z1+1;
+    const wc=LW(pathC((v.z0+v.z1)/2),(v.z0+v.z1)/2),wt=new THREE.Mesh(new THREE.PlaneGeometry(MP.lake[2]*2+6,v.z0-v.z1+8),new THREE.MeshBasicMaterial({color:0x24401a,transparent:true,opacity:.92}));wt.rotation.set(-Math.PI/2,0,SROT);wt.position.set(wc.x,-.14,wc.z);scene.add(wt);propMeshes.push(wt);
+    const wg=new THREE.Mesh(new THREE.PlaneGeometry(MP.lake[2]*2+6,v.z0-v.z1+8),new THREE.MeshBasicMaterial({map:refLavaTex,color:0x4aff3a,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false}));wg.rotation.copy(wt.rotation);wg.position.set(wc.x,-.12,wc.z);scene.add(wg);propMeshes.push(wg);CHZS.lakeT=wg.material.map;
+    const plank=SM({color:0x5a4430,roughness:1}),dark=SM({color:0x3a2c20,roughness:1});
+    for(let z=za;z>zb;z-=.55){const c=pathC(z),w0=LW(c,z),z2=z-.55,dir=Math.atan2(LW(pathC(z2),z2).x-w0.x,LW(pathC(z2),z2).z-w0.z),pl=mesh(new THREE.BoxGeometry(5.6,.12,.46),Math.random()<.2?dark:plank,0,0,0);pl.position.set(w0.x,.02,w0.z);pl.rotation.y=dir;pl.rotation.z=rand(-.03,.03);scene.add(pl);propMeshes.push(pl)}
+    for(let z=za;z>zb;z-=3)for(const sd of [-1,1]){const w0=LW(pathC(z)+sd*2.9,z),p_=mesh(new THREE.CylinderGeometry(.09,.11,1.4,6),dark,w0.x,.3,w0.z);scene.add(p_);propMeshes.push(p_)}
+    CHZS.bridge=v}}}
+let poisonAcc=0;
+function chzTickX(dt,pl,Z){
+  if(CHZS.pools&&CHZS.pools.length){const t=performance.now()/1000;let inP=null;for(const q of CHZS.pools){for(const b of q.bub){const k=(t*.5+b.ph)%1;b.m.position.y=.05+k*.35;b.m.material.opacity=.8*(1-k)}if(Math.hypot(P.pos.x-q.x,P.pos.z-q.z)<q.r*.92)inP=q}
+    if(inP&&P.hp>0&&!(P.mv)){if(inP.kind==='sand'){P.sandT=.15}else{poisonAcc+=dt;if(poisonAcc>=.5){poisonAcc=0;hurtPct(.025,1);hitSpark(new THREE.Vector3(P.pos.x,.6,P.pos.z),0x9aff6a,0x3a8a1a,4)}}}else poisonAcc=Math.min(poisonAcc,.4)}
+  if(P.sandT>0)P.sandT-=dt;
+  if(CHZS.lakeT)CHZS.lakeT.offset.y=performance.now()/9000}
+/* v698: 장 날씨 2 — 비(선)·안개(색별)·눈·불티·모래 등 */
+const W2={kind:'',rain:null,mist:null,pts:null,pv:null,base:null,storm:0,st:0};
+function wx2Init(kind){W2.kind=kind;
+  if(!W2.rain){const N=260,g=new THREE.BufferGeometry(),a=new Float32Array(N*6);g.setAttribute('position',new THREE.BufferAttribute(a,3));W2.rain=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x9ab0c0,transparent:true,opacity:.35,depthWrite:false}));W2.rain.frustumCulled=false;scene.add(W2.rain);
+    for(let i=0;i<N;i++){const x=rand(-18,18),y=rand(0,12),z=rand(-18,14);a.set([x,y,z,x+.06,y+.7,z],i*6)}
+    W2.mist=[];for(let i=0;i<12;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0x6a8a5a,transparent:true,opacity:.14,depthWrite:false}));m.scale.set(16,5,1);scene.add(m);W2.mist.push({m,ox:rand(-18,18),oz:rand(-16,12),ph:rand(0,6)})}
+    const M=420,g2=new THREE.BufferGeometry(),p2=new Float32Array(M*3);g2.setAttribute('position',new THREE.BufferAttribute(p2,3));W2.pts=new THREE.Points(g2,new THREE.PointsMaterial({size:.18,map:dotTex,color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));W2.pts.frustumCulled=false;scene.add(W2.pts);
+    W2.pv=new Float32Array(M*2);for(let i=0;i<M;i++){W2.pv[i*2]=rand(0,6.3);W2.pv[i*2+1]=rand(.6,1.4);p2.set([rand(-18,18),rand(0,12),rand(-18,14)],i*3)}}
+  const C2={swamp:{rain:1,mist:0x6a8a5a,mo:.15,pts:0},snow:{mist:0xd0dce8,mo:.2,pts:1,pc:0xf4f8ff,ps:.2,vy:-1.6,vx:2.2,blend:0},embers:{mist:0x5a4a44,mo:.1,pts:1,pc:0xff8a3a,ps:.17,vy:1.1,vx:.4,blend:1},sand:{mist:0xb8a070,mo:.12,pts:1,pc:0xd8c090,ps:.12,vy:-.2,vx:9,blend:0},fire:{mist:0x6a2a2a,mo:.1,pts:1,pc:0xff6a2a,ps:.2,vy:1.6,vx:.2,blend:1}}[kind]||null;
+  W2.cf=C2;W2.rain.visible=!!(C2&&C2.rain);for(const q of W2.mist){q.m.visible=!!(C2&&C2.mist);if(C2&&C2.mist)q.m.material.color.set(C2.mist)}W2.pts.visible=!!(C2&&C2.pts);
+  if(C2&&C2.pts){const m=W2.pts.material;m.color.set(C2.pc);m.size=C2.ps;m.blending=C2.blend?THREE.AdditiveBlending:THREE.NormalBlending;m.needsUpdate=true}
+  W2.base=null;W2.storm=0;W2.st=rand(14,22)}
+function wx2Tick(dt){const on=mapKind==='story'&&!inTown&&W2.cf;if(!W2.rain)return;W2.rain.visible=!!(on&&W2.cf.rain);for(const q of W2.mist)q.m.visible=!!(on&&W2.cf.mist);W2.pts.visible=!!(on&&W2.cf.pts);
+  if(!on){if(W2.base){scene.fog.near=W2.base[0];scene.fog.far=W2.base[1];W2.base=null}return}const C2=W2.cf,t=performance.now()/1000,cx=camT.x,cz=camT.z;
+  if(!W2.base)W2.base=[scene.fog.near,scene.fog.far];
+  /* 모래폭풍(6장) · 눈보라(4장, 봉화를 다 밝히기 전) — 시야가 좁아짐 */let fogK=0;
+  if(W2.kind==='sand'){W2.st-=dt;if(W2.st<=0){if(W2.storm>0){W2.storm=0;W2.st=rand(16,24)}else{W2.storm=1;W2.st=8;toast('모래폭풍','앞이 보이지 않는다 — 등대 불빛을 따라가세요')}}fogK=W2.storm}
+  if(W2.kind==='snow')fogK=chevOn('beacons')?0:.7;W2.fk=(W2.fk||0)+(fogK-(W2.fk||0))*Math.min(1,dt*1.5);
+  scene.fog.near=W2.base[0]+(4-W2.base[0])*W2.fk;scene.fog.far=W2.base[1]+(20-W2.base[1])*W2.fk;
+  for(const q of W2.mist){q.m.position.set(cx+q.ox+Math.sin(t*.07+q.ph)*3,.9,cz+q.oz+Math.cos(t*.05+q.ph)*2);q.m.material.opacity=C2.mo*(1+W2.fk*2)}
+  if(C2.rain){const a=W2.rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=6){let y=a[i+1]-15*dt;let x=a[i],z=a[i+2];if(y<0||Math.abs(x-cx)>19||z-cz>15||z-cz<-19){x=cx+rand(-18,18);z=cz+rand(-18,14);y=rand(8,12)}a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x+.06;a[i+4]=y+.7;a[i+5]=z}W2.rain.geometry.attributes.position.needsUpdate=true}
+  if(C2.pts){const a=W2.pts.geometry.attributes.position.array,k=1+W2.fk*1.4;for(let i=0,o=0;i<a.length;i+=3,o++){const ph=W2.pv[o*2],sp=W2.pv[o*2+1];a[i]+=(C2.vx*k+Math.sin(t*1.1+ph)*.5)*sp*dt;a[i+1]+=C2.vy*sp*dt;a[i+2]+=Math.cos(t*.8+ph)*.3*dt;
+      if(a[i+1]<0||a[i+1]>12||a[i]-cx>19||a[i]-cx<-19||a[i+2]-cz>15||a[i+2]-cz<-19){a[i]=cx+(C2.vx>3?-18:rand(-18,18));a[i+2]=cz+rand(-18,14);a[i+1]=C2.vy>0?rand(0,1.5):C2.vy<-.5?rand(8,12):rand(.2,4)}}W2.pts.geometry.attributes.position.needsUpdate=true}}
+/* 3장 소품 — 썩은 늪: 이끼 늘어진 비틀린 나무, 갈대, 쓰러진 통나무, 갈색 버섯, 기둥 위 오두막 */
+function chzSwamp(Z){const bark=SM({color:0x2a2a1e,roughness:1}),moss=SM({color:0x4a5a2a,roughness:1,side:THREE.DoubleSide}),reed=SM({color:0x6a6a3a,roughness:1}),cap=SM({color:0x6a4a2a,roughness:.8}),thatch=SM({color:0x5a5030,roughness:1}),side=()=>Math.random()<.5?-1:1;
+  for(let n=0;n<26;n++){const z=rand(-STORY_L+18,STORY_L-12),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(.5,9)),g=chzG(x,z,rand(0,6)),h=rand(2.6,4.4),t=mesh(new THREE.CylinderGeometry(.14,.34,h,7),bark,0,h/2,0);t.rotation.z=rand(-.25,.25);g.add(t);
+    for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.04,.1,rand(1.2,2),5),bark,0,0,0),q=new THREE.Group();b.position.y=.8;q.add(b);q.position.y=h*rand(.6,.9);q.rotation.set(0,rand(0,6),rand(.6,1.2));g.add(q);
+      for(let k=0;k<2;k++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.14,rand(.6,1.2)),moss);m.position.set(rand(-.1,.1),1.1-k*.3,0);q.add(m)}}}
+  for(let n=0;n<34;n++){const z=rand(-STORY_L+14,STORY_L-10),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(-.6,3)),g=chzG(x,z,0);for(let i=0;i<7;i++){const h=rand(.6,1.4),r=mesh(new THREE.ConeGeometry(.03,h,4),reed,rand(-.4,.4),h/2,rand(-.4,.4));r.rotation.z=rand(-.2,.2);g.add(r)}}
+  for(let n=0;n<8;n++){const z=rand(-STORY_L+20,STORY_L-16),sd=side(),x=pathC(z)+sd*(pathW(z)-rand(.8,2)),g=chzG(x,z,rand(0,3)),l=mesh(new THREE.CylinderGeometry(.3,.35,rand(3,4.5),8),bark,0,.3,0);l.rotation.z=Math.PI/2;g.add(l);{const w0=LW(x,z);colliders.push({x:w0.x,z:w0.z,r:.8})}}
+  for(let n=0;n<16;n++){const z=rand(-STORY_L+14,STORY_L-10),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(-.4,2)),g=chzG(x,z,0);for(let i=0;i<3;i++){const h=rand(.2,.6),r=rand(.14,.32);g.add(mesh(new THREE.CylinderGeometry(r*.25,r*.3,h,6),SM({color:0xb8a888}),i*.3-.3,h/2,rand(-.2,.2)));const c=mesh(new THREE.SphereGeometry(r,10,6,0,6.3,0,1.6),cap,i*.3-.3,h,0);c.scale.y=.6;g.add(c)}}
+  for(const z of [92,-24,-70]){const sd=side(),x=pathC(z)+sd*(pathW(z)+2.6),g=chzG(x,z,rand(0,6));for(const [px,pz] of [[-1.2,-1],[1.2,-1],[-1.2,1],[1.2,1]])g.add(mesh(new THREE.CylinderGeometry(.1,.12,2.2,6),bark,px,1.1,pz));
+    g.add(mesh(new THREE.BoxGeometry(2.8,1.6,2.4),SM({color:0x4a3a2a,roughness:1}),0,3,0));const rf=mesh(new THREE.ConeGeometry(2.4,1.4,4),thatch,0,4.5,0);rf.rotation.y=Math.PI/4;g.add(rf);const lt=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xffb060,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));lt.position.set(1.5,2.8,1.3);lt.scale.setScalar(.9);g.add(lt)}}
 function chzOpenGate(){const G=CHZS.gate;if(!G)return;chevSet('gate');for(const c of G.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}const g=G.g;
   fx.push({m:g,t:0,dur:1.4,keep:1,upd(k){g.position.y=-k*1.4;g.rotation.x=k*.08},end(){scene.remove(g)}});for(let i=0;i<5;i++){const w=LW(pathC(G.z)+rand(-4,4),G.z);hitSpark(new THREE.Vector3(w.x,.6,w.z),0xffb060,0xff5a1a,10)}
   shake=Math.max(shake,.25);toast('길이 열렸다','바리케이드가 무너졌습니다');const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};save();CHZS.gate=null}
@@ -2474,6 +2547,7 @@ function chzTick(dt){const Z=CHZ[S.ch];if(!Z||S.phase!==1)return;const pl=W2L(P.
       for(let i=0;i<3;i++){const a=i/3*6.28,w=LW(q.x+Math.cos(a)*2.2,q.z+Math.sin(a)*2.2),g2=spawnEnemy('grunt',w.x,w.z,i?0:1);g2.gev=1;g2.idle=true}
       toast('묘역 열쇠지기','열쇠를 든 자가 묘소로 달아난다 — 쫓아가 쓰러뜨리세요')}
     else if(KG.sp&&!enemies.some(e=>e.kb&&e.hp>0))chzOpenKeyGate()}
+  chzTickX(dt,pl,Z);
   const C=CHZS.chest;if(C&&Math.hypot(P.pos.x-C.x,P.pos.z-C.z)<2.4){CHZS.chest=null;chevSet('chest');const L=C.lid;fx.push({m:L,t:0,dur:.5,keep:1,upd(k){L.rotation.x=-k*1.9},end(){}});
     const p=new THREE.Vector3(C.x,0,C.z);dropItem(p,false,1);dropItem(p,false,1);dropItem(p,false,2);toast('보물 상자','누군가 숨겨 둔 물건을 찾았다');save()}
   const T=CHZS.trace;if(T&&!chevOn('trace')&&Math.hypot(P.pos.x-T.x,P.pos.z-T.z)<4.4&&!talkOn()){chevSet('trace');save();talk(Z.trace)}
@@ -6973,7 +7047,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v697';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v698';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8504,7 +8578,7 @@ const EGM=()=>S.ch>=NCH&&mapKind!=='story'?3:1;
 /* v235: 엔드게임 몬스터 생성량 설정 50~120% (기기별 localStorage egRate) — 생성 간격과 동시 최대 수에 함께 적용 */
 let EG_RATE=100;try{const v=+localStorage.getItem('egRate');if(v)EG_RATE=Math.max(50,Math.min(120,v))}catch(e){}
 const egR=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?EG_RATE/100:1;/* v108: 엔드게임 몬스터 수·젠 속도 ×3 */
-function update(dt){packTick();wxTick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
+function update(dt){packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
   let mx=input.x,mz=input.z;
