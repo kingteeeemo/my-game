@@ -1865,7 +1865,7 @@ function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return t
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({nick:'',v696g2:1,playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
+const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 /* v603: 시즌 2 장비 개편 이전의 새 장비 → 같은 부위·티어·베이스로 다시 만듦(남아 있는 옵션 종류는 최대한 유지, 획득량 옵션은 다른 옵션으로) · 강화는 최대 +20 */
@@ -1913,7 +1913,6 @@ function reconcile(s){if(s&&s.lvConv&&!s.lvConv.free2){s.lvConv.free2=1;s.clr=0;
   if(!s.v40){s.v40=1;const O5=[9,18,30,48,72],O10=[5,9,13,18,24,31,39,48,58,70],sum=(a,n)=>a.slice(0,n).reduce((x,y)=>x+y,0);
     for(const g of Object.keys(s.sk2||{})){if(!GEMS2[g]){delete s.sk2[g];continue}const L=s.sk2[g]||0,nl=Math.min(L,g2Max(g)),r=sum(g==='flame'?O10:O5,L)-sum(G2C[g2Max(g)].e,nl);s.sk2[g]=nl;if(r>0)s.ess=(s.ess||0)+r}}
   if(s.sk2&&s.sk2.bshrap){const L=s.sk2.bshrap;for(let i=0;i<L;i++){s.ess=(s.ess||0)+(s.test?NG2C[5][i]:Math.ceil(G2C[5].e[i]*1.3));s.gold=(s.gold||0)+Math.round(G2C[5].g[i]/10)}delete s.sk2.bshrap}/* v675: 파편 작렬 삭제 → 정수·골드 반환 */
-  if(!s.v696g2){s.v696g2=1;if(s.sk2){const M3=[0,2,3,5],M4=[0,1,2,4,5];for(const g of ['aftsh','meteor2','overl','tri','dash','boomer','pecho']){const L=s.sk2[g]||0;if(L)s.sk2[g]=M3[Math.min(3,L)]}const b=s.sk2.bmulti||0;if(b)s.sk2.bmulti=M4[Math.min(4,b)]}}/* v696: 2차 강화 모두 5단계 — 3단계였던 것은 1→2·2→3·3→5, 연발 폭격(4단계) 1→1·2→2·3→4·4→5 (같은 세기 유지) */
   /* v145: 대지 분쇄 — 가시 확산(1차)·용암 균열(2차) 자리 바꿈 → 찍은 포인트·정수·골드 반환 */
   if(!s.v145q){s.v145q=1;const q=s.sk&&s.sk.quake;if(q&&q.qfork){s.skp.quake=(s.skp.quake||0)+q.qfork;delete q.qfork}
     const mL=(s.sk2&&s.sk2.magma)||0;if(mL){const c=G2C[5];for(let i=0;i<mL;i++){s.ess=(s.ess||0)+c.e[i];s.gold=(s.gold||0)+c.g[i]}}if(s.sk2)delete s.sk2.magma}
@@ -6974,7 +6973,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v696';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v697';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
