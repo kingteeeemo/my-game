@@ -3181,10 +3181,13 @@ function vHouse(x,z,ry,w,d,chim){const g=new THREE.Group();w=w||4;d=d||3.4;g.add
   g.add(mesh(new THREE.BoxGeometry(.9,1.6,.1),plankMat,0,.8,d/2+.02));const win=new THREE.Mesh(new THREE.PlaneGeometry(.7,.6),new THREE.MeshBasicMaterial({color:0xffb060}));win.position.set(w*.3,1.5,d/2+.03);g.add(win);
   if(chim){g.add(mesh(new THREE.BoxGeometry(.6,2.2,.6),PM.stone,w*.28,3.6,-d*.2))}
   refAdd(g,x,z,ry,Math.max(w,d)*.62);g.position.y-=.15;return g}
-function vTree(x,z,s,big){const g=new THREE.Group();s=s||1;const t=mesh(new THREE.CylinderGeometry(.18*s,.32*s,3*s,8),vilMat.bark,0,1.5*s,0);t.rotation.z=rand(-.08,.08);g.add(t);
-  const N=big?9:5;for(let i=0;i<N;i++){const a=i/N*6.3+rand(-.3,.3),q=i?rand(.9,1.7)*s:0,c=mesh(rockGeos[i%4],i%2?vilMat.leaf:vilMat.leaf2,Math.cos(a)*q,(3+rand(-.2,.9))*s,Math.sin(a)*q);c.scale.setScalar((big?rand(1.1,1.5):rand(.75,1.05))*s);g.add(c)}
+/* v688: 나무·덤불 — 바위 모양(각진 다면체)이라 공중에 뜬 바위처럼 보이던 것을 둥근 초록 잎 덩어리로 */
+const vLeafG=new THREE.SphereGeometry(1,12,9),vLeafM=[0x3f5a34,0x4e6a3a,0x5a6646].map(c=>SM({color:c,roughness:.92}));
+function vTree(x,z,s,big){const g=new THREE.Group();s=s||1;const H=(big?3.4:2.6)*s,t=mesh(new THREE.CylinderGeometry(.16*s,.3*s,H,8),vilMat.bark,0,H/2,0);g.add(t);
+  for(const a of [.6,2.8,4.6]){const b=mesh(new THREE.CylinderGeometry(.05*s,.1*s,1.3*s,6),vilMat.bark,0,0,0),q=new THREE.Group();b.position.y=.65*s;q.add(b);q.position.y=H*.72;q.rotation.set(0,a,.75);g.add(q)}
+  const N=big?8:5,R=(big?1.9:1.25)*s;for(let i=0;i<N;i++){const a=i/N*6.3+rand(-.3,.3),q=i?rand(.45,.8)*R:0,c=mesh(vLeafG,vLeafM[i%3],Math.cos(a)*q,H+(i?rand(-.35,.25):.35)*R,Math.sin(a)*q);c.scale.set(1,.78,1).multiplyScalar((i?rand(.55,.75):.8)*R);g.add(c)}
   return refAdd(g,x,z,rand(0,6),.45*s)}
-function vBush(x,z,s){const g=new THREE.Group();for(let i=0;i<3;i++){const c=mesh(rockGeos[i],vilMat.leaf,rand(-.4,.4)*s,.35*s,rand(-.4,.4)*s);c.scale.setScalar(rand(.5,.8)*s);g.add(c)}refAdd(g,x,z,0,0);g.position.y=gMin(x,z,.85*s)-.12;return g}
+function vBush(x,z,s){const g=new THREE.Group();for(let i=0;i<4;i++){const c=mesh(vLeafG,vLeafM[i%3],rand(-.45,.45)*s,.28*s,rand(-.45,.45)*s);c.scale.set(1,.7,1).multiplyScalar(rand(.38,.58)*s);g.add(c)}refAdd(g,x,z,0,0);g.position.y=gMin(x,z,.6*s)-.05;return g}
 function vFence(ax,az,bx,bz){const L=Math.hypot(bx-ax,bz-az),n=Math.max(1,Math.round(L/1.8)),g=new THREE.Group();for(let i=0;i<=n;i++){const t=i/n,x=ax+(bx-ax)*t,z=az+(bz-az)*t;const p=mesh(new THREE.BoxGeometry(.14,1.1,.14),vilMat.beam,x,groundH(x,z)+.55,z);g.add(p)}
   for(const y of [.45,.85]){const r=mesh(new THREE.BoxGeometry(.06,.08,L),vilMat.beam,(ax+bx)/2,groundH((ax+bx)/2,(az+bz)/2)+y,(az+bz)/2);r.rotation.y=Math.atan2(bx-ax,bz-az);g.add(r)}scene.add(g);propMeshes.push(g)}
 function buildVillage(){clearProps();propTheme='town';mapKind='town';townSync();setGround(130,130,.72);const L=STL;refA={lava:[],shroom:[],smoke:[]};
@@ -3226,7 +3229,7 @@ function buildVillage(){clearProps();propTheme='town';mapKind='town';townSync();
   for(const [x,z,ry,w,d] of [[-9.6,-5,.9,4,3.4],[9.4,9.6,-2.3,4,3.2],[-10,11.4,2.2,3.6,3.2],[6.8,-12.6,-.6,3.6,3],[-12.8,-11.6,1.3,4,3.4],[8.6,15.8,-2.6,3.6,3]])vHouse(x,z,ry,w,d,Math.random()<.4);
   /* 울타리 · 덤불 · 나무 (바깥 언덕) */
   vFence(-4.4,12.6,-4.6,9.2);vFence(4.4,12.6,4.6,9.6);vFence(-12.4,-1.2,-15.6,-.4);vFence(11.6,-3.6,14.6,-4.6);
-  {let n=0;for(let it=0;it<500&&n<46;it++){const c=L.c[it%L.c.length],a=rand(0,6.3),q=c[2]+rand(1,6),x=c[0]+Math.cos(a)*q,z=c[1]+Math.sin(a)*q,o=refOut(x,z);if(o<1.2||o>7)continue;(z<c[1]-1&&Math.random()<.5)?vTree(x,z,rand(.8,1.15)):vBush(x,z,rand(.7,1.2));n++}}
+  {let n=0;for(let it=0;it<500&&n<46;it++){const c=L.c[it%L.c.length],a=rand(0,6.3),q=c[2]+rand(1,6),x=c[0]+Math.cos(a)*q,z=c[1]+Math.sin(a)*q,o=refOut(x,z);if(o<1.2||o>7||colliders.some(q=>q.r>=1.2&&Math.hypot(q.x-x,q.z-z)<q.r+2.4))continue;(z<c[1]-1&&Math.random()<.5)?vTree(x,z,rand(.8,1.15)):vBush(x,z,rand(.7,1.2));n++}}
   /* 길가 등불 */
   for(const [x,z] of [[-2.6,12.4],[2.6,12.4],[-2.8,-7],[1.2,-11.6],[-9.4,3.4],[9.2,0.6],[6.8,-6]]){const g=new THREE.Group(),gl=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xffc860,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,opacity:.85}));gl.visible=false;gl.scale.setScalar(1.1);g.add(gl);
     g.add(mesh(new THREE.CylinderGeometry(.07,.09,2.2,6),PM.iron,0,1.1,0));propModel('post_lantern',m=>{if(!g.parent)return;for(const c of g.children)c.visible=c===gl;const b=new THREE.Box3().setFromObject(m),k=2.5/Math.max(.1,b.max.y-b.min.y);m.scale.setScalar(k);m.position.y=-b.min.y*k;g.add(m);m.updateMatrixWorld(true);m.traverse(o=>{if(o.isMesh&&/_lantern$/i.test(o.name)){const c=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());g.worldToLocal(c);gl.position.copy(c)}})});refAdd(g,x,z,rand(0,6),.3);refPool(x,z,1.6,0xffd27a,.18)}
@@ -6796,7 +6799,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v687';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v688';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
