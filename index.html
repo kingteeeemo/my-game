@@ -2443,14 +2443,15 @@ let CHC={on:0,t:0,dur:7.2};const _ccP=new THREE.Vector3(),_ccL=new THREE.Vector3
 function chPeak(){/* 맵 북쪽 끝 너머 봉우리(안개 무시) — 꼭대기에 아쉬카르의 불 */const pz=-STORY_L-120,px=pathC(-STORY_L),g=chzG(px,pz,0),mm=new THREE.MeshBasicMaterial({color:0x17131a,fog:false});
   g.add(mesh(new THREE.ConeGeometry(62,92,7),mm,0,40,0));const r1=mesh(new THREE.ConeGeometry(40,58,6),mm,-52,22,14),r2=mesh(new THREE.ConeGeometry(36,50,6),mm,50,18,18);g.add(r1,r2);
   const gm=new THREE.SpriteMaterial({map:refGlowTex,color:0xff7a2a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}),c=new THREE.Sprite(gm);c.position.y=88;c.scale.setScalar(46);g.add(c);
-  const c2=new THREE.Sprite(gm.clone());c2.material.color.set(0xffd080);c2.position.y=88;c2.scale.setScalar(18);g.add(c2);g.traverse(o=>o.frustumCulled=false);CHZS.peak={g,c,c2};return g}
-function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0};chevSet('intro');save();P.mv=null;camera.far=700;camera.updateProjectionMatrix();
+  const c2=new THREE.Sprite(gm.clone());c2.material.color.set(0xffd080);c2.position.y=88;c2.scale.setScalar(18);g.add(c2);g.traverse(o=>o.frustumCulled=false);g.visible=false;CHZS.peak={g,c,c2};return g}
+function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0};chevSet('intro');save();P.mv=null;window.CHCON=1;if(CHZS.peak)CHZS.peak.g.visible=true;
   const el=$('chCine')||(()=>{const d=document.createElement('div');d.id='chCine';d.innerHTML='<div class="cck"></div><div class="ccn"></div><div class="cct"></div>';document.body.appendChild(d);d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();CHC.t=Math.max(CHC.t,CHC.dur-1.2)});return d})();
   const Z=CHZ[S.ch];el.querySelector('.cck').textContent=`루멘하르 · ${S.ch+1}장`;el.querySelector('.ccn').textContent=CH[S.ch].n;el.querySelector('.cct').textContent=Z.intro||'';el.hidden=false;el.className='on'}
 function chCineCam(dt){if(!CHC.on)return;CHC.t+=Math.min(dt,.05);const t=CHC.t,D=CHC.dur;const s0=STORY_L-6,s1=STORY_L-46,u=Math.min(1,t/(D-1.6)),e=u*u*(3-2*u),lz=s0+(s1-s0)*e,cz=lz+12-6*e;
-  const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(pk.x,26,pk.z),Math.min(1,.35+e*.65));
+  const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(LW(pathC(cz-104),cz-104).x,14,LW(pathC(cz-104),cz-104).z),Math.min(1,.35+e*.65));
   const b=Math.max(0,Math.min(1,(t-(D-1.6))/1.6)),bb=b*b*(3-2*b);if(bb>0){_ccP.lerp(camera.position,bb);_ccL.lerp(_ccB.set(camT.x,camT.y+1,camT.z),bb)}
-  camera.position.copy(_ccP);camera.lookAt(_ccL);const el=$('chCine');if(el&&t>D-1.8)el.className='';if(t>=D){CHC.on=0;camera.far=120;camera.updateProjectionMatrix();if(el)el.hidden=true;stageBanner()}}
+  if(CHZS.peak){const pz=cz-104,pw=LW(pathC(pz),pz),G=CHZS.peak.g;G.position.set(pw.x,-8,pw.z);G.scale.setScalar(.42)}
+  camera.position.copy(_ccP);camera.lookAt(_ccL);const el=$('chCine');if(el&&t>D-1.8)el.className='';if(t>=D){CHC.on=0;window.CHCON=0;if(CHZS.peak)CHZS.peak.g.visible=false;if(el)el.hidden=true;stageBanner();const q=window.CHGQ||[];window.CHGQ=[];setTimeout(()=>q.forEach(k=>guide(k,true)),700)}}
 function chzCrypt(g){/* 작은 영묘 — 계단 받침·기둥 넷·삼각 지붕·어두운 문 */g.add(mesh(new THREE.BoxGeometry(3.6,.4,3.2),PM.pillar,0,.2,0),mesh(new THREE.BoxGeometry(3,2.4,2.6),PM.stone,0,1.6,-.1));
   for(const sx of [-1.25,1.25])g.add(mesh(new THREE.CylinderGeometry(.18,.2,2.4,10),PM.pillar,sx,1.6,1.35));
   for(const sx of [-1,1]){const rf=mesh(new THREE.BoxGeometry(1.95,.16,3.5),PM.pillar,sx*.8,3.2,.1);rf.rotation.z=-sx*.5;g.add(rf)}
@@ -2464,7 +2465,7 @@ function chzOpenGate(){const G=CHZS.gate;if(!G)return;chevSet('gate');for(const 
   fx.push({m:g,t:0,dur:1.4,keep:1,upd(k){g.position.y=-k*1.4;g.rotation.x=k*.08},end(){scene.remove(g)}});for(let i=0;i<5;i++){const w=LW(pathC(G.z)+rand(-4,4),G.z);hitSpark(new THREE.Vector3(w.x,.6,w.z),0xffb060,0xff5a1a,10)}
   shake=Math.max(shake,.25);toast('길이 열렸다','바리케이드가 무너졌습니다');const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};save();CHZS.gate=null}
 function chzTick(dt){const Z=CHZ[S.ch];if(!Z||S.phase!==1)return;const pl=W2L(P.pos.x,P.pos.z);
-  if(Z.intro&&!chevOn('intro')&&!CHC.on&&!ldBusy&&!S.test&&!S.demo&&pl.z>STORY_L-24)chCineStart();
+  if(Z.intro&&!chevOn('intro')&&!CHC.on&&!ldBusy&&!S.test&&!S.demo&&!S.tutor&&$('notice').hidden&&$('guide').hidden&&pl.z>STORY_L-24)chCineStart();
   if(CHZS.peak){const k=1+.12*Math.sin(performance.now()/260)+.06*Math.sin(performance.now()/97);CHZS.peak.c.scale.setScalar(46*k)}
   const G=CHZS.gate;if(G){if(!G.sp&&pl.z<G.z+24&&pl.z>G.z-1){G.sp=1;const d=diff();for(let i=0;i<5;i++){const z=G.z+4+rand(0,5),x=pathC(z)+rand(-.6,.6)*pathW(z),w=LW(x,z),e=spawnEnemy(i<2?(d.brute?'brute':'grunt'):'grunt',w.x,w.z,i<2?1:0);e.gev=1}toast('길이 막혔다','바리케이드를 지키는 정예 무리를 쓰러뜨리세요')}
     else if(G.sp&&!enemies.some(e=>e.gev&&e.hp>0))chzOpenGate()}
@@ -7113,7 +7114,7 @@ Object.assign(GUIDES,{
   tdone:{n:'튜토리얼 완료',steps:()=>GUIDES.intro.steps().slice(4)}
 });
 let GDQ=[],GCUR=null;
-function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
+function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;if(window.CHCON){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
 function guideRect(sel){if(sel==='@left'){const w=innerWidth,h=innerHeight;return {left:12,top:h*.5,right:w*.45,bottom:h-12}}
   let el=document.querySelector(sel);if(el&&!el.hidden&&!el.offsetParent&&el.closest('.rail'))el=$('hamBtn');/* v559: 세로 폰에서는 메뉴 안 버튼 대신 메뉴 버튼을 가리킴 */if(!el||el.hidden||!el.offsetParent)return null;const r=el.getBoundingClientRect();return r.width>0?r:null}
