@@ -3029,11 +3029,12 @@ function hearthMesh(n){const g=new THREE.Group();
   const hr=npcMesh({id:'haran',x:0,z:0,c:0x4a4a52,hat:0x2a2a30});hr.position.set(-2.2,0,.9);hr.rotation.y=-.5;g.add(hr);
   const dm=new THREE.Object3D();g.position.set(n.x,0,n.z);fires.push({x:n.x,z:n.z,y:1.6,a:dm,b:dm,ph:0,l:null});
   refH={g,a,b,c,ring,t:0};return g}
+/* v680: 조율사(오린)는 북동 천막촌(수정 작업대), 재단사(이네)는 언덕 꼭대기(마네킹·빨랫줄·천 두루마리)로 자리 바꿈 */
 /* v678: 쉼터 지형 — 넓힘(약 1.6배) + 북서 언덕은 돌아 올라가는 길. 걸을 수 있는 곳 = 원·캡슐의 합(REFW) + 언덕길(REFHP) + 언덕 꼭대기(REFT), 그 밖은 바위벽 지형.
    언덕길: 광장 북서쪽에서 계단으로 오름 → 서쪽으로 비탈 따라 → 북쪽으로 꺾어 계단 → 동쪽으로 돌아 꼭대기(조율사 오린). 꼭대기는 광장에서 바로 위로 보이지만 바로는 못 감 */
 const REFW={c:[[0,0,10],[0,14.2,6.5],[-19,3,7.5],[18,-1.5,7],[12,-15,6.5],[0,-20.5,4.8]],k:[[-8,1,-13,2.5,3],[8,-.5,12.5,-1.2,3],[5.5,-7.5,9.5,-11.5,2.8],[0,-9,0,-16.5,2.6]]};
 const REFHP=[[-5.8,-7.4,0],[-9.8,-10.6,1.1],[-15.6,-11.2,1.7],[-17.6,-15.8,2.6],[-14.2,-19.6,3.1]],REFHR=1.7,REFT={x:-9.6,z:-20,r:4.4,h:3.1},REFHILL={x:-13,z:-15.5,r:9.5,h:4.2};
-const REFP={shop:[-20.2,4.8],gear:[-9.4,-19.4],smith:[16.4,0],heir:[12.4,-13.2],stash:[0,-22.6],hearth:[0,-1.5]};
+const REFP={shop:[-20.2,4.8],gear:[12.4,-13.2],smith:[16.4,0],heir:[-9.4,-19.4],stash:[0,-22.6],hearth:[0,-1.5]};
 function segD(x,z,ax,az,bx,bz){const vx=bx-ax,vz=bz-az,t=Math.max(0,Math.min(1,((x-ax)*vx+(z-az)*vz)/(vx*vx+vz*vz)));return Math.hypot(x-ax-vx*t,z-az-vz*t)}
 function refPath(x,z){let b=1e9,h=0;for(let i=0;i<REFHP.length-1;i++){const [ax,az,ah]=REFHP[i],[bx,bz,bh]=REFHP[i+1],vx=bx-ax,vz=bz-az,t=Math.max(0,Math.min(1,((x-ax)*vx+(z-az)*vz)/(vx*vx+vz*vz))),d=Math.hypot(x-ax-vx*t,z-az-vz*t);if(d<b){b=d;h=ah+(bh-ah)*t}}return [b,h]}
 function refOut(x,z){let d=1e9;for(const [cx,cz,r] of REFW.c)d=Math.min(d,Math.hypot(x-cx,z-cz)-r);for(const [ax,az,bx,bz,r] of REFW.k)d=Math.min(d,segD(x,z,ax,az,bx,bz)-r);d=Math.min(d,refPath(x,z)[0]-REFHR,Math.hypot(x-REFT.x,z-REFT.z)-REFT.r);return d}
@@ -3104,15 +3105,15 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
       /* 바깥쪽 가장자리 바위(난간처럼) */const nx=(bz-az)/L,nz=-(bx-ax)/L;for(let k=0;k<=Math.round(L/1.6);k++){const t=k/Math.max(1,Math.round(L/1.6));for(const sd of [-1,1]){const x=ax+(bx-ax)*t+nx*sd*(REFHR+.5),z=az+(bz-az)*t+nz*sd*(REFHR+.5);if(refOut(x,z)<.3)continue;if(Math.random()<.55)refRock(x,z,rand(.45,.8),rand(.6,1))}}}
     const T=REFT;for(let i=0;i<18;i++){const a=i/18*Math.PI*2,x=T.x+Math.cos(a)*(T.r+.5),z=T.z+Math.sin(a)*(T.r+.5);if(refOut(x,z)<.3)continue;refRock(x,z,rand(.6,1.1),rand(.8,1.3))}
     const wb=new THREE.Group();wb.add(mesh(new THREE.BoxGeometry(1.8,.12,.9),PM.wood,0,.95,0));for(const [px,pz] of [[-.8,-.35],[.8,-.35],[-.8,.35],[.8,.35]])wb.add(mesh(new THREE.BoxGeometry(.1,.95,.1),PM.wood,px,.47,pz));
-    for(let i=0;i<4;i++){const c=mesh(PG.crys,PM.ice,-.6+i*.4,1.05,rand(-.2,.2)),h=rand(.3,.6);c.scale.set(.14,h,.14);wb.add(c)}wb.add(mesh(new THREE.TorusGeometry(.22,.04,6,14),PM.iron,.5,1.1,.2));refAdd(wb,-10.8,-21.4,.3,1);
+    for(let i=0;i<4;i++){const c=mesh(PG.crys,PM.ice,-.6+i*.4,1.05,rand(-.2,.2)),h=rand(.3,.6);c.scale.set(.14,h,.14);wb.add(c)}wb.add(mesh(new THREE.TorusGeometry(.22,.04,6,14),PM.iron,.5,1.1,.2));refAdd(wb,14.2,-14.8,-.4,1);
     refTree(-7.2,-22);for(const [x,z] of [[-12.8,-18],[-6.4,-18.4],[-11.6,-22.8]])addProp(x,z,'crystal');refPool(-9.6,-20,4.6,0x6ab8ff,.2);
     for(const [x,z] of [[-12.8,-9.4],[-16.6,-13.6],[-15.8,-18.6]])addProp(x,z,'pillar')}
   /* 북동 천막촌 — 재단사 이네 */
   {for(const [x,z,ry,m] of [[15.6,-17.6,-.3,refCloth],[8.4,-18.6,.2,refMat.red],[16.8,-12,-1.1,refMat.blue],[9,-11.8,.6,refCloth]]){const g=new THREE.Group(),t=mesh(PG.tent,m,0,1.1,0);t.rotation.y=Math.PI/4;g.add(t,mesh(PG.leg,PM.wood,0,1.6,0));refAdd(g,x,z,ry,1.4)}
     const cl=new THREE.Group();for(const sx of [-1.6,1.6])cl.add(mesh(new THREE.CylinderGeometry(.05,.05,2.2,6),PM.wood,sx,1.1,0));cl.add(mesh(new THREE.BoxGeometry(3.2,.03,.03),PM.wood,0,2.1,0));
-    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.PlaneGeometry(.55,rand(.8,1.2)),refMat.cloth[i]);c.position.set(-1.1+i*.72,1.55,0);c.rotation.y=rand(-.2,.2);cl.add(c)}refAdd(cl,10.4,-14.6,.5,0);
-    const mq=new THREE.Group();mq.add(mesh(new THREE.CylinderGeometry(.04,.04,1,6),PM.wood,0,.5,0),mesh(new THREE.CylinderGeometry(.22,.3,.8,10),refMat.cloth[1],0,1.3,0),mesh(new THREE.SphereGeometry(.13,8,6),PM.wood,0,1.8,0),mesh(new THREE.CylinderGeometry(.25,.25,.04,10),PM.wood,0,.02,0));refAdd(mq,14.2,-14.6,0,.4);
-    for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.13,.13,.9,10),refMat.cloth[i],0,.13,0);b.rotation.z=Math.PI/2;const g=new THREE.Group();g.add(b);refAdd(g,11+i*.35,-16.4+i*.25,.4,0)}
+    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.PlaneGeometry(.55,rand(.8,1.2)),refMat.cloth[i]);c.position.set(-1.1+i*.72,1.55,0);c.rotation.y=rand(-.2,.2);cl.add(c)}refAdd(cl,-7.6,-17.4,-.3,0);
+    const mq=new THREE.Group();mq.add(mesh(new THREE.CylinderGeometry(.04,.04,1,6),PM.wood,0,.5,0),mesh(new THREE.CylinderGeometry(.22,.3,.8,10),refMat.cloth[1],0,1.3,0),mesh(new THREE.SphereGeometry(.13,8,6),PM.wood,0,1.8,0),mesh(new THREE.CylinderGeometry(.25,.25,.04,10),PM.wood,0,.02,0));refAdd(mq,-11.4,-21.2,0,.4);
+    for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.13,.13,.9,10),refMat.cloth[i],0,.13,0);b.rotation.z=Math.PI/2;const g=new THREE.Group();g.add(b);refAdd(g,-12.4+i*.35,-19.2+i*.25,.4,0)}
     refPool(12.4,-14.6,4.6,0xffb070,.16);addProp(13.6,-10.4,'brazier')}
   /* 북쪽 무너진 성문 — 창고 */
   {for(const sx of [-2.6,2.6]){const g=new THREE.Group(),h=sx<0?4.2:2.6;g.add(mesh(PG.base,PM.pillar,0,.18,0));const d=mesh(PG.drum,PM.pillar,0,.35+h/2,0);d.scale.y=h;g.add(d);if(sx<0)g.add(mesh(PG.cap,PM.pillar,0,.5+h,0));refAdd(g,sx,-18.4,0,.9)}
@@ -6709,7 +6710,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v679';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v680';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
