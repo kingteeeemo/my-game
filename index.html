@@ -93,7 +93,7 @@ body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body
 </style></head><body>
 <title>루멘하르</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Archivo:wdth,wght@87,500;87,800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@700&family=Archivo:wdth,wght@87,500;87,800&display=swap">
 <style>
 /* Layout: full-screen 3D isometric scene; HUD floats over it — vitals top-left, quest under it, build menu top-right, joystick bottom-left, actions bottom-right; choices as bottom sheets */
 :root{
@@ -457,7 +457,25 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .title{--ember:#ff8a3a}
 .chap{color:#a89c8c!important;letter-spacing:.14em}
 .gcard p{color:#e4dccd}
-#clear .hint{color:#e4dccd;font-size:14px;line-height:1.65}#clear h2{line-height:1.3}
+#clear .hint{color:#e4dccd;font-size:14px;line-height:1.65}
+/* v718: 장 완료 — 화면 가운데를 가로지르는 띠(배너형). 이야기와 버튼은 아래쪽 */
+#clear:has(.cban){background:rgba(6,6,9,.74)}
+#clearSheet:has(.cban){background:none;border:0;box-shadow:none;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border-radius:0;zoom:1;animation:none;overflow:visible;display:block}
+.cban{position:relative;width:100%;height:100%;text-align:center}
+.cb-band{position:absolute;left:0;right:0;top:36%;transform:translateY(-50%);padding:32px 16px 28px;background:linear-gradient(90deg,transparent,rgba(10,10,13,.94) 16%,rgba(10,10,13,.94) 84%,transparent);animation:cbIn .7s cubic-bezier(.2,.8,.2,1) both}
+.cb-band:before,.cb-band:after{content:"";position:absolute;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(232,220,196,.6),transparent)}
+.cb-band:before{top:0}.cb-band:after{bottom:0}
+.cb-l{font:700 12px var(--ko);letter-spacing:.16em;color:#a89c8c}
+.cban h1{margin:12px 0 0;font:700 min(34px,8.6vw)/1.25 "Noto Serif KR","Noto Serif CJK KR",serif;letter-spacing:.06em;color:#e8dcc4;animation:cbT 1.1s cubic-bezier(.2,.8,.2,1) both}
+.cb-s{margin-top:10px;font:500 15px var(--ko);color:#cfc5b4}
+.cb-low{position:absolute;left:24px;right:24px;bottom:max(36px,calc(env(safe-area-inset-bottom,0px) + 24px));animation:cbF .6s .8s both}
+.cb-low p{font:500 15px/1.7 var(--ko);color:#e4dccd;margin:0 0 6px}
+.cb-low .nx{font-size:13px;color:#a89c8c;margin:10px 0 18px}
+#clear .cb-low button{width:100%;height:52px;font-size:16px;font-weight:800}
+.cban:before{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(transparent,rgba(6,6,9,.9) 38%,rgba(6,6,9,.96));animation:cbF .6s .6s both}
+@keyframes cbIn{from{opacity:0;transform:translateY(-50%) scaleY(.4)}to{opacity:1;transform:translateY(-50%) scaleY(1)}}
+@keyframes cbT{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.06em}}
+@keyframes cbF{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}#clear h2{line-height:1.3}
 /* v716: 마을 안내 — 마을 사람을 세로로, 얼굴 그림 · 하는 일 · 마을 지도 위 위치 */
 .tnl{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
 .tnr{display:grid;grid-template-columns:54px 1fr 64px;gap:10px;align-items:center;padding:7px;border-radius:10px;background:#18181e;border:1px solid rgba(232,220,196,.1)}
@@ -7397,7 +7415,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v717';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v718';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7834,12 +7852,11 @@ function showEnhDone(){$('noticeSheet').innerHTML=`<div><div class="chap">Level 
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='noticeOk')$('notice').hidden=true});
 function showClear(){
   const done=S.ch,last=done===LAST;
-  $('clearSheet').innerHTML=`<div><div class="chap">Chapter ${done+1} Clear</div><h2>${done+1}장 · ${CH[done].n} 완료</h2></div>
-    ${done===0&&!S.vil?`<p class="hint">${CH[done].boss}가 쓰러졌습니다. 들판 끝, 재 섞인 연기 너머로 작은 불빛들이 보입니다.</p>
-    <p class="hint">아직 꺼지지 않은 마을 — <b style="color:var(--ink)">세렌</b>. 잠시 쉬어 갈 수 있을 것 같습니다.</p>
-    <button class="primary" id="toVil">세렌 마을로</button>`:`${CHZ[done]&&CHZ[done].clr?CHZ[done].clr.map(l=>`<p class="hint">${l}</p>`).join(''):`<p class="hint">${CH[done].boss}가 쓰러졌습니다.</p>`}
-    <p class="hint">${last?`마지막 결전이 남았습니다.`:`다음: ${done+2}장 ${CH[done+1].n} · 적이 한 단계 강해집니다.`}</p>
-    <button class="primary" id="${last?'toFinal':'nextCh'}">${last?'계단을 오른다':CH[done+1].indoor&&!CH[done].indoor?'루멘 성으로':CH[done+1].indoor?`위층으로 · ${done+2}장`:`${done+2}장 시작`}</button>`}`;
+  const lines=done===0&&!S.vil?[`들판 끝, 재 섞인 연기 너머로 작은 불빛들이 보입니다.`,`아직 꺼지지 않은 마을 — <b style="color:var(--ink)">세렌</b>. 잠시 쉬어 갈 수 있을 것 같습니다.`]:CHZ[done]&&CHZ[done].clr?CHZ[done].clr:[],
+    nx=done===0&&!S.vil?'':last?'마지막 결전이 남았습니다.':`다음 · ${done+2}장 ${CH[done+1].n} — 적이 한 단계 강해집니다`,
+    bt=done===0&&!S.vil?`<button class="primary" id="toVil">세렌 마을로</button>`:`<button class="primary" id="${last?'toFinal':'nextCh'}">${last?'계단을 오른다':CH[done+1].indoor&&!CH[done].indoor?'루멘 성으로':CH[done+1].indoor?`위층으로 · ${done+2}장`:`${done+2}장 시작`}</button>`;
+  $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${done+1}장 · ${CH[done].n}</div><h1>${CH[done].boss} 처치</h1><div class="cb-s">${done+1}장 완료</div></div>
+    <div class="cb-low">${lines.map(l=>`<p>${l}</p>`).join('')}${nx?`<p class="nx">${nx}</p>`:'<div style="height:14px"></div>'}${bt}</div></div>`;
   $('clear').hidden=false;releaseAll();
 }
 /* 최종 보스 패배 (v29): 바로 재도전하거나, 5장으로 돌아가 성장한 뒤 재도전 */
@@ -7853,10 +7870,8 @@ $('bossExit').addEventListener('click',()=>{if(paused())return;const b=$('bossEx
   askConfirm('정말 나가시겠습니까?',S.duel?duelMapN()+'에서 나가 엔드게임 사냥터로 돌아갑니다.':`최종 결전에서 나가 ${NCH}장으로 돌아갑니다.`,'나가기',()=>{b.hidden=true;if(S.duel)duelLeave();else retreatToCh5()})});
 function retreatToCh5(){S.phase=5;save();mapLoad(`${NCH}장 · ${CH[LAST].n}`,'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>toast(`${NCH}장 · ${CH[LAST].n}`,'장비를 모으고 강화한 뒤 「최종 결전 재도전」을 누르세요'))}
 function showFinalClear(){
-  $('clearSheet').innerHTML=`<div><div class="chap">Final Chapter Clear</div><h2>${FINAL.boss} 처치</h2></div>
-    <p class="hint">불타는 왕좌의 불길이 꺼졌습니다. (스토리 준비 중 · 이 자리에 엔딩 이야기가 들어갑니다)</p>
-    <p class="hint">메인 스토리를 모두 마쳤습니다. 이제 위험도가 끝없이 오르는 파밍 지역이 열립니다.</p>
-    <button class="primary" id="toEndless">끝없는 심연으로</button>`;
+  $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">최종 결전 · 불타는 왕좌</div><h1>${FINAL.boss} 처치</h1><div class="cb-s">메인 스토리 완료</div></div>
+    <div class="cb-low"><p>불타는 왕좌의 불길이 꺼졌습니다.</p><p class="nx">이제 위험도가 끝없이 오르는 파밍 지역이 열립니다.</p><button class="primary" id="toEndless">끝없는 심연으로</button></div></div>`;
   $('clear').hidden=false;releaseAll();
 }
 $('clearSheet').addEventListener('click',e=>{
