@@ -2549,9 +2549,29 @@ function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),
   if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
   if(!CH[i].indoor)for(let z=STORY_L-35;z>-STORY_L+20;z-=rand(38,50)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,'tower',rand(0,6),1,true)}
   for(let n=0;n<70;n++){const z=rand(-STORY_L,STORY_L);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
-  chzBuild(i);
+  chzBuild(i);reachFix();
   altarRing.visible=altarLight.visible=true;arenaRing.visible=false;for(const l of arenaLights)l.visible=false}
 let crysKind='void';
+/* v721: 길 막힘 검사 — 소품이 무작위로 놓이다 길·곁가지 연결길·봉화 같은 목표를 막는 일이 없게, 맵을 지은 뒤 0.5칸 격자로 시작점에서 걸어서 닿는지 확인.
+   못 닿는 목표가 있으면 막는 소품의 충돌만 없앰(모습은 그대로): 1차 곁가지 안·연결길 위, 2차 걸을 수 있는 땅 위 전부. 막는 문(bar)은 열린 것으로 봄 */
+function reachTargets(){const T=[],e=endPtL();T.push({w:L2W(e.x,e.z),r:3});if(!CHZS)return T;
+  for(const B of CHZS.beacons||[])T.push({w:B.w,r:2.8});for(const t of CHZS.tw||[])T.push({w:t.w,r:3});for(const C of CHZS.chests||[])T.push({w:C,r:2.3});
+  if(CHZS.trace)T.push({w:CHZS.trace,r:4.3});if(CHZS.rescue)T.push({w:CHZS.rescue,r:3.1});if(CHZS.camp)T.push({w:CHZS.camp,r:4.9});if(CHZS.crypt)T.push({w:L2W(CHZS.crypt.x,CHZS.crypt.z),r:4});
+  for(const E of CHZS.ev2||[]){if(E.v.k==='hold')T.push({w:E.w,r:3.3});if(E.v.k==='carry'){T.push({w:E.wa,r:2.5});T.push({w:E.wb,r:2.7})}if(E.v.k==='nest')for(const N of E.nests)T.push({w:N.w,r:2.6})}
+  return T}
+function reachRun(){const r=.45,st=.5,X0=-30,NX=121,NZ=Math.ceil(2*STORY_L/st)+1,B=new Map();for(const c of colliders){if(c.bar)continue;const k=Math.floor(c.x/4)+','+Math.floor(c.z/4);(B.get(k)||B.set(k,[]).get(k)).push(c)}
+  const lx=(i,j)=>pathC(STORY_L-j*st)+X0+i*st,lz=j=>STORY_L-j*st,ok=new Uint8Array(NX*NZ),seen=new Uint8Array(NX*NZ),inn=(x,z)=>sOutL(x,z)<=0&&sOutL(x+.4,z)<=0&&sOutL(x-.4,z)<=0&&sOutL(x,z+.4)<=0&&sOutL(x,z-.4)<=0;
+  for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++){const x=lx(i,j),z=lz(j);if(!inn(x,z))continue;const w=L2W(x,z),ix=Math.floor(w.x/4),iz=Math.floor(w.z/4);let f=1;
+    for(let a=-1;a<=1&&f;a++)for(let b=-1;b<=1&&f;b++){const L=B.get((ix+a)+','+(iz+b));if(L)for(const c of L)if(Math.hypot(w.x-c.x,w.z-c.z)<c.r+r-.05){f=0;break}}ok[j*NX+i]=f}
+  let q=[],ci=Math.round(-X0/st);{let best=null,bd=1e9;for(let j=4;j<60;j++)for(let i=0;i<NX;i++)if(ok[j*NX+i]){const d=Math.abs(i-ci)+j*.1;if(d<bd){bd=d;best=[i,j]}}if(!best)return null;q.push(best);seen[best[1]*NX+best[0]]=1}
+  while(q.length){const n=[];for(const [i,j] of q)for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const I=i+a,J=j+b;if(I<0||J<0||I>=NX||J>=NZ)continue;const k=J*NX+I;if(seen[k]||!ok[k])continue;if(b&&Math.abs(lx(i,j)-lx(I,J))>1.2)continue;seen[k]=1;n.push([I,J])}q=n}
+  return {hit(t){const L=W2L(t.w.x,t.w.z);for(let j=Math.max(0,Math.floor((STORY_L-L.z-t.r)/st));j<=Math.min(NZ-1,Math.ceil((STORY_L-L.z+t.r)/st));j++)for(let i=0;i<NX;i++)if(seen[j*NX+i]&&Math.hypot(lx(i,j)-L.x,lz(j)-L.z)<t.r)return true;return false}}}
+function reachFix(){if(mapKind!=='story')return;try{const T=reachTargets(),own=c=>T.some(t=>Math.hypot(c.x-t.w.x,c.z-t.w.z)<.6);
+  for(let pass=0;pass<3;pass++){const R=reachRun();if(!R)return;const miss=T.filter(t=>!R.hit(t));if(!miss.length){if(pass)console.log('reachFix: 막힘을 풀었습니다 (단계 '+pass+')');return}if(pass===2){console.log('reachFix: 아직 닿지 않는 목표',miss.length);return}
+    for(let i=colliders.length-1;i>=0;i--){const c=colliders[i];if(c.bar||own(c))continue;const L=W2L(c.x,c.z);let rm=false;
+      if(pass===0){for(const q of MP.pk||[])if(Math.hypot(L.x-q.x,L.z-q.z)<q.r+c.r||segD(L.x,L.z,q.ax,q.az,q.x,q.z)<2.4+c.r){rm=true;break}}
+      else rm=sOutL(L.x,L.z)<c.r;
+      if(rm)colliders.splice(i,1)}}}catch(e){console.log('reachFix',e)}}
 /* v691: 장 사건 — 짓기(chzBuild) · 진행(chzTick). 상태: S.chev['장:키'], 마지막 모닥불 S.chk={ch,x,z} */
 let CHZS={};const chK=k=>S.ch+':'+k,chevOn=k=>!!(S.chev&&S.chev[chK(k)]),chevSet=k=>{S.chev=S.chev||{};S.chev[chK(k)]=1};
 const LW=(x,z)=>L2W(x,z);let chzMat=null;const chzMatInit=()=>chzMat||(chzMat={log:SM({color:0x2a201a,roughness:1}),char:SM({color:0x161210,roughness:1}),wood:SM({color:0x5a4030,roughness:.95}),gold:SM({color:0xc9a040,roughness:.4,metalness:.6}),foot:new THREE.MeshBasicMaterial({color:0x0c0a08,transparent:true,opacity:.55,depthWrite:false})});
@@ -2696,6 +2716,7 @@ function chzKairen(){/* 카이렌 — 회색 갑옷, 검붉은 망토, 긴 칼 *
 function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.tw=[];
   for(const q of MP.pk){if(q.k!=='tower')continue;/* 탑 수호자 — 양옆 탑 아래의 타락한 빛의 수호자. 둘 다 쓰러뜨리면 성역 문이 열림 */const w=LW(q.x,q.z),tw=LW(q.x+q.side*2.6,q.z-1.5);if(!(Z.tw&&Z.tw.noTower))addProp(tw.x,tw.z,'tower',0);refPool(w.x,w.z,q.r*.8,0xffc860,.16);
     for(let i=0;i<4;i++){const a=i/4*6.28+.4;APL(q.x+Math.cos(a)*(q.r-.7),q.z+Math.sin(a)*(q.r-.7),'pillar',0,0,true)}CHZS.tw.push({q,w,sp:0,done:chevOn('g'+q.id)})}
+  if(CHZS.tw.length&&CHZS.tw.every(t=>t.done))chevSet('sgate');/* v721: 수호자를 다 쓰러뜨린 기록이 있으면 문은 열린 채로 */
   for(const v of Z.ev){if(v.k!=='sgate'||chevOn('sgate'))continue;/* 성역 문 — 흰 돌기둥 둘 + 금빛 문짝(위를 가로지르는 들보 없음) */const c=pathC(v.z),wd=pathW(v.z)+.4,g=chzG(c,v.z,0),gold=SM({color:0xc8a040,roughness:.35,metalness:.7,emissive:0x3a2a08,emissiveIntensity:.5}),white=SM({color:0xd8d2c4,roughness:.6});
     for(const sx of [-1,1]){g.add(mesh(new THREE.BoxGeometry(1.1,5.2,1.1),white,sx*(wd+.55),2.6,0),mesh(new THREE.ConeGeometry(.8,1,4),gold,sx*(wd+.55),5.7,0))}
     const leaves=[];for(const sx of [-1,1]){const lf=new THREE.Group();lf.position.set(sx*wd,0,0);lf.add(mesh(new THREE.BoxGeometry(wd,3.6,.25),gold,-sx*wd/2,1.8,0));for(const y of [.8,1.8,2.8])lf.add(mesh(new THREE.BoxGeometry(wd*.8,.12,.3),white,-sx*wd/2,y,0));
@@ -2728,6 +2749,7 @@ function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.t
     colliders.push({x:w.x,z:w.z,r:1.2});const ring=new THREE.Mesh(new THREE.RingGeometry(2.3,2.6,36,1,0,.01),new THREE.MeshBasicMaterial({color:Z.bring||0xffc070,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(w.x,groundH(w.x,w.z)+.06,w.z);scene.add(ring);propMeshes.push(ring);
     const B={q,g,w,ring,lit,pr:0,sp:0};CHZS.beacons.push(B);if(lit)chzBeaconFire(B,1);
     if(q.kai&&!chevOn('kai')){const k=chzKairen(),kw=LW(q.x+q.side*1.6,q.z-1.4);k.position.set(kw.x,groundH(kw.x,kw.z),kw.z);k.rotation.y=SROT+Math.PI;scene.add(k);propMeshes.push(k);CHZS.kai={g:k,cd:0,st:'wait',B}}}
+  if(CHZS.beacons.length&&CHZS.beacons.every(b=>b.lit))chevSet('beacons');/* v721: 봉화를 모두 밝힌 기록이 있으면 벽은 열린 채로 */
   for(const v of Z.ev){if(v.k==='icewall'&&!chevOn('beacons')){const c=pathC(v.z),wd=pathW(v.z),g=chzG(c,v.z,0),sh=Z.wall==='shadow',ice=sh?SM({color:0x1a1024,roughness:.2,transparent:true,opacity:.86,emissive:0x5a1a9a,emissiveIntensity:.6}):SM({color:0xb8d8f0,roughness:.15,metalness:.1,transparent:true,opacity:.82,emissive:0x2a4a6a,emissiveIntensity:.4});
     if(Z.wall==='bars'){/* v713: 쇠창살 문 */for(let x=-wd-.6;x<=wd+.6;x+=.42)g.add(mesh(new THREE.BoxGeometry(.09,4.2,.09),PM.iron,x,2.1,0));for(const y of [.5,1.6,2.7,3.8])g.add(mesh(new THREE.BoxGeometry(wd*2+1.4,.1,.12),PM.iron,0,y,0));for(let x=-wd-.6;x<=wd+.6;x+=.42)g.add(mesh(new THREE.ConeGeometry(.08,.3,4),PM.iron,x,-.05,0))}
     else for(let x=-wd-1;x<=wd+1;x+=1.1){const h=rand(2.2,3.6),b=mesh(new THREE.BoxGeometry(1.1,h,1.2),ice,x,h/2,rand(-.3,.3));b.rotation.y=rand(-.3,.3);b.rotation.z=rand(-.08,.08);g.add(b);const sp=mesh(new THREE.ConeGeometry(.35,rand(.8,1.6),5),ice,x+rand(-.2,.2),h+.4,0);g.add(sp)}
@@ -2792,7 +2814,27 @@ function evTrapDrop(E,w){const v=E.v,r=1.5,tg=new THREE.Mesh(new THREE.CircleGeo
       if(t>=D&&!hit){hit=1;tg.material.opacity=0;rim.visible=false;ob.position.y=gy+(v.st==='ice'?.9:.4);hitSpark(new THREE.Vector3(w.x,.5,w.z),v.st==='ice'?0xe0f4ff:0xd8c8b0,v.st==='ice'?0x8ac8f0:0x8a7a6a,12);shake=Math.max(shake,.12);
         if(P.hp>0&&!P.mv&&Math.hypot(P.pos.x-w.x,P.pos.z-w.z)<r+.25)hurtPct(.1)}
       if(t>D+.6)ob.scale.multiplyScalar(.9)},end(){scene.remove(tg,rim,ob)}})}
-function evTick(dt,pl,Z){if(!CHZS.ev2)return;let hud='';
+/* v721: 막는 곳(얼음벽·쇠창살·장막·바리케이드·철문·성역 문·봉인) 앞 20m 안에 오면 무엇을 해야 하는지 위쪽 띠로 계속 안내 */
+function evBlockHint(pl,Z){const near=z=>pl.z>z-1&&pl.z-z<22;
+  if(CHZS.ice&&near(CHZS.ice.z)){const L=CHZS.beacons.filter(b=>!b.lit).length,BT=Z.btx,nm=Z.wall==='bars'?'쇠창살 문':Z.wall==='shadow'?'어둠의 장막':'얼음벽';return L?`<b>${nm}</b>${BT?BT.un:'꺼진 봉화'} ${L}곳을 밝히세요 · <i>지도의 금빛 표시</i>`:''}
+  if(CHZS.gate&&near(CHZS.gate.z))return `<b>바리케이드</b>지키는 무리를 모두 쓰러뜨리세요${CHZS.gate.sp?` · 남은 ${enemies.filter(e=>e.gev&&e.hp>0).length}`:''}`;
+  if(CHZS.kg&&near(CHZS.kg.z))return `<b>묘역 철문</b>열쇠를 든 자를 쓰러뜨리세요 · <i>지도의 금빛 표시</i>`;
+  if(CHZS.sg&&near(CHZS.sg.z)){const L=CHZS.tw.filter(t=>!t.done).length;return `<b>${Z.tw?'왕좌의 문':'성역 문'}</b>양옆의 ${Z.tw?Z.tw.n:'수호자'}를 쓰러뜨리세요 · 남은 ${L}`}
+  for(const E of CHZS.ev2||[])if(!E.done&&E.seal&&E.seal.on&&near(E.seal.z))return `<b>봉인</b>${E.v.n} — ${{hold:'원 안에 머무르세요',nest:'둥지를 모두 부수세요',carry:'불씨를 꺼진 화로로 옮기세요'}[E.v.k]} · <i>지도의 금빛 표시</i>`;
+  return ''}
+/* v721: 지도에 남은 목표(꺼진 봉화·수호자·열쇠지기·정화의 원·둥지·화로) 금빛 마름모 */
+function evObjectives(){const O=[];if(!CHZS)return O;
+  if(CHZS.ice&&CHZS.beacons)for(const B of CHZS.beacons)if(!B.lit)O.push(B.w);
+  if(CHZS.sg&&CHZS.tw)for(const T of CHZS.tw)if(!T.done)O.push(T.w);
+  if(CHZS.kg){const k=enemies.find(e=>e.kb&&e.hp>0);if(k)O.push(k.pos)}
+  for(const E of CHZS.ev2||[]){if(E.done)continue;if(E.v.k==='hold')O.push(E.w);if(E.v.k==='nest')for(const N of E.nests)if(!N.dead)O.push(N.w);if(E.v.k==='carry')O.push(E.on?E.wb:E.wa)}
+  return O}
+/* v721: 꼭 쓰러뜨려야 하는 적(바리케이드·열쇠지기·수호자·매복)이 벽 안에 끼거나 멀리 떨어져 8초 넘게 닿지 않으면 플레이어 앞 길 위로 옮김 */
+function evRescue(dt,pl){EVH.rt=(EVH.rt||0)+dt;if(EVH.rt<1)return;EVH.rt=0;if(P.hp<=0)return;
+  for(const e of enemies){if(e.hp<=0||e.nest||e.flee||e.boss||e._rm)continue;const need=e.amb||e.kb||e.twg||(e.gev&&CHZS.gate&&CHZS.gate.sp);if(!need){e.farT=0;continue}
+    const q=W2L(e.pos.x,e.pos.z),out=sOutL(q.x,q.z)>.6,far=EVH.bn&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)>26;
+    if(out||far){e.farT=(e.farT||0)+1;if(e.farT>=(out?4:8)){e.farT=0;const z=pl.z-4,w=LW(pathC(z)+rand(-.4,.4)*pathW(z),z);e.pos.x=w.x;e.pos.z=w.z;e.g.position.x=w.x;e.g.position.z=w.z;e.idle=false;e.kbT=0;hitSpark(new THREE.Vector3(w.x,1,w.z),0xffffff,0xb0a0ff,10)}}else e.farT=0}}
+function evTick(dt,pl,Z){if(!CHZS.ev2)return;let hud='';evRescue(dt,pl);
   for(const E of CHZS.ev2){const v=E.v;if(E.done)continue;
     if(v.k==='amb'){const inZ=pl.z<v.z+v.r-3&&pl.z>v.z-v.r+3,out=pl.z>v.z+v.r+2||pl.z<v.z-v.r-2;
       if(E.st===0&&inZ&&P.hp>0){E.st=1;E.wave=0;E.wt=.4;evSealUp(E.wA);evSealUp(E.wB);shake=Math.max(shake,.3);toast(v.n,v.h)}
@@ -2825,7 +2867,7 @@ function evTick(dt,pl,Z){if(!CHZS.ev2)return;let hud='';
     if(v.k==='traps'){const inZ=pl.z<v.z0&&pl.z>v.z1;if(!inZ)continue;if(!E.msg){E.msg=1;toast(v.n,v.h)}E.cd-=dt;
       if(E.cd<=0&&P.hp>0){E.cd=rand(.7,1.1);const lead=Math.random()<.6,z=pl.z+(lead?rand(-1.5,1.5):rand(-5,5)),x=lead?pl.x+rand(-1.2,1.2):pathC(z)+rand(-.8,.8)*pathW(z);evTrapDrop(E,LW(x,z));if(Math.random()<.4){const z2=pl.z+rand(-6,6);evTrapDrop(E,LW(pathC(z2)+rand(-.8,.8)*pathW(z2),z2))}}
       hud=`<b>${v.n}</b><i>바닥의 표시를 피하세요</i>`}}
-  if(hud)evHud(hud)}
+  {const bh=evBlockHint(pl,Z);EVH.bn=!!bh;if(!hud)hud=bh}if(hud)evHud(hud)}
 function chzTickX(dt,pl,Z){evTick(dt,pl,Z);
   if(CHZS.tw&&CHZS.tw.length){for(const T of CHZS.tw){if(T.done)continue;const d=Math.hypot(P.pos.x-T.w.x,P.pos.z-T.w.z);
       if(!T.sp&&d<16){T.sp=1;const dd=diff(),e=spawnEnemy(dd.brute?'brute':'grunt',T.w.x,T.w.z,2);e.gev=1;e.twg=T.q.id;e.lab.firstChild.textContent=Z.tw?Z.tw.n:'타락한 빛의 수호자';for(let i=0;i<2;i++){const a=i*3.1,w2=LW(T.q.x+Math.cos(a)*2,T.q.z+Math.sin(a)*2),e2=spawnEnemy('grunt',w2.x,w2.z,1);e2.gev=1}
@@ -7489,7 +7531,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v720';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v721';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8956,6 +8998,7 @@ function drawMiniTo(mctx,W,H,cx,cz,V,k,rot,full){
   for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';{const q=full?Math.max(k,3):k;mctx.fillRect(mx(p.m.position.x)-q/2,mz(p.m.position.z)-q/2,q,q)}}
   for(const e of enemies){if(Math.abs(e.pos.x-cx)>V||Math.abs(e.pos.z-cz)>V)continue;const r=[1.1,1.5,2,3.2][e.rank]*k*(full?1.6:W/108)*1.1;mctx.fillStyle=RANK[e.rank].c;mctx.globalAlpha=e.idle?.5:1;mctx.beginPath();mctx.arc(mx(e.pos.x),mz(e.pos.z),Math.max(1,r),0,7);mctx.fill()}mctx.globalAlpha=1;
   if(full&&mapKind==='story'&&CHZS){/* 전체 지도: 모닥불(주황)·사건 지점(진홍) */const dot=(x,z,c,r)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc(mx(x),mz(z),r,0,7);mctx.fill()};if(CHZS.camp)dot(CHZS.camp.x,CHZS.camp.z,'#ff9a3a',5);const sp=startPt();dot(sp.x,sp.z,'rgba(232,220,196,.8)',4)}
+  if(mapKind==='story'&&CHZS&&S.phase===1&&typeof evObjectives==='function'){const tt=performance.now()/1000;for(const o of evObjectives()){if(Math.abs(o.x-cx)>V||Math.abs(o.z-cz)>V)continue;const X=mx(o.x),Y=mz(o.z),r=(full?8:Math.max(4,W/26))*(1+.15*Math.sin(tt*4));mctx.fillStyle='#ffe0a0';mctx.strokeStyle='#1a1008';mctx.lineWidth=1.4;mctx.beginPath();mctx.moveTo(X,Y-r);mctx.lineTo(X+r*.72,Y);mctx.lineTo(X,Y+r);mctx.lineTo(X-r*.72,Y);mctx.closePath();mctx.fill();mctx.stroke()}}
   const px=mx(P.pos.x),pz=mz(P.pos.z),f=P.face,sz=full?11:Wd/22;
   mctx.fillStyle='#ffb070';mctx.strokeStyle='#1a1008';mctx.lineWidth=1;mctx.beginPath();
   mctx.moveTo(px+Math.sin(f)*sz,pz+Math.cos(f)*sz);mctx.lineTo(px+Math.sin(f+2.5)*sz*.65,pz+Math.cos(f+2.5)*sz*.65);mctx.lineTo(px+Math.sin(f-2.5)*sz*.65,pz+Math.cos(f-2.5)*sz*.65);mctx.closePath();mctx.fill();mctx.stroke();mctx.restore();
@@ -8965,7 +9008,7 @@ function openAreaMap(){if(paused()&&!mapOpen)return;closeAllSheets();mapOpen=tru
   const nm=inTown?TOWN.n:mapKind==='story'?`${S.ch+1}장 · ${CH[S.ch].n}`:mapTitle();
   $('wmapSheet').innerHTML=`<div class="shead"><div><div class="chap">Area Map</div><h2>${nm}</h2></div><button class="close" id="wmClose">닫기</button></div>
     <div class="amwrap"><canvas id="amC"></canvas></div>
-    <div class="amleg"><span><i style="background:#ffb070"></i>나</span>${mapKind==='story'?'<span><i style="border:2px solid #b080ff;background:none"></i>보스 제단</span><span><i style="background:#ff9a3a"></i>모닥불</span><span><i style="background:rgba(232,220,196,.8)"></i>출발</span>':''}${inTown?'<span><i style="background:#ffd24a"></i>마을 사람</span>':''}<span><i style="background:#c0392b"></i>적</span></div>
+    <div class="amleg"><span><i style="background:#ffb070"></i>나</span>${mapKind==='story'?'<span><i style="border:2px solid #b080ff;background:none"></i>보스 제단</span><span><i style="background:#ffe0a0;border-radius:1px;transform:rotate(45deg) scale(.8)"></i>할 일</span><span><i style="background:#ff9a3a"></i>모닥불</span><span><i style="background:rgba(232,220,196,.8)"></i>출발</span>':''}${inTown?'<span><i style="background:#ffd24a"></i>마을 사람</span>':''}<span><i style="background:#c0392b"></i>적</span></div>
     <button class="ghost" id="amWorld" style="width:100%">루멘하르 지도 보기</button>`;
   const cv=$('amC'),box=cv.parentElement.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),W=Math.max(200,box.width),H=Math.max(240,Math.min(window.innerHeight*.62,box.width*1.5));
   cv.style.width=W+'px';cv.style.height=H+'px';cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);const ctx=cv.getContext('2d'),w=cv.width,h=cv.height;
