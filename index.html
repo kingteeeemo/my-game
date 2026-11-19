@@ -1507,7 +1507,7 @@ const GEMS2={
   tri:{s:'frost',n:'오중 보주',c:'#bfe8ff',d:L=>`보주 ${TRI_N[L]}개 발사${TRI_N[L]>=3?` (사방 ${TRI_N[L]}방향${TRI_N[L]===5?' · 정오각형':''})`:''} · 보주 속도 +${Math.round(TRI_SP[L]*100)}%`},
   fnova:{s:'frost',n:'서리 폭발',c:'#7fd0ff',d:L=>{const v=novaSt(L);return `보주마다 ${v.iv.toFixed(2)}초마다 그 자리에 얼음 폭발\n초당 ${(1/v.iv).toFixed(1)}회 · 반경 ${v.r.toFixed(1)}m · 파편 피해 ×${v.m.toFixed(2)}\n파편 난사 빈도 -${Math.min(100,L*20)}%${L>=5?' (파편 없음)':''}`}},
   dash:{s:'whirl',n:'질주',c:'#a0e0a0',d:L=>`회전 베기 시전하는 동안 이동 속도 +${12*L}%`},
-  flame:{s:'whirl',get n(){return whEl()==='frost'?'서리 폭발':'화염 폭발'},get c(){return whEl()==='frost'?'#7fd0ff':'#ff8a3a'},d:L=>{const f=flameSt(L);return `회전하는 동안 ${f.iv.toFixed(2)}초마다 내 자리에 ${whEl()==='frost'?'서리':'화염'} 폭발\n초당 ${(1/f.iv).toFixed(1)}회 · 회전 범위의 ${Math.round(f.rm*100)}% · 피해 ×${f.m.toFixed(2)}`}},
+  flame:{s:'whirl',get n(){return whEl()==='frost'?'서리 폭발':'화염 폭발'},get c(){return whEl()==='frost'?'#7fd0ff':'#ff8a3a'},d:L=>{const f=flameSt(L);return `회전하는 동안 내 자리에 ${whEl()==='frost'?'서리':'화염'} 폭발\n회전 범위의 ${Math.round(f.rm*100)}% · 피해 ×${f.m.toFixed(2)}`/* v717: 초당 횟수 표기 삭제(Austin — 단계로는 간격이 안 바뀜) */}},
   boomer:{s:'volley',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 한꺼번에 되돌아옴 (돌아올 때 피해 ×${r.m.toFixed(2)})\n화살 속도 +${Math.round((r.sp-1)*100)}%`}},
   lblast:{s:'volley',get n(){return arEl()==='fire'?'화염 폭발':'번개 폭발'},get c(){return arEl()==='fire'?'#ff7a4a':'#b8a0ff'},d:L=>{const x=lbSt(L);return `화살이 맞은 자리에 ${arEl()==='fire'?'화염':'번개'} 폭발\n반경 ${x.r.toFixed(1)}m · 피해 ×${x.m.toFixed(2)}`}}
 };
@@ -7397,7 +7397,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v716';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v717';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
