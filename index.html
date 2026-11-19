@@ -1670,7 +1670,7 @@ const OPT={
   mcr:{n:'스킬 마나 소모',sp:1,rng:SPR,f:v=>`-${v}%`,slots:['ring'],roll:spRoll},
   fdmg:{n:'최종 피해',sp:1,rng:SPR,f:v=>`+${v}%`,slots:['weapon'],roll:spRoll}/* v54: 무기 특수 — 모든 피해에 곱연산 */
 };
-let uid=Date.now()%1e6,volSeq=0;const VOL_K=.55,ovlK=(e,k,id)=>{const o=e[k]||(e[k]={__n:0}),c=o[id]||0;o[id]=c+1;if(!c&&o.__n++>=60){e[k]={[id]:1,__n:0}}return Math.pow(VOL_K,c)};/* v98: 다발 사격 한 번에 같은 적에게 겹쳐 맞을수록 피해 감소 — 1발째 100% · 2발째 55% · 3발째 30%… */
+let uid=Date.now()%1e6,volSeq=0;const VOL_K=.55,ovlC=(e,v)=>{if(!v)return 1;const o=e[v.k]||(e[v.k]={__n:0}),c=o[v.id]||0;o[v.id]=c+1;if(!c&&o.__n++>=60){e[v.k]={[v.id]:1,__n:0}}return c<v.cap?1:Math.pow(VOL_K,c-v.cap+1)}/* v725: 한 번 시전에 같은 적이 맞는 횟수가 cap을 넘으면 0.55배씩 감소 — 무리 속 겹침 피해 억제(혼자 있는 적·보스는 cap 안이라 그대로) */,ovlK=(e,k,id)=>{const o=e[k]||(e[k]={__n:0}),c=o[id]||0;o[id]=c+1;if(!c&&o.__n++>=60){e[k]={[id]:1,__n:0}}return Math.pow(VOL_K,c)};/* v98: 다발 사격 한 번에 같은 적에게 겹쳐 맞을수록 피해 감소 — 1발째 100% · 2발째 55% · 3발째 30%… */
 const RAR_M=[1,1,1,1.35];/* v76: 전설(주황)은 기본 수치·일반 옵션 수치 ×1.35 (희귀 대비 +35%, 옵션 1개 더). 특수 능력치 수치는 그대로 */
 function rollRarity(boss){const w=boss?[0,50,38*.4,12*.15*.3]:[58,30,10*.4,((2+chE())*.15+(S.ch>=NCH?.04*S.tier:0))*.3];if(S.ch>=4){w[0]=0;w[1]=0}/* v44: 전설 ×0.3 · 5장(불타는 폐허)~: 노랑·주황만 */let t=Math.random()*w.reduce((a,b)=>a+b),i=0;while(t>w[i]){t-=w[i];i++}return i}
 function makeItem(slot,ilvl,rar,spP=.03){slot=kSlot(slot);/* v604: 두 번째 반지 칸(ring2)도 반지 아이템으로 생성 — 테스트·스킵·시연의 EQS 순회 오류 수정 */if(NS())return nsMakeItem(slot,nRollTier());/* v44: 특수 능력치 확률 — 필드 3% · 상점 10% (전설만) */
@@ -6367,7 +6367,7 @@ function hurt(e,amt,quiet,so){
 function freeze(e,t){if(e.frzT>0||(e.frzI||0)>0)return;e.frzT=e.boss?t*.35:t}
 function aoe(c,r,dmg,o={}){r*=NSX.area;/* v603: 스킬 범위 증가 (판정 범위) */
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e)continue;/* v194: 배열 복사 없이 뒤에서부터 */const dx=e.pos.x-c.x,dz=e.pos.z-c.z,d=Math.hypot(dx,dz);
-    if(d<r+e.r*.6){if(o.knock&&!e.boss){e.kbT=.22;e.kbx=dx/(d||1)*16;e.kbz=dz/(d||1)*16}if(o.slow)e.slowT=2;if(o.spark&&Math.random()<.7)hitSpark(e.pos,0xffffff,0x6a9aff,2);hurt(e,o.bm&&(e.boss||e.duel||e.final)?dmg*o.bm:dmg,o.quiet,o.so)}}
+    if(d<r+e.r*.6){if(o.knock&&!e.boss){e.kbT=.22;e.kbx=dx/(d||1)*16;e.kbz=dz/(d||1)*16}if(o.slow)e.slowT=2;if(o.spark&&Math.random()<.7)hitSpark(e.pos,0xffffff,0x6a9aff,2);hurt(e,(o.bm&&(e.boss||e.duel||e.final)?dmg*o.bm:dmg)*ovlC(e,o.ov),o.quiet,o.so)}}
 }
 function kill(e){
   if(NS()&&!S.demo&&(NSX.killH||NSX.killM)&&P.hp>0){if(NSX.killH)P.hp=Math.min(P.mhp,P.hp+P.mhp*NSX.killH);if(NSX.killM)P.mp=Math.min(P.mmp,P.mp+P.mmp*NSX.killM)}/* v603: 처치 시 생명력·마나 회복 */
@@ -7020,20 +7020,20 @@ function kinHit(e,c){/* v689: 몸이 푸르게 변하는 것 삭제(Austin) — 
   streaks({x:p.x,z:p.z},Math.round(4*q),{sp:[6,12],up:[0,4],y:[p.y-.2,p.y+.2],life:[.1,.2],w:.05,len:.5,c0:0xffffff,c1:0x8fb0ff,drag:4,grav:-6});
   if(Math.random()<.65*q)for(let i=0;i<2;i++){const a=Math.random()*6.28,rr=e.r+rnd(.4,1.1),a0={x:e.pos.x+Math.sin(a)*rr,y:p.y+rnd(-.5,.7),z:e.pos.z+Math.cos(a)*rr};boltFx(a0,p,{w:.45,dur:.14,br:0,lv:3})}}
 /* v675: 폭발은 겹쳐 맞음(같은 적이 한 화살의 여러 폭발에 모두 맞음) — 대신 폭발 1회 피해 ×0.25. 줄기 위의 적은 반경에 따라 보통 3~7번 맞아 단일 대상 피해 약 0.8~1.7배, 보스전에 유리 */
-const BM_OV=.2;/* v684: 몬스터 쪽 폭발이 더해져 .25→.2 */
+const BM_OV=.2,BOOM_CAP=15;/* v725: 화살 하나가 같은 적에게 터뜨리는 폭발은 15번까지 온전히(보스가 받는 양) *//* v684: 몬스터 쪽 폭발이 더해져 .25→.2 */
 function boomExplode(c,o,hit,last){SFX.p('arrowboom');const R=o.r;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();boomFx(c,R,Math.max(.5,1/Math.sqrt(fbT.length)));
-  {const r=R*NSX.area;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||e.hp<=0||e.air)continue;if(Math.hypot(e.pos.x-c.x,e.pos.z-c.z)<r+e.r*.6){kinHit(e,c);hurt(e,o.dmg*BM_OV,2,o.so)}}}
+  {const r=R*NSX.area;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||e.hp<=0||e.air||(o.only&&e!==o.only))continue;if(o.only||Math.hypot(e.pos.x-c.x,e.pos.z-c.z)<r+e.r*.6){kinHit(e,c);hurt(e,o.dmg*BM_OV*ovlC(e,o.ov),2,o.so)}}}
   if(o.ember)kinField(c,R*.75,o.ember.dps,o.ember.dur);
 }
 /* v671: 화살이 적을 꿰뚫고 사거리 끝까지 날아가며, 일정 간격마다 지나간 자리에서 충격파가 연달아 터짐. 화살 하나당 같은 적은 한 번만 피해(hit) */
-function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set(),back=!!o.from;
+function shootBoom(a,dist,o){o={...o,ov:{k:'bc',id:++volSeq,cap:BOOM_CAP}};const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set(),back=!!o.from;
   /* v673: 더 불규칙 — 간격이 아주 촘촘함~크게 비는 구간까지 섞이고, 한 자리에서 1~4개가 무리 지어 엇박자로 터짐. 위치는 줄기에서 좌우로 크게 벗어나고 크기도 .55~1.3배로 들쭉날쭉 */
   const gap=()=>{const r=Math.random();return step*(r<.35?rnd(.08,.3):r<.65?rnd(.4,.9):r<.88?rnd(1,1.6):rnd(1.8,2.6))};let next=rnd(.5,3.2);
   shoot(a,{from:o.from,color:0xdfe8ff,size:.5,long:true,trail:2.4,tw:.16,tcol:0x8fb0ff,glow:1.8,gcol:0x9ab8ff,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0x8fb0ff,c1:0xffffff,cw:.22}});const p=projs[projs.length-1];
   const sx=Math.cos(a),sz=-Math.sin(a);/* 진행 방향의 옆 */const sought=new Set();
   /* v684: 화살이 몬스터 곁을 지나가면 그 몬스터 몸 위에서 작은 폭발이 2~4번 다다닥 터짐(화살 하나당 몬스터마다 한 번) */
   const seek=pp=>{for(const e of enemies){if(e.hp<=0||e.air||sought.has(e))continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<o.r*.8+e.r){sought.add(e);const n=2+(Math.random()<.6?1:0)+(Math.random()<.25?1:0);let t=rnd(0,.04);
-    for(let i=0;i<n;i++){later(t,()=>{if(e.hp<=0)return;const j=e.r*.5;boomExplode({x:e.pos.x+rnd(-j,j),z:e.pos.z+rnd(-j,j)},{...o,r:o.r*rnd(.4,.65)},null,0)});t+=rnd(.04,.1)}}}};
+    for(let i=0;i<n;i++){later(t,()=>{if(e.hp<=0)return;const j=e.r*.5;boomExplode({x:e.pos.x+rnd(-j,j),z:e.pos.z+rnd(-j,j)},{...o,r:o.r*rnd(.4,.65),only:e},null,0)/* v725: 몸 위에서 터지는 작은 폭발은 그 몬스터만 */});t+=rnd(.04,.1)}}}};
   p.upd=()=>{p.m.position.y=1;const d=(life-p.life)*sp,pp=p.m.position;let k=0;seek(pp);
     while(d>=next&&next<dist-step*.2&&k<3){k++;next+=gap();const r0=Math.random(),cn=r0<.45?1:r0<.75?2:r0<.93?3:4;let t=k>1?rnd(.01,.05):0;
       for(let i=0;i<cn;i++){const side=rnd(-1,1)*o.r*(i?1:.6),bk=rnd(-.6,.6)*o.r,x=pp.x+sx*side-Math.sin(a)*bk,z=pp.z+sz*side-Math.cos(a)*bk,rr=o.r*(i?rnd(.45,.8):rnd(.65,1.05));/* v684: 조금 작게 */
@@ -7046,7 +7046,7 @@ function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
 /* v198: 대상이 폭발 자리를 벗어나도 피해는 반드시 들어감 — 반경 안은 일반 범위 피해, 반경 밖으로 도망간 지정 대상은 직접 피해 */
-function pillarAoe(q,r,dmg,o,lock){/* v199/v200: quiet=2 → 치명타 판정 + 숫자 항상 표시 */aoe(q,r,dmg,{quiet:2,so:o.so});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg,2,o.so)}
+function pillarAoe(q,r,dmg,o,lock){/* v199/v200: quiet=2 → 치명타 판정 + 숫자 항상 표시 */aoe(q,r,dmg,{quiet:2,so:o.so,ov:o.ov});if(lock&&lock.hp>0&&enemies.indexOf(lock)>=0&&Math.hypot(lock.pos.x-q.x,lock.pos.z-q.z)>=r+lock.r*.6)hurt(lock,dmg*ovlC(lock,o.ov),2,o.so)}
 function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const g=new THREE.Group();g.position.set(c.x,0,c.z);scene.add(g);
   const outer=new THREE.Mesh(pillarGeo,pillarMat(0x4a0a9a,0xa030ff)),mid=new THREE.Mesh(pillarGeo,pillarMat(0x9a20ff,0xff70f0)),inner=new THREE.Mesh(pillarGeo,pillarMat(0xffffff,0xffffff));
@@ -7417,8 +7417,8 @@ function castFire(slot,id){
       for(let i=1;i<=st.stw.n;i++){const e=cand[i],cc=e?{x:e.pos.x,z:e.pos.z}:{x:c0.x+rnd(-1,1)*st.r*.8,z:c0.z+rnd(-1,1)*st.r*.8};later(.09*i,()=>smiteCast(e&&e.hp>0?{x:e.pos.x,z:e.pos.z}:cc,o2,e||t0||null,false))}}return}
   if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;poseStart('pillar',.5,{pre:P.castPre});const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
     const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
-    const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
-    const mk=(c,lk)=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch,lock:lk},hit,0);
+    const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg),ov={k:'pc',id:++volSeq,cap:n*(1+(st.pecho?st.pecho.n:0))};/* v725: 한 번 시전에 같은 적이 맞는 폭발은 (기둥 수 × (1+여진 수))번까지 온전히 = 보스 1마리가 받는 양 */
+    const mk=(c,lk)=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch,lock:lk,ov},hit,0);
     /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 */
     if(!cand.length){const c0=pcMode?{x:ap.x,z:ap.z}:{x:P.pos.x+Math.sin(P.face)*5,z:P.pos.z+Math.cos(P.face)*5};for(let i=0;i<n;i++){const o=i?{x:c0.x+rnd(-.9,.9),z:c0.z+rnd(-.9,.9)}:c0;i?later(i*.08,()=>mk(o)):mk(o)}return}
     for(let i=0;i<n;i++){const e=cand[i%cand.length],rep=i>=cand.length,c={x:e.pos.x+(rep?rnd(-.7,.7):0),z:e.pos.z+(rep?rnd(-.7,.7):0)};
@@ -7674,7 +7674,7 @@ function overloadOrb(p,dmg,dur){const R=OV_R,Y=1.5,q=QM();
           popFx(e.pos.x,1,e.pos.z,.4,2.2,.14,0xdff0ff,.8);if(q>=.75)bodyArcs({x:e.pos.x,z:e.pos.z},e.r*.9,e.h||1.4,3);hitKind='zap';hurt(e,dmg,true);hitKind=null}}
         if(n){pulse=1;popFx(p.x,c.y,p.z,.8,3,.14,0xffffff,.7);flash(p,0x4a8aff,1.6)}}},
     end(){if(lk<.9)return;/* 맵 이동·정리(wipeFx)로 끊긴 경우엔 마무리 폭발 없음 */fireBurst(p,1.8,.7,false,PAL_BOLT);radialBolts(p,R*.5,4,0x9ac4ff);popFx(p.x,Y,p.z,.6,3.2,.16,0xffffff,.8)}})}
-function explode(p,dmg,skip,r=2.4,ice,bm){SFX.p(ice==='bolt'?'zapboom':ice?(SFX.o?'shard':'frost'):'fire');blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg,true)}hitKind=hk}
+function explode(p,dmg,skip,r=2.4,ice,bm,ov){SFX.p(ice==='bolt'?'zapboom':ice?(SFX.o?'shard':'frost'):'fire');blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,(bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg)*ovlC(e,ov),true)}hitKind=hk}
 
 /* ================= input ================= */
 const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
@@ -9519,7 +9519,7 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
     if(0/* v467: 플레이어 투사체는 구조물을 무시하고 통과 */&&!dead&&!p.orb&&!p.back&&!p.ghost&&!p.thru)for(const c of colliders)if((pp.x-c.x)*(pp.x-c.x)+(pp.z-c.z)*(pp.z-c.z)<c.r*c.r){dead=true;if(p.blast)explode(pp,p.dmg*p.bm,null,p.br,p.bolt?'bolt':undefined);break}
     if(!dead&&!p.ghost){const hrE=p.hrg?Math.max(p.hr,p.hrg*Math.hypot(pp.x-p.ox,pp.z-p.oz)-.4):p.hr;/* v441 */for(const e of hgNear(pp.x,pp.z,hrE).slice()){if(e._rm||p.hit.has(e))continue;if(p.hitT?p.hitT(e):Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+hrE){/* v645: hitT = 투사체별 판정(검기 부채꼴 호) */
       p.hit.add(e);if(p.onHit)p.onHit(e,pp);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid)vm=ovlK(e,'vc',p.vid);/* v263: 시전별로 따로 셈 (다른 시전이 끼어들어도 초기화되지 않음) */hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
-      if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined);
+      if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined,0,p.vid?{k:'vc',id:p.vid,cap:1}:null);/* v725: 폭발도 화살과 같은 겹침 감소를 나눠 씀 */
       if(p.split&&!p.back){const sp=p.split,h=Math.atan2(p.vx,p.vz),hs=new Set(p.hit);p.split=null;
         const dp=p.depth||0;
         /* v139: 유도 없이 날아가던 방향을 기준으로 사방 같은 간격(3발=정삼각형, 4발=정사각형 …) · 갈라진 화살에는 2차 폭발 없음 */
