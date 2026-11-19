@@ -731,7 +731,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 @media (orientation:landscape) and (max-height:520px){.sbanner.duel{margin-top:-5vh}}/* v571: 모바일 가로는 5% 낮춤(-10vh→-5vh) */
 @media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:calc(17vh/var(--hz,1.7) - 98px)}}/* v572: PC는 HUD zoom(--hz) 때문에 px·vh 값이 zoom배로 커져 보임 → 문구 중심이 화면 높이의 17%에 오도록 zoom으로 나눠 맞춤 */
 /* v70 월드맵 */
-#wmapSheet{max-width:560px}.amwrap{display:flex;justify-content:center;border-radius:12px;background:#0f1014;border:1px solid var(--line);overflow:hidden}#amC{display:block}.amleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}.amleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-sizing:border-box}.wmwrap{display:flex;flex-direction:column;gap:10px}
+#stcF{position:fixed;inset:0;z-index:58;background:radial-gradient(ellipse at 50% 40%,#3a1206,#000 70%);opacity:0;pointer-events:none;transition:opacity 1.4s;display:flex;align-items:center;justify-content:center}#stcF.on{opacity:1}#stcF p{color:#f0dcc0;font:500 15px var(--ko);letter-spacing:.06em}body.stc .hud,body.stc .rcol,body.stc #toast{opacity:0;pointer-events:none;transition:opacity .4s}#wmapSheet{max-width:560px}.amwrap{display:flex;justify-content:center;border-radius:12px;background:#0f1014;border:1px solid var(--line);overflow:hidden}#amC{display:block}.amleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}.amleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-sizing:border-box}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0e0d0c;border:1px solid #3a352e}
 .wminfo{display:flex;flex-direction:column;gap:6px}.wminfo b.cur{font-size:17px;color:#efe1c8}.wminfo .wmbar{height:6px;border-radius:4px;background:#2a2a33;overflow:hidden}.wminfo .wmbar i{display:block;height:100%;background:linear-gradient(90deg,#8a2228,#c23a3f)}
 @keyframes wmflow{to{stroke-dashoffset:-20}}.wm .fut{animation:wmflow 1.2s linear infinite}
@@ -1532,11 +1532,16 @@ const CH=[
   {n:'서리바람 협곡',boss:'서리 군주',drain:0,goal:90,hp:1.35,dmg:.899,cap:40,spawn:.52,xp:1.66,brute:true,ice:1,ground:[52,60,70],fog:0x141a22,mob:{grunt:'서리 망령',runner:'얼음 늑대',brute:'빙하 트롤'},pal:{grunt:0x5a7a9a,runner:0x8ab0c8,brute:0x4a6a8a,boss:0x3a5a9a}},
   {n:'불타는 옛 왕도',boss:'잿불 군단장',drain:.005,env:'열기',goal:102,hp:1.63,dmg:1.085,cap:48,spawn:.43,xp:1.88,brute:true,ground:[62,44,36],fog:0x1a1210,mob:{grunt:'불꽃 임프',runner:'화염 사냥개',brute:'용암 거인'},pal:{grunt:0x9a5a3a,runner:0xc87a3a,brute:0x7a3a2a,boss:0x9a3a2a}},
   {n:'재의 사막',boss:'모래 폭군',drain:.006,env:'작열',goal:114,hp:1.92,dmg:1.272,cap:56,spawn:.36,xp:2.1,brute:true,ground:[72,60,42],fog:0x1a140c,mob:{grunt:'모래 망령',runner:'사막 하이에나',brute:'사암 골렘'},pal:{grunt:0x9a8a5a,runner:0xa07a4a,brute:0x8a6a3a,boss:0xa0602a}},
-  {n:'루멘 성역',boss:'심연의 왕',drain:.007,env:'심연의 냉기',goal:126,hp:2.2,dmg:1.458,cap:64,spawn:.3,xp:2.32,brute:true,ground:[40,34,52],fog:0x120f18,mob:{grunt:'심연의 추종자',runner:'그림자 추적자',brute:'공허의 짐승'},pal:{grunt:0x6a4a8a,runner:0x9a5aa0,brute:0x4a2a6a,boss:0x7a2a9a}}
+  {n:'루멘 성역',boss:'심연의 왕',drain:.007,env:'심연의 냉기',goal:126,hp:2.2,dmg:1.458,cap:64,spawn:.3,xp:2.32,brute:true,ground:[40,34,52],fog:0x120f18,mob:{grunt:'심연의 추종자',runner:'그림자 추적자',brute:'공허의 짐승'},pal:{grunt:0x6a4a8a,runner:0x9a5aa0,brute:0x4a2a6a,boss:0x7a2a9a}},
+  /* v713: 8~10장 — 루멘 성 안을 층층이 올라 꼭대기의 불타는 왕좌로. 7장보다 한 단계씩 강함 */
+  {n:'불타는 회랑',boss:'회랑의 수문장',drain:.008,env:'열기',goal:138,hp:2.49,dmg:1.644,cap:72,spawn:.27,xp:2.54,brute:true,indoor:1,ground:[46,38,34],fog:0x140c0a,mob:{grunt:'타락한 성기사',runner:'불꽃 망령',brute:'화염 갑주'},pal:{grunt:0x8a6a4a,runner:0xd07a3a,brute:0x6a3a2a,boss:0xa04a2a}},
+  {n:'무너진 빛의 예배당',boss:'타락한 대사제',drain:.009,env:'심연의 냉기',goal:150,hp:2.78,dmg:1.83,cap:80,spawn:.25,xp:2.76,brute:true,indoor:1,ground:[44,42,52],fog:0x0e0c14,mob:{grunt:'재의 수도사',runner:'그을린 천사',brute:'석상 수호자'},pal:{grunt:0x7a6a5a,runner:0xb0a080,brute:0x6a6a72,boss:0x8a6aa0}},
+  {n:'왕좌로 가는 계단',boss:'왕좌의 근위대장',drain:.01,env:'열기',goal:162,hp:3.07,dmg:2.016,cap:88,spawn:.23,xp:2.98,brute:true,indoor:1,ground:[40,30,28],fog:0x160a08,mob:{grunt:'불꽃 근위병',runner:'그림자 암살자',brute:'용암 기사'},pal:{grunt:0xa05a3a,runner:0x5a4a6a,brute:0x8a2a1a,boss:0xb03a1a}}
 ];
+const EGB=6;/* v713: 엔드게임 수치 기준은 예전 마지막 장(7장)에 고정 — 장이 늘어도 엔드게임 밸런스는 그대로 */
 const NCH=CH.length,LAST=NCH-1;
 /* 이전 5장 기준 진행도(0~4)로 환산: 레어·유니크 비율, 무리 크기 등 기존 공식에 사용. 엔드게임 = 5 */
-const chF=c=>Math.min(c,LAST)*4/LAST,chE=()=>S.ch>=NCH?5:chF(S.ch);
+const chF=c=>c<=EGB?c*4/EGB:Math.min(5,4+(c-EGB)/3),/* v713: 1~7장 그대로, 8~10장은 4→5(엔드게임 입구) */chE=()=>S.ch>=NCH?5:chF(S.ch);
 /* 등급: 기본(흰) · 레어(파랑) · 유니크(노랑) · 고유(주황, 보스) */
 const RANK=[
   {n:'기본',c:'#f2efe8',hex:0xf2efe8,hp:1,dmg:1,xp:1,sc:1},
@@ -1880,7 +1885,7 @@ function isBetter(it,cur){if(NS()&&it&&it.ns){if(!cur&&!S.eq[eqKey(it)])return t
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
+const fresh=()=>({nchV:NCH,nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 /* v603: 시즌 2 장비 개편 이전의 새 장비 → 같은 부위·티어·베이스로 다시 만듦(남아 있는 옵션 종류는 최대한 유지, 획득량 옵션은 다른 옵션으로) · 강화는 최대 +20 */
@@ -1893,6 +1898,8 @@ function nsMigItem(it,cls){if(!it||!it.ns||it.nv===2||!NSLOT[it.slot])return it;
 function nsMigSave(s){if(s.nv2)return;s.nv2=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
 function migrate(s){
   nsMigSave(s);
+  /* v713: 스토리 7장 → 10장. 예전 엔드게임(ch 7) → 새 엔드게임(ch 10). 예전 7장 보스를 잡고 최종 결전 앞이었으면(phase 3·5) → 8장부터, 아쉬카르까지 마쳤으면(phase 4) 그대로 결말 */
+  if(!s.nchV){s.nchV=NCH;if(s.ch>=7)s.ch=NCH;else if(s.ch===6&&s.phase===4)s.ch=LAST;else if(s.ch===6&&(s.phase===3||s.phase===5)){s.ch=7;s.phase=0;s.kills=0;s.chk=null}}
   if(s.sk)return;s.sk={};s.skp={};s.stats={str:0,vit:0,agi:0,int:0};s.statPts=(s.lv-1)*STAT_PER_LV;
   const sk0=s.cls?CLS[s.cls].skills[0]:null;
   for(const p of s.picks||[]){if(p.k==='gem'){s.sk[p.s]=s.sk[p.s]||{};s.sk[p.s][p.g]=Math.min(GMAX,(s.sk[p.s][p.g]||0)+1)}else if(sk0)s.skp[sk0]=(s.skp[sk0]||0)+1}
@@ -2019,7 +2026,7 @@ const mpRegen=()=>NS()?P.mmp*(gear().mreg+(auraOn('mreg')?auraRegenP(auraL('mreg
 /* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
 const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65+(t>90?.1*(t-90):0)))};/* v385: 위험도 90부터 냉기 증가량 ×1.1 (90 이후 증가분만 10% 가파르게, 90에서는 연속) */
 /* v236: 스토리(1~7장·최종 결전)는 환경 피해 없음. 엔드게임 위험도 t = 옛 곡선을 3칸 당긴 값(1=옛 5장 열기 0.5% · 2=옛 6장 0.6% · 3=옛 7장 1.4% · 4=옛 위험도1 …, 35·65 기준점도 38·68로), 전체 ×0.8 */
-const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)return P.mhp*.006;if(t===0)return P.mhp*.007*2;const d=P.mhp*Math.min(.015,CH[LAST].drain+.001*t)*2;return t>35?coldAt(t,d):d};
+const COLD_SH=3,COLD_K=.8,coldRaw=t=>{if(t<=-2)return P.mhp*.005;if(t===-1)return P.mhp*.006;if(t===0)return P.mhp*.007*2;const d=P.mhp*Math.min(.015,CH[EGB].drain+.001*t)*2;return t>35?coldAt(t,d):d};
 const envDrain=()=>{if(inTown||S.ch<NCH||NS())return 0;const tt=S.duel?S.duel.tier:S.tier;return coldRaw(Math.max(1,tt)-COLD_SH)*COLD_K};/* v58: 심연의 냉기 2배 */
 const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>NS()?P.mhp*(gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
@@ -2042,7 +2049,7 @@ function critComp(l){if(NS())return 1;if(CC_MEMO[l])return CC_MEMO[l];const P=CC
 const dr=()=>{if(NS())return nsDef().def;const a=gear().armor;return a/(a+70+chE()*25)};
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
-  const t=S.duel?S.duel.tier:oT(S.tier),last=CH[LAST];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
+  const t=S.duel?S.duel.tier:oT(S.tier),last=CH[EGB];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
   return {...last,n:'끝없는 심연',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:(last.xp+.3*t)*(t>=100?.85:1)/* v380: 위험도 100~ 경험치 -15% */,drain:Math.min(.015,last.drain+.001*t)};
 }
 /* 엔드게임 위험도별 배율 (v29): 체력은 단계마다 약 12%씩 복리 + 선형 4% → 위험도 10 ≈ 5장의 4.4배, 20 ≈ 17배, 30 ≈ 66배
@@ -2050,10 +2057,10 @@ function diff(){
 /* v40: 난이도 상향 — 위험도 0에서 +20%, 이후 위험도마다 +1%씩 선형 추가 (체력·피해 모두) */
 const egUp=t=>1.2+.01*t;
 /* v131: 위험도 40부터 몬스터 체력 +30% · 골드는 그 30%를 빼고 계산 · 위험도 50부터 체력 증가에 따른 골드 증가폭 절반 */
-const egHp0=t=>CH[LAST].hp*Math.pow(1.12,t)*(1+.04*t)*egUp(t);
+const egHp0=t=>CH[EGB].hp*Math.pow(1.12,t)*(1+.04*t)*egUp(t);
 const goldAdjT=t=>{let f=(t>=40?1/1.3:1)*(t>=100?1/1.15:1)*(t>=110?1/1.2:1);/* v382: 위험도 100~ 체력 +15%만큼 골드 보정 */if(t>=50){const r=egHp0(t)/egHp0(50);f*=(1+.5*(r-1))/r}return f};
 const goldAdj=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?goldAdjT(oT(S.tier)):1;
-const egHp=t=>egHp0(t)*(t>=40?1.3:1)*(t>=100?1.15:1)*(t>=110?1.2:1),/* v386: 위험도 110~ 추가로 몬스터 체력 +20% */ /* v380: 위험도 100~ 몬스터 체력 +15% */egDmg=t=>CH[LAST].dmg*Math.pow(1.07,t)*egUp(t);
+const egHp=t=>egHp0(t)*(t>=40?1.3:1)*(t>=100?1.15:1)*(t>=110?1.2:1),/* v386: 위험도 110~ 추가로 몬스터 체력 +20% */ /* v380: 위험도 100~ 몬스터 체력 +15% */egDmg=t=>CH[EGB].dmg*Math.pow(1.07,t)*egUp(t);
 const GATE_EVERY=5;/* 위험도 5·10·15…를 넘어가려면 관문 보스를 쓰러뜨려야 함 */
 
 function skillStats(id){
@@ -2186,7 +2193,7 @@ const GCACHE={},G_REP=9;
    snow 바람결 눈밭·드러난 바위·얼음 / cobble 그을린 왕도 벽돌길(틈에 불씨) / sand 물결무늬 모래·재 줄기 / marble 금줄 박힌 대리석판·결·빛나는 균열 */
 function groundSet2(sty){
   const N=512,TAU=Math.PI*2,n=fbm(N,4,4),f=fbm(N,32,2),m=fbm(N,8,3),w=fbm(N,6,2),hf=fbm(N,128,1),w2=fbm(N,5,3),k=sty.s;
-  const vo=k==='grave'?voro(N,6):k==='field'||k==='sand'||k==='snow'?voro(N,40):null;
+  const vo=k==='grave'?voro(N,6):k==='obsid'?voro(N,9):k==='field'||k==='sand'||k==='snow'?voro(N,40):null;
   const cc=mkCv(N),hc=mkCv(N),rc=mkCv(N),ec=sty.glow?mkCv(N):null,ci=new ImageData(N,N),hi=new ImageData(N,N),ri=new ImageData(N,N),ei=ec?new ImageData(N,N):null,gc=sty.glow?new THREE.Color(sty.glow):null;
   const L=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t],line=(v,wd)=>1-sstep(0,wd,Math.abs(v));
   const bh=[];for(let i=0;i<512;i++)bh.push(Math.random());
@@ -2220,6 +2227,20 @@ function groundSet2(sty){
       const rp=Math.sin(TAU*(2*x+9*y)/N*2+ww*10+nn*5),ash=sstep(.6,.72,mm+(ff-.5)*.2);
       c=L([92,76,52],[104,88,60],.5+.5*rp);c=L(c,[64,60,56],ash*.6);h=.45+.18*rp+.15*nn;r=.97;
       const pb=vo.id[i]<.05?sstep(2,5,vo.edge[i]):0;c=L(c,[60,52,44],pb);h+=pb*.25;c=c.map(q=>q*(1+(ff-.5)*.2+(Math.random()-.5)*.06))}
+    else if(k==='hall'){/* v713: 성 회랑 — 큰 직사각 화강암 판(엇갈림), 그을음, 틈의 불씨 */
+      const BH=64,BW=128,row=(y/BH)|0,ox=(row%2)*64,bx=(x+ox)%N,col=(bx/BW)|0,u=bx-col*BW,v=y-row*BH,dE=Math.min(u,BW-u,v,BH-v),id=bh[(row*7+col*3)%512];
+      const slab=sstep(1.5,4,dE),bev=sstep(2,12,dE),soot=sstep(.5,.72,mm),ember=(1-slab)*sstep(.6,.68,nn+(hh-.5)*.2);
+      c=L([22,18,16],L([62,54,50],[52,48,46],id),slab);c=c.map(q=>q*(.85+.3*id+(ff-.5)*.3));c=L(c,[22,18,16],soot*.6*slab);
+      h=.15+slab*(.45+.15*bev+.08*ff);r=.9-slab*.2;g=ember*(.5+.5*ff)}
+    else if(k==='chapel'){/* v713: 예배당 — 대각 체크 대리석(검정·흰색), 금줄, 결, 보랏빛 균열 */
+      const T=64,a=(x+y)%N,b=(x-y+N)%N,ua=a%T,vb=b%T,par=(((a/T)|0)+((b/T)|0))%2,dE=Math.min(ua,T-ua,vb,T-vb)*.7071,gold=1-sstep(.8,2.2,dE),slab=sstep(2.2,4,dE);
+      const vein=line(Math.sin(TAU*(2*x+3*y)/N+ww*8+nn*3),.05)*.5,crk=line(w2[i]-.5+(nn-.5)*.12,.012)*sstep(.62,.7,mm),soot=sstep(.58,.75,nn+(ff-.5)*.3);
+      c=par?[66,64,72]:[34,33,40];c=L(c,par?[54,52,60]:[48,46,56],vein);c=L(c,[24,20,28],soot*.5);c=L(c,[18,14,22],crk);c=L(c,[140,110,50],gold*.85);
+      h=.2+slab*.5-crk*.3;r=.4+.3*soot+crk*.3-gold*.2;g=crk*.9;c=c.map(q=>q*(1+(ff-.5)*.12))}
+    else if(k==='obsid'){/* v713: 왕좌층 — 흑요석 판(보로노이), 판 사이로 비치는 용암 */
+      const e=vo.edge[i],id=vo.id[i],slab=sstep(1.2,3.5,e),lava=(1-slab)*sstep(.42,.55,nn+(hh-.5)*.3);
+      c=L([34,14,10],L([30,24,30],[40,30,36],id),slab);c=c.map(q=>q*(1+(ff-.5)*.25));c=L(c,[70,26,14],lava*.8);
+      h=.15+slab*(.5+.1*ff);r=.35+(1-slab)*.5;g=lava}
     else{/* marble: 4×4 대리석판 + 금줄 + 결 + 빛나는 균열 */
       const T=128,u=x%T,v=y%T,ti=((y/T)|0)*4+((x/T)|0),id=bh[ti*17%512],dE=Math.min(u,T-u,v,T-v),gold=1-sstep(1,2.6,dE),slab=sstep(2.6,5,dE),bev=sstep(3,14,dE);
       const vein=line(Math.sin(TAU*((1+(ti%3))*x+(2+(ti%2))*y)/N+ww*7+nn*3),.06)*.6+line(Math.sin(TAU*(3*x-2*y)/N*2+ww*11),.03)*.3;
@@ -2231,7 +2252,7 @@ function groundSet2(sty){
     if(ei){ei.data[j]=gc.r*255*g;ei.data[j+1]=gc.g*255*g;ei.data[j+2]=gc.b*255*g;ei.data[j+3]=255}}
   cc.getContext('2d').putImageData(ci,0,0);hc.getContext('2d').putImageData(hi,0,0);rc.getContext('2d').putImageData(ri,0,0);if(ec)ec.getContext('2d').putImageData(ei,0,0);
   return {map:cvTex(cc,G_REP),bump:cvTex(hc,G_REP),rough:cvTex(rc,G_REP),emi:ec?cvTex(ec,G_REP):null}}
-const GS2={field:1,grave:1,mud:1,snow:1,cobble:1,sand:1,marble:1};
+const GS2={field:1,grave:1,mud:1,snow:1,cobble:1,sand:1,marble:1,hall:1,chapel:1,obsid:1};
 function groundSet(key,d){
   if(GCACHE[key])return GCACHE[key];
   if(d.sty&&GS2[d.sty.s])return GCACHE[key]=groundSet2(d.sty);
@@ -2280,7 +2301,7 @@ const MAP_EVERY=10;
 function egMapFor(t){return dBand(t);/* v621: 지역은 구간마다 고정 — 심연 · 황무지 · 서리 무덤 · 용암 분지 · 공허 신전 */if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/MAP_EVERY));/* v392: 지역(맵)은 위험도 10단계마다 바뀜 */
   while(S.egMaps.length<=blk){const i=S.egMaps.length,cs=i-i%5,used=S.egMaps.slice(cs,i);let pool=[0,1,2,3,4].filter(x=>!used.includes(x));if(i%5===0)pool=pool.filter(x=>x!==S.egMaps[i-1]);S.egMaps.push(pool[Math.random()*pool.length|0])}
   return S.egMaps[blk]}
-const GSTY=[{s:'field'},{s:'grave'},{s:'mud'},{s:'snow'},{s:'cobble',glow:0xff5a1a},{s:'sand'},{s:'marble',glow:0x9a4aff}],GPT=['ash','ash','ash','snow','ember','ash','void'];
+const GSTY=[{s:'field'},{s:'grave'},{s:'mud'},{s:'snow'},{s:'cobble',glow:0xff5a1a},{s:'sand'},{s:'marble',glow:0x9a4aff},{s:'hall',glow:0xff6a2a},{s:'chapel',glow:0xb08aff},{s:'obsid',glow:0xff5a1a}],GPT=['ash','ash','ash','snow','ember','ash','void','ember','void','ember'];
 const inArena=()=>!inTown&&(!!S.duel||S.ch===LAST&&(S.phase===3||S.phase===4));
 function curTheme(){if(inTown){townSync();return {key:TOWN.key,d:TOWN,pt:TOWN.pt}}if(inArena())return {key:'final',d:FINAL,pt:S.duel&&S.duel.b==='maw'?'deep':FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
 let groundGlow=false,propTheme='',inTown=false;
@@ -2298,7 +2319,7 @@ function applyTheme(){
   if((mapKind==='field'||mapKind==='story')&&propTheme!==th.key)(mapKind==='story'?buildStory:buildField)();
 }
 /* ================= v41 맵: 스토리는 시작(남쪽)→끝(북쪽) 골짜기 길, 양옆은 언덕. 엔드게임은 사각 평지 ================= */
-const STORY_L=129,/* v205: 92 → 106 (+15%) → v206: 129 (+40%) */ARENA_END={r:13},START_R=8;
+const STORY_L=168,/* v205: 92 → 106 (+15%) → v206: 129 (+40%) → v713: 168 (+30%) — 장 구성(CHZ) 좌표는 129 기준으로 적고 불러올 때 늘림 */ARENA_END={r:13},START_R=8;
 let MP={amp:12,f1:.03,ph:0,amp2:5,f2:.071,ph2:1,w0:10,w1:2.5,ph3:0};
 function srng(seed){let a=seed*9301+49297;return ()=>{a=(a*9301+49297)%233280;return a/233280}}
 /* v691: 장 구성(CHZ) — 한 줄 길 대신 넓은 공터·좁은 길이 번갈아(폭 키프레임 wk), 곁가지 공터(pk: 보물·흔적·정예), 장 사건(ev: 바리케이드·모닥불).
@@ -2353,8 +2374,40 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   pk:[{k:'chest',z:86,side:1,d:6,r:4},{k:'tower',z:32,side:-1,d:6.5,r:5.4,id:1},{k:'tower',z:28,side:1,d:6.5,r:5.4,id:2},{k:'elite',z:-44,side:-1,d:6.5,r:5.2}],
   ev:[{k:'sgate',z:6},{k:'camp',z:-92}],witness:1,
   camp:[['','봉우리 꼭대기에서 불길이 치솟는다.'],['','불길 속에서 무언가가 떨어져 내린다. 부러진 칼, 찢긴 붉은 망토.'],['','「…카이렌!」'],['???','「그는 불 앞에 섰고, 불은 그를 삼켰다. 이제 그 길을 이을 자는 그대뿐이다.」']],
-  wx:'fire',props:'sanctum',intro:'본래 빛을 모시던 루멘 성역. 지금은 꺼지지 않는 불이 차지한 곳. 왕좌가 머지않다.'}];
+  clr:['심연의 왕이 쓰러지자, 굳게 닫혀 있던 성의 정문이 천천히 열립니다.','그 너머로 루멘 성이 불길을 머금은 채 하늘로 솟아 있습니다. 꼭대기의 불타는 왕좌까지 — 이제 성을 오릅니다.'],
+  wx:'fire',props:'sanctum',intro:'본래 빛을 모시던 루멘 성역. 지금은 꺼지지 않는 불이 차지한 곳. 왕좌가 머지않다.'},
+  {/* 8장 불타는 회랑 — 성 1층. 도르래를 돌려 쇠창살 문을 올림 */indoor:1,
+  wk:[[129,7],[112,7],[100,13],[86,6],[72,6],[58,14],[44,6],[34,6],[22,12],[10,5],[-2,5],[-14,12],[-30,6],[-44,14],[-60,6],[-76,6],[-92,12],[-104,7],[-129,9]],
+  pk:[{k:'chest',z:86,side:1,d:6,r:4},{k:'beacon',z:56,side:-1,d:6,r:4.8,id:1},{k:'trace',z:22,side:1,d:6,r:4.4},{k:'elite',z:-44,side:1,d:6.5,r:5.2},{k:'chest',z:-66,side:-1,d:6,r:4,cid:2}],
+  ev:[{k:'fire',z:72},{k:'fire',z:34},{k:'icewall',z:4},{k:'camp',z:-92}],
+  bvis:'lever',wall:'bars',bring:0xd0a060,btx:{un:'성문 도르래',hint:'도르래 곁에 잠시 머물러 쇠창살 문을 올리세요',lit:'도르래가 돌아간다',left:'남은 도르래',all:'쇠창살 문이 올라간다',open:['쇠창살 문이 열렸다','회랑 안쪽으로 나아갈 수 있습니다']},
+  tv:'wall',trace:[['','벽에 걸린 낡은 방패. 빛의 기사단 문장이 검게 그을려 있다.'],['','방패 뒤 벽에 칼끝으로 새긴 글귀가 남아 있다.'],['','「빛이 꺼지던 밤, 우리는 왕좌를 지키지 못했다. 불이 속삭였고, 형제들의 칼이 서로를 향했다.」'],['','글귀는 거기서 끊겨 있다.']],
+  camp:[['???','「이곳은 빛의 기사들이 머물던 곳. 그들 중 몇은 아직도 불의 명령을 따르고 있다.」'],['???','「위층에는 내가 머물던 예배당이 있다. 그곳으로 오라.」']],
+  clr:['회랑의 수문장이 무너지자, 회랑 끝 계단 위로 불빛이 번집니다.','위층 — 빛의 신을 모시던 예배당으로 오릅니다.'],
+  wx:'embers',props:'castle',intro:'성역 문 너머, 루멘 성의 첫 층. 빛의 기사단이 지키던 회랑은 이제 불길에 휩싸였다.'},
+  {/* 9장 무너진 빛의 예배당 — 성 중층. 빛의 성소 셋을 되살리면 어둠의 장막이 걷힘 */indoor:1,
+  wk:[[129,8],[112,8],[100,15],[84,7],[70,7],[56,16],[40,7],[28,7],[16,14],[4,6],[-6,6],[-18,15],[-36,7],[-50,15],[-66,6],[-80,6],[-92,12],[-104,7],[-129,9]],
+  pk:[{k:'chest',z:84,side:-1,d:6,r:4},{k:'beacon',z:56,side:1,d:6,r:4.8,id:1},{k:'beacon',z:30,side:-1,d:6,r:4.8,id:2},{k:'beacon',z:14,side:1,d:6,r:4.8,id:3},{k:'elite',z:-40,side:-1,d:6.5,r:5.2},{k:'chest',z:-62,side:1,d:6,r:4,cid:2}],
+  ev:[{k:'icewall',z:-1},{k:'camp',z:-92}],
+  bvis:'shrine',wall:'shadow',bring:0xfff0c0,btx:{un:'꺼진 빛의 성소',hint:'성소 곁에 잠시 머물러 빛을 되살리세요',lit:'성소에 빛이 돌아온다',left:'남은 성소',all:'모든 성소가 빛난다',open:['어둠의 장막이 걷힌다','예배당 안쪽으로 나아갈 수 있습니다']},
+  blore:{1:[['빛의 목소리','「…오래 기다렸다. 이 성소는 내가 처음 이 땅에 내려온 자리.」']],2:[['빛의 목소리','「불은 나를 이기지 못했다. 다만 사람들이 나를 잊게 했을 뿐.」']],3:[['빛의 목소리','「왕좌에 오르라. 그곳에 앉은 불을 꺼뜨리면, 나는 다시 이 땅을 비출 것이다.」']]},
+  camp:[['???','「위층에서 불의 숨결이 느껴진다. 그는 그대가 오는 것을 알고 있다.」']],
+  clr:['타락한 대사제가 쓰러지자, 깨진 색유리 너머로 희미한 빛이 스칩니다.','남은 것은 성의 가장 높은 층 — 왕좌로 가는 계단입니다.'],
+  wx:'embers',props:'chapel',intro:'빛의 신을 모시던 예배당. 깨진 색유리 사이로 이제는 불빛만 새어 든다.'},
+  {/* 10장 왕좌로 가는 계단 — 성 상층. 불길 벽 + 근위병 둘을 쓰러뜨리면 왕좌의 문이 열림, 보스 뒤 큰 계단 → 불타는 왕좌 */indoor:1,
+  wk:[[129,7],[112,7],[100,12],[88,5],[74,5],[60,13],[46,5],[36,5],[24,13],[12,13],[2,5],[-10,5],[-22,13],[-38,5],[-50,5],[-62,13],[-78,6],[-92,12],[-104,7],[-129,9]],
+  pk:[{k:'chest',z:100,side:1,d:6,r:4},{k:'chest',z:60,side:-1,d:6,r:4,cid:2},{k:'tower',z:22,side:-1,d:6.5,r:5.4,id:1},{k:'tower',z:14,side:1,d:6.5,r:5.4,id:2},{k:'elite',z:-62,side:-1,d:6.5,r:5.2}],
+  ev:[{k:'fire',z:80},{k:'fire',z:42},{k:'sgate',z:-2},{k:'fire',z:-44},{k:'camp',z:-92}],
+  tw:{n:'왕좌의 근위병',t:'근위병 초소',msg:'양옆 초소의 근위병을 모두 쓰러뜨리면 왕좌의 문이 열립니다',open:'왕좌의 문이 열린다',noTower:1},
+  camp:[['','위층에서 낮은 웃음소리가 울린다. 계단 전체가 열기로 일렁인다.'],['???','「…마지막이다. 저 근위대장을 넘으면, 그가 있다. 두려워 말라. 나는 그대 곁에 있다.」']],
+  clr:['근위대장이 무릎을 꿇자, 그 뒤의 거대한 계단이 불길에 물듭니다.','계단 끝, 불타는 왕좌에서 그가 기다리고 있습니다.'],
+  wx:'fire',props:'throne',intro:'루멘 성의 가장 높은 층. 이 계단 끝에, 불타는 왕좌가 있다.'}];
+/* v713: 장 구성 좌표를 맵 길이에 맞게 늘림 + 1~7장 곁가지 하나씩 추가 */
+(function(){const X=[{k:'elite',z:96,side:1,d:7,r:5.2},{k:'elite',z:-60,side:1,d:6.5,r:5.2},{k:'chest',z:-30,side:1,d:6,r:4,cid:2},{k:'chest',z:-70,side:1,d:6,r:4,cid:2},{k:'chest',z:-70,side:1,d:6,r:4,cid:2},{k:'elite',z:56,side:1,d:6.5,r:5.2},{k:'chest',z:-66,side:1,d:6,r:4,cid:2}];
+  const K=STORY_L/129;CHZ.forEach((Z,i)=>{if(!Z||Z.scaled)return;Z.scaled=1;if(X[i])Z.pk.push(X[i]);Z.wk=Z.wk.map(([z,w])=>[z*K,w]);for(const q of Z.pk)q.z*=K;for(const v of Z.ev){if(v.z!=null)v.z*=K;if(v.z0!=null){v.z0*=K;v.z1*=K}}
+    if(Z.pools)Z.pools=Z.pools.map(([z,a,b])=>[z*K,a,b]);if(Z.lh)Z.lh=Z.lh.map(z=>z*K);if(Z.lake)Z.lake=[Z.lake[0]*K,Z.lake[1]*K,Z.lake[2]]})})();
 function storyParams(ch){const r=srng(ch*7+3);MP={amp:8+r()*8,f1:.022+r()*.016,ph:r()*6,amp2:3+r()*4,f2:.06+r()*.03,ph2:r()*6,w0:9.5+r()*2,w1:1.5+r()*2,ph3:r()*6};
+  MP.indoor=!!(CH[ch]&&CH[ch].indoor);if(MP.indoor){MP.amp*=.35;MP.amp2*=.3}/* v713: 성 안은 곧은 회랑 */
   const Z=CHZ[ch];MP.wk=Z?Z.wk:null;MP.lake=Z&&Z.lake||null;MP.pk=[];if(Z)for(const q of Z.pk){const c=pathC(q.z),w=pathW(q.z),x=c+q.side*(w+q.d);MP.pk.push(Object.assign({},q,{x,ax:c,az:q.z}))}}
 function wkW(z){const K=MP.wk;for(let i=0;i<K.length-1;i++){const [z0,w0]=K[i],[z1,w1]=K[i+1];if(z<=z0&&z>=z1){const t=(z0-z)/(z0-z1),u=(1-Math.cos(t*Math.PI))/2;return w0+(w1-w0)*u}}return K[K.length-1][1]}
 const pathC=z=>MP.amp*Math.sin(z*MP.f1+MP.ph)+MP.amp2*Math.sin(z*MP.f2+MP.ph2);
@@ -2368,7 +2421,7 @@ const endPt=()=>{const q=endPtL();return L2W(q.x,q.z)},startPt=()=>{const q=star
 function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathW(z),dz=Math.max(0,Math.abs(z)-STORY_L);
   const de=Math.hypot(x-e.x,z-e.z)-ARENA_END.r,ds=Math.hypot(x-s_.x,z-s_.z)-START_R;let dp=1e9;if(MP.pk)for(const q of MP.pk)dp=Math.min(dp,Math.hypot(x-q.x,z-q.z)-q.r,segD(x,z,q.ax,q.az,q.x,q.z)-2.4);return Math.max(dz,Math.min(dc,de,ds,dp))}
 function storyOut(x,z){const q=W2L(x,z);return sOutL(q.x,q.z)}
-function groundHL(x,z){const d=sOutL(x,z);if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
+function groundHL(x,z){const d=sOutL(x,z);if(MP.indoor){/* v713: 성 안 — 길 밖은 곧게 선 벽(높이 4.2), 끝 제단 뒤는 위층 계단 자리만 비워 두고 벽이 높아짐 */const e=endPtL();if(z<-STORY_L+3&&Math.abs(x-e.x)<4.3)return 0;if(d<=0)return 0;return Math.min(4.2+(z<-STORY_L+6?Math.min(8,(-STORY_L+6-z)*.8):0),d*4)}if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
 function groundH(x,z){if(mapKind==='town'&&inTown&&TLY)return refHt(x,z);if(mapKind!=='story')return 0;const q=W2L(x,z);return groundHL(q.x,q.z)}
 function spawnPt(){if(inArena())return {x:FB_START.x,z:FB_START.z};if(mapKind==='story')return S.chk&&S.chk.ch===S.ch?{x:S.chk.x,z:S.chk.z}:startPt();return {x:0,z:0}}
 /* 바닥 메시를 맵 크기로 다시 만들고 높이(언덕)를 입힘 (스토리는 로컬 좌표로 만들고 메시를 θ만큼 회전) */
@@ -2393,7 +2446,7 @@ function arenaHole(R){if(mapKind!=='arena'||R===groundHoleR)return;for(const m o
   g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();ground.geometry.dispose();ground.geometry=g;ground.rotation.z=0;groundHoleR=R;
   /* 구멍 위에 걸친 바닥 얼룩·뼈는 숨김 */for(const m of propMeshes)if(m.visible&&Math.hypot(m.position.x,m.position.z)<5.6){m.visible=false;m.userData.hh=1}}
 /* 언덕 색 (장별): 길보다 밝고 색이 다른 비탈 */
-const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.6,1.05,.75],[1.7,1.45,1.0],[1.35,1.1,1.7]];
+const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.6,1.05,.75],[1.7,1.45,1.0],[1.35,1.1,1.7],[.5,.44,.42],[.5,.5,.58],[.48,.38,.36]];
 /* 맵 경계 안으로 밀어 넣기 */
 function mapClamp(p,r){
   if(mapKind==='story'){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L+r,STORY_L-r);
@@ -2422,21 +2475,21 @@ function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),
   setGround(130,2*STORY_L+30,2);
   const e=endPtL(),s_=startPtL(),ew=endPt();ALTAR.x=ew.x;ALTAR.z=ew.z;altarRing.position.set(ew.x,.04,ew.z);altarLight.position.set(ew.x,3,ew.z);
   for(let a=0;a<6;a++){const t=a/6*Math.PI*2+.3;APL(e.x+Math.cos(t)*9,e.z+Math.sin(t)*9,'firePillar')}
-  APL(e.x,e.z-11,'statue',0);
+  if(!CH[i].indoor)APL(e.x,e.z-11,'statue',0);
   /* 시작 야영지 */
-  APL(s_.x-4,s_.z+2,'tent',.4);APL(s_.x+4.5,s_.z+1,'cart',-.5);APL(s_.x+1.5,s_.z+4,'brazier');
+  if(!CH[i].indoor){APL(s_.x-4,s_.z+2,'tent',.4);APL(s_.x+4.5,s_.z+1,'cart',-.5)}APL(s_.x+1.5,s_.z+4,'brazier');
   /* 길을 따라: 관문 아치 · 무너진 성벽 · 길 안 소품 */
   if(!CHZ[i])for(let z=STORY_L-26;z>-STORY_L+30;z-=rand(24,32))addArch(z);/* v691: 장 구성이 있는 장은 길 위를 가로지르는 아치 없음(시야 가림) */
   for(let z=STORY_L-14;z>-STORY_L+24;z-=rand(9,15)){const c=pathC(z),w=pathW(z),side=Math.random()<.5?-1:1;
-    if(Math.random()<.55){const dz=1,dx=pathC(z-dz)-c;APL(c+side*(w-1.4),z,'wall',Math.atan2(dx,-dz),rand(4,7))}
+    if(!CH[i].indoor&&Math.random()<.55){const dz=1,dx=pathC(z-dz)-c;APL(c+side*(w-1.4),z,'wall',Math.atan2(dx,-dz),rand(4,7))}
     for(let k=0;k<2;k++){const zz=z+rand(-5,5),cc=pathC(zz),ww=pathW(zz),off=rand(.35,.85)*(Math.random()<.5?-1:1);APL(cc+off*(ww-1),zz,pickW(set))}
     if(Math.random()<.35)APL(c+rand(-.5,.5)*w,z+rand(-4,4),'brazier')}
   /* 길 가장자리 바위 줄 (경계가 한눈에 보이도록) */
-  for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1)continue;APL(x,z,'rock',0,0,true)}
+  if(!CH[i].indoor)for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1)continue;APL(x,z,'rock',0,0,true)}
   /* 언덕: 양옆 비탈에 나무·바위·수정, 언덕 위 감시탑 */
-  const slope=[{tree:3,rock:3},{tree:2,tomb:3,rock:1},{tree:4,rock:2},{crystal:3,rock:3,tree:1},{rock:4,pillar:1.5,bones:1},{rock:5,pillar:1,bones:1.5},{crystal:3,rock:2,pillar:1.5}][i];
-  for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
-  for(let z=STORY_L-35;z>-STORY_L+20;z-=rand(38,50)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,'tower',rand(0,6),1,true)}
+  const slope=[{tree:3,rock:3},{tree:2,tomb:3,rock:1},{tree:4,rock:2},{crystal:3,rock:3,tree:1},{rock:4,pillar:1.5,bones:1},{rock:5,pillar:1,bones:1.5},{crystal:3,rock:2,pillar:1.5},{},{},{}][i];
+  if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
+  if(!CH[i].indoor)for(let z=STORY_L-35;z>-STORY_L+20;z-=rand(38,50)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,'tower',rand(0,6),1,true)}
   for(let n=0;n<70;n++){const z=rand(-STORY_L,STORY_L);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
   chzBuild(i);
   altarRing.visible=altarLight.visible=true;arenaRing.visible=false;for(const l of arenaLights)l.visible=false}
@@ -2447,14 +2500,14 @@ const LW=(x,z)=>L2W(x,z);let chzMat=null;const chzMatInit=()=>chzMat||(chzMat={l
 function chzG(lx,lz,ry){const g=new THREE.Group(),w=LW(lx,lz);g.position.set(w.x,groundH(w.x,w.z),w.z);g.rotation.y=(ry||0)+SROT;scene.add(g);propMeshes.push(g);return g}
 function chzCampfire(g,lit){for(let i=0;i<9;i++){const a=i/9*6.28,r=mesh(rockGeos[i%4],PM.stone,Math.cos(a)*.75,.1,Math.sin(a)*.75);r.scale.set(.24,.18,.24);g.add(r)}
   for(let i=0;i<3;i++){const l=mesh(new THREE.CylinderGeometry(.09,.11,1,6),lit?chzMat.log:chzMat.char,0,.18,0);l.rotation.set(Math.PI/2,i*1.05,0);l.rotation.order='YXZ';g.add(l)}}
-function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');wx2Init(Z&&Z.wx||'');if(!Z)return;chzMatInit();chzProps(Z);chPeak();chzBuildX(Z);
+function chzBuild(ch){CHZS={};WX.smoke=[];const Z=CHZ[ch];wxInit(Z&&Z.wx||'');wx2Init(Z&&Z.wx||'');if(!Z)return;chzMatInit();chzProps(Z);if(!Z.indoor)chPeak();chzBuildX(Z);
   /* 길 안내 불씨 — 길 가운데 은은한 점 */
   for(let z=STORY_L-16;z>-STORY_L+20;z-=8){const w=LW(pathC(z),z);refPool(w.x,w.z,.75,0xffa040,.2)}
   for(const q of MP.pk){const w=LW(q.x,q.z);
     for(let n=0;n<3;n++)ADL(q.x+rand(-1,1)*q.r*.6,q.z+rand(-1,1)*q.r*.6);
-    if(q.k==='chest'&&!chevOn('chest')){const g=chzG(q.x,q.z,q.side>0?-Math.PI/2:Math.PI/2);g.add(mesh(new THREE.BoxGeometry(1.2,.7,.8),chzMat.wood,0,.35,0),mesh(new THREE.BoxGeometry(1.26,.08,.86),chzMat.gold,0,.2,0));
+    if(q.k==='chest'&&!chevOn('chest'+(q.cid||''))){const g=chzG(q.x,q.z,q.side>0?-Math.PI/2:Math.PI/2);g.add(mesh(new THREE.BoxGeometry(1.2,.7,.8),chzMat.wood,0,.35,0),mesh(new THREE.BoxGeometry(1.26,.08,.86),chzMat.gold,0,.2,0));
       const lid=new THREE.Group();lid.position.set(0,.7,-.4);lid.add(mesh(new THREE.BoxGeometry(1.24,.28,.84),chzMat.wood,0,.14,.4),mesh(new THREE.BoxGeometry(.2,.2,.06),chzMat.gold,0,.05,.83));g.add(lid);
-      colliders.push({x:w.x,z:w.z,r:.8});refPool(w.x,w.z,1.6,0xffd070,.22);CHZS.chest={g,lid,x:w.x,z:w.z};for(let n=0;n<3;n++)APL(q.x+rand(-1,1)*2.6,q.z+rand(-1,1)*2.6,'rock',0,0,true)}
+      colliders.push({x:w.x,z:w.z,r:.8});refPool(w.x,w.z,1.6,0xffd070,.22);(CHZS.chests=CHZS.chests||[]).push({g,lid,x:w.x,z:w.z,key:'chest'+(q.cid||'')});for(let n=0;n<3;n++)APL(q.x+rand(-1,1)*2.6,q.z+rand(-1,1)*2.6,'rock',0,0,true)}
     if(q.k==='trace'&&Z.tv){chzTraceVis(Z.tv,q,w)}
     else if(q.k==='trace'){const g=chzG(q.x,q.z,0);chzCampfire(g,0);const bd=mesh(new THREE.BoxGeometry(.8,.07,1.8),SM({color:0x3a2e24,roughness:1}),1.6,.04,.4);bd.rotation.y=.4;g.add(bd);
       const st=chzG(q.x-q.side*1.8,q.z-2.4,0);st.add(mesh(rockGeos[1],PM.stone,0,.6,0));st.children[0].scale.set(1,1.3,.8);const rn=new THREE.Mesh(new THREE.PlaneGeometry(.9,.5),new THREE.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:.55}));rn.position.set(0,.9,.82);st.add(rn);
@@ -2501,7 +2554,7 @@ function chzGrave(Z){const iron=SM({color:0x24262c,roughness:.5,metalness:.6}),d
   for(let n=0;n<10;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)-rand(.6,1.4)),g=chzG(x,z,0);for(let i=0;i<4;i++){const h=rand(.2,.45),cx=rand(-.3,.3),cz=rand(-.3,.3);g.add(mesh(new THREE.CylinderGeometry(.05,.05,h,6),wax,cx,h/2,cz));const f=new THREE.Sprite(fl);f.position.set(cx,h+.08,cz);f.scale.setScalar(.35);g.add(f)}}
   for(let n=0;n<14;n++){const z=rand(-STORY_L+20,STORY_L-14),sd=side(),x=pathC(z)+sd*(pathW(z)+rand(1.8,9)),g=chzG(x,z,rand(0,6)),h=rand(2.6,4),t=mesh(new THREE.CylinderGeometry(.1,.24,h,7),grey,0,h/2,0);t.rotation.z=rand(-.12,.12);g.add(t);
     for(let i=0;i<3;i++){const b=mesh(new THREE.CylinderGeometry(.03,.08,rand(.9,1.6),5),grey,0,0,0),q=new THREE.Group();b.position.y=.65;q.add(b);q.position.y=h*rand(.55,.85);q.rotation.set(0,rand(0,6),rand(.5,1.1));g.add(q)}}}
-function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props==='swamp')return chzSwamp(Z);if(Z.props==='canyon')return chzCanyon(Z);if(Z.props==='city')return chzCity(Z);if(Z.props==='desert')return chzDesert(Z);if(Z.props==='sanctum')return chzSanctum(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
+function chzProps(Z){if(Z.props==='grave')return chzGrave(Z);if(Z.props==='swamp')return chzSwamp(Z);if(Z.props==='canyon')return chzCanyon(Z);if(Z.props==='city')return chzCity(Z);if(Z.props==='desert')return chzDesert(Z);if(Z.props==='sanctum')return chzSanctum(Z);if(Z.props==='castle'||Z.props==='chapel'||Z.props==='throne')return chzCastle(Z);if(Z.props!=='farm')return;const M=chzMat,char=M.char,burnt=SM({color:0x3a3028,roughness:1}),sack=SM({color:0x6a5a40,roughness:1}),cloth=SM({color:0x4a3a34,roughness:1,side:THREE.DoubleSide}),hay=SM({color:0x4a3c22,roughness:1});
   const side=()=>Math.random()<.5?-1:1,offPt=(z,a,b)=>{const sd=side(),x=pathC(z)+sd*(pathW(z)+rand(a,b));return [x,z,sd]};
   /* 무너진 농가 — 지붕 없이 벽 일부·그을린 기둥 */
   for(const z of [97,54,-3,-41]){const sd=side(),x=pathC(z)+sd*(pathW(z)-3.6),zz=z;const g=chzG(x,zz,rand(-.4,.4)+(sd>0?Math.PI:0));{const w0=LW(x,zz);colliders.push({x:w0.x,z:w0.z,r:2.5})}const W=4.4,D=3.6;
@@ -2583,7 +2636,7 @@ function chzKairen(){/* 카이렌 — 회색 갑옷, 검붉은 망토, 긴 칼 *
   const ck=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.3),cloak);ck.position.set(0,1.05,-.22);ck.rotation.x=.12;g.add(ck);
   const sw=new THREE.Group();sw.position.set(.38,1.2,.05);const s2=new THREE.Group();s2.rotation.x=Math.PI*.55;chzSword(s2,0);s2.rotation.z=0;sw.add(s2);g.add(sw);g.userData.sw=sw;return g}
 function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.tw=[];
-  for(const q of MP.pk){if(q.k!=='tower')continue;/* 탑 수호자 — 양옆 탑 아래의 타락한 빛의 수호자. 둘 다 쓰러뜨리면 성역 문이 열림 */const w=LW(q.x,q.z),tw=LW(q.x+q.side*2.6,q.z-1.5);addProp(tw.x,tw.z,'tower',0);refPool(w.x,w.z,q.r*.8,0xffc860,.16);
+  for(const q of MP.pk){if(q.k!=='tower')continue;/* 탑 수호자 — 양옆 탑 아래의 타락한 빛의 수호자. 둘 다 쓰러뜨리면 성역 문이 열림 */const w=LW(q.x,q.z),tw=LW(q.x+q.side*2.6,q.z-1.5);if(!(Z.tw&&Z.tw.noTower))addProp(tw.x,tw.z,'tower',0);refPool(w.x,w.z,q.r*.8,0xffc860,.16);
     for(let i=0;i<4;i++){const a=i/4*6.28+.4;APL(q.x+Math.cos(a)*(q.r-.7),q.z+Math.sin(a)*(q.r-.7),'pillar',0,0,true)}CHZS.tw.push({q,w,sp:0,done:chevOn('g'+q.id)})}
   for(const v of Z.ev){if(v.k!=='sgate'||chevOn('sgate'))continue;/* 성역 문 — 흰 돌기둥 둘 + 금빛 문짝(위를 가로지르는 들보 없음) */const c=pathC(v.z),wd=pathW(v.z)+.4,g=chzG(c,v.z,0),gold=SM({color:0xc8a040,roughness:.35,metalness:.7,emissive:0x3a2a08,emissiveIntensity:.5}),white=SM({color:0xd8d2c4,roughness:.6});
     for(const sx of [-1,1]){g.add(mesh(new THREE.BoxGeometry(1.1,5.2,1.1),white,sx*(wd+.55),2.6,0),mesh(new THREE.ConeGeometry(.8,1,4),gold,sx*(wd+.55),5.7,0))}
@@ -2607,13 +2660,19 @@ function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.t
     CHZS.rescue=chevOn('rescue')?null:{g,bars,sv,x:w.x,z:w.z};if(chevOn('rescue')){bars.visible=false;sv.position.y=0}}
 
   for(const q of MP.pk){if(q.k!=='beacon')continue;const w=LW(q.x,q.z),g=chzG(q.x,q.z,0),lit=chevOn('b'+q.id);
-    g.add(mesh(new THREE.CylinderGeometry(.9,1.1,1,10),PM.pillar,0,.5,0),mesh(new THREE.CylinderGeometry(.75,.55,.6,10,1,true),PM.iron,0,1.3,0),mesh(new THREE.CylinderGeometry(.6,.6,.12,10),PM.coal,0,1.15,0));
-    for(let i=0;i<4;i++){const a=i/4*6.28;g.add(mesh(new THREE.BoxGeometry(.08,1.6,.08),PM.iron,Math.cos(a)*.7,.9,Math.sin(a)*.7))}
-    colliders.push({x:w.x,z:w.z,r:1.2});const ring=new THREE.Mesh(new THREE.RingGeometry(2.3,2.6,36,1,0,.01),new THREE.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(w.x,groundH(w.x,w.z)+.06,w.z);scene.add(ring);propMeshes.push(ring);
+    if(Z.bvis==='lever'){/* v713: 성문 도르래 — 돌 받침 + 기둥 둘 + 사슬 감은 굴대 + 손잡이 */const st=SM({color:0x4e423c,roughness:.9});g.add(mesh(new THREE.BoxGeometry(2,.5,1.4),st,0,.25,0));for(const sx of [-.8,.8])g.add(mesh(new THREE.BoxGeometry(.25,1.6,.25),PM.iron,sx,1.2,0));
+      const dr=mesh(new THREE.CylinderGeometry(.32,.32,1.4,12),PM.iron,0,1.6,0);dr.rotation.z=Math.PI/2;g.add(dr);for(let i=0;i<6;i++){const ln=mesh(new THREE.TorusGeometry(.1,.03,4,8),PM.iron,-.5+i*.2,1.6,.34);g.add(ln)}
+      const h=new THREE.Group();h.position.set(.95,1.6,0);h.add(mesh(new THREE.BoxGeometry(.12,1.1,.12),SM({color:0x5a4430,roughness:1}),0,.5,0),mesh(new THREE.SphereGeometry(.14,8,6),PM.iron,0,1.05,0));g.add(h);g.userData.h=h}
+    else if(Z.bvis==='shrine'){/* v713: 빛의 성소 — 흰 대리석 받침 + 금빛 해 고리 + 꺼진 수정 */const wm=SM({color:0xd8d2c4,roughness:.5}),gd=SM({color:0xc8a040,roughness:.35,metalness:.7});g.add(mesh(new THREE.CylinderGeometry(1,1.15,.5,8),wm,0,.25,0),mesh(new THREE.CylinderGeometry(.55,.7,1.2,8),wm,0,1.1,0));
+      const ring=mesh(new THREE.TorusGeometry(.6,.06,6,24),gd,0,2.3,0);g.add(ring);const cr=mesh(PG.crys,SM({color:0x6a6a7a,roughness:.3,emissive:0x222230,emissiveIntensity:.4}),0,2.3,0);cr.scale.set(.25,.5,.25);g.add(cr);g.userData.cr=cr}
+    else{g.add(mesh(new THREE.CylinderGeometry(.9,1.1,1,10),PM.pillar,0,.5,0),mesh(new THREE.CylinderGeometry(.75,.55,.6,10,1,true),PM.iron,0,1.3,0),mesh(new THREE.CylinderGeometry(.6,.6,.12,10),PM.coal,0,1.15,0));
+    for(let i=0;i<4;i++){const a=i/4*6.28;g.add(mesh(new THREE.BoxGeometry(.08,1.6,.08),PM.iron,Math.cos(a)*.7,.9,Math.sin(a)*.7))}}
+    colliders.push({x:w.x,z:w.z,r:1.2});const ring=new THREE.Mesh(new THREE.RingGeometry(2.3,2.6,36,1,0,.01),new THREE.MeshBasicMaterial({color:Z.bring||0xffc070,transparent:true,opacity:.85,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(w.x,groundH(w.x,w.z)+.06,w.z);scene.add(ring);propMeshes.push(ring);
     const B={q,g,w,ring,lit,pr:0,sp:0};CHZS.beacons.push(B);if(lit)chzBeaconFire(B,1);
     if(q.kai&&!chevOn('kai')){const k=chzKairen(),kw=LW(q.x+q.side*1.6,q.z-1.4);k.position.set(kw.x,groundH(kw.x,kw.z),kw.z);k.rotation.y=SROT+Math.PI;scene.add(k);propMeshes.push(k);CHZS.kai={g:k,cd:0,st:'wait',B}}}
-  for(const v of Z.ev){if(v.k==='icewall'&&!chevOn('beacons')){const c=pathC(v.z),wd=pathW(v.z),g=chzG(c,v.z,0),ice=SM({color:0xb8d8f0,roughness:.15,metalness:.1,transparent:true,opacity:.82,emissive:0x2a4a6a,emissiveIntensity:.4});
-    for(let x=-wd-1;x<=wd+1;x+=1.1){const h=rand(2.2,3.6),b=mesh(new THREE.BoxGeometry(1.1,h,1.2),ice,x,h/2,rand(-.3,.3));b.rotation.y=rand(-.3,.3);b.rotation.z=rand(-.08,.08);g.add(b);const sp=mesh(new THREE.ConeGeometry(.35,rand(.8,1.6),5),ice,x+rand(-.2,.2),h+.4,0);g.add(sp)}
+  for(const v of Z.ev){if(v.k==='icewall'&&!chevOn('beacons')){const c=pathC(v.z),wd=pathW(v.z),g=chzG(c,v.z,0),sh=Z.wall==='shadow',ice=sh?SM({color:0x1a1024,roughness:.2,transparent:true,opacity:.86,emissive:0x5a1a9a,emissiveIntensity:.6}):SM({color:0xb8d8f0,roughness:.15,metalness:.1,transparent:true,opacity:.82,emissive:0x2a4a6a,emissiveIntensity:.4});
+    if(Z.wall==='bars'){/* v713: 쇠창살 문 */for(let x=-wd-.6;x<=wd+.6;x+=.42)g.add(mesh(new THREE.BoxGeometry(.09,4.2,.09),PM.iron,x,2.1,0));for(const y of [.5,1.6,2.7,3.8])g.add(mesh(new THREE.BoxGeometry(wd*2+1.4,.1,.12),PM.iron,0,y,0));for(let x=-wd-.6;x<=wd+.6;x+=.42)g.add(mesh(new THREE.ConeGeometry(.08,.3,4),PM.iron,x,-.05,0))}
+    else for(let x=-wd-1;x<=wd+1;x+=1.1){const h=rand(2.2,3.6),b=mesh(new THREE.BoxGeometry(1.1,h,1.2),ice,x,h/2,rand(-.3,.3));b.rotation.y=rand(-.3,.3);b.rotation.z=rand(-.08,.08);g.add(b);const sp=mesh(new THREE.ConeGeometry(.35,rand(.8,1.6),5),ice,x+rand(-.2,.2),h+.4,0);g.add(sp)}
     const cl=[];for(let x=-wd;x<=wd;x+=1){const w2=LW(c+x,v.z),cc={x:w2.x,z:w2.z,r:.85,bar:1};colliders.push(cc);cl.push(cc)}CHZS.ice={g,cl,z:v.z}}}
 
   if(Z.pools)for(const [z,xf,r] of Z.pools){const x=pathC(z)+xf*pathW(z),w=LW(x,z),g=new THREE.Group();g.position.set(w.x,.04,w.z);
@@ -2632,14 +2691,16 @@ function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.t
     for(let z=za;z>zb;z-=3)for(const sd of [-1,1]){const w0=LW(pathC(z)+sd*2.9,z),p_=mesh(new THREE.CylinderGeometry(.09,.11,1.4,6),dark,w0.x,.3,w0.z);scene.add(p_);propMeshes.push(p_)}
     CHZS.bridge=v}}}
 let poisonAcc=0;
-function chzBeaconFire(B,quiet){const g=B.g,fm=new THREE.SpriteMaterial({map:flameTex,color:0xffb050,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}),f1=new THREE.Sprite(fm),f2=new THREE.Sprite(fm);f1.position.y=2.1;f1.scale.set(1.6,2.6,1);f2.position.set(.2,1.8,.1);f2.scale.set(1,1.8,1);g.add(f1,f2);B.fl=[f1,f2];
+function chzBeaconFire(B,quiet){const Zb=CHZ[S.ch]||{};
+  if(Zb.bvis==='lever'){const h=B.g.userData.h;if(h){if(quiet)h.rotation.z=-1.3;else fx.push({m:h,t:0,dur:.9,keep:1,upd(k){h.rotation.z=-1.3*k},end(){}})}B.fl=null;return}
+  if(Zb.bvis==='shrine'){const cr=B.g.userData.cr;if(cr){cr.material=SM({color:0xfff4d8,roughness:.2,emissive:0xffe0a0,emissiveIntensity:1.2})}const m=new THREE.SpriteMaterial({map:refGlowTex,color:0xfff0c0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}),a=new THREE.Sprite(m),b=new THREE.Sprite(m.clone());a.position.y=2.3;a.scale.set(1.6,2.6,1);b.position.y=4;b.scale.set(1.2,6,1);b.material.opacity=.35;B.g.add(a,b);B.fl=[a,b];return}const g=B.g,fm=new THREE.SpriteMaterial({map:flameTex,color:0xffb050,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}),f1=new THREE.Sprite(fm),f2=new THREE.Sprite(fm);f1.position.y=2.1;f1.scale.set(1.6,2.6,1);f2.position.set(.2,1.8,.1);f2.scale.set(1,1.8,1);g.add(f1,f2);B.fl=[f1,f2];
   fires.push({x:B.w.x,z:B.w.z,y:2.2,a:new THREE.Object3D(),b:new THREE.Object3D(),ph:B.q.id,l:null});refPool(B.w.x,B.w.z,5,0xff9a40,.35);B.ring.visible=false;if(!quiet){hitSpark(new THREE.Vector3(B.w.x,1.8,B.w.z),0xffd090,0xff6a1a,16);shake=Math.max(shake,.15)}}
 let fwHit=0;
 function chzTickX(dt,pl,Z){
   if(CHZS.tw&&CHZS.tw.length){for(const T of CHZS.tw){if(T.done)continue;const d=Math.hypot(P.pos.x-T.w.x,P.pos.z-T.w.z);
-      if(!T.sp&&d<16){T.sp=1;const dd=diff(),e=spawnEnemy(dd.brute?'brute':'grunt',T.w.x,T.w.z,2);e.gev=1;e.twg=T.q.id;e.lab.firstChild.textContent='타락한 빛의 수호자';for(let i=0;i<2;i++){const a=i*3.1,w2=LW(T.q.x+Math.cos(a)*2,T.q.z+Math.sin(a)*2),e2=spawnEnemy('grunt',w2.x,w2.z,1);e2.gev=1}
-        if(!chevOn('twmsg')){chevSet('twmsg');toast('탑 수호자','양옆 탑의 수호자를 모두 쓰러뜨리면 성역 문이 열립니다')}}
-      else if(T.sp&&!enemies.some(e=>e.twg===T.q.id&&e.hp>0)){T.done=1;chevSet('g'+T.q.id);const n=CHZS.tw.filter(t=>t.done).length;toast('수호자가 쓰러졌다',n<CHZS.tw.length?'남은 수호자 1':'성역 문이 열린다');save();
+      if(!T.sp&&d<16){T.sp=1;const dd=diff(),e=spawnEnemy(dd.brute?'brute':'grunt',T.w.x,T.w.z,2);e.gev=1;e.twg=T.q.id;e.lab.firstChild.textContent=Z.tw?Z.tw.n:'타락한 빛의 수호자';for(let i=0;i<2;i++){const a=i*3.1,w2=LW(T.q.x+Math.cos(a)*2,T.q.z+Math.sin(a)*2),e2=spawnEnemy('grunt',w2.x,w2.z,1);e2.gev=1}
+        if(!chevOn('twmsg')){chevSet('twmsg');toast(Z.tw?Z.tw.t:'탑 수호자',Z.tw?Z.tw.msg:'양옆 탑의 수호자를 모두 쓰러뜨리면 성역 문이 열립니다')}}
+      else if(T.sp&&!enemies.some(e=>e.twg===T.q.id&&e.hp>0)){T.done=1;chevSet('g'+T.q.id);const n=CHZS.tw.filter(t=>t.done).length;toast('수호자가 쓰러졌다',n<CHZS.tw.length?'남은 수호자 1':(Z.tw?Z.tw.open:'성역 문이 열린다'));save();
         if(n>=CHZS.tw.length&&CHZS.sg){const G=CHZS.sg;chevSet('sgate');for(const c of G.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}for(const [lf,sx] of G.leaves)fx.push({m:lf,t:0,dur:1.6,keep:1,upd(k){const e=1-(1-k)*(1-k);lf.rotation.y=sx*e*1.6},end(){}});
           shake=Math.max(shake,.3);const w=LW(pathC(G.z-3),G.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};CHZS.sg=null;save()}}}}
   if(Z.witness&&CHZS.camp&&!chevOn('wit')&&Math.hypot(P.pos.x-CHZS.camp.x,P.pos.z-CHZS.camp.z)<5){chevSet('wit');/* 목격 — 봉우리에서 불덩이가 떨어져 내림 */const m=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xff7a2a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,fog:false}));
@@ -2654,11 +2715,11 @@ function chzTickX(dt,pl,Z){
     talk(Z.rescue,()=>{S.pots.hp.m=(S.pots.hp.m||0)+3;S.pots.mp.m=(S.pots.mp.m||0)+2;P.hp=P.mhp;P.mp=P.mmp;toast('생존자를 구했다','중형 생명력 물약 3 · 중형 마나 물약 2 · 체력 회복');save()})}
 
   if(CHZS.beacons&&CHZS.beacons.length){const t=performance.now()/1000;for(const B of CHZS.beacons){if(B.fl){const k=1+.12*Math.sin(t*9+B.q.id);B.fl[0].scale.set(1.6*k,2.6*k,1)}if(B.lit)continue;const d=Math.hypot(P.pos.x-B.w.x,P.pos.z-B.w.z);
-      if(!B.sp&&d<9){B.sp=1;for(let i=0;i<4;i++){const z=B.q.z-4-rand(0,3),x=B.q.x+rand(-2.5,2.5),w=LW(x,z),e=spawnEnemy(i?'grunt':'runner',w.x,w.z,i?0:1);e.gev=1}toast('꺼진 봉화','봉화 곁에 잠시 머물러 불을 붙이세요')}
+      if(!B.sp&&d<9){B.sp=1;for(let i=0;i<4;i++){const z=B.q.z-4-rand(0,3),x=B.q.x+rand(-2.5,2.5),w=LW(x,z),e=spawnEnemy(i?'grunt':'runner',w.x,w.z,i?0:1);e.gev=1}{const BT=Z.btx;toast(BT?BT.un:'꺼진 봉화',BT?BT.hint:'봉화 곁에 잠시 머물러 불을 붙이세요')}}
       if(d<2.9&&P.hp>0){B.pr=Math.min(2.5,B.pr+dt)}else B.pr=Math.max(0,B.pr-dt*.5);B.ring.geometry.dispose();B.ring.geometry=new THREE.RingGeometry(2.3,2.6,36,1,0,Math.max(.01,B.pr/2.5*Math.PI*2));
-      if(B.pr>=2.5){B.lit=1;chevSet('b'+B.q.id);chzBeaconFire(B);const n=CHZS.beacons.filter(b=>b.lit).length;toast('봉화가 타오른다',n<CHZS.beacons.length?`남은 봉화 ${CHZS.beacons.length-n}곳`:'모든 봉화가 타오른다');save();
-        if(n>=CHZS.beacons.length){chevSet('beacons');const I=CHZS.ice;if(I){for(const c of I.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}const g=I.g;fx.push({m:g,t:0,dur:2,keep:1,upd(k){g.position.y=-k*3.6;g.scale.y=1-k*.6},end(){scene.remove(g)}});const w=LW(pathC(I.z-3),I.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};CHZS.ice=null}
-          later(1.2,()=>toast('눈보라가 걷힌다','얼음벽이 녹아 길이 열렸습니다'));save()}}}}
+      if(B.pr>=2.5){B.lit=1;chevSet('b'+B.q.id);chzBeaconFire(B);const n=CHZS.beacons.filter(b=>b.lit).length;{const BT=Z.btx;toast(BT?BT.lit:'봉화가 타오른다',n<CHZS.beacons.length?`${BT?BT.left:'남은 봉화'} ${CHZS.beacons.length-n}곳`:(BT?BT.all:'모든 봉화가 타오른다'))}if(Z.blore&&Z.blore[B.q.id])later(1,()=>{if(!talkOn())talk(Z.blore[B.q.id])});save();
+        if(n>=CHZS.beacons.length){chevSet('beacons');const I=CHZS.ice;if(I){for(const c of I.cl){const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1)}const g=I.g;if(Z.wall==='bars')fx.push({m:g,t:0,dur:2.4,keep:1,upd(k){g.position.y=k*k*4.6},end(){}});else fx.push({m:g,t:0,dur:2,keep:1,upd(k){g.position.y=-k*3.6;g.scale.y=1-k*.6},end(){scene.remove(g)}});const w=LW(pathC(I.z-3),I.z-3);S.chk={ch:S.ch,x:w.x,z:w.z};CHZS.ice=null}
+          later(1.2,()=>{const BT=Z.btx;toast(BT?BT.open[0]:'눈보라가 걷힌다',BT?BT.open[1]:'얼음벽이 녹아 길이 열렸습니다')});save()}}}}
   const KA=CHZS.kai;if(KA){const g=KA.g,d=Math.hypot(P.pos.x-g.position.x,P.pos.z-g.position.z);
     if(KA.st==='wait'&&d<16)KA.st='fight';
     if(KA.st==='fight'){KA.cd-=dt;if(KA.B.lit)KA.lt=(KA.lt||0)+dt;const sw=g.userData.sw;sw.rotation.x+=(0-sw.rotation.x)*Math.min(1,dt*8);let tg=null,bd=7;for(const e of enemies){if(e.hp<=0||e.boss)continue;const dd=Math.hypot(e.pos.x-g.position.x,e.pos.z-g.position.z);if(dd<bd){bd=dd;tg=e}}
@@ -2696,6 +2757,40 @@ function wx2Tick(dt){const on=mapKind==='story'&&!inTown&&W2.cf;if(!W2.rain)retu
   if(C2.rain){const a=W2.rain.geometry.attributes.position.array;for(let i=0;i<a.length;i+=6){let y=a[i+1]-15*dt;let x=a[i],z=a[i+2];if(y<0||Math.abs(x-cx)>19||z-cz>15||z-cz<-19){x=cx+rand(-18,18);z=cz+rand(-18,14);y=rand(8,12)}a[i]=x;a[i+1]=y;a[i+2]=z;a[i+3]=x+.06;a[i+4]=y+.7;a[i+5]=z}W2.rain.geometry.attributes.position.needsUpdate=true}
   if(C2.pts){const a=W2.pts.geometry.attributes.position.array,k=1+W2.fk*1.4;for(let i=0,o=0;i<a.length;i+=3,o++){const ph=W2.pv[o*2],sp=W2.pv[o*2+1];a[i]+=(C2.vx*k+Math.sin(t*1.1+ph)*.5)*sp*dt;a[i+1]+=C2.vy*sp*dt;a[i+2]+=Math.cos(t*.8+ph)*.3*dt;
       if(a[i+1]<0||a[i+1]>12||a[i]-cx>19||a[i]-cx<-19||a[i+2]-cz>15||a[i+2]-cz<-19){a[i]=cx+(C2.vx>3?-18:rand(-18,18));a[i+2]=cz+rand(-18,14);a[i+1]=C2.vy>0?rand(0,1.5):C2.vy<-.5?rand(8,12):rand(.2,4)}}W2.pts.geometry.attributes.position.needsUpdate=true}}
+/* v713: 8~10장 소품 — 루멘 성 안. 가운데 긴 양탄자(금테), 벽을 따라 늘어선 돌기둥(인스턴스), 벽걸이 횃불·깃발·불빛 창, 넓은 홀의 안쪽 기둥 줄,
+   예배당(chapel)은 긴 의자·색유리 창·빛의 석상, 왕좌층(throne)은 벽 쪽 용암 도랑·큰 화로. 끝 제단 뒤에는 위층으로 오르는 계단과 큰 문 */
+function chzRibbon(o0,o1,y,mat,z0,z1){const P_=[],I=[];let n=0;for(let z=z0;z>=z1;z-=1.5){const c=pathC(z),a=LW(c+o0,z),b=LW(c+o1,z);P_.push(a.x,y,a.z,b.x,y,b.z);if(n){const k=n*2;I.push(k-2,k-1,k,k-1,k+1,k)}n++}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P_,3));g.setIndex(I);g.computeVertexNormals();const m=new THREE.Mesh(g,mat);m.receiveShadow=true;scene.add(m);propMeshes.push(m);return m}
+function chzCastle(Z){const k=Z.props,ch=k==='chapel',th=k==='throne',side=()=>Math.random()<.5?-1:1;
+  const stone=SM({color:ch?0x6a6872:0x4e423c,roughness:.9}),dark=SM({color:0x1e1816,roughness:1}),gold=SM({color:0xb08a40,roughness:.4,metalness:.6}),
+    carpet=SM({color:ch?0x3a2a5a:th?0x5a0a08:0x6a1414,roughness:1,side:THREE.DoubleSide}),trim=SM({color:0xa8843a,roughness:.5,metalness:.4,side:THREE.DoubleSide}),
+    banC=ch?0xd8d0c0:th?0x2a0a0a:0x7a1a16,ban=SM({color:banC,roughness:1,side:THREE.DoubleSide});
+  /* 양탄자 */const zA=STORY_L-4,zB=-STORY_L+24;chzRibbon(-1.3,1.3,.035,carpet,zA,zB);chzRibbon(-1.48,-1.3,.04,trim,zA,zB);chzRibbon(1.3,1.48,.04,trim,zA,zB);
+  /* 벽 기둥 — 인스턴스로 한 번에 */const pz=[];for(let z=STORY_L-2;z>-STORY_L+2;z-=3.2)for(const sd of [-1,1]){const x=pathC(z)+sd*(pathW(z)+.15);if(MP.pk.some(q=>Math.abs(q.z-z)<3.4&&q.side===sd))continue;const e=endPtL();if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+.5)continue;pz.push([x,z])}
+  {const G=new THREE.BoxGeometry(.95,5.2,.95),C=new THREE.BoxGeometry(1.25,.35,1.25),im=new THREE.InstancedMesh(G,stone,pz.length),ic=new THREE.InstancedMesh(C,th?dark:gold,pz.length),M=new THREE.Matrix4(),Q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),SROT),V1=new THREE.Vector3(1,1,1);
+    pz.forEach(([x,z],i)=>{const w=LW(x,z);M.compose(new THREE.Vector3(w.x,2.6,w.z),Q,V1);im.setMatrixAt(i,M);M.compose(new THREE.Vector3(w.x,5.3,w.z),Q,V1);ic.setMatrixAt(i,M)});
+    im.castShadow=true;scene.add(im,ic);propMeshes.push(im,ic)}
+  /* 벽걸이 횃불·깃발·창 */
+  let n=0;for(let z=STORY_L-10;z>-STORY_L+22;z-=7){n++;const sd=n%2?1:-1,w=pathW(z),x=pathC(z)+sd*(w-.25);if(MP.pk.some(q=>Math.abs(q.z-z)<4&&q.side===sd))continue;
+    if(n%2){const g=chzG(x,z,sd>0?-Math.PI/2:Math.PI/2);g.add(mesh(new THREE.BoxGeometry(.18,.6,.18),dark,0,2.2,-.05),mesh(new THREE.CylinderGeometry(.22,.12,.3,8),dark,0,2.6,.1));const w0=LW(x,z);addFire(g,w0.x,2.55,w0.z)}
+    else{const g=chzG(x,z,sd>0?-Math.PI/2:Math.PI/2),f=new THREE.Mesh(new THREE.PlaneGeometry(1.1,2.6),ban);f.position.set(0,2.6,.12);g.add(f,mesh(new THREE.BoxGeometry(1.4,.08,.08),gold,0,3.95,.14));if(!th){const em=mesh(new THREE.CircleGeometry(.32,16),gold,0,2.9,.14);g.add(em)}}}
+  for(let z=STORY_L-20;z>-STORY_L+30;z-=15){const sd=Math.floor(z/15)%2?1:-1,x=pathC(z)+sd*(pathW(z)+.1),g=chzG(x,z,sd>0?-Math.PI/2:Math.PI/2);
+    if(ch){const cols=[0xd84a3a,0x3a7ad8,0xe0c040,0x5ac06a,0xa05ad8];for(let i=0;i<6;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.55,.9),new THREE.MeshBasicMaterial({color:cols[(i+n)%5],transparent:true,opacity:.75}));m.position.set((i%2-.5)*.6,2.2+Math.floor(i/2)*.95,.1);g.add(m)}}
+    else{const m=new THREE.Mesh(new THREE.PlaneGeometry(1,2.4),new THREE.MeshBasicMaterial({map:refGlowTex,color:th?0xff5a1a:0xff9a4a,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}));m.position.set(0,2.9,.1);g.add(m)}
+    g.add(mesh(new THREE.BoxGeometry(1.4,.2,.25),stone,0,4.3,.05))}
+  /* 넓은 홀 — 안쪽 기둥 줄 */for(let z=STORY_L-12;z>-STORY_L+30;z-=6.5){const w=pathW(z);if(w<11)continue;for(const sd of [-1,1]){const x=pathC(z)+sd*(w-3.4),g=chzG(x,z,0);g.add(mesh(new THREE.CylinderGeometry(.5,.55,5,12),stone,0,2.5,0),mesh(new THREE.BoxGeometry(1.3,.4,1.3),stone,0,.2,0),mesh(new THREE.BoxGeometry(1.3,.35,1.3),th?dark:gold,0,5.1,0));const w0=LW(x,z);colliders.push({x:w0.x,z:w0.z,r:.65})}}
+  if(ch){/* 긴 의자(넓은 홀 양옆) · 빛의 석상 */for(let z=STORY_L-12;z>-STORY_L+30;z-=2.6){const w=pathW(z);if(w<12||Math.random()<.35)continue;for(const sd of [-1,1]){const x=pathC(z)+sd*4.6,g=chzG(x,z,0),broken=Math.random()<.3;g.add(mesh(new THREE.BoxGeometry(3.6,.12,.7),SM({color:0x4a3424,roughness:1}),0,.5,0),mesh(new THREE.BoxGeometry(3.6,.7,.12),SM({color:0x3a2a1c,roughness:1}),0,.75,-.3));if(broken)g.rotation.z=.25;
+      for(const dx of [-1.4,1.4]){const w0=LW(x+dx,z);colliders.push({x:w0.x,z:w0.z,r:.45})}}}
+    for(const z of [104,48,-24,-58]){const sd=side();APL(pathC(z)+sd*(pathW(z)-1.4),z,'statue',sd>0?-1.2:1.2,0,false)}}
+  if(th){/* 큰 화로 */for(let z=STORY_L-14;z>-STORY_L+30;z-=11){for(const sd of [-1,1]){const w=pathW(z);if(w<9)continue;const x=pathC(z)+sd*(w-1.6),g=chzG(x,z,0);g.add(mesh(new THREE.CylinderGeometry(.35,.5,1.4,8),dark,0,.7,0),mesh(new THREE.CylinderGeometry(.8,.4,.45,10),dark,0,1.5,0));const w0=LW(x,z);addFire(g,w0.x,1.6,w0.z);colliders.push({x:w0.x,z:w0.z,r:.7})}}
+    /* 벽 쪽 용암 도랑(장식) */const lava=new THREE.MeshBasicMaterial({map:refLavaTex,color:0xff7a2a});const lv=[];for(const sd of [-1,1]){const P_=[],I=[];let m=0;for(let z=zA;z>=zB;z-=1.5){const c=pathC(z),w=pathW(z),a=LW(c+sd*(w-.9),z),b=LW(c+sd*(w-.15),z);P_.push(a.x,.03,a.z,b.x,.03,b.z);if(m){const q=m*2;I.push(q-2,q-1,q,q-1,q+1,q)}m++}
+      const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(P_,3));gg.setIndex(I);const mm=new THREE.Mesh(gg,lava);scene.add(mm);propMeshes.push(mm)}}
+  /* 위층 계단 + 큰 문(끝 제단 뒤) */const e=endPtL(),z0=-STORY_L+1.5,NS=16,rise=th?.55:.45;
+  for(let i=0;i<NS;i++){const z=z0-i*1,h=(i+1)*rise,g=chzG(e.x,z,0);g.add(mesh(new THREE.BoxGeometry(8.4,h,1.02),stone,0,h/2,0));g.add(mesh(new THREE.BoxGeometry(2.6,.03,1.02),carpet,0,h+.016,0))}
+  {const top=z0-NS,hT=NS*rise,g=chzG(e.x,top-.5,0);for(const sx of [-1,1])g.add(mesh(new THREE.BoxGeometry(1.4,8,1.4),stone,sx*4.9,hT+4-1,0));g.add(mesh(new THREE.BoxGeometry(11.2,1.2,1.6),th?dark:gold,0,hT+7.4,0));
+    const gl=new THREE.Mesh(new THREE.PlaneGeometry(8.4,7),new THREE.MeshBasicMaterial({map:refGlowTex,color:th?0xff4a10:0xffa050,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));gl.position.set(0,hT+3.4,-.4);g.add(gl);
+    for(const sx of [-1,1]){const fg=chzG(e.x+sx*4.9,top+1.2,0),w0=LW(e.x+sx*4.9,top+1.2);addFire(fg,w0.x,hT+.4,w0.z)}}
+  for(let i=0;i<NS;i+=3)for(const sx of [-1,1]){const z=z0-i,h=(i+1)*rise,g=chzG(e.x+sx*4.8,z,0);g.add(mesh(new THREE.BoxGeometry(.6,h+1.2,.6),stone,0,(h+1.2)/2,0))}}
 /* 7장 소품 — 루멘 성역: 흰 대리석 빛의 기둥(금빛 머리, 일부 쓰러짐), 훼손된 빛의 석상, 금빛 화로, 바닥의 금빛 원 문양, 그을린 금빛 깃발, 꺼진 빛의 제단 */
 function chzSanctum(Z){const white=SM({color:0xd8d2c4,roughness:.6}),gold=SM({color:0xc8a040,roughness:.35,metalness:.7}),char=SM({color:0x2a2420,roughness:1}),ban=SM({color:0xd8c890,roughness:1,side:THREE.DoubleSide}),side=()=>Math.random()<.5?-1:1;
   for(let z=STORY_L-20;z>-STORY_L+24;z-=9)for(const sd of [-1,1]){if(Math.random()<.3)continue;const x=pathC(z)+sd*(pathW(z)+.8),g=chzG(x,z,0);if(Math.random()<.25){const c=mesh(new THREE.CylinderGeometry(.42,.48,4.6,12),white,0,.5,0);c.rotation.z=Math.PI/2;c.rotation.y=rand(0,3);g.add(c,mesh(new THREE.CylinderGeometry(.55,.6,.5,12),white,0,.25,0))}
@@ -2759,7 +2854,7 @@ function chzTick(dt){const Z=CHZ[S.ch];if(!Z||S.phase!==1)return;const pl=W2L(P.
       toast('묘역 열쇠지기','열쇠를 든 자가 묘소로 달아난다 — 쫓아가 쓰러뜨리세요')}
     else if(KG.sp&&!enemies.some(e=>e.kb&&e.hp>0))chzOpenKeyGate()}
   chzTickX(dt,pl,Z);
-  const C=CHZS.chest;if(C&&Math.hypot(P.pos.x-C.x,P.pos.z-C.z)<2.4){CHZS.chest=null;chevSet('chest');const L=C.lid;fx.push({m:L,t:0,dur:.5,keep:1,upd(k){L.rotation.x=-k*1.9},end(){}});
+  if(CHZS.chests)for(const C of CHZS.chests)if(!C.open&&Math.hypot(P.pos.x-C.x,P.pos.z-C.z)<2.4){C.open=1;chevSet(C.key);const L=C.lid;fx.push({m:L,t:0,dur:.5,keep:1,upd(k){L.rotation.x=-k*1.9},end(){}});
     const p=new THREE.Vector3(C.x,0,C.z);dropItem(p,false,1);dropItem(p,false,1);dropItem(p,false,2);toast('보물 상자','누군가 숨겨 둔 물건을 찾았다');save()}
   const T=CHZS.trace;if(T&&!chevOn('trace')&&Math.hypot(P.pos.x-T.x,P.pos.z-T.z)<4.4&&!talkOn()){chevSet('trace');save();talk(Z.trace)}
   const K=CHZS.camp;if(K&&Math.hypot(P.pos.x-K.x,P.pos.z-K.z)<5){if(!(S.chk&&S.chk.ch===S.ch&&Math.hypot(S.chk.x-K.x,S.chk.z-K.z)<1)){S.chk={ch:S.ch,x:K.x,z:K.z+0};P.hp=P.mhp;P.mp=P.mmp;toast('모닥불','체력과 마나가 모두 회복되었습니다 · 쓰러지면 여기서 다시 일어납니다');save();
@@ -2803,7 +2898,7 @@ const decalMats=(()=>{const mk=(draw)=>{const c=mkCv(128),g=c.getContext('2d');d
 function mesh(geo,mat,x,y,z){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;return m}
 function addFire(g,x,y,z){const a=new THREE.Sprite(flameMatA),b=new THREE.Sprite(flameMatB);a.position.set(0,y+.45,0);b.position.set(0,y+.3,0);g.add(a,b);fires.push({x,z,y:y+.8,a,b,ph:rand(0,9),l:null})}
 function bowlTop(g,y){g.add(mesh(PG.bowl,PM.iron,0,y,0),mesh(PG.coal,PM.coal,0,y+.17,0))}
-const PROPSET=[{rock:3,tree:3,pillar:1.5,bones:1.2,brazier:.8},{tomb:4,tree:2,rock:1,pillar:1,bones:1.4,brazier:.8},{tree:4,rock:2,bones:1.4,tomb:1,brazier:.6},{rock:3.5,crystal:3,tree:1.2,pillar:1,brazier:.8},{pillar:3.5,rock:2.5,bones:1.6,brazier:1.2,tree:1},{rock:4,pillar:2.5,bones:2,brazier:1},{crystal:3,pillar:3,rock:2,brazier:1,bones:1}];
+const PROPSET=[{rock:3,tree:3,pillar:1.5,bones:1.2,brazier:.8},{tomb:4,tree:2,rock:1,pillar:1,bones:1.4,brazier:.8},{tree:4,rock:2,bones:1.4,tomb:1,brazier:.6},{rock:3.5,crystal:3,tree:1.2,pillar:1,brazier:.8},{pillar:3.5,rock:2.5,bones:1.6,brazier:1.2,tree:1},{rock:4,pillar:2.5,bones:2,brazier:1},{crystal:3,pillar:3,rock:2,brazier:1,bones:1},{pillar:2,brazier:2,bones:1},{pillar:2,brazier:1.5,bones:.6},{pillar:2,brazier:2.5,bones:1}];
 /* v687: 비탈에 놓는 소품이 공중에 뜨지 않게 — 중심만이 아니라 둘레 8곳 중 가장 낮은 땅 높이에 놓음 */
 function gMin(x,z,r){let h=groundH(x,z);for(let i=0;i<8;i++){const a=i*Math.PI/4;h=Math.min(h,groundH(x+Math.cos(a)*r,z+Math.sin(a)*r))}return h}
 function addProp(x,z,kind,rot,arg,noCol){
@@ -4916,7 +5011,7 @@ function sKillTab(){if(!S.sKill||S.sKill.ch!==S.ch||S.sKill.seed!==S.sSeed)S.sKi
 const sKilled=id=>id!=null&&sKillTab().ids.includes(id);
 function seedPacks(){if(S.sSeedCh!==S.ch||!(S.sSeed>0)){S.sSeed=1+(Math.random()*1e6|0);S.sSeedCh=S.ch}const MR=Math.random;Math.random=srng(S.sSeed);try{seedPacks0()}finally{Math.random=MR}
   let id=0;for(const k of packQ)for(const m of k.m)m.id=id++;packQ.sort((a,b)=>b.z-a.z);packTick()}
-function seedPacks0(){packQ=[];const d=diff(),ci=chF(S.ch),goal=Math.round(CH[Math.min(S.ch,LAST)].goal*GOAL_M),len=2*(STORY_L-24),step=len/(goal/3);let left=goal,z=STORY_L-24;
+function seedPacks0(){packQ=[];const d=diff(),ci=chF(S.ch),goal=Math.round(CH[Math.min(S.ch,LAST)].goal*GOAL_M*STORY_L/129),len=2*(STORY_L-24),step=len/(goal/3);let left=goal,z=STORY_L-24;
   while(left>0&&z>-STORY_L+24){if(MP.wk){let t=0;while(t++<6&&(Math.random()>pathW(z)/15||(CHZ[S.ch]&&CHZ[S.ch].ev.some(v=>Math.abs(z-v.z)<(v.k==='camp'?12:7)))))z-=2.5}const c=pathC(z),n=Math.min(left,2+(Math.random()*3|0));left-=n;z-=step*rand(.75,1.25);const pk={z,m:[]};
   for(let i=0;i<n;i++){const q=Math.random(),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<.70?'grunt':q<.86?'shooter':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute',q2=Math.random(),pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=q2<pu?2:q2<pu+pr?1:0;
     pk.m.push({t:type,rk,x:c+rand(-.6,.6)*pathW(z),z:z+rand(-3,3)})}packQ.push(pk)}
@@ -7263,7 +7358,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v712';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v713';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7374,7 +7469,7 @@ const isPC=()=>pcMode||matchMedia('(hover:hover) and (pointer:fine)').matches;
 const GB='<b style="color:var(--ink)">';
 const GUIDES={
   intro:{n:'게임 진행 방식',steps:()=>[
-    {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 7장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`7장의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
+    {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 10장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`10장을 지나 성 꼭대기의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
     {t:'이동',tgt:isPC()?null:['@left'],d:isPC()?`${GB}W A S D</b>(또는 방향키)로 움직이고, ${GB}마우스</b>로 공격 방향을 정합니다.`:`화면 ${GB}왼쪽 아무 곳</b>이나 누른 채 끌면 그 방향으로 움직입니다.`},
     {t:'주력 스킬과 보스 모드',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다. 마나가 모자라면 같은 버튼으로 ${GB}기본 공격</b>이 나갑니다.`,d2:`${GB}「보스」</b> 버튼은 주력 스킬을 한 대상에 몰아치는 보스 모드를 켜고 끕니다. 켜져 있으면 테두리가 돕니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
     {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 몬스터가 떨어뜨리고, 마을 물약 상점에서도 삽니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
@@ -7390,7 +7485,7 @@ const GUIDES={
   gacha:{n:'장비 뽑기',steps:()=>[{t:'장비 뽑기',d:`골드로 ${GB}현재 레벨에 맞는 전설 장비</b>를 뽑습니다. 원하는 부위를 고를 수 있고, 레벨이 오를수록 가격도 오릅니다.`,d2:`가끔 ${GB}특수 능력치(★)</b>가 붙어 나옵니다. 특수 능력치가 나오면 실수로 넘기지 않도록 「계속 뽑기」가 ${GB}2초간 잠깁니다</b>.`}]},
   smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다.`,d2:`실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.`}]},
   heir:{n:'전승',steps:()=>[{t:'특수 능력치 전승',d:`★ 특수 능력치를 ${GB}같은 부위의 다른 전설 장비</b>로 옮깁니다. 레벨이 올라 더 좋은 장비를 얻어도 아끼던 능력치를 그대로 이어 쓸 수 있습니다.`,d2:`수치는 그대로 옮겨지고, ${GB}원래 장비는 사라집니다</b>. 결투장에서 얻은 ${GB}각인의 서</b>는 여기서 아무 전설 장비에나 새깁니다. 부위에 맞는 특수 능력치가 붙습니다(일반 8% · 상급 11%).`}]},
-  map:{n:'월드맵',steps:()=>[{t:'월드맵',d:`1장에서 7장까지 이어지는 ${GB}여정의 길</b>과 지금 위치를 보여줍니다. 금색 길은 이미 지나온 길입니다. 7장을 지나면 엔드게임 영역에 표시됩니다.`}]},
+  map:{n:'월드맵',steps:()=>[{t:'월드맵',d:`1장에서 10장까지 이어지는 ${GB}여정의 길</b>과 지금 위치를 보여줍니다. 진홍 실선은 이미 지나온 길입니다. 8~10장은 루멘 성 안을 오르는 길이고, 최종 결전 뒤에는 엔드게임 영역에 표시됩니다.`}]},
   stage:{n:'단계',steps:()=>[{t:'단계',d:`장과 위험도 목록, 지금 위치를 봅니다. 엔드게임에서는 여기서 ${GB}위험도</b>를 골라 사냥하고, ${GB}결투장</b>에 도전합니다.`,d2:`위험도가 높을수록 좋은 장비가 나옵니다.`}]}
 };
 Object.assign(GUIDES,{
@@ -7423,7 +7518,7 @@ addEventListener('resize',()=>{if(GCUR)guideRender()});
 function guideBook(){if(!S||!S.cls)return;GCUR={key:'book',steps:[{t:'가이드 다시 보기',d:'보고 싶은 안내를 고르세요.'}],i:0};GUIDES.book=GUIDES.book||{n:'가이드',steps:()=>[]};
   $('guide').hidden=false;guideRender();$('gCard').querySelector('p').insertAdjacentHTML('afterend',`<div class="glist">${Object.keys(GUIDES).filter(k=>k!=='book'&&!/^t\d|^tdone/.test(k)).map(k=>`<button data-gk="${k}">${GUIDES[k].n}</button>`).join('')}</div>`);$('gNext').textContent='닫기'}
 /* ===== v94 튜토리얼 훈련장: 1장 지도 앞부분만 사용. 무리1 → 레벨업·스탯·스킬 창 → 무리2(물약) → 훈련 교관 → 1장 시작 ===== */
-const TUT_ALT=29;/* 훈련 교관 위치(길 좌표 z) */
+const TUT_ALT=STORY_L-100;/* 훈련 교관 위치(길 좌표 z) */
 function tutAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Tutorial</div><h2>튜토리얼을 진행할까요?</h2></div>
   <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 스탯, 물약, 보스전을 직접 해 보며 익힙니다. 3~5분 정도 걸립니다.</p>
   <button class="primary" id="tutYes" style="width:100%">튜토리얼 시작 (추천)</button><button class="ghost" id="tutNo" style="width:100%">건너뛰고 1장으로</button>`;$('notice').hidden=false;releaseAll()}
@@ -7660,9 +7755,9 @@ function showClear(){
   $('clearSheet').innerHTML=`<div><div class="chap">Chapter ${done+1} Clear</div><h2>${done+1}장 · ${CH[done].n} 완료</h2></div>
     ${done===0&&!S.vil?`<p class="hint">${CH[done].boss}가 쓰러졌습니다. 들판 끝, 재 섞인 연기 너머로 작은 불빛들이 보입니다.</p>
     <p class="hint">아직 꺼지지 않은 마을 — <b style="color:var(--ink)">세렌</b>. 잠시 쉬어 갈 수 있을 것 같습니다.</p>
-    <button class="primary" id="toVil">세렌 마을로</button>`:`<p class="hint">${CH[done].boss}가 쓰러졌습니다. (스토리 준비 중 · 이 자리에 ${done+1}장 마무리 이야기가 들어갑니다)</p>
-    <p class="hint">${last?`성역 깊은 곳에서 무언가가 깨어납니다. 마지막 결전이 남았습니다.`:`다음: ${done+2}장 ${CH[done+1].n} · 적이 한 단계 강해집니다.`}</p>
-    <button class="primary" id="${last?'toFinal':'nextCh'}">${last?'최종 결전으로':`${done+2}장 시작`}</button>`}`;
+    <button class="primary" id="toVil">세렌 마을로</button>`:`${CHZ[done]&&CHZ[done].clr?CHZ[done].clr.map(l=>`<p class="hint">${l}</p>`).join(''):`<p class="hint">${CH[done].boss}가 쓰러졌습니다.</p>`}
+    <p class="hint">${last?`마지막 결전이 남았습니다.`:`다음: ${done+2}장 ${CH[done+1].n} · 적이 한 단계 강해집니다.`}</p>
+    <button class="primary" id="${last?'toFinal':'nextCh'}">${last?'계단을 오른다':CH[done+1].indoor&&!CH[done].indoor?'루멘 성으로':CH[done+1].indoor?`위층으로 · ${done+2}장`:`${done+2}장 시작`}</button>`}`;
   $('clear').hidden=false;releaseAll();
 }
 /* 최종 보스 패배 (v29): 바로 재도전하거나, 5장으로 돌아가 성장한 뒤 재도전 */
@@ -7691,7 +7786,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
     mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 불 켜진 집들이 나타난다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 상인도, 대장장이도 있으니 쉬어 가시오.」'],['문지기 오스릭','「준비가 되면 남쪽 문으로 오시오. 그 너머가 잊힌 자들의 묘역이오. 길은 내가 열어 주겠소.」']],()=>{toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
-  if(e.target.id==='toFinal'){$('clear').hidden=true;playCine();return}
+  if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
   if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();$('clear').hidden=true;mapLoad('끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast('끝없는 심연','쓰러뜨릴수록 강해집니다');stageBanner()});return}
@@ -7703,8 +7798,16 @@ $('clearSheet').addEventListener('click',e=>{
 
 /* ================= 최종 결전 컷신 (v27) =================
    스토리 확정 전 임시 문구. 대사는 CINE_LINES만 바꾸면 됨 */
-/* v690: 루멘 성역은 본래 빛을 모시던 곳 — 아쉬카르가 차지해 왕좌를 불태움(등장 때 왕좌를 부수는 이유) */const CINE_LINES=['심연의 왕이 쓰러지자, 성역 깊은 곳에서 불길이 다시 타오릅니다.','본래 루멘하르의 빛을 모시던 성역 — 지금은 꺼지지 않는 불이 차지한 곳.','빛의 왕좌는 불타는 왕좌가 되었고, 그 위에서 성역의 주인이 당신을 기다리고 있습니다.','(스토리 준비 중 · 이 자리에 최종장 컷신이 들어갑니다)'];
+/* v690: 루멘 성역은 본래 빛을 모시던 곳 — 아쉬카르가 차지해 왕좌를 불태움(등장 때 왕좌를 부수는 이유) */const CINE_LINES=[`${CH[LAST].boss}가 쓰러지자, 성의 꼭대기에서 불길이 다시 타오릅니다.`,'본래 루멘하르의 빛을 모시던 성역 — 지금은 꺼지지 않는 불이 차지한 곳.','빛의 왕좌는 불타는 왕좌가 되었고, 그 위에서 성역의 주인이 당신을 기다리고 있습니다.','(스토리 준비 중 · 이 자리에 최종장 컷신이 들어갑니다)'];
 let cineFocus=null,cineTimers=[];
+/* v713: 10장 보스를 쓰러뜨리면 — 보스 뒤 큰 계단을 직접 걸어 오르고, 화면이 불빛으로 물들며 불타는 왕좌(최종 결전)로 이어짐 */
+let STC=null;
+function stairCine(){releaseAll();P.mv=null;const e=endPtL(),p0=W2L(P.pos.x,P.pos.z);STC={t:0,a:{x:p0.x,z:p0.z},b:{x:e.x,z:-STORY_L+2.5},c:{x:e.x,z:-STORY_L-12.5},done:0};document.body.classList.add('stc');toastOff()}
+function stcTick(dt){const T=STC;T.t+=dt;const rise=.55,stY=z=>z>-STORY_L+1.5?0:Math.min(16,Math.ceil(-STORY_L+1.5-z+.001))*rise;let q;
+  if(T.t<1.6){const k=T.t/1.6,u=k*k*(3-2*k);q={x:T.a.x+(T.b.x-T.a.x)*u,z:T.a.z+(T.b.z-T.a.z)*u}}else{const k=Math.min(1,(T.t-1.6)/4.2);q={x:T.b.x+(T.c.x-T.b.x)*k,z:T.b.z+(T.c.z-T.b.z)*k}}
+  const w=L2W(q.x,q.z);P.pos.x=w.x;P.pos.z=w.z;P.pos.y+=(stY(q.z)-P.pos.y)*Math.min(1,dt*10);camT.set(w.x,P.pos.y*.6,w.z);const d=L2W(0,-1);P.face=Math.atan2(d.x,d.z);
+  if(T.t>4.4&&!T.fade){T.fade=1;let el=$('stcF');if(!el){el=document.createElement('div');el.id='stcF';document.body.appendChild(el)}el.innerHTML='<p>계단 끝, 불길 속에 왕좌가 보인다.</p>';el.className='';void el.offsetWidth;el.className='on'}
+  if(T.t>6.4&&!T.done){T.done=1;STC=null;document.body.classList.remove('stc');P.pos.y=0;enterArena();setTimeout(()=>{const el=$('stcF');if(el)el.className=''},1200)}}
 function cineClear(){for(const t of cineTimers)clearTimeout(t);cineTimers=[];try{DGN.cend=null}catch(_){}}
 function playCine(){releaseAll();cineClear();const el=$('cine');el.hidden=false;el.className='cine';
   $('cineBody').innerHTML=CINE_LINES.map(l=>`<p>${l}</p>`).join('')+'<button class="primary" id="cineGo" hidden>불타는 왕좌로</button>';
@@ -7775,7 +7878,7 @@ function basicDps0(){const b=C().basic,crit=NS()?nsCritF():(1+Math.min(1,critCh(
 /* 장별 적정 DPS (적 1명 기준)
    = 그 장에서 몬스터가 생겨나는 체력 총량(초당)을 따라잡는 데 필요한 DPS ÷ 4 (스킬이 평균 4명을 동시에 맞힌다고 가정)
    몬스터 체력 = 종류 비율(러너 30%·구울 56%·브루트 14%) × 장 체력 배율 × 등급 비율(레어·유니크 확률) × 무리 크기 ÷ 생성 간격 */
-function stageReq(ch,tier=1){const c=ch<NCH?CH[ch]:{...CH[LAST],hp:egHp(oT(tier))},ci=ch<NCH?chF(ch):4,E=ETYPES;
+function stageReq(ch,tier=1){const c=ch<NCH?CH[ch]:{...CH[EGB],hp:egHp(oT(tier))},ci=ch<NCH?chF(ch):4,E=ETYPES;
   const typeHp=c.brute?.3*E.runner.hp+.56*E.grunt.hp+.14*E.brute.hp:.3*E.runner.hp+.7*E.grunt.hp;
   const pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=(1-pu-pr)+pr*RANK[1].hp+pu*RANK[2].hp,pack=1+(.25+(ch<NCH?chF(ch):5)*.06)*3;
   return typeHp*c.hp*rk*pack/c.spawn/4*1.3*(NS()?nsHpMul(ch,tier):1)}/* v58: 적정 DPS +30% */
@@ -8332,7 +8435,7 @@ $('bossSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.duel){closeBoss();duelEnter(b.dataset.duel,b.dataset.boss,!!b.dataset.dummy);return}});
 $('bossP').addEventListener('click',e=>{if(e.target.id==='bossP')closeBoss()});
 /* ================= 월드맵 (v70): 1~7장 루트 → 엔드게임 영역 ================= */
-const WM=[[150,512],[262,462],[118,398],[258,334],[136,270],[262,204],[176,132]],WM_EG=[318,58];/* v709: 대륙 지도 위 지역 위치(남쪽 세렌 마을 → 북쪽 루멘 성역), 엔드게임은 성역 너머 심연 */
+const WM=[[150,540],[262,494],[118,442],[258,390],[136,338],[262,286],[176,236],[124,184],[230,152],[150,116]],WM_EG=[318,52];/* v713: 8~10장은 북쪽 봉우리의 루멘 성 *//* v709: 대륙 지도 위 지역 위치(남쪽 세렌 마을 → 북쪽 루멘 성역), 엔드게임은 성역 너머 심연 */
 const wmLeg=i=>{const a=WM[i],b=i+1<WM.length?WM[i+1]:WM_EG,ym=(a[1]+b[1])/2;return `M${a[0]},${a[1]} C${a[0]},${ym} ${b[0]},${ym} ${b[0]},${b[1]}`};
 function wmPos(){if(S.ch>=NCH)return NCH;const t=S.phase===0?0:S.phase===1?.88*storyProg:S.phase===2?1:S.phase===3?.94:1;return S.ch+t}
 /* v709: 월드맵 — 재에 덮인 대륙 루멘하르 지도(해안선·지형 표식·지역 이름), 지나온 길은 진홍 실선, 남은 길은 점선 */
@@ -8353,14 +8456,15 @@ function renderMap(){
   const cr=(x,y)=>`<path d="M${x} ${y} v-9 M${x-3} ${y-6} h6" stroke="${INK}" stroke-width="1"/>`;
   const dn=(x,y)=>`<path d="M${x-10} ${y} q5 -5 10 0 q5 -5 10 0" fill="none" stroke="${INK}" stroke-width="1"/>`;
   const sw=(x,y)=>`<path d="M${x-8} ${y} h5 M${x+1} ${y} h7 M${x-5} ${y+4} h9" stroke="${INK}" stroke-width="1"/>`;
-  let t='';[[96,522],[112,536],[188,540],[204,526],[78,486]].forEach(q=>t+=tr(...q));
-  [[234,486],[246,494],[290,476],[298,488],[282,446]].forEach(q=>t+=cr(...q));
-  [[80,402],[92,420],[150,420],[160,384],[70,380]].forEach(q=>t+=sw(...q));
-  [[226,340,1],[240,326,1.3],[292,344,1.1],[300,318,.9],[214,312,.8]].forEach(q=>t+=mt(...q));
-  [[300,226],[296,186],[316,206],[286,250],[204,240]].forEach(q=>t+=dn(...q));
-  [[138,140,1],[154,124,1.2],[204,118,1.1],[218,140,.9],[120,160,.8],[176,108,1.6]].forEach(q=>t+=mt(...q));
-  t+=`<g stroke="${INK}" fill="none" stroke-width="1"><path d="M62 300 h16 v-10 l4 -5 4 5 v10 h9 v-14 l5 -6 5 6 v14 h9"/><path d="M60 312 h56"/></g>`;
-  t+=`<circle cx="176" cy="96" r="26" fill="url(#wmFire)"/>`;
+  let t='';[[96,552],[112,564],[198,566],[212,552],[80,516]].forEach(q=>t+=tr(...q));
+  [[230,514],[242,522],[292,506],[300,518],[290,470]].forEach(q=>t+=cr(...q));
+  [[78,448],[90,466],[150,466],[160,428],[70,424]].forEach(q=>t+=sw(...q));
+  [[222,404,1],[236,390,1.3],[294,404,1.1],[302,378,.9],[212,372,.8]].forEach(q=>t+=mt(...q));
+  [[302,300],[298,264],[318,282],[288,318],[212,292]].forEach(q=>t+=dn(...q));
+  [[112,236,.8],[236,232,.9],[96,200,.9],[268,196,.9]].forEach(q=>t+=mt(...q));
+  t+=`<g stroke="${INK}" fill="none" stroke-width="1"><path d="M62 344 h16 v-10 l4 -5 4 5 v10 h9 v-14 l5 -6 5 6 v14 h9"/><path d="M60 356 h56"/></g>`;
+  /* 루멘 성 — 봉우리 위 층층이 솟은 성(8~10장) */t+=`<g stroke="${INK2}" fill="none" stroke-width="1.1" transform="translate(128 -24)"><path d="M150 214 v-34 h14 v-26 l6 -8 6 8 v26 h14 v34 M164 154 v-20 h12 v20 M168 134 l4 -10 4 10 M140 214 h56"/><path d="M144 196 v-14 l3 -4 3 4 v14 M190 196 v-14 l3 -4 3 4 v14"/></g>`;
+  t+=`<circle cx="172" cy="104" r="30" fill="url(#wmFire)"/>`;
   g+=`<g opacity=".85">${t}</g>`;
   /* 세렌 마을 · 엔드게임 심연 · 나침반 */
   g+=`<g transform="translate(96 566)"><rect x="-7" y="-7" width="14" height="10" fill="none" stroke="${INK2}" stroke-width="1.2"/><path d="M-9 -6 L0 -13 L9 -6" fill="none" stroke="${INK2}" stroke-width="1.2"/></g>
@@ -8390,7 +8494,7 @@ function renderMap(){
    <div class="wmwrap"><svg class="wm" viewBox="0 0 380 600" role="img" aria-label="루멘하르 지도">${g}${lines}${nodes}${mk}</svg>
    <div class="wminfo"><span class="chap">현재 위치</span><b class="cur">${info}</b><span class="hint" style="margin:0">${sub}</span>
    <div class="wmbar"><i style="width:${pct}%"></i></div><span class="hint" style="margin:0">여정 ${eg?'완주 · 엔드게임 진행 중':`${S.ch+1} / ${NCH}단계`}</span>
-   <span class="hint" style="margin:6px 0 0">세렌 마을에서 출발해 북쪽 루멘 성역까지 오릅니다. 진홍 실선은 이미 지나온 길입니다.</span></div></div>`;
+   <span class="hint" style="margin:6px 0 0">세렌 마을에서 출발해 북쪽 루멘 성역을 지나, 루멘 성 꼭대기의 불타는 왕좌까지 오릅니다. 진홍 실선은 이미 지나온 길입니다.</span></div></div>`;
   const me=$('wmMe');
   if(eg)me.setAttribute('transform',`translate(${ex},${ey+24})`);
   else{const p=document.getElementById('wmL'+leg);if(p){const q=p.getPointAtLength(p.getTotalLength()*fr);me.setAttribute('transform',`translate(${q.x},${q.y})`)}}
@@ -8705,7 +8809,7 @@ addEventListener('resize',sizeMini);sizeMini();
 let slotArm={i:-1,t:0};
 const nickSafe=n=>String(n).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,16),fmtPlay=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h}시간 ${m}분`:`${m}분`};
 function fmtTime(t){if(!t)return '';const d=new Date(t),p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`}
-function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 불타는 왕좌':'최종 보스 처치 완료'):s.ch>=5?`끝없는 심연 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
+function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 불타는 왕좌':'최종 보스 처치 완료'):s.ch>=NCH?`끝없는 심연 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
 function showSlots(){
   if(curSlot!==null&&S.cls)save();/* v265: 플레이 시간이 최신으로 보이도록 */
   const canClose=curSlot!==null&&!!S.cls;
@@ -8814,7 +8918,7 @@ function steer(e,ux,uz,dd,dt){if(!colliders.length)return {x:ux,z:uz};const ex=e
   const px=-uz*e.avS,pz=ux*e.avS,cx=best.c.x-ex,cz=best.c.z-ez,cd=Math.hypot(cx,cz)||1;
   if(cd<best.R+.6){let tx=-cz/cd,tz=cx/cd;if(tx*px+tz*pz<0){tx=-tx;tz=-tz}return {x:tx,z:tz}}/* 장애물에 붙었으면 표면을 따라 미끄러짐 */
   const w=Math.min(1.6,1.6*(1-(best.t-best.R)/L)+.3),x=ux+px*w,z=uz+pz*w,l=Math.hypot(x,z)||1;return {x:x/l,z:z/l}}
-function pushOut(p,r){
+function pushOut(p,r){if(STC&&p===P.pos)return;
   for(const c of colliders){const dx=p.x-c.x,dz=p.z-c.z,d=Math.hypot(dx,dz),m=r+c.r;if(d<m&&d>1e-4){p.x=c.x+dx/d*m;p.z=c.z+dz/d*m}}
   mapClamp(p,r);
   if(mapKind==='arena'&&thOn){/* v611: 불타는 왕좌는 네모난 단상 — 계단을 오르는 동안은 계단 폭 안에서만 */const T=THR;if(ASHC.on&&p===P.pos){}else if(knAppr&&p===P.pos){p.x=clamp(p.x,-4.3,4.3);p.z=clamp(p.z,0,T.hz+22)}else{p.x=clamp(p.x,-T.px+r*.5,T.px-r*.5);p.z=clamp(p.z,T.pzn+r*.5,(thGate===2&&p===P.pos?T.gz-.3:T.pzs)-r*.5)}}
@@ -8850,7 +8954,7 @@ const EGM=()=>S.ch>=NCH&&mapKind!=='story'?3:1;
 /* v235: 엔드게임 몬스터 생성량 설정 50~120% (기기별 localStorage egRate) — 생성 간격과 동시 최대 수에 함께 적용 */
 let EG_RATE=100;try{const v=+localStorage.getItem('egRate');if(v)EG_RATE=Math.max(50,Math.min(120,v))}catch(e){}
 const egR=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?EG_RATE/100:1;/* v108: 엔드게임 몬스터 수·젠 속도 ×3 */
-function update(dt){packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
+function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
   let mx=input.x,mz=input.z;
@@ -8898,7 +9002,7 @@ function update(dt){packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&S.ch
   else{let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,dt*18)}
   const piv=hero.userData.piv;
   if(hero.userData.blade){const on=P.spin>0||P.swing>0,bm=hero.userData.blade.material;bm.emissive.setHex(on?(P.spin>0&&P.spinFire?0xff6a20:0x6a8ad0):(hero.userData.bladeBase||0x221a10))}
-  heroAnim(dt,ml>.05&&!P.mv&&!P.cast);
+  heroAnim(dt,(ml>.05||!!STC)&&!P.mv&&!P.cast);
   P.slam=(P.slam||0)-dt;
   if(bc(S.cls)==='warrior'){const u=hero.userData;
     if(P.slam>0){/* v131 대지 분쇄: (시전 없이 쓰면 먼저 들어 올림) → 수직 내려꽂기 → 잠깐 버팀 → 복귀 */
