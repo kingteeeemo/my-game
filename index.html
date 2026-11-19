@@ -6235,7 +6235,7 @@ function hurt(e,amt,quiet,so){
   if(NSX.bossd&&(e.boss||e.duel||e.final))amt*=1+NSX.bossd;/* v603: 보스 피해 증가 *//* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
-  const crit=Math.random()<critCh()+(so?so.crit:0);/* v723: 숫자를 숨기는 타격(quiet)도 치명타 판정 — 숫자 표시와 치명타를 분리 */
+  const crit=Math.random()<critCh()+(so?so.crit:0);/* v724: 숫자를 숨기는 타격(quiet)도 치명타 판정 — 숫자 표시와 치명타를 분리 */
   let v=Math.max(1,Math.round(amt*(crit?(NS()?nsCritMul():1.8):1)*(critNew()?critComp(S.lv):1)*rand(.9,1.1)));/* v445 시험: 레벨 보정은 치명타 판정을 받는 타격에만(치명타 없는 지속·장판 피해는 원래도 손실이 없으므로 제외) */
   let itl=0;if(e.perch&&!e.p2&&e.hp-v<=e.mhp*ASH.p1){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p1));itl=1}/* v606: 90%에서 멈추고 사이페 → v629 93.3% */
   else if(e.perch&&e.p2&&!e.p3&&e.hp-v<=e.mhp*ASH.p1b){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p1b));itl=3}/* v629: 86.7% 사이페 B */
@@ -7531,7 +7531,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v723';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v724';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
