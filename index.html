@@ -1641,6 +1641,8 @@ const nLin=(a,b,d)=>[0,1,2,3,4,5].map(i=>[a-d*i,b-d*i]);
 /* v603 시즌 2 장비 개편 (claude/season2-crafting-endgame.md) — 9부위 · 줄마다 티어 · 강화는 기본옵에만(+20) · 접두어·접미어는 고정 수치 */
 /* 티어별 범위: 1티어 범위, 티어마다 1티어 값의 10%씩 감소 (6티어 = 50%) */
 const nPct=(a,b)=>[0,1,2,3,4,5].map(i=>[a*(1-.1*i),b*(1-.1*i)]);
+/* v704: 생명력·마나 계열(최대 생명력·최대 마나·최대 생명력 %·반지·허리띠 기본옵)은 하위 티어를 더 가파르게 — 1티어 그대로, 2~6티어 75·52·34·21·12% */
+const NHM=[1,.75,.52,.34,.21,.12],nPctH=(a,b)=>NHM.map(m=>[a*m,b*m]);
 /* 옵션 정의: n 이름 · r 티어 범위 · u 단위 · dp 소수 자리 */
 const NSO={
   wd:{n:'피해',r:nPct(280,300),u:'',dp:0},
@@ -1654,9 +1656,9 @@ const NSO={
   pdmg:{n:'투사체 피해',r:nPct(40,44),u:'%',dp:1},
   sdmg:{n:'주문 피해',r:nPct(40,44),u:'%',dp:1},
   cdr:{n:'쿨타임 감소',r:nPct(280,300),u:'',dp:0},
-  hp:{n:'최대 생명력',r:nPct(900,960),u:'',dp:0},
-  mp:{n:'최대 마나',r:nPct(500,540),u:'',dp:0},
-  hpp:{n:'최대 생명력',r:nPct(25,28),u:'%',dp:1},
+  hp:{n:'최대 생명력',r:nPctH(900,960),u:'',dp:0},
+  mp:{n:'최대 마나',r:nPctH(500,540),u:'',dp:0},
+  hpp:{n:'최대 생명력',r:nPctH(25,28),u:'%',dp:1},
   defp:{n:'방어력 증가',r:nPct(40,44),u:'%',dp:1},
   evap:{n:'회피력 증가',r:nPct(40,44),u:'%',dp:1},
   esp:{n:'에너지 쉴드 증가',r:nPct(40,44),u:'%',dp:1},
@@ -1675,7 +1677,7 @@ const NSO={
   res:{n:'마나 점유 효율',r:nPct(11.8,13.0),u:'%',dp:1}};
 /* 기본옵 (아이템 티어 고정 · 강화 적용): k가 null이면 방어구 베이스(방어/회피/에쉴) */
 const NSB={weapon:{k:'wd',r:nPct(280,300)},helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:null,r:nPct(400,430)},boots:{k:null,r:nPct(400,430)},
-  amulet:{k:'inc',r:nPct(30,33)},ring:{k:'hp',r:nPct(600,640)},belt:{k:'mp',r:nPct(600,640)}};
+  amulet:{k:'inc',r:nPct(30,33)},ring:{k:'hp',r:nPctH(600,640)},belt:{k:'mp',r:nPctH(600,640)}};
 const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,gloves:NSB.gloves.r,boots:NSB.boots.r};
 /* 부위별 후보: o 접두어 · x 접미어 (기본옵 제외) */
 const NSLOT={weapon:{o:['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','mp'],x:['bcrit','amp','killH','killM','bossd']},
@@ -7240,7 +7242,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v703';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v704';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
