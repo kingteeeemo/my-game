@@ -1407,7 +1407,7 @@ const GEMS={
   burn:{n:'화염 지대',t:'area',c:'#ff9a3a',d:L=>`회전하는 동안 지나간 자리에 불바닥 ${(2.5+.15*L).toFixed(1)}초 (초당 ${Math.round((.6+.12*L)*100)}%)`},
   knock:{n:'충격파',t:'area',c:'#a0d8a0',d:L=>`적을 밀쳐냄`},
   swift:{n:'질풍 회전',t:'whirl',c:'#a0d8a0',d:L=>`회전 중 이동 속도 ${50+5*L}%\n회전 범위의 ${100+5*L}% 안의 적을 초당 ${(3+.7*L).toFixed(1)}m 끌어당김\n(고유 몬스터 제외)`},
-  haste:{get n(){return typeof S!=='undefined'&&S&&S.main==='wave'?'칠매검':'가속'}/* v664: 매화참에서는 「칠매검」 */,t:'any',c:'#f2f2f2',d:L=>`쿨타임 -${Math.round(hasteP()*100*L)}%\n스킬 시전시간 감소`},
+  haste:{get n(){return typeof S!=='undefined'&&S&&S.main==='wave'?'칠매검':'가속'}/* v664: 매화참에서는 「칠매검」 */,t:'any',c:'#f2f2f2',d:L=>`쿨타임 -${Math.round(hasteP()*100*L)}%\n시전 시간 -${Math.round(hasteP()*100*L)}%`},
   orbsize:{n:'거대 보주',t:'orb',c:'#bfe8ff',d:L=>{const g=gOrb(L);return `보주 크기·적중 범위 +${26*L}%`}},
   barrage:{n:'파편 난사',t:'orb',c:'#9fe8ff',d:L=>{const b=barr(L);return `파편 ${b.cnt}갈래 · 발사 빈도 +${Math.round((b.rate-1)*100)}%\n파편 크기 +${Math.round((b.sz-1)*100)}% · 속도 +${Math.round((b.sp-1)*100)}%`}},
   qlen:{n:'균열 확장',t:'quake',c:'#d8a060',d:L=>`가시 사거리 ${qLen(L).toFixed(1)}m\n피해 +${6*L}%`},
@@ -1425,7 +1425,7 @@ const GEMS={
 /* v40 1차 강화 보조 수치 */
 const VOL_N=[0,1,1,2,2,3,3,4,4,5,6];/* 다발 사격 추가 화살: 1·3·5·7·9·10단계에 1발씩 (2발 → 8발) */
 const volN=L=>VOL_N[L]||0,volD=L=>1/(1+.1*volN(L));/* v138: 화살이 늘수록 한 발 피해 감소 — 한 발 피해 = 1 ÷ (1 + 0.1 × 추가 화살 수) (전에는 2단계마다 +12%) */
-const hasteP=()=>.05;/* v272: 회전 베기도 다른 스킬과 같이 10단계 -50% */const WIV=.18;/* v272: 회전 베기 타격 간격 .2 → .18 (지속시간 -10%) *//* v105: 10단계 -50% (회전 베기는 지속형이라 단계당 -4%, 10단계 -40% 유지) */
+const hasteP=()=>.03;/* v708: 가속 10단계 = 쿨타임·시전 시간 −30% (기존 −50%·시전 −75%) — 나머지는 장비로 *//* v272: 회전 베기도 다른 스킬과 같이 10단계 -50% */const WIV=.18;/* v272: 회전 베기 타격 간격 .2 → .18 (지속시간 -10%) *//* v105: 10단계 -50% (회전 베기는 지속형이라 단계당 -4%, 10단계 -40% 유지) */
 /* 파편 난사 (v40): 폭발 통합. 갈래 수·빈도·크기·속도 + 끝에서 파편과 폭발 */
 const barr=L=>({cnt:1+Math.floor((L+1)/4),rate:1+.012*L,sz:1+.06*L,sp:1+.04*L,dm:1-.025*L,burst:10+.5*L}/* v299: 발사 빈도 +12%→+1.2%/단계(-90%), 끝 파편 10단계 30→15개 */);
 /* v44: 끝 폭발은 거대 보주로 이동 (파편 난사에 능력이 몰려 있던 것 분산) */
@@ -6848,7 +6848,7 @@ function castSkill(slot){if(knAppr)return;/* v590: 다리를 건너는 동안 �
 const CAST_K=.25,CAST_MAX=.6;
 /* v124: 가속 0단계는 기존 시전시간 그대로, 10단계는 (가속 10단계를 찍은 기존 수치)의 절반 — 사이는 선형. 장비 쿨감·강화 보정(st.cd에서 가속분만 뺀 값)은 그대로 반영 */
 const CT_MIN=.15;/* v307: 시전 최소 0.15초 — 쿨타임이 아주 짧아져도(110 스펙 0.28초) 쓰는 순간 잠깐 멈춤. 단 쿨타임의 60%를 넘지 않음(연속 시전 DPS 유지) */
-function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(.05,1-hp*L),old10=1-hp*GMAX,f=1-(L/GMAX)*(1-.5*old10);const ct=Math.min(CAST_MAX,CAST_K*base*f);return Math.max(ct,Math.min(CT_MIN,st.cd*.6))}
+function castTime(id,st){const L=gl(id,'haste'),hp=hasteP(),base=st.cd/Math.max(.05,1-hp*L),f=1-hp*L;const ct=Math.min(CAST_MAX,CAST_K*base*f);return Math.max(ct,Math.min(CT_MIN,st.cd*.6))}
 function castFire(slot,id){
   const b=SK[id],st=skillStats(id),base=baseDmg();P.skSwing=true;
   if(b.kind==='proj'){
@@ -7246,7 +7246,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v707';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v708';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
