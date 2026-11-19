@@ -2036,7 +2036,7 @@ function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if
 try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0))&&parseSave(old))localStorage.setItem(slotKey(0),old);localStorage.removeItem(KEY)}catch(e){}
 
 /* v662: 무사 — 전사에서 분리한 새 직업(매화 검객 모델·매화참). base:'warrior' = 기본 공격·장비·동작은 전사 것을 그대로 씀(bc()). 아직 테스트 캐릭터 전용 */
-CLS.musa={base:'warrior',testOnly:1,n:'무사',en:'Blade',d:'매화 가면을 쓴 검객. 대검을 크게 휘둘러 붉은 검기를 날리는 매화참으로 길 위의 적을 모두 벱니다.',opts:['wave'],get skills(){return [mainOf(this)]},basic:'melee',bn:'베기',mpm:.8,hp:1.3,dmg:1,spd:6.2,body:0x7a1420,hood:0x1a1618,c:'#e61833'};
+CLS.musa={base:'warrior',/* v722: 일반 모드 공개 */n:'무사',en:'Blade',d:'매화 가면을 쓴 검객. 대검을 크게 휘둘러 붉은 검기를 날리는 매화참으로 길 위의 적을 모두 벱니다.',opts:['wave'],get skills(){return [mainOf(this)]},basic:'melee',bn:'베기',mpm:.8,hp:1.3,dmg:1,spd:6.2,body:0x7a1420,hood:0x1a1618,c:'#e61833'};
 function bc(c){return (CLS[c]&&CLS[c].base)||c}
 const C=()=>CLS[S.cls]||CLS.warrior;
 function mainOf(c){const m=typeof S!=='undefined'&&S&&S.main;return m&&c.opts.includes(m)?m:c.opts[0]}/* v82: 시작할 때 고른 주력 스킬 */
@@ -6723,7 +6723,7 @@ const SK_NEW={
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bacc','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살이 적을 꿰뚫고 멀리 날아가며, 지나가는 길마다 충격파를 연달아 터뜨립니다.'},
   pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
-for(const [c,k] of [['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
+CLS.archer.opts.push('boom');/* v722: 폭발 사격 일반 모드 공개 (이전엔 테스트 전용) */
 Object.assign(GEMS,{
   wlen:{n:'매화섬',t:'wave',c:'#ffc080',/* v664: 참격 연장 → 매화섬 */d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
   wecho:{n:'낙화검',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${Math.round(((1+.04*L)*(1+e.n*e.m)-1)*100)}%\n검기가 지나간 자리·벤 적에게 매화 꽃잎이 흩날림${L?` (${Math.round(L/GMAX*100)}%)`:''}${L<10?'\n5단계·10단계에 피해가 크게 오름':''}`}},/* v664: 예리한 참격 → 낙화검 — 꽃잎 효과가 여기 붙음(단계마다 늘어 10단계 = 이전 양) *//* v648: 연속 참격 → 예리한 참격 */
@@ -7531,7 +7531,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v721';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v722';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
