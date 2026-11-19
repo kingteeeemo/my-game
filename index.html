@@ -731,7 +731,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 @media (orientation:landscape) and (max-height:520px){.sbanner.duel{margin-top:-5vh}}/* v571: 모바일 가로는 5% 낮춤(-10vh→-5vh) */
 @media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:calc(17vh/var(--hz,1.7) - 98px)}}/* v572: PC는 HUD zoom(--hz) 때문에 px·vh 값이 zoom배로 커져 보임 → 문구 중심이 화면 높이의 17%에 오도록 zoom으로 나눠 맞춤 */
 /* v70 월드맵 */
-#wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
+#wmapSheet{max-width:560px}.amwrap{display:flex;justify-content:center;border-radius:12px;background:#0f1014;border:1px solid var(--line);overflow:hidden}#amC{display:block}.amleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}.amleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-sizing:border-box}.wmwrap{display:flex;flex-direction:column;gap:10px}
 .wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0e0d0c;border:1px solid #3a352e}
 .wminfo{display:flex;flex-direction:column;gap:6px}.wminfo b.cur{font-size:17px;color:#efe1c8}.wminfo .wmbar{height:6px;border-radius:4px;background:#2a2a33;overflow:hidden}.wminfo .wmbar i{display:block;height:100%;background:linear-gradient(90deg,#8a2228,#c23a3f)}
 @keyframes wmflow{to{stroke-dashoffset:-20}}.wm .fut{animation:wmflow 1.2s linear infinite}
@@ -2622,6 +2622,9 @@ function chzBuildX(Z){CHZS.pools=[];CHZS.beacons=[];CHZS.fw=[];CHZS.lh=[];CHZS.t
     const bub=[];for(let i=0;i<4;i++){const b=mesh(new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color:sd?0xb89a68:0x9aff6a,transparent:true,opacity:.8}),rand(-.6,.6)*r,.05,rand(-.6,.6)*r);g.add(b);bub.push({m:b,ph:rand(0,1)})}
     scene.add(g);propMeshes.push(g);CHZS.pools.push({x:w.x,z:w.z,r,bub,kind:Z.pkind||'poison'})}
   for(const v of Z.ev){if(v.k==='bridge'){/* 독 늪 위 나무다리 — 판자·말뚝·밧줄, 양옆은 독물 */const za=v.z0-1,zb=v.z1+1;
+    /* v711: 다리 위(폭 ±4.2)에 놓인 나무·바위·벽·장식은 모두 치움 */
+    for(let i=propMeshes.length-1;i>=0;i--){const m=propMeshes[i],l=W2L(m.position.x,m.position.z);if(l.z<zb-1.5||l.z>za+1.5||Math.abs(l.x-pathC(l.z))>4.2)continue;scene.remove(m);propMeshes.splice(i,1)}
+    for(let i=colliders.length-1;i>=0;i--){const c=colliders[i],l=W2L(c.x,c.z);if(l.z>=zb-1.5&&l.z<=za+1.5&&Math.abs(l.x-pathC(l.z))<=4.2)colliders.splice(i,1)}
     const wc=LW(pathC((v.z0+v.z1)/2),(v.z0+v.z1)/2),wt=new THREE.Mesh(new THREE.PlaneGeometry(MP.lake[2]*2+6,v.z0-v.z1+8),new THREE.MeshBasicMaterial({color:0x24401a,transparent:true,opacity:.92}));wt.rotation.set(-Math.PI/2,0,SROT);wt.position.set(wc.x,-.14,wc.z);scene.add(wt);propMeshes.push(wt);
     const wg=new THREE.Mesh(new THREE.PlaneGeometry(MP.lake[2]*2+6,v.z0-v.z1+8),new THREE.MeshBasicMaterial({map:refLavaTex,color:0x4aff3a,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false}));wg.rotation.copy(wt.rotation);wg.position.set(wc.x,-.12,wc.z);scene.add(wg);propMeshes.push(wg);CHZS.lakeT=wg.material.map;
     const plank=SM({color:0x5a4430,roughness:1}),dark=SM({color:0x3a2c20,roughness:1});
@@ -7260,7 +7263,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v710';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v711';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8654,10 +8657,12 @@ $('rOk').onclick=()=>{try{localStorage.removeItem(KEY)}catch(err){}closeRestart(
 /* ================= minimap ================= */
 const mini=$('mini'),mctx=mini.getContext('2d');let miniT=0;
 function sizeMini(){const d=Math.min(window.devicePixelRatio||1,2)*(dmZ||1),w=mini.clientWidth||108;mini.width=Math.round(w*d);mini.height=Math.round(w*d)}
-function drawMini(){
+function drawMini(){drawMiniTo(mctx,mini.width,mini.width,P.pos.x,P.pos.z,40,mini.width/80,0,false)}
+/* v711: 미니맵·전체 지도 공용 그리기 — k: 1m당 픽셀, rot: 캔버스 회전(스토리 전체 지도는 길이 세로로 서게), full: 전체 지도 모드 */
+function drawMiniTo(mctx,W,H,cx,cz,V,k,rot,full){
   /* v41: 내 위치 중심 (반경 40m). 스토리 맵은 골짜기 길과 끝 제단을 표시 */
-  const W=mini.width,V=40,k=W/(2*V),cx=P.pos.x,cz=P.pos.z,mx=v=>(v-cx+V)*k,mz=v=>(v-cz+V)*k;
-  mctx.clearRect(0,0,W,W);mctx.fillStyle='rgba(255,255,255,.05)';
+  const Wd=full?150:W,mx=v=>W/2+(v-cx)*k,mz=v=>H/2+(v-cz)*k;
+  mctx.clearRect(0,0,W,H);mctx.save();if(rot){mctx.translate(W/2,H/2);mctx.rotate(rot);mctx.translate(-W/2,-H/2)}mctx.fillStyle='rgba(255,255,255,.05)';
   if(mapKind==='story'){mctx.beginPath();const pl=W2L(cx,cz),z0=Math.min(STORY_L,pl.z+V*1.5),z1=Math.max(-STORY_L,pl.z-V*1.5),pt=(x,z)=>{const w=L2W(x,z);mctx.lineTo(mx(w.x),mz(w.z))};for(let z=z0;z>=z1;z-=2)pt(pathC(z)-pathW(z),z);for(let z=z1;z<=z0;z+=2)pt(pathC(z)+pathW(z),z);mctx.closePath();mctx.fill();
     const e=endPt(),s_=startPt();for(const [q,r] of [[e,ARENA_END.r],[s_,START_R]]){mctx.beginPath();mctx.arc(mx(q.x),mz(q.z),r*k,0,7);mctx.fill()}
     if(MP.pk){mctx.strokeStyle=mctx.fillStyle;mctx.lineCap='round';for(const q of MP.pk){const c=L2W(q.x,q.z),a=L2W(q.ax,q.az);mctx.beginPath();mctx.arc(mx(c.x),mz(c.z),q.r*k,0,7);mctx.fill();mctx.lineWidth=4.8*k;mctx.beginPath();mctx.moveTo(mx(a.x),mz(a.z));mctx.lineTo(mx(c.x),mz(c.z));mctx.stroke()}mctx.lineWidth=1}}
@@ -8666,19 +8671,34 @@ function drawMini(){
   else if(mapKind==='town'&&inTown&&TLY){const L=TLY;for(const [x,z,r] of L.c){mctx.beginPath();mctx.arc(mx(x),mz(z),r*k,0,7);mctx.fill()}mctx.strokeStyle=mctx.fillStyle;mctx.lineCap='round';for(const [ax,az,bx,bz,r] of L.k){mctx.lineWidth=2*r*k;mctx.beginPath();mctx.moveTo(mx(ax),mz(az));mctx.lineTo(mx(bx),mz(bz));mctx.stroke()}mctx.lineWidth=2*L.hr*k;mctx.beginPath();L.hp.forEach(([x,z],i)=>i?mctx.lineTo(mx(x),mz(z)):mctx.moveTo(mx(x),mz(z)));mctx.stroke();mctx.beginPath();mctx.arc(mx(L.t.x),mz(L.t.z),L.t.r*k,0,7);mctx.fill();mctx.lineWidth=1}
   else{mctx.beginPath();mctx.arc(mx(0),mz(0),(mapKind==='town'?TOWN_R:knOn?KNA.R*KNA.s:ARENA_R)*k,0,7);mctx.fill()}/* v593: 무너진 성채는 경기장 바닥 전체(다리와 맞닿는 가장자리까지) */
   mctx.fillStyle='rgba(150,145,160,.45)';for(const c of colliders){if(Math.abs(c.x-cx)>V+3||Math.abs(c.z-cz)>V+3)continue;mctx.beginPath();mctx.arc(mx(c.x),mz(c.z),Math.max(1,c.r*k),0,7);mctx.fill()}
-  if(thOn){/* v603: 불타는 왕좌 — 올라오는 큰 계단 */mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-5),mz(THR.hz-.6),10*k,22.6*k);mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,W/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*5),mz(THR.hz-.25));mctx.lineTo(mx(sx*5),mz(THR.hz+22))}mctx.stroke()}
-  if(mwOn){/* v597: 수몰굴 — 내려오는 돌계단 */const K=MWS;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(ARENA_R-.6),K.w*k,(K.z1-ARENA_R+.6)*k);mctx.fillRect(mx(-K.cw+1.4),mz(K.z1),(K.cw-1.4)*2*k,5.6*k);mctx.strokeStyle='rgba(140,200,220,.4)';mctx.lineWidth=Math.max(1,W/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*K.w/2),mz(ARENA_R-.25));mctx.lineTo(mx(sx*K.w/2),mz(K.z1))}mctx.stroke()}
+  if(thOn){/* v603: 불타는 왕좌 — 올라오는 큰 계단 */mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-5),mz(THR.hz-.6),10*k,22.6*k);mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,Wd/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*5),mz(THR.hz-.25));mctx.lineTo(mx(sx*5),mz(THR.hz+22))}mctx.stroke()}
+  if(mwOn){/* v597: 수몰굴 — 내려오는 돌계단 */const K=MWS;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(ARENA_R-.6),K.w*k,(K.z1-ARENA_R+.6)*k);mctx.fillRect(mx(-K.cw+1.4),mz(K.z1),(K.cw-1.4)*2*k,5.6*k);mctx.strokeStyle='rgba(140,200,220,.4)';mctx.lineWidth=Math.max(1,Wd/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*K.w/2),mz(ARENA_R-.25));mctx.lineTo(mx(sx*K.w/2),mz(K.z1))}mctx.stroke()}
   if(knOn){/* v592: 무너진 성채 — 다리·문 앞 발판·통로 */const K=KNB;mctx.fillStyle='rgba(255,255,255,.07)';mctx.fillRect(mx(-K.w/2),mz(K.z0-.6),K.w*k,(K.z1-K.z0-3)*k);mctx.fillRect(mx(-5),mz(K.z1-3.6),10*k,3.6*k);mctx.fillRect(mx(-K.gw),mz(K.z1-.9),K.gw*2*k,1.8*k);mctx.fillRect(mx(-K.tw),mz(K.z1+.9),K.tw*2*k,4.6*k);
-    mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,W/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*K.w/2),mz(K.z0-.25));mctx.lineTo(mx(sx*K.w/2),mz(K.z1-3.6))}mctx.stroke()}
-  if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,W/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
-  const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){if(!npcOn(n))continue;mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,W/40),0,7);mctx.fill()}
-  if(mapKind==='story'){const ax=clamp(mx(ALTAR.x),4,W-4),az=clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,W/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
-  for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';mctx.fillRect(mx(p.m.position.x)-k*.5,mz(p.m.position.z)-k*.5,k,k)}
-  for(const e of enemies){if(Math.abs(e.pos.x-cx)>V||Math.abs(e.pos.z-cz)>V)continue;const r=[1.1,1.5,2,3.2][e.rank]*k*(W/108)*1.1;mctx.fillStyle=RANK[e.rank].c;mctx.globalAlpha=e.idle?.5:1;mctx.beginPath();mctx.arc(mx(e.pos.x),mz(e.pos.z),Math.max(1,r),0,7);mctx.fill()}mctx.globalAlpha=1;
-  const px=W/2,pz=W/2,f=P.face,sz=W/22;
+    mctx.strokeStyle='rgba(200,170,140,.45)';mctx.lineWidth=Math.max(1,Wd/140);mctx.beginPath();for(const sx of [-1,1]){mctx.moveTo(mx(sx*K.w/2),mz(K.z0-.25));mctx.lineTo(mx(sx*K.w/2),mz(K.z1-3.6))}mctx.stroke()}
+  if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,Wd/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
+  const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){if(!npcOn(n))continue;mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,Wd/40),0,7);mctx.fill()}
+  if(mapKind==='story'){const ax=full?mx(ALTAR.x):clamp(mx(ALTAR.x),4,W-4),az=full?mz(ALTAR.z):clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,Wd/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
+  for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';{const q=full?Math.max(k,3):k;mctx.fillRect(mx(p.m.position.x)-q/2,mz(p.m.position.z)-q/2,q,q)}}
+  for(const e of enemies){if(Math.abs(e.pos.x-cx)>V||Math.abs(e.pos.z-cz)>V)continue;const r=[1.1,1.5,2,3.2][e.rank]*k*(full?1.6:W/108)*1.1;mctx.fillStyle=RANK[e.rank].c;mctx.globalAlpha=e.idle?.5:1;mctx.beginPath();mctx.arc(mx(e.pos.x),mz(e.pos.z),Math.max(1,r),0,7);mctx.fill()}mctx.globalAlpha=1;
+  if(full&&mapKind==='story'&&CHZS){/* 전체 지도: 모닥불(주황)·사건 지점(진홍) */const dot=(x,z,c,r)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc(mx(x),mz(z),r,0,7);mctx.fill()};if(CHZS.camp)dot(CHZS.camp.x,CHZS.camp.z,'#ff9a3a',5);const sp=startPt();dot(sp.x,sp.z,'rgba(232,220,196,.8)',4)}
+  const px=mx(P.pos.x),pz=mz(P.pos.z),f=P.face,sz=full?11:Wd/22;
   mctx.fillStyle='#ffb070';mctx.strokeStyle='#1a1008';mctx.lineWidth=1;mctx.beginPath();
-  mctx.moveTo(px+Math.sin(f)*sz,pz+Math.cos(f)*sz);mctx.lineTo(px+Math.sin(f+2.5)*sz*.65,pz+Math.cos(f+2.5)*sz*.65);mctx.lineTo(px+Math.sin(f-2.5)*sz*.65,pz+Math.cos(f-2.5)*sz*.65);mctx.closePath();mctx.fill();mctx.stroke();
+  mctx.moveTo(px+Math.sin(f)*sz,pz+Math.cos(f)*sz);mctx.lineTo(px+Math.sin(f+2.5)*sz*.65,pz+Math.cos(f+2.5)*sz*.65);mctx.lineTo(px+Math.sin(f-2.5)*sz*.65,pz+Math.cos(f-2.5)*sz*.65);mctx.closePath();mctx.fill();mctx.stroke();mctx.restore();
 }
+/* v711: 미니맵을 누르면 지금 있는 곳의 전체 지도 */
+function openAreaMap(){if(paused()&&!mapOpen)return;closeAllSheets();mapOpen=true;$('wmap').hidden=false;releaseAll();
+  const nm=inTown?TOWN.n:mapKind==='story'?`${S.ch+1}장 · ${CH[S.ch].n}`:mapTitle();
+  $('wmapSheet').innerHTML=`<div class="shead"><div><div class="chap">Area Map</div><h2>${nm}</h2></div><button class="close" id="wmClose">닫기</button></div>
+    <div class="amwrap"><canvas id="amC"></canvas></div>
+    <div class="amleg"><span><i style="background:#ffb070"></i>나</span>${mapKind==='story'?'<span><i style="border:2px solid #b080ff;background:none"></i>보스 제단</span><span><i style="background:#ff9a3a"></i>모닥불</span><span><i style="background:rgba(232,220,196,.8)"></i>출발</span>':''}${inTown?'<span><i style="background:#ffd24a"></i>마을 사람</span>':''}<span><i style="background:#c0392b"></i>적</span></div>
+    <button class="ghost" id="amWorld" style="width:100%">루멘하르 지도 보기</button>`;
+  const cv=$('amC'),box=cv.parentElement.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),W=Math.max(200,box.width),H=Math.max(240,Math.min(window.innerHeight*.62,box.width*1.5));
+  cv.style.width=W+'px';cv.style.height=H+'px';cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);const ctx=cv.getContext('2d'),w=cv.width,h=cv.height;
+  if(mapKind==='story'){let X=8;for(let z=-STORY_L;z<=STORY_L;z+=4)X=Math.max(X,Math.abs(pathC(z))+pathW(z)+3);if(MP.pk)for(const q of MP.pk)X=Math.max(X,Math.abs(q.x)+q.r+3);
+    const Z=STORY_L+10,k=Math.min(w/(2*X),h/(2*Z)),c=L2W(0,0),R=Math.atan2(SRS,SRC);drawMiniTo(ctx,w,h,c.x,c.z,STORY_L+40,k,R,true)}
+  else{let R=mapKind==='field'?B+2:inTown?TOWN_R+4:knOn?Math.max(KNA.R*KNA.s,Math.abs(KNB.z0))+4:thOn?THR.hz+24:mwOn?MWS.z1+8:ARENA_R+4;drawMiniTo(ctx,w,h,0,0,R+10,Math.min(w,h)/(2*R),0,true)}}
+$('wmap').addEventListener('click',e=>{if(e.target.id==='amWorld'){renderMap();guide('map')}});
+for(const id of ['mini','mBd'])$(id).addEventListener('click',e=>{e.stopPropagation();openAreaMap()});
 addEventListener('resize',sizeMini);sizeMini();
 
 /* ================= save slots ================= */
