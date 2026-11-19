@@ -564,8 +564,21 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
 .title h1{margin:0;font:900 clamp(40px,11vw,84px)/1.05 var(--ko);letter-spacing:.04em;color:#f4e6d2;text-shadow:0 0 28px rgba(255,110,40,.55),0 2px 0 #3a1608}
 .title .sub{font-family:var(--en);font-stretch:87%;font-weight:800;font-size:clamp(12px,3vw,16px);letter-spacing:.42em;color:var(--ember);text-transform:uppercase;margin-top:10px}
 .title .go{min-width:min(280px,70vw);font-size:18px;padding:16px 28px;box-shadow:0 0 30px rgba(255,110,40,.4)}
+/* v709: 시작 화면 — 빛의 문장(제목 뒤에서 천천히 도는 금빛 태양 문장, 한쪽에 불길이 갈라진 금), 재가 내리고 불티가 오름 */
+.title{background:radial-gradient(ellipse at 50% 40%,#2a140c 0,#0d0809 55%,#060507 100%)}
+.title .tglow{position:absolute;left:50%;top:36%;width:min(70vw,64vh);aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,120,40,.35),transparent 65%);pointer-events:none}
+.title .tsig{position:absolute;left:50%;top:36%;width:min(96vw,420px,62vh);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
+.title .tsig svg{width:100%;height:100%;animation:tspin 120s linear infinite}@keyframes tspin{to{transform:rotate(360deg)}}
+.title .thead{position:absolute;top:36%;left:0;right:0;transform:translateY(-50%)}
+.title .tfoot{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 9vh);left:0;right:0;display:flex;flex-direction:column;gap:12px;align-items:center}
+.title .tline{width:min(300px,76vw);height:1px;background:linear-gradient(90deg,transparent,rgba(216,180,106,.6),transparent)}
+.title .go{background:linear-gradient(#ffa050,#ff7a2a);border:1px solid #ffd09a;position:relative;margin:0}
+.title .go:before,.title .go:after{content:"◆";position:absolute;top:50%;transform:translateY(-50%);font-size:9px;color:#d8b46a}.title .go:before{left:-22px}.title .go:after{right:-22px}
+.title .tash{position:absolute;inset:0;pointer-events:none;overflow:hidden}.title .tash b{position:absolute;top:-6px;width:2px;height:2px;background:#bbb;border-radius:50%;opacity:.4;animation:tfall linear infinite}
+@keyframes tfall{to{transform:translate(30px,105vh)}}
+@media (orientation:landscape) and (max-height:560px){.title .tsig,.title .tglow,.title .thead{top:40%}.title .tsig{width:min(420px,70vh)}.title .tfoot{bottom:4vh;gap:8px}.title .tline{display:none}}
 .title small{color:var(--muted);font-size:11px}
-@media (prefers-reduced-motion:reduce){.title .emb i{animation:none}}
+@media (prefers-reduced-motion:reduce){.title .emb i,.title .tash b,.title .tsig svg{animation:none}}
 .autob{position:absolute;pointer-events:auto;right:96px;bottom:196px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:800 11px var(--ko);padding:0}
 .autob.on{color:#0f2a12;background:#7fe07a;border-color:#7fe07a;box-shadow:0 0 10px rgba(127,224,122,.5)}
 .autopop{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(250px + env(safe-area-inset-bottom,0px));z-index:9;width:min(300px,calc(100vw - 28px));display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:rgba(20,20,26,.96);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.6)}
@@ -719,8 +732,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 @media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:calc(17vh/var(--hz,1.7) - 98px)}}/* v572: PC는 HUD zoom(--hz) 때문에 px·vh 값이 zoom배로 커져 보임 → 문구 중심이 화면 높이의 17%에 오도록 zoom으로 나눠 맞춤 */
 /* v70 월드맵 */
 #wmapSheet{max-width:560px}.wmwrap{display:flex;flex-direction:column;gap:10px}
-.wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0f1014;border:1px solid var(--line)}
-.wminfo{display:flex;flex-direction:column;gap:6px}.wminfo b.cur{font-size:17px;color:#ffd24a}.wminfo .wmbar{height:6px;border-radius:4px;background:#2a2a33;overflow:hidden}.wminfo .wmbar i{display:block;height:100%;background:linear-gradient(90deg,#d9a44a,#ffd24a)}
+.wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0e0d0c;border:1px solid #3a352e}
+.wminfo{display:flex;flex-direction:column;gap:6px}.wminfo b.cur{font-size:17px;color:#efe1c8}.wminfo .wmbar{height:6px;border-radius:4px;background:#2a2a33;overflow:hidden}.wminfo .wmbar i{display:block;height:100%;background:linear-gradient(90deg,#8a2228,#c23a3f)}
 @keyframes wmflow{to{stroke-dashoffset:-20}}.wm .fut{animation:wmflow 1.2s linear infinite}
 @media (orientation:landscape) and (max-height:560px){#wmapSheet{max-width:820px}.wmwrap{flex-direction:row;align-items:stretch}.wm{flex:1;min-width:0;max-height:70vh}.wminfo{flex:0 0 34%}}
 .tjump{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px dashed #5ad1c8;border-radius:10px;background:#14202a;font-size:13px}.tjump span{color:#5ad1c8;font-weight:700;white-space:nowrap}.tjump select{flex:1;min-width:0;background:#0f1014;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit}
@@ -1134,7 +1147,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim" id="bossP" hidden><div class="sheet" id="bossSheet"></div></div>
 <div class="scrim" id="smith" hidden><div class="sheet" id="smithSheet"></div></div>
 <div class="scrim" id="heir" hidden><div class="sheet" id="heirSheet"></div></div>
-<div class="title" id="title"><div class="emb" id="emb" aria-hidden="true"></div><div><h1>루멘하르</h1><div class="sub">Lumenhar</div></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div>
+<div class="title" id="title"><div class="tglow" aria-hidden="true"></div><div class="tsig" aria-hidden="true"><svg id="tsig" viewBox="-100 -100 200 200"><g fill="none" stroke="#d8b46a"><circle r="92" stroke-width=".6" opacity=".5"/><circle r="86" stroke-width="1.6" opacity=".75" stroke-dasharray="120 6 40 8 200 5"/><circle r="62" stroke-width=".8" opacity=".55"/><path d="M0-98V-70M0 70V98M-98 0H-70M70 0H98M-69-69L-50-50M50 50L69 69M-69 69L-50 50M50-50L69-69" stroke-width="1.2" opacity=".7"/></g><path d="M-30 -80 l12 18 -6 14 14 20 -4 18" stroke="#ff7a2a" stroke-width="1.4" fill="none" opacity=".9"/></svg></div><div class="emb" id="emb" aria-hidden="true"></div><div class="tash" id="tash" aria-hidden="true"></div><div class="thead"><h1>루멘하르</h1><div class="sub">Lumenhar</div></div><div class="tfoot"><div class="tline"></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div></div>
 <div class="scrim center" id="slots" hidden><div class="sheet modal" id="slotSheet"></div></div>
 <div id="loadScr" hidden><div class="lw"><div class="lt">루멘하르</div><div class="len">Lumenhar</div><div class="lbar"><i id="loadBar"></i></div><div class="ltip" id="loadTip"></div></div></div>
 <div class="scrim center" id="nick" hidden style="z-index:60"><div class="sheet modal" id="nickSheet"></div></div>
@@ -7246,7 +7259,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v708';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v709';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8310,41 +8323,67 @@ $('bossSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.duel){closeBoss();duelEnter(b.dataset.duel,b.dataset.boss,!!b.dataset.dummy);return}});
 $('bossP').addEventListener('click',e=>{if(e.target.id==='bossP')closeBoss()});
 /* ================= 월드맵 (v70): 1~7장 루트 → 엔드게임 영역 ================= */
-const WM=[[132,548],[252,486],[132,414],[252,344],[132,274],[252,204],[132,134]],WM_EG=[236,56];
+const WM=[[150,512],[262,462],[118,398],[258,334],[136,270],[262,204],[176,132]],WM_EG=[318,58];/* v709: 대륙 지도 위 지역 위치(남쪽 세렌 마을 → 북쪽 루멘 성역), 엔드게임은 성역 너머 심연 */
 const wmLeg=i=>{const a=WM[i],b=i+1<WM.length?WM[i+1]:WM_EG,ym=(a[1]+b[1])/2;return `M${a[0]},${a[1]} C${a[0]},${ym} ${b[0]},${ym} ${b[0]},${b[1]}`};
 function wmPos(){if(S.ch>=NCH)return NCH;const t=S.phase===0?0:S.phase===1?.88*storyProg:S.phase===2?1:S.phase===3?.94:1;return S.ch+t}
+/* v709: 월드맵 — 재에 덮인 대륙 루멘하르 지도(해안선·지형 표식·지역 이름), 지나온 길은 진홍 실선, 남은 길은 점선 */
 function renderMap(){
-  const v=wmPos(),eg=S.ch>=NCH,leg=Math.min(NCH-1,Math.floor(v)),fr=eg?1:v-leg;
-  let g='',lines='',nodes='';
-  g+=`<defs><radialGradient id="wmEg"><stop offset="0" stop-color="#ff6a3a" stop-opacity=".55"/><stop offset="1" stop-color="#ff6a3a" stop-opacity="0"/></radialGradient></defs>`;
-  for(let i=0;i<NCH;i++){const c=CH[i].ground,col=`rgb(${Math.min(255,c[0]*2.2)|0},${Math.min(255,c[1]*2.2)|0},${Math.min(255,c[2]*2.2)|0})`;
-    g+=`<ellipse cx="${WM[i][0]}" cy="${WM[i][1]}" rx="62" ry="40" fill="${col}" opacity=".16"/>`}
-  g+=`<ellipse cx="${WM_EG[0]}" cy="${WM_EG[1]}" rx="104" ry="52" fill="url(#wmEg)"/>`;
+  const v=wmPos(),eg=S.ch>=NCH,leg=Math.min(NCH-1,Math.floor(v)),fr=eg?1:v-leg,INK='#5e574e',INK2='#8f877b',RED='#c23a3f';
+  let g=`<defs><filter id="wmN" x="0" y="0" width="100%" height="100%"><feTurbulence baseFrequency=".85" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .48  0 0 0 0 .44  0 0 0 .09 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <radialGradient id="wmPap" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="#211e1b"/><stop offset="1" stop-color="#0e0d0c"/></radialGradient>
+    <radialGradient id="wmEg"><stop offset="0" stop-color="#3ad8c4" stop-opacity=".45"/><stop offset="1" stop-color="#3ad8c4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="wmFire"><stop offset="0" stop-color="#ff7a3a" stop-opacity=".5"/><stop offset="1" stop-color="#ff7a3a" stop-opacity="0"/></radialGradient></defs>
+    <rect x="0" y="0" width="380" height="600" fill="url(#wmPap)"/><rect x="0" y="0" width="380" height="600" fill="#fff" filter="url(#wmN)"/>`;
+  /* 해안선 — 바깥 물결선 두 겹 + 땅 */
+  const coast='M70 560 C40 520 52 470 40 430 C26 380 58 350 50 300 C42 250 70 220 74 180 C78 130 110 100 150 86 C190 70 214 92 246 84 C282 76 318 98 326 140 C334 178 312 200 324 236 C338 280 352 312 332 352 C316 384 336 420 318 456 C300 494 312 530 276 556 C240 580 196 570 160 578 C120 586 92 584 70 560Z';
+  g+=`<path d="${coast}" fill="none" stroke="${INK}" stroke-width=".8" opacity=".35" transform="translate(190 330) scale(1.07) translate(-190 -330)"/><path d="${coast}" fill="none" stroke="${INK}" stroke-width=".6" opacity=".2" transform="translate(190 330) scale(1.14) translate(-190 -330)"/>
+    <path d="${coast}" fill="#1c1a17" stroke="${INK2}" stroke-width="1.6"/>`;
+  /* 지형 표식 */
+  const mt=(x,y,s)=>`<path d="M${x-9*s} ${y} L${x} ${y-12*s} L${x+9*s} ${y} M${x-2*s} ${y-9*s} L${x+2*s} ${y-6*s}" fill="none" stroke="${INK}" stroke-width="1.1"/>`;
+  const tr=(x,y)=>`<path d="M${x} ${y} v-5 M${x-4} ${y-4} L${x} ${y-12} L${x+4} ${y-4}Z" fill="none" stroke="${INK}" stroke-width="1"/>`;
+  const cr=(x,y)=>`<path d="M${x} ${y} v-9 M${x-3} ${y-6} h6" stroke="${INK}" stroke-width="1"/>`;
+  const dn=(x,y)=>`<path d="M${x-10} ${y} q5 -5 10 0 q5 -5 10 0" fill="none" stroke="${INK}" stroke-width="1"/>`;
+  const sw=(x,y)=>`<path d="M${x-8} ${y} h5 M${x+1} ${y} h7 M${x-5} ${y+4} h9" stroke="${INK}" stroke-width="1"/>`;
+  let t='';[[96,522],[112,536],[188,540],[204,526],[78,486]].forEach(q=>t+=tr(...q));
+  [[234,486],[246,494],[290,476],[298,488],[282,446]].forEach(q=>t+=cr(...q));
+  [[80,402],[92,420],[150,420],[160,384],[70,380]].forEach(q=>t+=sw(...q));
+  [[226,340,1],[240,326,1.3],[292,344,1.1],[300,318,.9],[214,312,.8]].forEach(q=>t+=mt(...q));
+  [[300,226],[296,186],[316,206],[286,250],[204,240]].forEach(q=>t+=dn(...q));
+  [[138,140,1],[154,124,1.2],[204,118,1.1],[218,140,.9],[120,160,.8],[176,108,1.6]].forEach(q=>t+=mt(...q));
+  t+=`<g stroke="${INK}" fill="none" stroke-width="1"><path d="M62 300 h16 v-10 l4 -5 4 5 v10 h9 v-14 l5 -6 5 6 v14 h9"/><path d="M60 312 h56"/></g>`;
+  t+=`<circle cx="176" cy="96" r="26" fill="url(#wmFire)"/>`;
+  g+=`<g opacity=".85">${t}</g>`;
+  /* 세렌 마을 · 엔드게임 심연 · 나침반 */
+  g+=`<g transform="translate(96 566)"><rect x="-7" y="-7" width="14" height="10" fill="none" stroke="${INK2}" stroke-width="1.2"/><path d="M-9 -6 L0 -13 L9 -6" fill="none" stroke="${INK2}" stroke-width="1.2"/></g>
+    <text x="112" y="566" font-size="11" fill="${INK2}" letter-spacing="2">세렌 마을</text>
+    <ellipse cx="${WM_EG[0]}" cy="${WM_EG[1]}" rx="56" ry="30" fill="url(#wmEg)"/>
+    <g transform="translate(346 548)" stroke="${INK}" fill="none"><circle r="18"/><path d="M0 -24 V24 M-24 0 H24"/><path d="M0 -16 L4 0 L0 16 L-4 0Z" fill="${INK2}"/></g><text x="346" y="518" text-anchor="middle" font-size="10" fill="${INK2}" font-weight="700">N</text>
+    <text x="28" y="34" font-size="12" fill="${INK2}" letter-spacing="4">루멘하르</text><text x="28" y="50" font-size="9" fill="${INK}" letter-spacing="3">재에 덮인 대륙</text>`;
+  let lines='',nodes='';
   for(let i=0;i<NCH;i++){const done=eg||i<leg;
-    lines+=`<path id="wmL${i}" d="${wmLeg(i)}" fill="none" stroke="#6a6a78" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" class="fut" opacity=".7"/>`;
-    if(done)lines+=`<path d="${wmLeg(i)}" fill="none" stroke="#ffd24a" stroke-width="4" stroke-linecap="round"/>`;
-    else if(i===leg&&fr>0)lines+=`<path d="${wmLeg(i)}" pathLength="1" fill="none" stroke="#ffd24a" stroke-width="4" stroke-linecap="round" stroke-dasharray="${fr.toFixed(3)} 2"/>`}
-  for(let i=0;i<NCH;i++){const [x,y]=WM[i],cleared=eg||i<S.ch,cur=!eg&&i===S.ch,left=x>190,tx=left?x+24:x-24,anc=left?'start':'end';
-    nodes+=`<circle cx="${x}" cy="${y}" r="15" fill="${cleared?'#d9a44a':cur?'#2a2210':'#22232b'}" stroke="${cur?'#ffd24a':cleared?'#ffd24a':'#555'}" stroke-width="${cur?3.5:2}"/>
-      <text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${cleared?'#1a1206':cur?'#ffd24a':'#888'}">${cleared?'✓':i+1}</text>
-      <text x="${tx}" y="${y-2}" text-anchor="${anc}" font-size="13" font-weight="700" fill="${cur?'#ffd24a':cleared?'#e6d3a0':'#8a8a94'}">${i+1}장</text>
-      <text x="${tx}" y="${y+14}" text-anchor="${anc}" font-size="12" fill="${cur?'#efe8da':cleared?'#b8aa88':'#6e6e78'}">${CH[i].n}</text>`}
+    lines+=`<path id="wmL${i}" d="${wmLeg(i)}" fill="none" stroke="${RED}" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round" class="fut" opacity=".55"/>`;
+    if(done)lines+=`<path d="${wmLeg(i)}" fill="none" stroke="${RED}" stroke-width="3" stroke-linecap="round"/>`;
+    else if(i===leg&&fr>0)lines+=`<path d="${wmLeg(i)}" pathLength="1" fill="none" stroke="${RED}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${fr.toFixed(3)} 2"/>`}
+  lines=`<path d="M96 560 C110 540 140 530 ${WM[0][0]} ${WM[0][1]}" fill="none" stroke="${RED}" stroke-width="3" stroke-linecap="round" opacity=".9"/>`+lines;
+  for(let i=0;i<NCH;i++){const [x,y]=WM[i],cleared=eg||i<S.ch,cur=!eg&&i===S.ch,left=x>190,tx=left?x-16:x+16,anc=left?'end':'start';
+    nodes+=`<circle cx="${x}" cy="${y}" r="${cur?8:6}" fill="${cleared?RED:cur?'#1c1a17':'#1c1a17'}" stroke="${cur||cleared?RED:INK2}" stroke-width="${cur?3:1.6}"/>${cur?`<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${RED}" opacity=".6"/>`:''}
+      <text x="${tx}" y="${y-3}" text-anchor="${anc}" font-size="10" font-weight="700" letter-spacing="1" fill="${cur?'#e8c9a0':cleared?'#b8a48a':INK2}">${i+1}장</text>
+      <text x="${tx}" y="${y+11}" text-anchor="${anc}" font-size="11" letter-spacing="1" fill="${cur?'#efe8da':cleared?'#a89a86':'#7a7268'}">${CH[i].n}</text>`}
   const [ex,ey]=WM_EG;
-  nodes+=`<circle cx="${ex}" cy="${ey}" r="26" fill="#2a1410" stroke="${eg?'#ff8a5a':'#7a4a3a'}" stroke-width="${eg?4:2.5}"/><circle cx="${ex}" cy="${ey}" r="17" fill="none" stroke="#ff6a3a" stroke-width="1.5" stroke-dasharray="3 4" opacity=".8"/>
-    <text x="${ex}" y="${ey+5}" text-anchor="middle" font-size="15" font-weight="700" fill="${eg?'#ffb08a':'#9a6a5a'}">∞</text>
-    <text x="${ex-34}" y="${ey-2}" text-anchor="end" font-size="13" font-weight="700" fill="${eg?'#ffb08a':'#9a6a5a'}">엔드게임</text>
-    <text x="${ex-34}" y="${ey+14}" text-anchor="end" font-size="12" fill="${eg?'#efe8da':'#6e6e78'}">끝나지 않는 심층</text>`;
-  const mk=`<g id="wmMe"><circle r="11" fill="#ffd24a" opacity=".35"><animate attributeName="r" values="8;18;8" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".5;0;.5" dur="1.6s" repeatCount="indefinite"/></circle><circle r="6.5" fill="#fff3c0" stroke="#d9a44a" stroke-width="2.5"/><text y="-17" text-anchor="middle" font-size="11" font-weight="700" fill="#ffd24a" stroke="#0f1014" stroke-width="3" paint-order="stroke">현재 위치</text></g>`;
+  nodes+=`<circle cx="${ex}" cy="${ey}" r="13" fill="#0e1414" stroke="${eg?'#3ad8c4':'#3a6a64'}" stroke-width="${eg?3:1.6}"/><circle cx="${ex}" cy="${ey}" r="7" fill="none" stroke="#3ad8c4" stroke-dasharray="2 3" opacity=".8"/>
+    <text x="${ex-20}" y="${ey-3}" text-anchor="end" font-size="10" font-weight="700" letter-spacing="1" fill="${eg?'#8af0e0':'#5a8a84'}">엔드게임</text>
+    <text x="${ex-20}" y="${ey+11}" text-anchor="end" font-size="11" letter-spacing="1" fill="${eg?'#efe8da':'#6e7a78'}">끝나지 않는 심층</text>`;
+  const mk=`<g id="wmMe"><circle r="11" fill="#ffd9a0" opacity=".35"><animate attributeName="r" values="8;18;8" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".5;0;.5" dur="1.6s" repeatCount="indefinite"/></circle><circle r="5.5" fill="#fff3d8" stroke="${RED}" stroke-width="2.5"/><text y="-15" text-anchor="middle" font-size="10" font-weight="700" fill="#efe1c8" stroke="#141210" stroke-width="3" paint-order="stroke">현재 위치</text></g>`;
   const info=eg?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n}`:`${S.ch+1}장 · ${CH[S.ch].n}`;
   const sub=S.tutor?'훈련장 · 여정을 떠나기 전 튜토리얼':eg?`위험도 ${S.tier} · 여정의 끝, 엔드게임 영역`:S.phase===0?'출발':S.phase===1?`길 끝 제단의 보스가 기다립니다 · 길 ${Math.round(storyProg*100)}% 지남`:S.phase===2?'다음 길이 열렸습니다':(S.ch===LAST?'최종 결전':'다음 길로');
   const pct=eg?100:Math.round(v/NCH*100);
-  $('wmapSheet').innerHTML=`<div class="shead"><div><h2>월드맵</h2></div><button class="close" id="wmClose">닫기</button></div>
-   <div class="wmwrap"><svg class="wm" viewBox="0 0 380 600" role="img" aria-label="월드맵">${g}${lines}${nodes}${mk}</svg>
+  $('wmapSheet').innerHTML=`<div class="shead"><div><h2>루멘하르</h2></div><button class="close" id="wmClose">닫기</button></div>
+   <div class="wmwrap"><svg class="wm" viewBox="0 0 380 600" role="img" aria-label="루멘하르 지도">${g}${lines}${nodes}${mk}</svg>
    <div class="wminfo"><span class="chap">현재 위치</span><b class="cur">${info}</b><span class="hint" style="margin:0">${sub}</span>
    <div class="wmbar"><i style="width:${pct}%"></i></div><span class="hint" style="margin:0">여정 ${eg?'완주 · 엔드게임 진행 중':`${S.ch+1} / ${NCH}단계`}</span>
-   <span class="hint" style="margin:6px 0 0">1장에서 출발해 7장을 지나면 엔드게임 영역이 열립니다. 금색 길은 이미 지나온 길입니다.</span></div></div>`;
+   <span class="hint" style="margin:6px 0 0">세렌 마을에서 출발해 북쪽 루멘 성역까지 오릅니다. 진홍 실선은 이미 지나온 길입니다.</span></div></div>`;
   const me=$('wmMe');
-  if(eg)me.setAttribute('transform',`translate(${ex},${ey+34})`);
+  if(eg)me.setAttribute('transform',`translate(${ex},${ey+24})`);
   else{const p=document.getElementById('wmL'+leg);if(p){const q=p.getPointAtLength(p.getTotalLength()*fr);me.setAttribute('transform',`translate(${q.x},${q.y})`)}}
 }
 function openMap(){closeAllSheets();mapOpen=true;$('wmap').hidden=false;renderMap();releaseAll();guide('map')}
@@ -9166,7 +9205,9 @@ document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click
 })();
 
 {const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%'};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
-(function(){const e=$('emb');for(let i=0;i<26;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
+(function(){const g=$('tsig');for(let i=0;i<24;i++){const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',i%2?'M0-78L2-66L-2-66Z':'M0-80L3-64L-3-64Z');p.setAttribute('fill','#d8b46a');p.setAttribute('opacity',i%2?.35:.65);p.setAttribute('transform',`rotate(${i*15})`);g.appendChild(p)}
+  const A=$('tash');for(let i=0;i<40;i++){const b=document.createElement('b');b.style.cssText=`left:${Math.random()*100}%;animation-duration:${9+Math.random()*9}s;animation-delay:${-Math.random()*18}s`;A.appendChild(b)}})();
+(function(){const e=$('emb');for(let i=0;i<34;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 $('goStart').onclick=()=>{$('title').hidden=true;showSlots()};
 setTimeout(skwPreload,600);
 hud();
