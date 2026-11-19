@@ -6672,7 +6672,7 @@ function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_S
   const so=lp(so0,Math.max(so0,sh.so));return {...sh,hw:lp(h0,Math.max(h0,sh.hw)),so,si:so-lp(th0,sh.so-sh.si),zt:lp(W.zt,sh.zt),e,dz:-(trav+.8)*(1-e),sw:Math.min(1,tt/W.t)}}
 function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q,f)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
-const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.08*L/* v719: 1차 가속 화살(10단계): +80% */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
+const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.15*L/* v720: 가속 화살 10단계 +150% (v719 +80%) */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
@@ -6693,7 +6693,7 @@ Object.assign(GEMS2,{
   wfan:{s:'wave',n:'매영조화',/* v664: 검기 확장 → 매영조화 */c:'#ffb0c8',d:L=>{const g=(typeof S!=='undefined'&&S&&S.sk&&S.sk.wave)||{},k=wvProg(g.wlen||0,g.wecho||0,L),a=wvShape(k,0,1).deg,b=wvShape(k,1,1).deg;return `검기가 더 넓게 퍼짐 — 발사 ${Math.round(a)}° → 사거리 끝 ${Math.round(b)}°\n(매화섬·낙화검도 크기를 조금 키움 · 모두 최대 ${WV_A0[1]}° → ${WV_A1[1]}°)`}},/* v645: 부채 검기 → 검기 확장 (같은 id라 기존 투자 단계 유지) */
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
   bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',/* v696: 5단계 */d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
-  bret:{s:'boom',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 나에게 되돌아오며 다시 연달아 폭발 (돌아올 때 피해 ×${r.m.toFixed(2)})`}},/* v719: 다발 사격 회귀 화살을 폭발 사격에도 */
+  bret:{s:'boom',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 나를 향해 되돌아와 뚫고 반대편까지 날아가며 다시 연달아 폭발 (돌아올 때 피해 ×${r.m.toFixed(2)})`}},/* v719: 다발 사격 회귀 화살을 폭발 사격에도 */
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
   pecho:{s:'pillar',n:'여진',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
@@ -6869,8 +6869,8 @@ function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1
         /* v675: 캐릭터 가까이(5m 안)는 근처에 적이 있을 때만 터짐 */if(Math.hypot(x-P.pos.x,z-P.pos.z)<5&&!enemies.some(e=>e.hp>0&&!e.air&&Math.hypot(e.pos.x-x,e.pos.z-z)<rr+e.r+.5))continue;
         later(t,()=>boomExplode({x,z},{...o,r:rr},hit,0));t+=rnd(.025,.11)}}
     if(Math.random()<.5*QM())emit(PADD,{x:pp.x,y:pp.y,z:pp.z,life:.2,s0:.3,s1:.05,c0:0xffffff,c1:0x6a8aff,a:.8,tex:1})};
-  p.onEnd=()=>{const q=p.m.position;if(!back||enemies.some(e=>e.hp>0&&!e.air&&Math.hypot(e.pos.x-q.x,e.pos.z-q.z)<o.r+e.r+.5))boomExplode({x:q.x,z:q.z},o,hit,1);
-    /* v719 회귀 화살: 끝에서 나에게 되돌아오며 다시 연달아 폭발(피해 ×ret) */if(o.ret&&!back&&P.hp>0){const fx0=q.x,fz0=q.z;later(.08,()=>{const dx=P.pos.x-fx0,dz=P.pos.z-fz0,dd=Math.hypot(dx,dz);if(dd<2)return;shootBoom(Math.atan2(dx,dz),Math.max(2,dd-.8),{...o,from:{x:fx0,z:fz0},dmg:o.dmg*o.ret,ret:0})})}}}
+  p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o,hit,1);
+    /* v719 회귀 화살: 끝에서 나에게 되돌아오며 다시 연달아 폭발(피해 ×ret) */if(o.ret&&!back&&P.hp>0){const fx0=q.x,fz0=q.z;later(.08,()=>{const dx=P.pos.x-fx0,dz=P.pos.z-fz0,dd=Math.hypot(dx,dz);shootBoom(dd>.5?Math.atan2(dx,dz):a+Math.PI,dd+dist,{...o,from:{x:fx0,z:fz0},dmg:o.dmg*o.ret,ret:0})/* v720: 다발 사격처럼 나를 뚫고 반대편으로 같은 사거리만큼 더 날아가며 폭발 */})}}}
 /* ---------- 마법사: 사술 폭발 ---------- */
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
