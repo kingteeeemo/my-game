@@ -2556,7 +2556,7 @@ function chCineCam(dt){if(!CHC.on)return;if(!$('notice').hidden){CHC.on=0;window
   const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(LW(pathC(cz-104),cz-104).x,14,LW(pathC(cz-104),cz-104).z),Math.min(1,.35+e*.65));
   const b=Math.max(0,Math.min(1,(t-(D-1.6))/1.6)),bb=b*b*(3-2*b);if(bb>0){_ccP.lerp(camera.position,bb);_ccL.lerp(_ccB.set(camT.x,camT.y+1,camT.z),bb)}
   if(CHZS.peak){const pz=cz-104,pw=LW(pathC(pz),pz),G=CHZS.peak.g;G.position.set(pw.x,-8,pw.z);G.scale.setScalar(.42)}
-  camera.position.copy(_ccP);camera.lookAt(_ccL);const el=$('chCine');if(el&&t>D-1.8)el.className='';if(t>=D){CHC.on=0;window.CHCON=0;if(CHZS.peak)CHZS.peak.g.visible=false;if(el)el.hidden=true;stageBanner();const q=window.CHGQ||[];window.CHGQ=[];setTimeout(()=>q.forEach(k=>guide(k,true)),700)}}
+  camera.position.copy(_ccP);camera.lookAt(_ccL);const el=$('chCine');if(el&&t>D-1.8)el.className='';if(t>=D){CHC.on=0;window.CHCON=0;if(CHZS.peak)CHZS.peak.g.visible=false;if(el)el.hidden=true;stageBanner();const q=window.CHGQ||[];window.CHGQ=[];if(window.TUTASK){window.TUTASK=0;setTimeout(tutAsk,700);return}setTimeout(()=>q.forEach(k=>guide(k,true)),700)}}
 function chzCrypt(g){/* 작은 영묘 — 계단 받침·기둥 넷·삼각 지붕·어두운 문 */g.add(mesh(new THREE.BoxGeometry(3.6,.4,3.2),PM.pillar,0,.2,0),mesh(new THREE.BoxGeometry(3,2.4,2.6),PM.stone,0,1.6,-.1));
   for(const sx of [-1.25,1.25])g.add(mesh(new THREE.CylinderGeometry(.18,.2,2.4,10),PM.pillar,sx,1.6,1.35));
   for(const sx of [-1,1]){const rf=mesh(new THREE.BoxGeometry(1.95,.16,3.5),PM.pillar,sx*.8,3.2,.1);rf.rotation.z=-sx*.5;g.add(rf)}
@@ -3719,10 +3719,11 @@ function mapLoad(title,sub,fn,after){
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
-function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치면 1장과 함께 열립니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+const vilLock=()=>S&&S.ch===0&&!S.vil&&!S.test&&!S.skipStart;/* v710: 세렌 마을은 1장을 마치고 이야기로 도착한 뒤부터 */
+function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
-function townStart(){if(S.tutor||S.test||S.demo||!S.cls)return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
+function townStart(){if(S.tutor||S.test||S.demo||!S.cls||vilLock())return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
   const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
 /* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
@@ -7259,7 +7260,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v709';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v710';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7281,7 +7282,7 @@ const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],[
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
 const HMICON={'@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
 function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=HMICON[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${HMICON[id]()}</svg>`:($(id)&&$(id).querySelector('svg')?$(id).querySelector('svg').outerHTML:'');return `<button data-hm="${id}">${sv}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
-function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?inTown:!inTown&&!(S.ch>=NCH));return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
+function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?(inTown||vilLock()):!inTown&&!(S.ch>=NCH));return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
     const d=HMDOT[id];if(d){const on=!$(d).hidden;b.querySelector('.hdot').hidden=!on;if(on)any=true}});
   $('hamDot').hidden=!any}
 function hmAct(id){if(id==='@town'){if(inTown)return toast('이미 마을에 있습니다');if(!paused())townAsk();return}
@@ -7542,7 +7543,7 @@ function startGame(cls,main,skip){
   inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTPEND=1;setTimeout(tutAsk,900)}}
+  if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}}/* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -7654,9 +7655,11 @@ $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='noticeOk')$('not
 function showClear(){
   const done=S.ch,last=done===LAST;
   $('clearSheet').innerHTML=`<div><div class="chap">Chapter ${done+1} Clear</div><h2>${done+1}장 · ${CH[done].n} 완료</h2></div>
-    <p class="hint">${CH[done].boss}가 쓰러졌습니다. (스토리 준비 중 · 이 자리에 ${done+1}장 마무리 이야기가 들어갑니다)</p>
+    ${done===0&&!S.vil?`<p class="hint">${CH[done].boss}가 쓰러졌습니다. 들판 끝, 재 섞인 연기 너머로 작은 불빛들이 보입니다.</p>
+    <p class="hint">아직 꺼지지 않은 마을 — <b style="color:var(--ink)">세렌</b>. 잠시 쉬어 갈 수 있을 것 같습니다.</p>
+    <button class="primary" id="toVil">세렌 마을로</button>`:`<p class="hint">${CH[done].boss}가 쓰러졌습니다. (스토리 준비 중 · 이 자리에 ${done+1}장 마무리 이야기가 들어갑니다)</p>
     <p class="hint">${last?`성역 깊은 곳에서 무언가가 깨어납니다. 마지막 결전이 남았습니다.`:`다음: ${done+2}장 ${CH[done+1].n} · 적이 한 단계 강해집니다.`}</p>
-    <button class="primary" id="${last?'toFinal':'nextCh'}">${last?'최종 결전으로':`${done+2}장 시작`}</button>`;
+    <button class="primary" id="${last?'toFinal':'nextCh'}">${last?'최종 결전으로':`${done+2}장 시작`}</button>`}`;
   $('clear').hidden=false;releaseAll();
 }
 /* 최종 보스 패배 (v29): 바로 재도전하거나, 5장으로 돌아가 성장한 뒤 재도전 */
@@ -7682,6 +7685,9 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11);bonusCine(()=>showDuelClear(g));return}
   if(e.target.id==='tutEnd'){tutEnd();return}
+  if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
+    if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
+    mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 불 켜진 집들이 나타난다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 상인도, 대장장이도 있으니 쉬어 가시오.」'],['문지기 오스릭','「준비가 되면 남쪽 문으로 오시오. 그 너머가 잊힌 자들의 묘역이오. 길은 내가 열어 주겠소.」']],()=>{toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;playCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
