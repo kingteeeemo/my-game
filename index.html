@@ -6235,8 +6235,8 @@ function hurt(e,amt,quiet,so){
   if(NSX.bossd&&(e.boss||e.duel||e.final))amt*=1+NSX.bossd;/* v603: 보스 피해 증가 *//* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
-  const crit=(!quiet||quiet>=2)&&Math.random()<critCh()+(so?so.crit:0);
-  let v=Math.max(1,Math.round(amt*(crit?(NS()?nsCritMul():1.8):1)*((!quiet||quiet>=2)&&critNew()?critComp(S.lv):1)*rand(.9,1.1)));/* v445 시험: 레벨 보정은 치명타 판정을 받는 타격에만(치명타 없는 지속·장판 피해는 원래도 손실이 없으므로 제외) */
+  const crit=Math.random()<critCh()+(so?so.crit:0);/* v723: 숫자를 숨기는 타격(quiet)도 치명타 판정 — 숫자 표시와 치명타를 분리 */
+  let v=Math.max(1,Math.round(amt*(crit?(NS()?nsCritMul():1.8):1)*(critNew()?critComp(S.lv):1)*rand(.9,1.1)));/* v445 시험: 레벨 보정은 치명타 판정을 받는 타격에만(치명타 없는 지속·장판 피해는 원래도 손실이 없으므로 제외) */
   let itl=0;if(e.perch&&!e.p2&&e.hp-v<=e.mhp*ASH.p1){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p1));itl=1}/* v606: 90%에서 멈추고 사이페 → v629 93.3% */
   else if(e.perch&&e.p2&&!e.p3&&e.hp-v<=e.mhp*ASH.p1b){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p1b));itl=3}/* v629: 86.7% 사이페 B */
   else if(e.perch&&e.p3&&e.hp-v<=e.mhp*ASH.p2){v=Math.max(0,Math.round(e.hp-e.mhp*ASH.p2));itl=2}/* v614: 80%에서 멈추고 2막 = 스토리 클리어 */
