@@ -3958,7 +3958,7 @@ function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div'
 function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL').hidden=true;$('npcAct').classList.remove('talkhide');TALK=null;if(T.done)T.done();return}
   const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;$('talkN').className=vo?'vo':'';$('talkT').textContent=t;$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸';const H=$('talkH');if(T.i===0){H.style.opacity=.25;clearTimeout(T.ht);T.ht=setTimeout(()=>{H.style.opacity=''},1500)}else H.style.opacity=''}
 /* 엔드게임 마을로 — 결말(fall) · 부캐 시작(alt) · 결말 도중 재접속 */
-function toRefuge(kind){if(RZ)riftClear();clearPools();collectAll();wipeFx();for(const e of [...enemies])dropEnemy(e);for(const p of pickups)scene.remove(p.m);pickups.length=0;S.duel=null;S.fld=null;inTown=true;P.mv=null;townSync();
+function toRefuge(kind){if(RZ)riftClear();clearPools();collectAll();wipeFx();for(const e of [...enemies])dropEnemy(e);for(const p of pickups)scene.remove(p.m);pickups.length=0;S.duel=null;bossAuto(false);S.fld=null;inTown=true;P.mv=null;townSync();
   mapLoad(TOWN.n,kind==='fall'?'성역 아래로 옮겨집니다':'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,kind==='fall'?14.6:8.5);camT.copy(P.pos);P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;fldHold=false;save();
     if(kind==='fall'){const b=$('ashBg');if(b){b.style.transition='opacity 1.8s';b.style.opacity=0;later(2,()=>{b.style.transition=''})}}},
   ()=>{if(kind==='fall'){toast('금빛이 사라진다','');refShieldFade();later(3.4,()=>{stageBanner();refLore()})}else{stageBanner();toast('스토리 스킵 · 31레벨','1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');later(2.4,()=>refLore())}})}
@@ -4059,11 +4059,11 @@ function mapLoad(title,sub,fn,after){
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 const vilLock=()=>S&&S.ch===0&&!S.vil&&!S.test&&!S.skipStart;/* v710: 세렌 마을은 1장을 마치고 이야기로 도착한 뒤부터 */
-function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls||vilLock())return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
-  const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+  const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;bossAuto(false);inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
 /* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
 let fldHold=false;
@@ -5745,8 +5745,8 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   mawPose(M,t,e.jaw||0);mawLureUpd(M,t);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,2.9);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
-function duelLeave(){collectAll();S.duel=null;save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner();bossAuto(true)})}
+function duelLeave(){collectAll();S.duel=null;bossAuto(false);save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
@@ -7694,6 +7694,10 @@ function fireNow(k){if(paused()||!S.cls||(P.hp<=0&&k!=='boss'))return;if(k==='s1
 function bossToggle(){const id=C().skills[0];if(!BOSS_IDS.includes(id)){toast('보스 모드 없음',`「${SK[id].n}」은(는) 보스 모드가 없는 스킬입니다`);return}
   if(!g2Done(id)){toast('보스 모드 잠김','2차 강화를 모두 끝내면 쓸 수 있습니다 (피해 증가 제외)');return}
   S.bossM=!S.bossM;feed(`${SK[id].n}: ${S.bossM?'보스 모드 켜짐':'보스 모드 꺼짐'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(S.bossM)guide('bossm');save()}
+/* v725: 결투장에 들어가면 보스 모드 자동 켬, 나오면 들어가기 전 상태로 */
+function bossAuto(on){if(!S||!S.cls)return;const id=C().skills[0];if(!BOSS_IDS.includes(id)||!g2Done(id))return;
+  if(on){S.bossPrev=!!S.bossM;if(S.bossM)return;S.bossM=true}else{if(S.bossPrev===undefined)return;const v=S.bossPrev;delete S.bossPrev;if(S.bossM===v)return;S.bossM=v}
+  feed(`${SK[id].n}: ${S.bossM?'보스 모드 자동 켜짐':'보스 모드 꺼짐 (원래대로)'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(on&&S.bossM){toast('보스 모드 자동 켜짐',`「${SK[id].n}」이(가) 한 대상에 몰아치는 모양으로 바뀝니다 · 결투장을 나가면 원래대로`);guide('bossm')}save()}
 function bossBtn(){const b=$('bAtk');if(!b||!S||!S.cls)return;const id=C().skills[0],ok=BOSS_IDS.includes(id)&&g2Done(id);b.classList.toggle('autoon',!!(ok&&S.bossM));b.classList.toggle('nob',!ok)}
 ['mousedown'].forEach(ev=>{canvas.addEventListener(ev,e=>mouseBtn(e,true));stick.addEventListener(ev,e=>mouseBtn(e,true))});
 addEventListener('mouseup',e=>mouseBtn(e,false));
@@ -8808,9 +8812,9 @@ $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
 /* v646: 테스트 맵 — 테스트 캐릭터 전용. 몬스터·균열·관문이 전혀 나오지 않는 빈 맵에서 스킬만 써 봄. 다음 resetWorld(위험도 이동·마을 다녀오기 등) 때 자동으로 풀림 */
 let testMap=false,testMapK=0;
-function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;if(S.ch<NCH){S.ch=NCH;S.phase=0}riftNow=0;testMapK=1;
+function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;if(S.ch<NCH){S.ch=NCH;S.phase=0}riftNow=0;testMapK=1;
   mapLoad('테스트 맵','몬스터 없음 · 스킬 시험',()=>{setMap(true);applyTheme();resetWorld()},()=>toast('테스트 맵','몬스터가 나오지 않습니다 · 사냥터에서 위험도를 고르면 돌아갑니다'))}
-function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null}clearPools();inTown=false;$('npcAct').hidden=true;
+function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
   else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egK=0;S.runClr=0;S.mutRun={...(S.mut||{})}}
   else{S.ch=+k;S.phase=0;S.kills=0}
