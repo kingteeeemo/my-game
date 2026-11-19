@@ -452,7 +452,34 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .gcard .gkeys{font-size:12px;color:#a8a0b4;background:#26232e;border-radius:8px;padding:6px 9px;margin:4px 0 6px}
 .gcard .gfoot{display:flex;align-items:center;gap:8px;margin-top:8px}.gcard .gdots{display:flex;gap:5px;flex:1}.gcard .gdots i{width:6px;height:6px;border-radius:3px;background:#4a4555}.gcard .gdots i.on{background:#ffb070;width:16px}
 .gcard button{font:700 13px var(--ko);border-radius:9px;padding:8px 14px;border:1px solid var(--line);background:#2a2733;color:var(--ink)}.gcard button.go{background:#ffb070;color:#1a1208;border-color:#ffb070}
-.gcard .glist{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px}.gcard .glist button{text-align:left;padding:9px 10px}
+.gcard .glist{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px}.glh{margin:10px 0 2px;font:800 11px var(--ko);letter-spacing:.12em;color:#a89c8c}.glist button.gnew{border-color:rgba(216,180,106,.45)}
+.gcard{max-height:calc(100% - 24px);overflow:auto}
+.gvid{position:relative;margin:8px 0 6px;padding:10px;border-radius:10px;background:#121216;border:1px solid rgba(232,220,196,.12);font:500 12px/1.4 var(--ko);color:#d8d0c0;overflow:hidden}
+.gv-cap{font:800 10px var(--ko);letter-spacing:.1em;color:#a89c8c;margin-bottom:6px}.gv-foot{margin-top:6px;font-size:11px;color:#a89c8c}
+.gv-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:7px;background:#1c1c22;margin:4px 0}.gv-row small{color:#a89c8c}.gv-dim{opacity:.5}
+.gv-pips{display:flex;gap:3px;flex:1;justify-content:center}.gv-pips i{width:12px;height:5px;border-radius:2px;background:#2e2e36}.gv-pips i.on{background:#e8dcc4}.gv-pips .gv-pip{animation:gvPip 4s infinite}
+@keyframes gvPip{0%,40%{background:#2e2e36}46%,100%{background:#e8dcc4}}
+.gv-cards{display:flex;gap:6px;margin-bottom:6px}.gv-c{position:relative;flex:1;text-align:center;padding:12px 4px;border-radius:8px;background:#1c1c22;border:1px solid #2e2e36;font-weight:700}
+.gv-pick{animation:gvPick 4s infinite}@keyframes gvPick{0%,30%{border-color:#2e2e36;background:#1c1c22}36%,80%{border-color:#d8b46a;background:#2e2618}100%{border-color:#2e2e36}}
+.gv-tap{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid #fff;opacity:0;pointer-events:none;animation:gvTap 4s infinite}.gv-tap2{left:auto;right:4px}
+@keyframes gvTap{0%,26%{opacity:0;transform:scale(.4)}32%{opacity:.95;transform:scale(1)}46%,100%{opacity:0;transform:scale(1.7)}}
+.gv-sw2{position:relative;display:inline-grid}.gv-sw2>b{grid-area:1/1;font-weight:inherit}.gv-sw2 .a{animation:gvA 4s infinite}.gv-sw2 .b{animation:gvB 4s infinite}
+@keyframes gvA{0%,38%{opacity:1}44%,94%{opacity:0}100%{opacity:1}}@keyframes gvB{0%,38%{opacity:0}44%,94%{opacity:1}100%{opacity:0}}
+.gv-btn{position:relative;padding:5px 10px;border-radius:7px;border:1px solid #e8dcc4;background:#2a2a32;color:#e8dcc4;font:800 12px var(--ko)}.gv-wide{display:block;width:100%;margin-top:8px;padding:8px}
+.gv-cost{color:#a89c8c;font-weight:800}.gv-ess{color:#ff6a5a}
+.gv-tg{width:34px;height:18px;border-radius:9px;background:#2e2e36;position:relative;animation:gvTg 4s infinite}.gv-tg i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#a89c8c;animation:gvKn 4s infinite}
+@keyframes gvTg{0%,36%{background:#2e2e36}42%,100%{background:#8a7a4a}}@keyframes gvKn{0%,36%{left:2px;background:#a89c8c}42%,100%{left:18px;background:#fff4d8}}
+.gv-mana{position:relative;margin-top:8px;height:22px;border-radius:6px;background:linear-gradient(90deg,#2a5ab8,#4a8fe0);overflow:hidden;display:flex;align-items:center;justify-content:space-between;padding:0 8px;color:#fff;font-weight:800}
+.gv-mana small{font-weight:700;font-size:11px;z-index:1}.gv-mana b{z-index:1}.gv-res{position:absolute;right:0;top:0;bottom:0;width:0;background:repeating-linear-gradient(135deg,#1a1a22 0 5px,#26262e 5px 10px);animation:gvRes 4s infinite}
+@keyframes gvRes{0%,40%{width:0}52%,100%{width:50%}}
+.gv-ld{display:flex;flex-direction:column;gap:3px}.gv-lr{display:flex;justify-content:space-between;padding:5px 9px;border-radius:6px;background:#1c1c22;animation:gvLr 3.3s infinite}.gv-lr b{font-weight:800}.gv-lr span{color:#a89c8c}
+@keyframes gvLr{0%,100%{background:#1c1c22;box-shadow:none}10%,25%{background:#2e2618;box-shadow:inset 0 0 0 1px #d8b46a}}
+.gv-item{border-radius:8px;background:#18181e;border:1px solid #2e2e36;padding:6px}.gv-ih{display:flex;justify-content:space-between;padding:2px 4px 6px;border-bottom:1px solid #2e2e36;margin-bottom:4px}.gv-ih span{color:#a89c8c;font-size:11px}
+.gv-l{position:relative;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 6px;border-radius:5px}.gv-l em{font-style:normal;font-size:10px;color:#a89c8c;border:1px solid #3a3530;border-radius:4px;padding:0 5px}.gv-base{color:#fff4d8;font-weight:800}
+.gv-sel{animation:gvSel 4s infinite}@keyframes gvSel{0%,100%{background:#2a2418;box-shadow:inset 0 0 0 1px rgba(216,180,106,.5)}40%,50%{background:#3a2e14;box-shadow:inset 0 0 0 1px #d8b46a}}
+.gv-gold{color:#ffd88a}.gv-upl em{border-color:#d8b46a}
+.gv-roll{display:inline-block;height:1.4em;overflow:hidden;vertical-align:bottom}.gv-roll>span{display:flex;flex-direction:column;animation:gvRoll 4s infinite}.gv-roll b{height:1.4em;line-height:1.4em;font-weight:800;color:#fff4d8}
+@keyframes gvRoll{0%,32%{transform:translateY(0)}36%{transform:translateY(-1.4em)}40%{transform:translateY(-2.8em)}44%,96%{transform:translateY(-4.2em)}100%{transform:translateY(0)}}.gcard .glist button{text-align:left;padding:9px 10px}
 .cls .cport{width:86px;height:110px;flex-shrink:0;object-fit:contain;border-radius:10px;background:radial-gradient(circle at 50% 62%,color-mix(in srgb,var(--cc) 34%,transparent),transparent 70%),#15141a;border:1px solid var(--line)}
 .cls .badge{width:44px;height:44px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font:800 13px var(--en);font-stretch:87%;color:#111}
 .skill{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px;background:var(--card)}
@@ -7360,7 +7387,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v714';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v715';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7378,9 +7405,9 @@ PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placePort):PORT_MQ.ad
 /* v559: 메뉴 펼치기 패널 — 기존 버튼을 대신 눌러 줌(메뉴 추가 시 HMENU에 한 줄만 추가) */
 const SV={st:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20.5c.6-4.2 3.6-6.8 7.5-6.8s6.9 2.6 7.5 6.8"/>',ch:'<path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/>',home:'<path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z"/>'};
 /* v585: 메뉴는 고정 3줄 — [상태 장비 스킬 마을] [사냥터 보스 지도 설정] [캐릭터 변경 처음 화면 전체화면]. 마을/사냥터는 서로 바뀌지 않고 각자 자리에 고정 */
-const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['@town','마을']],[['@hunt','사냥터'],['openBoss','보스'],['openMap','지도'],['openPause','설정']],[['@char','캐릭터 변경'],['@title','처음 화면'],['@fs','전체화면']]];
+const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['@town','마을']],[['@hunt','사냥터'],['openBoss','보스'],['openMap','지도'],['@guide','가이드']],[['openPause','설정'],['@char','캐릭터 변경'],['@title','처음 화면'],['@fs','전체화면']]];
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
-const HMICON={'@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
+const HMICON={'@guide':()=>'<path d="M4 5.5c2.6-1.2 5.3-1.2 8 .4 2.7-1.6 5.4-1.6 8-.4v13c-2.6-1.2-5.3-1.2-8 .4-2.7-1.6-5.4-1.6-8-.4z"/><path d="M12 5.9v13"/>','@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
 function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=HMICON[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${HMICON[id]()}</svg>`:($(id)&&$(id).querySelector('svg')?$(id).querySelector('svg').outerHTML:'');return `<button data-hm="${id}">${sv}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
 function hmSync(){let any=false;document.querySelectorAll('#hmG [data-hm]').forEach(b=>{const id=b.dataset.hm;if(id==='@town'||id==='@hunt'){b.classList.toggle('dim',id==='@town'?(inTown||vilLock()):!inTown&&!(S.ch>=NCH));return}if(id[0]==='@')return;const src=$(id);if(!src)return;b.hidden=!!src.hidden;
     const d=HMDOT[id];if(d){const on=!$(d).hidden;b.querySelector('.hdot').hidden=!on;if(on)any=true}});
@@ -7390,6 +7417,7 @@ function hmAct(id){if(id==='@town'){if(inTown)return toast('이미 마을에 있
   if(id==='@char'){save();closeAllSheets();showSlots();return}
   if(id==='@title'){save();closeAllSheets();showSlots();$('slots').hidden=true;$('title').hidden=false;return}
   if(id==='@fs'){toggleFs();return}
+  if(id==='@guide'){hmClose();closeAllSheets();guideBook();return}
   $(id).click()}
 function hmOpen(){hmBuild();hmSync();$('hmenu').hidden=false;releaseAll()}
 function hmClose(){$('hmenu').hidden=true}
@@ -7474,16 +7502,16 @@ const GUIDES={
     {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 10장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`10장을 지나 성 꼭대기의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
     {t:'이동',tgt:isPC()?null:['@left'],d:isPC()?`${GB}W A S D</b>(또는 방향키)로 움직이고, ${GB}마우스</b>로 공격 방향을 정합니다.`:`화면 ${GB}왼쪽 아무 곳</b>이나 누른 채 끌면 그 방향으로 움직입니다.`},
     {t:'주력 스킬과 보스 모드',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다. 마나가 모자라면 같은 버튼으로 ${GB}기본 공격</b>이 나갑니다.`,d2:`${GB}「보스」</b> 버튼은 주력 스킬을 한 대상에 몰아치는 보스 모드를 켜고 끕니다. 켜져 있으면 테두리가 돕니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
-    {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 몬스터가 떨어뜨리고, 마을 물약 상점에서도 삽니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
+    {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 생명력·마나 물약은 ${GB}충전식</b> — 기본 3회, 몬스터를 처치하면 다시 채워지고 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
     {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 포인트 분배 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
     {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 장비 뽑기, 대장장이, 전승사가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
-    {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}설정(톱니바퀴)</b> → 「가이드 다시 보기」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
+    {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}메뉴</b> → 「가이드」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
   lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`스탯 포인트도 ${STAT_PER_LV}점 받습니다. ${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수로 하는 ${GB}2차 강화</b>가 열립니다.`}]},
   skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
   stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 엔드게임부터는 심연의 냉기로 생명력이 계속 줄어드니 힘(재생)도 챙기세요.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
   town:{n:'마을',steps:()=>[{t:'세렌 마을',d:`NPC에게 가까이 가면 대화 버튼이 뜹니다.`,d2:`${GB}${TOWN.shop}</b> 물약 상점 · ${GB}${TOWN.gear}</b> 장비 뽑기 · ${GB}${TOWN.smith}</b> 부위 강화 · ${GB}${TOWN.heir}</b> 특수 능력치 전승`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
-  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약을 크기별로 삽니다. 큰 물약일수록 많이 회복합니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`사냥 중에는 하단 물약 버튼(1·2·3)으로 마시고, 「자동」을 켜면 알아서 마십니다.`}]},
+  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 기본 3회, 여기서 ${GB}잿불 정수</b>로 충전 횟수를 최대 5회까지 늘립니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`몬스터를 처치하면 충전되고, 보스전은 가득 찬 채로 시작해 보스에게 준 피해만큼 다시 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
   gacha:{n:'장비 뽑기',steps:()=>[{t:'장비 뽑기',d:`골드로 ${GB}현재 레벨에 맞는 전설 장비</b>를 뽑습니다. 원하는 부위를 고를 수 있고, 레벨이 오를수록 가격도 오릅니다.`,d2:`가끔 ${GB}특수 능력치(★)</b>가 붙어 나옵니다. 특수 능력치가 나오면 실수로 넘기지 않도록 「계속 뽑기」가 ${GB}2초간 잠깁니다</b>.`}]},
   smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다.`,d2:`실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.`}]},
   heir:{n:'전승',steps:()=>[{t:'특수 능력치 전승',d:`★ 특수 능력치를 ${GB}같은 부위의 다른 전설 장비</b>로 옮깁니다. 레벨이 올라 더 좋은 장비를 얻어도 아끼던 능력치를 그대로 이어 쓸 수 있습니다.`,d2:`수치는 그대로 옮겨지고, ${GB}원래 장비는 사라집니다</b>. 결투장에서 얻은 ${GB}각인의 서</b>는 여기서 아무 전설 장비에나 새깁니다. 부위에 맞는 특수 능력치가 붙습니다(일반 8% · 상급 11%).`}]},
@@ -7491,7 +7519,7 @@ const GUIDES={
   stage:{n:'단계',steps:()=>[{t:'단계',d:`장과 위험도 목록, 지금 위치를 봅니다. 엔드게임에서는 여기서 ${GB}위험도</b>를 골라 사냥하고, ${GB}결투장</b>에 도전합니다.`,d2:`위험도가 높을수록 좋은 장비가 나옵니다.`}]}
 };
 Object.assign(GUIDES,{
-  t0:{n:'튜토리얼',steps:()=>[{t:'훈련장 튜토리얼',d:`짧은 훈련장에서 게임의 기본을 익힙니다. ${GB}몬스터 무리 처치 → 레벨업·스탯·스킬 → 물약 → 훈련 교관 처치</b> 순서로 진행됩니다.`,d2:`실제 장(1~7장)도 이처럼 ${GB}길을 따라 끝까지 가서 보스를 쓰러뜨리는</b> 방식입니다.`},
+  t0:{n:'튜토리얼',steps:()=>[{t:'훈련장 튜토리얼',d:`짧은 훈련장에서 게임의 기본을 익힙니다. ${GB}몬스터 무리 처치 → 레벨업·스탯·스킬 → 물약 → 훈련 교관 처치</b> 순서로 진행됩니다.`,d2:`실제 장(1~10장)도 이처럼 ${GB}길을 따라 끝까지 가서 보스를 쓰러뜨리는</b> 방식입니다.`},
     GUIDES.intro.steps()[1],Object.assign({},GUIDES.intro.steps()[2],{t:'첫 무리를 처치하세요'})]},
   t1:{n:'튜토리얼 · 스탯',steps:()=>[{t:'스탯을 찍어 보세요',tgt:['#openStat'],d:`레벨업으로 스탯 포인트를 받았습니다. ${GB}「스탯」</b>을 눌러 원하는 스탯에 포인트를 넣어 보세요.`,d2:`${GB}힘</b> 생명력 · ${GB}민첩</b> 이동·치명타 · ${GB}지능</b> 마나. 숫자 배지는 남은 포인트입니다.`}]},
   t2:{n:'튜토리얼 · 스킬',steps:()=>[{t:'스킬 창을 열어 보세요',tgt:['#openMenu'],d:`방금 고른 강화는 ${GB}「스킬」</b> 창에서 확인합니다. 강화 단계와 효과, 지금 DPS가 나옵니다. 레벨업 강화를 미뤄 두었다면 여기서 「지금 고르기」로 고릅니다. 열어 본 뒤 닫으면 다음으로 넘어갑니다.`}]},
@@ -7499,6 +7527,36 @@ Object.assign(GUIDES,{
   t4:{n:'튜토리얼 · 보스',steps:()=>[{t:'훈련 교관을 쓰러뜨리세요',d:`길 끝 제단에 ${GB}훈련 교관</b>이 기다립니다. 바닥에 빨간 장판이 깔리면 그 밖으로 피하세요.`,d2:`보스를 쓰러뜨리면 튜토리얼이 끝나고 ${GB}1장</b>이 시작됩니다.`}]},
   bossm:{n:'보스 모드',steps:()=>[{t:'보스 모드를 켰습니다',tgt:['#bAtk'],d:`${GB}「보스」</b> 버튼이 켜졌습니다. 주력 스킬이 넓게 퍼지는 대신 ${GB}한 대상에 몰아치는 모양</b>으로 바뀝니다.`,d2:`보스처럼 단단한 한 마리를 상대할 때 켜 두세요. 같은 버튼을 다시 누르면 꺼집니다. 피해 배율은 그대로이고 모양만 바뀝니다.`}]},
   tdone:{n:'튜토리얼 완료',steps:()=>GUIDES.intro.steps().slice(4)}
+});
+/* v715: 성장·제작 가이드 — 카드 위에 CSS로 움직이는 짧은 시연(4초 반복) */
+const GV={
+  lv:`<div class="gv-cap">레벨업 · 강화 하나 고르기</div><div class="gv-cards"><div class="gv-c">피해</div><div class="gv-c gv-pick">범위 확대<i class="gv-tap"></i></div><div class="gv-c">가속</div></div>
+    <div class="gv-row"><span>범위 확대</span><span class="gv-pips">${'<i class="on"></i>'.repeat(3)}<i class="gv-pip"></i>${'<i></i>'.repeat(6)}</span><span class="gv-sw2"><b class="a">3/10</b><b class="b">4/10</b></span></div>`,
+  ex:`<div class="gv-cap">스킬 창 · 추가 강화</div><div class="gv-row"><span>화염 폭발</span><span class="gv-pips">${'<i class="on"></i>'.repeat(2)}<i class="gv-pip"></i><i></i><i></i></span><button class="gv-btn">◆ 47<i class="gv-tap"></i></button></div>
+    <div class="gv-row gv-dim"><span>질주</span><span class="gv-pips"><i class="on"></i><i></i><i></i></span><span class="gv-cost">◆ 47</span></div><div class="gv-foot">보유 <b class="gv-ess">◆ <span class="gv-sw2"><b class="a">120</b><b class="b">73</b></span></b></div>`,
+  au:`<div class="gv-cap">스킬 창 · 오라 탭</div><div class="gv-row"><span>치명타의 오라 <small>5단계</small></span><span class="gv-tg"><i></i></span><i class="gv-tap gv-tap2"></i></div>
+    <div class="gv-mana"><span class="gv-res"></span><b>마나</b><small class="gv-sw2"><b class="a">사용 가능 100%</b><b class="b">사용 가능 50%</b></small></div><div class="gv-foot">켜 두는 동안 최대 마나의 50%를 차지</div>`,
+  ld:`<div class="gv-cap">위험도가 오를수록 높은 티어</div><div class="gv-ld">${[[6,'스토리'],[5,'위험도 1~4'],[4,'위험도 5~9'],[3,'위험도 10~14'],[2,'위험도 15~19'],[1,'위험도 20']].map(([t,r],i)=>`<div class="gv-lr" style="animation-delay:${i*.55}s"><b>${t}티어</b><span>${r}</span></div>`).join('')}</div>`,
+  ln:`<div class="gv-item"><div class="gv-ih"><b>2티어 갑옷</b><span>6줄</span></div><div class="gv-l gv-base"><span>방어력 +1,240</span><em>2티어</em></div><div class="gv-l"><span>최대 생명력 +410</span><em>2티어</em></div><div class="gv-l"><span>쿨감 +3.1%</span><em>4티어</em></div><div class="gv-l"><span>방어력 증가 +18%</span><em>3티어</em></div><div class="gv-l"><span>생명력 재생 +2.2%</span><em>5티어</em></div><div class="gv-l"><span>마나 재생 +1.9%</span><em>3티어</em></div></div>`,
+  rr:`<div class="gv-cap">조율사 · 수치 조정 (윤회의 불씨 1)</div><div class="gv-item">${[['치명타 확률','+',[8.4,11.2,9.7,12.6],'%','3티어'],['치명타 데미지','+',[38,45,41,52],'%','3티어'],['공격 속도','+',[6.1,7.4,5.8,8.2],'%','4티어'],['피해 증폭','+',[9,12,10,14],'%','2티어']].map(([n,sg,vs,u,t])=>`<div class="gv-l"><span>${n} ${sg}<span class="gv-roll"><span>${vs.map(v=>`<b>${v}</b>`).join('')}</span></span>${u}</span><em>${t}</em></div>`).join('')}</div><button class="gv-btn gv-wide">🔥 1 수치 조정<i class="gv-tap"></i></button>`,
+  cv:`<div class="gv-cap">조율사 · 옵션 변환</div><div class="gv-item"><div class="gv-l"><span>치명타 확률 +11.2%</span><em>3티어</em></div><div class="gv-l gv-sel"><span class="gv-sw2"><b class="a">최대 마나 +8.2%</b><b class="b">공격 속도 +6.9%</b></span><em>3티어</em></div><div class="gv-l"><span>피해 증폭 +12%</span><em>2티어</em></div></div><button class="gv-btn gv-wide">🔥 6 옵션 변환<i class="gv-tap"></i></button><div class="gv-foot">옵션 종류만 바뀌고 줄 티어(3티어)는 그대로</div>`,
+  up:`<div class="gv-cap">조율사 · 티어 승급 (성역의 인장 1)</div><div class="gv-item"><div class="gv-ih"><b>2티어 반지</b><span>최고 2티어까지</span></div><div class="gv-l"><span>치명타 확률 +11.2%</span><em>3티어</em></div><div class="gv-l gv-sel gv-upl"><span class="gv-sw2"><b class="a">치명타 데미지 +41%</b><b class="b">치명타 데미지 +58%</b></span><em class="gv-sw2"><b class="a">3티어</b><b class="b gv-gold">2티어</b></em></div></div><button class="gv-btn gv-wide">⬢ 1 티어 승급<i class="gv-tap"></i></button>`
+};
+Object.assign(GUIDES,{
+  gskill:{n:'스킬 강화 시스템',steps:()=>[
+    {t:'1차 강화 — 레벨업',v:GV.lv,d:`레벨이 오를 때마다 주력 스킬 강화 3가지 중 ${GB}하나를 1단계</b> 올립니다. 강화마다 최대 ${GMAX}단계이고, ${GB}${ESS_LV}레벨</b>쯤 모두 채워집니다.`,d2:`스킬 창에서 단계·효과·DPS를 보고, 자동으로 고르게 설정할 수도 있습니다.`},
+    {t:'추가 강화 — 잿불 정수',v:GV.ex,d:`1차 강화를 모두 채우면 ${GB}추가 강화</b>가 열립니다. 엔드게임에서 모은 ${GB}잿불 정수(◆)</b>로 스킬 창에서 올리며, 실패는 없습니다.`,d2:`첫 강화 24개부터 마지막 강화 94개까지 점점 비싸집니다.`},
+    {t:'오라 — 잿불 정수',v:GV.au,d:`스킬 창 ${GB}「오라」</b> 탭에서 정수로 오라를 배우고 1~10단계까지 올립니다(24개 → 94개). 켜 두면 ${GB}최대 마나의 일부를 차지</b>하는 대신 효과가 계속 유지됩니다.`,d2:`방어·회피·보호막 / 치명타·가속·피의 서약 / 생명력·마나 재생. 장비의 ${GB}마나 점유 효율</b>이 높을수록 차지하는 양이 줄어 여러 오라를 함께 켤 수 있습니다.`},
+    {t:'물약 충전 횟수 — 잿불 정수',d:`물약은 충전식(기본 3회)입니다. 마을 ${GB}물약 상점</b>에서 잿불 정수로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다.`}]},
+  gtier:{n:'티어 시스템',steps:()=>[
+    {t:'장비 티어 1~6',v:GV.ld,d:`장비는 ${GB}1~6티어</b>로 나뉘고 ${GB}1티어가 가장 좋습니다</b>. 스토리에서는 5·6티어, 엔드게임에서는 위험도가 오를수록 높은 티어가 나옵니다.`,d2:`위험도 1~4 최고 5티어 · 5~9 4티어 · 10~14 3티어 · 15~19 2티어 · 20 1티어.`},
+    {t:'줄마다 다른 티어',v:GV.ln,d:`옵션 ${GB}줄마다 티어를 따로</b> 뽑습니다. 아이템 티어는 그 아이템의 줄이 오를 수 있는 ${GB}최고 티어</b>입니다 — 2티어 아이템에 3·4·5티어 줄이 섞여 나올 수 있습니다.`,d2:`맨 위 기본옵(방어력·피해 등)은 아이템 티어로 고정됩니다. 줄 수(4·5·6줄)는 바꿀 수 없어 ${GB}6줄 아이템</b>이 좋은 바탕이 됩니다.`},
+    {t:'완성까지의 순서',d:`① 원하는 부위의 ${GB}높은 티어 6줄</b> 아이템을 얻는다 → ② ${GB}윤회의 불씨</b>로 필요 없는 줄을 원하는 옵션으로 변환 → ③ ${GB}성역의 인장</b>으로 줄 티어를 아이템 티어까지 승급 → ④ 불씨로 수치를 다듬는다.`,d2:`대장장이 강화(골드, 최대 +20)는 기본옵에 붙습니다. 엔드게임 마을 ${GB}조율사</b>에서 ②~④를 합니다.`}]},
+  gember:{n:'윤회의 불씨 · 조율',steps:()=>[
+    {t:'수치 조정 — 불씨 1개',v:GV.rr,d:`아이템의 ${GB}모든 줄 수치</b>를 각 줄 티어 범위 안에서 다시 뽑습니다. 옵션 종류와 줄 티어는 그대로입니다.`,d2:`조율사 창 「수치 조정」 탭에서 각 줄의 범위와 지금 수치의 위치를 볼 수 있습니다.`},
+    {t:'옵션 변환 — 불씨 3~8개',v:GV.cv,d:`고른 ${GB}줄 하나의 옵션 종류</b>를 바꿉니다. 줄 티어는 그대로, 수치는 그 티어 범위에서 새로 뽑습니다. 접두어는 접두어로, 접미어는 접미어로만 바뀝니다.`,d2:`비용은 줄 티어에 따라 6티어 3개 · 5티어 4개 · … · 1티어 8개. 이미 붙어 있는 옵션은 나오지 않습니다.`}]},
+  gseal:{n:'성역의 인장 · 티어 승급',steps:()=>[
+    {t:'티어 승급 — 인장 1개',v:GV.up,d:`고른 ${GB}줄 하나의 티어를 1단계</b> 올립니다. ${GB}아이템 티어까지만</b> 올라가고, 수치는 새 티어 범위에서 다시 뽑습니다.`,d2:`${GB}성역의 인장</b>은 엔드게임 사냥터에서 나오며 위험도와 변이가 높을수록 많이 나옵니다. 9부위를 모두 완성하는 데 가장 오래 걸리는 재화입니다.`}]}
 });
 let GDQ=[],GCUR=null;
 function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;if(window.CHCON){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
@@ -7508,7 +7566,7 @@ function guideRect(sel){if(sel==='@left'){const w=innerWidth,h=innerHeight;retur
 function guideRender(){const g=GCUR,st=g.steps[g.i],n=g.steps.length,sp=$('gSpot'),cd=$('gCard');
   let R=null;for(const s of st.tgt||[]){const r=guideRect(s);if(!r)continue;R=R?{left:Math.min(R.left,r.left),top:Math.min(R.top,r.top),right:Math.max(R.right,r.right),bottom:Math.max(R.bottom,r.bottom)}:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}}
   if(R){const p=6;sp.className='gspot';Object.assign(sp.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.right-R.left+p*2+'px',height:R.bottom-R.top+p*2+'px'})}else sp.className='gspot none';
-  const pc=isPC();cd.innerHTML=`<div class="chap">${GUIDES[g.key].n}${n>1?` · ${g.i+1}/${n}`:''}</div><h3>${st.t}</h3><p>${st.d}</p>${st.d2?`<p>${st.d2}</p>`:''}${st.k&&pc?`<div class="gkeys">${st.k}</div>`:''}
+  const pc=isPC();cd.innerHTML=`<div class="chap">${GUIDES[g.key].n}${n>1?` · ${g.i+1}/${n}`:''}</div><h3>${st.t}</h3>${st.v?`<div class="gvid">${st.v}</div>`:''}<p>${st.d}</p>${st.d2?`<p>${st.d2}</p>`:''}${st.k&&pc?`<div class="gkeys">${st.k}</div>`:''}
     <div class="gfoot"><div class="gdots">${n>1?g.steps.map((_,j)=>`<i class="${j===g.i?'on':''}"></i>`).join(''):''}</div>${n>1&&g.i<n-1?'<button id="gSkip">건너뛰기</button>':''}${g.i>0?'<button id="gPrev">이전</button>':''}<button class="go" id="gNext">${g.i<n-1?'다음':'확인'}</button></div>`;
   cd.style.top=cd.style.bottom='';const H=innerHeight;
   if(R){const cy=(R.top+R.bottom)/2;if(cy>H*.5)cd.style.bottom=Math.max(12,H-R.top+16)+'px';else cd.style.top=Math.min(H-200,R.bottom+16)+'px'}else{cd.style.top='50%';cd.style.transform='translate(-50%,-50%)';return}
@@ -7517,12 +7575,13 @@ function guideNext(){if(!GCUR)return;if(GCUR.i<GCUR.steps.length-1){GCUR.i++;gui
 function guideClose(){GCUR=null;$('guide').hidden=true;$('gCard').style.transform='';if(GDQ.length){const k=GDQ.shift();setTimeout(()=>guide(k,true),250)}}
 $('guide').addEventListener('click',e=>{const id=e.target.id;if(id==='gNext')guideNext();else if(id==='gPrev'&&GCUR){GCUR.i--;guideRender()}else if(id==='gSkip')guideClose();else if(e.target.dataset.gk){const k=e.target.dataset.gk;GCUR=null;guide(k,true)}});
 addEventListener('resize',()=>{if(GCUR)guideRender()});
-function guideBook(){if(!S||!S.cls)return;GCUR={key:'book',steps:[{t:'가이드 다시 보기',d:'보고 싶은 안내를 고르세요.'}],i:0};GUIDES.book=GUIDES.book||{n:'가이드',steps:()=>[]};
-  $('guide').hidden=false;guideRender();$('gCard').querySelector('p').insertAdjacentHTML('afterend',`<div class="glist">${Object.keys(GUIDES).filter(k=>k!=='book'&&!/^t\d|^tdone/.test(k)).map(k=>`<button data-gk="${k}">${GUIDES[k].n}</button>`).join('')}</div>`);$('gNext').textContent='닫기'}
+const GBOOK=[['기본',['intro','map','stage','skill','inv','bossm','town']],['성장 · 제작',['gskill','gtier','gember','gseal']],['마을 사람',['pot','gacha','smith','heir']]];/* v715: 메뉴 → 가이드 */
+function guideBook(){if(!S||!S.cls)return;GCUR={key:'book',steps:[{t:'가이드',d:'보고 싶은 안내를 고르세요. 「성장 · 제작」은 움직이는 그림으로 보여 줍니다.'}],i:0};GUIDES.book=GUIDES.book||{n:'Guide',steps:()=>[]};
+  $('guide').hidden=false;guideRender();$('gCard').querySelector('p').insertAdjacentHTML('afterend',GBOOK.map(([h,ks])=>`<div class="glh">${h}</div><div class="glist">${ks.filter(k=>GUIDES[k]).map(k=>`<button data-gk="${k}" class="${['gskill','gtier','gember','gseal'].includes(k)?'gnew':''}">${GUIDES[k].n}</button>`).join('')}</div>`).join(''));$('gNext').textContent='닫기'}
 /* ===== v94 튜토리얼 훈련장: 1장 지도 앞부분만 사용. 무리1 → 레벨업·스탯·스킬 창 → 무리2(물약) → 훈련 교관 → 1장 시작 ===== */
 const TUT_ALT=STORY_L-100;/* 훈련 교관 위치(길 좌표 z) */
 function tutAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Tutorial</div><h2>튜토리얼을 진행할까요?</h2></div>
-  <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 스탯, 물약, 보스전을 직접 해 보며 익힙니다. 3~5분 정도 걸립니다.</p>
+  <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 스탯, 물약, 보스전을 직접 해 보며 익힙니다. 1분 남짓이면 끝납니다.</p>
   <button class="primary" id="tutYes" style="width:100%">튜토리얼 시작 (추천)</button><button class="ghost" id="tutNo" style="width:100%">건너뛰고 1장으로</button>`;$('notice').hidden=false;releaseAll()}
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='tutYes'||e.target.id==='tutNo')window.TUTPEND=0;if(e.target.id==='tutYes'){$('notice').hidden=true;S.tutor=1;S.tutStep=0;S.tut.intro=1;resetWorld();toast('튜토리얼 · 훈련장','길을 따라 나아가며 기본을 익히세요');setTimeout(()=>guide('t0'),900)}
   else if(e.target.id==='tutNo'){$('notice').hidden=true;S.tutor=0;save();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('intro'),700)}});
@@ -7542,10 +7601,10 @@ setInterval(()=>{if(!S||!S.tutor||inTown||S.demo)return;const free=$('guide').hi
   else if(S.tutStep===2){if(free&&!statOpen){guide('t2');tutHi('#openMenu')}if(menuOpen)S.tutSaw=1;else if(S.tutSaw&&free){S.tutStep=3;tutHi(null);if(S.tut2){S.tutStep=4;setTimeout(()=>guide('t4'),300)}else guide('t3')}}
   else if(S.tutStep===3){if(P.hp<P.mhp*.6&&!S.tutHp){S.tutHp=1;tutHi(['#bHp']);toast('생명력이 줄었습니다','빨간 물약을 눌러 보세요')}if(P.hp>=P.mhp*.95&&S.tutHp===1){S.tutHp=2;tutHi(null)}}},300);
 function showTutClear(){$('clearSheet').innerHTML=`<div><div class="chap">Tutorial Clear</div><h2>훈련장 완료!</h2></div>
-  <p class="hint">기본을 모두 익혔습니다. 보상으로 <b style="color:var(--ink)">골드 30</b>과 <b style="color:var(--ink)">소형 생명력·마나 물약 3개씩</b>을 받았습니다.</p>
+  <p class="hint">기본을 모두 익혔습니다. 보상으로 <b style="color:var(--ink)">골드 30</b>을 받았습니다. 물약은 <b style="color:var(--ink)">충전식</b>이라 몬스터를 처치하면 다시 채워집니다.</p>
   <p class="hint">이제 1장 ${CH[0].n}에서 진짜 여정이 시작됩니다. 길 끝 제단의 ${CH[0].boss}를 쓰러뜨리세요.</p>
   <button class="primary" id="tutEnd">1장 시작</button>`;$('clear').hidden=false;releaseAll()}
-function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gold||0)+30;S.pots.hp.s+=3;S.pots.mp.s+=3;$('clear').hidden=true;tutHi(null);
+function tutEnd(){S.tutor=0;S.tutStep=0;S.ch=0;S.phase=0;S.kills=0;S.gold=(S.gold||0)+30;$('clear').hidden=true;tutHi(null);
   setMap(true);applyTheme();resetWorld();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('tdone'),900)}
 /* v92 직업 선택 카드에 들어갈 캐릭터 초상(실제 모델을 작은 화면에 한 번 그려 이미지로 저장) */
 const portCv={},portOk={};
