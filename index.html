@@ -98,7 +98,7 @@ body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body
 /* Layout: full-screen 3D isometric scene; HUD floats over it — vitals top-left, quest under it, build menu top-right, joystick bottom-left, actions bottom-right; choices as bottom sheets */
 :root{
   --bg:#0f1014; --panel:rgba(20,20,26,.84); --line:rgba(255,255,255,.1); --ink:#efe8da; --muted:#9a95a0;
-  --hp:#c8443a; --xp:#d9a44a; --ember:#ff8a3a; --gem:#5ad1c8; --boss:#8a5ad0; --card:#1d1d24;
+  --hp:#c8443a; --xp:#d9a44a; --ember:#e8dcc4;--ember0:#ff8a3a;/* v716: 강조색 주황 → 아이보리(새 UI 기준색) */ --gem:#5ad1c8; --boss:#8a5ad0; --card:#1d1d24;
   --ko:"Pretendard","Noto Sans KR",system-ui,sans-serif;
   --en:"Archivo","Pretendard",system-ui,sans-serif;
   color-scheme:dark;
@@ -450,10 +450,20 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .gcard{position:absolute;left:50%;transform:translateX(-50%);width:min(380px,calc(100% - 32px));background:#1d1b23;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;box-shadow:0 12px 40px rgba(0,0,0,.55);color:var(--ink);font:500 14px/1.55 var(--ko)}
 .gcard .chap{margin-bottom:2px}.gcard h3{margin:0 0 6px;font:800 17px var(--ko)}.gcard p{margin:0 0 6px;color:#c9c3cf}.gcard p b{color:var(--ink)}
 .gcard .gkeys{font-size:12px;color:#a8a0b4;background:#26232e;border-radius:8px;padding:6px 9px;margin:4px 0 6px}
-.gcard .gfoot{display:flex;align-items:center;gap:8px;margin-top:8px}.gcard .gdots{display:flex;gap:5px;flex:1}.gcard .gdots i{width:6px;height:6px;border-radius:3px;background:#4a4555}.gcard .gdots i.on{background:#ffb070;width:16px}
-.gcard button{font:700 13px var(--ko);border-radius:9px;padding:8px 14px;border:1px solid var(--line);background:#2a2733;color:var(--ink)}.gcard button.go{background:#ffb070;color:#1a1208;border-color:#ffb070}
+.gcard .gfoot{display:flex;align-items:center;gap:8px;margin-top:8px}.gcard .gdots{display:flex;gap:5px;flex:1}.gcard .gdots i{width:6px;height:6px;border-radius:3px;background:#4a4555}.gcard .gdots i.on{background:#e8dcc4;width:16px}
+.gcard button{font:700 13px var(--ko);border-radius:9px;padding:8px 14px;border:1px solid var(--line);background:#2a2733;color:var(--ink)}.gcard button.go{background:#e8dcc4;color:#141417;border-color:#e8dcc4}
 .gcard .glist{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 2px}.glh{margin:10px 0 2px;font:800 11px var(--ko);letter-spacing:.12em;color:#a89c8c}.glist button.gnew{border-color:rgba(216,180,106,.45)}
 .gcard{max-height:calc(100% - 24px);overflow:auto}
+.title{--ember:#ff8a3a}
+.chap{color:#a89c8c!important;letter-spacing:.14em}
+.gcard p{color:#e4dccd}
+#clear .hint{color:#e4dccd;font-size:14px;line-height:1.65}#clear h2{line-height:1.3}
+/* v716: 마을 안내 — 마을 사람을 세로로, 얼굴 그림 · 하는 일 · 마을 지도 위 위치 */
+.tnl{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
+.tnr{display:grid;grid-template-columns:54px 1fr 64px;gap:10px;align-items:center;padding:7px;border-radius:10px;background:#18181e;border:1px solid rgba(232,220,196,.1)}
+.tnr img,.tnr .tnp{width:54px;height:54px;border-radius:9px;background:#26232e;object-fit:cover;display:block}
+.tnr .tnm{width:64px;height:64px;border-radius:9px;background:#0f1014;display:block}
+.tnr b{display:block;font:800 14px var(--ko);color:#f2ead8}.tnr span{display:block;font:600 12px var(--ko);color:#cfc5b4;margin-top:1px}.tnr small{display:block;font:500 11px var(--ko);color:#a89c8c;margin-top:2px}
 .gvid{position:relative;margin:8px 0 6px;padding:10px;border-radius:10px;background:#121216;border:1px solid rgba(232,220,196,.12);font:500 12px/1.4 var(--ko);color:#d8d0c0;overflow:hidden}
 .gv-cap{font:800 10px var(--ko);letter-spacing:.1em;color:#a89c8c;margin-bottom:6px}.gv-foot{margin-top:6px;font-size:11px;color:#a89c8c}
 .gv-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:7px;background:#1c1c22;margin:4px 0}.gv-row small{color:#a89c8c}.gv-dim{opacity:.5}
@@ -3721,7 +3731,7 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
   /* 길가 등불 — 이야기 단계마다 2개씩 더 켜짐 */
   const LP=[[-2.2,8.4],[2.2,8.4],[-8.4,3],[8.6,1.4],[-3.4,-7.2],[3.6,-7.6],[-13.6,0],[13.2,-3.4],[0,-13],[7.6,-9.8],[-12.6,-12.6],[-17.2,-17.8]],on=Math.min(LP.length,2+lv*2);
   LP.forEach(([x,z],i)=>{const g=new THREE.Group(),lit=i<on;g.add(mesh(new THREE.CylinderGeometry(.07,.09,1.7,6),PM.iron,0,.85,0),mesh(new THREE.BoxGeometry(.32,.38,.32),lit?refLampOn:refLampOff,0,1.85,0),mesh(new THREE.ConeGeometry(.28,.2,4),PM.iron,0,2.14,0));const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xffc860,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,opacity:lit?.85:0}));gl.scale.setScalar(1.1);gl.visible=false;g.add(gl);propModel('post_lantern',m=>{if(!g.parent)return;for(const c of g.children)c.visible=c===gl;/* v684: 등불은 기둥 위 — 높이 2.5m로 맞추고 빛은 등 안쪽 높이에 */const b=new THREE.Box3().setFromObject(m),k=2.5/Math.max(.1,b.max.y-b.min.y);m.scale.setScalar(k);m.position.y=-b.min.y*k;g.add(m);const lb=new THREE.Box3();m.updateMatrixWorld(true);let ly=1.9,lx=0,lz=0;m.traverse(o=>{if(o.isMesh&&/_lantern$/i.test(o.name)){lb.setFromObject(o);const c=lb.getCenter(new THREE.Vector3());g.worldToLocal(c);ly=c.y;lx=c.x;lz=c.z}});gl.position.set(lx,ly,lz)});refAdd(g,x,z,rand(0,6),.3);if(lit)refPool(x,z,1.6,0xffd27a,.22)});
-  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);m.position.y=groundH(n.x,n.z);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:n.id==='hearth'?{x:n.x,z:n.z,r:1.45}:{x:n.x,z:n.z,r:.6})}
+  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);n.m=m;m.position.y=groundH(n.x,n.z);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:n.id==='hearth'?{x:n.x,z:n.z,r:1.45}:{x:n.x,z:n.z,r:.6})}
   if(refH){refH.lv=lv}
   for(let i=0;i<10;i++){const t=rand(0,6.3),r=rand(2.5,8);addDecal(Math.cos(t)*r,-1.5+Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
@@ -3813,7 +3823,7 @@ function buildVillage(){clearProps();propTheme='town';mapKind='town';townSync();
   /* 길가 등불 */
   for(const [x,z] of [[-2.6,12.4],[2.6,12.4],[-2.8,-7],[1.2,-11.6],[-9.4,3.4],[9.2,0.6],[6.8,-6]]){const g=new THREE.Group(),gl=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:0xffc860,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,opacity:.85}));gl.visible=false;gl.scale.setScalar(1.1);g.add(gl);
     g.add(mesh(new THREE.CylinderGeometry(.07,.09,2.2,6),PM.iron,0,1.1,0));propModel('post_lantern',m=>{if(!g.parent)return;for(const c of g.children)c.visible=c===gl;const b=new THREE.Box3().setFromObject(m),k=2.5/Math.max(.1,b.max.y-b.min.y);m.scale.setScalar(k);m.position.y=-b.min.y*k;g.add(m);m.updateMatrixWorld(true);m.traverse(o=>{if(o.isMesh&&/_lantern$/i.test(o.name)){const c=new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());g.worldToLocal(c);gl.position.copy(c)}})});refAdd(g,x,z,rand(0,6),.3);refPool(x,z,1.6,0xffd27a,.18)}
-  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);m.position.y=groundH(n.x,n.z);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
+  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);n.m=m;m.position.y=groundH(n.x,n.z);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
   for(let i=0;i<12;i++){const t=rand(0,6.3),r=rand(2.5,8);addDecal(Math.cos(t)*r,3+Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 function buildTown(){townSync();if(refOn())return buildRefuge();return buildVillage();clearProps();propTheme='town';mapKind='town';setGround(96,96,96);
@@ -3832,7 +3842,7 @@ function buildTown(){townSync();if(refOn())return buildRefuge();return buildVill
     for(let i=0;i<4;i++){const b=mesh(new THREE.BoxGeometry(.08,1.1,.03),PM.iron,-1+i*.65,1.05,.18);b.rotation.z=(i%2?.15:-.15);g.add(b)}
     for(const px of [-.7,.7]){const sh=mesh(new THREE.CylinderGeometry(.32,.32,.08,12),SM({color:[0x8a2a2a,0x2a4a8a][px>0?1:0],roughness:.6}),px,1.95,.1);sh.rotation.x=Math.PI/2;g.add(sh)}
     g.position.set(0,0,-7.4);scene.add(g);propMeshes.push(g);colliders.push({x:-1,z:-7.4,r:.8},{x:1,z:-7.4,r:.8})}
-  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
+  for(const n of NPCS){if(!npcOn(n))continue;const m=npcMesh(n);n.m=m;scene.add(m);propMeshes.push(m);colliders.push(n.id==='stash'&&NS()?{x:n.x,z:n.z,r:1.2}:{x:n.x,z:n.z,r:.6})}
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML='';d.hidden=true;$('names').appendChild(d);return d});
@@ -7387,7 +7397,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v715';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v716';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7510,7 +7520,7 @@ const GUIDES={
   skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
   stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 엔드게임부터는 심연의 냉기로 생명력이 계속 줄어드니 힘(재생)도 챙기세요.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
-  town:{n:'마을',steps:()=>[{t:'세렌 마을',d:`NPC에게 가까이 가면 대화 버튼이 뜹니다.`,d2:`${GB}${TOWN.shop}</b> 물약 상점 · ${GB}${TOWN.gear}</b> 장비 뽑기 · ${GB}${TOWN.smith}</b> 부위 강화 · ${GB}${TOWN.heir}</b> 특수 능력치 전승`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
+  town:{n:'마을',steps:()=>[{t:TOWN.n,v:townNpcHtml(),d:`마을 사람에게 가까이 가면 대화 버튼이 뜹니다. 오른쪽 작은 지도의 ${GB}빛나는 점</b>이 그 사람이 있는 자리입니다.`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
   pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 기본 3회, 여기서 ${GB}잿불 정수</b>로 충전 횟수를 최대 5회까지 늘립니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`몬스터를 처치하면 충전되고, 보스전은 가득 찬 채로 시작해 보스에게 준 피해만큼 다시 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
   gacha:{n:'장비 뽑기',steps:()=>[{t:'장비 뽑기',d:`골드로 ${GB}현재 레벨에 맞는 전설 장비</b>를 뽑습니다. 원하는 부위를 고를 수 있고, 레벨이 오를수록 가격도 오릅니다.`,d2:`가끔 ${GB}특수 능력치(★)</b>가 붙어 나옵니다. 특수 능력치가 나오면 실수로 넘기지 않도록 「계속 뽑기」가 ${GB}2초간 잠깁니다</b>.`}]},
   smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다.`,d2:`실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.`}]},
@@ -7558,6 +7568,17 @@ Object.assign(GUIDES,{
   gseal:{n:'성역의 인장 · 티어 승급',steps:()=>[
     {t:'티어 승급 — 인장 1개',v:GV.up,d:`고른 ${GB}줄 하나의 티어를 1단계</b> 올립니다. ${GB}아이템 티어까지만</b> 올라가고, 수치는 새 티어 범위에서 다시 뽑습니다.`,d2:`${GB}성역의 인장</b>은 엔드게임 사냥터에서 나오며 위험도와 변이가 높을수록 많이 나옵니다. 9부위를 모두 완성하는 데 가장 오래 걸리는 재화입니다.`}]}
 });
+/* v716: 마을 사람 얼굴 — 마을에 있을 때 그 사람 앞에 카메라를 잠깐 두고 한 장 찍어 둠(마을별 캐시) */
+const NPCPIC={};
+function npcPortrait(n){const key=(refOn()?'r':'v')+n.id;if(NPCPIC[key])return NPCPIC[key];if(!inTown||!n.m)return '';
+  try{const c=renderer.domElement,pr=renderer.getPixelRatio(),sz=new THREE.Vector2();renderer.getSize(sz);const S2=Math.floor(Math.min(sz.x,sz.y,220)),P2=Math.floor(S2*pr),cam=new THREE.PerspectiveCamera(26,1,.05,80);
+    const bx=new THREE.Box3().setFromObject(n.m),h=Math.max(.6,bx.max.y-bx.min.y),cx=(bx.min.x+bx.max.x)/2,cz=(bx.min.z+bx.max.z)/2,whole=n.id==='hearth'||n.id==='stash',ty=whole?bx.min.y+h*.5:bx.max.y-h*.3,d=whole?h*2.6:h*1.35,dl=Math.hypot(cx,cz),ux=dl>2?-cx/dl:0,uz=dl>2?-cz/dl:1;/* 광장 쪽에서 바라봄(뒤는 대개 건물) */
+    cam.position.set(cx+ux*d*.85,ty+h*.55,cz+uz*d*.85);cam.lookAt(cx,ty,cz);const hv=hero.visible;hero.visible=false;renderer.setViewport(0,0,S2,S2);renderer.render(scene,cam);hero.visible=hv;
+    const o=mkCv(108),x=o.getContext('2d');x.drawImage(c,0,c.height-P2,P2,P2,0,0,108,108);renderer.setViewport(0,0,sz.x,sz.y);return NPCPIC[key]=o.toDataURL('image/jpeg',.85)}catch(e){return ''}}
+function npcWhere(n){const a=Math.atan2(n.x,-n.z),d=Math.hypot(n.x,n.z);if(d<3)return '광장 한가운데';const dir=['위쪽','오른쪽 위','오른쪽','오른쪽 아래','아래쪽','왼쪽 아래','왼쪽','왼쪽 위'][((Math.round(a/(Math.PI/4))%8)+8)%8];return `광장 ${dir}${d>14?' 끝':''}`}
+function npcMapPic(n){if(!inTown)return '';try{const N=128,o=mkCv(N),x=o.getContext('2d'),R=(TLY?Math.max(...NPCS.filter(npcOn).map(q=>Math.hypot(q.x,q.z))):TOWN_R)+6,k=N/(2*R);
+    drawMiniTo(x,N,N,0,0,R+10,k,0,true);const px=N/2+n.x*k,pz=N/2+n.z*k;x.strokeStyle='#fff4d8';x.lineWidth=3;x.beginPath();x.arc(px,pz,9,0,7);x.stroke();x.fillStyle='#ffe0a0';x.beginPath();x.arc(px,pz,4.5,0,7);x.fill();return o.toDataURL()}catch(e){return ''}}
+function townNpcHtml(){const L=NPCS.filter(n=>npcOn(n));return `<div class="tnl">${L.map(n=>{const pic=npcPortrait(n),mp=npcMapPic(n);return `<div class="tnr">${pic?`<img src="${pic}" alt="">`:'<i class="tnp"></i>'}<div><b>${npcName(n.id)}</b><span>${npcSub(n.id)}</span><small>${npcWhere(n)}</small></div>${mp?`<img class="tnm" src="${mp}" alt="">`:'<i class="tnm"></i>'}</div>`}).join('')}</div>${inTown?'':'<div class="gv-foot">마을에서 열면 얼굴과 위치 그림이 함께 보입니다.</div>'}`}
 let GDQ=[],GCUR=null;
 function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;if(window.CHCON){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
