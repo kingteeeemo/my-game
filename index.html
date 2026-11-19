@@ -1828,7 +1828,11 @@ const nsCritMul=()=>1.5+gear().cdm/100;
 const nsCritF=()=>1+Math.min(1,nsCritCh())*(nsCritMul()-1);
 /* 스킬별 고정 계수 (직업 간 보정 삭제 — 우버 아귀 허수아비 측정 기준, 강화 효과 조정 전 임시값) */
 const NSK={rain:.66,quake:1.01,chainl:1.10,frost:1.43,whirl:3.74,volley:23.8};
-const nsSkillK=id=>NSK[id]!==undefined?NSK[id]:(()=>{const b=BAL[id];return b?(SKM[id]||1)*b[1]*b[2]:1})();
+const nsSkillK0=id=>NSK[id]!==undefined?NSK[id]:(()=>{const b=BAL[id];return b?(SKM[id]||1)*b[1]*b[2]:1})();
+/* v725 스킬 밸런스 — 110 스펙(1티어) 기준 사냥(구울 12마리 무리) DPS를 한 줄로(NSF), 보스 DPS는 보스에게만 붙는 배율로 따로(NSB, 보스 모드가 있는 스킬은 켠 상태 기준) */
+const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,chainl:1.167,pillar:.682,wave:19.8},
+  NSBK={whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
+const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;return id&&NS()?(NSBK[id]||1):1};
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
 const nsCd=(u,h)=>.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358);
@@ -6232,6 +6236,7 @@ function hurt(e,amt,quiet,so){
   if(e.perch&&e.weakT>0)amt*=ASH.wk;/* v603: 아쉬카르 — 머리가 내려와 있는 동안 약점(피해 1.5배) */
   if(e.duel&&e.dA&&e.dA.k==='sipe'&&!(e.dA.t<.8)){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 검귀 카이렌 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 · v266: 검귀·아귀 모두 사이페 진입 후 0.8초는 피해가 들어가고, 그 사이 체력 0이면 처치 */
   if(e.chBoss)amt*=STORY_BOSS_DR;
+  if(e.boss||e.duel||e.final)amt*=nsBossK();/* v725 */
   if(NSX.bossd&&(e.boss||e.duel||e.final))amt*=1+NSX.bossd;/* v603: 보스 피해 증가 *//* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
