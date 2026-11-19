@@ -7246,7 +7246,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v706';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v707';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7604,11 +7604,19 @@ let lvlDefer=false;
 function autoLabel(){const g=S.autoGem&&S.autoGem.startsWith('g:')?GEMS[S.autoGem.slice(2)]:null;return `자동 찍기${S.pending>1?` (${S.pending}회)`:''} · ${g?g.n+' 우선':'균형'}`}
 function autoPickNow(){const k=S.pending;if(!S.autoGem)S.autoGem='bal';/* v121: 누르면 균형 자동 강화가 설정으로 유지됨(이후 레벨업에는 창이 뜨지 않음) */const n=autoSpend(S.autoGem);offer=null;lvlSkill=null;refreshMax();save();
   if(S.pending>0)showLevelUp();else{$('lvl').hidden=true;toast('자동 강화 켜짐',(n?`강화 ${n}회를 올렸습니다 · `:'')+'이후 레벨업은 자동 분배 · 「스킬」에서 끌 수 있어요')}}
+/* v707: 자동 분배로 남은 강화를 다 올린 뒤에도 창을 유지 — 현재 강화 단계와 자동 분배 ON/OFF만 보여 줌 */
+function lvDoneView(){const sk=C().skills,s=lvlSkill&&sk.includes(lvlSkill)?lvlSkill:sk[0];lvlSkill=s;offer=null;
+  let h=`<div class="shead"><div><h2>${SK[s].n} 강화</h2><small class="lvsub">Lv ${S.lv} · ${SK[s].role}</small></div><button class="close" id="lvClose">닫기</button></div><div class="msec lvrows">`;
+  for(const g of gemsFor(s)){const L=gl(s,g);h+=mnRow({k:g,n:GEMS[g].n,L,M:GMAX,cur:L?GEMS[g].d(L):'',nx:L<GMAX?GEMS[g].d(L+1):'',btns:`<button class="mbt sq p" disabled aria-label="${GEMS[g].n}">${L>=GMAX?'✓':'+'}</button>`})}
+  h+=`</div>${sk.length>1?'<button class="ghost lvback" id="lvNext">다른 스킬 보기</button>':''}<div class="lvft"><button class="ghost" id="lvSk">스킬 창</button><button class="agbtn${S.autoGem?' on':''}" id="lvAg">자동 분배 ${S.autoGem?'ON':'OFF'}</button></div><p class="hint">${S.autoGem?'자동 분배가 켜져 있어 레벨업할 때마다 가장 낮은 강화부터 자동으로 올라갑니다.':'자동 분배가 꺼져 있어 다음 레벨업부터 직접 고릅니다.'}</p>`;
+  $('lvlSheet').innerHTML=h;$('lvl').hidden=false;releaseAll()}
+$('lvl').addEventListener('click',e=>{if(e.target!==$('lvl'))return;if(S.pending>0)closeLevelUp();else{lvlSkill=null;offer=null;$('lvl').hidden=true}});/* v707: 바깥을 누르면 닫기 */
 function closeLevelUp(){lvlDefer=true;lvlSkill=null;offer=null;$('lvl').hidden=true;toast('강화는 나중에 고를 수 있어요','「스킬」에서 「지금 고르기」를 누르세요')}
 $('lvlSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
-  if(b.id==='lvClose'){closeLevelUp();return}
+  if(b.id==='lvClose'){if(S.pending>0)closeLevelUp();else{lvlSkill=null;offer=null;$('lvl').hidden=true}return}
+  if(b.id==='lvNext'){const sk=C().skills;lvlSkill=sk[(sk.indexOf(lvlSkill)+1)%sk.length];lvDoneView();return}
   if(b.id==='lvAuto'){autoPickNow();return}
-  if(b.id==='lvAg'){if(S.autoGem){S.autoGem=null;save();showLevelUp()}else{S.autoGem='bal';autoPickNow()}return}/* v639: 자동 분배 켜고 끄기 */
+  if(b.id==='lvAg'){if(S.autoGem){S.autoGem=null;save();if(S.pending>0)showLevelUp();else lvDoneView()}else{S.autoGem='bal';autoSpend(S.autoGem);offer=null;refreshMax();save();if(S.pending>0)showLevelUp();else lvDoneView()}return}/* v707: 자동 분배 켜고 끄기 — 창은 닫지 않고 ON/OFF만 바뀜(닫기·바깥 눌러 닫기) */
   if(b.id==='lvSk'){lvlDefer=true;lvlSkill=null;offer=null;$('lvl').hidden=true;openMenu();return}/* v639: 스킬 창으로 */
   if(b.dataset.oa!==undefined){const p=offer&&offer[+b.dataset.oa];if(!p)return;S.autoGem='g:'+p.g;autoPickNow();return}/* v120: 고른 강화만 자동 분배(설정의 자동 강화에도 저장) */
   if(b.dataset.k){lvlSkill=b.dataset.k;offer=null;showLevelUp();return}
