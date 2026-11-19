@@ -1503,7 +1503,7 @@ const gOrb=L=>({ex:L>0,br:(1.8+.15*L)*1.3,bm:(.4+.05*L)*1.5});
 /* 2차 강화 (v33 → v40): 1차 강화 3종을 모두 채우는 31레벨부터 해금. 「잿불 정수」+ 골드로 올림 (실패 없음)
    직업마다 위 = 3단계 강화, 아래 = 5단계 강화 */
 const ESS_LV=31,G2MAX=5;let mapOpen=false,heirOpen=false;
-const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},4:{e:[12,28,55,85],g:[4000,12000,25000,45000]}/* v674: 4단계 표(연발 폭격) */,5:{e:[9,18,30,48,72],g:[3000,8000,15000,25000,40000]}};
+const G2C={3:{e:[15,35,70],g:[5000,15000,40000]},4:{e:[12,28,55,85],g:[4000,12000,25000,45000]}/* v674: 4단계 표(연발 폭격) */,5:{e:[9,18,36,58,86]/* v719: 3~5단계 +20% */,g:[3000,8000,15000,25000,40000]}};
 const g2Max=g=>GEMS2[g].max||G2MAX,g2Cost=(g,L)=>NS()&&NG2C[g2Max(g)]?NG2C[g2Max(g)][L]:Math.ceil(G2C[g2Max(g)].e[L]*1.3),/* v235: 2차 강화 정수 +30% (G2C 원본은 옛 세이브 반환 계산용으로 유지) */g2Gold=(g,L)=>Math.max(1,Math.round(G2C[g2Max(g)].g[L]/10));/* v411: 골드 1/10 */
 /* v82 새 주력 스킬 보조 수치 */
 const qLen=L=>L<1?7:7.56+(20-7.56)*(L-1)/9,/* v155: 1단계 7.56m 유지 → 10단계 20m */qWid=L=>1.6*(1+.05*L),qDmg=L=>1+.06*L,QSP_DEG=[45,60,90,130,170,210]/* v155: 기본(가시 확산 0단계) 30° → 45° */,qFork=F=>({n:F>=2?5:F>=1?3:1,m:.45+.08*F}),qHalf=F=>QSP_DEG[Math.min(5,F)]*Math.PI/360;/* v145: 가시 확산 1차 → 2차 강화(5단계). 5단계 = 옛 10단계(210° · 가장자리 ×0.85) *//* v140: 균열 확장의 부채꼴 확대 제거 */
@@ -1877,7 +1877,7 @@ function auraToggle(k){if(!auraL(k))return;S.auraOn=S.auraOn||{};if(S.auraOn[k])
   refreshMax();save()}
 function auraUp(k){const L=auraL(k);if(L>=10)return false;const c=AURA_COST[L];if((S.ess||0)<c)return false;S.ess-=c;S.aura=S.aura||{};S.aura[k]=L+1;return true}
 /* 추가 강화 정수(새 비용): 첫 강화 24 ~ 마지막 94 */
-const NG2C={3:[24,47,94],4:[24,40,67,94],5:[24,34,47,67,94]};
+const NG2C={3:[24,47,94],4:[24,40,67,94],5:[24,34,56,80,113]/* v719: 3~5단계 +20% */};
 let menuTab='sk',menuAuraMeasure=false;
 /* ===== v484 NS 몬스터·보스 (설계 7-3) ===== */
 const nLerpLog=(x,pts)=>{if(x<=pts[0][0])return pts[0][1];for(let i=1;i<pts.length;i++)if(x<=pts[i][0]){const[a,b]=pts[i-1],[c,d]=pts[i],f=(x-a)/(c-a);return Math.exp(Math.log(b)+(Math.log(d)-Math.log(b))*f)}return pts[pts.length-1][1]};
@@ -2144,7 +2144,7 @@ function skillStats(id){
   if(b.kind==='rain'){st.radius=rR(L('rarea'));st.dur=rDur(L('rarea'));const d=rDen(L('rdens'));st.rate=d.rate;st.zones=d.zones;st.rslow=L('rdens')>0;const e=g2('relem'),m=g2('meteor2');st.rel=e?relSt(e):null;st.met=0;st.spl=m?splSt(m):null;st.bolt=arEl()!=='fire'}
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);{const w=wvEcho(e);st.dmg*=(1+.05*l)*(1+.04*e)*(1+w.n*w.m)}st.wec={n:0,m:0};/* v648: 한 번 휘둘러 검기 하나 — 추가 검기 몫은 피해로 */const f=g2('wfan'),bu=g2('wburst');st.fan={n:1,m:1,sp:0};/* v645: 갈래 없음 — 하나의 파동 */st.burst=bu?wvBurst(bu):null;st.wk=wvProg(l,e,f)}
-  if(b.kind==='boom'){const r=L('brad'),e=L('bember');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=e?bmEmber(e):null;st.multi=bmMulti(g2('bmulti'));st.bspd=bmSpd(g2('bspd'))}
+  if(b.kind==='boom'){const r=L('brad'),q=g2('bret');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=null;st.multi=bmMulti(g2('bmulti'));st.bspd=bmSpd(L('bacc'));st.ret=q?retSt(q):null}/* v719: 잔불 삭제 · 가속 화살 1차(10단계) · 2차 회귀 화살 */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
@@ -6599,13 +6599,13 @@ function wvSwing(sh,tt,trav,h0){const e0=Math.min(1,Math.max(0,(tt-WV_SW.t)/WV_S
   const so=lp(so0,Math.max(so0,sh.so));return {...sh,hw:lp(h0,Math.max(h0,sh.hw)),so,si:so-lp(th0,sh.so-sh.si),zt:lp(W.zt,sh.zt),e,dz:-(trav+.8)*(1-e),sw:Math.min(1,tt/W.t)}}
 function wvFillQ(g,sh,sx,sz,dz,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const f=-1+2*i/seg,x=f*sh.hw*sx,q=1-f*f,zo=sh.zt+(sh.dz||0)+sh.so*sz*q+dz,zi=sh.zt+(sh.dz||0)+wvIn(sh,q,f)-(sz-1)*sh.so*.6*q+dz-.04;ps.setXYZ(i*2,x,0,zi);ps.setXYZ(i*2+1,x,0,zo)}ps.needsUpdate=true}
 function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0;i<=seg;i++){const a=-half+2*half*i/seg,sn=Math.sin(a),cs=Math.cos(a);ps.setXYZ(i*2,sn*ri,0,cs*ri+off);ps.setXYZ(i*2+1,sn*ro,0,cs*ro+off)}ps.needsUpdate=true}
-const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.16*L/* 탄속 강화(5단계): +80% */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
+const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.08*L/* v719: 1차 가속 화살(10단계): +80% */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const SK_NEW={
   wave:{n:'매화참',role:'다수 공격',tag:'wave',en:'Plum Blossom Slash · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
-  boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bember','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살이 적을 꿰뚫고 멀리 날아가며, 지나가는 길마다 충격파를 연달아 터뜨립니다.'},
+  boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bacc','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살이 적을 꿰뚫고 멀리 날아가며, 지나가는 길마다 충격파를 연달아 터뜨립니다.'},
   pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
 for(const [c,k] of [['archer','boom']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
@@ -6613,14 +6613,14 @@ Object.assign(GEMS,{
   wlen:{n:'매화섬',t:'wave',c:'#ffc080',/* v664: 참격 연장 → 매화섬 */d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
   wecho:{n:'낙화검',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${Math.round(((1+.04*L)*(1+e.n*e.m)-1)*100)}%\n검기가 지나간 자리·벤 적에게 매화 꽃잎이 흩날림${L?` (${Math.round(L/GMAX*100)}%)`:''}${L<10?'\n5단계·10단계에 피해가 크게 오름':''}`}},/* v664: 예리한 참격 → 낙화검 — 꽃잎 효과가 여기 붙음(단계마다 늘어 10단계 = 이전 양) *//* v648: 연속 참격 → 예리한 참격 */
   brad:{n:'대폭발',t:'boom',c:'#ff9a4a',d:L=>`폭발 반경 ${bmRad(L).toFixed(1)}m · 피해 +${4*L}%`},
-  bember:{n:'잔불',t:'boom',c:'#ff7a3a',d:L=>{const e=bmEmber(L);return `폭발 자리에 불바닥 ${e.dur.toFixed(1)}초 (초당 피해 ×${e.m.toFixed(2)})`}},
+  bacc:{n:'가속 화살',t:'boom',c:'#c8d8ff',d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v719: 잔불 자리, 2차 → 1차 */
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})\n${L<10?([1,4,7].includes(L+1)?'다음 단계: 기둥 +1개':'다음 단계: 피해 +5%'):'최대'}`}}});
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'매영조화',/* v664: 검기 확장 → 매영조화 */c:'#ffb0c8',d:L=>{const g=(typeof S!=='undefined'&&S&&S.sk&&S.sk.wave)||{},k=wvProg(g.wlen||0,g.wecho||0,L),a=wvShape(k,0,1).deg,b=wvShape(k,1,1).deg;return `검기가 더 넓게 퍼짐 — 발사 ${Math.round(a)}° → 사거리 끝 ${Math.round(b)}°\n(매화섬·낙화검도 크기를 조금 키움 · 모두 최대 ${WV_A0[1]}° → ${WV_A1[1]}°)`}},/* v645: 부채 검기 → 검기 확장 (같은 id라 기존 투자 단계 유지) */
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
   bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',/* v696: 5단계 */d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
-  bspd:{s:'boom',n:'가속 화살',c:'#c8d8ff',max:5,d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v672 */
+  bret:{s:'boom',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 나에게 되돌아오며 다시 연달아 폭발 (돌아올 때 피해 ×${r.m.toFixed(2)})`}},/* v719: 다발 사격 회귀 화살을 폭발 사격에도 */
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
   pecho:{s:'pillar',n:'여진',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
@@ -6782,10 +6782,10 @@ function boomExplode(c,o,hit,last){const R=o.r;fbT.push(time);while(fbT.length&&
   if(o.ember)kinField(c,R*.75,o.ember.dps,o.ember.dur);
 }
 /* v671: 화살이 적을 꿰뚫고 사거리 끝까지 날아가며, 일정 간격마다 지나간 자리에서 충격파가 연달아 터짐. 화살 하나당 같은 적은 한 번만 피해(hit) */
-function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set();
+function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1.6,o.r*.7),hit=new Set(),back=!!o.from;
   /* v673: 더 불규칙 — 간격이 아주 촘촘함~크게 비는 구간까지 섞이고, 한 자리에서 1~4개가 무리 지어 엇박자로 터짐. 위치는 줄기에서 좌우로 크게 벗어나고 크기도 .55~1.3배로 들쭉날쭉 */
   const gap=()=>{const r=Math.random();return step*(r<.35?rnd(.08,.3):r<.65?rnd(.4,.9):r<.88?rnd(1,1.6):rnd(1.8,2.6))};let next=rnd(.5,3.2);
-  shoot(a,{color:0xdfe8ff,size:.5,long:true,trail:2.4,tw:.16,tcol:0x8fb0ff,glow:1.8,gcol:0x9ab8ff,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0x8fb0ff,c1:0xffffff,cw:.22}});const p=projs[projs.length-1];
+  shoot(a,{from:o.from,color:0xdfe8ff,size:.5,long:true,trail:2.4,tw:.16,tcol:0x8fb0ff,glow:1.8,gcol:0x9ab8ff,speed:sp,life,dmg:0,ghost:true,nofx:true,rib:{n:9,w:.22,c0:0x8fb0ff,c1:0xffffff,cw:.22}});const p=projs[projs.length-1];
   const sx=Math.cos(a),sz=-Math.sin(a);/* 진행 방향의 옆 */const sought=new Set();
   /* v684: 화살이 몬스터 곁을 지나가면 그 몬스터 몸 위에서 작은 폭발이 2~4번 다다닥 터짐(화살 하나당 몬스터마다 한 번) */
   const seek=pp=>{for(const e of enemies){if(e.hp<=0||e.air||sought.has(e))continue;if(Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<o.r*.8+e.r){sought.add(e);const n=2+(Math.random()<.6?1:0)+(Math.random()<.25?1:0);let t=rnd(0,.04);
@@ -6796,7 +6796,8 @@ function shootBoom(a,dist,o){const sp=26*(o.spd||1),life=dist/sp,step=Math.max(1
         /* v675: 캐릭터 가까이(5m 안)는 근처에 적이 있을 때만 터짐 */if(Math.hypot(x-P.pos.x,z-P.pos.z)<5&&!enemies.some(e=>e.hp>0&&!e.air&&Math.hypot(e.pos.x-x,e.pos.z-z)<rr+e.r+.5))continue;
         later(t,()=>boomExplode({x,z},{...o,r:rr},hit,0));t+=rnd(.025,.11)}}
     if(Math.random()<.5*QM())emit(PADD,{x:pp.x,y:pp.y,z:pp.z,life:.2,s0:.3,s1:.05,c0:0xffffff,c1:0x6a8aff,a:.8,tex:1})};
-  p.onEnd=()=>{const q=p.m.position;boomExplode({x:q.x,z:q.z},o,hit,1)}}
+  p.onEnd=()=>{const q=p.m.position;if(!back||enemies.some(e=>e.hp>0&&!e.air&&Math.hypot(e.pos.x-q.x,e.pos.z-q.z)<o.r+e.r+.5))boomExplode({x:q.x,z:q.z},o,hit,1);
+    /* v719 회귀 화살: 끝에서 나에게 되돌아오며 다시 연달아 폭발(피해 ×ret) */if(o.ret&&!back&&P.hp>0){const fx0=q.x,fz0=q.z;later(.08,()=>{const dx=P.pos.x-fx0,dz=P.pos.z-fz0,dd=Math.hypot(dx,dz);if(dd<2)return;shootBoom(Math.atan2(dx,dz),Math.max(2,dd-.8),{...o,from:{x:fx0,z:fz0},dmg:o.dmg*o.ret,ret:0})})}}}
 /* ---------- 마법사: 사술 폭발 ---------- */
 /* v174: 아주 긴 기둥(화면 위까지, 40m)이 하늘에서 순식간에 내리꽂힘. 진한 보라(프리멀티플라이드 블렌딩이라 바탕을 어둡게 덮음) + 자홍 심지. 꽂힌 뒤 가늘어지며 사라짐 */
 const PAL_HEX={c:[0xffd0ff,0xb020ff,0x12001e],core:[0xffffff,0xff80f0,0xa020ff],ring:0xd060ff,fl:0xc040ff,st:[0xffd0ff,0x8010e0],sp:[0xffffff,0xc040ff],smoke:0x1a0a2a,ember:0xb040ff,fast:1,noring:1,soft:1.9};
@@ -7092,7 +7093,7 @@ function castFire(slot,id){
     one(1,0);for(let i=1;i<=st.wec.n;i++)one(st.wec.m,i*.22);return}
   if(b.kind==='boom'){aim(18);P.swing=.18;poseStart('sweep',.46,{pre:P.castPre});const n=st.multi.n,a=P.face,sp=Math.min(.418,1.21/Math.max(1,n-1));/* v674: 각도 10% 넓힘 */
     for(let i=0;i<n;i++){const d=i-(n-1)/2,aa=a+d*sp,dist=(4.5+Math.abs(d)*1.1)*1.7*2.1;/* v671: 사거리 2.1배(가운데 화살 16m) *//* v179: 최대 사거리 1.7배 · 가까운 적이 있으면 그 앞에서 터짐 *//* v180: 한 번에 발사 */{const fx_=P.pos.x+Math.sin(aa)*.9,fz=P.pos.z+Math.cos(aa)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.12,s0:1.4,s1:.4,c0:0xffffff,c1:0x6a8aff,a:.9,tex:1});
-      shootBoom(aa,dist,{spd:st.bspd||1,r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:st.ember?{dps:base*st.dmg*st.multi.m*st.ember.m,dur:st.ember.dur}:null})}}return}
+      shootBoom(aa,dist,{spd:st.bspd||1,r:st.r,dmg:base*st.dmg*st.multi.m,so:st.so,ember:null,ret:st.ret&&Math.random()<st.ret.p?st.ret.m:0})}}return}
   if(b.kind==='pillar'){aim(PILLAR_RANGE);P.swing=.15;poseStart('pillar',.5,{pre:P.castPre});const ap=pcMode?mouseW:P.pos,hand={x:P.pos.x+Math.sin(P.face)*.6,y:1.4,z:P.pos.z+Math.cos(P.face)*.6};popFx(hand.x,hand.y,hand.z,.5,1.8,.16,0xe0c0ff,.9);
     const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg);
@@ -7415,7 +7416,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v718';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v719';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7929,7 +7930,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='rain'){parts.push(`반경 ${s.radius.toFixed(1)}m · ${s.dur.toFixed(1)}초 · 초당 ${s.rate.toFixed(1)}회`);if(s.zones>1)parts.push(`화살비 ${s.zones}곳`);if(s.rel)parts.push(`속성 폭발 초당 ${s.rel.rate.toFixed(1)}회`);if(s.spl)parts.push(`분열 파편 ${s.spl.n}개`)}
   else if(b.kind==='chainl'){parts.push(`번개 ${s.forks}줄 · ${s.bn}번 튕김`);if(s.cst)parts.push(`번개 폭풍 ${s.cst.r.toFixed(1)}m`);if(s.ovl)parts.push(`과부하 ${s.ovl.dur.toFixed(1)}초`)}
   else if(b.kind==='wave'){parts.push(`사거리 ${s.len.toFixed(1)}m`);{const w0=wvShape(s.wk||0,0,1),w1=wvShape(s.wk||0,1,1);parts.push(`검기 ${Math.round(w0.deg)}°→${Math.round(w1.deg)}°`)}if(s.wec.n)parts.push(`연속 ${1+s.wec.n}번`);if(s.fan.n>1)parts.push(`검기 ${s.fan.n}갈래`);if(s.burst)parts.push(`끝 폭발 ${s.burst.r.toFixed(1)}m`)}
-  else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ember)parts.push(`잔불 ${s.ember.dur.toFixed(1)}초`);}
+  else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
   else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${(s.bossK||WHIRL_BM).toFixed(2)}`);const nw=NS()&&b.kind==='whirl';if(s.hits&&!nw)parts.push(`${s.hits}회 타격`);if(s.echo&&!nw)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(nw?`${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*(1-hasteP()*gl(id,'haste')),1-hasteP()*gl(id,'haste')).toFixed(2)}초마다`:`${whEl()==='frost'?'서리':'화염'} 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
@@ -7948,7 +7949,7 @@ function skillDps0(id){
   if(b.kind==='chainl'){const h0=base*st.dmg*crit,hit=h0*CH_HIT,stm=st.cst?h0*st.cst.m*1.5:0,ov=st.ovl?h0*st.ovl.m*(st.ovl.dur/.3)*.5:0;
     return {main:(hit+stm+ov)/cd,label:'번개에 맞은 적 1명당',sub:`번개 ${st.forks}줄 · ${st.bn}번 튕김 · 1회 ${fmtN(hit)}${stm?' · 번개 폭풍':''}${ov?' · 과부하':''}`}}
   if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
-  if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ember?hit*st.ember.m*st.ember.dur*.6:0,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 잔불':''}${sh?' · 파편':''}`}}
+  if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ret?hit*st.ret.m*st.ret.p:0/* v719: 회귀 화살 */,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 회귀':''}${sh?' · 파편':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
     return {main:hit/act+fl,label:'범위 안의 적 1명당 (누르고 있는 동안)',sub:`${act.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)}${fl?` · ${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*h,h).toFixed(2)}초마다`:''}`}}
@@ -8045,7 +8046,7 @@ const SKIGK={au_def:'shield',au_eva:'feather',au_es:'bubble',au_crit:'eye',au_ha
   barrage:'shards',orbsize:'orb',tri:'tri',fnova:'nova',
   cbounce:'bounce',cfork:'fork',overl:'over',cstorm:'storm',
   dash:'dash',flame:'flame',
-  wlen:'wave',wecho:'echo',wfan:'fan',wburst:'burst',brad:'burst',bember:'flame',bmulti:'shards',prad:'pillar',ptwin:'pillar',pchain:'link',pecho:'echo'};
+  wlen:'wave',wecho:'echo',wfan:'fan',wburst:'burst',brad:'burst',bacc:'dash',bret:'boomer',bmulti:'shards',prad:'pillar',ptwin:'pillar',pchain:'link',pecho:'echo'};
 function skIco(k,c){let g=SKIGK[k]||'gem';if(k==='flame'&&typeof whEl==='function'&&whEl()==='frost')g='snow';
   return `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:${c}">${SKIG[g]}</svg>`}
 const skSeg=(L,M)=>Array.from({length:M},(_,i)=>`<i${i<L?' class="on"':''}></i>`).join('');
