@@ -2189,9 +2189,9 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 /* v134: 카메라 확대·축소 (설정) — +30% 확대(거리 0.7배) ~ −30% 축소(거리 1.3배) */
 /* v729: 효과음(SFX) — sfx/*.mp3 · 웹 오디오. 첫 터치에서 잠금 해제(iOS) 후 전부 미리 불러옴(약 340KB) */
 const SFX=(()=>{
-  const NM=['hit','crit','dodge','petal','plum','mondeath','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup'];
+  const NM=['hit','crit','dodge','petal','plum','mondeath','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,mondeath:.2,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1,levelup:.9,swing:.45};
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,mondeath:.2,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1,levelup:.9,swing:.45,plumboom:.8,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
   const LIM={hit:[.12,5],mondeath:[.15,3],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
   const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
@@ -2223,7 +2223,7 @@ const SFX=(()=>{
   function swing(o){let i;do{i=1+Math.random()*9|0}while(i===sw&&Math.random()<.9);sw=i;return p('swing'+i,o)}
   function hit(crit,quiet){p('hit',{v:quiet&&!crit?.6:crit?1.2:1});if(crit)p('crit')}
   function setVol(v){vol=Math.max(0,Math.min(100,+v||0));if(master)master.gain.value=vol/100;try{localStorage.setItem('sfxVol',String(vol))}catch(e){}}
-  return{p,swing,hit,setVol,get vol(){return vol}}
+  return{p,swing,hit,setVol,o:0,get vol(){return vol}}
 })();
 let CAM_Z=0;try{CAM_Z=Math.max(-30,Math.min(30,+localStorage.getItem('camZ')||0))}catch(e){}
 const camK=()=>1-CAM_Z/100;
@@ -6929,7 +6929,7 @@ function shootWave(a,o){const DIR=o.dir||WV_SW.dir,ROLL=o.roll||0,YAW=o.yaw||0,A
     if(!e.boss&&e.hp>0){const k=.45/(1+(e.r||.5));e.pos.x+=Math.sin(d)*k;e.pos.z+=Math.cos(d)*k}
     if(first){hitStop=Math.max(hitStop,.055);shake=Math.max(shake,.09)}};
   p.onEnd=()=>{gl_.material.dispose();if(rb&&rb.m){const m=rb.m,mat=rb.mat;p.rbm=null;fx.push({m,t:0,dur:.14,upd(k){mat.uniforms.fade.value=1-k},end(){m.geometry.dispose()}/* 재질은 fx 정리에서 풀로 반환 */})}geo.dispose();geo2.dispose();geo3.dispose();for(const x of [m1,m2,m3])x.material.dispose();
-    if(o.burst){SFX.p('petal');const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r*.4,.45*Math.max(.55,1/Math.sqrt(fbT.length)),false,PAL_WAVE);/* v645: 불덩이는 작게 — X자 참격이 주인공 */shake=Math.max(shake,.16);wvCross(c,a,o.burst.r);aoe(c,o.burst.r,o.burst.dmg,{quiet:2,so:o.so})}};
+    if(o.burst){SFX.p('plumboom');SFX.p('petal',{v:.5});const q=p.m.position,c={x:q.x,z:q.z};fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();fireBurst(c,o.burst.r*.4,.45*Math.max(.55,1/Math.sqrt(fbT.length)),false,PAL_WAVE);/* v645: 불덩이는 작게 — X자 참격이 주인공 */shake=Math.max(shake,.16);wvCross(c,a,o.burst.r);aoe(c,o.burst.r,o.burst.dmg,{quiet:2,so:o.so})}};
   return p}
 /* ---------- 궁수: 폭발 사격 ---------- */
 /* v174 폭발 사격 폭발: 화염 불덩이·번개와 다른 「충격 폭발」 — 흰빛 섬광 심지 + 두꺼운 호박색 충격파 고리 2겹 + 바닥을 따라 뻗는 빛살 + 돌 파편·흙먼지 고리 + 크레이터 */
@@ -7018,7 +7018,7 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
   const PRE=.07,HOLD=.16,FADE=.34,D=PRE+HOLD+FADE;
   fx.push({m:g,t:0,dur:D,upd(k,dt){tt+=dt;const us=[outer,mid,inner].map(m=>m.material.uniforms);for(const u of us)u.uT.value=tt;
       if(tt<PRE){const e=tt/PRE;const bot=H*(1-e*e);for(const m of [outer,mid,inner])m.position.y=bot;us[0].uOp.value=.85;us[1].uOp.value=.9;us[2].uOp.value=1;disc.material.opacity=.5*e;ring.material.opacity=.5*e;ring.scale.setScalar(R*.6)}
-      else{if(!boomed){boomed=true;for(const m of [outer,mid,inner])m.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));
+      else{if(!boomed){boomed=true;SFX.p('pillar');for(const m of [outer,mid,inner])m.position.y=0;fbT.push(time);while(fbT.length&&fbT[0]<time-.25)fbT.shift();const FK=Math.max(.55,1/Math.sqrt(fbT.length));
           fireBurst({x:c.x,z:c.z},R*.85,.5*FK,fbT.length<3,PAL_HEX);/* v176: 덜 밝게, 효과 범위만큼 넓게 */
           for(let i=0;i<Math.round(4*QM());i++){const a=Math.random()*6.28,d=R*rnd(.35,.8);later(rnd(.02,.1),()=>fireBurst({x:c.x+Math.sin(a)*d,z:c.z+Math.cos(a)*d},R*.4,.35*FK,false,PAL_HEX))}radialBolts({x:c.x,z:c.z},R*.95,Math.round(5*QM()),0xd040ff);
           groundFx({x:c.x,z:c.z},dotTex,0xe080ff,R*.6,R*2.1,.4,.5*FK,true,.07);decalFx({x:c.x,z:c.z},crackTex,0xc040ff,R*rnd(.8,1.1),1.2,.6,true);decalFx({x:c.x,z:c.z},crackTex,0x08000f,R*rnd(.9,1.2),3,.6,false);decalFx({x:c.x,z:c.z},dotTex,0x1a0530,R*1.3,2.6,.55,false);shake=Math.max(shake,.22);
@@ -7240,7 +7240,7 @@ function castFire(slot,id){
     const tok=P.wTok=(P.wTok||0)+1,alive=()=>P.wTok===tok;/* v124: 구르기로 취소하면 예약된 타격·효과가 모두 사라짐 */
     const round=(mul,delay)=>{for(let i=0;i<st.hits;i++){const f=()=>{if(!alive())return;if(i===0&&delay===0)groundFx(P.pos,shockTex,0xcfe0ff,st.radius*.3,st.radius*1.05,.3,.6,true,.07);aoe(P.pos,st.radius,base*st.dmg*mul,{knock:st.knock&&i===st.hits-1,quiet:i%2===1,spark:1,bm:st.bossK})},t=delay+i*WIV;t>0?later(t,f):f()}};
     round(1,0);for(let i=1;i<=st.echo;i++)round(st.echoMul,i*(st.hits*WIV+.05));
-    SFX.swing({v:1.3});P.spin=st.hits*WIV*(1+st.echo);P.spinFire=!!st.flame&&whEl()!=='frost';poseStart('whirl',P.spin,{});const n0=fx.length;whirlFx(st.radius,P.spin,!!st.flame&&whEl()!=='frost');
+    P.spin=st.hits*WIV*(1+st.echo);for(let i=0,n=Math.ceil(P.spin/(WIV*2));i<n;i++)later(i*WIV*2,()=>alive()&&SFX.p('whirl'));/* v730: 회전 베기 효과음 — 0.36초마다 반복 */P.spinFire=!!st.flame&&whEl()!=='frost';poseStart('whirl',P.spin,{});const n0=fx.length;whirlFx(st.radius,P.spin,!!st.flame&&whEl()!=='frost');
     /* 화염 지대: 회전하는 동안 이동 경로를 따라 불바닥을 깔아 둠 */
     if(st.dash){P.dashT=P.spin;P.dashM=st.dash}/* 질주 (v40): 회전하는 동안만 */
     P.vortex=st.vortex?{r:st.radius*st.vortex.rm,sp:st.vortex.sp}:null;
@@ -7250,7 +7250,7 @@ function castFire(slot,id){
     if(st.burn){const n=Math.ceil(P.spin/WIV);for(let i=0;i<n;i++)later(i*WIV,()=>alive()&&burnField({x:P.pos.x,z:P.pos.z},st.radius*.7,base*st.burnMul*.5,st.burnDur,st.bossK))}
     return;
   }
-  if(b.kind==='orb'){
+  if(b.kind==='orb'){SFX.p('orb');
     /* 얼음 보주: 천천히 날아가며 사방으로 얼음 파편을 뿌림 (v310: 끝 폭발 없음) */
     aim(16);{const fx_=P.pos.x+Math.sin(P.face)*.9,fz=P.pos.z+Math.cos(P.face)*.9;emit(PADD,{x:fx_,y:1.2,z:fz,life:.16,s0:1.6,s1:.5,c0:0xdff4ff,c1:0x4a9ad8,a:.7,tex:1})}
     const n=st.proj,spr=Math.min(.32,1.2/Math.max(1,n-1));
@@ -7264,9 +7264,9 @@ function castFire(slot,id){
       shoot(a,{rib:null,/* v301: 고리 제거 *//* v280: 고리를 마력탄처럼(보주 크기 비례 나선 2가닥, 회전 12 · 길이 12 · 굵기 ·심지 .3) · 밝기 .6 → .42(-30%) · 둘레 원형 고리(rings) 제거 */color:oc,size:1.3*st.orbScale,hr:.4*st.orbScale,glow:1.2*(1-dk*.5)*ORBD(),/* v302: 광채 1.5→1.2 (-20%) */gcol:gc,coreM:cm,coreS:.45*(1-dk*.5)*ORBD(),dim:dk,speed:b.speed*(st.osp||1),life:b.life*.7/* v309: 사거리 -30% */,dmg:base*st.dmg*1.6,pierce:999,slow:true,frz:st.frz,orb:{cid,shf:st.shf,sd:base*st.dmg*st.sdm,sp:st.pierce,sc:st.chain,blast:st.blast,br:st.br,bm:st.bm,frz:null,rate:st.rate,burst:st.burst,nova:st.nova,edge:BZ&&(i===0||i===n-1),/* v322: 보스 모드 양끝 보주의 서리 폭발 자국은 겹쳐도 녹지 않음 */cnt:st.cnt,ssz:st.ssz,ssp:st.ssp}});if(st.nova)projs[projs.length-1].nt=st.nova.iv*(.7+i/n)};fire()}/* v311: 보스 모드도 한꺼번에 — 다발 사격 보스 모드처럼 좁은 부채꼴(간격 .11rad, 5발 전체 약 25°) *//* 서리 폭발 시점을 보주마다 엇갈리게 (시작점에서 겹쳐 하얗게 뭉치지 않도록) */
     P.swing=.2;poseStart('orb',.56,{pre:P.castPre});return;
   }
-  if(b.kind==='quake'){SFX.swing({v:1.4,rate:.8});aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
+  if(b.kind==='quake'){aim(16);const p0={x:P.pos.x,z:P.pos.z},dmg=base*st.dmg,a=P.face,half=st.half,len=st.len,core=half/st.fork.n;
     const pre=P.castPre,SLAM=Math.max(.2,(pre?.42:.6)*(P.castF||1)),HIT=pre?.075:Math.min(.27,SLAM*.45);P.slam=SLAM;P.slamT=SLAM;P.swing=Math.min(SLAM,.2);P.slamK=pre?1:0;/* v131: 검을 거꾸로 들어 수직으로 내려꽂음 — 꽂는 순간 가시 *//* v89: 검을 머리 위로 들었다가 바닥을 내려찍는 모션, 찍는 순간 가시 */
-    later(HIT,()=>{const q={x:p0.x+Math.sin(a)*1.3,z:p0.z+Math.cos(a)*1.3};shake=Math.max(shake,.32);fireBurst(q,1.6,1,true,PAL_DUST);/* v166: 흙먼지 구름 */
+    later(HIT,()=>{const q={x:p0.x+Math.sin(a)*1.3,z:p0.z+Math.cos(a)*1.3};SFX.p('quake');shake=Math.max(shake,.32);fireBurst(q,1.6,1,true,PAL_DUST);/* v166: 흙먼지 구름 */
       groundFx(q,shockTex,0x9a8070,.3,2.2,.28,.7,false,.07);groundFx(q,dotTex,0xffd8a0,.2,1.2,.12,.6,true,.08);
       spray(PNRM,q,10,{sp:[2,5],up:[3,7],y:[.1,.3],life:[.4,.8],s0:[.3,.6],s1:[.1,.2],c0:0x5a4a48,c1:0x1a1418,a:.9,drag:1.5,tex:2});
       debris(q,{n:5,color:0x2a2228,geo:octaGeo,sp:[2,5],up:[3,6],y:[.1,.3],sz:[.1,.22],r0:.3,dur:.9,g:22});
@@ -7560,7 +7560,7 @@ function overloadOrb(p,dmg,dur){const R=OV_R,Y=1.5,q=QM();
           popFx(e.pos.x,1,e.pos.z,.4,2.2,.14,0xdff0ff,.8);if(q>=.75)bodyArcs({x:e.pos.x,z:e.pos.z},e.r*.9,e.h||1.4,3);hitKind='zap';hurt(e,dmg,true);hitKind=null}}
         if(n){pulse=1;popFx(p.x,c.y,p.z,.8,3,.14,0xffffff,.7);flash(p,0x4a8aff,1.6)}}},
     end(){if(lk<.9)return;/* 맵 이동·정리(wipeFx)로 끊긴 경우엔 마무리 폭발 없음 */fireBurst(p,1.8,.7,false,PAL_BOLT);radialBolts(p,R*.5,4,0x9ac4ff);popFx(p.x,Y,p.z,.6,3.2,.16,0xffffff,.8)}})}
-function explode(p,dmg,skip,r=2.4,ice,bm){SFX.p(ice&&ice!=='bolt'?'frost':'fire');blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg,true)}hitKind=hk}
+function explode(p,dmg,skip,r=2.4,ice,bm){SFX.p(ice==='bolt'?'zapboom':ice?(SFX.o?'shard':'frost'):'fire');blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg,true)}hitKind=hk}
 
 /* ================= input ================= */
 const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
@@ -9394,7 +9394,7 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
     if(p.home){const t=nearestEnemy(pp,7,p.hit);if(t){const ax=t.pos.x-pp.x,az=t.pos.z-pp.z,l=Math.hypot(ax,az)||1;p.vx+=(ax/l*p.speed-p.vx)*Math.min(1,dt*5);p.vz+=(az/l*p.speed-p.vz)*Math.min(1,dt*5)}}
     if(p.col===0xb8f07a&&Math.random()<dt*8*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vy:rnd(0,.6),life:rnd(.25,.4),s0:.35,s1:.05,c0:0xeaffb0,c1:0x4a9a20,a:.8,tex:1});
     pp.x+=p.vx*dt;pp.z+=p.vz*dt;p.m.rotation.y=Math.atan2(p.vx,p.vz);p.life-=dt;let dead=p.life<=0;if(p.rib)ribStep(p,dt);if(p.upd)p.upd(dt);/* v172 */
-    if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;NOVA_CID=p.orb.cid||0;NOVA_KEEP=p.life<=v.iv||!!p.orb.edge;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova');NOVA_CID=0;NOVA_KEEP=false}}/* v317: 보주 수명이 다음 폭발 전에 끝나면 이번이 마지막 폭발 */
+    if(p.orb&&p.orb.nova&&!dead){p.nt-=dt;if(p.nt<=0){const v=p.orb.nova;p.nt=v.iv;NOVA_CID=p.orb.cid||0;NOVA_KEEP=p.life<=v.iv||!!p.orb.edge;SFX.o=1;explode({x:pp.x,z:pp.z},p.orb.sd*v.m,null,v.r,'nova');SFX.o=0;NOVA_CID=0;NOVA_KEEP=false}}/* v317: 보주 수명이 다음 폭발 전에 끝나면 이번이 마지막 폭발 */
     if(p.orb&&!dead){const S2=p.m.scale.x;for(const c of p.m.children)if(c.userData.ring){c.rotation.x+=dt*5*c.userData.ring;c.rotation.y+=dt*3.3}
       if(Math.random()<dt*14*QM())emit(PADD,{x:pp.x,y:1.2,z:pp.z,vx:-p.vx*.15,vz:-p.vz*.15,life:.35,s0:S2*.7,s1:S2*.3,c0:0x7fc0ef,c1:0x10305a,a:.2*(1-p.dim),drag:3,tex:1})}
     if(p.orb&&!dead&&p.orb.shf>0){p.et-=dt;if(p.et<=0){p.et=.11/((p.orb.rate||1)*p.orb.shf);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
