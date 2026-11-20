@@ -4554,13 +4554,31 @@ const LOOKS={wings:{n:'빛의 날개',wing:1,col:[.3,.56,1],hot:[.93,.97,1],sp:[
   wings_fire:{n:'화염 날개',wing:1,col:[1,.13,.01],hot:[1,.5,.12],sp:[1,.6,.2],fl:1,glow:0xff4a10,em:1}};
 /* v483: 외형 상점(재화 구매)이 생기기 전까지는 테스트 캐릭터에서만 보이고 착용됨 — 일반 캐릭터는 외형 줄 숨김·저장된 착용 값 무시 */
 const lookOk=()=>!!S;/* v511: 외형은 일반 모드에도 적용 */
-function lookRow(){if(!lookOk()||!Object.keys(LOOKS).some(lookOwn))return '';return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).filter(lookOwn).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}</div>`}
+function lookRow(){const wk=Object.keys(WLOOKS).filter(k=>lookOwn(k)&&wlookOk(k,S.cls));if(!lookOk()||(!Object.keys(LOOKS).some(lookOwn)&&!wk.length))return '';return `<div class="lookrow"><span class="tag" style="color:var(--muted)">외형</span>${Object.keys(LOOKS).filter(lookOwn).map(k=>`<button data-look="${k}" class="${S.look===k?'on':''}">${LOOKS[k].n}${S.look===k?' · 착용 중':''}</button>`).join('')}${wk.map(k=>`<button data-wlook="${k}" class="${S.wlook===k?'on':''}">${WLOOKS[k].n}${S.wlook===k?' · 착용 중':''}</button>`).join('')}</div>`}
 function lookSet(id){if(!lookOk())return;S.look=id&&LOOKS[id]?id:null;save()}
 /* v508: 외형 구매 재화 「광휘의 파편」 — 재단사 세라에게서 외형 장비를 삼. 획득처(드롭·보상)는 추후, 테스트 캐릭터는 무한 */
 const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.wings_fire.pr=700;LOOKS.wings_lava.pr=700;
-const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k));/* 이미 착용 중이던 외형은 보유로 인정 */
+/* v729: 무기 외형 — 재단사 세라가 판매. S.wlook = 착용 중인 무기 외형 id. 지금은 잿불 검귀의 대검(전사·무사).
+   검귀 모델의 손 기준 자리 그대로 오른손에 붙임(원래 무기는 숨김, 등급 빛·휘두를 때 빛은 새 검에 그대로). 길이 ×1.15라 무기 끝점도 그만큼 */
+const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',L:1.15,cn:'전사 · 무사'}};
+const lookGet=k=>LOOKS[k]||WLOOKS[k];
+const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
+const WSK={st:0,cb:[]};
+function wskLoad(cb){if(WSK.st===2){cb&&cb();return}if(cb)WSK.cb.push(cb);if(WSK.st||!THREE.GLTFLoader)return;WSK.st=1;
+  new THREE.GLTFLoader().load(WLOOKS.wsk_knight.file+'?'+APP_VER,g=>{const m=g.scene.getObjectByName('knight_sword');if(!m){WSK.st=3;return}const t=m.getObjectByName('knight_tip');if(t)m.remove(t);WSK.src=m;WSK.st=2;const L=WSK.cb;WSK.cb=[];L.forEach(f=>{try{f()}catch(e){}})},null,()=>{WSK.st=3})}
+function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&&wlookOk(S.wlook,K.cls)?S.wlook:null;if((K.wsk||null)===want)return;
+  if(K.wskM){if(K.wskM.parent)K.wskM.parent.remove(K.wskM);K.wskM=null;K.swM=K.swM0;K.swCrack=K.swCrack0;K.swLift=K.swLift0;K.swM0.visible=true;if(K.tip0)K.tip.position.copy(K.tip0);K.wsk=null;if(hero&&skOf(hero)===K)skwGear()}
+  if(!want)return;if(WSK.st!==2){if(WSK.st!==3)wskLoad(()=>wskSync(K));return}
+  if(!K.sw.parent||!/RightHand$/.test(K.sw.parent.name))return;/* 등에 멘 동안(초상화)엔 손으로 돌아온 뒤에 */
+  const W=WLOOKS[want],m=WSK.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
+  K.sw.updateMatrix();const M=K.sw.matrix.clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale);K.sw.add(m);
+  if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone()}
+  const mt=mm.material;mt.color.setScalar(1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);K.swM0.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
+  if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=SKC[K.cls].lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
+  K.tip.position.copy(K.tip0).multiplyScalar(W.L||1);K.wskM=m;K.wsk=want;if(hero&&skOf(hero)===K)skwGear()}
+const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k||S.wlook===k));/* 이미 착용 중이던 외형은 보유로 인정 */
 const lookCoin=()=>S.test?Infinity:(S.lumi||0);
-function lookBuy(k){const L=LOOKS[k];if(!L||lookOwn(k))return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
+function lookBuy(k){const L=lookGet(k);if(!L||lookOwn(k))return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
   if(!S.test)S.lumi-=c;(S.lkOwn=S.lkOwn||{})[k]=1;save();toast('외형 구매',`${L.n}`,'#c890ff');return true}
 const WG={m:null,a:0,open:1,tw:0,v:new THREE.Vector3(),pp:null,pr:0,_v:new THREE.Vector3()};
 function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.wing)&&hero&&!S.demo&&P.hp>0;let m=WG.m;
@@ -4801,7 +4819,7 @@ function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userD
   if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
   if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
-function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;const mage=K.cls==='mage',arc=K.cls==='archer';
+function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;if(S&&(S.wlook||K.wsk))wskSync(K);const mage=K.cls==='mage',arc=K.cls==='archer';
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
   if(P.flinch){if(P.hp>0)K.hitT=.35;P.flinch=false}/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */K.hitT-=dt;
   let st,t=null,rate=1,aim=0;
@@ -7135,29 +7153,31 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
 let nsKind=null;
 /* 외형 미리보기 — 장비창 전용 공간에서 캐릭터 뒷모습 3/4 각도를 한 번에 그려 이미지로 저장(직업별 캐시). 날개 모양을 고쳐도 항상 최신 모습 */
 let LKIMG={};
-function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const todo=Object.keys(LOOKS).filter(k=>!LKIMG[k]);if(!todo.length)return;
+function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls));if(wk.length&&WSK.st!==2&&WSK.st!==3){wskLoad(()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
+  const todo=[...Object.keys(LOOKS),...(WSK.st===2&&KW&&KW.st===2?wk:[])].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
   const sl=S.look,cm={m:camera.layers.mask,fov:camera.fov,asp:camera.aspect,p:camera.position.clone(),q:camera.quaternion.clone()},fg=scene.fog?{n:scene.fog.near,f:scene.fog.far}:null,g=invStudio(),cv=renderer.domElement,Wd=cv.width,Hd=cv.height,sz=Math.min(Wd,Hd),o=document.createElement('canvas');o.width=o.height=360;const cx=o.getContext('2d'),u=g.userData,hr=hero.rotation.x;
   try{camera.layers.set(1);if(fg){scene.fog.near=900;scene.fog.far=1000}camera.fov=30;camera.aspect=Wd/Hd;g.position.set(P.pos.x,0,P.pos.z);u.dk.visible=true;
     const f=(P.face||0)+Math.PI,dx=Math.sin(f),dz=Math.cos(f);u.key.position.set(dx*2,9,dz*2);u.rim.position.set(-dx*3,4,-dz*3);
-    for(const k of todo){S.look=k;for(let i=0;i<14;i++)wingTick(.1);hero.traverse(x=>x.layers.enable(1));
-      camera.position.set(P.pos.x+dx*14.5,23,P.pos.z+dz*14.5);camera.lookAt(P.pos.x,2.4,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+    for(const k of todo){const wp=!!WLOOKS[k];S.look=wp?null:k;S.wlook=wp?k:null;if(KW)wskSync(KW);for(let i=0;i<14;i++)wingTick(.1);hero.traverse(x=>x.layers.enable(1));
+      if(wp){const f2=(P.face||0)+.75;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,7.5,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,2.1,P.pos.z)}
+      else camera.position.set(P.pos.x+dx*14.5,23,P.pos.z+dz*14.5),camera.lookAt(P.pos.x,2.4,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
       renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9)}
   }catch(e){}
-  u.dk.visible=false;S.look=sl;camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
+  u.dk.visible=false;S.look=sl;S.wlook=swl;if(KW)wskSync(KW);camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
   for(let i=0;i<14;i++)wingTick(.1)}
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 999';
   let h=`<div class="shead"><div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
-  for(const k of Object.keys(LOOKS)){const L=LOOKS[k],own=lookOwn(k),on=S.look===k,ok=lookCoin()>=(L.pr||0);
-    h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':''}</div>
-      <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}">${on?'해제':'착용'}</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
+  for(const k of [...Object.keys(LOOKS),...Object.keys(WLOOKS)]){const L=lookGet(k),wp=!!WLOOKS[k],own=lookOwn(k),on=wp?S.wlook===k:S.look===k,ok=lookCoin()>=(L.pr||0),cl=wp&&!wlookOk(k,S.cls);
+    h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':wp?`<span class="lkw" style="background:rgba(20,20,26,.8);color:#cfc5b4">${L.cn} 전용</span>`:''}</div>
+      <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';renderLooks();$('nsSheet').hidden=false;releaseAll()}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
-  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
+  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(WLOOKS[k]){if(ac==='buy'){if(lookBuy(k)&&wlookOk(k,S.cls)){S.wlook=k;save()}}else{S.wlook=ac==='off'?null:k;save()}renderLooks();return}if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
   if(b.dataset.sc&&stashOpen){const [d,k]=b.dataset.sc.split(',');stashCurMove(d,k);return}
   if(a==='drw'&&rrOpen){if(rrSpin||!rrSel||performance.now()-drNoClick<400)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
@@ -7603,7 +7623,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v729';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v730';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8512,6 +8532,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','gloves','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:kSlot(k)}renderInv();return}
   if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i],ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
+  if(b.dataset.wlook){S.wlook=S.wlook===b.dataset.wlook?null:b.dataset.wlook;save();renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
   if(b.id==='iDrop'){const it=S.inv.find(x=>x.id===invSel);if(it&&!it.lock){S.gold+=sellPrice(it);S.inv=S.inv.filter(x=>x!==it)}invSel=null;save();renderInv();refreshUpBtn();return}
