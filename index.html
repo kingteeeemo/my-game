@@ -799,7 +799,8 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .ivcmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .lkcur{display:flex;align-items:center;gap:8px;margin:10px 0;padding:10px 14px;border-radius:12px;background:#202028;border:1px solid #3a3a46;color:#d8d0c0;font:700 13px var(--ko)}.lkcur b{margin-left:auto;color:#e8c8ff;font:800 16px var(--en);font-stretch:87%}.lkcur i,.lkp i{display:inline-block;width:11px;height:11px;margin-right:6px;border-radius:2px;background:linear-gradient(135deg,#e8c8ff,#9a6aff);transform:rotate(45deg)}.lkcur i{margin:0 2px 0 0}
 .lkgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}.lkc{display:flex;flex-direction:column;gap:7px;min-width:0}.lkimg{position:relative;aspect-ratio:1;border-radius:14px;border:2px solid #3a3a46;background:#202028 center/cover no-repeat;overflow:hidden}.lkimg.on{border-color:#c890ff;box-shadow:0 0 14px rgba(200,144,255,.35)}.lkn{position:absolute;left:8px;top:8px;padding:3px 9px;border-radius:10px;background:rgba(10,10,14,.7);font:800 12.5px var(--ko);color:#fff}.lkw{position:absolute;right:8px;bottom:8px;padding:3px 8px;border-radius:9px;background:#c890ff;color:#1a1020;font:800 11px var(--ko)}
-.lkb{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lkp,.lkbuy{min-height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 14px var(--en);font-stretch:87%;box-sizing:border-box}.lkp{background:#202028;border:1px solid #3a3a46;color:#e8c8ff}.lkp.own{color:#8a8a96;font:700 12.5px var(--ko)}.lkbuy{border:0;background:#ff8a3a;color:#1a1008;font:800 14px var(--ko)}.lkbuy.w{background:#2e2e3a;color:var(--ink);border:1px solid #4a4a56}.lkbuy:disabled{opacity:.4}
+.lkb{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lkp,.lkbuy{min-height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 14px var(--en);font-stretch:87%;box-sizing:border-box}.lkp{background:#202028;border:1px solid #3a3a46;color:#e8c8ff}.lkp.own{color:#8a8a96;font:700 12.5px var(--ko)}.lkbuy{border:0;background:#ff8a3a;color:#1a1008;font:800 14px var(--ko)}.lkbuy.w{background:#2e2e3a;color:var(--ink);border:1px solid #4a4a56}.lkbuy:disabled{opacity:.4}.lkbuy.x{background:#2a2a32;color:#8a8a96;border:1px solid #3a3a46;opacity:1}
+.lkcats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lkcat{position:relative;aspect-ratio:1/1.12;border-radius:16px;border:2px solid #3a3a46;background:#202028 center/cover no-repeat;padding:0;cursor:pointer;overflow:hidden;text-align:left}.lkcat:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,14,0) 45%,rgba(10,10,14,.92))}.lkcat b{position:absolute;left:12px;bottom:30px;font:800 17px var(--ko);color:#fff}.lkcat i{position:absolute;left:12px;bottom:11px;font:600 12px var(--ko);font-style:normal;color:#b8b0c8}.lkcat:active{border-color:#c890ff}.lkhd{display:flex;align-items:center;gap:8px}.lkbk{border:1px solid #4a4a56;background:#2a2a34;color:var(--ink);border-radius:10px;min-width:38px;height:34px;font:800 16px var(--ko);padding:0 10px}
 .cdia{display:block;width:26px;height:26px;margin:auto;background:var(--c);transform:rotate(45deg) scale(.72);border-radius:4px;box-shadow:0 0 12px var(--c),inset 0 0 8px rgba(255,255,255,.45)}.cdia.sq{border-radius:50%;transform:scale(.8)}
 .skr{display:flex;gap:10px;align-items:stretch;background:#1f1f27;border:1px solid var(--line);border-radius:12px;padding:8px}.skr.off{opacity:.55}
 .ski{flex:none;width:60px;height:60px;align-self:center;border-radius:10px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--c) 26%,#16161c),#101015 75%);border:1.5px solid color-mix(in srgb,var(--c) 60%,transparent);box-shadow:inset 0 0 12px rgba(0,0,0,.6);display:grid;place-items:center}
@@ -4561,7 +4562,7 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
    검귀 모델의 손 기준 자리 그대로 오른손에 붙임(원래 무기는 숨김, 등급 빛·휘두를 때 빛은 새 검에 그대로). 길이 ×1.15라 무기 끝점도 그만큼 */
 /* v738: 무기 외형 여러 개 — 마법사 「월광의 홀」 추가. rel:'hand' = 손 기준 자리(검귀 모델에서 뽑은 자리) → 원래 무기 기준으로 환산, rel:'sw' = 원래 무기 자리 기준 그대로(쥐는 곳 = 원점, 막대 = +y).
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
-const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,cn:'전사 · 무사'},
+const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k];
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
@@ -7157,31 +7158,47 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
 let nsKind=null;
 /* 외형 미리보기 — 장비창 전용 공간에서 캐릭터 뒷모습 3/4 각도를 한 번에 그려 이미지로 저장(직업별 캐시). 날개 모양을 고쳐도 항상 최신 모습 */
 let LKIMG={};
-function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls));for(const k of wk){const st=wskS(k).st;if(st!==2&&st!==3)wskLoad(k,()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
-  const todo=[...Object.keys(LOOKS),...(KW&&KW.st===2?wk.filter(k=>wskS(k).st===2):[])].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
+/* v739: 다른 직업 무기 미리보기 — 무기만 세워 둠(가장 긴 축을 세로로, 높이 3.6). pvF:-1이면 위아래 뒤집기 */
+function wlookPv(k){const W=WLOOKS[k],m=wskS(k).src.clone(true);m.position.set(0,0,0);m.quaternion.identity();m.scale.setScalar(1);
+  m.traverse(o=>{o.layers.enable(1);if(o.isMesh){o.material=o.material.clone();o.material.color.setScalar(W.col||1.9);o.material.emissive.setHex(0xffffff);o.material.emissiveIntensity=1.6;o.material.metalness=Math.min(o.material.metalness,.6);o.frustumCulled=false}});
+  m.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());m.position.copy(c).negate();
+  const ax=sz.x>=sz.y&&sz.x>=sz.z?new THREE.Vector3(1,0,0):sz.y>=sz.z?new THREE.Vector3(0,1,0):new THREE.Vector3(0,0,1),len=Math.max(sz.x,sz.y,sz.z)||1;
+  const piv=new THREE.Group();piv.add(m);piv.quaternion.setFromUnitVectors(ax.multiplyScalar(W.pvF||1),new THREE.Vector3(0,1,0));const g=new THREE.Group();g.add(piv);g.scale.setScalar(3.6/len);g.traverse(o=>o.layers.enable(1));return g}
+function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls)),wo=Object.keys(WLOOKS).filter(k=>!wlookOk(k,S.cls));for(const k of [...wk,...wo]){const st=wskS(k).st;if(st!==2&&st!==3)wskLoad(k,()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
+  const todo=[...Object.keys(LOOKS),...(KW&&KW.st===2?wk.filter(k=>wskS(k).st===2):[]),...wo.filter(k=>wskS(k).st===2)].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
   const sl=S.look,cm={m:camera.layers.mask,fov:camera.fov,asp:camera.aspect,p:camera.position.clone(),q:camera.quaternion.clone()},fg=scene.fog?{n:scene.fog.near,f:scene.fog.far}:null,g=invStudio(),cv=renderer.domElement,Wd=cv.width,Hd=cv.height,sz=Math.min(Wd,Hd),o=document.createElement('canvas');o.width=o.height=360;const cx=o.getContext('2d'),u=g.userData,hr=hero.rotation.x;
   try{camera.layers.set(1);if(fg){scene.fog.near=900;scene.fog.far=1000}camera.fov=30;camera.aspect=Wd/Hd;g.position.set(P.pos.x,0,P.pos.z);u.dk.visible=true;
     const f=(P.face||0)+Math.PI,dx=Math.sin(f),dz=Math.cos(f);u.key.position.set(dx*2,9,dz*2);u.rim.position.set(-dx*3,4,-dz*3);
-    for(const k of todo){const wp=!!WLOOKS[k];S.look=wp?null:k;S.wlook=wp?k:null;if(KW)wskSync(KW);for(let i=0;i<14;i++)wingTick(.1);hero.traverse(x=>x.layers.enable(1));
+    for(const k of todo){const wp=!!WLOOKS[k];if(wp&&!wlookOk(k,S.cls)){const f2=(P.face||0)+.75,pv=wlookPv(k);pv.position.set(P.pos.x,2.1,P.pos.z);pv.rotation.y=f2+.5;scene.add(pv);hero.visible=false;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,6.2,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,2.1,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+        renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9);scene.remove(pv);hero.visible=true;continue}
+      S.look=wp?null:k;S.wlook=wp?k:null;if(KW)wskSync(KW);for(let i=0;i<14;i++)wingTick(.1);hero.traverse(x=>x.layers.enable(1));
       if(wp){const f2=(P.face||0)+.75;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,7.5,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,2.1,P.pos.z)}
       else camera.position.set(P.pos.x+dx*14.5,23,P.pos.z+dz*14.5),camera.lookAt(P.pos.x,2.4,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
       renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9)}
-  }catch(e){}
+  }catch(e){hero.visible=true}
   u.dk.visible=false;S.look=sl;S.wlook=swl;if(KW)wskSync(KW);camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
   for(let i=0;i<14;i++)wingTick(.1)}
+/* v739: 외형 상인 — 먼저 분류(등 부착물 · 무기)를 고르고 들어가면 그 분류만. 무기는 모든 직업 것을 보여 주되 다른 직업 무기는 구매·착용 불가 */
+let LKCAT=null;const LKCATS={back:{n:'등 부착물',ks:()=>Object.keys(LOOKS)},weapon:{n:'무기',ks:()=>Object.keys(WLOOKS).sort((a,b)=>wlookOk(b,S.cls)-wlookOk(a,S.cls))}};
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 999';
-  let h=`<div class="shead"><div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
+  if(!LKCAT||!LKCATS[LKCAT]){let h=`<div class="shead"><div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
+    <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkcats">`;
+    for(const c in LKCATS){const ks=LKCATS[c].ks(),on=c==='back'?S.look:(S.wlook&&wlookOk(S.wlook,S.cls)?S.wlook:null),pk=on||ks.find(k=>LKIMG[k]);
+      h+=`<button class="lkcat" data-lkc="${c}" style="${pk&&LKIMG[pk]?`background-image:url(${LKIMG[pk]})`:''}"><b>${LKCATS[c].n}</b><i>${ks.length}종${on?' · '+lookGet(on).n+' 착용 중':''}</i></button>`}
+    $('nsBody').innerHTML=h+'</div>';return}
+  let h=`<div class="shead"><div class="lkhd"><button class="lkbk" data-lkc="">‹</button><h2>${LKCATS[LKCAT].n}</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
-  for(const k of [...Object.keys(LOOKS),...Object.keys(WLOOKS)]){const L=lookGet(k),wp=!!WLOOKS[k],own=lookOwn(k),on=wp?S.wlook===k:S.look===k,ok=lookCoin()>=(L.pr||0),cl=wp&&!wlookOk(k,S.cls);
+  for(const k of LKCATS[LKCAT].ks()){const L=lookGet(k),wp=!!WLOOKS[k],own=lookOwn(k),on=wp?S.wlook===k:S.look===k,ok=lookCoin()>=(L.pr||0),cl=wp&&!wlookOk(k,S.cls);
     h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':wp?`<span class="lkw" style="background:rgba(20,20,26,.8);color:#cfc5b4">${L.cn} 전용</span>`:''}</div>
-      <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
+      <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:cl?`<button class="lkbuy x" disabled>${L.cn} 전용</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
-function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';renderLooks();$('nsSheet').hidden=false;releaseAll()}
+function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll()}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
-  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(WLOOKS[k]){if(ac==='buy'){if(lookBuy(k)&&wlookOk(k,S.cls)){S.wlook=k;save()}}else{S.wlook=ac==='off'?null:k;save()}renderLooks();return}if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
+  if(b.dataset.lkc!==undefined&&nsKind==='look'){LKCAT=b.dataset.lkc||null;renderLooks();const bd=$('nsBody');if(bd)bd.scrollTop=0;return}
+  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(WLOOKS[k]){if(!wlookOk(k,S.cls)){renderLooks();return}if(ac==='buy'){if(lookBuy(k)&&wlookOk(k,S.cls)){S.wlook=k;save()}}else{S.wlook=ac==='off'?null:k;save()}renderLooks();return}if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
   if(b.dataset.sc&&stashOpen){const [d,k]=b.dataset.sc.split(',');stashCurMove(d,k);return}
   if(a==='drw'&&rrOpen){if(rrSpin||!rrSel||performance.now()-drNoClick<400)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
