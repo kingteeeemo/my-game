@@ -7627,7 +7627,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v738';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v739';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9450,7 +9450,7 @@ const _dt=new THREE.Vector3();
 /* v484 장비창: 카메라를 캐릭터 정면으로 — 세로는 위쪽, 가로·PC는 왼쪽(가방 반대편) 가운데에 캐릭터가 오도록 */
 const _icp=new THREE.Vector3(),_icl=new THREE.Vector3();
 /* v489 장비창 전용 공간 — 월드(마을·사냥터)는 그리지 않고, 밝은 스튜디오 + 전용 조명 안에 내 캐릭터만. 레이어 1만 그리는 방식 */
-const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0,exp:false,f:.57,ph:.43,zoom:1,zs:1,py:0,pts:new Map(),pin:null};const IVZ=3;/* v733: 장비창 확대 — PC 마우스 휠, 모바일 두 손가락. 확대하면 위아래로 끌어 살펴봄 */
+const IVS={g:null,rot:0,snap:true,on:false,drag:null,dragEnd:0,exp:false,f:.57,ph:.43,zoom:1,zs:1,py:0,pts:new Map(),pin:null};const IVZ=3,IVZM=.7;/* v733: 장비창 확대 — PC 마우스 휠, 모바일 두 손가락. 확대하면 위아래로 끌어 살펴봄 */
 function invStudio(){if(IVS.g)return IVS.g;const g=IVS.g=new THREE.Group();
   const bg=new THREE.Mesh(new THREE.SphereGeometry(60,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     vertexShader:`varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
@@ -9471,7 +9471,7 @@ function invCam(){if(IVS.snap||IVS.ra==null)IVS.ra=IVS.rot;else IVS.ra+=(IVS.rot
   const pf=.57;/* v499: 가방을 넓혀도 캐릭터 크기·위치는 그대로(가방이 아래를 덮음) */
   const FOV=port?26:28,ch=port?.46*(pf/.57)*Hh:Hh,want=(port?4.15:3.8)/.85;/* v496: 세로 캐릭터 영역 57%(넓힐 때 34%) — 캐릭터 크기는 57%일 때 v493과 같게, 줄면 같이 작아짐 · /* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
   if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
-  const pk=port?clamp((IVS.ph-IVS_PH[0])/(IVS_PH[1]-IVS_PH[0]),0,1):0,visH=want*Hh/ch/(1-.05*pk);if(IVS.snap)IVS.zs=IVS.zoom;else IVS.zs+=(IVS.zoom-IVS.zs)*.3;const zk=1-1/IVS.zs,pyM=1.35*zk;IVS.py=clamp(IVS.py,-pyM,pyM);const D=visH/2/Math.tan(FOV*Math.PI/360)/IVS.zs,ly=1.45+.85*zk+IVS.py;/* v501: 가방을 올리면 캐릭터 5% 작게 */
+  const pk=port?clamp((IVS.ph-IVS_PH[0])/(IVS_PH[1]-IVS_PH[0]),0,1):0,visH=want*Hh/ch/(1-.05*pk);if(IVS.snap)IVS.zs=IVS.zoom;else IVS.zs+=(IVS.zoom-IVS.zs)*.3;const zk=Math.max(0,1-1/IVS.zs),pyM=1.35*zk;IVS.py=clamp(IVS.py,-pyM,pyM);const D=visH/2/Math.tan(FOV*Math.PI/360)/IVS.zs,ly=1.45+.85*zk+IVS.py;/* v501: 가방을 올리면 캐릭터 5% 작게 */
   /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
   const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy0=port?(.5-(pf/2+.025))*Hh:-.02*Hh,oy=port?Math.max(oy0,Hh/2+1.45*Hh/visH-((1-IVS.ph)*Hh-14)):oy0;/* v501: 가방 윗선이 발을 가리면 그만큼 캐릭터를 위로 */
   camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();
@@ -9482,9 +9482,9 @@ const ivPinD=()=>{const [a,b]=[...IVS.pts.values()];return Math.hypot(a.x-b.x,a.
 $('invSheet').addEventListener('pointerdown',e=>{if(!IVS.on||!e.target.closest('.iv2stage')||e.target.closest('button,.iv2dim'))return;IVS.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(IVS.pts.size>=2){if(IVS.drag&&IVS.drag.mv)IVS.dragEnd=Date.now();IVS.drag=null;IVS.pin={d:ivPinD(),z:IVS.zoom};IVS.dragEnd=Date.now();return}
   IVS.drag={id:e.pointerId,x:e.clientX,y:e.clientY,r:IVS.rot,py:IVS.py,mv:false}});
-addEventListener('pointermove',e=>{if(IVS.pts.has(e.pointerId)){IVS.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(IVS.pin&&IVS.pts.size>=2){IVS.zoom=clamp(IVS.pin.z*ivPinD()/IVS.pin.d,1,IVZ);return}}
+addEventListener('pointermove',e=>{if(IVS.pts.has(e.pointerId)){IVS.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(IVS.pin&&IVS.pts.size>=2){IVS.zoom=clamp(IVS.pin.z*ivPinD()/IVS.pin.d,IVZM,IVZ);return}}
   const d=IVS.drag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.abs(dx)>5||Math.abs(dy)>5)d.mv=true;if(d.mv){IVS.rot=d.r-dx*.012;if(IVS.zoom>1.02)IVS.py=d.py+dy*2.4/innerHeight}});
-$('invSheet').addEventListener('wheel',e=>{if(!IVS.on||!e.target.closest('.iv2stage'))return;e.preventDefault();IVS.zoom=clamp(IVS.zoom*Math.exp(-e.deltaY*.0015),1,IVZ)},{passive:false});
+$('invSheet').addEventListener('wheel',e=>{if(!IVS.on||!e.target.closest('.iv2stage'))return;e.preventDefault();IVS.zoom=clamp(IVS.zoom*Math.exp(-e.deltaY*.0015),IVZM,IVZ)},{passive:false});
 {const f=e=>{IVS.pts.delete(e.pointerId);if(IVS.pts.size<2)IVS.pin=null};addEventListener('pointerup',f);addEventListener('pointercancel',f)}
 /* v499: 세로 — 가방 영역을 손가락으로 끌어 올리면 가방이 따라 올라오며 넓어지고(캐릭터 영역 위를 덮음), 맨 위에서 끌어 내리면 다시 내려감. 끝까지 넓힌 뒤에는 가방 스크롤 */
 const IVS_PH=[.43,.58];
