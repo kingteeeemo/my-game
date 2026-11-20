@@ -5192,8 +5192,8 @@ function seedPacks0(){packQ=[];const d=diff(),ci=chF(S.ch),goal=Math.round(CH[Ma
 /* v725: 스토리 장 보스 3D 모델(Meshy로 만들고 Mixamo로 뼈대·동작) — 1장 「잿빛 수확자」 허수아비 사신, 2장 묘지기 거인.
    GLB 하나에 몸(스킨)+무기(오른손 뼈 자식)+동작 idle·walk·atk(평타)·skill(장판 시전)·die. 받기 전·실패 시엔 예전 절차적 모델.
    모델은 장마다 한 벌만 불러 두고 보스가 나올 때 붙였다가, 쓰러진 뒤 가라앉으면 떼어 둠(다시 도전할 때 재사용) */
-const SBC={0:{file:'models/boss_reaper.glb',S:2.3,col:1.6,em:0xff7a2a,emI:2.4,ts:1.05,lc:0xffd8b0,li:2.6,atkT:.9,skT:1.4},
-           1:{file:'models/boss_colossus.glb',S:2.5,col:2.2,em:0xa8d8ff,emI:3,eye:0x9ad0ff,ts:.95,lc:0xc8dcff,li:2.2,atkT:1.2,skT:2.1}};
+const SBC={0:{file:'models/boss_reaper.glb',S:4.6,col:1.6,em:0xff7a2a,emI:2.4,ts:1.05,lc:0xffd8b0,li:2.6,atkT:.9,skT:1.4},
+           1:{file:'models/boss_colossus.glb',S:5,col:2.2,em:0xa8d8ff,emI:3,eye:0x9ad0ff,ts:.95,lc:0xc8dcff,li:2.2,atkT:1.2,skT:2.1}};
 const SBN={};
 function sbLoad(ch){const C=SBC[ch];if(!C||!THREE.GLTFLoader)return;const K=SBN[ch]||(SBN[ch]={st:0});if(K.st)return;K.st=1;
   new THREE.GLTFLoader().load(C.file,g=>{const r=g.scene;K.mats=[];r.traverse(o=>{if(o.isMesh){o.castShadow=false;o.frustumCulled=false;const m=o.material;m.metalness=.15;m.metalnessMap=null;m.roughness=.85;m.needsUpdate=true;/* 금속 1이면 환경광이 없어 새까맣게 보임 */m.color.setScalar(C.col);m.emissive.setHex(C.em);m.emissiveIntensity=C.emI;m.side=THREE.DoubleSide;K.mats.push(m)}});
@@ -7563,7 +7563,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v726';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v727';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
