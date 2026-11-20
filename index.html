@@ -4559,22 +4559,27 @@ function lookSet(id){if(!lookOk())return;S.look=id&&LOOKS[id]?id:null;save()}
 const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.wings_fire.pr=700;LOOKS.wings_lava.pr=700;
 /* v729: 무기 외형 — 재단사 세라가 판매. S.wlook = 착용 중인 무기 외형 id. 지금은 잿불 검귀의 대검(전사·무사).
    검귀 모델의 손 기준 자리 그대로 오른손에 붙임(원래 무기는 숨김, 등급 빛·휘두를 때 빛은 새 검에 그대로). 길이 ×1.15라 무기 끝점도 그만큼 */
-const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',L:1.15,cn:'전사 · 무사'}};
+/* v738: 무기 외형 여러 개 — 마법사 「월광의 홀」 추가. rel:'hand' = 손 기준 자리(검귀 모델에서 뽑은 자리) → 원래 무기 기준으로 환산, rel:'sw' = 원래 무기 자리 기준 그대로(쥐는 곳 = 원점, 막대 = +y).
+   원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
+const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,cn:'전사 · 무사'},
+  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k];
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
-const WSK={st:0,cb:[]};
-function wskLoad(cb){if(WSK.st===2){cb&&cb();return}if(cb)WSK.cb.push(cb);if(WSK.st||!THREE.GLTFLoader)return;WSK.st=1;
-  new THREE.GLTFLoader().load(WLOOKS.wsk_knight.file+'?'+APP_VER,g=>{const m=g.scene.getObjectByName('knight_sword');if(!m){WSK.st=3;return}const t=m.getObjectByName('knight_tip');if(t)m.remove(t);WSK.src=m;WSK.st=2;const L=WSK.cb;WSK.cb=[];L.forEach(f=>{try{f()}catch(e){}})},null,()=>{WSK.st=3})}
+const WSK={};const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
+function wskLoad(k,cb){const Q=wskS(k),W=WLOOKS[k];if(Q.st===2){cb&&cb();return}if(cb)Q.cb.push(cb);if(Q.st||!THREE.GLTFLoader||!W)return;Q.st=1;
+  new THREE.GLTFLoader().load(W.file+'?'+APP_VER,g=>{const m=g.scene.getObjectByName(W.node);if(!m){Q.st=3;return}const t=m.getObjectByName('knight_tip');if(t)m.remove(t);Q.src=m;Q.st=2;const L=Q.cb;Q.cb=[];L.forEach(f=>{try{f()}catch(e){}})},null,()=>{Q.st=3})}
 function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&&wlookOk(S.wlook,K.cls)?S.wlook:null;if((K.wsk||null)===want)return;
-  if(K.wskM){if(K.wskM.parent)K.wskM.parent.remove(K.wskM);K.wskM=null;K.swM=K.swM0;K.swCrack=K.swCrack0;K.swLift=K.swLift0;K.swM0.visible=true;if(K.tip0)K.tip.position.copy(K.tip0);K.wsk=null;if(hero&&skOf(hero)===K)skwGear()}
-  if(!want)return;if(WSK.st!==2){if(WSK.st!==3)wskLoad(()=>wskSync(K));return}
+  if(K.wskM){if(K.wskM.parent)K.wskM.parent.remove(K.wskM);K.wskM=null;K.swM=K.swM0;K.swCrack=K.swCrack0;K.swLift=K.swLift0;if(K.gemM0!==undefined)K.gemM=K.gemM0;for(const o of K.wskHid||[])o.material.visible=true;if(K.tip0)K.tip.position.copy(K.tip0);K.wsk=null;if(hero&&skOf(hero)===K)skwGear()}
+  if(!want)return;const Q=wskS(want);if(Q.st!==2){if(Q.st!==3)wskLoad(want,()=>wskSync(K));return}
   if(!K.sw.parent||!/RightHand$/.test(K.sw.parent.name))return;/* 등에 멘 동안(초상화)엔 손으로 돌아온 뒤에 */
-  const W=WLOOKS[want],m=WSK.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
-  K.sw.updateMatrix();const M=K.sw.matrix.clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale);K.sw.add(m);
-  if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone()}
-  const mt=mm.material;mt.color.setScalar(1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);K.swM0.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
-  if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=SKC[K.cls].lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
-  K.tip.position.copy(K.tip0).multiplyScalar(W.L||1);K.wskM=m;K.wsk=want;if(hero&&skOf(hero)===K)skwGear()}
+  const W=WLOOKS[want],m=Q.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
+  if(!K.wskHid){K.wskHid=[];K.sw.traverse(o=>{if(o.isMesh)K.wskHid.push(o)})}
+  if(W.rel==='hand'){K.sw.updateMatrix();const M=K.sw.matrix.clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale)}K.sw.add(m);
+  if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone();K.gemM0=K.gemM}
+  const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
+  if(W.gem){K.gemM=mt;mt.emissive.setHex(0xffffff);K.swLift=null}
+  else if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=SKC[K.cls].lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
+  if(W.tip)K.tip.position.set(...W.tip);else K.tip.position.copy(K.tip0).multiplyScalar(W.L||1);K.wskM=m;K.wsk=want;if(hero&&skOf(hero)===K)skwGear()}
 const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k||S.wlook===k));/* 이미 착용 중이던 외형은 보유로 인정 */
 const lookCoin=()=>S.test?Infinity:(S.lumi||0);
 function lookBuy(k){const L=lookGet(k);if(!L||lookOwn(k))return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
@@ -7152,8 +7157,8 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
 let nsKind=null;
 /* 외형 미리보기 — 장비창 전용 공간에서 캐릭터 뒷모습 3/4 각도를 한 번에 그려 이미지로 저장(직업별 캐시). 날개 모양을 고쳐도 항상 최신 모습 */
 let LKIMG={};
-function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls));if(wk.length&&WSK.st!==2&&WSK.st!==3){wskLoad(()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
-  const todo=[...Object.keys(LOOKS),...(WSK.st===2&&KW&&KW.st===2?wk:[])].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
+function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls));for(const k of wk){const st=wskS(k).st;if(st!==2&&st!==3)wskLoad(k,()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
+  const todo=[...Object.keys(LOOKS),...(KW&&KW.st===2?wk.filter(k=>wskS(k).st===2):[])].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
   const sl=S.look,cm={m:camera.layers.mask,fov:camera.fov,asp:camera.aspect,p:camera.position.clone(),q:camera.quaternion.clone()},fg=scene.fog?{n:scene.fog.near,f:scene.fog.far}:null,g=invStudio(),cv=renderer.domElement,Wd=cv.width,Hd=cv.height,sz=Math.min(Wd,Hd),o=document.createElement('canvas');o.width=o.height=360;const cx=o.getContext('2d'),u=g.userData,hr=hero.rotation.x;
   try{camera.layers.set(1);if(fg){scene.fog.near=900;scene.fog.far=1000}camera.fov=30;camera.aspect=Wd/Hd;g.position.set(P.pos.x,0,P.pos.z);u.dk.visible=true;
     const f=(P.face||0)+Math.PI,dx=Math.sin(f),dz=Math.cos(f);u.key.position.set(dx*2,9,dz*2);u.rim.position.set(-dx*3,4,-dz*3);
