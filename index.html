@@ -4572,11 +4572,11 @@ function lookRow(){const wk=Object.keys(WLOOKS).filter(k=>lookOwn(k)&&wlookOk(k,
 function lookSet(id){if(!lookOk())return;S.look=id&&LOOKS[id]?id:null;save()}
 /* v508: 외형 구매 재화 「광휘의 파편」 — 재단사 세라에게서 외형 장비를 삼. 획득처(드롭·보상)는 추후, 테스트 캐릭터는 무한 */
 const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.wings_fire.pr=700;LOOKS.wings_lava.pr=700;
-/* v729: 무기 외형 — 재단사 세라가 판매. S.wlook = 착용 중인 무기 외형 id. 지금은 잿불 검귀의 대검(전사·무사).
+/* v729: 무기 외형 — 재단사 세라가 판매. S.wlook = 착용 중인 무기 외형 id. 지금은 검귀 카이렌의 대검(전사·무사, v745 이름 변경).
    검귀 모델의 손 기준 자리 그대로 오른손에 붙임(원래 무기는 숨김, 등급 빛·휘두를 때 빛은 새 검에 그대로). 길이 ×1.15라 무기 끝점도 그만큼 */
 /* v738: 무기 외형 여러 개 — 마법사 「월광의 홀」 추가. rel:'hand' = 손 기준 자리(검귀 모델에서 뽑은 자리) → 원래 무기 기준으로 환산, rel:'sw' = 원래 무기 자리 기준 그대로(쥐는 곳 = 원점, 막대 = +y).
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
-const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
+const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k];
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
@@ -7182,16 +7182,16 @@ function wlookPv(k){const W=WLOOKS[k],m=wskS(k).src.clone(true);m.position.set(0
 function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={_c:S.cls};const KW=skOf(hero),wk=Object.keys(WLOOKS).filter(k=>wlookOk(k,S.cls)),wo=Object.keys(WLOOKS).filter(k=>!wlookOk(k,S.cls));for(const k of [...wk,...wo]){const st=wskS(k).st;if(st!==2&&st!==3)wskLoad(k,()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks()})}
   const todo=[...Object.keys(LOOKS),...(KW&&KW.st===2?wk.filter(k=>wskS(k).st===2):[]),...wo.filter(k=>wskS(k).st===2)].filter(k=>!LKIMG[k]);if(!todo.length)return;const swl=S.wlook;
   const sl=S.look,cm={m:camera.layers.mask,fov:camera.fov,asp:camera.aspect,p:camera.position.clone(),q:camera.quaternion.clone()},fg=scene.fog?{n:scene.fog.near,f:scene.fog.far}:null,g=invStudio(),cv=renderer.domElement,Wd=cv.width,Hd=cv.height,sz=Math.min(Wd,Hd),o=document.createElement('canvas');o.width=o.height=360;const cx=o.getContext('2d'),u=g.userData,hr=hero.rotation.x;
-  try{camera.layers.set(1);if(fg){scene.fog.near=900;scene.fog.far=1000}camera.fov=30;camera.aspect=Wd/Hd;const Y=hero.position.y||0;/* v743: 지면이 높은 마을에서도 캐릭터 높이 기준으로 찍음(전에는 높이 0 기준이라 하반신만 찍힘) */g.position.set(P.pos.x,Y,P.pos.z);u.dk.visible=true;if(u.bgv){u.bgv.visible=false;u.bg0.forEach(o=>o.visible=true)}
+  try{camera.layers.set(1);if(fg){scene.fog.near=900;scene.fog.far=1000}camera.fov=30;camera.aspect=Wd/Hd;const Y=hero.position.y||0;/* v743: 지면이 높은 마을에서도 캐릭터 높이 기준으로 찍음(전에는 높이 0 기준이라 하반신만 찍힘) */g.position.set(P.pos.x,Y,P.pos.z);/* v745: 장비창과 같은 배경(각인된 단상) */if(u.bgv)u.bgv.rotation.y=(P.face||0)+Math.PI;else u.dk.visible=true;
     const f=(P.face||0)+Math.PI,dx=Math.sin(f),dz=Math.cos(f);u.key.position.set(dx*2,9,dz*2);u.rim.position.set(-dx*3,4,-dz*3);
-    for(const k of todo){const wp=!!WLOOKS[k];if(wp&&!wlookOk(k,S.cls)){const f2=(P.face||0)+.75,pv=wlookPv(k);pv.position.set(P.pos.x,Y+2.1,P.pos.z);pv.rotation.y=f2+.5;scene.add(pv);hero.visible=false;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,Y+6.2,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,Y+2.1,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+    for(const k of todo){const wp=!!WLOOKS[k];if(wp){/* v745: 내 직업 무기도 캐릭터 없이 무기만 */const f2=(P.face||0)+.75,pv=wlookPv(k);pv.position.set(P.pos.x,Y+2.1,P.pos.z);pv.rotation.y=f2+.5;scene.add(pv);hero.visible=false;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,Y+6.2,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,Y+2.1,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
         renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9);scene.remove(pv);hero.visible=true;continue}
       S.look=wp?null:k;S.wlook=wp?k:null;if(KW)wskSync(KW);for(let i=0;i<14;i++)wingTick(.1);if(!wp&&LOOKS[k].mdl&&!(LV.g&&LV.g.userData.ready)){/* v743: 용암 날개는 모델을 내려받는 중이면 빈 사진을 저장하지 않고, 받은 뒤 다시 찍음 */clearTimeout(LKIMG._rt);LKIMG._rt=setTimeout(()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks();else lookShots()},600);continue}hero.traverse(x=>x.layers.enable(1));
       if(wp){const f2=(P.face||0)+.75;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,Y+7.5,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,Y+2.1,P.pos.z)}
       else camera.position.set(P.pos.x+dx*14.5,Y+23,P.pos.z+dz*14.5),camera.lookAt(P.pos.x,Y+2.4,P.pos.z);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
       renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9)}
   }catch(e){hero.visible=true}
-  u.dk.visible=false;if(u.bgv){u.bgv.visible=true;u.bg0.forEach(o=>o.visible=false)}S.look=sl;S.wlook=swl;if(KW)wskSync(KW);camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
+  u.dk.visible=false;S.look=sl;S.wlook=swl;if(KW)wskSync(KW);camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
   for(let i=0;i<14;i++)wingTick(.1)}
 /* v739: 외형 상인 — 먼저 분류(등 부착물 · 무기)를 고르고 들어가면 그 분류만. 무기는 모든 직업 것을 보여 주되 다른 직업 무기는 구매·착용 불가 */
 let LKCAT=null;const LKCATS={back:{n:'등 부착물',ks:()=>Object.keys(LOOKS)},weapon:{n:'무기',ks:()=>Object.keys(WLOOKS).sort((a,b)=>wlookOk(b,S.cls)-wlookOk(a,S.cls))}};
@@ -7659,7 +7659,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v744';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v745';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
