@@ -5745,7 +5745,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   mawPose(M,t,e.jaw||0);mawLureUpd(M,t);M.root.rotation.z=Math.sin(t*.7)*.03;{const br=e.dA&&e.dA.k==='breath'&&e.dA.t>.8,ty=br?e.dA.a:Math.atan2(P.pos.x-e.pos.x,P.pos.z-e.pos.z),cy=e.g.rotation.y;let d=((ty-cy+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;e.g.rotation.y=cy+d*Math.min(1,dt*(br?14:5))}/* v214: 항상 플레이어를 바라봄 */for(const m of M.eyes)m.scale.setScalar(1+Math.sin(t*5+m.position.x*7)*.12);
   if(Math.random()<dt*8*QM()){const a=rnd(0,6.28),r=rnd(0,2.9);emit(PADD,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.05,z:e.pos.z+Math.sin(a)*r,vy:rnd(.3,.9),life:rnd(.5,1),s0:.25,s1:.5,c0:S.duel&&S.duel.uber?0xff5a8a:0xb060ff,c1:0x1a0630,a:.5,tex:1})}
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
-function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner();bossAuto(true)})}
+function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;bossAuto(false);save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
@@ -6306,7 +6306,7 @@ function blastFx(p,r,ice){const q=QM(),R=Math.min(r,ice==='nova'?10:6);
   streaks(p,5,{sp:[5,10],up:[1,3],y:[.5,1.1],life:[.18,.3],w:.05,len:.6,c0:0xffffff,c1:0x4a9aff,drag:3});
 }
 /* 얼음으로 처치: 몸이 얼음 조각으로 산산조각 */
-let hitKind=null;
+let hitKind=null,noBossK=false;/* v725: 기본 공격은 스킬별 보스 배율 제외 */
 const scorchTex=decalMats[0].map;
 function shatterFx(e){const p=e.pos,R=e.r||.6,col=e.mat&&e.mat.color?e.mat.color.getHex():0x8899aa;
   const big=e.rank>=2?1.6:1;
@@ -6354,7 +6354,7 @@ function hurt(e,amt,quiet,so){
   if(e.perch&&e.weakT>0)amt*=ASH.wk;/* v603: 아쉬카르 — 머리가 내려와 있는 동안 약점(피해 1.5배) */
   if(e.duel&&e.dA&&e.dA.k==='sipe'&&!(e.dA.t<.8)){if(!(e.invN>time)){e.invN=time+.6;dmgNum(e.pos,'무적','',e.h)}return}/* v202: 검귀 카이렌 사이 페이즈(불꽃 분할) 동안 무적 — 사이 페이즈 전에 처치하면 사이 페이즈 없이 끝남 · v266: 검귀·아귀 모두 사이페 진입 후 0.8초는 피해가 들어가고, 그 사이 체력 0이면 처치 */
   if(e.chBoss)amt*=STORY_BOSS_DR;
-  if(e.boss||e.duel||e.final)amt*=nsBossK();/* v725 */
+  if((e.boss||e.duel||e.final)&&!noBossK)amt*=nsBossK();/* v725 */
   if(NSX.bossd&&(e.boss||e.duel||e.final))amt*=1+NSX.bossd;/* v603: 보스 피해 증가 *//* v235: 스토리 장 보스 받는 피해 -20% (표기 없음) / v236: 최종 보스 제외 */
   if(e.boss&&S.cls==='mage'&&C().skills[0]==='frost')amt*=1.1;/* v106: 얼음 보주는 단일 대상이 약해서 보스전 최종 피해 +10% */
   if(so){if(so.giant&&e.rank>=2)amt*=1+so.giant;if(so.exec&&e.hp/e.mhp<.3)amt*=1+so.exec}
@@ -6774,7 +6774,7 @@ function shoot(a,o){
    if(o.trail){const t=new THREE.Mesh(fxPlane,trailMat(o.tcol||o.color));t.rotation.x=-Math.PI/2;t.scale.set((o.tw||.12)/sx,o.trail/2/sz,1);t.position.z=-(o.trail/2)/sz;m.add(t)}
    if(o.glow){const g=new THREE.Sprite(glowMat(o.gcol||o.color));g.scale.setScalar(o.glow);m.add(g)}
    if(o.rings){for(let i=0;i<1;i++){const r=new THREE.Mesh(ringTorus,ringMat);r.scale.setScalar(1.25);r.rotation.set(i?1.1:-.5,i?.4:1.2,0);r.userData.ring=i?1:-1;m.add(r)}}}
-  projs.push({rib:o.rib?ribStart(o.rib,m.position):null,vid:o.vid||0,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,hrg:o.hrg||0,ox:m.position.x,oz:m.position.z,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,ghost:!!o.ghost,thru:!!o.thru,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
+  projs.push({rib:o.rib?ribStart(o.rib,m.position):null,vid:o.vid||0,basic:!!o.basic,m,vx:Math.sin(a)*o.speed,vz:Math.cos(a)*o.speed,speed:o.speed,life:o.life,dmg:o.dmg,pierce:o.pierce||0,chain:o.chain||0,blast:!!o.blast,bolt:!!o.bolt,br:o.br||2.4,bm:o.bm||.6,home:!!o.home,so:o.so||null,orb:o.orb||null,col:o.color,hr:o.hr||.35,hrg:o.hrg||0,ox:m.position.x,oz:m.position.z,slow:!!o.slow,frz:o.frz||null,nofx:!!o.nofx,dim:o.dim||0,ret:o.ret||0,retAt:o.retAt||0,rng:o.rng||0,split:o.split||null,ghost:!!o.ghost,thru:!!o.thru,child:!!o.child,nt:o.orb&&o.orb.nova?o.orb.nova.iv*.6:0,et:.1,ea:a,hit:new Set()});
 }
 function orbShard(p,a){const z=p.orb.ssz||1;shoot(a,{from:p.m.position,color:0xd8f4ff,size:.32*z,hr:.35*z,trail:.75*z,tw:.09*z,tcol:0x9ad8ff,speed:15*(p.orb.ssp||1),life:.45,dmg:p.orb.sd,pierce:p.orb.sp,chain:p.orb.sc,slow:true,frz:p.orb.frz,nofx:true})}
 function orbEnd(p){}/* v310: 보주 끝 폭발(파편·충격파·섬광·얼음 가시 폭발) 전부 제거 */
@@ -6798,13 +6798,13 @@ function basicFire(){
     aim(4);setCd(.42*cdMul());P.swing=.18;P.swingDir*=-1;swingFx();poseStart('slash',.36,{d:P.swingDir,pre:P.castPre});
     const fx_=Math.sin(P.face),fz=Math.cos(P.face);let n=0;
     for(const e of [...enemies]){const dx=e.pos.x-P.pos.x,dz=e.pos.z-P.pos.z,d=Math.hypot(dx,dz);
-      if(d<2.6+e.r&&(dx*fx_+dz*fz)/(d||1)>Math.cos(1.0)){hitSpark(e.pos,0xfff0d0,0xff8a30,4);hurt(e,baseDmg());n++}}
+      if(d<2.6+e.r&&(dx*fx_+dz*fz)/(d||1)>Math.cos(1.0)){hitSpark(e.pos,0xfff0d0,0xff8a30,4);noBossK=true;hurt(e,baseDmg());noBossK=false;n++}}
     /* 전사: 베기가 적중하면 적 1명당 마나 2 회복 (한 번에 최대 8) */
     if(bc(S.cls)==='warrior'&&n)P.mp=Math.min(P.mmp,P.mp+Math.min(8,n*2));
   }else if(b==='arrow'){
-    aim(16);setCd(.45*cdMul());P.swing=.12;poseStart('shot',.5,{pre:P.castPre});SFX.p('arrow');shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0});
+    aim(16);setCd(.45*cdMul());P.swing=.12;poseStart('shot',.5,{pre:P.castPre});SFX.p('arrow');shoot(P.face,{color:0xe8e0c8,size:.4,long:true,speed:28,life:.75,dmg:baseDmg()*.9,trail:2,tcol:0xfff0c0,basic:1});
   }else{
-    aim(16);setCd(.55*cdMul());P.swing=.15;poseStart('bolt',.42,{pre:P.castPre});shoot(P.face,{rib:{helix:.32,spin:12,n:12,w:.22,c0:0x8a5aff,c1:0xf0e8ff,cw:.3},color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
+    aim(16);setCd(.55*cdMul());P.swing=.15;poseStart('bolt',.42,{pre:P.castPre});shoot(P.face,{rib:{helix:.32,spin:12,n:12,w:.22,c0:0x8a5aff,c1:0xf0e8ff,cw:.3},color:0xa08aff,size:.75,speed:15,life:1.2,dmg:baseDmg(),basic:1,home:true,trail:1.6,tw:.3,glow:2.4,gcol:0x7a5aff});
   }
 }
 /* ================= v172 신규 주력 스킬 3종 (초안) =================
@@ -7695,9 +7695,15 @@ function bossToggle(){const id=C().skills[0];if(!BOSS_IDS.includes(id)){toast('�
   if(!g2Done(id)){toast('보스 모드 잠김','2차 강화를 모두 끝내면 쓸 수 있습니다 (피해 증가 제외)');return}
   S.bossM=!S.bossM;feed(`${SK[id].n}: ${S.bossM?'보스 모드 켜짐':'보스 모드 꺼짐'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(S.bossM)guide('bossm');save()}
 /* v725: 결투장에 들어가면 보스 모드 자동 켬, 나오면 들어가기 전 상태로 */
-function bossAuto(on){if(!S||!S.cls)return;const id=C().skills[0];if(!BOSS_IDS.includes(id)||!g2Done(id))return;
+function bossAuto(on){if(!on)bmAutoOn=false;if(!S||!S.cls)return;const id=C().skills[0];if(!BOSS_IDS.includes(id)||!g2Done(id))return;
   if(on){S.bossPrev=!!S.bossM;if(S.bossM)return;S.bossM=true}else{if(S.bossPrev===undefined)return;const v=S.bossPrev;delete S.bossPrev;if(S.bossM===v)return;S.bossM=v}
   feed(`${SK[id].n}: ${S.bossM?'보스 모드 자동 켜짐':'보스 모드 꺼짐 (원래대로)'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(on&&S.bossM){toast('보스 모드 자동 켜짐',`「${SK[id].n}」이(가) 한 대상에 몰아치는 모양으로 바뀝니다 · 결투장을 나가면 원래대로`);guide('bossm')}save()}
+/* v725: 보스와 마주치고 등장 연출이 끝난 뒤에 자동으로 켬(결투장·관문 보스·최종 보스), 보스가 사라지면 원래대로 */
+let bmAutoT=0,bmAutoOn=false;
+function bossAutoTick(dt){const e=enemies.find(e=>e.hp>0&&(e.duel||e.gate||e.final));
+  if(!e){if(bmAutoOn){bmAutoOn=false;bossAuto(false)}bmAutoT=0;return}
+  if(bmAutoOn||knAppr||ldBusy||bossIntroE(e)){bmAutoT=0;return}
+  bmAutoT+=dt;if(bmAutoT>=(e.gate?1.6:.4)){bmAutoOn=true;bossAuto(true)}}
 function bossBtn(){const b=$('bAtk');if(!b||!S||!S.cls)return;const id=C().skills[0],ok=BOSS_IDS.includes(id)&&g2Done(id);b.classList.toggle('autoon',!!(ok&&S.bossM));b.classList.toggle('nob',!ok)}
 ['mousedown'].forEach(ev=>{canvas.addEventListener(ev,e=>mouseBtn(e,true));stick.addEventListener(ev,e=>mouseBtn(e,true))});
 addEventListener('mouseup',e=>mouseBtn(e,false));
@@ -9424,7 +9430,7 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
   if(P.hasteT>0){P.hasteT-=dt;if(ml>.05&&Math.random()<dt*30*QM())streak({x:P.pos.x+rnd(-.3,.3),y:rnd(.2,1.2),z:P.pos.z+rnd(-.3,.3),vx:-mx*rnd(3,6),vy:rnd(0,.5),vz:-mz*rnd(3,6),life:.25,w:.06,len:.7,c0:0xc0ffc8,c1:0x2a9a3a,drag:2});if(P.hasteT<=0)feed('신속 물약 효과 종료','#8ae08a')}
   P.mpWarn-=dt;
   P.mp=Math.min(P.mmp,P.mp+dt*mpRegen());
-  if(NS()){nsPotTick(dt);const em=nsShieldMax();P.esMax=em;if(P.es===undefined||P.es>em)P.es=Math.min(P.es===undefined?em:P.es,em);P.esT=Math.max(0,(P.esT||0)-dt);P.es=Math.min(em,P.es+dt*em*(hpRegen()/P.mhp+(P.esT<=0?.2*NSX.esrc:0)));
+  bossAutoTick(dt);if(NS()){nsPotTick(dt);const em=nsShieldMax();P.esMax=em;if(P.es===undefined||P.es>em)P.es=Math.min(P.es===undefined?em:P.es,em);P.esT=Math.max(0,(P.esT||0)-dt);P.es=Math.min(em,P.es+dt*em*(hpRegen()/P.mhp+(P.esT<=0?.2*NSX.esrc:0)));
     {const cap=P.mmp*Math.max(0,1-nsReserve()/100);if(P.mp>cap)P.mp=cap}
     if(auraOn('blood')){if(!bloodOk()||(P.bloodAct&&P.hp<=P.mhp*.2))P.bloodAct=false;else if(!P.bloodAct&&P.hp>=P.mhp*.5)P.bloodAct=true;if(P.bloodAct&&P.hp>0)P.hp=Math.max(1,P.hp-P.mhp*.094*dt)}else P.bloodAct=false}else{P.es=0;P.esMax=0}
   /* v426: 생명력 재생과 환경 피해(심연의 냉기)를 매 프레임 순증감(재생-냉기)으로 합쳐 부드럽게 적용 — 재생력 ≥ 냉기면 생명력이 줄지 않는 것처럼 보임. 환경만으로는 1 이하로 떨어지지 않음 */
@@ -9527,7 +9533,7 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
     if(p.orb&&!dead&&p.orb.shf>0){p.et-=dt;if(p.et<=0){p.et=.11/((p.orb.rate||1)*p.orb.shf);p.ea+=2.4;const c=p.orb.cnt||1;for(let k=0;k<c;k++)orbShard(p,p.ea+k*Math.PI*2/c)}}
     if(0/* v467: 플레이어 투사체는 구조물을 무시하고 통과 */&&!dead&&!p.orb&&!p.back&&!p.ghost&&!p.thru)for(const c of colliders)if((pp.x-c.x)*(pp.x-c.x)+(pp.z-c.z)*(pp.z-c.z)<c.r*c.r){dead=true;if(p.blast)explode(pp,p.dmg*p.bm,null,p.br,p.bolt?'bolt':undefined);break}
     if(!dead&&!p.ghost){const hrE=p.hrg?Math.max(p.hr,p.hrg*Math.hypot(pp.x-p.ox,pp.z-p.oz)-.4):p.hr;/* v441 */for(const e of hgNear(pp.x,pp.z,hrE).slice()){if(e._rm||p.hit.has(e))continue;if(p.hitT?p.hitT(e):Math.hypot(e.pos.x-pp.x,e.pos.z-pp.z)<e.r+hrE){/* v645: hitT = 투사체별 판정(검기 부채꼴 호) */
-      p.hit.add(e);if(p.onHit)p.onHit(e,pp);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid)vm=ovlK(e,'vc',p.vid);/* v263: 시전별로 따로 셈 (다른 시전이 끼어들어도 초기화되지 않음) */hitKind=p.slow?'ice':null;hurt(e,p.dmg*vm,p.nofx,p.so);hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
+      p.hit.add(e);if(p.onHit)p.onHit(e,pp);if(p.slow)e.slowT=2;if(p.frz&&Math.random()<p.frz.p)freeze(e,p.frz.t);let vm=1;if(p.vid)vm=ovlK(e,'vc',p.vid);/* v263: 시전별로 따로 셈 (다른 시전이 끼어들어도 초기화되지 않음) */hitKind=p.slow?'ice':null;noBossK=!!p.basic;hurt(e,p.dmg*vm,p.nofx,p.so);noBossK=false;hitKind=null;if(!p.nofx&&p.slow)emit(PADD,{x:pp.x,y:1,z:pp.z,life:.12,s0:1,s1:.4,c0:0xdff4ff,a:.6,tex:1});else if(!p.nofx)hitSpark(pp,p.slow?0xdff4ff:p.col||0xfff0c0,p.slow?0x4a9ad8:0xff8a30,3);if(0)ringFx(pp,.8,p.slow?0x9ad8ff:0xffa060,.2);
       if(p.blast)explode(pp,p.dmg*p.bm*vm,e,p.br,p.bolt?'bolt':undefined,0,p.vid?{k:'vc',id:p.vid,cap:1}:null);/* v725: 폭발도 화살과 같은 겹침 감소를 나눠 씀 */
       if(p.split&&!p.back){const sp=p.split,h=Math.atan2(p.vx,p.vz),hs=new Set(p.hit);p.split=null;
         const dp=p.depth||0;
