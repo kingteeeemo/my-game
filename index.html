@@ -2528,7 +2528,7 @@ function addArch(z){bannerMat=bannerMat||SM({color:0x6a1a1a,roughness:.95,side:T
 /* 로컬 좌표로 소품 배치 */
 const APL=(x,z,k,rot,arg,nc)=>{const w=L2W(x,z);addProp(w.x,w.z,k,(rot||0)+SROT,arg,nc)},ADL=(x,z)=>{const w=L2W(x,z);addDecal(w.x,w.z)};
 /* 스토리 맵 생성 */
-function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),set=PROPSET[i];propTheme=th.key;mapKind='story';storyParams(i);crysKind=CH[i].ice?'ice':'void';
+function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),set=PROPSET[i];if(SBC[i])sbLoad(i);/* v725: 장 보스 모델 미리 받기 */propTheme=th.key;mapKind='story';storyParams(i);crysKind=CH[i].ice?'ice':'void';
   if(S.sRotCh!==S.ch||!(S.sRot>=0)){S.sRot=(Math.random()*8|0)*Math.PI/4;S.sRotCh=S.ch}SROT=S.sRot;SRC=Math.cos(SROT);SRS=Math.sin(SROT);
   setGround(130,2*STORY_L+30,2);
   const e=endPtL(),s_=startPtL(),ew=endPt();ALTAR.x=ew.x;ALTAR.z=ew.z;altarRing.position.set(ew.x,.04,ew.z);altarLight.position.set(ew.x,3,ew.z);
@@ -4926,7 +4926,7 @@ function enemyModel(type,mat,rank,ci){const M=NM.mob(type,mat,rank,ci);/* v92: �
   if(rank===2){const a=new THREE.Sprite(glowMat(0xf0d040));a.scale.setScalar(2.2);a.position.y=1;a.material.opacity=.35;M.root.add(a)}
   return M}
 /* 걷기·공격 동작 */
-function enemyAnim(e,dt,moving){const M=e.M;if(!M)return;if(M.dragon){dragonAnim(e,dt,moving);if(e.perch&&e.hp>0)ashPose(e);return}if(M.maw)return mawAnim(e,dt);if(M.duel)return duelAnim(e,dt,moving);e.wk+=dt*(moving?e.spd*2.6:0);const w=Math.sin(e.wk);e.atk=Math.max(0,e.atk-dt);
+function enemyAnim(e,dt,moving){const M=e.M;if(!M)return;if(e.sb)return sbAnim(e,dt,moving);if(M.dragon){dragonAnim(e,dt,moving);if(e.perch&&e.hp>0)ashPose(e);return}if(M.maw)return mawAnim(e,dt);if(M.duel)return duelAnim(e,dt,moving);e.wk+=dt*(moving?e.spd*2.6:0);const w=Math.sin(e.wk);e.atk=Math.max(0,e.atk-dt);
   if(M.quad){M.legs.forEach((l,i)=>l.rotation.x=(i===0||i===3?w:-w)*.7);M.body.rotation.x=moving?Math.sin(e.wk*2)*.05:0;if(M.tail)M.tail.rotation.y=Math.sin(time*6+e.ph)*.4;
     if(M.head)M.head.rotation.x=e.atk>0?-.5*Math.sin(e.atk/.3*Math.PI):0}
   else{M.legs.forEach((l,i)=>l.rotation.x=(i?-w:w)*.6);const at=e.atk>0?Math.sin(e.atk/.35*Math.PI):0;
@@ -5150,7 +5150,7 @@ function drgFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.sp
     end(){S2.dead=0;S2.side=0;S2.bank=0;try{e.mat.dispose()}catch(_){}}};fx.push(F)}
 /* v580: 보스에게 지고 다시 도전할 때는 등장 연출 생략(이기면 다시 보여 줌) */
 const bossFailed={};
-function bossFall(e){bossFailed[e.final?'dragon':e.maw?'maw':'knight']=0;if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);if(e.final&&e.M&&e.M.mdl)return drgFall(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
+function bossFall(e){if(e.sb)return sbFall(e);bossFailed[e.final?'dragon':e.maw?'maw':'knight']=0;if(e.duel&&!e.maw&&e.M&&e.M.sk&&BKN.root===e.M.sk&&BKN.acts.die)return bkKneel(e);if(e.final&&e.M&&e.M.mdl)return drgFall(e);e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const g=e.g,side=Math.random()<.5?-1:1,ry=g.rotation.y,H=e.h||3;let land=0;
   /* v237: 심연의 아귀는 웅덩이(M.pool)는 그 자리에 두고 몸통(M.root)만 쓰러져 웅덩이로 가라앉음 */
   const MW=!!((e.maw||e.duel)&&e.M&&e.M.root),/* v383: 검귀 카이렌도 몸통만 쓰러지고 바닥 원(등급 고리·그림자)은 그대로 */tg=MW?e.M.root:g,y0=tg.position.y,rx0=tg.rotation.x,rz0=tg.rotation.z;
   const lp=MW?{x:e.pos.x-side*Math.cos(ry)*H*.5,z:e.pos.z+side*Math.sin(ry)*H*.5}:e.pos;
@@ -5188,7 +5188,36 @@ function seedPacks0(){packQ=[];const d=diff(),ci=chF(S.ch),goal=Math.round(CH[Ma
   for(let i=0;i<n;i++){const q=Math.random(),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<.70?'grunt':q<.86?'shooter':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute',q2=Math.random(),pu=(.008+.008*ci)*3,pr=(.06+.035*ci)*3,rk=q2<pu?2:q2<pu+pr?1:0;
     pk.m.push({t:type,rk,x:c+rand(-.6,.6)*pathW(z),z:z+rand(-3,3)})}packQ.push(pk)}
   if(MP.pk)for(const q of MP.pk)if(q.k==='elite'){const d2=diff(),pk={z:q.z,m:[]};for(let i=0;i<5;i++)pk.m.push({t:i<2&&d2.brute?'brute':i<2?'runner':'grunt',rk:i<2?1:0,x:q.x+rand(-.5,.5)*q.r,z:q.z+rand(-.5,.5)*q.r});packQ.push(pk)}}
-function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3);e.dmg*=BOSS_DM}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
+/* v725: 스토리 장 보스 3D 모델(Meshy로 만들고 Mixamo로 뼈대·동작) — 1장 「잿빛 수확자」 허수아비 사신, 2장 묘지기 거인.
+   GLB 하나에 몸(스킨)+무기(오른손 뼈 자식)+동작 idle·walk·atk(평타)·skill(장판 시전)·die. 받기 전·실패 시엔 예전 절차적 모델.
+   모델은 장마다 한 벌만 불러 두고 보스가 나올 때 붙였다가, 쓰러진 뒤 가라앉으면 떼어 둠(다시 도전할 때 재사용) */
+const SBC={0:{file:'models/boss_reaper.glb',S:2.3,col:1.6,em:0xff7a2a,emI:2.4,ts:1.05,lc:0xffd8b0,li:2.6,atkT:.9,skT:1.4},
+           1:{file:'models/boss_colossus.glb',S:2.5,col:2.2,em:0xa8d8ff,emI:3,eye:0x9ad0ff,ts:.95,lc:0xc8dcff,li:2.2,atkT:1.2,skT:2.1}};
+const SBN={};
+function sbLoad(ch){const C=SBC[ch];if(!C||!THREE.GLTFLoader)return;const K=SBN[ch]||(SBN[ch]={st:0});if(K.st)return;K.st=1;
+  new THREE.GLTFLoader().load(C.file,g=>{const r=g.scene;K.mats=[];r.traverse(o=>{if(o.isMesh){o.castShadow=false;o.frustumCulled=false;const m=o.material;m.metalness=.15;m.metalnessMap=null;m.roughness=.85;m.needsUpdate=true;/* 금속 1이면 환경광이 없어 새까맣게 보임 */m.color.setScalar(C.col);m.emissive.setHex(C.em);m.emissiveIntensity=C.emI;m.side=THREE.DoubleSide;K.mats.push(m)}});
+    if(C.eye){const hd=r.getObjectByName('mixamorigHead');if(hd)for(const sx of [-1,1]){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:C.eye,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.scale.setScalar(.09);sp.position.set(sx*.045,.09,.11);hd.add(sp)}}
+    {const L=new THREE.PointLight(C.lc||0xffe8d0,C.li||1.6,10,1.6);L.position.set(0,2.4,1.4);r.add(L);K.light=L}/* 어두운 장에서도 보스 몸이 보이게 앞 위에서 비춤 */
+    K.root=r;K.clips={};for(const c of g.animations)K.clips[c.name]=c;K.st=2;for(const e of enemies)if(e.chBoss&&e.sbWant===ch&&!e.sb)sbAttach(e)},null,()=>{K.st=3})}
+function sbAttach(e){const ch=e.sbWant,C=SBC[ch],K=SBN[ch];if(!C||!K||K.st!==2||e.hp<=0)return;const r=K.root;if(r.parent)r.parent.remove(r);K.owner=e;
+  r.position.set(0,0,0);r.rotation.set(0,0,0);r.scale.setScalar(C.S/e.g.scale.x);e.g.add(r);e.M.root.visible=false;e.h=C.S*1.95+.35;
+  const mx=new THREE.AnimationMixer(r),acts={};for(const n in K.clips){const a=mx.clipAction(K.clips[n]);if(n==='atk'||n==='skill'||n==='die'){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true}acts[n]=a}
+  acts.idle.play();e.sb={mx,acts,cur:'idle',r,C,K,busy:0,pa:0};}
+function sbTo(e,n,ts){const B=e.sb,a=B.acts[n];if(!a)return;if(B.cur===n&&!(n==='atk'||n==='skill')){a.timeScale=ts||1;return}const o=B.acts[B.cur];a.reset();a.timeScale=ts||1;a.play();if(o&&o!==a)a.crossFadeFrom(o,n==='atk'||n==='skill'?.12:.25,false);B.cur=n}
+function sbSkill(e){if(!e.sb||e.hp<=0)return;const B=e.sb,c=B.acts.skill;if(!c)return;const T=B.C.skT;sbTo(e,'skill',c._clip.duration/T);B.busy=T}
+function sbAnim(e,dt,moving){const B=e.sb;e.atk=Math.max(0,e.atk-dt);
+  if(e.atk>0&&B.pa<=0&&B.busy<=0){const d=B.acts.atk._clip.duration,T=B.C.atkT;sbTo(e,'atk',d/T);B.busy=T}B.pa=e.atk;
+  if(B.busy>0)B.busy-=dt;else{if(moving)sbTo(e,'walk',clamp(e.spd*(e.spdK===undefined?1:e.spdK)/2.2,.7,1.7)*B.C.ts);else sbTo(e,'idle',1)}
+  const fl=e.flash>0?1.6:1;for(const m of B.K.mats)m.color.setScalar(B.C.col*fl);
+  B.mx.update(dt)}
+function sbFall(e){e.lab.remove();const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const B=e.sb,g=e.g,r=B.r,D=B.acts.die?B.acts.die._clip.duration:2;sbTo(e,'die',1);B.busy=99;
+  shake=Math.max(shake,.25);ringFx(e.pos,e.r*2.4,0xffe0b0,.4);let lt=0,land=0;const T=D+2.2;
+  fx.push({m:g,t:0,dur:T,keep:1,upd(k){const t=k*T,dt=Math.max(0,t-lt);lt=t;if(B.K.owner!==e)return;B.mx.update(dt);
+      if(!land&&t>D*.55){land=1;shake=Math.max(shake,.35);groundFx(e.pos,shockTex,0xc8b090,1,e.r*3,.5,.7,true,.08)}
+      const gk=Math.max(.15,1-t/D);for(const m of B.K.mats)m.emissiveIntensity=B.C.emI*gk;
+      if(t>D+.6)r.position.y=-(t-D-.6)*.9/r.scale.y},
+    end(){if(B.K.owner===e){B.mx.stopAllAction();r.position.y=0;for(const m of B.K.mats){m.emissiveIntensity=B.C.emI;m.color.setScalar(B.C.col)}if(r.parent)r.parent.remove(r);B.K.owner=null}try{e.mat.dispose()}catch(_){}}})}
+function spawnBoss(){if(enemies.some(e=>e.chBoss))return;const e=spawnEnemy('boss',ALTAR.x,ALTAR.z,3,{chBoss:true});e.hp=e.mhp=e.mhp*(S.ch<3?1:3);e.dmg*=BOSS_DM;if(SBC[S.ch]&&mapKind==='story'){e.sbWant=S.ch;sbLoad(S.ch);sbAttach(e)}}/* v98: 1~3장 보스는 체력 1/3 *//* v72: 장 보스 체력 3배 */
 /* 최종 보스: 5장 보스의 8배 체력 · 피해 1.3배 · 크기 1.35배. 체력 50% 이하 격노(빨라지고 패턴 간격 단축).
    일반 장판 공격 + 주기적으로 자기 주변 원형 충격파 */
 const FB_POS={x:0,z:-6},FB_START={x:0,z:13},FB_HP=84*1.1,/* v204에서 ×.8 → v206 원복 → v209 +10% */FB_DMG=1.92;/* v72: 체력 2배 · 피해 +20% / v75: 체력 추가 3배 */
@@ -7531,7 +7560,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v724';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v725';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9282,7 +9311,7 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
     e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob);
     if(e.rng&&!ob){if(!frz){e.acd-=dt;if(dd<e.rng+.5&&e.acd<=0){e.acd=2.2/(e.asp||1);e.atk=.35;nsShoot(e)}}}
     else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=(e.boss?1.3:1.05)/(e.asp||1);e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
-    if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
+    if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);sbSkill(e);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
     if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;const pk=e.patN%3;if(pk===1)bossCharge(e);else if(pk===2)bossSlam(e);else bossBreath(e)/* v563: 전방 브레스 추가 — 돌진 → 내려찍기 → 브레스 순 */}
       if(e.brW>0)e.brW-=dt;if(e.brT>0){e.brT-=dt;breathFx(e,dt)}}
     if(e.final&&!frz&&!e.chg&&e.ip<2&&e.hp<e.mhp*[.7,.35][e.ip]){e.ip++;startAir(e);continue}
