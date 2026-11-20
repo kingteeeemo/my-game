@@ -7204,7 +7204,7 @@ function nsWhirlTick(dt){if(knAppr)return false;const id=S&&S.cls?C().skills[0]:
   const st=skillStats(id),h=1-hasteP()*gl(id,'haste'),act=nsAct(h);
   if(P.chanT<=0){const cost=mpCost(id);
     if(!(S.test&&S.testMp)&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','기본 공격으로 싸웁니다');P.mpWarn=4}P.chan=false;if(P.cd.atk<=0&&P.spin<=0)basicAttack();return true}
-    P.mp-=cost;P.chanT+=act;const base=baseDmg();
+    P.mp-=cost;P.chanT+=act;SFX.p('whirl');/* 채널링 한 번(타격 간격)마다 회전 베기 소리 */const base=baseDmg();
     aoe(P.pos,st.radius,base*st.dmg*WHK,{quiet:(P.chanN=(P.chanN||0)+1)%2===0,spark:1,bm:st.bossK});
     if(!P.chan||P.spin<.2){const d=.6;P.spin=d;P.spinFire=!!st.flame&&whEl()!=='frost';poseStart('whirl',d,{});whirlFx(st.radius,d,!!st.flame&&whEl()!=='frost')}else P.spin=Math.max(P.spin,.25)}
   const fl=g2('flame');if(fl&&P.flameT<=0){const f=flameSt(fl);P.flameT=nsCd(CD_U*h,h);FLAME_SW=st.radius||6;explode({x:P.pos.x,z:P.pos.z},baseDmg()*st.dmg*f.m,null,st.radius*f.rm,whIce(),st.bossK);FLAME_SW=0}
@@ -7622,7 +7622,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v736';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v737';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
