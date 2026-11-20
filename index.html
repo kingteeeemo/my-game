@@ -478,11 +478,11 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 @keyframes cbT{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.06em}}
 @keyframes cbF{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}#clear h2{line-height:1.3}
 /* v716: 마을 안내 — 마을 사람을 세로로, 얼굴 그림 · 하는 일 · 마을 지도 위 위치 */
-.tnl{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
-.tnr{display:grid;grid-template-columns:54px 1fr 64px;gap:10px;align-items:center;padding:7px;border-radius:10px;background:#18181e;border:1px solid rgba(232,220,196,.1)}
-.tnr img,.tnr .tnp{width:54px;height:54px;border-radius:9px;background:#26232e;object-fit:cover;display:block}
-.tnr .tnm{width:64px;height:64px;border-radius:9px;background:#0f1014;display:block}
-.tnr b{display:block;font:800 14px var(--ko);color:#f2ead8}.tnr span{display:block;font:600 12px var(--ko);color:#cfc5b4;margin-top:1px}.tnr small{display:block;font:500 11px var(--ko);color:#a89c8c;margin-top:2px}
+.tnl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 4px}/* v748: 2줄 3칸 */
+.tnr{display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start;padding:6px;border-radius:10px;background:#18181e;border:1px solid rgba(232,220,196,.1)}
+.tnr>div{grid-column:1/-1;min-width:0}.tnr img,.tnr .tnp{width:100%;height:auto;aspect-ratio:1;border-radius:8px;background:#26232e;object-fit:cover;display:block}
+.tnr .tnm{width:100%;height:auto;aspect-ratio:1;border-radius:8px;background:#0f1014;display:block}
+.tnr b{display:block;font:800 13px var(--ko);color:#f2ead8;letter-spacing:-.02em;word-break:keep-all}.tnr span{display:block;font:600 11.5px var(--ko);color:#cfc5b4;margin-top:1px;word-break:keep-all}.tnr small{display:block;font:500 10.5px var(--ko);color:#a89c8c;margin-top:2px;word-break:keep-all}
 .gvid{position:relative;margin:8px 0 6px;padding:10px;border-radius:10px;background:#121216;border:1px solid rgba(232,220,196,.12);font:500 12px/1.4 var(--ko);color:#d8d0c0;overflow:hidden}
 .gv-cap{font:800 10px var(--ko);letter-spacing:.1em;color:#a89c8c;margin-bottom:6px}.gv-foot{margin-top:6px;font-size:11px;color:#a89c8c}
 .gv-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border-radius:7px;background:#1c1c22;margin:4px 0}.gv-row small{color:#a89c8c}.gv-dim{opacity:.5}
@@ -3944,10 +3944,10 @@ function refLore(force){if(!refOn()||!inTown||(!force&&(S.test||S.demo))||talkOn
   const b=REF_LORE.find(b=>b.ok()&&!L[b.k]);if(b){L[b.k]=1;save();talk(b.l)}}
 /* 대화창 — 화면 아무 곳이나 누르면 다음 줄 */
 let TALK=null;const talkOn=()=>!!TALK;
-function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();talkNext()})}
-  TALK={l:lines,i:-1,done};releaseAll&&releaseAll();P.mv=null;o.hidden=false;$('npcAct').classList.add('talkhide');talkNext()}
+function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const T=TALK;if(T&&T.i===0&&performance.now()-T.t0<1500)return;/* v748: 첫 줄은 1.5초 동안 넘기지 못함(실수로 바로 닫힘 방지) — 둘째 줄부터는 바로 */talkNext()})}
+  TALK={l:lines,i:-1,done,t0:performance.now(),pz:mapKind==='story'};/* v748: 스토리 사냥터 대사(모닥불·흔적·구출 등) 동안 게임 일시정지 */releaseAll&&releaseAll();P.mv=null;o.hidden=false;$('npcAct').classList.add('talkhide');talkNext()}
 function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL').hidden=true;$('npcAct').classList.remove('talkhide');TALK=null;if(T.done)T.done();return}
-  const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;$('talkN').className=vo?'vo':'';$('talkT').textContent=t;$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸'}
+  const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;$('talkN').className=vo?'vo':'';$('talkT').textContent=t;$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸';const H=$('talkH');if(T.i===0){H.style.opacity=.25;clearTimeout(T.ht);T.ht=setTimeout(()=>{H.style.opacity=''},1500)}else H.style.opacity=''}
 /* 엔드게임 마을로 — 결말(fall) · 부캐 시작(alt) · 결말 도중 재접속 */
 function toRefuge(kind){if(RZ)riftClear();clearPools();collectAll();wipeFx();for(const e of [...enemies])dropEnemy(e);for(const p of pickups)scene.remove(p.m);pickups.length=0;S.duel=null;S.fld=null;inTown=true;P.mv=null;townSync();
   mapLoad(TOWN.n,kind==='fall'?'성역 아래로 옮겨집니다':'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,kind==='fall'?14.6:8.5);camT.copy(P.pos);P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;fldHold=false;save();
@@ -7664,7 +7664,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v747';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v748';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7845,7 +7845,7 @@ function npcPortrait(n){const key=(refOn()?'r':'v')+n.id;if(NPCPIC[key])return N
 function npcWhere(n){const a=Math.atan2(n.x,-n.z),d=Math.hypot(n.x,n.z);if(d<3)return '광장 한가운데';const dir=['위쪽','오른쪽 위','오른쪽','오른쪽 아래','아래쪽','왼쪽 아래','왼쪽','왼쪽 위'][((Math.round(a/(Math.PI/4))%8)+8)%8];return `광장 ${dir}${d>14?' 끝':''}`}
 function npcMapPic(n){if(!inTown)return '';try{const N=128,o=mkCv(N),x=o.getContext('2d'),R=(TLY?Math.max(...NPCS.filter(npcOn).map(q=>Math.hypot(q.x,q.z))):TOWN_R)+6,k=N/(2*R);
     drawMiniTo(x,N,N,0,0,R+10,k,0,true);const px=N/2+n.x*k,pz=N/2+n.z*k;x.strokeStyle='#fff4d8';x.lineWidth=3;x.beginPath();x.arc(px,pz,9,0,7);x.stroke();x.fillStyle='#ffe0a0';x.beginPath();x.arc(px,pz,4.5,0,7);x.fill();return o.toDataURL()}catch(e){return ''}}
-function townNpcHtml(){const L=NPCS.filter(n=>npcOn(n));return `<div class="tnl">${L.map(n=>{const pic=npcPortrait(n),mp=npcMapPic(n);return `<div class="tnr">${pic?`<img src="${pic}" alt="">`:'<i class="tnp"></i>'}<div><b>${npcName(n.id)}</b><span>${npcSub(n.id)}</span><small>${npcWhere(n)}</small></div>${mp?`<img class="tnm" src="${mp}" alt="">`:'<i class="tnm"></i>'}</div>`}).join('')}</div>${inTown?'':'<div class="gv-foot">마을에서 열면 얼굴과 위치 그림이 함께 보입니다.</div>'}`}
+function townNpcHtml(){const L=NPCS.filter(n=>npcOn(n));return `<div class="tnl">${L.map(n=>{const pic=npcPortrait(n),mp=npcMapPic(n);return `<div class="tnr">${pic?`<img src="${pic}" alt="">`:'<i class="tnp"></i>'}${mp?`<img class="tnm" src="${mp}" alt="">`:'<i class="tnm"></i>'}<div><b>${npcName(n.id)}</b><span>${npcSub(n.id)}</span><small>${npcWhere(n)}</small></div></div>`}).join('')}</div>${inTown?'':'<div class="gv-foot">마을에서 열면 얼굴과 위치 그림이 함께 보입니다.</div>'}`}
 let GDQ=[],GCUR=null;
 function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;if(window.CHCON){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
@@ -9653,7 +9653,7 @@ $('openPause').addEventListener('click',openPause);$('pResume').addEventListener
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
 
 $('resume').addEventListener('pointerdown',e=>{e.preventDefault();hideResume()});
-const paused=()=>window.CL_PAUSE||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('title').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
+const paused=()=>window.CL_PAUSE||(TALK&&TALK.pz)||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('title').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
 const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
