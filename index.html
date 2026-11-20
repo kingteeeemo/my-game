@@ -7664,7 +7664,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v746';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v747';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9713,7 +9713,7 @@ setInterval(()=>{try{const on=['title','slots','classSel','skillSel'].some(id=>$
   const A=$('tash');for(let i=0;i<40;i++){const b=document.createElement('b');b.style.cssText=`left:${Math.random()*100}%;animation-duration:${9+Math.random()*9}s;animation-delay:${-Math.random()*18}s`;A.appendChild(b)}})();
 (function(){const e=$('emb');for(let i=0;i<34;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 /* v745: 「화면을 터치하세요」 — 첫 터치로 소리 잠금을 풀고(오프닝 BGM 시작) 게임 시작 버튼을 보여 줌 */
-{const t=$('title'),go=e=>{if(!t.classList.contains('tapwait')||t.hidden)return;if(e&&e.cancelable)e.preventDefault();e&&e.stopPropagation();t.classList.remove('tapwait');t.classList.add('tapdone')};t.addEventListener('pointerdown',go);addEventListener('keydown',e=>{if(!t.hidden&&t.classList.contains('tapwait'))go(e)})}
+{const t=$('title'),go=e=>{if(!t.classList.contains('tapwait')||t.hidden)return;if(e&&t.contains(e.target)){if(e.cancelable)e.preventDefault();e.stopPropagation()}/* 로그인 창 등 다른 창을 누른 터치는 그 창에 그대로 전달 */t.classList.remove('tapwait');t.classList.add('tapdone')};addEventListener('pointerdown',go,{capture:true});addEventListener('keydown',e=>{if(!t.hidden&&t.classList.contains('tapwait'))go(e)})}
 $('goStart').onclick=()=>{$('title').hidden=true;showSlots()};
 setTimeout(skwPreload,600);
 hud();
