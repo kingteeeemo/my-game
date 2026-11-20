@@ -177,7 +177,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;transition:opacity .4s;opacity:0;width:86%}
 .toast.on{opacity:1}
 .toast b{display:block;font-size:22px;font-weight:900;text-shadow:0 2px 12px #000;text-wrap:balance}
-.toast span{font-size:13px;color:var(--ember);text-shadow:0 1px 6px #000}
+.toast span{white-space:pre-line;font-size:13px;color:var(--ember);text-shadow:0 1px 6px #000}
 .nm{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:2px;font:700 10px var(--ko);text-shadow:0 1px 2px #000,0 0 3px #000;white-space:nowrap;will-change:transform}
 .nm i{display:block;width:36px;height:3px;background:rgba(0,0,0,.65);border-radius:2px;overflow:hidden}
 .nm b{display:block;height:100%;width:100%;background:#d8574e}
@@ -7696,8 +7696,8 @@ function bossToggle(){const id=C().skills[0];if(!BOSS_IDS.includes(id)){toast('�
   S.bossM=!S.bossM;feed(`${SK[id].n}: ${S.bossM?'보스 모드 켜짐':'보스 모드 꺼짐'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(S.bossM)guide('bossm');save()}
 /* v725: 결투장에 들어가면 보스 모드 자동 켬, 나오면 들어가기 전 상태로 */
 function bossAuto(on){if(!on)bmAutoOn=false;if(!S||!S.cls)return;const id=C().skills[0];if(!BOSS_IDS.includes(id)||!g2Done(id))return;
-  if(on){S.bossPrev=!!S.bossM;if(S.bossM)return;S.bossM=true}else{if(S.bossPrev===undefined)return;const v=S.bossPrev;delete S.bossPrev;if(S.bossM===v)return;S.bossM=v}
-  feed(`${SK[id].n}: ${S.bossM?'보스 모드 자동 켜짐':'보스 모드 꺼짐 (원래대로)'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(on&&S.bossM){toast('보스 모드 자동 켜짐',`「${SK[id].n}」이(가) 한 대상에 몰아치는 모양으로 바뀝니다 · 화면 우측 하단 보스 버튼을 클릭하여 켜고 끌 수 있습니다.`);guide('bossm')}save()}
+  if(on){S.bossPrev=!!S.bossM;S.bossM=true}else{if(S.bossPrev===undefined)return;const v=S.bossPrev;delete S.bossPrev;if(S.bossM===v)return;S.bossM=v}
+  feed(`${SK[id].n}: ${S.bossM?'보스 모드 자동 켜짐':'보스 모드 꺼짐 (원래대로)'}`,S.bossM?'#ffd24a':'#9ab');bossBtn();if(on&&S.bossM){toast('보스 모드 켜짐',`「${SK[id].n}」이(가) 한 대상에 몰아치는 모양으로 바뀝니다\n화면 우측 하단 보스 버튼을 클릭하여 켜고 끌 수 있습니다.`);guide('bossm')}save()}
 /* v725: 보스와 마주치고 등장 연출이 끝난 뒤에 자동으로 켬(결투장·관문 보스·최종 보스), 보스가 사라지면 원래대로 */
 let bmAutoT=0,bmAutoOn=false;
 function bossAutoTick(dt){const e=enemies.find(e=>e.hp>0&&(e.duel||e.gate||e.final));
