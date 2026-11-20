@@ -4563,7 +4563,7 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
 /* v738: 무기 외형 여러 개 — 마법사 「월광의 홀」 추가. rel:'hand' = 손 기준 자리(검귀 모델에서 뽑은 자리) → 원래 무기 기준으로 환산, rel:'sw' = 원래 무기 자리 기준 그대로(쥐는 곳 = 원점, 막대 = +y).
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
 const WLOOKS={wsk_knight:{n:'잿불 검귀의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
-  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
+  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:-.7,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k];
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
@@ -4575,6 +4575,7 @@ function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&
   if(!K.sw.parent||!/RightHand$/.test(K.sw.parent.name))return;/* 등에 멘 동안(초상화)엔 손으로 돌아온 뒤에 */
   const W=WLOOKS[want],m=Q.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
   if(!K.wskHid){K.wskHid=[];K.sw.traverse(o=>{if(o.isMesh)K.wskHid.push(o)})}
+  if(W.ry)m.rotation.y=W.ry;/* 막대 축(+y) 둘레로 돌림 */
   if(W.rel==='hand'){K.sw.updateMatrix();const M=K.sw.matrix.clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale)}K.sw.add(m);
   if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone();K.gemM0=K.gemM}
   const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
@@ -7644,7 +7645,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v739';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v740';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
