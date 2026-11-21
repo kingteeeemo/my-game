@@ -1840,7 +1840,7 @@ const NSK={rain:.66,quake:1.01,chainl:1.10,frost:1.43,whirl:3.74,volley:23.8};
 const nsSkillK0=id=>NSK[id]!==undefined?NSK[id]:(()=>{const b=BAL[id];return b?(SKM[id]||1)*b[1]*b[2]:1})();
 /* v725 스킬 밸런스 — 110 스펙(1티어) 기준 사냥(구울 12마리 무리) DPS를 한 줄로(NSF), 보스 DPS는 보스에게만 붙는 배율로 따로(NSB, 보스 모드가 있는 스킬은 켠 상태 기준) */
 const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,chainl:1.167,pillar:.682,wave:19.8},
-  NSBK={whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
+  NSBK={smite:1.87/* v764: 심판의 검 보스 134만→약 257만(다른 스킬 250만 선에 맞춤) */,whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
 const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;return id&&NS()?(NSBK[id]||1):1};
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
