@@ -927,7 +927,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .skillsel{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;justify-content:center;pointer-events:none}
 .skillsel .sheet{pointer-events:auto;max-height:52vh;border-radius:16px 16px 0 0;border:1px solid var(--line);gap:10px;background:rgba(23,23,29,.94)}
-.skcs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.skcs .skc:last-child:nth-child(odd){grid-column:1/-1}
+.skcs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.skillsel .sheet>.btns{position:sticky;bottom:0;z-index:2;margin-top:0;padding:8px 0 2px;background:rgb(23,23,29);box-shadow:0 -10px 10px rgb(23,23,29)}/* v767: 주력 스킬이 3개로 늘어 시작 버튼이 화면 밖으로 밀리지 않게 아래에 고정 */.skcs .skc:last-child:nth-child(odd){grid-column:1/-1}
 .skc{display:flex;flex-direction:column;gap:5px;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 11px;color:var(--ink);font:inherit;min-width:0}
 .skc.on{border-color:#ff8a3a;background:#231a13;box-shadow:0 0 0 1px rgba(255,138,58,.35)}
 .skt{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}.skt b{font-size:16px}.skt .en{font:600 9.5px var(--en);font-stretch:87%;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
@@ -7001,7 +7001,7 @@ const SK_NEW={
   pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
 CLS.archer.opts.push('boom');
-/* v757: 심판의 검은 테스트 모드에서만 노출 */for(const [c,k] of [['warrior','smite']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
+/* v767: 심판의 검 일반 공개(v757~ 테스트 모드 전용이었음) */if(!CLS.warrior.opts.includes('smite'))CLS.warrior.opts.push('smite');
 /* v722: 폭발 사격 일반 모드 공개 (이전엔 테스트 전용) */
 Object.assign(GEMS,{
   wlen:{n:'매화섬',t:'wave',c:'#ffc080',/* v664: 참격 연장 → 매화섬 */d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
@@ -7901,7 +7901,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v766';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v767';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9190,7 +9190,7 @@ function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT
 const GREAT_P=.2;/* v429 강화 대성공 확률 → v443: 10% → 30% → v461: 20% */
 function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=tkUse?tkGold(L,k):enhCost(L,k);if(L>=enhMax()||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
-    if(auto)smAutoN++;const big=NS()?L>=15:L>=29;/* v603: 새 강화는 16강(1%)부터 컷신 *//* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
+    if(auto)smAutoN++;const big=NS()?L>=10:L>=29;/* v767: 새 강화는 10→11부터 컷신 *//* v603: 새 강화는 16강(1%)부터 컷신 *//* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
     const pn=pityN(k),pHit=pn>=pityCap(L);const nat=!tkUse&&!pHit&&Math.random()<enhRate(L);if(tkUse||pHit||nat){const great=!NS()&&big&&nat&&Math.random()<GREAT_P,nl=L+(great?2:1);/* v429: 강화 대성공 — 컷신 구간(29→30~)에서 성공 시 +2단계 · v443: 확률 30%, 확정 강화 주문서·천장 성공은 제외(일반 확률로 성공했을 때만) */S.enh[k]=nl;if(S.pity)delete S.pity[k];smithRes={ok:true,L:nl,t:Date.now(),cine:big,great};refreshMax();if(big){cine=1;enhCine(k,nl,true,()=>renderSmith(),auto,great)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${nl} ${great?'대성공 ✦ +2단계':'강화 성공'} · 자동`,great?'#ffd24a':'#7fe07a');if(great)feed(`✦ 강화 대성공! ${SLOTN[k]} +${L} → +${nl}`,'#ffd24a');}
     else{(S.pity=S.pity||{})[k]={L,n:pn+1};smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0,gr:smithRes.great?1:0});save();if(!cine)renderSmith()}
