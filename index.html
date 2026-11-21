@@ -1272,9 +1272,10 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="sx-q" id="gfxSeg"><button data-q="0"><i class="sx-bars"><u class="f"></u><u></u><u></u></i><b>하</b><small>오래된 기기</small></button><button data-q="1"><i class="sx-bars"><u class="f"></u><u class="f"></u><u></u></i><b>중</b><small>휴대폰 권장</small></button><button data-q="2"><i class="sx-bars"><u class="f"></u><u class="f"></u><u class="f"></u></i><b>상</b><small>PC · 고사양</small></button></div>
       <p class="sx-note" id="gfxHint"></p>
       <div class="sx-sec">Camera</div>
-      <div class="sx-row"><div class="sx-rh"><b>카메라 거리</b><output id="camZO">기본</output></div>
-        <input type="range" class="sx-rng" id="camZr" min="-30" max="30" step="5" value="0" aria-label="카메라 거리">
-        <div class="sx-lbl"><span>멀리 −30%</span><span>가깝게 +30%</span></div></div>
+      <div class="sx-rh"><b>카메라 확대 잠금</b><output id="camZO">기본</output></div>
+      <div class="sx-q two" id="camLk"><button data-l="0"><b>끄기</b><small>휠 · 두 손가락으로 확대</small></button><button data-l="1"><b>켜기</b><small>지금 시점 고정</small></button></div>
+      <p class="sx-note">PC는 마우스 휠, 모바일은 두 손가락을 벌리거나 모아 확대합니다. 가까워질수록 캐릭터 등 뒤에서 보는 시점으로 기울어요.</p>
+      <button class="sx-link" id="camRst"><b>기본 시점으로</b><span>›</span></button>
     </section>
     <section data-p="s" hidden>
       <div class="sx-sec">Sound</div>
@@ -2321,8 +2322,13 @@ const SFX=(()=>{
   function setMute(b){muted=!!b;if(master)master.gain.value=muted?0:vol/100;if(bgmM)bgmM.gain.value=muted?0:bgmVol/100;try{localStorage.setItem('sndMute',muted?'1':'0')}catch(e){}}
   return{p,swing,hit,setVol,bgm,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
 })();
-let CAM_Z=0;try{CAM_Z=Math.max(-30,Math.min(30,+localStorage.getItem('camZ')||0))}catch(e){}
-const camK=()=>1-CAM_Z/100;
+/* v779: 카메라 확대 — 0 = 기본(예전 −15% 거리), −15까지 멀리, +45까지 가까이. 가까워질수록 낮게 내려와 등 뒤에서 보는 백뷰 쪽으로 기움 */
+const CZ_MIN=-15,CZ_MAX=45;let CAM_Z=0,CAM_LOCK=false;try{const v=localStorage.getItem('camZ3');if(v!==null&&v!==''&&!isNaN(+v))CAM_Z=Math.max(CZ_MIN,Math.min(CZ_MAX,+v));CAM_LOCK=localStorage.getItem('camLock')==='1'}catch(e){}
+const camT01=()=>CAM_Z>0?CAM_Z/CZ_MAX:0;
+const camK=()=>CAM_Z<=0?1.15-CAM_Z/100:1.15-.6*camT01();
+const camFK=()=>Math.max(1.15,camK());/* 안개는 기본 거리보다 가까워지지 않게 — 낮은 시점에서 먼 곳이 뿌옇게 막히지 않도록 */
+const CAM_A0=Math.atan2(17,12),CAM_A1=.36;const camA=()=>{const t=camT01();return CAM_A0-(CAM_A0-CAM_A1)*Math.pow(t,1.15)};
+function camSet(z,save=true){z=Math.max(CZ_MIN,Math.min(CZ_MAX,z));if(z===CAM_Z)return false;CAM_Z=z;if(save)try{localStorage.setItem('camZ3',String(Math.round(CAM_Z)))}catch(_){}try{resize();frameCam(1)}catch(_){}return true}
 /* 조명: 낮은 환경광 + 그림자를 드리우는 달빛 + 영웅의 횃불 + 가까운 화로 불빛(풀) + 스킬 섬광 */
 const hemi=new THREE.HemisphereLight(0x7684a4,0x1c140e,.55);scene.add(hemi);
 const SUN_OFF=new THREE.Vector3(-8,20,6);
@@ -7915,7 +7921,7 @@ function explode(p,dmg,skip,r=2.4,ice,bm,ov){SFX.p(ice==='bolt'?'zapboom':ice?(S
 
 /* ================= input ================= */
 const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
-const stick=$('stick'),knob=$('knob'),nub=$('nub');let sp=null;
+const stick=$('stick'),knob=$('knob'),nub=$('nub');let sp=null,camPZ=null;
 function mouseBtn(e,down){
   if(Date.now()-lastTouch<900)return;
   if(down){pcMode=true;mNdc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);updMouseWorld()}
@@ -7942,10 +7948,19 @@ addEventListener('mouseup',e=>mouseBtn(e,false));
 addEventListener('mousemove',e=>{if(Date.now()-lastTouch<900)return;mNdc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
 addEventListener('touchstart',()=>{lastTouch=Date.now();pcMode=false},{passive:true});
 canvas.addEventListener('contextmenu',e=>e.preventDefault());stick.addEventListener('contextmenu',e=>e.preventDefault());
-stick.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;if(sp)return;sp={id:e.pointerId,x:e.clientX,y:e.clientY};stick.setPointerCapture(e.pointerId);knob.style.left=e.clientX+'px';knob.style.top=(e.clientY-stick.getBoundingClientRect().top)+'px';knob.hidden=false;nub.style.transform=''});
+stick.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;if(sp||camPZ)return;sp={id:e.pointerId,x:e.clientX,y:e.clientY};stick.setPointerCapture(e.pointerId);knob.style.left=e.clientX+'px';knob.style.top=(e.clientY-stick.getBoundingClientRect().top)+'px';knob.hidden=false;nub.style.transform=''});
 stick.addEventListener('pointermove',e=>{if(!sp||e.pointerId!==sp.id)return;let dx=e.clientX-sp.x,dy=e.clientY-sp.y;const d=Math.hypot(dx,dy),m=48;if(d>m){dx=dx/d*m;dy=dy/d*m}nub.style.transform=`translate(${dx}px,${dy}px)`;if(d<6){input.x=input.z=0}else{const L=Math.hypot(dx,dy)||1;input.x=dx/L;input.z=dy/L}/* v233: 살짝만 밀어도 최대 속도(방향만 사용) */});
 const endStick=e=>{if(!sp||e.pointerId!==sp.id)return;sp=null;input.x=input.z=0;knob.hidden=true};
 stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercancel',endStick);
+/* v779: 모바일 두 손가락 확대·축소 — 화면(조이스틱 영역 포함)에 손가락 두 개가 닿으면 이동을 멈추고 벌리면 가까이, 모으면 멀리 */
+{const PT=new Map();const ok=e=>e.pointerType!=='mouse'&&(e.target===canvas||e.target===stick||stick.contains(e.target));
+  const dist=()=>{const a=[...PT.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
+  const can=()=>!CAM_LOCK&&!knAppr&&!paused()&&!CHC.on&&!invOpen;
+  addEventListener('pointerdown',e=>{if(!ok(e))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(PT.size===2&&can()){camPZ={d0:Math.max(30,dist()),z0:CAM_Z};if(sp){sp=null;input.x=input.z=0;knob.hidden=true}}},true);
+  addEventListener('pointermove',e=>{const q=PT.get(e.pointerId);if(!q)return;q.x=e.clientX;q.y=e.clientY;if(!camPZ||PT.size<2)return;if(!can()){camPZ=null;return}
+    const z=camPZ.z0+(dist()/camPZ.d0-1)*70;if(camSet(z,false))try{camSegUI()}catch(_){}input.x=input.z=0},true);
+  const up=e=>{if(!PT.delete(e.pointerId))return;if(camPZ&&PT.size<2){camPZ=null;try{localStorage.setItem('camZ3',String(Math.round(CAM_Z)))}catch(_){}}};
+  addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true)}
 document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('pointerdown',e=>{e.preventDefault();input.held[k]=true;b.classList.add('down');if(k==='s1'&&S&&S.autoSkSet&&!paused()&&!inTown){S.autoSkOn=!S.autoSkOn;skAutoUi();feed(S.autoSkOn?'스킬 자동 사용 켜짐':'스킬 자동 사용 꺼짐',S.autoSkOn?'#ffd24a':'#9ab');if(!S.autoSkOn)input.held[k]=false}fireNow(k)});
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{input.held[k]=false;b.classList.remove('down')}));
@@ -7984,7 +7999,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v778';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v779';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9895,9 +9910,9 @@ function frameCam(dt,target=P.pos){
   if(target===P.pos&&thOn&&mapKind==='arena'&&(!knAppr||ASHC.on)){/* v611: 왼쪽 위의 아쉬카르가 화면에 들어오게 시선을 보스 쪽으로 당김 */const b=enemies.find(e=>e.perch&&e.hp>0&&!e.air);if(b){const dx=(b.pos.x-P.pos.x)*.3,dz=(ASH.pawZ-2-P.pos.z)*.36,l=Math.hypot(dx,dz),k=l>4.2?4.2/l:1;/* v624: 당기는 거리 최대 4.2 — 보스에서 멀면 캐릭터가 화면 아래로 벗어나던 문제 */target=_dt.set(P.pos.x+dx*k,0,P.pos.z+dz*k)}}
   camT.lerp(target,Math.min(1,dt*6));
   {/* v611: 불타는 왕좌 전투는 카메라를 비스듬히 돌려 보스가 왼쪽 위에 오게(계단·다른 맵은 0) */const ty=thOn&&mapKind==='arena'&&(!knAppr||ASHC.on)?THR.yaw:0;/* v619: 결말(숨결) 동안에도 비스듬한 시점 유지 */camYaw+=(ty-camYaw)*Math.min(1,Math.max(dt,0)*2.5);if(Math.abs(camYaw-ty)<.002)camYaw=ty}
-  if(camYaw){const K=camK();camera.position.set(camT.x+CAM_OFF.z*Math.sin(camYaw)*K,camT.y+CAM_OFF.y*K,camT.z+CAM_OFF.z*Math.cos(camYaw)*K)}else camera.position.copy(camT).addScaledVector(CAM_OFF,camK());
+  {const L=CAM_OFF.length()*camK(),a=camA(),hz=Math.cos(a)*L,vy=Math.sin(a)*L;camera.position.set(camT.x+hz*Math.sin(camYaw),camT.y+vy,camT.z+hz*Math.cos(camYaw))}/* v779: 거리 + 각도(가까울수록 낮게) */
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
-  camera.lookAt(camT.x,camT.y+1,camT.z);
+  camera.lookAt(camT.x,camT.y+1+.7*camT01(),camT.z);
   if(mapKind==='arena')drgCam(dt);if(ASHC.cam&&thOn)ashCineCam(dt);
   if(CHC.on)chCineCam(dt);
 }
@@ -9906,13 +9921,13 @@ const DGCAM={back:7,up:3.1,side:1.6,mix:.65,ret:1.4,fog:1,kn:{land:1.4,landLy:.2
 function drgCam(dt){const C=DGCAM;
   if(ASHC.on)return;/* v617: 결말 동안은 결말 카메라(ashCineCam)·전투 시점 그대로 */
   if(knAppr&&mwOn)return mwCam(dt);if(knAppr&&thOn)return thCam(dt);
-  if(knAppr){/* v588: 다리를 달리는 동안 — 낮은 등 뒤 시점으로 멀리 선 검귀를 바라봄 */const K=KNB,kn=enemies.find(e=>e.duel&&!e.maw);{/* v596: 안개는 매 프레임 다리용으로 고정 — 화면 크기·설정 변경이 덮어써도 검귀가 가려지지 않게 */dgCamW=1;scene.fog.near=20*camK()*(1+C.fog);scene.fog.far=48*camK()*(1+C.fog)}
+  if(knAppr){/* v588: 다리를 달리는 동안 — 낮은 등 뒤 시점으로 멀리 선 검귀를 바라봄 */const K=KNB,kn=enemies.find(e=>e.duel&&!e.maw);{/* v596: 안개는 매 프레임 다리용으로 고정 — 화면 크기·설정 변경이 덮어써도 검귀가 가려지지 않게 */dgCamW=1;scene.fog.near=20*camFK()*(1+C.fog);scene.fog.far=48*camFK()*(1+C.fog)}
     camera.position.set(P.pos.x*.6,K.cy,P.pos.z+K.cb);camera.lookAt(P.pos.x*.3+(kn?kn.pos.x*.1:0),K.ly,P.pos.z-18);DGCAM.lk=0;DGCAM.px=P.pos.x;DGCAM.pz=P.pos.z;return}
   let b=enemies.find(e=>e.final&&e.air&&e.air.intro),w=0,kn=null,mw=null;
   if(b){const A=b.air;w=A.st==='roar'?1-Math.min(1,A.t/C.ret):1;w=w*w*(3-2*w)}
   else if((kn=enemies.find(e=>e.duel&&!e.maw&&e.hp>0&&e.M&&e.M.sk&&e.introT!==undefined))){/* v551: 검귀 카이렌 — 등장하는 동안은 검귀만 정면에서 잡고, 칼을 다 뽑으면 캐릭터 등 뒤로 물러났다가 쿼터뷰로 */const E=BKC.introT/BKC.introK,K=C.kn,k=(kn.introT-(E+K.q0))/(K.q1-K.q0);if(k<1){b=kn;w=1-Math.max(0,k);w=w*w*(3-2*w)}}
   if(!b&&(mw=enemies.find(e=>e.maw&&e.hp>0&&e.introT!==undefined))){/* v575: 심연의 아귀 — 구멍을 내려다보다가, 솟구치면 물러나며 올려다보고 쿼터뷰로 */const k=(mw.introT-(MWI.up+MWI.roar*.55))/MWI.ret;if(k<1){b=mw;w=1-Math.max(0,k);w=w*w*(3-2*w)}else mw=null}
-  if(w!==dgCamW){dgCamW=w;scene.fog.near=20*camK()*(1+w*C.fog);scene.fog.far=48*camK()*(1+w*C.fog)}
+  if(w!==dgCamW){dgCamW=w;scene.fog.near=20*camFK()*(1+w*C.fog);scene.fog.far=48*camFK()*(1+w*C.fog)}
   if(w<=0){DGCAM.lk=0;if(DGCAM.f0){camera.fov=DGCAM.f0;DGCAM.f0=0;camera.updateProjectionMatrix()}return}
   let dx=P.pos.x-FB_POS.x,dz=P.pos.z-FB_POS.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
   _dcP.set(P.pos.x+dx*C.back-dz*C.side,C.up,P.pos.z+dz*C.back+dx*C.side);
@@ -9934,7 +9949,7 @@ function drgCam(dt){const C=DGCAM;
 /* 모바일은 카메라를 2배 멀리 두어 캐릭터·몬스터가 절반 크기로 보이게(시야 확장) */
 let mobView=false;
 function resize(){const w=innerWidth,h=innerHeight,mob=mobView=w<h||matchMedia('(pointer:coarse)').matches;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?73.1:(matchMedia('(pointer:coarse)').matches||h<=520)?38.7:47.3;/* v120: 모바일(세로·폰 가로) 카메라 10% 축소: 67.9 → 73.1, 35.5 → 38.7 *//* v74: PC 15% 축소(42 → 47.3) *//* v70: 세로 모드 20% 축소(58 → 67.9) */ /* v57: 폰 가로 화면은 20% 확대(fov 42 → 35.5) */
-  CAM_OFF.set(0,17,12);scene.fog.near=20*camK();scene.fog.far=48*camK();camera.updateProjectionMatrix();if(PP.rt)ppSize()}
+  CAM_OFF.set(0,17,12);scene.fog.near=20*camFK();scene.fog.far=48*camFK();camera.updateProjectionMatrix();if(PP.rt)ppSize()}
 addEventListener('resize',resize);resize();
 /* ================= 전체화면 ================= */
 const FS_IN='M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',FS_OUT='M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5';
@@ -10018,9 +10033,9 @@ function loop(now){
 camT.set(0,0,0);frameCam(1);
 applyTheme();applyGfx();
 document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click',()=>{GUQ=+b.dataset.q;try{localStorage.setItem(GFX_KEY,String(GUQ))}catch(e){}applyGfx()}));
-function camSegUI(){const r=$('camZr');if(r){r.value=CAM_Z;rngPc(r)}const o=$('camZO');if(o)o.textContent=CAM_Z===0?'기본':(CAM_Z>0?'+':'−')+Math.abs(CAM_Z)+'%'}
+function camSegUI(){const o=$('camZO');if(o)o.textContent=CAM_LOCK?'잠김':CAM_Z===0?'기본':(CAM_Z>0?'확대 ':'축소 ')+Math.round(Math.abs(CAM_Z)/(CAM_Z>0?CZ_MAX:-CZ_MIN)*100)+'%';document.querySelectorAll('#camLk button').forEach(b=>b.classList.toggle('on',(b.dataset.l==='1')===CAM_LOCK))}
 function rngPc(r){r.style.setProperty('--pc',((+r.value-+r.min)/(+r.max-+r.min)*100)+'%')}
-$('camZr').addEventListener('input',e=>{const r=e.target;if(knAppr){camSegUI();toast('카메라','입장하는 동안은 바꿀 수 없습니다');return}/* v596 */CAM_Z=+r.value;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}camSegUI();resize();frameCam(1)});camSegUI();
+document.querySelectorAll('#camLk button').forEach(b=>b.addEventListener('click',()=>{CAM_LOCK=b.dataset.l==='1';try{localStorage.setItem('camLock',CAM_LOCK?'1':'0')}catch(_){}camSegUI()}));$('camRst').onclick=()=>{if(knAppr){toast('카메라','입장하는 동안은 바꿀 수 없습니다');return}camSet(0);camSegUI()};camSegUI();
 /* v777: 설정 탭 */{const T=$('sxTabs');const go=t=>{T.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('#pauseSheet section[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);try{localStorage.setItem('sxTab',t)}catch(_){}};T.addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b)go(b.dataset.t)});let t0='v';try{t0=localStorage.getItem('sxTab')||'v'}catch(_){}go(T.querySelector(`[data-t="${t0}"]`)?t0:'v');$('sxVer').textContent=APP_VER;
   $('pX').onclick=()=>closePause();$('pSlots2').onclick=()=>$('pSlots').click();$('pFull').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else fsReq&&fsReq.call(fsRoot)}catch(_){}}}
 /* v534: PC — 창 상단(제목 줄)을 끌어 창 이동(다시 열면 처음 위치) · 마우스 휠로 카메라 거리 조절 */
@@ -10031,8 +10046,8 @@ $('camZr').addEventListener('input',e=>{const r=e.target;if(knAppr){camSegUI();t
   addEventListener('pointerup',()=>{if(D){D.sh.classList.remove('dragging');D=null}});
   const mo=new MutationObserver(ms=>{for(const m of ms){const s=m.target;if(s.hidden)s.querySelectorAll(':scope>.sheet').forEach(x=>x.style.translate='')}});
   const hook=()=>document.querySelectorAll('.scrim').forEach(s=>{if(s._dg)return;s._dg=1;mo.observe(s,{attributes:true,attributeFilter:['hidden']});s.querySelectorAll(':scope>.sheet').forEach(x=>{if(pc())x.classList.add('dragok')})});hook();setTimeout(hook,1500);
-  addEventListener('wheel',e=>{if(!pc()||!e.target||(e.target.closest&&e.target.closest('.scrim,.sheet,.iv2,#mini,.feed,#cl')))return;if(typeof paused==='function'&&paused())return;if(knAppr)return;/* v596: 다리 구간에선 휠 확대·축소 막음 */
-    const z=Math.max(-30,Math.min(30,CAM_Z+(e.deltaY>0?-5:5)));if(z===CAM_Z)return;CAM_Z=z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}try{camSegUI()}catch(_){}resize();frameCam(1)},{passive:true});
+  addEventListener('wheel',e=>{if(!pc()||!e.target||(e.target.closest&&e.target.closest('.scrim,.sheet,.iv2,#mini,.feed,#cl')))return;if(typeof paused==='function'&&paused())return;if(knAppr)return;/* v596: 다리 구간에선 휠 확대·축소 막음 */if(CAM_LOCK||invOpen)return;/* v779: 확대 잠금 */
+    if(camSet(CAM_Z+(e.deltaY>0?-5:5)))try{camSegUI()}catch(_){}},{passive:true});
 })();
 
 {const chk=()=>{try{const on=['title','slots','classSel','skillSel'].some(id=>$(id)&&!$(id).hidden);const mb=$('muteBtn');if(mb)mb.hidden=!on;SFX.bgm(on?'title':(inTown&&mapKind==='town')?'refuge':null)/* v765: 마을 BGM — 세렌 마을·추락자의 쉼터 공용 */}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
