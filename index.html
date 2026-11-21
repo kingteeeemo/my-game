@@ -2159,7 +2159,7 @@ function skillStats(id){
   if(b.kind==='chainl'){const c=cBnc(L('cbounce')),f=cFrk(L('cfork'));st.bn=c.n;st.bk=c.k;st.jr=c.jr;st.forks=f.n;st.csl=f.sl;const x=g2('cstorm'),o=g2('overl');st.cst=x?csSt(x):null;st.ovl=o?ovSt(o):null}
   if(b.kind==='wave'){const l=L('wlen'),e=L('wecho');st.len=wvLen(l);{const w=wvEcho(e);st.dmg*=(1+.05*l)*(1+.04*e)*(1+w.n*w.m)}st.wec={n:0,m:0};/* v648: 한 번 휘둘러 검기 하나 — 추가 검기 몫은 피해로 */const f=g2('wfan'),bu=g2('wburst');st.fan={n:1,m:1,sp:0};/* v645: 갈래 없음 — 하나의 파동 */st.burst=bu?wvBurst(bu):null;st.wk=wvProg(l,e,f)}
   if(b.kind==='boom'){const r=L('brad'),q=g2('bret');st.r=bmRad(r);st.dmg*=bmDmg(r);st.ember=null;st.multi=bmMulti(g2('bmulti'));st.bspd=bmSpd(L('bacc'));st.ret=q?retSt(q):null}/* v719: 잔불 삭제 · 가속 화살 1차(10단계) · 2차 회귀 화살 */
-  if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「천뢰검」 */
+  if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「심판의 검」 (v760 이름 변경: 옛 천뢰검) */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
@@ -6843,24 +6843,24 @@ const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전
   bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
-const smRad=L=>2.3*(1+.07*L),smDmg=L=>1+.04*L,smArc=L=>({n:1+Math.floor(L/3),m:.3+.03*L,r:6.5}),/* 연쇄 낙뢰(10단계): 1·3·6·9단계에 번개 +1 */
-  smField=L=>({dur:1+.2*L,iv:.25,m:.06+.02*L}),/* 뇌전 지대(5단계) */smTwin=L=>({n:L,m:.4+.06*L});/* 뇌검우(5단계): 단계마다 검 +1 → 5단계 총 6자루 */
+const smRad=L=>2.3*(1+.07*L),smDmg=L=>1+.04*L,smArc=L=>({n:1+Math.floor(L/3),m:.3+.03*L,r:6.5}),/* 갈래 번개(10단계): 1·3·6·9단계에 번개 +1 */
+  smField=L=>({dur:1+.2*L,iv:.25,m:.06+.02*L}),/* 폭풍의 잔향(5단계) */smTwin=L=>({n:L,m:.4+.06*L});/* 심판의 비(5단계): 단계마다 검 +1 → 5단계 총 6자루 */
 const SK_NEW={
-  smite:{n:'천뢰검',role:'다수 공격',tag:'smite',en:'Heavenly Thunderblade · Lightning',kind:'smite',gems:['srad','sarc','haste'],mp:11,dmg:1.5,cd:1.2,desc:'하늘에서 번개를 두른 검을 적의 자리에 내리꽂습니다. 검이 꽂힌 자리에는 푸른 뇌전의 소용돌이가 터져 주변 적을 모두 휩씁니다.'},
+  smite:{n:'심판의 검',role:'다수 공격',tag:'smite',en:'Blade of Judgement · Lightning',kind:'smite',gems:['srad','sarc','haste'],mp:11,dmg:1.5,cd:1.2,desc:'하늘에서 번개를 두른 검을 적의 자리에 내리꽂습니다. 검이 꽂힌 자리에는 푸른 번개의 소용돌이가 터져 주변 적을 모두 휩씁니다.'},
   wave:{n:'매화참',role:'다수 공격',tag:'wave',en:'Plum Blossom Slash · Melee',kind:'wave',gems:['wlen','wecho','haste'],mp:11,dmg:1.3,cd:1.2,desc:'검을 크게 휘둘러 초승달 모양의 검기를 앞으로 날립니다. 검기는 길에 있는 적을 모두 베고 지나갑니다.'},
   boom:{n:'폭발 사격',role:'다수 공격',tag:'boom',en:'Explosive Shot · Bow',kind:'boom',gems:['brad','bacc','haste'],mp:12,dmg:1.6,cd:1.4,desc:'화살이 적을 꿰뚫고 멀리 날아가며, 지나가는 길마다 충격파를 연달아 터뜨립니다.'},
   pillar:{n:'사술 폭발',role:'다수 공격',tag:'pillar',en:'Hexblast · Chaos',kind:'pillar',gems:['prad','ptwin','haste'],mp:12,dmg:1.5,cd:1.3,desc:'적의 자리에 하늘까지 닿는 사술의 기둥을 내리꽂아 폭발시킵니다. 강화하면 폭발이 근처 적에게 사슬처럼 번집니다.'}};
 Object.assign(SK,SK_NEW);CLS.mage.opts=[...CLS.mage.opts,'pillar'];/* v195: 사술 폭발 일반 모드 공개 */ /* v173: 신규 스킬은 테스트 모드에서만 노출 (테스트 캐릭터 고르는 중이거나 테스트 캐릭터로 플레이 중) */
 CLS.archer.opts.push('boom');
-/* v757: 천뢰검은 테스트 모드에서만 노출 */for(const [c,k] of [['warrior','smite']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
+/* v757: 심판의 검은 테스트 모드에서만 노출 */for(const [c,k] of [['warrior','smite']]){const base=CLS[c].opts.slice();Object.defineProperty(CLS[c],'opts',{get(){return (typeof testPick!=='undefined'&&testPick)||(typeof S!=='undefined'&&S&&S.test)?[...base,k]:base}})}
 /* v722: 폭발 사격 일반 모드 공개 (이전엔 테스트 전용) */
 Object.assign(GEMS,{
   wlen:{n:'매화섬',t:'wave',c:'#ffc080',/* v664: 참격 연장 → 매화섬 */d:L=>`검기 사거리 ${wvLen(L).toFixed(1)}m\n피해 +${5*L}%`},
   wecho:{n:'낙화검',t:'wave',c:'#ffe0a0',d:L=>{const e=wvEcho(L);return `검기 피해 +${Math.round(((1+.04*L)*(1+e.n*e.m)-1)*100)}%\n검기가 지나간 자리·벤 적에게 매화 꽃잎이 흩날림${L?` (${Math.round(L/GMAX*100)}%)`:''}${L<10?'\n5단계·10단계에 피해가 크게 오름':''}`}},/* v664: 예리한 참격 → 낙화검 — 꽃잎 효과가 여기 붙음(단계마다 늘어 10단계 = 이전 양) *//* v648: 연속 참격 → 예리한 참격 */
   brad:{n:'대폭발',t:'boom',c:'#ff9a4a',d:L=>`폭발 반경 ${bmRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   bacc:{n:'가속 화살',t:'boom',c:'#c8d8ff',d:L=>`화살 속도 +${Math.round((bmSpd(L)-1)*100)}% — 같은 사거리를 더 빨리 꿰뚫고 지나감`},/* v719: 잔불 자리, 2차 → 1차 */
-  srad:{n:'뇌전 확산',t:'smite',c:'#9ac8ff',d:L=>`뇌전 반경 ${smRad(L).toFixed(1)}m · 피해 +${4*L}%`},
-  sarc:{n:'연쇄 낙뢰',t:'smite',c:'#b0d8ff',d:L=>{if(!L)return '검이 꽂힐 때 주변의 다른 적에게 번개가 튐';const a=smArc(L);return `검이 꽂힐 때 ${a.r.toFixed(1)}m 안의 다른 적 ${a.n}명에게 번개가 튐 (피해 ×${a.m.toFixed(2)})`}},
+  srad:{n:'폭풍의 손길',t:'smite',c:'#9ac8ff',d:L=>`번개 반경 ${smRad(L).toFixed(1)}m · 피해 +${4*L}%`},
+  sarc:{n:'갈래 번개',t:'smite',c:'#b0d8ff',d:L=>{if(!L)return '검이 꽂힐 때 주변의 다른 적에게 번개가 튐';const a=smArc(L);return `검이 꽂힐 때 ${a.r.toFixed(1)}m 안의 다른 적 ${a.n}명에게 번개가 튐 (피해 ×${a.m.toFixed(2)})`}},
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})\n${L<10?([1,4,7].includes(L+1)?'다음 단계: 기둥 +1개':'다음 단계: 피해 +5%'):'최대'}`}}});
 Object.assign(GEMS2,{
@@ -6868,8 +6868,8 @@ Object.assign(GEMS2,{
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
   bmulti:{s:'boom',n:'연발 폭격',c:'#ffd080',/* v696: 5단계 */d:L=>{const m=bmMulti(L);return `화살 ${m.n}발을 부채꼴로 쏘아 각각 폭발 (한 발 피해 ×${m.m.toFixed(2)})`}},
   bret:{s:'boom',n:'회귀 화살',c:'#d8f07a',d:L=>{const r=retSt(L);return `화살 ${Math.round(r.p*100)}%가 끝까지 날아간 뒤 나를 향해 되돌아와 뚫고 반대편까지 날아가며 다시 연달아 폭발 (돌아올 때 피해 ×${r.m.toFixed(2)})`}},/* v719: 다발 사격 회귀 화살을 폭발 사격에도 */
-  sfield:{s:'smite',n:'뇌전 지대',c:'#8ab8ff',d:L=>{const f=smField(L);return `검이 꽂힌 자리에 뇌전의 소용돌이가 ${f.dur.toFixed(1)}초 남음\n초당 피해 ×${(f.m/f.iv).toFixed(2)}`}},
-  stwin:{s:'smite',n:'뇌검우',c:'#d0e8ff',d:L=>{const t=smTwin(L);return `검이 총 ${1+t.n}자루 떨어짐 — 추가 ${t.n}자루는 주변의 다른 적에게 (추가 검 피해 ×${t.m.toFixed(2)})`}},
+  sfield:{s:'smite',n:'폭풍의 잔향',c:'#8ab8ff',d:L=>{const f=smField(L);return `검이 꽂힌 자리에 번개의 소용돌이가 ${f.dur.toFixed(1)}초 남음\n초당 피해 ×${(f.m/f.iv).toFixed(2)}`}},
+  stwin:{s:'smite',n:'심판의 비',c:'#d0e8ff',d:L=>{const t=smTwin(L);return `검이 총 ${1+t.n}자루 떨어짐 — 추가 ${t.n}자루는 주변의 다른 적에게 (추가 검 피해 ×${t.m.toFixed(2)})`}},
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
   pecho:{s:'pillar',n:'여진',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
@@ -7074,8 +7074,8 @@ function pillarStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40;
         if(f>0&&Math.random()<dt*40*QM())emit(PADD,{x:c.x+rnd(-.25,.25)*R,y:rnd(.2,6),z:c.z+rnd(-.25,.25)*R,vy:rnd(3,8),life:rnd(.25,.45),s0:.4,s1:.08,c0:0xff90f0,c1:0x8010e0,a:.9,tex:1})}},
     end(){for(const m of [outer,mid,inner,disc,ring])m.material.dispose()}})};
   if(delay>0)later(delay,go);else go()}
-/* ---------- v757 전사: 천뢰검 ---------- */
-/* 하늘에서 번개 검이 흰 빛줄기를 타고 내리꽂힘 → 꽂힌 자리에 흰·푸른 뇌전 소용돌이(바닥 고리 + 반구) + 사방 번개 */
+/* ---------- v757 전사: 심판의 검 ---------- */
+/* 하늘에서 번개 검이 흰 빛줄기를 타고 내리꽂힘 → 꽂힌 자리에 흰·푸른 번개 소용돌이(바닥 고리 + 반구) + 사방 번개 */
 const SMITE_RANGE=11,SMITE_VS=`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   SMITE_FS=`uniform float uT,uOp,uK,uDome;uniform vec3 uCol;varying vec2 vUv;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -7118,7 +7118,7 @@ function smiteStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40,q=QM(),fl=o.fie
         spray(PADD,p,Math.round(16*q),{sp:[R*1.2,R*3.2],up:[1.5,6],y:[.2,.9],r0:R*.3,life:[.25,.55],s0:[.22,.4],s1:[.03,.06],c0:0xffffff,c1:0x3a70ff,a:.95,drag:2.4,tex:1});
         pillarAoe(p,R,o.dmg,o,o.lock);if(o.after)o.after()}
       /* 빛줄기: 꽂힌 뒤 가늘어지며 사라짐 */{const f=Math.max(0,1-t2/.26);beamO.scale.set(W0[0]*(.3+.7*f),H,W0[0]*(.3+.7*f));beamI.scale.set(W0[1]*(.4+.6*f),H,W0[1]*(.4+.6*f));ub[0].uOp.value=.8*f;ub[1].uOp.value=f}
-      /* 소용돌이: 빠르게 퍼진 뒤 돌면서 옅어짐 (뇌전 지대가 있으면 그 시간만큼 남음) */{const e=1-Math.pow(1-Math.min(1,t2/.13),3),rr=R*(.3+.7*e)*1.08,rem=LIFE-t2,f=Math.min(1,Math.max(0,rem/FADE)),hot=Math.max(0,1-t2/.45),op=(fl?.5+.5*hot:1)*f;
+      /* 소용돌이: 빠르게 퍼진 뒤 돌면서 옅어짐 (폭풍의 잔향이 있으면 그 시간만큼 남음) */{const e=1-Math.pow(1-Math.min(1,t2/.13),3),rr=R*(.3+.7*e)*1.08,rem=LIFE-t2,f=Math.min(1,Math.max(0,rem/FADE)),hot=Math.max(0,1-t2/.45),op=(fl?.5+.5*hot:1)*f;
         ring.scale.setScalar(rr);dome.scale.set(rr*.97,rr*.62,rr*.97);ringM.uniforms.uOp.value=.85*op*BR;domeM.uniforms.uOp.value=.3*op*BR*(.5+.5*hot);ringM.uniforms.uK.value=domeM.uniforms.uK.value=Math.min(1,t2/.22)}
       /* 검: 잠깐 꽂혀 있다가 사라짐 */{const f=t2<HOLD?1:Math.max(0,1-(t2-HOLD)/.22);swM.opacity=f;swD.opacity=.9*f}
       if(Math.random()<dt*26*q*(t2<.5?1:.4))emit(PADD,{x:c.x+rnd(-1,1)*R*.8,y:rnd(.1,1.6),z:c.z+rnd(-1,1)*R*.8,vy:rnd(1,5),life:rnd(.15,.35),s0:.3,s1:.05,c0:0xffffff,c1:0x4a80ff,a:.9,tex:1});
@@ -7126,7 +7126,7 @@ function smiteStrike(c,o,delay=0){const go=()=>{const R=o.r,H=40,q=QM(),fl=o.fie
     end(){for(const m of [beamO,beamI])m.material.dispose();swM.dispose();swD.dispose();ringM.dispose();domeM.dispose()}})};
   if(delay>0)later(delay,go);else go()}
 function smiteTargets(ap){return enemies.filter(e=>!e.air&&e.hp>0&&!(e.boss&&!e.aggro)&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)-e.r<SMITE_RANGE).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z))}
-function smiteCast(c,o,lock,main){smiteStrike(c,Object.assign({},o,{lock,after:main&&o.arc?()=>{/* 연쇄 낙뢰: 꽂힌 자리에서 주변 다른 적에게 번개 */const skip=new Set(lock?[lock]:[]);for(let i=0;i<o.arc.n;i++){const t=nearestEnemy(c,o.arc.r,skip);if(!t)break;skip.add(t);later(.04+.05*i,()=>{if(t.hp<=0||enemies.indexOf(t)<0)return;zapFx({x:c.x,y:1.4,z:c.z},{x:t.pos.x,y:Math.min(1.4,t.h*.6||1),z:t.pos.z},{tgt:t});hurt(t,o.arc.dmg,2,o.so)})}}:null}))}
+function smiteCast(c,o,lock,main){smiteStrike(c,Object.assign({},o,{lock,after:main&&o.arc?()=>{/* 갈래 번개: 꽂힌 자리에서 주변 다른 적에게 번개 */const skip=new Set(lock?[lock]:[]);for(let i=0;i<o.arc.n;i++){const t=nearestEnemy(c,o.arc.r,skip);if(!t)break;skip.add(t);later(.04+.05*i,()=>{if(t.hp<=0||enemies.indexOf(t)<0)return;zapFx({x:c.x,y:1.4,z:c.z},{x:t.pos.x,y:Math.min(1.4,t.h*.6||1),z:t.pos.z},{tgt:t});hurt(t,o.arc.dmg,2,o.so)})}}:null}))}
 const PILLAR_RANGE=22.4;/* v180: 14m × 1.6 */
 function pillarTargets(ap){return enemies.filter(e=>!e.air&&e.hp>0&&Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<PILLAR_RANGE).sort((x,y)=>Math.hypot(x.pos.x-ap.x,x.pos.z-ap.z)-Math.hypot(y.pos.x-ap.x,y.pos.z-ap.z))}
 function pillarCast(c,o,hit,depth){const after=()=>{
@@ -7752,7 +7752,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v759';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v760';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8268,7 +8268,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='chainl'){parts.push(`번개 ${s.forks}줄 · ${s.bn}번 튕김`);if(s.cst)parts.push(`번개 폭풍 ${s.cst.r.toFixed(1)}m`);if(s.ovl)parts.push(`과부하 ${s.ovl.dur.toFixed(1)}초`)}
   else if(b.kind==='wave'){parts.push(`사거리 ${s.len.toFixed(1)}m`);{const w0=wvShape(s.wk||0,0,1),w1=wvShape(s.wk||0,1,1);parts.push(`검기 ${Math.round(w0.deg)}°→${Math.round(w1.deg)}°`)}if(s.wec.n)parts.push(`연속 ${1+s.wec.n}번`);if(s.fan.n>1)parts.push(`검기 ${s.fan.n}갈래`);if(s.burst)parts.push(`끝 폭발 ${s.burst.r.toFixed(1)}m`)}
   else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);}
-  else if(b.kind==='smite'){parts.push(`뇌전 반경 ${s.r.toFixed(1)}m`);if(s.stw)parts.push(`검 ${1+s.stw.n}자루`);if(s.arc)parts.push(`낙뢰 ${s.arc.n}줄기`);if(s.fld)parts.push(`지대 ${s.fld.dur.toFixed(1)}초`)}
+  else if(b.kind==='smite'){parts.push(`번개 반경 ${s.r.toFixed(1)}m`);if(s.stw)parts.push(`검 ${1+s.stw.n}자루`);if(s.arc)parts.push(`갈래 번개 ${s.arc.n}줄기`);if(s.fld)parts.push(`지대 ${s.fld.dur.toFixed(1)}초`)}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
   else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${(s.bossK||WHIRL_BM).toFixed(2)}`);const nw=NS()&&b.kind==='whirl';if(s.hits&&!nw)parts.push(`${s.hits}회 타격`);if(s.echo&&!nw)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(nw?`${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*(1-hasteP()*gl(id,'haste')),1-hasteP()*gl(id,'haste')).toFixed(2)}초마다`:`${whEl()==='frost'?'서리':'화염'} 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
@@ -8288,7 +8288,7 @@ function skillDps0(id){
     return {main:(hit+stm+ov)/cd,label:'번개에 맞은 적 1명당',sub:`번개 ${st.forks}줄 · ${st.bn}번 튕김 · 1회 ${fmtN(hit)}${stm?' · 번개 폭풍':''}${ov?' · 과부하':''}`}}
   if(b.kind==='wave'){const hit=base*st.dmg*crit,ec=hit*st.wec.n*st.wec.m,bu=st.burst?hit*st.burst.m*.6:0;return {main:(hit+ec+bu)/cd,label:'검기에 맞은 적 1명당',sub:`사거리 ${st.len.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 연속 참격':''}${bu?' · 끝 폭발':''}`}}
   if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ret?hit*st.ret.m*st.ret.p:0/* v719: 회귀 화살 */,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 회귀':''}${sh?' · 파편':''}`}}
-  if(b.kind==='smite'){const hit=base*st.dmg*crit,tw=st.stw?hit*st.stw.m*st.stw.n*.5:0,ar=st.arc?hit*st.arc.m*.5:0,fd=st.fld?hit*st.fld.m*Math.min(st.fld.dur,cd)/st.fld.iv*.6:0;return {main:(hit+tw+ar+fd)/cd,label:'검에 맞은 적 1명당',sub:`반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${tw?` · 검 ${1+st.stw.n}자루`:''}${ar?' · 낙뢰':''}${fd?' · 지대':''}`}}
+  if(b.kind==='smite'){const hit=base*st.dmg*crit,tw=st.stw?hit*st.stw.m*st.stw.n*.5:0,ar=st.arc?hit*st.arc.m*.5:0,fd=st.fld?hit*st.fld.m*Math.min(st.fld.dur,cd)/st.fld.iv*.6:0;return {main:(hit+tw+ar+fd)/cd,label:'검에 맞은 적 1명당',sub:`반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${tw?` · 검 ${1+st.stw.n}자루`:''}${ar?' · 갈래 번개':''}${fd?' · 잔향':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
     return {main:hit/act+fl,label:'범위 안의 적 1명당 (누르고 있는 동안)',sub:`${act.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)}${fl?` · ${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*h,h).toFixed(2)}초마다`:''}`}}
