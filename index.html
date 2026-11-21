@@ -2485,6 +2485,17 @@ function groundSet(key,d){
   cc.getContext('2d').putImageData(ci,0,0);hc.getContext('2d').putImageData(hi,0,0);rc.getContext('2d').putImageData(ri,0,0);if(ec)ec.getContext('2d').putImageData(ei,0,0);
   return GCACHE[key]={map:cvTex(cc,G_REP),bump:cvTex(hc,G_REP),rough:cvTex(rc,G_REP),emi:ec?cvTex(ec,G_REP):null}}
 const groundMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,metalness:0,bumpScale:.6,emissive:0xffffff,emissiveIntensity:0});
+/* v782: 길 밖 비탈·벽(스토리 장 언덕·성 안 벽, 쉼터 동굴 벽)이 바닥과 같은 타일이라 구분이 안 되던 것 → 바닥 판 정점마다 aHill(0=걷는 땅, 1=언덕·벽)을 넣고,
+   언덕 쪽은 장마다 다른 '암반' 텍스처(무늬·요철도 그것으로)로 바꾸고, 경계에 어두운 테두리 띠 + 바닥 발광은 끔 */
+const HU={hillMap:{value:null},hillBump:{value:null},hillRep:{value:.55}};
+const HILLC={c0:[64,70,58],c1:[60,62,74],c2:[52,58,44],c3:[64,74,92],c4:[58,46,42],c5:[104,78,54],c6:[66,60,84],c7:[44,40,52],c8:[46,40,44],c9:[52,36,32],refuge:[30,32,42]};
+groundMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,HU);
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aHill;varying float vHill;').replace('#include <begin_vertex>','#include <begin_vertex>\nvHill=aHill;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vHill;uniform sampler2D hillMap,hillBump;uniform float hillRep;')
+   .replace('#include <bumpmap_pars_fragment>',THREE.ShaderChunk.bumpmap_pars_fragment.replace('vec2 dHdxy_fwd','float hbS(vec2 u){return mix(texture2D(bumpMap,u).x,texture2D(hillBump,u*hillRep).x*1.6,vHill);}\nvec2 dHdxy_fwd').replace(/texture2D\( bumpMap, ([^)]*?) \)\.x/g,'hbS($1)'))
+   .replace('#include <map_fragment>','#include <map_fragment>\n#ifdef USE_MAP\nif(vHill>.001){vec4 hc=mapTexelToLinear(texture2D(hillMap,vUv*hillRep));diffuseColor.rgb=mix(diffuseColor.rgb,hc.rgb,smoothstep(.0,.35,vHill));}\ndiffuseColor.rgb*=1.-.55*smoothstep(.0,.12,vHill)*(1.-smoothstep(.16,.42,vHill));\n#endif')
+   .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance*=1.-smoothstep(.0,.3,vHill);')};
+groundMat.customProgramCacheKey=()=>'hill1';
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(96,96),groundMat);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 /* 최종 결전 맵 · 엔드게임 맵 테마 (v27) · 바닥 양식 (v28) */
@@ -2515,6 +2526,7 @@ const refOn=()=>!!S&&S.ch>=NCH;
 function townSync(){const r=refOn();Object.assign(TOWN,r?REF:TOWN0);TLY=r?REFL:STL;for(const n of NPCS){if(n.tx===undefined){n.tx=n.x;n.tz=n.z}const q=(r?REFP:STP)[n.id];n.x=q?q[0]:n.tx;n.z=q?q[1]:n.tz}}
 function applyTheme(){
   const th=curTheme(),d=th.d,gs=groundSet(th.key,d);
+  {const hc=HILLC[th.key];const hs=hc?groundSet('hill_'+th.key,{ground:hc,sty:{s:'rock',rough:.95}}):gs;HU.hillMap.value=hs.map;HU.hillBump.value=hs.bump||gs.bump}
   groundMat.map=gs.map;groundMat.bumpMap=gs.bump;groundMat.roughnessMap=gs.rough;groundMat.emissiveMap=gs.emi;groundMat.emissiveIntensity=gs.emi?1:0;groundGlow=!!gs.emi;for(const t of [gs.map,gs.bump,gs.rough,gs.emi])if(t)t.repeat.set(groundRep[0],groundRep[1]);groundMat.needsUpdate=true;
   scene.background.setHex(d.fog);scene.fog.color.setHex(d.fog);if(knOn){scene.background.setHex(0x220a04);scene.fog.color.setHex(0x220a04)}if(mwOn){scene.background.setHex(0x04080d);scene.fog.color.setHex(0x04080d)}
   const mc=new THREE.Color(d.fog).lerp(new THREE.Color(0x9aa0b0),.45);for(const m of mists)m.material.color.copy(mc);
@@ -2629,13 +2641,13 @@ function groundH(x,z){if(mapKind==='town'&&inTown&&TLY)return refHt(x,z);if(mapK
 function spawnPt(){if(inArena())return {x:FB_START.x,z:FB_START.z};if(mapKind==='story')return S.chk&&S.chk.ch===S.ch?{x:S.chk.x,z:S.chk.z}:startPt();return {x:0,z:0}}
 /* 바닥 메시를 맵 크기로 다시 만들고 높이(언덕)를 입힘 (스토리는 로컬 좌표로 만들고 메시를 θ만큼 회전) */
 function setGround(w,l,seg){groundHoleR=0;if(typeof mawPitClear==='function')mawPitClear();const g=new THREE.PlaneGeometry(w,l,Math.round(w/seg),Math.round(l/seg)),pa=g.attributes.position,story=mapKind==='story';
-  const col=new Float32Array(pa.count*3),ht=HILL_TINT[Math.min(S.ch||0,LAST)],rf=mapKind==='town'&&inTown&&TLY;
+  const col=new Float32Array(pa.count*3),hl=new Float32Array(pa.count),ht=HILL_TINT[Math.min(S.ch||0,LAST)],rf=mapKind==='town'&&inTown&&TLY;
   for(let i=0;i<pa.count;i++){const x=pa.getX(i),z=-pa.getY(i),h=story?groundHL(x,z):rf?refHt(x,z):0;pa.setZ(i,h);let r=1,gg=1,b=1;
-    if(rf&&h>.05){const o=refOut(x,z);if(o>0){const k=Math.min(1,o/3),l=1-Math.min(.5,h*.05),tn=TLY.tint;r=1-(1-tn[0]*l)*k;gg=1-(1-tn[1]*l)*k;b=1-(1-tn[2]*l)*k}}
-    if(story){const o=sOutL(x,z);if(o>0){const k=Math.min(1,o/5),l=.85+Math.min(.5,h*.035);r=1+(ht[0]*l-1)*k;gg=1+(ht[1]*l-1)*k;b=1+(ht[2]*l-1)*k}
+    if(rf&&h>.05){const o=refOut(x,z);if(o>0){hl[i]=Math.min(1,o/2.2);const k=Math.min(1,o/3),l=1-Math.min(.5,h*.05),tn=TLY.tint;r=1-(1-tn[0]*l)*k;gg=1-(1-tn[1]*l)*k;b=1-(1-tn[2]*l)*k}}
+    if(story){const o=sOutL(x,z);if(o>0){hl[i]=Math.min(1,o/2.2);const k=Math.min(1,o/5),l=.85+Math.min(.5,h*.035),q=.78+Math.min(.4,h*.03);/* v782: 언덕 색은 암반 텍스처가 맡고, 높을수록 조금 밝게만 */r=1+(q-1)*k;gg=r;b=r}
       else{const t=Math.max(0,1-Math.abs(x-pathC(z))/(pathW(z)*.45));const v=1+.22*t*t;r=v;gg=v*.97;b=v*.92}}
     col[i*3]=r;col[i*3+1]=gg;col[i*3+2]=b}
-  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();ground.geometry.dispose();ground.geometry=g;ground.rotation.z=story?SROT:0;
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setAttribute('aHill',new THREE.BufferAttribute(hl,1));g.computeVertexNormals();ground.geometry.dispose();ground.geometry=g;ground.rotation.z=story?SROT:0;
   for(const t of [groundMat.map,groundMat.bumpMap,groundMat.roughnessMap,groundMat.emissiveMap])if(t){t.repeat.set(w/10.7,l/10.7);t.needsUpdate=true}groundRep=[w/10.7,l/10.7]}
 let groundRep=[9,9];
 /* v575: 심연의 아귀 — 투기장 바닥 한가운데에 실제 구멍을 뚫음(바닥 판을 구멍 난 모양으로 교체). R=0 이면 원래 바닥으로 */
@@ -2646,7 +2658,7 @@ function arenaHole(R){if(mapKind!=='arena'||R===groundHoleR)return;for(const m o
   if(!R){setGround(96,96,96);return}
   const sh=new THREE.Shape();sh.moveTo(-48,-48);sh.lineTo(48,-48);sh.lineTo(48,48);sh.lineTo(-48,48);sh.lineTo(-48,-48);const h=new THREE.Path(),N=96;for(let k=0;k<=N;k++){const t=-k/N*Math.PI*2,r=mawRimR(t);k?h.lineTo(Math.cos(t)*r,Math.sin(t)*r):h.moveTo(Math.cos(t)*r,Math.sin(t)*r)}sh.holes.push(h);
   const g=new THREE.ShapeGeometry(sh,8),pa=g.attributes.position,uv=g.attributes.uv,col=new Float32Array(pa.count*3).fill(1);for(let i=0;i<pa.count;i++)uv.setXY(i,pa.getX(i)/96+.5,pa.getY(i)/96+.5);
-  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();ground.geometry.dispose();ground.geometry=g;ground.rotation.z=0;groundHoleR=R;
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setAttribute('aHill',new THREE.BufferAttribute(new Float32Array(pa.count),1));g.computeVertexNormals();ground.geometry.dispose();ground.geometry=g;ground.rotation.z=0;groundHoleR=R;
   /* 구멍 위에 걸친 바닥 얼룩·뼈는 숨김 */for(const m of propMeshes)if(m.visible&&Math.hypot(m.position.x,m.position.z)<5.6){m.visible=false;m.userData.hh=1}}
 /* 언덕 색 (장별): 길보다 밝고 색이 다른 비탈 */
 const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.6,1.05,.75],[1.7,1.45,1.0],[1.35,1.1,1.7],[.5,.44,.42],[.5,.5,.58],[.48,.38,.36]];
@@ -7997,7 +8009,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v781';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v782';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
