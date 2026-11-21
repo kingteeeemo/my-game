@@ -526,10 +526,11 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 @keyframes cbT{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.06em}}
 @keyframes cbF{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}#clear h2{line-height:1.3}
 /* v716: 마을 안내 — 마을 사람을 세로로, 얼굴 그림 · 하는 일 · 마을 지도 위 위치 */
-.tnl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 4px}/* v748: 2줄 3칸 */
+.tnl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0 4px}/* v748: 3줄 2칸(v784) */
 .tnr{display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start;padding:6px;border-radius:10px;background:#18181e;border:1px solid rgba(232,220,196,.1)}
-.tnr>div{grid-column:1/-1;min-width:0}.tnr img,.tnr .tnp{width:100%;height:auto;aspect-ratio:1;border-radius:8px;background:#26232e;object-fit:cover;display:block}
-.tnr .tnm{width:100%;height:auto;aspect-ratio:1;border-radius:8px;background:#0f1014;display:block}
+.tnr>div{grid-column:1/-1;min-width:0}.tnr img,.tnr .tnp{width:100%;height:58px;aspect-ratio:auto;border-radius:8px;background:#26232e;object-fit:cover;display:block}
+.tnr .tnm{width:100%;height:58px;aspect-ratio:auto;border-radius:8px;background:#0f1014;display:block}
+@media(max-height:520px){.tnr{grid-template-columns:40px 40px minmax(0,1fr);align-items:center;padding:5px;gap:6px}.tnr>div{grid-column:auto}.tnr img,.tnr .tnp,.tnr .tnm{width:40px;height:40px}.tnr b{font-size:12px}.tnr span{font-size:11px}.tnr small{font-size:10px;margin-top:1px}.tnl{gap:5px;margin:4px 0}.gv-foot{display:none}.gcard:has(.tnl){width:min(640px,calc(100% - 32px))}.gcard:has(.tnl) h3{margin-bottom:2px}}
 .tnr b{display:block;font:800 13px var(--ko);color:#f2ead8;letter-spacing:-.02em;word-break:keep-all}.tnr span{display:block;font:600 11.5px var(--ko);color:#cfc5b4;margin-top:1px;word-break:keep-all}.tnr small{display:block;font:500 10.5px var(--ko);color:#a89c8c;margin-top:2px;word-break:keep-all}
 .gvid{position:relative;margin:8px 0 6px;padding:10px;border-radius:10px;background:#121216;border:1px solid rgba(232,220,196,.12);font:500 12px/1.4 var(--ko);color:#d8d0c0;overflow:hidden}
 .gv-cap{font:800 10px var(--ko);letter-spacing:.1em;color:#a89c8c;margin-bottom:6px}.gv-foot{margin-top:6px;font-size:11px;color:#a89c8c}
