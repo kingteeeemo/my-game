@@ -2751,8 +2751,10 @@ function chPeak(){/* 맵 북쪽 끝 너머 봉우리(안개 무시) — 꼭대�
   g.add(mesh(new THREE.ConeGeometry(62,92,7),mm,0,40,0));const r1=mesh(new THREE.ConeGeometry(40,58,6),mm,-52,22,14),r2=mesh(new THREE.ConeGeometry(36,50,6),mm,50,18,18);g.add(r1,r2);
   const gm=new THREE.SpriteMaterial({map:refGlowTex,color:0xff7a2a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}),c=new THREE.Sprite(gm);c.position.y=88;c.scale.setScalar(46);g.add(c);
   const c2=new THREE.Sprite(gm.clone());c2.material.color.set(0xffd080);c2.position.y=88;c2.scale.setScalar(18);g.add(c2);g.traverse(o=>o.frustumCulled=false);g.visible=false;CHZS.peak={g,c,c2};return g}
-function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0};chevSet('intro');save();P.mv=null;window.CHCON=1;if(CHZS.peak)CHZS.peak.g.visible=true;
-  const el=$('chCine')||(()=>{const d=document.createElement('div');d.id='chCine';d.innerHTML='<div class="cck"></div><div class="ccn"></div><div class="cct"></div>';document.body.appendChild(d);d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();CHC.t=Math.max(CHC.t,CHC.dur-1.2)});return d})();
+function chCineEnd(){if(!CHC.on)return;CHC.on=0;window.CHCON=0;if(CHZS.peak)CHZS.peak.g.visible=false;const el=$('chCine');if(el){el.className='';el.hidden=true}camT.copy(P.pos);stageBanner();const q=window.CHGQ||[];window.CHGQ=[];if(window.TUTASK){window.TUTASK=0;setTimeout(tutAsk,700);return}setTimeout(()=>q.forEach(k=>guide(k,true)),700)}
+setInterval(()=>{if(CHC.on&&CHC.w0&&Date.now()-CHC.w0>(CHC.dur+4)*1000)chCineEnd()},1000);/* v771: 연출이 어떤 이유로든 진행되지 않으면(화면 멈춤 등) 시간이 지나면 강제로 닫음 */
+function chCineStart(){if(CHC.on)return;CHC={on:1,t:0,dur:7.2,sk:0,w0:Date.now()};chevSet('intro');save();P.mv=null;window.CHCON=1;if(CHZS.peak)CHZS.peak.g.visible=true;
+  const el=$('chCine')||(()=>{const d=document.createElement('div');d.id='chCine';d.innerHTML='<div class="cck"></div><div class="ccn"></div><div class="cct"></div>';document.body.appendChild(d);d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();CHC.t=Math.max(CHC.t,CHC.dur-1.2);const t0=CHC.t;setTimeout(()=>{if(CHC.on&&CHC.t<=t0+.05)chCineEnd()},1600)/* v771: 눌렀는데도 연출이 안 넘어가면 바로 닫음 */});return d})();
   const Z=CHZ[S.ch];el.querySelector('.cck').textContent=`루멘하르 · ${S.ch+1}장`;el.querySelector('.ccn').textContent=CH[S.ch].n;el.querySelector('.cct').textContent=Z.intro||'';el.hidden=false;el.className='on'}
 function chCineCam(dt){if(!CHC.on)return;if(!$('notice').hidden){CHC.on=0;window.CHCON=0;if(S.chev)delete S.chev[chK('intro')];if(CHZS.peak)CHZS.peak.g.visible=false;const el0=$('chCine');if(el0){el0.className='';el0.hidden=true}return}/* v696: 공지 창이 뜨면 연출을 접고, 창을 닫은 뒤 다시 */CHC.t+=Math.min(dt,.05);const t=CHC.t,D=CHC.dur;const s0=STORY_L-6,s1=STORY_L-46,u=Math.min(1,t/(D-1.6)),e=u*u*(3-2*u),lz=s0+(s1-s0)*e,cz=lz+12-6*e;
   const c=LW(pathC(cz),cz),pk=LW(pathC(-STORY_L),-STORY_L-120),l=LW(pathC(lz-30),lz-30);_ccP.set(c.x,9+6*e,c.z);_ccL.set(l.x,1,l.z).lerp(_ccA.set(LW(pathC(cz-104),cz-104).x,14,LW(pathC(cz-104),cz-104).z),Math.min(1,.35+e*.65));
@@ -7909,7 +7911,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v770';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v771';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8232,7 +8234,7 @@ function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pen
   for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
 function startGame(cls,main,skip){
-  inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
+  chCineEnd();inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}}/* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
@@ -9923,6 +9925,9 @@ let _lpErrT=0,_vwW=innerWidth,_vwH=innerHeight;addEventListener('resize',()=>{_v
 /* v594: 회전 직후 iOS가 크기 확정 전에 resize를 보내 화면이 늘어진 채 남던 문제 → 몇 차례 다시 맞추고, 매 프레임 크기를 확인 */
 const _rsKick=()=>{[60,200,450,900].forEach(t=>setTimeout(()=>dispatchEvent(new Event('resize')),t))};addEventListener('orientationchange',_rsKick);try{screen.orientation&&screen.orientation.addEventListener('change',_rsKick)}catch(e){}try{visualViewport&&visualViewport.addEventListener('resize',()=>{if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'))})}catch(e){}
 let slowT=0,hitStop=0;/* v652: 히트스톱 — 맞는 순간 아주 짧게 멈칫 */
+let _lpErrN=0;/* v771: 매 프레임 오류가 나서 화면이 멈추면 오류 내용을 화면에 띄움(캡처해서 알려 주기용) */
+function lpErrShow(e){try{let d=$('lpErr');if(!d){d=document.createElement('div');d.id='lpErr';d.style.cssText='position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 120px);z-index:99999;background:rgba(40,10,12,.94);color:#ffd8d0;border:1px solid #c44;border-radius:10px;padding:10px 12px;font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;pointer-events:auto';d.addEventListener('click',()=>d.remove());document.body.appendChild(d)}
+  d.textContent=`게임 오류 (${APP_VER}) — 이 화면을 캡처해서 알려 주세요 · 누르면 닫힘\n${e&&e.message}\n${String(e&&e.stack||'').split('\n').slice(1,4).join('\n')}\nmap:${mapKind} ch:${S&&S.ch} ph:${S&&S.phase} town:${inTown} cine:${CHC.on}`}catch(_){}}
 function loop(now){
   requestAnimationFrame(loop);/* v594: 다음 프레임을 먼저 예약 — 한 프레임에서 오류가 나도 게임이 멈추지 않음 */
   if(innerWidth!==_vwW||innerHeight!==_vwH)dispatchEvent(new Event('resize'));
@@ -9933,7 +9938,7 @@ function loop(now){
   if(!paused()){update(dt);updDmg(dt);hud();cdLabels(dt);if(S.cls&&!S.demo&&!S.test&&curSlot!==null)S.playSec=(S.playSec||0)+dt}else{if(fo)fxTick(dt);else if(cineFocus)drgCineTick(dt);hudMoney()}
   updLabels();if(++miniT%2===0)drawMini();
   if(cineFocus)frameCam(dt*.35,cineFocus);else frameCam(paused()&&!fo?0:dt);atmos(paused()&&!fo?0:dt);wingTick(paused()&&!fo&&!invOpen?0:dt);if(invOpen&&IVS.on)skwTick(dt);renderFrame(now/1000);
-  }catch(e){if(now-_lpErrT>3000){_lpErrT=now;console.error('[loop]',e)}}
+  _lpErrN=0}catch(e){if(now-_lpErrT>3000){_lpErrT=now;console.error('[loop]',e)}if(++_lpErrN===45)lpErrShow(e)}
 }
 
 /* boot */
