@@ -8272,7 +8272,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
   /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
   if(!portRT||portRT.width!==Wd||portRT.height!==Hd){if(portRT)portRT.dispose();const o={format:THREE.RGBAFormat,depthBuffer:true};portRT=renderer.capabilities.isWebGL2&&THREE.WebGLMultisampleRenderTarget?new THREE.WebGLMultisampleRenderTarget(Wd,Hd,o):new THREE.WebGLRenderTarget(Wd,Hd,o);if(portRT.isWebGLMultisampleRenderTarget)portRT.samples=4;portPx=new Uint8Array(Wd*Hd*4)}
-  renderer.setRenderTarget(portRT);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);renderer.readRenderTargetPixels(portRT,0,0,Wd,Hd,portPx);
+  renderer.setRenderTarget(portRT);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(sc,cam);try{renderer.getContext().finish()}catch(_){}/* v786: 읽기 전에 GPU 작업 완료 보장 */renderer.readRenderTargetPixels(portRT,0,0,Wd,Hd,portPx);
   /* v465: 복구 — 모델이 통째로 검게 찍히면(텍스처 업로드 실패 추정) 텍스처를 다시 올려 한 번 더 그림 */
   if(skB){const dk=()=>{let s=0,n=0;for(let i=0;i<portPx.length;i+=16)if(portPx[i+3]>128){s+=portPx[i]+portPx[i+1]+portPx[i+2];n++}return n>150&&s/n/3<16};
     if(dk()){portFix=(portFix||0)+1;skB.K.root.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material))for(const t of [m.map,m.normalMap,m.metalnessMap,m.roughnessMap,m.emissiveMap,m.aoMap])if(t)t.needsUpdate=true});
@@ -8282,7 +8282,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const g=cv.getContext('2d'),col=new THREE.Color(CLS[cls].c),rgb=`${col.r*255|0},${col.g*255|0},${col.b*255|0}`,gr=g.createRadialGradient(Wd*.5,Hd*.56,0,Wd*.5,Hd*.56,Wd*.95);gr.addColorStop(0,`rgba(${rgb},.38)`);gr.addColorStop(.4,`rgba(${rgb},.19)`);gr.addColorStop(1,`rgba(${rgb},0)`);
   g.globalCompositeOperation='source-over';g.fillStyle='#15141a';g.fillRect(0,0,Wd,Hd);g.fillStyle=gr;g.fillRect(0,0,Wd,Hd);g.drawImage(tc,0,0);
   renderer.setClearColor(cc,ca);renderer.setRenderTarget(prev);
-  gd.geometry.dispose();gd.material.dispose();if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}if(ry===undefined)portOk[cls]=K&&K.st===2?2:1;return cv}catch(e){return null}}
+  gd.geometry.dispose();gd.material.dispose();/* v786: 초상화를 그릴 때마다 새 조명의 그림자 맵(1024²)이 해제되지 않고 쌓여 GPU 메모리가 차던 것 — 직업 선택을 여러 번 열수록 초상화가 엉뚱한 직업으로 나오던 원인 */try{d.shadow.dispose();d.dispose&&d.dispose()}catch(_){}if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}if(ry===undefined)portOk[cls]=K&&K.st===2?2:1;return cv}catch(e){return null}}
 /* v349: 직업 선택 — 초상화는 한 프레임에 하나씩 그려 끼워 넣음(한 번에 셋을 그리면 폰에서 멈춤) */
 let portFix=0,portQ=0,portRT=null,portPx=null,portTmp=null;
 function portFill(){const cards=[...document.querySelectorAll('#classSheet .card.cls')];if($('classSel').hidden||!cards.length){portQ=0;return}
