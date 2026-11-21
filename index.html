@@ -4748,7 +4748,9 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
 /* v738: 무기 외형 여러 개 — 마법사 「월광의 홀」 추가. rel:'hand' = 손 기준 자리(검귀 모델에서 뽑은 자리) → 원래 무기 기준으로 환산, rel:'sw' = 원래 무기 자리 기준 그대로(쥐는 곳 = 원점, 막대 = +y).
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
 const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
-  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
+  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'},
+  /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
+  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
@@ -4757,7 +4759,7 @@ function wskLoad(k,cb){const Q=wskS(k),W=WLOOKS[k];if(Q.st===2){cb&&cb();return}
 function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&&wlookOk(S.wlook,K.cls)?S.wlook:null;if((K.wsk||null)===want)return;
   if(K.wskM){if(K.wskM.parent)K.wskM.parent.remove(K.wskM);K.wskM=null;K.swM=K.swM0;K.swCrack=K.swCrack0;K.swLift=K.swLift0;if(K.gemM0!==undefined)K.gemM=K.gemM0;for(const o of K.wskHid||[])o.material.visible=true;if(K.tip0)K.tip.position.copy(K.tip0);K.wsk=null;if(hero&&skOf(hero)===K)skwGear()}
   if(!want)return;const Q=wskS(want);if(Q.st!==2){if(Q.st!==3)wskLoad(want,()=>wskSync(K));return}
-  if(!K.sw.parent||!/RightHand$/.test(K.sw.parent.name))return;/* 등에 멘 동안(초상화)엔 손으로 돌아온 뒤에 */
+  if(!K.sw.parent||WLOOKS[want].rel==='hand'&&!/Hand$/.test(K.sw.parent.name))return;/* 등에 멘 동안(초상화)엔 손으로 돌아온 뒤에 · v776: 궁수 활은 왼손 */
   const W=WLOOKS[want],m=Q.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
   if(!K.wskHid){K.wskHid=[];K.sw.traverse(o=>{if(o.isMesh)K.wskHid.push(o)})}
   if(W.ry)m.rotation.y=W.ry;/* 막대 축(+y) 둘레로 돌림 */
@@ -5007,7 +5009,7 @@ function skaBack(K){const sw=K.sw;if(!sw||!K.bowBk)return null;const sv={par:sw.
 function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
   if(K.C.bl){/* v658: 매화 검객 대검 — v659: 칼 전체가 아니라 칼의 붉은 무늬만 어둡게 빛남(발광 맵 = 색 텍스처), 검은 쇠 느낌 유지 */if(m.emissiveMap!==m.map){m.emissiveMap=m.map;m.needsUpdate=true}const k=gemLv();m.emissive.setHex(0xfff0ec);/* v660: 붉은 색 대신 텍스처 본래 색으로 빛남 — 매화 문양·꽃 장식이 어두운 곳에서도 보이게 */m.emissiveIntensity=(.3+.3*k)*(1+.1*Math.sin(time*3.2));return}
   if(bc(K.cls)==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
-  if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
+  if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();if(K.wsk&&m.emissiveMap){/* v776: 외형 활은 진주 구슬만 빛남 */m.emissive.setHex(0xffffff);m.emissiveIntensity=(.55+.55*k)*(1+.12*Math.sin(time*2.6));return}m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
   if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
 function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(u&&u.sk&&K&&K.st===2&&u.sk!==K.root)skwAttach(hero);if(!u||!u.sk||!K||K.st!==2)return;if(S&&(S.wlook||K.wsk))wskSync(K);const mage=K.cls==='mage',arc=K.cls==='archer';
@@ -7920,7 +7922,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v775';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v776';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
