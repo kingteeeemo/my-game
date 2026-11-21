@@ -7664,7 +7664,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v749';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v750';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -7847,7 +7847,7 @@ function npcMapPic(n){if(!inTown)return '';try{const N=128,o=mkCv(N),x=o.getCont
     drawMiniTo(x,N,N,0,0,R+10,k,0,true);const px=N/2+n.x*k,pz=N/2+n.z*k;x.strokeStyle='#fff4d8';x.lineWidth=3;x.beginPath();x.arc(px,pz,9,0,7);x.stroke();x.fillStyle='#ffe0a0';x.beginPath();x.arc(px,pz,4.5,0,7);x.fill();return o.toDataURL()}catch(e){return ''}}
 function townNpcHtml(){const L=NPCS.filter(n=>npcOn(n));return `<div class="tnl">${L.map(n=>{const pic=npcPortrait(n),mp=npcMapPic(n);return `<div class="tnr">${pic?`<img src="${pic}" alt="">`:'<i class="tnp"></i>'}${mp?`<img class="tnm" src="${mp}" alt="">`:'<i class="tnm"></i>'}<div><b>${npcName(n.id)}</b><span>${npcSub(n.id)}</span><small>${npcWhere(n)}</small></div></div>`}).join('')}</div>${inTown?'':'<div class="gv-foot">마을에서 열면 얼굴과 위치 그림이 함께 보입니다.</div>'}`}
 let GDQ=[],GCUR=null;
-function guide(key,force){if(!S||!S.cls||S.demo||S.test||S.noGuide)return;if(window.CHCON){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
+function guide(key,force){if(!S||!S.cls)return;if(!force&&(S.demo||S.test||S.noGuide))return;/* v750: 가이드 메뉴에서 직접 고른 건 테스트 모드여도 열림(전에는 무시돼 빈 창만 남아 안 닫혔음) */if(window.CHCON&&!force){const q=window.CHGQ||(window.CHGQ=[]);if(!q.includes(key))q.push(key);return}/* v695: 장 시작 연출 중에는 미뤘다가 끝나면 띄움 */S.tut=S.tut||{};if(!force&&S.tut[key])return;S.tut[key]=1;try{save()}catch(e){}
   if(GCUR){if(GCUR.key!==key&&!GDQ.includes(key))GDQ.push(key);return}const G=GUIDES[key];if(!G)return;GCUR={key,steps:G.steps(),i:0};releaseAll();$('guide').hidden=false;guideRender()}
 function guideRect(sel){if(sel==='@left'){const w=innerWidth,h=innerHeight;return {left:12,top:h*.5,right:w*.45,bottom:h-12}}
   let el=document.querySelector(sel);if(el&&!el.hidden&&!el.offsetParent&&el.closest('.rail'))el=$('hamBtn');/* v559: 세로 폰에서는 메뉴 안 버튼 대신 메뉴 버튼을 가리킴 */if(!el||el.hidden||!el.offsetParent)return null;const r=el.getBoundingClientRect();return r.width>0?r:null}
@@ -7859,9 +7859,9 @@ function guideRender(){const g=GCUR,st=g.steps[g.i],n=g.steps.length,sp=$('gSpot
   cd.style.top=cd.style.bottom='';const H=innerHeight;
   if(R){const cy=(R.top+R.bottom)/2;if(cy>H*.5)cd.style.bottom=Math.max(12,H-R.top+16)+'px';else cd.style.top=Math.min(H-200,R.bottom+16)+'px'}else{cd.style.top='50%';cd.style.transform='translate(-50%,-50%)';return}
   cd.style.transform='translateX(-50%)'}
-function guideNext(){if(!GCUR)return;if(GCUR.i<GCUR.steps.length-1){GCUR.i++;guideRender()}else guideClose()}
+function guideNext(){if(!GCUR){guideClose();return}if(GCUR.i<GCUR.steps.length-1){GCUR.i++;guideRender()}else guideClose()}
 function guideClose(){GCUR=null;$('guide').hidden=true;$('gCard').style.transform='';if(GDQ.length){const k=GDQ.shift();setTimeout(()=>guide(k,true),250)}}
-$('guide').addEventListener('click',e=>{const id=e.target.id;if(id==='gNext')guideNext();else if(id==='gPrev'&&GCUR){GCUR.i--;guideRender()}else if(id==='gSkip')guideClose();else if(e.target.dataset.gk){const k=e.target.dataset.gk;GCUR=null;guide(k,true)}});
+$('guide').addEventListener('click',e=>{const id=e.target.id;if(id==='gNext')guideNext();else if(id==='gPrev'&&GCUR){GCUR.i--;guideRender()}else if(id==='gSkip')guideClose();else if(e.target.dataset.gk){const k=e.target.dataset.gk;GCUR=null;GDQ.length=0;guide(k,true);if(!GCUR)guideClose()}});
 addEventListener('resize',()=>{if(GCUR)guideRender()});
 const GBOOK=[['기본',['intro','map','stage','skill','inv','bossm','town']],['성장 · 제작',['gskill','gtier','gember','gseal']],['마을 사람',['pot','gacha','smith','heir']]];/* v715: 메뉴 → 가이드 */
 function guideBook(){if(!S||!S.cls)return;GCUR={key:'book',steps:[{t:'가이드',d:'보고 싶은 안내를 고르세요. 「성장 · 제작」은 움직이는 그림으로 보여 줍니다.'}],i:0};GUIDES.book=GUIDES.book||{n:'Guide',steps:()=>[]};
