@@ -189,7 +189,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .lvtag{font:800 12px var(--en);font-stretch:87%;color:var(--muted)}
 .dn{position:absolute;left:0;top:0;font-family:var(--en);font-stretch:87%;font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 3px #000,0 0 2px #000;will-change:transform;white-space:nowrap}
 .dn.crit{color:#ffcf4a;font-size:20px}.dn.hurt{color:#ff6a5a}.dn.heal{color:#7fe07a}
-.stick{position:fixed;left:0;bottom:0;width:55%;height:55%;pointer-events:auto;touch-action:none}
+.stick{position:fixed;left:0;bottom:0;width:48%;height:37%;/* v780: 조이스틱은 왼쪽 아래 영역에서만 — 나머지 화면은 두 손가락 확대·축소 */pointer-events:auto;touch-action:none}
 .knob{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;border:2px solid rgba(255,255,255,.16);background:rgba(0,0,0,.18)}
 .knob i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(239,232,218,.28)}
 .act{position:absolute;pointer-events:auto;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:700 12px var(--ko);touch-action:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
@@ -720,7 +720,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .act.mv{width:46px;height:46px;right:89px;bottom:66px;font-size:10px}.act.mv small{display:none}
   .lcol{width:min(220px,30vw)}
   .npcact{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-  .stick{width:45%;height:75%}
+  .stick{width:39%;height:34%}
   .toast{top:calc(150px + env(safe-area-inset-top,0px))}.toast b{font-size:17px}
   .sbanner{top:calc(98px + env(safe-area-inset-top,0px))}.sbanner b{font-size:26px!important}.sbanner span{font-size:15px}.sbanner small{font-size:11px}
   .sheet{max-height:94%}
@@ -7952,15 +7952,14 @@ stick.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;if(sp
 stick.addEventListener('pointermove',e=>{if(!sp||e.pointerId!==sp.id)return;let dx=e.clientX-sp.x,dy=e.clientY-sp.y;const d=Math.hypot(dx,dy),m=48;if(d>m){dx=dx/d*m;dy=dy/d*m}nub.style.transform=`translate(${dx}px,${dy}px)`;if(d<6){input.x=input.z=0}else{const L=Math.hypot(dx,dy)||1;input.x=dx/L;input.z=dy/L}/* v233: 살짝만 밀어도 최대 속도(방향만 사용) */});
 const endStick=e=>{if(!sp||e.pointerId!==sp.id)return;sp=null;input.x=input.z=0;knob.hidden=true};
 stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercancel',endStick);
-/* v779: 모바일 두 손가락 확대·축소 — 화면(조이스틱 영역 포함)에 손가락 두 개가 닿으면 이동을 멈추고 벌리면 가까이, 모으면 멀리 */
-{const PT=new Map();const ok=e=>e.pointerType!=='mouse'&&(e.target===canvas||e.target===stick||stick.contains(e.target));
-  const dist=()=>{const a=[...PT.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
-  const can=()=>!CAM_LOCK&&!knAppr&&!paused()&&!CHC.on&&!invOpen;
-  addEventListener('pointerdown',e=>{if(!ok(e))return;PT.set(e.pointerId,{x:e.clientX,y:e.clientY});if(PT.size===2&&can()){camPZ={d0:Math.max(30,dist()),z0:CAM_Z};if(sp){sp=null;input.x=input.z=0;knob.hidden=true}}},true);
-  addEventListener('pointermove',e=>{const q=PT.get(e.pointerId);if(!q)return;q.x=e.clientX;q.y=e.clientY;if(!camPZ||PT.size<2)return;if(!can()){camPZ=null;return}
-    const z=camPZ.z0+(dist()/camPZ.d0-1)*70;if(camSet(z,false))try{camSegUI()}catch(_){}input.x=input.z=0},true);
-  const up=e=>{if(!PT.delete(e.pointerId))return;if(camPZ&&PT.size<2){camPZ=null;try{localStorage.setItem('camZ3',String(Math.round(CAM_Z)))}catch(_){}}};
-  addEventListener('pointerup',up,true);addEventListener('pointercancel',up,true)}
+/* v780: 모바일 두 손가락 확대·축소 — 조이스틱 영역(왼쪽 아래) 밖 화면에 손가락 두 개를 대고 벌리면 가까이, 모으면 멀리. iOS에서 안정적인 touch 이벤트로 처리 */
+{const can=()=>!CAM_LOCK&&!knAppr&&!paused()&&!CHC.on&&!invOpen;
+  const pts=e=>[...e.touches].filter(t=>t.target===canvas);
+  const dist=a=>Math.hypot(a[0].clientX-a[1].clientX,a[0].clientY-a[1].clientY);
+  const st=e=>{const a=pts(e);if(a.length>=2&&can()){if(!camPZ)camPZ={d0:Math.max(30,dist(a)),z0:CAM_Z}}else if(a.length<2&&camPZ){camPZ=null;try{localStorage.setItem('camZ3',String(Math.round(CAM_Z)))}catch(_){}}};
+  document.addEventListener('touchstart',st,{passive:true});
+  document.addEventListener('touchmove',e=>{if(!camPZ)return;const a=pts(e);if(a.length<2||!can()){st(e);return}if(e.cancelable)e.preventDefault();if(camSet(camPZ.z0+(dist(a)/camPZ.d0-1)*70,false))try{camSegUI()}catch(_){}},{passive:false});
+  document.addEventListener('touchend',st,{passive:true});document.addEventListener('touchcancel',st,{passive:true})}
 document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
   b.addEventListener('pointerdown',e=>{e.preventDefault();input.held[k]=true;b.classList.add('down');if(k==='s1'&&S&&S.autoSkSet&&!paused()&&!inTown){S.autoSkOn=!S.autoSkOn;skAutoUi();feed(S.autoSkOn?'스킬 자동 사용 켜짐':'스킬 자동 사용 꺼짐',S.autoSkOn?'#ffd24a':'#9ab');if(!S.autoSkOn)input.held[k]=false}fireNow(k)});
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{input.held[k]=false;b.classList.remove('down')}));
@@ -7999,7 +7998,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v779';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v780';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
