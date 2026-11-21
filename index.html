@@ -2478,7 +2478,7 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   rescue:[['생존자','살았다… 고맙소. 불길에 갇혀 꼼짝도 못 했소.'],['생존자','당신도 그 검사처럼 왕좌로 가는 거요? 그 사람, 성벽에 무언가를 새기고 갔소.'],['생존자','이걸 가져가시오. 왕도에 남은 마지막 물약이오.']],
   tv:'wall',trace:[['','무너진 성벽에 칼끝으로 새긴 글귀가 아직 선명하다.'],['','「루멘의 왕이시여, 당신의 빛을 되찾아 오겠습니다. — 카이렌」'],['','글귀 아래로, 사막을 가리키는 화살표가 새겨져 있다.']],
   camp:[['???','「이 왕도는 한때 빛으로 가득했다. 그 빛을 기억하는 자가 남아 있는 한, 끝난 것은 아니다.」']],
-  wx:'embers',props:'city',intro:'한때 루멘하르의 빛이 가장 밝게 빛나던 왕도. 이제는 꺼지지 않는 불에 타오른다.'},
+  wx:'embers',props:'city',intro:'한때 빛의 도시 루멘의 중심이던 왕도. 이제는 꺼지지 않는 불에 타오른다.'},
   {/* 6장 재의 사막 */
   wk:[[129,9],[112,9],[98,15],[84,9],[70,15],[54,8],[40,14],[24,9],[10,15],[-6,8],[-22,14],[-40,9],[-56,15],[-74,7],[-92,12],[-104,7],[-129,9]],
   pk:[{k:'chest',z:84,side:-1,d:6,r:4},{k:'trace',z:10,side:1,d:6,r:4.6},{k:'elite',z:-46,side:1,d:6.5,r:5.2}],
@@ -7664,7 +7664,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v751';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v752';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
