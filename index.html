@@ -8097,7 +8097,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v794';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v795';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8502,7 +8502,7 @@ function startGame(cls,main,skip){
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   const go=()=>{if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}};
-  if(!S.test&&!S.skipStart)prologPlay(go);else{window.BGMHOLD=0;go()}}/* v789: 새 캐릭터마다(31레벨 엔드게임 시작 제외) *//* v784: 첫 캐릭터(스토리 시작)는 프롤로그를 먼저 — 끝나면 1장 시작 연출 → 튜토리얼 질문 *//* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
+  go()}/* v795: 프롤로그는 로딩 앞(닉네임 확인 직후)으로 옮김 — 시작 흐름은 askNick 확인 핸들러 참고 *//* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
@@ -8540,7 +8540,7 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='skGo'||b.id==='skGoSkip'){const c=demo.cls,m=demo.sk,sk=b.id==='skGoSkip';
     if(testPick){demoEnd();startGame(c,m,sk);return}
     /* v329: 닉네임을 묻는 동안은 주력 스킬 선택 화면(시연)이 그대로 배경 — 확인하면 로딩 화면을 거쳐 1장으로 */
-    askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;window.BGMHOLD=1;/* v792: 로딩~프롤로그 동안 오프닝 BGM을 끊지 않고 이어감 */demoEnd();S=fresh();showLoading(()=>startGame(c,m,sk))}})}});
+    askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;const pro=!(sk&&skipOk());/* v795: 순서 — 닉네임 → 프롤로그 → 로딩(오프닝 BGM이 여기서 페이드아웃) → 1장. 31레벨 엔드게임 시작은 프롤로그 없이 로딩 */demoEnd();S=fresh();const load=()=>{window.BGMHOLD=0;try{SFX.bgm(null)}catch(e){}showLoading(()=>startGame(c,m,sk))};if(pro){window.BGMHOLD=1;prologPlay(load)}else load()}})}});
 function showLoading(cb,msg){const L=$('loadScr'),bar=$('loadBar'),tip=$('loadTip');tip.textContent=msg||['잿불이 꺼진 성역으로 들어갑니다…','길 끝 제단에서 첫 번째 수호자가 기다립니다…','어둠이 짙어질수록 불씨는 더 밝게 탑니다…'][Math.floor(Math.random()*3)];
   L.hidden=false;bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition='width 1.3s cubic-bezier(.3,.6,.4,1)';bar.style.width='100%';
   setTimeout(()=>{try{cb()}finally{setTimeout(()=>{L.style.opacity='0';setTimeout(()=>{L.hidden=true;L.style.opacity=''},400)},150)}},1400)}
