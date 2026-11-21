@@ -4217,8 +4217,7 @@ function fldSnap(){if(S.tutor||S.test||S.demo||inTown||ldBusy||!(P.hp>0)||(S.ch<
   const Z=RZ;if(Z&&mapKind==='field'){f.rz={st:Z.st,c:Z.c,g:Z.gates.map(q=>[+q.x.toFixed(1),+q.z.toFixed(1)]),t:+Z.t.toFixed(1),hp:Z.hp,wave:Z.wave,wT:+(Z.wT||0).toFixed(1),bt:+(Z.bt||0).toFixed(1),bo:Z.bossOut?1:0,acc:Z.acc,
     m:Z.mobs.filter(e=>e.hp>0).slice(0,150).map(e=>[e.rk||0,e===Z.boss?1:0,+e.pos.x.toFixed(1),+e.pos.z.toFixed(1),Math.round(e.hp),Math.round(e.mhp)])}}
   return f}
-function riftRestore(z){riftClear();riftOpen(true);const Z=RZ;Z.c={x:z.c.x,z:z.c.z};Z.obj.position.set(Z.c.x,0,Z.c.z);
-  Z.gates.forEach((q,i)=>{const p=z.g[i]||z.g[0];q.x=p[0];q.z=p[1];q.g.position.set(p[0],0,p[1])});
+function riftRestore(z){riftClear();riftOpen(true);const Z=RZ;/* v762: 맵 소품은 다시 불러올 때마다 새로 놓이므로 성화·문 자리는 새로 고른 것을 그대로 씀 */
   if(z.st==='open'){Z.t=z.t;return}
   Z.st='on';Z.obj.remove(Z.obj.userData.bm);for(const q of Z.gates){q.bump=1;q.g.scale.setScalar(1)}
   Z.t=z.t;Z.hp=z.hp;Z.wave=z.wave;Z.wT=z.wT||0;Z.bt=z.bt||0;Z.sp=0;Z.bossOut=!!z.bo;Z.acc=z.acc||Z.acc;
@@ -6683,9 +6682,16 @@ function riftObj(){const g=new THREE.Group(),stone=new THREE.MeshStandardMateria
   const gl=new THREE.Sprite(glowMat(0xff7a20).clone());gl.scale.setScalar(5);gl.position.y=2.4;gl.material.opacity=.55;
   for(const c of [base,b2,cr])c.castShadow=true;g.add(base,b2,cr,gl);const ring=flatMesh(ringGeo,0xffb050,.6);ring.scale.set(2.2,2.2,1);ring.position.y=.07;g.add(ring);
   const {bm,bms}=mkBeam(0xff5a00);bm.position.y=11.5;g.add(bm);g.userData={cr,cm,gl,bm,bms};return g}
-function riftOpen(near){const ang=rand(0,Math.PI*2),r=near?2.5:rand(10,14),L=B-RIFT.dist[1]-2,c={x:clamp(P.pos.x+Math.cos(ang)*r,-L,L),z:clamp(P.pos.z+Math.sin(ang)*r,-L,L)};
+/* v762: 균열 문(포탈) 자리 — 문에서 성화까지 곧은 길에 걸리는 소품(충돌체)이 없고, 문 자체도 소품·호수·용암 위가 아닌 곳만. 다섯 문이 고르게 퍼지도록 목표 각도 근처에서 고름 */
+function riftLaneOk(x,z,c,pad){if(Math.abs(x)>B-3||Math.abs(z)>B-3)return false;const dx=c.x-x,dz=c.z-z,L2=dx*dx+dz*dz||1;
+  for(const k of colliders){if(Math.hypot(k.x-x,k.z-z)<k.r+2.2)return false;const t=Math.max(0,Math.min(1,((k.x-x)*dx+(k.z-z)*dz)/L2)),px=x+dx*t,pz=z+dz*t;if(Math.hypot(k.x-px,k.z-pz)<k.r+(pad||1.4))return false}return true}
+function riftGates(c,n){const C=[];for(const [d0,d1,pad] of [[RIFT.dist[0],RIFT.dist[1],1.4],[11,25,1.2],[9,28,.9]]){for(let i=0;i<72;i++){const a=i/72*Math.PI*2;for(let d=d0;d<=d1;d+=1.5){const x=c.x+Math.cos(a)*d,z=c.z+Math.sin(a)*d;if(riftLaneOk(x,z,c,pad)){C.push({a,x,z,d});break}}}if(C.length>=n*3)break}
+  const out=[],a0=rand(0,Math.PI*2),ad=(p,q)=>{const v=Math.abs(p-q)%(Math.PI*2);return Math.min(v,Math.PI*2-v)};
+  for(let i=0;i<n;i++){const tg=a0+i/n*Math.PI*2;let best=null,bd=1e9;for(const q of C){if(out.some(o=>ad(o.a,q.a)<.45))continue;const v=ad(q.a,tg);if(v<bd){bd=v;best=q}}if(best)out.push(best)}
+  while(out.length<n){const a=a0+out.length*1.3,d=RIFT.dist[0];out.push({a,x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)})}return out}
+function riftOpen(near){/* v762: 균열은 항상 맵 한가운데 */const c={x:0,z:0};
   const obj=riftObj();obj.position.set(c.x,0,c.z);scene.add(obj);
-  const a0=rand(0,Math.PI*2),gates=[];for(let i=0;i<RIFT.N;i++){const a=a0+i/RIFT.N*Math.PI*2+rand(-.35,.35),d=rand(...RIFT.dist),q={x:clamp(c.x+Math.cos(a)*d,-B+2,B-2),z:clamp(c.z+Math.sin(a)*d,-B+2,B-2)},pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
+  const gates=[];for(const q of riftGates(c,RIFT.N)){const pg=riftPortal(.6);pg.position.set(q.x,0,q.z);pg.scale.setScalar(.01);scene.add(pg);gates.push({x:q.x,z:q.z,g:pg})}
   const lab=document.createElement('div');lab.className='nm r3';lab.innerHTML='<span style="color:#ffb070">잿불 성화</span><i style="width:60px;height:5px"><b style="background:#ff9a3a"></b></i>';namesEl.appendChild(lab);
   RZ={st:'open',c,obj,gates,lab,labBar:lab.querySelector('b'),hp:RIFT.objHp,t:0,mobs:[],wave:0,boss:null,bossOut:false,acc:{k:0,g:0,e:0,l:0,r:0,pn:0,pg:0,ln:0,lg:0}};
   ringFx(c,3.4,0xff7a30,.8);flash(c,0xff7a30,3.5);shake=Math.max(shake,.25);
@@ -7893,7 +7899,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v762';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v763';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
