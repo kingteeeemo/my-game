@@ -1292,7 +1292,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="sx-row"><div class="sx-rh"><b>몬스터 생성량</b><output id="egRateO">100%</output></div>
         <input type="range" class="sx-rng" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량">
         <div class="sx-lbl"><span>50%</span><span>120%</span></div></div>
-      <p class="sx-note">엔드게임 사냥터에만 적용됩니다. 높이면 몬스터가 많이 나와 다음 위험도로 빨리 넘어갑니다.</p>
     </section>
     <section data-p="a" hidden>
       <div class="sx-sec">Help</div>
@@ -7998,7 +7997,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v780';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v781';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8363,7 +8362,7 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
     if(testPick){demoEnd();startGame(c,m,sk);return}
     /* v329: 닉네임을 묻는 동안은 주력 스킬 선택 화면(시연)이 그대로 배경 — 확인하면 로딩 화면을 거쳐 1장으로 */
     askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;demoEnd();S=fresh();showLoading(()=>startGame(c,m,sk))}})}});
-function showLoading(cb){const L=$('loadScr'),bar=$('loadBar'),tip=$('loadTip');tip.textContent=['잿불이 꺼진 성역으로 들어갑니다…','길 끝 제단에서 첫 번째 수호자가 기다립니다…','어둠이 짙어질수록 불씨는 더 밝게 탑니다…'][Math.floor(Math.random()*3)];
+function showLoading(cb,msg){const L=$('loadScr'),bar=$('loadBar'),tip=$('loadTip');tip.textContent=msg||['잿불이 꺼진 성역으로 들어갑니다…','길 끝 제단에서 첫 번째 수호자가 기다립니다…','어둠이 짙어질수록 불씨는 더 밝게 탑니다…'][Math.floor(Math.random()*3)];
   L.hidden=false;bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition='width 1.3s cubic-bezier(.3,.6,.4,1)';bar.style.width='100%';
   setTimeout(()=>{try{cb()}finally{setTimeout(()=>{L.style.opacity='0';setTimeout(()=>{L.hidden=true;L.style.opacity=''},400)},150)}},1400)}
 
@@ -9984,7 +9983,7 @@ $('autoPop').addEventListener('input',e=>{const k=e.target.dataset.apc;if(!k)ret
 $('autoPop').addEventListener('change',e=>{if(e.target.dataset.apc){save();autoRender()}});
 document.querySelectorAll('#askSeg button').forEach(b=>b.addEventListener('click',()=>{S.autoSkSet=b.dataset.a==='1';if(!S.autoSkSet)S.autoSkOn=false;skAutoUi();save()}));
 $('pGuide').onclick=()=>{closePause();guideBook()};
-$('pSlots').onclick=()=>{save();closePause();closeAllSheets();showSlots()};/* v71: 슬롯 버튼은 설정 창 안으로 */
+$('pSlots').onclick=()=>{save();closePause();closeAllSheets();showLoading(()=>showSlots(),`${S.nick||'캐릭터'}의 여정을 저장하고 나갑니다…`)};/* v781: 슬롯 선택 — 지금 캐릭터를 마치고 나가는 느낌으로 로딩 화면 *//* v71: 슬롯 버튼은 설정 창 안으로 */
 function openPause(){if(!S.cls)return;releaseAll();skAutoUi();$('pause').hidden=false}
 function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
