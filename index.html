@@ -4546,11 +4546,15 @@ const NM=(()=>{
 
 function makeHero(cls){return NM.hero(cls)}
 const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90},archer:{file:'models/archer.glb',S:1.76,wp:/bow/i,tip:[.05,0,0],lift:0},musa:{file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:1.6,bl:1}/* v662: 무사 — 매화 검객 모델(전사 뼈대에 직접 리깅, 전사 동작 공유) */};/* v380: 궁수 3D 모델 */
-const SKN={};function skMk(cls){return SKN[cls]||(SKN[cls]={cls,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:SKC[cls].S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null})}
+/* v769: 캐릭터 외형(몸 전체 스킨) — 재단사 세라 「캐릭터」 분류. S.blook = 착용 중인 스킨 id. 스킨마다 모델 상태(K)를 따로 두고(SKV), 지금 쓸 것을 SKN[cls]에 둠.
+   은빛 발키리: Mixamo 리깅 모델에 전사 동작 12개를 옮겨 담음(뼈마다 '전사 바인드 → 전사 동작' 세계 회전 차이를 발키리 바인드에 곱함, 중지·약지·새끼는 검지 동작, 엉덩이 이동은 엉덩이 높이 비율) + 전사 대검을 같은 손 기준 자리에 */
+const BLOOKS={bsk_valk:{n:'은빛 발키리',cls:['warrior'],pr:950,file:'models/valkyrie.glb',img:'models/valkyrie_thumb.jpg',S:1.764,col:1.3,swCol:1.9,metal:.5,cn:'전사'}};
+const bskOf=cls=>{if(!S||!S.blook)return null;const B=BLOOKS[S.blook],cs=$('classSel');return B&&B.cls.includes(cls)&&S.cls===cls&&(!cs||cs.hidden)?S.blook:null};
+const SKN={},SKV={};function skMk(cls){const sk=bskOf(cls),id=sk?cls+'@'+sk:cls;if(SKV[id])return SKN[cls]=SKV[id];const C=sk?Object.assign({},SKC[cls],BLOOKS[sk]):SKC[cls];return SKN[cls]=SKV[id]={cls,sk,C,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:C.S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null}}
 const SKW=skMk('warrior');skMk('mage');skMk('archer');skMk('musa');/* SKW: 전사 상태(기존 이름 유지) */
-function skwLoad(cls='warrior'){const K=skMk(cls),C=SKC[cls];if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
+function skwLoad(cls='warrior'){const K=skMk(cls),C=K.C;if(K.st||!THREE.GLTFLoader){if(!THREE.GLTFLoader)K.st=3;return}K.st=1;
   new THREE.GLTFLoader().load(C.file+'?'+APP_VER,g=>{try{const r=g.scene;r.scale.setScalar(K.S);let sw=null;
-    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;o.material.color.setScalar(C.col||(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9));/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
+    r.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const mn=o.material.name;if(C.metal!==undefined&&!C.wp.test(o.name))o.material.metalness=C.metal;o.material.color.setScalar(C.swCol&&C.wp.test(o.name)?C.swCol:C.col||(mn==='mage_staff'?.5:cls==='archer'?SKA.col:1.9));/* v339: 지팡이 막대는 어둡게(검은 철) */o.material.emissiveIntensity=cls==='mage'?2.4:1.6;
       if(mn==='mage_eye'){/* v339: 두건 속 눈 — 푸른 점광 */o.material.emissiveIntensity=3;o.castShadow=false;const g=new THREE.Sprite(glowMat(0x8ad8ff));g.scale.setScalar(.055);o.add(g);o.position.z=.103;/* v530: 눈을 두건 안쪽 벽에서 검은 얼굴 앞면으로 당김 */if(!o.parent.userData.face){/* v530: 두건 속 검은 얼굴 — 옆에서 봐도 속이 비어 보이지 않게 */const f=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:0x020203}));f.scale.set(.088,.105,.078);f.position.set(0,.05,.02);f.frustumCulled=false;o.parent.userData.face=f;K.faceAdd=[o.parent,f]}}
       if(mn==='mage_gem'){o.material=o.material.clone();K.gemM=o.material}else if(C.wp.test(o.name)||(o.parent&&C.wp.test(o.parent.name)&&!o.parent.isBone)){o.material=o.material.clone();K.swM=o.material;sw=o}}});
     if(K.faceAdd){K.faceAdd[0].add(K.faceAdd[1]);K.faceAdd=null}if(cls==='mage')r.traverse(o=>{/* v531: 두건 안쪽 면(얼굴 쪽을 향한 면)을 검게 — 옆에서 봐도 두건 입구까지 검은 얼굴로 보이게 */if(!o.isSkinnedMesh||o.geometry.attributes.aIn)return;const bi=o.skeleton.bones.findIndex(b=>/Head$/.test(b.name));if(bi<0)return;
@@ -4734,7 +4738,7 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
 const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'}};
-const lookGet=k=>LOOKS[k]||WLOOKS[k];
+const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
 function wskLoad(k,cb){const Q=wskS(k),W=WLOOKS[k];if(Q.st===2){cb&&cb();return}if(cb)Q.cb.push(cb);if(Q.st||!THREE.GLTFLoader||!W)return;Q.st=1;
@@ -4750,9 +4754,9 @@ function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&
   if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone();K.gemM0=K.gemM}
   const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
   if(W.gem){K.gemM=mt;mt.emissive.setHex(0xffffff);K.swLift=null}
-  else if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=SKC[K.cls].lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
+  else if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=K.C.lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
   if(W.tip)K.tip.position.set(...W.tip);else K.tip.position.copy(K.tip0).multiplyScalar(W.L||1);K.wskM=m;K.wsk=want;if(hero&&skOf(hero)===K)skwGear()}
-const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k||S.wlook===k));/* 이미 착용 중이던 외형은 보유로 인정 */
+const lookOwn=k=>!!(S&&((S.lkOwn&&S.lkOwn[k])||S.look===k||S.wlook===k||S.blook===k));/* 이미 착용 중이던 외형은 보유로 인정 */
 const lookCoin=()=>S.test?Infinity:(S.lumi||0);
 function lookBuy(k){const L=lookGet(k);if(!L||lookOwn(k))return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
   if(!S.test)S.lumi-=c;(S.lkOwn=S.lkOwn||{})[k]=1;save();toast('외형 구매',`${L.n}`,'#c890ff');return true}
@@ -4913,14 +4917,14 @@ function lavaTick(dt){const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.lava)&&
     LV.ec=Math.min(20,LV.ec+dt*(26+40*LV.bk)*QM());while(LV.ec>=1){LV.ec--;const p=g.userData.pt(Math.random()<.5?0:1,Math.floor(Math.random()*7),rnd(.2,.95),Math.random());if(!p)continue;v.set(p[0],p[1],p[2]);g.localToWorld(v);
       emit(PADD,{x:v.x,y:v.y,z:v.z,vy:rnd(1.2,3),life:rnd(.6,1.2),s0:.3,s1:.04,c0:0xffc050,c1:0x901c00,a:1,tex:1})}}}
 /*>WING*/
-function skOf(g){const u=g&&g.userData;return u&&SKC[u.cls]?skMk(u.cls):null}
+function skOf(g){const u=g&&g.userData;if(!u||!SKC[u.cls])return null;const K=skMk(u.cls);if(u.sk&&u.sk!==K.root&&K.st!==2){/* v769: 바꾼 외형을 받는 동안은 지금 붙은 모델로 계속 */if(!K.st)skwLoad(u.cls);for(const id in SKV)if(SKV[id].root===u.sk)return SKV[id]}return K}
 function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
-  const r=K.root;if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
+  const r=K.root;if(u.sk&&u.sk!==r&&u.sk.parent===g)g.remove(u.sk);if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
   for(const c of [...K.tip.children])K.tip.remove(c);
   K.cur='idle';K.prev=null;K.fadeT=0;K.tm={};K.hitT=0;K.pp=null;K.stQ=null;P.flinch=false;skwGear()}
 /* v336: 초상화 — 대검을 손에서 떼어 등 뒤에 비스듬히 멘 모습(손잡이는 오른 어깨 위, 칼끝은 왼쪽 엉덩이 쪽). 되돌리는 함수를 반환 */
 const SKB={gx:.42,up:.24,bk:.3,dx:.5,dz:0};
-function skwBack(r){const sw=SKW.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r.getObjectByName('mixamorigNeck'),sh=r.getObjectByName('mixamorigRightShoulder'),hp=r.getObjectByName('mixamorigHips');if(!sw||!sp||!nk||!sh||!hp)return null;
+function skwBack(r,K=SKW){const sw=K.sw,sp=r.getObjectByName('mixamorigSpine2'),nk=r.getObjectByName('mixamorigNeck'),sh=r.getObjectByName('mixamorigRightShoulder'),hp=r.getObjectByName('mixamorigHips');if(!sw||!sp||!nk||!sh||!hp)return null;
   r.updateMatrixWorld(true);const V=()=>new THREE.Vector3(),pN=V().setFromMatrixPosition(nk.matrixWorld),pS=V().setFromMatrixPosition(sh.matrixWorld),pH=V().setFromMatrixPosition(hp.matrixWorld),L=pN.y-pH.y;
   const sv={par:sw.parent,p:sw.position.clone(),q:sw.quaternion.clone(),s:sw.scale.clone()},ws=V();sw.matrixWorld.decompose(V(),new THREE.Quaternion(),ws);
   const sg=Math.sign(pS.x-pN.x)||-1,g=new THREE.Vector3(pN.x+sg*L*SKB.gx,pN.y+L*SKB.up,pN.z-L*SKB.bk),z=new THREE.Vector3(-sg*SKB.dx,-1,SKB.dz).normalize(),y=new THREE.Vector3(z.y,-z.x,0).normalize(),x=new THREE.Vector3().crossVectors(y,z);
@@ -4990,12 +4994,12 @@ function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;
   sw.quaternion.copy(qc).slerp(K.bowQ0,K.bowA)}
 function skaBack(K){const sw=K.sw;if(!sw||!K.bowBk)return null;const sv={par:sw.parent,p:sw.position.clone(),q:sw.quaternion.clone()};skaBow(K,'back',1);return ()=>{sv.par.add(sw);sw.position.copy(sv.p);sw.quaternion.copy(sv.q)}}
 function skwGear(){if(!hero)return;const K=skOf(hero);if(!K||!K.swM||!hero.userData.sk)return;const wr=hero.userData.wRar||0,m=K.swM;if(K.gemM)skwGem(K,wr,gemLv(),0);
-  if(SKC[K.cls].bl){/* v658: 매화 검객 대검 — v659: 칼 전체가 아니라 칼의 붉은 무늬만 어둡게 빛남(발광 맵 = 색 텍스처), 검은 쇠 느낌 유지 */if(m.emissiveMap!==m.map){m.emissiveMap=m.map;m.needsUpdate=true}const k=gemLv();m.emissive.setHex(0xfff0ec);/* v660: 붉은 색 대신 텍스처 본래 색으로 빛남 — 매화 문양·꽃 장식이 어두운 곳에서도 보이게 */m.emissiveIntensity=(.3+.3*k)*(1+.1*Math.sin(time*3.2));return}
+  if(K.C.bl){/* v658: 매화 검객 대검 — v659: 칼 전체가 아니라 칼의 붉은 무늬만 어둡게 빛남(발광 맵 = 색 텍스처), 검은 쇠 느낌 유지 */if(m.emissiveMap!==m.map){m.emissiveMap=m.map;m.needsUpdate=true}const k=gemLv();m.emissive.setHex(0xfff0ec);/* v660: 붉은 색 대신 텍스처 본래 색으로 빛남 — 매화 문양·꽃 장식이 어두운 곳에서도 보이게 */m.emissiveIntensity=(.3+.3*k)*(1+.1*Math.sin(time*3.2));return}
   if(bc(K.cls)==='warrior'){/* v339: 대검도 무기 강화 단계에 비례해 밝아짐(지팡이 보석과 같은 곡선) + 맥동 */const k=gemLv(),pl=1+.1*Math.sin(time*3.2);m.emissiveIntensity=1.6*(.4+1.3*k)*pl}
   if(K.cls==='archer'){/* v380: 활은 발광 맵이 없어 몸 전체에 등급색을 은은하게(강화할수록 밝게) */const k=gemLv();m.emissive.setHex(wr>=1?[0,0x5a86ff,0xffc83a,0xff7a2a][wr]:0);m.emissiveIntensity=wr>=1?.04+.12*k:0;return}
   if(K.cls==='mage'){/* v342: 지팡이 막대는 등급과 무관하게 검은 철 그대로 — 보석만 바뀜 */m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff);return}
   if(wr>=1&&K.swLift){m.emissiveMap=K.swLift;m.emissive.setHex([0,0x5a86ff,0xffc83a,0xff7a2a][wr]).multiplyScalar([0,1.3,1.2,1.3][wr])}else{m.emissiveMap=K.swCrack||m.emissiveMap;m.emissive.setHex(0xffffff)}}
-function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||K.st!==2)return;if(S&&(S.wlook||K.wsk))wskSync(K);const mage=K.cls==='mage',arc=K.cls==='archer';
+function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(u&&u.sk&&K&&K.st===2&&u.sk!==K.root)skwAttach(hero);if(!u||!u.sk||!K||K.st!==2)return;if(S&&(S.wlook||K.wsk))wskSync(K);const mage=K.cls==='mage',arc=K.cls==='archer';
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
   if(P.flinch){if(P.hp>0)K.hitT=.35;P.flinch=false}/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */K.hitT-=dt;
   let st,t=null,rate=1,aim=0;
@@ -5029,7 +5033,7 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(!u||!u.sk||!K||
   if(mage){const free=st==='roll'||st==='hit'||st==='die'||!!ASHC.lie;/* v621: 쓰러진 동안은 지팡이를 하늘로 세우지 않고 손에 쥔 그대로 */skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
-  if(K.swM){const on=bc(K.cls)==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:SKC[K.cls].bl?0xb01c28:0xa8c0ff);else skwGear()}
+  if(K.swM){const on=bc(K.cls)==='warrior'&&(P.spin>0||P.swing>0);if(on)K.swM.emissive.setHex(P.spin>0&&P.spinFire?0xff7a30:K.C.bl?0xb01c28:0xa8c0ff);else skwGear()}
   if(mage&&K.gemM)skwGem(K,u.wRar||0,gemLv(),aim*.6)}
 /* 착용 장비 → 외형: 갑옷 등급 = 금속 테두리 색, 투구 = 투구/두건 표시, 무기 등급 = 날·수정 빛, 신발 = 신발 색 */
 function applyGearLook(){if(!hero||!S.eq)return;const u=hero.userData,eq=S.eq,ar=eq.armor?eq.armor.rar:0,wr=0;/* v731: 무기 등급에 따라 무기 색·빛(날 빛·지팡이 보석 색·불티)이 바뀌던 것 없앰 — 모든 직업 무기는 원래 색 그대로 */
@@ -7420,18 +7424,18 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
   u.dk.visible=false;S.look=sl;S.wlook=swl;if(KW)wskSync(KW);camera.layers.mask=cm.m;camera.fov=cm.fov;camera.aspect=cm.asp;camera.position.copy(cm.p);camera.quaternion.copy(cm.q);if(fg){scene.fog.near=fg.n;scene.fog.far=fg.f}camera.updateProjectionMatrix();
   for(let i=0;i<14;i++)wingTick(.1)}
 /* v739: 외형 상인 — 먼저 분류(등 부착물 · 무기)를 고르고 들어가면 그 분류만. 무기는 모든 직업 것을 보여 주되 다른 직업 무기는 구매·착용 불가 */
-let LKCAT=null;const LKCATS={back:{n:'등 부착물',ks:()=>Object.keys(LOOKS)},weapon:{n:'무기',ks:()=>Object.keys(WLOOKS).sort((a,b)=>wlookOk(b,S.cls)-wlookOk(a,S.cls))}};
+let LKCAT=null;const LKCATS={back:{n:'등 부착물',ks:()=>Object.keys(LOOKS)},weapon:{n:'무기',ks:()=>Object.keys(WLOOKS).sort((a,b)=>wlookOk(b,S.cls)-wlookOk(a,S.cls))},body:{n:'캐릭터',ks:()=>Object.keys(BLOOKS).sort((a,b)=>blookOk(b,S.cls)-blookOk(a,S.cls))}};
 function renderLooks(){lookShots();
   const cur=S.test?'∞':fmtG(S.lumi||0)+' / 999';
   if(!LKCAT||!LKCATS[LKCAT]){let h=`<div class="shead"><div><h2>외형 장비</h2></div><button class="close" data-ns="close">닫기</button></div>
     <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkcats">`;
-    for(const c in LKCATS){const ks=LKCATS[c].ks(),on=c==='back'?S.look:(S.wlook&&wlookOk(S.wlook,S.cls)?S.wlook:null),pk=on||ks.find(k=>LKIMG[k]);
-      h+=`<button class="lkcat" data-lkc="${c}" style="${pk&&LKIMG[pk]?`background-image:url(${LKIMG[pk]})`:''}"><b>${LKCATS[c].n}</b><i>${ks.length}종${on?' · '+lookGet(on).n+' 착용 중':''}</i></button>`}
+    for(const c in LKCATS){const ks=LKCATS[c].ks(),on=c==='back'?S.look:c==='body'?(S.blook&&blookOk(S.blook,S.cls)?S.blook:null):(S.wlook&&wlookOk(S.wlook,S.cls)?S.wlook:null),pk=on||ks.find(k=>lkImg(k));
+      h+=`<button class="lkcat" data-lkc="${c}" style="${pk&&lkImg(pk)?`background-image:url(${lkImg(pk)})`:''}"><b>${LKCATS[c].n}</b><i>${ks.length}종${on?' · '+lookGet(on).n+' 착용 중':''}</i></button>`}
     $('nsBody').innerHTML=h+'</div>';return}
   let h=`<div class="shead"><div class="lkhd"><button class="lkbk" data-lkc="">‹</button><h2>${LKCATS[LKCAT].n}</h2></div><button class="close" data-ns="close">닫기</button></div>
   <div class="lkcur">${ci('l')}<span>보유 ${LCUR}</span><b>${cur}</b></div><div class="lkgrid">`;
-  for(const k of LKCATS[LKCAT].ks()){const L=lookGet(k),wp=!!WLOOKS[k],own=lookOwn(k),on=wp?S.wlook===k:S.look===k,ok=lookCoin()>=(L.pr||0),cl=wp&&!wlookOk(k,S.cls);
-    h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${LKIMG[k]?`background-image:url(${LKIMG[k]})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':wp?`<span class="lkw" style="background:rgba(20,20,26,.8);color:#cfc5b4">${L.cn} 전용</span>`:''}</div>
+  for(const k of LKCATS[LKCAT].ks()){const L=lookGet(k),bp=!!BLOOKS[k],wp=!!WLOOKS[k]||bp,own=lookOwn(k),on=bp?S.blook===k:wp?S.wlook===k:S.look===k,ok=lookCoin()>=(L.pr||0),cl=bp?!blookOk(k,S.cls):wp&&!wlookOk(k,S.cls);
+    h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${lkImg(k)?`background-image:url(${lkImg(k)})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':wp?`<span class="lkw" style="background:rgba(20,20,26,.8);color:#cfc5b4">${L.cn} 전용</span>`:''}</div>
       <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:cl?`<button class="lkbuy x" disabled>${L.cn} 전용</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll()}
@@ -7439,7 +7443,7 @@ function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(b.dataset.lkc!==undefined&&nsKind==='look'){LKCAT=b.dataset.lkc||null;renderLooks();const bd=$('nsBody');if(bd)bd.scrollTop=0;return}
-  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(WLOOKS[k]){if(!wlookOk(k,S.cls)){renderLooks();return}if(ac==='buy'){if(lookBuy(k)&&wlookOk(k,S.cls)){S.wlook=k;save()}}else{S.wlook=ac==='off'?null:k;save()}renderLooks();return}if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
+  if(b.dataset.lk!==undefined&&nsKind==='look'){const [ac,k]=b.dataset.lk.split(',');if(BLOOKS[k]){if(!blookOk(k,S.cls)){renderLooks();return}if(ac==='buy'){if(lookBuy(k)){S.blook=k;save()}}else{S.blook=ac==='off'?null:k;save()}renderLooks();return}if(WLOOKS[k]){if(!wlookOk(k,S.cls)){renderLooks();return}if(ac==='buy'){if(lookBuy(k)&&wlookOk(k,S.cls)){S.wlook=k;save()}}else{S.wlook=ac==='off'?null:k;save()}renderLooks();return}if(ac==='buy'){if(lookBuy(k))lookSet(k)}else lookSet(ac==='off'?null:k);renderLooks();return}
   if(b.dataset.sc&&stashOpen){const [d,k]=b.dataset.sc.split(',');stashCurMove(d,k);return}
   if(a==='drw'&&rrOpen){if(rrSpin||!rrSel||performance.now()-drNoClick<400)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
@@ -8145,7 +8149,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
   /* v395: 배경 빛 스프라이트(dotTex) 삭제 — 모바일에서 배경에 색 점이 찍히던 원인 후보. 배경은 2D 캔버스 그라데이션으로 그리고 3D는 투명 배경으로 그려 위에 합성 */
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
-    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!SKC[cls].bl)skB.back=skwBack(r)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    if(cls==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(cls==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!K.C.bl)skB.back=skwBack(r,K)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
   /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
