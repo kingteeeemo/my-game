@@ -8097,7 +8097,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v796';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v797';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8431,11 +8431,12 @@ const PRL=[/* v792: c0 = 그림 가로 위치(0~1) · d = 시선 이동 방향(+
   {c0:.48,d:1,fx:'fire',c:['불의 용, 아쉬카르.','루멘은 단 하룻밤 만에\n불길 속으로 무너졌다.']},
   {c0:.54,d:1,fx:'throne',c:['용은 빛의 왕좌를 부수고\n그 위에 앉았다.','빛은 꺼지고,\n꺼지지 않는 불길만이 남았다.']},
   {c0:.55,d:1,fx:'ash',c:['잿불은 루멘하르를 넘어\n온 세상에 내렸다.','들판은 시들고,\n한낮에도 하늘이 어두워졌다.']},
-  {c0:.52,d:-1,fx:'ash2',c:['꺼져 가는 빛은 마지막 목소리로 불렀다.\n「불씨를 지닌 자여, 왕좌로 오라.」','부름을 들은 이들이\n사방에서 모여들었다.','그러나 왕좌에서\n돌아온 자는 없었다.']},
+  {c0:.52,d:-1,fx:'ash2',c:['꺼져 가는 빛은 마지막 목소리로 불렀다.\n「불씨를 지닌 자여, 왕좌로 오라.」','부름을 들은 이들이\n사방에서 모여들었다.']},
+  {c0:.5,d:-1,fx:'empty',c:['그러나 왕좌에서\n돌아온 자는 없었다.','사람들은 그들이 모두 불에 삼켜졌다 믿었고,\n더는 누구도 왕좌로 향하지 않았다.']},
   {c0:.53,d:1,fx:'hero',c:['그리고 지금,\n또 한 사람이 재 속에서 일어선다.']}];
 const PRL_V=.03,PRL_Z=[1,1.06];/* 이동 속도: 초당 그림 높이의 3% · 확대: 장면 동안 1 → 1.06 */
 /* 입자: m 금빛 티끌 · e 불티 · a 재 (장면마다 목표 개수, 다 탄 입자가 새 장면 비율로 다시 생겨 자연스럽게 바뀜) */
-const PRL_FX={snow:{m:0,e:0,a:0,s:150},fall:{m:0,e:60,a:20,f:1},note:{m:6,e:0,a:0},mote:{m:40,e:0,a:0},night:{m:0,e:14,a:20},fire:{m:0,e:110,a:30},throne:{m:0,e:70,a:20},ash:{m:0,e:0,a:130},ash2:{m:0,e:10,a:80},hero:{m:0,e:0,a:90}};
+const PRL_FX={snow:{m:0,e:0,a:0,s:150},fall:{m:0,e:60,a:20,f:1},note:{m:6,e:0,a:0},mote:{m:40,e:0,a:0},night:{m:0,e:14,a:20},fire:{m:0,e:110,a:30},throne:{m:0,e:70,a:20},ash:{m:0,e:0,a:130},ash2:{m:0,e:10,a:80},empty:{m:0,e:0,a:110},hero:{m:0,e:0,a:90}};
 const PRO=window.PRO={on:0};
 const prlDur=t=>Math.max(4.4,2.6+t.replace(/\s/g,'').length*.12);/* 자막 한 줄이 떠 있는 시간 */
 function prologPlay(cb,set){if(PRO.on)return;const el=$('prolog'),Ls=[...el.querySelectorAll('.plL')],cv=$('plFx');PRO.S=set&&set.sc||PRL;el.querySelector('.plTag').textContent=set&&set.tag||'Prologue';/* v785: 다른 그림 슬라이드(장 이야기)도 같은 연출로 */
