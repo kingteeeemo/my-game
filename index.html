@@ -6984,7 +6984,7 @@ const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전
   bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
   plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
-const smRad=L=>2.3*(1+.07*L),smDmg=L=>1+.04*L,smArc=L=>({n:1+Math.floor(L/3),m:.3+.03*L,r:6.5}),/* 갈래 번개(10단계): 1·3·6·9단계에 번개 +1 */
+const smRad=L=>2.3*(1+.1125*L)/* v762: 10단계 반경 +25% (3.9m→4.9m), 0단계 2.3m 그대로 */,smDmg=L=>1+.04*L,smArc=L=>({n:1+Math.floor(L/3),m:.3+.03*L,r:6.5}),/* 갈래 번개(10단계): 1·3·6·9단계에 번개 +1 */
   smField=L=>({dur:1+.2*L,iv:.25,m:.06+.02*L}),/* 폭풍의 잔향(5단계) */smTwin=L=>({n:L,m:.4+.06*L});/* 심판의 비(5단계): 단계마다 검 +1 → 5단계 총 6자루 */
 const SK_NEW={
   smite:{n:'심판의 검',role:'다수 공격',tag:'smite',en:'Blade of Judgement · Lightning',kind:'smite',gems:['srad','sarc','haste'],mp:11,dmg:1.5,cd:1.2,desc:'하늘에서 번개를 두른 검을 적의 자리에 내리꽂습니다. 검이 꽂힌 자리에는 푸른 번개의 소용돌이가 터져 주변 적을 모두 휩씁니다.'},
@@ -7893,7 +7893,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v761';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v762';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
