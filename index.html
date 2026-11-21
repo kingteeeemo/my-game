@@ -101,7 +101,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 #prolog .plHint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 4.5vh);text-align:center;font:400 12px/1 "Noto Sans KR",sans-serif;color:rgba(236,224,200,.5);opacity:0;transition:opacity 1s;pointer-events:none}#prolog .plHint.on{opacity:1}
 #prolog .plDots{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 2.2vh);display:flex;justify-content:center;gap:7px;pointer-events:none}#prolog .plDots i{width:5px;height:5px;border-radius:50%;background:rgba(236,224,200,.25);transition:background .6s}#prolog .plDots i.on{background:rgba(236,224,200,.85)}
 #prolog .plBlack{position:absolute;inset:0;background:#000;opacity:1;transition:opacity 1.4s ease;pointer-events:none}#prolog .plBlack.off{opacity:0}
-@media (orientation:portrait){#prolog .plBox{top:10%;bottom:10%}#prolog .plBox .plShade{background:linear-gradient(#000,transparent 9%,transparent 70%,rgba(0,0,0,.55) 90%,#000)!important;box-shadow:none!important}#prolog .plCap{bottom:calc(env(safe-area-inset-bottom,0px) + 5.5vh)}#prolog .plHint{bottom:auto;top:calc(10vh - 20px)}#prolog .plDots{bottom:calc(env(safe-area-inset-bottom,0px) + 1.6vh)}}/* v789: 세로 화면 — 위아래 10% 검은 여백, 그림을 더 작게 */
+@media (orientation:portrait){#prolog .plBox{top:10%;bottom:10%;-webkit-mask-image:linear-gradient(transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(transparent,#000 7%,#000 93%,transparent)}/* v796: 그림 칸 위아래 경계의 흐린 선 제거 — 경계를 마스크로 부드럽게 */#prolog .plBox .plShade{background:linear-gradient(#000,transparent 9%,transparent 70%,rgba(0,0,0,.55) 90%,#000)!important;box-shadow:none!important}#prolog .plCap{bottom:calc(env(safe-area-inset-bottom,0px) + 5.5vh)}#prolog .plHint{bottom:auto;top:calc(10vh - 20px)}#prolog .plDots{bottom:calc(env(safe-area-inset-bottom,0px) + 1.6vh)}}/* v789: 세로 화면 — 위아래 10% 검은 여백, 그림을 더 작게 */
 #talkL{position:fixed;inset:0;z-index:58;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 50vh;padding-bottom:calc(50dvh + 6px);background:linear-gradient(rgba(0,0,0,.4),transparent 50%)}/* v706: 대사 상자는 화면 세로 가운데 바로 위 */#talkL[hidden]{display:none}#talkB{width:min(560px,100%);background:rgba(12,12,18,.9);border:1px solid #6a5a3a;border-radius:12px;padding:13px 16px 10px;color:#efe8da;font-size:15px;line-height:1.6;box-shadow:0 6px 24px rgba(0,0,0,.5)}#talkN{font-size:12.5px;font-weight:700;color:#ffd27a;margin-bottom:4px;letter-spacing:.02em}#talkN.vo{color:#ffe9a8;opacity:.75}#talkT.vo{color:#ffe08a;font-style:italic}#talkH{text-align:right;font-size:11px;opacity:.5;margin-top:4px}#npcAct.talkhide{display:none!important}
 body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
@@ -8097,7 +8097,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v795';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v796';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8432,10 +8432,10 @@ const PRL=[/* v792: c0 = 그림 가로 위치(0~1) · d = 시선 이동 방향(+
   {c0:.54,d:1,fx:'throne',c:['용은 빛의 왕좌를 부수고\n그 위에 앉았다.','빛은 꺼지고,\n꺼지지 않는 불길만이 남았다.']},
   {c0:.55,d:1,fx:'ash',c:['잿불은 루멘하르를 넘어\n온 세상에 내렸다.','들판은 시들고,\n한낮에도 하늘이 어두워졌다.']},
   {c0:.52,d:-1,fx:'ash2',c:['꺼져 가는 빛은 마지막 목소리로 불렀다.\n「불씨를 지닌 자여, 왕좌로 오라.」','부름을 들은 이들이\n사방에서 모여들었다.','그러나 왕좌에서\n돌아온 자는 없었다.']},
-  {c0:.53,d:-1,fx:'hero',c:['그리고 지금,\n또 한 사람이 재 속에서 일어선다.']}];
+  {c0:.53,d:1,fx:'hero',c:['그리고 지금,\n또 한 사람이 재 속에서 일어선다.']}];
 const PRL_V=.03,PRL_Z=[1,1.06];/* 이동 속도: 초당 그림 높이의 3% · 확대: 장면 동안 1 → 1.06 */
 /* 입자: m 금빛 티끌 · e 불티 · a 재 (장면마다 목표 개수, 다 탄 입자가 새 장면 비율로 다시 생겨 자연스럽게 바뀜) */
-const PRL_FX={snow:{m:0,e:0,a:0,s:150},fall:{m:0,e:60,a:20,f:1},note:{m:6,e:0,a:0},mote:{m:40,e:0,a:0},night:{m:0,e:14,a:20},fire:{m:0,e:110,a:30},throne:{m:0,e:70,a:20},ash:{m:0,e:0,a:130},ash2:{m:0,e:10,a:80},hero:{m:0,e:40,a:90}};
+const PRL_FX={snow:{m:0,e:0,a:0,s:150},fall:{m:0,e:60,a:20,f:1},note:{m:6,e:0,a:0},mote:{m:40,e:0,a:0},night:{m:0,e:14,a:20},fire:{m:0,e:110,a:30},throne:{m:0,e:70,a:20},ash:{m:0,e:0,a:130},ash2:{m:0,e:10,a:80},hero:{m:0,e:0,a:90}};
 const PRO=window.PRO={on:0};
 const prlDur=t=>Math.max(4.4,2.6+t.replace(/\s/g,'').length*.12);/* 자막 한 줄이 떠 있는 시간 */
 function prologPlay(cb,set){if(PRO.on)return;const el=$('prolog'),Ls=[...el.querySelectorAll('.plL')],cv=$('plFx');PRO.S=set&&set.sc||PRL;el.querySelector('.plTag').textContent=set&&set.tag||'Prologue';/* v785: 다른 그림 슬라이드(장 이야기)도 같은 연출로 */
