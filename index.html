@@ -347,6 +347,40 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .sheet h2{margin:0;font-size:19px;font-weight:900;text-wrap:balance}
 .close{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;font:700 13px var(--ko)}
 .hint{font-size:12px;color:var(--muted);line-height:1.55;margin:0}
+/* v777: 설정 창 — 왼쪽 탭형(화면·소리·전투·계정) */
+#pause .setx{padding:0;gap:0;text-align:left;align-items:stretch;width:min(560px,calc(100% - 24px));height:min(680px,calc(100% - 24px));max-height:none;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg,#121217,#0e0e12)}
+.setx .sx-top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.setx .sx-top h2{margin:0;font:800 21px var(--ko)}.setx .sx-en,.setx .sx-sec,.setx .sx-ver{font-family:var(--en);font-stretch:87%;letter-spacing:.14em;text-transform:uppercase}
+.setx .sx-en{display:block;font-size:10px;color:#cbbd9f;margin-bottom:2px}
+.setx .sx-x{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ember);font-size:14px;padding:0;min-height:0}
+.setx .sx-body{flex:1;display:flex;min-height:0}
+.setx .sx-tabs{width:78px;flex:0 0 auto;border-right:1px solid var(--line);padding:8px 0;display:flex;flex-direction:column;gap:2px;background:rgba(0,0,0,.22)}
+.setx .sx-tabs button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 0;border:0;border-radius:0;background:none;color:#6b6670;font:600 12px var(--ko);position:relative;min-height:0;width:100%}
+.setx .sx-tabs svg{flex:0 0 auto;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.setx .sx-tabs button.on{color:var(--ember);background:linear-gradient(90deg,rgba(232,220,196,.1),transparent)}
+.setx .sx-tabs button.on:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--ember)}
+.setx .sx-ver{margin-top:auto;text-align:center;font-size:10px;color:#6b6670;padding:6px 0}
+.setx .sx-pane{flex:1;min-width:0;overflow-y:auto;padding:14px 16px 18px;-webkit-overflow-scrolling:touch}
+.setx .sx-sec{font-size:10px;color:var(--muted);margin:6px 0 10px}.setx section>.sx-sec:not(:first-child){margin-top:18px}
+.setx .sx-q{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}.setx .sx-q.two{grid-template-columns:1fr 1fr}
+.setx .sx-q button{border:1px solid var(--line);border-radius:12px;padding:11px 9px 10px;text-align:left;background:#1a1a20;color:var(--ink);display:block;min-height:0;width:auto}
+.setx .sx-q b{display:block;font:800 17px var(--ko);margin-bottom:3px}.setx .sx-q small{font-size:11px;color:var(--muted);line-height:1.35;display:block}
+.setx .sx-q button.on{border-color:var(--ember);background:linear-gradient(160deg,rgba(232,220,196,.16),rgba(232,220,196,.04))}.setx .sx-q button.on b{color:var(--ember)}
+.setx .sx-bars{display:flex;gap:3px;margin-bottom:8px}.setx .sx-bars u{height:4px;flex:1;border-radius:2px;background:#333}.setx .sx-bars u.f{background:#8d846f}.setx .sx-q button.on .sx-bars u.f{background:var(--ember)}
+.setx .sx-note{font-size:12px;color:var(--muted);line-height:1.5;margin:2px 0 6px}
+.setx .sx-row{margin-bottom:16px}.setx .sx-rh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.setx .sx-rh b{font:700 15px var(--ko)}
+.setx .sx-rh output{font:800 15px var(--en);font-stretch:87%;color:var(--ember)}
+.setx .sx-rng{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;touch-action:pan-y}
+.setx .sx-rng::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--ember) var(--pc,50%),#34323a var(--pc,50%))}
+.setx .sx-rng::-moz-range-track{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--ember) var(--pc,50%),#34323a var(--pc,50%))}
+.setx .sx-rng::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9.5px;border-radius:50%;background:var(--ember);border:0;box-shadow:0 0 0 5px rgba(232,220,196,.15)}
+.setx .sx-rng::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ember);border:0;box-shadow:0 0 0 5px rgba(232,220,196,.15)}
+.setx .sx-lbl{display:flex;justify-content:space-between;font:500 11px var(--ko);color:#6b6670;margin-top:2px}
+.setx .sx-link{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;padding:0 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:#1a1a20;color:var(--ink)}.setx .sx-link b{font:700 15px var(--ko)}.setx .sx-link span{color:var(--muted);font-size:18px}
+.setx .sx-foot{display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.setx .sx-foot button{height:50px;border-radius:12px;font:700 15px var(--ko);margin:0}.setx .sx-foot .ghost{flex:1}.setx .sx-foot .primary{flex:2}
+@media (max-width:520px) and (orientation:portrait){#pause .setx{width:100%;height:100%;border-radius:0;border:0}#pause .setx .sx-top{padding-top:calc(14px + env(safe-area-inset-top,0px))}}
+@media (orientation:landscape) and (max-height:520px){#pause .setx{height:calc(100% - 16px)}.setx .sx-top{padding:10px 16px 8px}.setx .sx-tabs button{padding:8px 0}.setx .sx-foot{padding:8px 16px 10px}.setx .sx-foot button{height:42px}}
 .gfx{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font-weight:700;font-size:14px}
 .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .seg button{background:none;border:0;color:var(--muted);font:700 13px var(--ko);padding:9px 16px;min-width:52px}
@@ -1224,23 +1258,51 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <p class="hint">레벨, 스킬 강화, 스탯, 장비, 가방, 장 진행이 모두 지워지고 직업 선택부터 다시 시작합니다. 되돌릴 수 없습니다.</p>
   <div class="btns"><button class="ghost" id="rCancel">취소</button><button class="primary" id="rOk">처음부터 시작</button></div>
 </div></div>
-<div class="scrim center" id="pause" hidden><div class="sheet modal" style="text-align:center;align-items:center">
-  <div><h2>설정</h2></div>
-  <p class="hint">설정을 여는 동안 게임이 멈춥니다. PC는 Esc로도 열고 닫을 수 있어요.</p>
-  <div class="gfx"><span>화질</span><div class="seg" id="gfxSeg"><button data-q="0">하</button><button data-q="1">중</button><button data-q="2">상</button></div></div>
-  <p class="hint" id="gfxHint" style="width:100%;text-align:left"></p>
-  <div class="gfx"><span>카메라</span><div class="seg" id="camSeg"><button data-z="-30">−30%</button><button data-z="-15">−15%</button><button data-z="0">기본</button><button data-z="15">+15%</button><button data-z="30">+30%</button></div></div>
-  <p class="hint" style="width:100%;text-align:left">+는 확대(가깝게), −는 축소(멀리 넓게) 봅니다.</p>
-  <div class="gfx"><span style="white-space:nowrap">몬스터 생성</span><div class="ampr" style="flex:1"><input type="range" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량"><output id="egRateO">100%</output></div></div>
-  <p class="hint" style="width:100%;text-align:left">엔드게임 사냥터의 몬스터 생성량입니다. 높이면 몬스터가 더 많이 나와 다음 위험도로 빨리 넘어가고, 낮추면 천천히 넘어갑니다.</p>
-  <div class="gfx"><span style="white-space:nowrap">배경음</span><div class="ampr" style="flex:1"><input type="range" id="bgmVol" min="0" max="100" step="5" value="50" aria-label="배경음 크기"><output id="bgmVolO">50%</output></div></div>
-  <div class="gfx"><span style="white-space:nowrap">효과음</span><div class="ampr" style="flex:1"><input type="range" id="sfxVol" min="0" max="100" step="5" value="70" aria-label="효과음 크기"><output id="sfxVolO">70%</output></div></div>
-  <p class="hint" style="width:100%;text-align:left">효과음 일부는 elevenlabs.io 로 만들었습니다.</p>
-  <div class="gfx"><span style="white-space:nowrap">스킬 자동 사용</span><div class="seg" id="askSeg"><button data-a="0">끄기</button><button data-a="1">켜기</button></div></div>
-  <p class="hint" style="width:100%;text-align:left" id="askHint"></p>
-  <button class="ghost" id="pGuide" style="width:100%">가이드 다시 보기</button>
-  <button class="ghost" id="pSlots" style="width:100%">슬롯 · 처음부터</button>
-  <button class="primary" id="pResume" style="width:100%">계속하기</button>
+<div class="scrim center" id="pause" hidden><div class="sheet modal setx" id="pauseSheet">
+  <div class="sx-top"><div><span class="sx-en">Settings</span><h2>설정</h2></div><button class="sx-x" id="pX" aria-label="닫기">✕</button></div>
+  <div class="sx-body"><nav class="sx-tabs" id="sxTabs">
+    <button data-t="v" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg>화면</button>
+    <button data-t="s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>소리</button>
+    <button data-t="c"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>전투</button>
+    <button data-t="a"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>계정</button>
+    <span class="sx-ver" id="sxVer"></span>
+  </nav><div class="sx-pane">
+    <section data-p="v">
+      <div class="sx-sec">Graphics</div>
+      <div class="sx-q" id="gfxSeg"><button data-q="0"><i class="sx-bars"><u class="f"></u><u></u><u></u></i><b>하</b><small>오래된 기기</small></button><button data-q="1"><i class="sx-bars"><u class="f"></u><u class="f"></u><u></u></i><b>중</b><small>휴대폰 권장</small></button><button data-q="2"><i class="sx-bars"><u class="f"></u><u class="f"></u><u class="f"></u></i><b>상</b><small>PC · 고사양</small></button></div>
+      <p class="sx-note" id="gfxHint"></p>
+      <div class="sx-sec">Camera</div>
+      <div class="sx-row"><div class="sx-rh"><b>카메라 거리</b><output id="camZO">기본</output></div>
+        <input type="range" class="sx-rng" id="camZr" min="-30" max="30" step="5" value="0" aria-label="카메라 거리">
+        <div class="sx-lbl"><span>멀리 −30%</span><span>가깝게 +30%</span></div></div>
+    </section>
+    <section data-p="s" hidden>
+      <div class="sx-sec">Sound</div>
+      <div class="sx-row"><div class="sx-rh"><b>배경음</b><output id="bgmVolO">50%</output></div><input type="range" class="sx-rng" id="bgmVol" min="0" max="100" step="5" value="50" aria-label="배경음 크기"></div>
+      <div class="sx-row"><div class="sx-rh"><b>효과음</b><output id="sfxVolO">70%</output></div><input type="range" class="sx-rng" id="sfxVol" min="0" max="100" step="5" value="70" aria-label="효과음 크기"></div>
+      <p class="sx-note">효과음 일부는 elevenlabs.io 로 만들었습니다.</p>
+    </section>
+    <section data-p="c" hidden>
+      <div class="sx-sec">Skill</div>
+      <div class="sx-rh"><b>스킬 자동 사용</b></div>
+      <div class="sx-q two" id="askSeg"><button data-a="0"><b>끄기</b><small>누를 때마다 직접</small></button><button data-a="1"><b>켜기</b><small>버튼으로 자동 전환</small></button></div>
+      <p class="sx-note" id="askHint"></p>
+      <div class="sx-sec">Field</div>
+      <div class="sx-row"><div class="sx-rh"><b>몬스터 생성량</b><output id="egRateO">100%</output></div>
+        <input type="range" class="sx-rng" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량">
+        <div class="sx-lbl"><span>50%</span><span>120%</span></div></div>
+      <p class="sx-note">엔드게임 사냥터에만 적용됩니다. 높이면 몬스터가 많이 나와 다음 위험도로 빨리 넘어갑니다.</p>
+    </section>
+    <section data-p="a" hidden>
+      <div class="sx-sec">Help</div>
+      <button class="sx-link" id="pGuide"><b>가이드 다시 보기</b><span>›</span></button>
+      <button class="sx-link" id="pFull"><b>전체 화면</b><span>›</span></button>
+      <div class="sx-sec">Character</div>
+      <button class="sx-link" id="pSlots2"><b>슬롯 · 처음부터</b><span>›</span></button>
+      <p class="sx-note">설정을 여는 동안 게임이 멈춥니다. PC는 Esc로도 열고 닫을 수 있어요.</p>
+    </section>
+  </div></div>
+  <div class="sx-foot"><button class="ghost" id="pSlots">슬롯 선택</button><button class="primary" id="pResume">계속하기</button></div>
 </div></div>
 <div class="scrim" id="stat" hidden><div class="sheet" id="statSheet"></div></div>
 <div class="pchint" id="pchint">이동 WASD · 좌클릭 <b id="hL"></b> · 우클릭·Space <b id="hR"></b> · <b id="hM"></b> Shift·E · 물약 1 2 · 신속 3 · 스킬 I · 장비 B · 스탯 C · 위험도 G · 보스 H · 마을 T · 전체화면 F</div>
@@ -9956,8 +10018,11 @@ function loop(now){
 camT.set(0,0,0);frameCam(1);
 applyTheme();applyGfx();
 document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click',()=>{GUQ=+b.dataset.q;try{localStorage.setItem(GFX_KEY,String(GUQ))}catch(e){}applyGfx()}));
-function camSegUI(){document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.z===CAM_Z))}
-document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click',()=>{if(knAppr){camSegUI();toast('카메라','입장하는 동안은 바꿀 수 없습니다');return}/* v596 */CAM_Z=+b.dataset.z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(e){}camSegUI();resize();frameCam(1)}));camSegUI();
+function camSegUI(){const r=$('camZr');if(r){r.value=CAM_Z;rngPc(r)}const o=$('camZO');if(o)o.textContent=CAM_Z===0?'기본':(CAM_Z>0?'+':'−')+Math.abs(CAM_Z)+'%'}
+function rngPc(r){r.style.setProperty('--pc',((+r.value-+r.min)/(+r.max-+r.min)*100)+'%')}
+$('camZr').addEventListener('input',e=>{const r=e.target;if(knAppr){camSegUI();toast('카메라','입장하는 동안은 바꿀 수 없습니다');return}/* v596 */CAM_Z=+r.value;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}camSegUI();resize();frameCam(1)});camSegUI();
+/* v777: 설정 탭 */{const T=$('sxTabs');const go=t=>{T.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('#pauseSheet section[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);try{localStorage.setItem('sxTab',t)}catch(_){}};T.addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b)go(b.dataset.t)});let t0='v';try{t0=localStorage.getItem('sxTab')||'v'}catch(_){}go(T.querySelector(`[data-t="${t0}"]`)?t0:'v');$('sxVer').textContent=APP_VER;
+  $('pX').onclick=()=>closePause();$('pSlots2').onclick=()=>$('pSlots').click();$('pFull').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else fsReq&&fsReq.call(fsRoot)}catch(_){}}}
 /* v534: PC — 창 상단(제목 줄)을 끌어 창 이동(다시 열면 처음 위치) · 마우스 휠로 카메라 거리 조절 */
 (()=>{const pc=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;let D=null;
   document.addEventListener('pointerdown',e=>{if(!pc()||e.button!==0)return;const hd=e.target.closest&&e.target.closest('.scrim>.sheet>.shead');if(!hd||e.target.closest('button,input,select,a'))return;
@@ -9972,9 +10037,9 @@ document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click
 
 {const chk=()=>{try{const on=['title','slots','classSel','skillSel'].some(id=>$(id)&&!$(id).hidden);const mb=$('muteBtn');if(mb)mb.hidden=!on;SFX.bgm(on?'title':(inTown&&mapKind==='town')?'refuge':null)/* v765: 마을 BGM — 세렌 마을·추락자의 쉼터 공용 */}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
 {const mb=$('muteBtn'),sh=()=>{mb.classList.toggle('muted',SFX.muted)};sh();mb.addEventListener('click',()=>{SFX.setMute(!SFX.muted);sh()})}/* v769: 음소거 버튼(시작·슬롯·직업·스킬 선택 화면) */
-{const r=$('bgmVol'),o=$('bgmVolO');const sh=()=>{r.value=SFX.bgmVol;o.textContent=SFX.bgmVol+'%'};sh();r.addEventListener('input',()=>{SFX.setBgmVol(+r.value);sh()})}
-{const r=$('sfxVol'),o=$('sfxVolO');const sh=()=>{r.value=SFX.vol;o.textContent=SFX.vol+'%'};sh();r.addEventListener('input',()=>{SFX.setVol(+r.value);sh()});r.addEventListener('change',()=>SFX.p('dodge'))}
-{const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%'};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
+{const r=$('bgmVol'),o=$('bgmVolO');const sh=()=>{r.value=SFX.bgmVol;o.textContent=SFX.bgmVol+'%';rngPc(r)};sh();r.addEventListener('input',()=>{SFX.setBgmVol(+r.value);sh()})}
+{const r=$('sfxVol'),o=$('sfxVolO');const sh=()=>{r.value=SFX.vol;o.textContent=SFX.vol+'%';rngPc(r)};sh();r.addEventListener('input',()=>{SFX.setVol(+r.value);sh()});r.addEventListener('change',()=>SFX.p('dodge'))}
+{const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%';rngPc(r)};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
 (function(){const g=$('tsig');for(let i=0;i<24;i++){const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',i%2?'M0-78L2-66L-2-66Z':'M0-80L3-64L-3-64Z');p.setAttribute('fill','#d8b46a');p.setAttribute('opacity',i%2?.35:.65);p.setAttribute('transform',`rotate(${i*15})`);g.appendChild(p)}
   const A=$('tash');for(let i=0;i<40;i++){const b=document.createElement('b');b.style.cssText=`left:${Math.random()*100}%;animation-duration:${9+Math.random()*9}s;animation-delay:${-Math.random()*18}s`;A.appendChild(b)}})();
 (function(){const e=$('emb');for(let i=0;i<34;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
