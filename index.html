@@ -350,6 +350,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .scrim{position:fixed;inset:0;z-index:10;background:rgba(5,5,8,.62);display:flex;align-items:flex-end;justify-content:center}
 .scrim.center{align-items:center}#clear{background:#07060a}.brow,.btx{margin:0}.brow{display:flex;gap:12px;align-items:center}.btx{display:flex;flex-direction:column;gap:2px;min-width:0}.bslot{flex:none;width:52px;height:52px;border-radius:10px;border:2px solid var(--rc);background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(0,0,0,.5));box-shadow:0 0 14px var(--rc),inset 0 0 10px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:800 26px/1 var(--ko);text-decoration:none;color:var(--rc)}.ecine.bonus{background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),transparent 62%),#060408}
 #slots,#classSel{background:#07060a}
+#classSheet.pend{opacity:0}
 .sheet{width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:#17171d;border-top:1px solid var(--line);border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
 #smith .sheet>*{flex-shrink:0}#smith .sheet,#shop .sheet{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -8023,7 +8024,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v784';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v785';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8282,14 +8283,18 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
 /* v349: 직업 선택 — 초상화는 한 프레임에 하나씩 그려 끼워 넣음(한 번에 셋을 그리면 폰에서 멈춤) */
 let portFix=0,portQ=0,portRT=null,portPx=null,portTmp=null;
 function portFill(){const cards=[...document.querySelectorAll('#classSheet .card.cls')];if($('classSel').hidden||!cards.length){portQ=0;return}
-  for(const b of cards){const k=b.dataset.c,K=SKN[k],want=K&&K.st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
-    if(cur&&have===want)continue;if(!cur||have!==want){const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}requestAnimationFrame(portFill);return}
-  portQ=0}
+  /* v785: 직업 카드 초상화를 한 번에 모두 그려 끼움(한 칸씩 다다닥 뜨던 것 제거) — 모델이 다 준비될 때까지 시트를 숨겼다가 한꺼번에 보임 */
+  let all=true;for(const b of cards){const k=b.dataset.c,K=SKN[k],st=K&&K.st,want=st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
+    if(!(st===2||st===3))all=false;
+    if(cur&&have===want)continue;const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}
+  if(all)$('classSheet').classList.remove('pend');
+  if(all&&cards.every(b=>{const K=SKN[b.dataset.c];return (portOk[b.dataset.c]||0)===(K&&K.st===2?2:1)})){portQ=0;return}
+  if(all){portQ=0;return}requestAnimationFrame(portFill)}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st&&(testPick||!CLS[c].testOnly))skwLoad(c);
   let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
   for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
-  $('classSheet').innerHTML=h;$('classSel').hidden=false;releaseAll();
+  $('classSheet').innerHTML=h;$('classSheet').classList.add('pend');clearTimeout(window.pendT);window.pendT=setTimeout(()=>$('classSheet').classList.remove('pend'),3000);$('classSel').hidden=false;releaseAll();
   for(const b of document.querySelectorAll('#classSheet .card.cls')){const k=b.dataset.c,cv=portCv[k];if(cv&&portOk[k])b.querySelector('.badge').replaceWith(cv)}/* 이미 그려 둔 초상화는 바로 끼움 */
   if(!portQ){portQ=1;requestAnimationFrame(portFill)}
 }
