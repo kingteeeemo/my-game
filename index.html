@@ -2213,7 +2213,7 @@ const SFX=(()=>{
   function loadAll(){if(loaded||!ctx)return;loaded=true;NM.forEach(n=>{fetch('sfx/'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(decode).then(b=>{buf[n]=b}).catch(()=>{})})}
   function unlock(){init();if(!ctx)return;if(ctx.state!=='running')try{ctx.resume()}catch(e){}
     if(!ready){try{const b=ctx.createBuffer(1,1,22050),sr=ctx.createBufferSource();sr.buffer=b;sr.connect(ctx.destination);sr.start(0)}catch(e){}ready=true}
-    loadAll();bgmSync()}
+    loadAll();bgmSync();bgmPrime()}
   ['pointerdown','touchend','mousedown','keydown'].forEach(t=>addEventListener(t,unlock,{capture:true,passive:true}));
   document.addEventListener('visibilitychange',()=>{if(ctx&&!document.hidden&&ctx.state!=='running')try{ctx.resume()}catch(e){}});
   /* p(이름,{v:음량배율, pr:음높이 흔들림(기본 ±8%), rate, delay:초, fit:초(이 시간 안에 끝나도록 뒤쪽부터 재생)}) → {stop()} */
@@ -2232,7 +2232,7 @@ const SFX=(()=>{
     try{src.start(t,off)}catch(e){return null}
     return{stop(f){try{const c=ctx.currentTime;g.gain.cancelScheduledValues(c);g.gain.setValueAtTime(g.gain.value,c);g.gain.linearRampToValueAtTime(0,c+(f||.06));src.stop(c+(f||.06)+.02)}catch(e){}}}}
   /* v744: 배경음(BGM) — 긴 곡이라 미리 풀지 않고 오디오 요소로 흘려 재생(메모리 절약), 곡이 바뀌면 서서히 교차 */
-  const BGMF={title:'bgm/title.mp3'};let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
+  const BGMF={title:'bgm/title.mp3',refuge:'bgm/refuge.mp3'};let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
   try{const v=localStorage.getItem('bgmVol');if(v!==null&&v!==''&&!isNaN(+v))bgmVol=Math.max(0,Math.min(100,+v))}catch(e){}
   function bgmPre(n){if(bgmT[n]||!BGMF[n])return bgmT[n];const el=new Audio();el.loop=true;el.preload='auto';el.src=BGMF[n];try{el.load()}catch(e){}return bgmT[n]={el,g:null,off:0}}
   function bgmTrack(n){const t=bgmPre(n);if(!t.g){t.g=ctx.createGain();t.g.gain.value=0;try{ctx.createMediaElementSource(t.el).connect(t.g)}catch(e){}t.g.connect(bgmM)}return t}
@@ -2240,7 +2240,9 @@ const SFX=(()=>{
     if(bgmCur&&bgmT[bgmCur]){const t=bgmT[bgmCur];t.g.gain.cancelScheduledValues(c);t.g.gain.setValueAtTime(t.g.gain.value,c);t.g.gain.linearRampToValueAtTime(0,c+1.2);clearTimeout(t.off);t.off=setTimeout(()=>{try{t.el.pause()}catch(e){}},1300)}
     bgmCur=bgmWant;if(!bgmCur||!BGMF[bgmCur])return;const t=bgmTrack(bgmCur);clearTimeout(t.off);
     try{const pr=t.el.play();if(pr&&pr.catch)pr.catch(()=>{bgmCur=null})}catch(e){}
-    t.g.gain.cancelScheduledValues(c);t.g.gain.setValueAtTime(t.g.gain.value,c);t.g.gain.linearRampToValueAtTime(1,c+.25)}
+    t.g.gain.cancelScheduledValues(c);t.g.gain.setValueAtTime(t.g.gain.value,c);t.g.gain.linearRampToValueAtTime(1,c+(bgmCur==='title'?.25:1.5))}/* 오프닝은 터치 즉시, 나머지는 천천히 */
+  /* 폰(iOS)은 오디오 요소마다 첫 재생을 터치 안에서 해야 함 — 첫 터치 때 나머지 곡도 소리 0으로 잠깐 틀었다 멈춰 둠 */
+  function bgmPrime(){if(!ctx||!bgmM)return;for(const n in BGMF){if(n===bgmCur||n===bgmWant)continue;try{const t=bgmTrack(n);t.g.gain.value=0;const pr=t.el.play();if(pr&&pr.then)pr.then(()=>{if(bgmCur!==n)try{t.el.pause()}catch(e){}}).catch(()=>{})}catch(e){}}}
   function bgm(n){bgmWant=n||null;bgmSync()}
   bgmPre('title');/* v750: 오프닝 곡을 페이지가 열리자마자 내려받아 둠 — 터치 순간 바로 재생 */
   function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));if(bgmM)bgmM.gain.value=bgmVol/100;try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
@@ -7899,7 +7901,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v764';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v766';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9944,7 +9946,7 @@ document.querySelectorAll('#camSeg button').forEach(b=>b.addEventListener('click
     const z=Math.max(-30,Math.min(30,CAM_Z+(e.deltaY>0?-5:5)));if(z===CAM_Z)return;CAM_Z=z;try{localStorage.setItem('camZ',String(CAM_Z))}catch(_){}try{camSegUI()}catch(_){}resize();frameCam(1)},{passive:true});
 })();
 
-{const chk=()=>{try{const on=['title','slots','classSel','skillSel'].some(id=>$(id)&&!$(id).hidden);SFX.bgm(on?'title':null)}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
+{const chk=()=>{try{const on=['title','slots','classSel','skillSel'].some(id=>$(id)&&!$(id).hidden);SFX.bgm(on?'title':(inTown&&refOn()&&mapKind==='town')?'refuge':null)/* v765: 추락자의 쉼터 BGM */}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
 {const r=$('bgmVol'),o=$('bgmVolO');const sh=()=>{r.value=SFX.bgmVol;o.textContent=SFX.bgmVol+'%'};sh();r.addEventListener('input',()=>{SFX.setBgmVol(+r.value);sh()})}
 {const r=$('sfxVol'),o=$('sfxVolO');const sh=()=>{r.value=SFX.vol;o.textContent=SFX.vol+'%'};sh();r.addEventListener('input',()=>{SFX.setVol(+r.value);sh()});r.addEventListener('change',()=>SFX.p('dodge'))}
 {const r=$('egRate'),o=$('egRateO');const sh=()=>{r.value=EG_RATE;o.textContent=EG_RATE+'%'};sh();r.addEventListener('input',()=>{EG_RATE=Math.max(50,Math.min(120,+r.value||100));try{localStorage.setItem('egRate',String(EG_RATE))}catch(e){}sh()})}
