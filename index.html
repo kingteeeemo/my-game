@@ -2415,11 +2415,11 @@ ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const FINAL={n:'불타는 왕좌',boss:'성역의 주인',ground:[60,34,30],fog:0x1c0c0a,sty:{s:'flag',glow:0xff4a10,gl:.42},pt:'ember'},EGTHEME={ground:[34,44,52],fog:0x0a1016,sty:{s:'flag',glow:0x22c8b8,gl:.28},pt:'void'};
 /* v41 엔드게임 지역 5종. 관문 보스(위험도 5·10·…)를 넘을 때마다 지역이 바뀜 */
 const EGMAPS=[
-  {n:'추락의 바닥',ground:[34,44,52],fog:0x0a1016,sty:{s:'flag',glow:0x22c8b8,gl:.28},pt:'void',crys:'void',set:{crystal:3,pillar:3,rock:2,obelisk:1.2,bones:1},st:'obelisks'},
-  {n:'꺾인 칼의 황야',ground:[70,40,32],fog:0x180c0a,sty:{s:'dirt',st:.3},pt:'ash',crys:'void',set:{rock:4,tree:3,bones:2.5,wall:1.2,brazier:.8},st:'ruins'},
-  {n:'얼어붙은 기사단 묘역',ground:[56,66,78],fog:0x101820,sty:{s:'flag',rough:.55},pt:'snow',crys:'ice',set:{crystal:3,tomb:3,rock:2,statue:.8,tree:1},st:'graves'},
-  {n:'불의 뿌리',ground:[58,36,28],fog:0x1c0e08,sty:{s:'flag',glow:0xff5a10,gl:.36},pt:'ember',crys:'void',set:{rock:4,pillar:2,brazier:1.4,bones:1.2},st:'lava'},
-  {n:'잠든 빛의 신전',ground:[42,34,58],fog:0x110c1c,sty:{s:'flag',glow:0x9a4aff,gl:.3},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
+  {n:'추락의 바닥',ground:[44,56,64],fog:0x081418,sty:{s:'rock',glow:0x22c8b8,gl:.3},pt:'void',crys:'void',set:{crystal:3,pillar:3,rock:2,obelisk:1.2,bones:1},st:'obelisks'},
+  {n:'꺾인 칼의 황야',ground:[70,40,32],fog:0x1a0e0a,sty:{s:'field'},pt:'ash',crys:'void',set:{rock:4,tree:3,bones:2.5,wall:1.2,brazier:.8},st:'ruins'},
+  {n:'얼어붙은 기사단 묘역',ground:[56,66,78],fog:0x14202c,sty:{s:'snow'},pt:'snow',crys:'ice',set:{crystal:3,tomb:3,rock:2,statue:.8,tree:1},st:'graves'},
+  {n:'불의 뿌리',ground:[58,36,28],fog:0x1c0a06,sty:{s:'obsid',glow:0xff5a1a},pt:'ember',crys:'void',set:{rock:4,pillar:2,brazier:1.4,bones:1.2},st:'lava'},
+  {n:'잠든 빛의 신전',ground:[42,34,58],fog:0x120e20,sty:{s:'marble',glow:0x9a4aff},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
 /* 지역 순서: 한 사이클(5개) 안에서는 겹치지 않게 무작위, 사이클이 끝나면 다시 무작위 (이전 지역 바로 반복 금지). 첫 지역은 1번 */
 /* v756: 「추락자의 길」 — 위험도마다 장소 이름(아래에서 위로, 왕좌를 향해). 위험도 20이 끝 */
 const TPN=[,'떨어진 자리','빛 조각의 굴','오벨리스크 숲','갈라진 오르막','첫 무덤 언덕','버려진 야영지','꺾인 칼의 들','찢긴 깃발 고개','검귀의 길목','서리 내린 문','잠든 기사들의 회랑','얼음 석상 광장','무너진 영묘','아귀의 굴','뿌리의 입구','녹은 쇠의 강','불타는 뿌리 숲','심장 아래 분지','왕좌의 그림자','신전의 문'];
@@ -3175,18 +3175,159 @@ function addProp(x,z,kind,rot,arg,noCol){
   if(cr&&!noCol)colliders.push({x,z,r:cr});scene.add(g);propMeshes.push(g);
 }
 function addDecal(x,z){const m=new THREE.Mesh(PG.decal,decalMats[Math.random()*3|0]);m.rotation.set(-Math.PI/2,0,rand(0,6));m.position.set(x,.025,z);m.scale.setScalar(rand(1.6,3.6));m.receiveShadow=true;scene.add(m);propMeshes.push(m)}
-function clearProps(){if(typeof knArena==='function')knArena(false);if(typeof mwArena==='function')mwArena(false);if(typeof thArena==='function')thArena(false);for(const m of propMeshes)scene.remove(m);propMeshes.length=0;colliders.length=0;fires.length=0;for(const l of fireLights)l.intensity=0}
+function clearProps(){egLight(-1);if(typeof knArena==='function')knArena(false);if(typeof mwArena==='function')mwArena(false);if(typeof thArena==='function')thArena(false);for(const m of propMeshes)scene.remove(m);propMeshes.length=0;colliders.length=0;fires.length=0;for(const l of fireLights)l.intensity=0}
 function freeSpot(r,minC,cx=0,cz=0,avoid=8){for(let k=0;k<14;k++){const x=rand(-r,r)+cx,z=rand(-r,r)+cz;if(Math.hypot(x,z)<avoid||Math.hypot(x-ALTAR.x,z-ALTAR.z)<10)continue;if(colliders.every(c=>Math.hypot(c.x-x,c.z-z)>c.r+minC))return [x,z]}return null}
 const altarRing=new THREE.Mesh(new THREE.RingGeometry(3.2,3.6,48),new THREE.MeshBasicMaterial({color:0x8a5ad0,transparent:true,opacity:.7,side:THREE.DoubleSide}));
 altarRing.rotation.x=-Math.PI/2;altarRing.position.set(ALTAR.x,.04,ALTAR.z);scene.add(altarRing);
 const altarLight=new THREE.PointLight(0x9a6ae0,1.2,16);altarLight.position.set(ALTAR.x,3,ALTAR.z);scene.add(altarLight);
 /* 일반 필드: 테마별 소품 44개 + 화로 6개 + 바닥 자국 + 북쪽 제단(불 켜진 기둥 4개) */
 function pickW(o){let t=0;for(const k in o)t+=o[k];let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return 'rock'}
-function buildField(){clearProps();mapKind='field';setGround(96,96,96);ALTAR.x=0;ALTAR.z=-30;altarRing.position.set(0,.04,-30);altarLight.position.set(0,3,-30);const th=curTheme(),eg=th.d.set?th.d:null,set=eg?eg.set:PROPSET[Math.min(S.ch||0,LAST)];propTheme=th.key;crysKind=eg?eg.crys:'void';if(eg)egStruct(eg.st);
+/* ===== v757: 엔드게임 「추락자의 길」 지역별 맵 — 성역 아래 동굴(가장자리 암벽) + 지역마다 다른 바닥·빛·소품 =====
+   0 추락의 바닥: 천장 틈의 빛줄기, 떨어진 성역 잔해(흰 돌·금 조각), 청록 빛 수정 무리, 석순
+   1 꺾인 칼의 황야: 땅에 꽂힌 칼 무리, 여러 나라의 찢긴 깃발, 방패, 칼 꽂힌 돌무덤, 불탄 야영지
+   2 얼어붙은 기사단 묘역: 기사 석관 줄, 얼어붙은 기사상, 얼음 가시, 무너진 아치, 얼어붙은 검은 물(아귀의 심연), 푸른 등불
+   3 불의 뿌리: 벽에서 뻗어 나와 바닥을 기는 불타는 뿌리, 용암 웅덩이, 현무암 기둥
+   4 잠든 빛의 신전: 흰 기둥 회랑, 금빛 해 문양 제단(희미한 빛), 무릎 꿇은 빛의 사제상, 금 상감 원 */
+let egSave=null;const EGG={};
+function egLight(m){if(m<0){if(egSave){hemi.color.setHex(egSave.c);hemi.groundColor.setHex(egSave.g);hemi.intensity=egSave.i;sun.color.setHex(egSave.sc);sun.intensity=egSave.si;egSave=null}return}
+  if(!egSave)egSave={c:hemi.color.getHex(),g:hemi.groundColor.getHex(),i:hemi.intensity,sc:sun.color.getHex(),si:sun.intensity};
+  const L=[[0x6a9ab0,0x0a1c22,.74,0x9ad8e8,.48],[0xb08a6a,0x3a1a0c,.82,0xf0b888,.62],[0x9ab8d8,0x2a3848,.66,0xd0e6ff,.52],[0x8a5a48,0x6a2006,.62,0xffa070,.42],[0x8a7ab8,0x221a3a,.62,0xe0d0ff,.48]][m];
+  hemi.color.setHex(L[0]);hemi.groundColor.setHex(L[1]);hemi.intensity=L[2];sun.color.setHex(L[3]);sun.intensity=L[4]}
+function egCv(w,h,f){const c=mkCv(w);c.height=h;const g=c.getContext('2d');f(g,w,h);const t=new THREE.CanvasTexture(c);return t}
+function egMerge(parts){/* [[geo, x,y,z, rx,ry,rz, sx,sy,sz]] → 한 덩어리 */let n=0;const G=parts.map(p=>{const g=p[0].index?p[0].toNonIndexed():p[0].clone(),o=new THREE.Object3D();o.position.set(p[1]||0,p[2]||0,p[3]||0);o.rotation.set(p[4]||0,p[5]||0,p[6]||0);o.scale.set(p[7]||1,p[8]||p[7]||1,p[9]||p[7]||1);o.updateMatrix();g.applyMatrix4(o.matrix);n+=g.attributes.position.count;return g});
+  const P=new Float32Array(n*3),N=new Float32Array(n*3),U=new Float32Array(n*2);let k=0;for(const g of G){const c=g.attributes.position.count;P.set(g.attributes.position.array,k*3);N.set(g.attributes.normal.array,k*3);if(g.attributes.uv)U.set(g.attributes.uv.array,k*2);k+=c}
+  const r=new THREE.BufferGeometry();r.setAttribute('position',new THREE.BufferAttribute(P,3));r.setAttribute('normal',new THREE.BufferAttribute(N,3));r.setAttribute('uv',new THREE.BufferAttribute(U,2));return r}
+function egI(geo,mat,A,cast,col){/* A: [x,y,z,ry,sx,sy,sz,rx,rz,color] */if(!A.length)return null;const im=new THREE.InstancedMesh(geo,mat,A.length),o=new THREE.Object3D(),c=new THREE.Color();
+  A.forEach((a,i)=>{o.position.set(a[0],a[1],a[2]);o.rotation.set(a[7]||0,a[3]||0,a[8]||0);const s=a[4]||1;o.scale.set(s,a[5]===undefined?s:a[5],a[6]===undefined?s:a[6]);o.updateMatrix();im.setMatrixAt(i,o.matrix);if(col)im.setColorAt(i,c.setHex(a[9]===undefined?0xffffff:a[9]))});
+  im.castShadow=!!cast;im.receiveShadow=true;im.frustumCulled=false;scene.add(im);propMeshes.push(im);return im}
+function egAdd(o){scene.add(o);propMeshes.push(o);return o}
+function egGlow(x,y,z,s,col,op){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:col,transparent:true,opacity:op===undefined?.8:op,blending:THREE.AdditiveBlending,depthWrite:false}));m.position.set(x,y,z);m.scale.setScalar(s);return egAdd(m)}
+function egShaft(x,z,r,h,col,op){/* 천장 틈에서 내려오는 빛줄기 + 바닥 빛 웅덩이 */const T=EGG.shT||(EGG.shT=egCv(4,128,(g,w,hh)=>{const q=g.createLinearGradient(0,0,0,hh);q.addColorStop(0,'rgba(255,255,255,.95)');q.addColorStop(.55,'rgba(255,255,255,.35)');q.addColorStop(.9,'rgba(255,255,255,.08)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,0,w,hh)}));
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r*.55,r,h,18,1,true),new THREE.MeshBasicMaterial({map:T,color:col,transparent:true,opacity:op||.16,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m.position.set(x,h/2,z);egAdd(m);
+  const d=new THREE.Mesh(new THREE.CircleGeometry(r*1.25,28),new THREE.MeshBasicMaterial({map:refGlowTex,color:col,transparent:true,opacity:(op||.16)*2.2,blending:THREE.AdditiveBlending,depthWrite:false}));d.rotation.x=-Math.PI/2;d.position.set(x,.05,z);egAdd(d);return m}
+function egFree(x,z,r){if(Math.hypot(x,z)<9||Math.hypot(x-ALTAR.x,z-ALTAR.z)<11)return false;if(Math.abs(x)>37||Math.abs(z)>37)return false;return colliders.every(c=>Math.hypot(c.x-x,c.z-z)>c.r+r)}
+function egSpot(r,tries,box){for(let k=0;k<(tries||30);k++){const b=box||36,x=rand(-b,b),z=rand(-b,b);if(egFree(x,z,r))return [x,z]}return null}
+function egWalls(mat,hN,hS,tint){/* 가장자리 암벽: 북쪽은 높게, 카메라 쪽(남쪽)은 낮게 */const A=[[],[],[],[]];
+  const put=(x,z,h)=>{A[Math.random()*4|0].push([x,h*.35,z,rand(0,6),rand(3.2,5.5),h,rand(3.2,5.5),rand(-.15,.15),rand(-.15,.15)])};
+  for(let v=-50;v<=50;v+=3.2){const n=rand(.75,1.25);put(v+rand(-1,1),-44-rand(0,4),hN*n);put(v+rand(-1,1),-50-rand(0,4),hN*1.3*n);
+    put(-44-rand(0,4),v+rand(-1,1),(v<20?hN*.8:hS*1.4)*n);put(44+rand(0,4),v+rand(-1,1),(v<20?hN*.8:hS*1.4)*n);if(v<20){put(-50-rand(0,3),v,hN*n);put(50+rand(0,3),v,hN*n)}
+    put(v+rand(-1,1),44+rand(0,3),hS*n)}
+  for(let i=0;i<4;i++)egI(rockGeos[i],mat,A[i],false)}
+function egStalag(mat,n,col){/* 석순: 가장자리 쪽에 많이, 안쪽엔 조금 */const G=EGG.stg||(EGG.stg=new THREE.ConeGeometry(1,1,7,1)),A=[];
+  for(let i=0;i<n;i++){const edge=Math.random()<.7,b=edge?rand(30,40):rand(10,34),t=rand(0,6.28);let x=Math.cos(t)*b,z=Math.sin(t)*b;if(edge){x=clamp(x*1.15,-40,40);z=clamp(z*1.15,-41,41)}if(z>28&&edge)continue;if(!edge&&!egFree(x,z,1.2))continue;const h=edge?rand(2.5,7):rand(1.2,3),r=h*rand(.16,.24);A.push([x,h/2-.1,z,rand(0,6),r,h,r,rand(-.08,.08),rand(-.08,.08)]);if(!edge)colliders.push({x,z,r:r*.9})}
+  egI(G,mat,A,true)}
+function egScatterRocks(mat,n,smin,smax){const A=[[],[],[],[]];for(let i=0;i<n;i++){const p=egSpot(1);if(!p)continue;const s=rand(smin,smax);A[i%4].push([p[0],s*.25,p[1],rand(0,6),s,s*rand(.5,.9),s*rand(.8,1.2)]);if(s>1.1)colliders.push({x:p[0],z:p[1],r:s*.8})}for(let i=0;i<4;i++)egI(rockGeos[i],mat,A[i],true)}
+
+function egB0(){/* 추락의 바닥 */const stone=SM({color:0x46525a,map:stoneTex,bumpMap:stoneTex,bumpScale:.2,roughness:.95}),white=SM({color:0xb8b4ac,map:stoneTex,bumpMap:stoneTex,bumpScale:.12,roughness:.7}),gold=SM({color:0xb8903a,roughness:.35,metalness:.75}),
+    crys=SM({color:0x1e7a80,roughness:.25,metalness:.1,emissive:0x18c0b8,emissiveIntensity:1.1,transparent:true,opacity:.92});
+  egWalls(stone,13,3);egStalag(stone,70);
+  /* 천장 틈 빛줄기 — 떨어진 자리 */for(const [x,z,r] of [[-14,6,3.2],[12,-12,2.6],[22,14,2.2],[-24,-20,2.4],[4,24,1.8]])egShaft(x,z,r,34,0xbfe8ff,.13);
+  /* 떨어진 성역 잔해: 흰 돌 블록·부러진 기둥 토막·금 조각 */const blk=new THREE.BoxGeometry(1,1,1),drum=new THREE.CylinderGeometry(.6,.62,1,12),B=[],D=[],Gd=[];
+  for(let i=0;i<20;i++){const p=egSpot(1.6);if(!p)continue;const [x,z]=p;const k=Math.random();
+    if(k<.45){const s=rand(.9,1.9);B.push([x,s*.4,z,rand(0,6),s*rand(1,1.6),s*rand(.6,.9),s,rand(-.3,.3),rand(-.3,.3)]);colliders.push({x,z,r:s*.8})}
+    else{const l=rand(1.6,3.4);D.push([x,.55,z,rand(0,6),1,l,1,Math.PI/2,0]);colliders.push({x,z,r:1})}
+    if(Math.random()<.5)for(let j=0;j<3;j++)Gd.push([x+rand(-2,2),.08,z+rand(-2,2),rand(0,6),rand(.25,.5),rand(.05,.12),rand(.2,.4),rand(-.3,.3)])}
+  egI(blk,white,B,true);egI(drum,white,D,true);egI(blk,gold,Gd,false);
+  /* 청록 빛 수정 무리 — 부서진 빛의 파편 */const C=[];for(let i=0;i<16;i++){const p=egSpot(1.8);if(!p)continue;const [x,z]=p,n=3+(Math.random()*4|0),big=Math.random()<.4?1.6:1;
+    for(let j=0;j<n;j++){const h=rand(.9,2.4)*big,a=rand(0,6.28),d=j?rand(.3,1)*big:0;C.push([x+Math.cos(a)*d,h*.6,z+Math.sin(a)*d,rand(0,3),h*.28,h,h*.28,rand(-.35,.35),rand(-.35,.35)])}
+    egGlow(x,1.4*big,z,5*big,0x30e0d0,.32);colliders.push({x,z,r:1.1*big})}egI(PG.crys,crys,C,false);
+  egScatterRocks(stone,26,.4,1.3);
+  for(let i=0;i<14;i++){const p=egSpot(.5);if(p)addProp(p[0],p[1],'bones',0,0,true)}}
+
+function egB1(){/* 꺾인 칼의 황야 */const rock=SM({color:0x5a4438,map:stoneTex,bumpMap:stoneTex,bumpScale:.2,roughness:1}),iron=SM({color:0x6a6670,roughness:.45,metalness:.6}),rust=SM({color:0x5a3a2a,roughness:.8,metalness:.3}),wood=SM({color:0x3a2c22,roughness:1});
+  egWalls(rock,9,2.5);egStalag(rock,26);
+  const sw=EGG.sword||(EGG.sword=egMerge([[new THREE.BoxGeometry(.12,1.6,.035),0,.8,0],[new THREE.BoxGeometry(.56,.09,.1),0,1.62,0],[new THREE.CylinderGeometry(.04,.04,.38,6),0,1.85,0],[new THREE.SphereGeometry(.07,6,4),0,2.06,0]])),
+    swB=EGG.swordB||(EGG.swordB=egMerge([[new THREE.BoxGeometry(.12,.7,.035),0,.35,0],[new THREE.BoxGeometry(.56,.09,.1),0,.72,0],[new THREE.CylinderGeometry(.04,.04,.38,6),0,.95,0]]));
+  const S1=[],S2=[],SH=[],F=[],P=[],CA=[],CS=[];
+  /* 칼 무리(쓰러진 자리마다 여럿) */for(let i=0;i<22;i++){const p=egSpot(1.2);if(!p)continue;const [x,z]=p,n=2+(Math.random()*4|0);for(let j=0;j<n;j++){const a=rand(0,6.28),d=rand(0,1.8),A=[x+Math.cos(a)*d,-.4,z+Math.sin(a)*d,rand(0,6),1.35,1.35,1.35,rand(-.35,.35),rand(-.35,.35)];(Math.random()<.35?S2:S1).push(A)}
+    if(Math.random()<.6)SH.push([x+rand(-1.5,1.5),.05,z+rand(-1.5,1.5),rand(0,6),1,1,1,Math.PI/2+rand(-.2,.2),0,[0x6a2a22,0x2a3a5a,0x3a4a2a,0x6a5a30,0x4a4a50][Math.random()*5|0]])}
+  egI(sw,iron,S1,true);egI(swB,rust,S2,true);egI(EGG.shield||(EGG.shield=new THREE.CylinderGeometry(.55,.55,.07,14)),SM({color:0xffffff,roughness:.7,metalness:.3}),SH,true,true);
+  /* 여러 나라의 찢긴 깃발 */const ban=EGG.banT||(EGG.banT=egCv(64,128,(g,w,h)=>{g.fillStyle='#fff';g.beginPath();g.moveTo(0,0);g.lineTo(w,0);let y=h*.62;for(let x=w;x>=0;x-=6){g.lineTo(x,y+rand(-14,22))}g.closePath();g.fill();g.globalCompositeOperation='destination-out';for(let i=0;i<7;i++){g.beginPath();g.arc(rand(6,w-6),rand(16,h*.6),rand(2,7),0,7);g.fill()}g.globalCompositeOperation='source-over';g.fillStyle='rgba(0,0,0,.35)';for(let i=0;i<30;i++)g.fillRect(rand(0,w),rand(0,h*.7),rand(2,8),rand(2,8))}));
+  const bm=new THREE.MeshStandardMaterial({map:ban,alphaTest:.5,side:THREE.DoubleSide,roughness:1,emissive:0x1a0c08}),bg=EGG.banG||(EGG.banG=(()=>{const g=new THREE.PlaneGeometry(1.5,3,1,6);g.translate(.8,-1.5,0);const p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i);p.setZ(i,Math.sin(y*2.2)*.12+(p.getX(i)>.6?.1:0))}g.computeVertexNormals();return g})());
+  for(let i=0;i<18;i++){const p=egSpot(.8);if(!p)continue;const [x,z]=p,h=rand(4.2,5.6),tl=rand(-.18,.18);P.push([x,h/2-.2,z,0,1,h,1,tl,rand(-.12,.12)]);F.push([x,h-.4,z,rand(0,6),1,rand(.75,1.05),1,tl*.5,0,[0xc03a2a,0x3a6ab0,0x6a9a3a,0xc0a040,0x8a3a8a,0xb0b0a8][i%6]]);colliders.push({x,z,r:.35})}
+  egI(EGG.pole||(EGG.pole=new THREE.CylinderGeometry(.05,.06,1,6)),wood,P,true);egI(bg,bm,F,true,true);
+  /* 칼 꽂힌 돌무덤(쓰러진 도전자의 무덤) */for(let i=0;i<12;i++){const p=egSpot(1.4);if(!p)continue;const [x,z]=p;for(let j=0;j<7;j++){const a=j/7*6.28,s=rand(.35,.55);CA.push([x+Math.cos(a)*.6*(j?1:0),s*.5+(j?0:.4),z+Math.sin(a)*.6*(j?1:0),rand(0,6),s,s*.8,s])}CS.push([x,.2,z,rand(0,6),1,1,1,rand(-.1,.1),rand(-.1,.1)]);colliders.push({x,z,r:1})}
+  egI(rockGeos[1],rock,CA,true);egI(sw,iron,CS,true);
+  for(let i=0;i<5;i++){const p=egSpot(2);if(!p)continue;addProp(p[0],p[1],Math.random()<.5?'tent':'cart',rand(0,6))}
+  for(let i=0;i<6;i++){const p=egSpot(1.5);if(p)addProp(p[0],p[1],'brazier')}
+  for(let i=0;i<8;i++){const p=egSpot(1);if(p)addProp(p[0],p[1],'tree')}
+  for(let i=0;i<20;i++){const p=egSpot(.5);if(p)addProp(p[0],p[1],'bones',0,0,true)}
+  egScatterRocks(rock,20,.4,1.2);for(let i=0;i<30;i++)addDecal(rand(-38,38),rand(-38,38))}
+
+function egB2(){/* 얼어붙은 기사단 묘역 */const rock=SM({color:0x5a6878,map:stoneTex,bumpMap:stoneTex,bumpScale:.2,roughness:.9}),stone=SM({color:0x5c626e,map:stoneTex,bumpMap:stoneTex,bumpScale:.18,roughness:.85}),snow=SM({color:0x8a96a6,roughness:1}),
+    ice=SM({color:0x9ad0f0,roughness:.1,metalness:.15,emissive:0x16405a,emissiveIntensity:.8,transparent:true,opacity:.85});
+  egWalls(rock,12,3);egStalag(ice,30);
+  /* 기사 석관 줄 — 뚜껑에 검 문양, 위에 눈 */const coff=EGG.coff||(EGG.coff=egMerge([[new THREE.BoxGeometry(1.2,.7,2.4),0,.35,0],[new THREE.BoxGeometry(1.35,.18,2.55),0,.79,0],[new THREE.BoxGeometry(.12,.06,1.5),0,.91,-.1],[new THREE.BoxGeometry(.6,.06,.12),0,.91,.48]])),
+    cap=EGG.ccap||(EGG.ccap=new THREE.BoxGeometry(1.25,.12,2.3));const CF=[],CP=[];
+  for(const [cx,cz,cols,rows,ry] of [[-20,-6,3,4,0],[18,4,3,3,.12],[-6,20,4,2,Math.PI/2],[20,-22,2,3,-.15]])for(let a=0;a<cols;a++)for(let b=0;b<rows;b++){if(Math.random()<.15)continue;const lx=(a-(cols-1)/2)*2.6,lz=(b-(rows-1)/2)*3.6,c=Math.cos(ry),s=Math.sin(ry),x=cx+lx*c+lz*s,z=cz-lx*s+lz*c;if(!egFree(x,z,1.2))continue;
+    const t=rand(-.05,.05);CF.push([x,0,z,ry+t,1,1,1]);if(Math.random()<.7)CP.push([x+rand(-.1,.1),.93,z+rand(-.3,.3),ry+t,rand(.6,.85),.7,rand(.45,.75)]);colliders.push({x,z,r:1.25})}
+  egI(coff,stone,CF,true);egI(cap,snow,CP,false);
+  /* 얼어붙은 기사상 + 발밑 얼음 */const IC=[];for(let i=0;i<6;i++){const p=egSpot(1.8);if(!p)continue;addProp(p[0],p[1],'statue',rand(0,6));for(let j=0;j<5;j++){const a=rand(0,6.28),h=rand(.8,2.2);IC.push([p[0]+Math.cos(a)*1,h*.4,p[1]+Math.sin(a)*1,rand(0,3),h*.25,h,h*.25,rand(-.4,.4),rand(-.4,.4)])}}
+  /* 얼음 가시 무리 */for(let i=0;i<12;i++){const p=egSpot(1.4);if(!p)continue;for(let j=0;j<4;j++){const a=rand(0,6.28),d=j?rand(.3,1):0,h=rand(1,2.8);IC.push([p[0]+Math.cos(a)*d,h*.45,p[1]+Math.sin(a)*d,rand(0,3),h*.26,h,h*.26,rand(-.3,.3),rand(-.3,.3)])}colliders.push({x:p[0],z:p[1],r:1})}
+  egI(PG.crys,ice,IC,false);
+  /* 무너진 아치 — 묘역의 문 */for(const [x,z,ry] of [[0,12,0],[-26,14,.5]]){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;for(const sx of [-1,1]){const h=sx<0?5.4:rand(2.4,3.6);g.add(mesh(PG.base,stone,sx*3.2,.18,0));const d=mesh(PG.drum,stone,sx*3.2,.35+h/2,0);d.scale.set(1.15,h,1.15);g.add(d);
+      const sc=mesh(cap,snow,sx*3.2,.4+h,0);sc.scale.set(.55,1,.5);g.add(sc);const c=Math.cos(ry),s=Math.sin(ry);colliders.push({x:x+sx*3.2*c,z:z-sx*3.2*s,r:.9})}
+    const lt=mesh(new THREE.BoxGeometry(4.2,.7,1.2),stone,-1.3,5.9,0);lt.rotation.z=-.08;g.add(lt);const fl=mesh(new THREE.BoxGeometry(2.6,.6,1.1),stone,2.4,.3,1.4);fl.rotation.set(.1,.5,.3);g.add(fl);egAdd(g)}
+  /* 얼어붙은 검은 물 — 아귀가 사는 심연으로 이어지는 곳 */{const x=-2,z=-16,R=7.5,w=new THREE.Mesh(new THREE.CircleGeometry(R,48),SM({color:0x0c1a28,roughness:.06,metalness:.6,emissive:0x061420,emissiveIntensity:1}));w.rotation.x=-Math.PI/2;w.position.set(x,.03,z);w.receiveShadow=true;egAdd(w);
+    const cr=EGG.crT||(EGG.crT=egCv(256,256,(g,W)=>{g.strokeStyle='rgba(200,235,255,.75)';g.lineCap='round';const br=(x,y,a,l,wd)=>{if(l<6)return;const x2=x+Math.cos(a)*l,y2=y+Math.sin(a)*l;g.lineWidth=wd;g.beginPath();g.moveTo(x,y);g.lineTo(x2,y2);g.stroke();br(x2,y2,a+rand(-.5,.5),l*.75,wd*.75);if(Math.random()<.45)br(x2,y2,a+rand(-1.3,1.3),l*.5,wd*.6)};for(let i=0;i<7;i++)br(128,128,i*.9+rand(-.3,.3),rand(30,48),2.4);g.strokeStyle='rgba(200,235,255,.3)';g.lineWidth=3;g.beginPath();g.arc(128,128,122,0,7);g.stroke()}));
+    const c2=new THREE.Mesh(new THREE.CircleGeometry(R,48),new THREE.MeshBasicMaterial({map:cr,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.55}));c2.rotation.x=-Math.PI/2;c2.position.set(x,.05,z);egAdd(c2);
+    const rim=[];for(let i=0;i<26;i++){const a=i/26*6.28,s=rand(.6,1.2);rim.push([x+Math.cos(a)*(R+.3),s*.2,z+Math.sin(a)*(R+.3),rand(0,6),s,s*.5,s])}egI(rockGeos[2],rock,rim,true);
+    for(let i=0;i<5;i++){const a=rand(0,6.28),g=new THREE.Group();g.position.set(x+Math.cos(a)*(R+1.2),0,z+Math.sin(a)*(R+1.2));chzSword(g,Math.random()<.5);g.rotation.set(rand(-.3,.3),rand(0,6),rand(-.3,.3));egAdd(g)}
+    colliders.push({x,z,r:R-.5});egGlow(x,.6,z,16,0x3a7aff,.18)}
+  /* 푸른 등불 — 꺼지지 않은 기사단의 등 */for(let i=0;i<8;i++){const p=egSpot(.8);if(!p)continue;const g=new THREE.Group();g.position.set(p[0],0,p[1]);g.add(mesh(new THREE.CylinderGeometry(.08,.1,2.2,6),stone,0,1.1,0),mesh(new THREE.BoxGeometry(.4,.5,.4),stone,0,2.35,0));egAdd(g);egGlow(p[0],2.35,p[1],2.6,0x7ac8ff,.9);colliders.push({x:p[0],z:p[1],r:.3})}
+  egScatterRocks(rock,22,.4,1.2)}
+
+function egLava(x,z,r,rock){const T=EGG.lavT||(EGG.lavT=egCv(128,128,(g,w)=>{const q=g.createRadialGradient(64,64,4,64,64,64);q.addColorStop(0,'#ffe080');q.addColorStop(.35,'#ff9a20');q.addColorStop(.75,'#d03a08');q.addColorStop(1,'#300a04');g.fillStyle=q;g.fillRect(0,0,w,w);g.fillStyle='rgba(30,10,6,.85)';for(let i=0;i<26;i++){const a=rand(0,6.28),d=rand(18,58);g.beginPath();g.ellipse(64+Math.cos(a)*d,64+Math.sin(a)*d,rand(3,10),rand(2,6),a,0,7);g.fill()}}));
+  const m=new THREE.Mesh(new THREE.CircleGeometry(r,32),new THREE.MeshBasicMaterial({map:T,color:0xb8a8a0}));m.rotation.x=-Math.PI/2;m.rotation.z=rand(0,6);m.position.set(x,.06,z);egAdd(m);
+  const A=[];for(let i=0;i<14;i++){const a=i/14*6.28,s=rand(.5,.9)*Math.max(1,r/3);A.push([x+Math.cos(a)*(r+.2),s*.15,z+Math.sin(a)*(r+.2),rand(0,6),s,s*.45,s])}egI(rockGeos[3],rock,A,true);
+  egGlow(x,.8,z,r*3,0xff6a20,.22);fires.push({x,z,y:1,a:{scale:{set(){}}},b:{scale:{set(){}}},ph:rand(0,9)});colliders.push({x,z,r:r*.9})}
+
+function egB3(){/* 불의 뿌리 */const rock=SM({color:0x2a2220,map:stoneTex,bumpMap:stoneTex,bumpScale:.22,roughness:.95}),bas=SM({color:0x2c2828,roughness:.85});
+  egWalls(rock,14,3);
+  /* 용암 틈 — 북쪽 벽 아래 불의 뿌리에서 갈라져 바닥으로 뻗는 빛나는 균열(평평한 띠) */
+  const fT=EGG.fisT||(EGG.fisT=egCv(64,8,(g,w,h)=>{const q=g.createLinearGradient(0,0,w,0);q.addColorStop(0,'rgba(255,60,0,0)');q.addColorStop(.3,'rgba(255,110,20,.75)');q.addColorStop(.5,'rgba(255,230,150,1)');q.addColorStop(.7,'rgba(255,110,20,.75)');q.addColorStop(1,'rgba(255,60,0,0)');g.fillStyle=q;g.fillRect(0,0,w,h)})),
+    cT=EGG.crsT||(EGG.crsT=egCv(64,8,(g,w,h)=>{const q=g.createLinearGradient(0,0,w,0);q.addColorStop(0,'rgba(10,4,2,0)');q.addColorStop(.25,'rgba(10,4,2,.85)');q.addColorStop(.75,'rgba(10,4,2,.85)');q.addColorStop(1,'rgba(10,4,2,0)');g.fillStyle=q;g.fillRect(0,0,w,h)}));
+  const fM=new THREE.MeshBasicMaterial({map:fT,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),cM=new THREE.MeshBasicMaterial({map:cT,transparent:true,depthWrite:false,side:THREE.DoubleSide});
+  const strip=(pts,w0,w1,y,mat)=>{const cv=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],0,p[1]))),N=Math.max(8,Math.round(cv.getLength()/.6)),P=[],U=[],I=[];
+    for(let i=0;i<=N;i++){const t=i/N,c=cv.getPointAt(t),d=cv.getTangentAt(t),w=(w0+(w1-w0)*t)*(.8+.4*Math.sin(t*23+w0*7)),nx=-d.z,nz=d.x;P.push(c.x+nx*w,y,c.z+nz*w,c.x-nx*w,y,c.z-nz*w);U.push(0,t,1,t);if(i<N){const k=i*2;I.push(k,k+1,k+2,k+1,k+3,k+2)}}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.setIndex(I);const m=new THREE.Mesh(g,mat);m.renderOrder=2;egAdd(m);return cv};
+  const fis=(pts,w)=>{strip(pts,w*2.2,w*.9,.035,cM);const cv=strip(pts,w,w*.3,.05,fM);for(let k=0;k<3;k++){const t=rand(.2,.8),q=cv.getPointAt(t),a=rand(0,6.28),l=rand(3,7),p2=[[q.x,q.z],[q.x+Math.cos(a)*l*.5+rand(-1,1),q.z+Math.sin(a)*l*.5],[q.x+Math.cos(a+.3)*l,q.z+Math.sin(a+.3)*l]];strip(p2,w*1.6,w*.5,.034,cM);strip(p2,w*.6,w*.15,.048,fM)}};
+  for(const pts of [[[-6,-38],[-4,-34],[2,-26],[-2,-14],[4,-4],[2,8]],[[14,-38],[16,-34],[24,-24],[22,-10],[30,0],[34,14]],[[-22,-38],[-20,-32],[-28,-20],[-24,-6],[-32,6],[-28,22]],[[-44,-12],[-34,-10],[-26,-2]],[[44,-24],[34,-20],[26,-28],[12,-30]]])fis(pts,rand(.45,.6));
+  /* 북쪽 벽의 용암 폭포 — 불의 뿌리가 벽을 타고 내려옴 */const lT=EGG.lfT||(EGG.lfT=egCv(64,128,(g,w,h)=>{g.fillStyle='#000';g.fillRect(0,0,w,h);for(let i=0;i<40;i++){const x=rand(4,w-4),c=Math.random()<.4?'#ffe0a0':'#ff7a20';g.strokeStyle=c;g.lineWidth=rand(1,4);g.beginPath();g.moveTo(x,0);g.lineTo(x+rand(-3,3),h);g.stroke()}const q=g.createLinearGradient(0,0,w,0);q.addColorStop(0,'rgba(0,0,0,1)');q.addColorStop(.25,'rgba(0,0,0,0)');q.addColorStop(.75,'rgba(0,0,0,0)');q.addColorStop(1,'rgba(0,0,0,1)');g.fillStyle=q;g.fillRect(0,0,w,h)}));
+  for(const x of [-5,15,-21]){const w=rand(2.2,3.2),m=new THREE.Mesh(new THREE.PlaneGeometry(w,16),new THREE.MeshBasicMaterial({map:lT,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));m.position.set(x,8,-39.4);egAdd(m);egGlow(x,1,-38.6,9,0xff6a20,.5);egGlow(x,7,-39,7,0xff5a10,.25);egLava(x,-36.4,2.2,rock)}
+  /* 흑요석 가시 — 속에서 불빛이 새어 나옴 */const ob=SM({color:0x141016,roughness:.12,metalness:.5,emissive:0x3a0a02,emissiveIntensity:1}),SP=[];for(let i=0;i<11;i++){const p=egSpot(1.6);if(!p)continue;for(let j=0;j<4;j++){const a=rand(0,6.28),d=j?rand(.4,1.2):0,h=rand(1.4,3.6);SP.push([p[0]+Math.cos(a)*d,h*.45,p[1]+Math.sin(a)*d,rand(0,3),h*.22,h,h*.22,rand(-.25,.25),rand(-.25,.25)])}egGlow(p[0],.4,p[1],3.4,0xff5a10,.35);colliders.push({x:p[0],z:p[1],r:1.1})}egI(PG.crys,ob,SP,true);
+  /* 현무암 기둥 무리 */const hx=EGG.hex||(EGG.hex=new THREE.CylinderGeometry(1,1,1,6)),H=[];for(let i=0;i<14;i++){const edge=Math.random()<.6,p=edge?[rand(-36,36),rand(-38,-26)*(Math.random()<.7?1:-.2)]:egSpot(2);if(!p)continue;const [x,z]=p;if(!edge&&!egFree(x,z,2))continue;
+    for(let j=0;j<6;j++){const a=rand(0,6.28),d=j?rand(.6,1.8):0,h=rand(1,edge?6:3.2),r=rand(.45,.7);H.push([x+Math.cos(a)*d,h/2,z+Math.sin(a)*d,rand(0,1),r,h,r])}colliders.push({x,z,r:1.8})}egI(hx,bas,H,true);
+  for(let i=0;i<6;i++){const p=egSpot(4);if(p)egLava(p[0],p[1],rand(2.2,3.6),rock)}
+  for(let i=0;i<5;i++){const p=egSpot(1.5);if(p)addProp(p[0],p[1],'brazier')}
+  egScatterRocks(rock,24,.4,1.3);for(let i=0;i<24;i++)addDecal(rand(-38,38),rand(-38,38))}
+
+function egB4(){/* 잠든 빛의 신전 */const rock=SM({color:0x3a3448,map:stoneTex,bumpMap:stoneTex,bumpScale:.2,roughness:.95}),white=SM({color:0xd8d2e0,map:stoneTex,bumpMap:stoneTex,bumpScale:.08,roughness:.55}),gold=SM({color:0xc8a040,roughness:.3,metalness:.8,emissive:0x3a2a08,emissiveIntensity:.6}),
+    vio=SM({color:0x5a3a9a,roughness:.25,emissive:0x5a2ac0,emissiveIntensity:.9});
+  egWalls(rock,13,3);
+  /* 흰 기둥 회랑 — 남쪽에서 북쪽 제단까지 */const bx=EGG.cbx||(EGG.cbx=new THREE.BoxGeometry(1.6,.4,1.6)),sh=EGG.csh||(EGG.csh=new THREE.CylinderGeometry(.55,.62,1,16)),tp=EGG.ctp||(EGG.ctp=new THREE.BoxGeometry(1.5,.35,1.5)),cap=EGG.capG||(EGG.capG=new THREE.CylinderGeometry(.85,.6,.45,16));
+  const CB=[],CS=[],CT=[],CP=[],FL=[];for(const sx of [-1,1])for(let z=30;z>=-22;z-=6.5){const x=sx*9.5;if(Math.random()<.22){FL.push([x+sx*rand(1,3),.6,z+rand(-1,1),rand(-.6,.6),1,rand(4,6),1,Math.PI/2,0]);CB.push([x,.2,z,0,1,1,1]);continue}
+    const h=Math.random()<.25?rand(1.5,3.5):rand(7,9);CB.push([x,.2,z,0,1,1,1]);CS.push([x,.4+h/2,z,rand(0,1),1,h,1]);if(h>6){CT.push([x,.4+h+.17,z,0,1,1,1]);CP.push([x,.4+h+.55,z,0,1,1,1])}colliders.push({x,z,r:1})}
+  egI(bx,white,CB,true);egI(sh,white,CS,true);egI(tp,white,CT,true);egI(cap,gold,CP,true);egI(sh,white,FL,true);
+  /* 금빛 해 문양 제단 — 잠든 빛 */{const x=0,z=-18,g=new THREE.Group();g.position.set(x,0,z);g.add(mesh(new THREE.CylinderGeometry(5.2,5.6,.5,40),white,0,.25,0),mesh(new THREE.CylinderGeometry(3.6,3.6,.12,40),SM({color:0x2a2238,roughness:.4}),0,.56,0));
+    const rg=new THREE.Mesh(new THREE.RingGeometry(2.4,3.3,40),SM({color:0xc8a040,roughness:.3,metalness:.8,emissive:0x8a6010,emissiveIntensity:.8,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=.63;g.add(rg);
+    for(let i=0;i<12;i++){const a=i/12*6.28,t=mesh(new THREE.BoxGeometry(.3,.06,1.2),gold,Math.cos(a)*4.1,.64,Math.sin(a)*4.1);t.rotation.y=-a+Math.PI/2;g.add(t)}
+    egAdd(g);egGlow(x,1.8,z,9,0xffd890,.35);egShaft(x,z,3,36,0xffe0a0,.09);colliders.push({x,z,r:5})}
+  /* 무릎 꿇은 빛의 사제상 */for(const [x,z,ry] of [[-6,-12,.6],[6,-12,-.6],[-6,-24,2.5],[6,-24,-2.5]]){addProp(x,z,'statue',ry)}
+  /* 바닥 금 상감 원 */for(const [x,z,r] of [[0,10,4],[0,26,3],[-22,-4,3.4],[22,-4,3.4]]){const m=new THREE.Mesh(new THREE.RingGeometry(r,r+.22,48),new THREE.MeshBasicMaterial({color:0xc8a040,transparent:true,opacity:.45,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(x,.04,z);egAdd(m);const m2=new THREE.Mesh(new THREE.RingGeometry(r*.55,r*.55+.16,6),m.material);m2.rotation.x=-Math.PI/2;m2.position.set(x,.045,z);egAdd(m2)}
+  /* 금빛 화로(희미한 빛) */for(const [x,z] of [[-14,0],[14,0],[-14,20],[14,20],[-16,-14],[16,-14]]){const g=new THREE.Group();g.position.set(x,0,z);g.add(mesh(new THREE.CylinderGeometry(.3,.4,1.1,8),gold,0,.55,0),mesh(new THREE.CylinderGeometry(.55,.35,.3,10),gold,0,1.2,0));egAdd(g);egGlow(x,1.5,z,2.4,0xffd080,.7);colliders.push({x,z,r:.5})}
+  /* 보랏빛 수정 — 잠든 빛을 옭아맨 것 */const V=[];for(let i=0;i<10;i++){const p=egSpot(1.4);if(!p)continue;for(let j=0;j<4;j++){const a=rand(0,6.28),d=j?rand(.3,.9):0,h=rand(.9,2.4);V.push([p[0]+Math.cos(a)*d,h*.55,p[1]+Math.sin(a)*d,rand(0,3),h*.26,h,h*.26,rand(-.3,.3),rand(-.3,.3)])}egGlow(p[0],1.2,p[1],4,0x9a5aff,.3);colliders.push({x:p[0],z:p[1],r:1})}egI(PG.crys,vio,V,false);
+  /* 무너진 아치 둘 */for(const [x,z,ry] of [[-24,18,.3],[24,-24,-.4]]){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;for(const sx of [-1,1]){const h=sx<0?6:3;const d=mesh(PG.drum,white,sx*3,h/2,0);d.scale.set(1.2,h,1.2);g.add(d);const c=Math.cos(ry),s=Math.sin(ry);colliders.push({x:x+sx*3*c,z:z-sx*3*s,r:.9})}const lt=mesh(new THREE.BoxGeometry(4.6,.8,1.3),white,-1,6.4,0);lt.rotation.z=-.12;g.add(lt);egAdd(g)}
+  egScatterRocks(rock,16,.4,1.1)}
+
+function egBuild(m){egLight(m);[egB0,egB1,egB2,egB3,egB4][m]()}
+
+function buildField(){clearProps();mapKind='field';setGround(96,96,96);ALTAR.x=0;ALTAR.z=-30;altarRing.position.set(0,.04,-30);altarLight.position.set(0,3,-30);const th=curTheme(),eg=th.d.set?th.d:null,set=eg?eg.set:PROPSET[Math.min(S.ch||0,LAST)];propTheme=th.key;crysKind=eg?eg.crys:'void';
   for(let a=0;a<4;a++){const t=a*Math.PI/2+Math.PI/4;addProp(ALTAR.x+Math.cos(t)*6.5,ALTAR.z+Math.sin(t)*6.5,'firePillar')}
-  for(let i=0;i<6;i++){const t=i/6*Math.PI*2+rand(-.3,.3),r=rand(11,26);addProp(Math.cos(t)*r,Math.sin(t)*r,'brazier')}
+  if(eg&&th.eg!==undefined)egBuild(th.eg);/* v757: 엔드게임은 지역별 맵 */
+  else{for(let i=0;i<6;i++){const t=i/6*Math.PI*2+rand(-.3,.3),r=rand(11,26);addProp(Math.cos(t)*r,Math.sin(t)*r,'brazier')}
   for(let i=0;i<44;i++){const p=freeSpot(36,1.2);if(p)addProp(p[0],p[1],pickW(set))}
-  for(let i=0;i<34;i++)addDecal(rand(-38,38),rand(-38,38));
+  for(let i=0;i<34;i++)addDecal(rand(-38,38),rand(-38,38))}
   altarRing.visible=altarLight.visible=true;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='field'}
 /* 최종 결전 맵: 기둥으로 둘러싼 원형 투기장 (반지름 19.5, 밖으로 나갈 수 없음) */
 let ARENA_R=19.5;/* v588: 검귀 카이렌 결투장은 20% 작게(15.6) — buildArena 에서 정함 */const _ar=0,arenaRing=new THREE.Mesh(new THREE.RingGeometry(19.1,19.8,96),new THREE.MeshBasicMaterial({color:0xff5a2a,transparent:true,opacity:.55,side:THREE.DoubleSide}));
@@ -7752,7 +7893,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v760';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v761';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
