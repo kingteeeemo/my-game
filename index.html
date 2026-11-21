@@ -8118,7 +8118,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v799';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v800';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8369,9 +8369,10 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
     if(dk()){portFix=(portFix||0)+1;skB.K.root.traverse(o=>{if(o.isMesh)for(const m of [].concat(o.material))for(const t of [m.map,m.normalMap,m.metalnessMap,m.roughnessMap,m.emissiveMap,m.aoMap])if(t)t.needsUpdate=true});
       renderer.clear();renderer.render(sc,cam);renderer.readRenderTargetPixels(portRT,0,0,Wd,Hd,portPx);if(dk())portOk[cls]=0}}
 
-  const tc=portTmp||(portTmp=document.createElement('canvas'));if(tc.width!==Wd||tc.height!==Hd){tc.width=Wd;tc.height=Hd}const tg=tc.getContext('2d'),im=tg.createImageData(Wd,Hd),row=Wd*4;for(let y=0;y<Hd;y++)im.data.set(portPx.subarray((Hd-1-y)*row,(Hd-y)*row),y*row);tg.putImageData(im,0,0);
   const g=cv.getContext('2d'),col=new THREE.Color(CLS[cls].c),rgb=`${col.r*255|0},${col.g*255|0},${col.b*255|0}`,gr=g.createRadialGradient(Wd*.5,Hd*.56,0,Wd*.5,Hd*.56,Wd*.95);gr.addColorStop(0,`rgba(${rgb},.38)`);gr.addColorStop(.4,`rgba(${rgb},.19)`);gr.addColorStop(1,`rgba(${rgb},0)`);
-  g.globalCompositeOperation='source-over';g.fillStyle='#15141a';g.fillRect(0,0,Wd,Hd);g.fillStyle=gr;g.fillRect(0,0,Wd,Hd);g.drawImage(tc,0,0);
+  /* v800: 직업 초상화 뒤바뀜의 진짜 원인 — 네 직업이 임시 캔버스 하나(portTmp)를 같이 쓰고 drawImage로 옮겼는데, iOS 사파리는 캔버스 그리기를 나중에 몰아서 처리해서 앞 직업 칸에 다음 직업 그림이 찍힘(전사 칸=궁수, 궁수 칸=마법사…, 마지막 무사만 정상). 공유 캔버스를 없애고 픽셀을 직업 캔버스에 바로 넣은 뒤 배경을 그 뒤(destination-over)에 깔아 줌 */
+  const im=g.createImageData(Wd,Hd),row=Wd*4;for(let y=0;y<Hd;y++)im.data.set(portPx.subarray((Hd-1-y)*row,(Hd-y)*row),y*row);g.putImageData(im,0,0);
+  g.globalCompositeOperation='destination-over';g.fillStyle=gr;g.fillRect(0,0,Wd,Hd);g.fillStyle='#15141a';g.fillRect(0,0,Wd,Hd);g.globalCompositeOperation='source-over';
   renderer.setClearColor(cc,ca);renderer.setRenderTarget(prev);
   gd.geometry.dispose();gd.material.dispose();/* v786: 초상화를 그릴 때마다 새 조명의 그림자 맵(1024²)이 해제되지 않고 쌓여 GPU 메모리가 차던 것 — 직업 선택을 여러 번 열수록 초상화가 엉뚱한 직업으로 나오던 원인 */try{d.shadow.dispose();d.dispose&&d.dispose()}catch(_){}if(skB){const r=skB.K.root;if(skB.back)skB.back();m.remove(r);r.scale.setScalar(skB.sc);if(skB.par)skB.par.add(r)}if(ry===undefined)portOk[cls]=K&&K.st===2?2:1;return cv}catch(e){return null}}
 /* v349: 직업 선택 — 초상화는 한 프레임에 하나씩 그려 끼워 넣음(한 번에 셋을 그리면 폰에서 멈춤) */
