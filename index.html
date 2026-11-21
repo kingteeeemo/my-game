@@ -4750,7 +4750,7 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
 const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],pr:900,file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'},
   /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
-  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,cn:'궁수'}};
+  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,bk:[.2,0,0],cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
@@ -4997,7 +4997,7 @@ function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.
 /* v380: 궁수 활 — 마을에서 서 있을 때·직업 선택 초상화는 등에 멤(archer_bow_back, Spine2 아래). 그 외에는 왼손.
    손에 든 활: 쏘기·화살비·구르기·사망은 손을 그대로 따라가고(GLB에 맞춘 쏘는 방향), 평소(대기·달리기·피격)에는 세계 기준으로 세워 듦(활대 수직, 배가 앞쪽) — 둘 사이는 부드럽게 전환 */
 const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415,musa:1.4}/* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
-function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;
+function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;if(K.wskM){/* v777: 외형 활을 등에 멜 때 자리(bk) — 시위 쪽으로 무게가 쏠린 활을 등 가운데로 */const b=WLOOKS[K.wsk]&&WLOOKS[K.wsk].bk;if(mode==='back'&&b)K.wskM.position.set(...b);else K.wskM.position.set(0,0,0)}
   if(mode==='back'&&K.bowBk){if(sw.parent!==K.bowBk){K.bowBk.add(sw);sw.position.set(0,0,0);sw.quaternion.identity()}return}
   if(sw.parent!==K.hand){K.hand.add(sw);sw.position.copy(K.bowP0);sw.quaternion.copy(K.bowQ0);K.bowA=1}
   const want=mode==='aim'?1:0;K.bowA+=(want-K.bowA)*(dt>=1?1:1-Math.exp(-dt*SKA.rate));
@@ -7922,7 +7922,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v776';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v777';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
