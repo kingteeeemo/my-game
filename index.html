@@ -5207,7 +5207,7 @@ const WIND={atk:cls=>bc(cls)==='warrior'?PZ.slash(cls,{d:-P.swingDir}).keys[0][1
 function poseStart(id,T,o){const f=PZ[id];if(!f)return;if(id!=='whirl')T*=P.castF||1;/* v343: 시전시간이 줄어든 만큼 발사 동작도 짧게 */const p=Object.assign({id,T,t:T},o||{}),def=f(S.cls,p);if(!def)return;Object.assign(p,def);if(p.pre)p.tp0=p.tp;else p.tp0=0;P.pose=p}
 function poseState(p,k){const ks=p.keys;let i=0;while(i<ks.length-1&&ks[i+1][0]<=k)i++;if(i>=ks.length-1)return ks[ks.length-1][1];
   const [k0,a]=ks[i],[k1,b,ez]=ks[i+1],f=(EZ[ez||'lin'])(clamp((k-k0)/Math.max(1e-4,k1-k0),0,1));return lerpSt(a,b,f)}
-function applyState(u,s,w){if(w<=0)return;const L=(o,k,v)=>{o[k]+=(v-o[k])*w};
+function applyState(u,s,w){if(w<=0)return;if(!s)s=REST[bc(S.cls)]||REST.warrior;/* v783: 포즈 상태가 비면 기본 자세로 */const L=(o,k,v)=>{o[k]+=(v-o[k])*w};
   L(u.piv.rotation,'x',s.px);L(u.piv.rotation,'y',s.py);L(u.piv.position,'z',s.pz);L(u.armR.rotation,'x',s.ax);L(u.armR.rotation,'y',s.ay);L(u.armR.rotation,'z',s.az);L(u.fore.rotation,'x',s.fx);
   L(u.armL.rotation,'x',s.lx);L(u.armL.rotation,'y',s.ly);L(u.armL.rotation,'z',s.lz);L(u.body.rotation,'x',s.bx);L(u.body.rotation,'y',s.by);L(u.body.rotation,'z',s.bz);u.body.position.y+=s.bh*w;
   L(u.legL.rotation,'x',s.g1);L(u.legR.rotation,'x',s.g2);if(u.head){L(u.head.rotation,'x',s.hx);L(u.head.rotation,'y',s.hy);L(u.head.rotation,'z',s.hz)}
@@ -5215,7 +5215,7 @@ function applyState(u,s,w){if(w<=0)return;const L=(o,k,v)=>{o[k]+=(v-o[k])*w};
 /* 매 프레임: 진행 중인 동작을 기본 자세 위에 섞음. relax = 유지 자세에서 천천히 풀림 */
 function poseTick(u,dt){const p=P.pose;if(!p)return;p.t-=dt;
   if(p.relax){const w=EZ.es(Math.max(0,p.t/p.T));applyState(u,p.last,w);if(p.t<=0)P.pose=null;return}
-  const k0=Math.max(0,1-p.t/p.T),k=p.tp0+(1-p.tp0)*k0,w=p.tp>0&&!p.pre?EZ.es(Math.min(1,k/p.tp)):1,s=poseState(p,k);applyState(u,s,w);
+  const k0=Math.max(0,1-p.t/p.T),k=p.tp0+(1-p.tp0)*k0,w=p.tp>0&&!p.pre?EZ.es(Math.min(1,k/p.tp)):1,s=poseState(p,k)||REST[bc(S.cls)]||REST.warrior;applyState(u,s,w);
   if(p.t<=0){if(p.hold)P.pose={relax:1,T:.4,t:.4,last:s};else P.pose=null}}
 REST.musa=REST.warrior;let hero=makeHero(S.cls||'warrior');scene.add(hero);skwAttach(hero);
 const P={pos:new THREE.Vector3(),face:0,hp:0,mhp:0,mp:0,mmp:0,inv:0,swing:0,swingDir:1,spin:0,cd:{atk:0,s1:0,s2:0,pot:0,mv:0},regen:0,mpWarn:0,mv:null,skSwing:false};
@@ -8009,7 +8009,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v782';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v783';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
