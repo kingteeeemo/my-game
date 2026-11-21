@@ -92,6 +92,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 #prolog{position:fixed;inset:0;z-index:9500;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;cursor:pointer}#prolog[hidden]{display:none}
 #prolog .plL{position:absolute;left:0;top:0;width:1376px;height:768px;max-width:none;max-height:none;transform-origin:0 0;opacity:0;transition:opacity 1.6s ease;will-change:transform,opacity}#prolog .plL.on{opacity:1}
 #prolog canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#prolog .plBox{position:absolute;inset:0;overflow:hidden}
 #prolog .plShade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(0,0,0,.45),transparent 20%,transparent 52%,rgba(0,0,0,.82) 88%,rgba(0,0,0,.9));box-shadow:inset 0 0 18vmin rgba(0,0,0,.7)}
 #prolog .plCap{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 11vh);padding:0 26px;margin:0;text-align:center;font:700 clamp(16px,4.4vw,25px)/1.8 "Noto Serif KR","Noto Serif CJK KR",serif;letter-spacing:.03em;color:#ece0c8;text-shadow:0 2px 12px #000,0 0 3px #000;opacity:0;transform:translateY(8px);transition:opacity .9s ease,transform 1.2s ease;pointer-events:none;word-break:keep-all}#prolog .plCap.on{opacity:1;transform:none}#prolog .plCap.out{opacity:0;transition:opacity .35s}
 #prolog .plTag{position:absolute;left:calc(env(safe-area-inset-left,0px) + 20px);top:calc(env(safe-area-inset-top,0px) + 18px);font:500 11px/1 Archivo,sans-serif;font-stretch:87%;letter-spacing:.32em;color:rgba(236,224,200,.6);text-transform:uppercase;pointer-events:none}
@@ -100,6 +101,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 #prolog .plHint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 4.5vh);text-align:center;font:400 12px/1 "Noto Sans KR",sans-serif;color:rgba(236,224,200,.5);opacity:0;transition:opacity 1s;pointer-events:none}#prolog .plHint.on{opacity:1}
 #prolog .plDots{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 2.2vh);display:flex;justify-content:center;gap:7px;pointer-events:none}#prolog .plDots i{width:5px;height:5px;border-radius:50%;background:rgba(236,224,200,.25);transition:background .6s}#prolog .plDots i.on{background:rgba(236,224,200,.85)}
 #prolog .plBlack{position:absolute;inset:0;background:#000;opacity:1;transition:opacity 1.4s ease;pointer-events:none}#prolog .plBlack.off{opacity:0}
+@media (orientation:portrait){#prolog .plBox{top:10%;bottom:10%}#prolog .plBox .plShade{background:linear-gradient(#000,transparent 9%,transparent 70%,rgba(0,0,0,.55) 90%,#000)!important;box-shadow:none!important}#prolog .plCap{bottom:calc(env(safe-area-inset-bottom,0px) + 5.5vh)}#prolog .plHint{bottom:auto;top:calc(10vh - 20px)}#prolog .plDots{bottom:calc(env(safe-area-inset-bottom,0px) + 1.6vh)}}/* v789: 세로 화면 — 위아래 10% 검은 여백, 그림을 더 작게 */
 #talkL{position:fixed;inset:0;z-index:58;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 50vh;padding-bottom:calc(50dvh + 6px);background:linear-gradient(rgba(0,0,0,.4),transparent 50%)}/* v706: 대사 상자는 화면 세로 가운데 바로 위 */#talkL[hidden]{display:none}#talkB{width:min(560px,100%);background:rgba(12,12,18,.9);border:1px solid #6a5a3a;border-radius:12px;padding:13px 16px 10px;color:#efe8da;font-size:15px;line-height:1.6;box-shadow:0 6px 24px rgba(0,0,0,.5)}#talkN{font-size:12.5px;font-weight:700;color:#ffd27a;margin-bottom:4px;letter-spacing:.02em}#talkN.vo{color:#ffe9a8;opacity:.75}#talkT.vo{color:#ffe08a;font-style:italic}#talkH{text-align:right;font-size:11px;opacity:.5;margin-top:4px}#npcAct.talkhide{display:none!important}
 body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 </style></head><body>
@@ -1322,7 +1324,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim" id="stat" hidden><div class="sheet" id="statSheet"></div></div>
 <div class="pchint" id="pchint">이동 WASD · 좌클릭 <b id="hL"></b> · 우클릭·Space <b id="hR"></b> · <b id="hM"></b> Shift·E · 물약 1 2 · 신속 3 · 스킬 I · 장비 B · 스탯 C · 위험도 G · 보스 H · 마을 T · 전체화면 F</div>
 <div class="scrim center" id="lvl" hidden><div class="sheet modal" id="lvlSheet"></div></div>
-<div id="prolog" hidden><img class="plL" alt=""><img class="plL" alt=""><canvas id="plFx"></canvas><div class="plShade"></div><div class="plTag">Prologue · Lumenhar</div><p class="plCap" id="plCap"></p><div class="plHint" id="plHint">화면을 누르면 다음으로</div><div class="plDots" id="plDots"></div><div class="plBlack" id="plBlack"></div><button class="plSkip" id="plSkip">건너뛰기</button></div>
+<div id="prolog" hidden><div class="plBox" id="plBox"><img class="plL" alt=""><img class="plL" alt=""><div class="plShade"></div></div><canvas id="plFx"></canvas><div class="plTag">Prologue · Lumenhar</div><p class="plCap" id="plCap"></p><div class="plHint" id="plHint">화면을 누르면 다음으로</div><div class="plDots" id="plDots"></div><div class="plBlack" id="plBlack"></div><button class="plSkip" id="plSkip">건너뛰기</button></div>
 <div class="cine" id="cine" hidden><div class="cineBar"></div><div class="cineBody" id="cineBody"></div><button class="close cineSkip" id="cineSkip">건너뛰기</button><div class="cineBar b"></div></div>
 <div class="scrim center" id="clear" hidden><div class="sheet modal" id="clearSheet"></div></div>
 <div id="resume" hidden><div><b>⚔ 전투 일시정지</b><span>화면을 눌러 보스 전투를 이어갑니다</span></div></div>
@@ -8027,7 +8029,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v788';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v789';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8355,18 +8357,19 @@ function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pen
 const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
 /* ===== v784 프롤로그: 캐릭터를 만든 직후 · 1장 시작 연출 전 — 그림 7장 슬라이드 (천천히 확대·좌우 이동, 재·불티, 명조 자막) =====
    p: 좌우 이동(−1 왼쪽 끝 ~ 1 오른쪽 끝, 세로 화면에서 크게 움직임) · z: 확대 · fx: 입자 · c: 자막(한 장면에 여러 줄을 차례로) */
-const PRL=[
-  {p:[-.3,.2],z:[1.02,1.1],fx:'mote',c:['오래전, 이 대륙은 루멘하르라 불렸다.\n옛말로 「빛이 머무는 땅」.','그 한가운데,\n빛의 도시 루멘이 있었다.']},
-  {p:[.35,0],z:[1.1,1.02],fx:'night',c:['그러나 어느 밤,\n봉우리 너머에서 붉은 날개가 하늘을 덮었다.']},
-  {p:[-.25,.05],z:[1.03,1.12],fx:'fire',c:['불의 용, 아쉬카르.','루멘은 단 하룻밤 만에\n불길 속으로 무너졌다.']},
-  {p:[-.1,.05],z:[1,1.12],fx:'throne',c:['용은 빛의 왕좌를 부수고\n그 위에 앉았다.','빛은 꺼지고,\n꺼지지 않는 불길만이 남았다.']},
-  {p:[-.5,.3],z:[1.06,1.02],fx:'ash',c:['잿불은 루멘하르를 넘어\n온 세상에 내렸다.','들판은 시들고,\n한낮에도 하늘이 어두워졌다.']},
-  {p:[.35,-.1],z:[1.02,1.1],fx:'ash2',c:['꺼져 가는 빛은 마지막 목소리로 불렀다.\n「불씨를 지닌 자여, 왕좌로 오라.」','부름을 들은 이들이\n사방에서 모여들었다.','그러나 왕좌에서\n돌아온 자는 없었다.']},
-  {p:[.5,-.05],z:[1.12,1.02],fx:'hero',c:['그리고 지금,\n또 한 사람이 재 속에서 일어선다.']}];
+const PRL=[/* v789: c = 화면 가운데에 둘 그림 가로 위치(0~1) — 모든 장면이 같은 속도로 왼쪽→오른쪽 이동, 같은 비율로 천천히 확대 */
+  {c0:.55,fx:'mote',c:['오래전, 이 대륙은 루멘하르라 불렸다.\n옛말로 「빛이 머무는 땅」.','그 한가운데,\n빛의 도시 루멘이 있었다.']},
+  {c0:.5,fx:'night',c:['그러나 어느 밤,\n봉우리 너머에서 붉은 날개가 하늘을 덮었다.']},
+  {c0:.48,fx:'fire',c:['불의 용, 아쉬카르.','루멘은 단 하룻밤 만에\n불길 속으로 무너졌다.']},
+  {c0:.54,fx:'throne',c:['용은 빛의 왕좌를 부수고\n그 위에 앉았다.','빛은 꺼지고,\n꺼지지 않는 불길만이 남았다.']},
+  {c0:.55,fx:'ash',c:['잿불은 루멘하르를 넘어\n온 세상에 내렸다.','들판은 시들고,\n한낮에도 하늘이 어두워졌다.']},
+  {c0:.52,fx:'ash2',c:['꺼져 가는 빛은 마지막 목소리로 불렀다.\n「불씨를 지닌 자여, 왕좌로 오라.」','부름을 들은 이들이\n사방에서 모여들었다.','그러나 왕좌에서\n돌아온 자는 없었다.']},
+  {c0:.53,fx:'hero',c:['그리고 지금,\n또 한 사람이 재 속에서 일어선다.']}];
+const PRL_V=.03,PRL_Z=[1,1.06];/* 이동 속도: 초당 그림 높이의 3% · 확대: 장면 동안 1 → 1.06 */
 /* 입자: m 금빛 티끌 · e 불티 · a 재 (장면마다 목표 개수, 다 탄 입자가 새 장면 비율로 다시 생겨 자연스럽게 바뀜) */
 const PRL_FX={mote:{m:40,e:0,a:0},night:{m:0,e:14,a:20},fire:{m:0,e:110,a:30},throne:{m:0,e:70,a:20},ash:{m:0,e:0,a:130},ash2:{m:0,e:10,a:80},hero:{m:0,e:40,a:90}};
 const PRO=window.PRO={on:0};
-const prlDur=t=>Math.max(3.4,1.8+t.replace(/\s/g,'').length*.1);/* 자막 한 줄이 떠 있는 시간 */
+const prlDur=t=>Math.max(4.4,2.6+t.replace(/\s/g,'').length*.12);/* 자막 한 줄이 떠 있는 시간 */
 function prologPlay(cb){if(PRO.on)return;const el=$('prolog'),Ls=[...el.querySelectorAll('.plL')],cv=$('plFx');
   Object.assign(PRO,{on:1,cb,si:-1,ci:-1,ct:0,cd:0,L:Ls.map(e=>({e,sc:null,t:0,d:1})),cur:0,parts:[],t0:performance.now(),last:performance.now(),ending:0,tap:0,ready:0});
   Ls.forEach(e=>{e.classList.remove('on');e.removeAttribute('src')});$('plCap').className='plCap';$('plCap').textContent='';$('plHint').className='plHint';$('plBlack').className='plBlack';
@@ -8388,8 +8391,9 @@ function prlPart(k,W,H,init){const r=Math.random;if(k==='e')return{k,x:r()*W,y:i
   if(k==='m')return{k,x:r()*W,y:init?r()*H:H*(.4+r()*.6),vx:(r()-.5)*8,vy:-(6+r()*14),s:1+r()*1.8,l:0,L:5+r()*5,f:r()*6};
   return{k,x:r()*W*1.2-W*.1,y:init?r()*H:-10,vx:10+r()*25,vy:18+r()*30,s:1+r()*2.6,l:0,L:6+r()*6,f:r()*6}}
 function prlTick(now){if(!PRO.on)return;PRO.raf=requestAnimationFrame(prlTick);const dt=Math.min(.05,(now-PRO.last)/1000);PRO.last=now;const el=$('prolog'),W=el.clientWidth,H=el.clientHeight;
-  /* 그림: 화면을 덮는 크기 × 확대, 좌우 이동 */
-  for(const L of PRO.L){if(!L.sc)continue;L.t+=dt;const u=Math.min(1,L.t/L.d),e=u*u*(3-2*u),sc=L.sc,z=sc.z[0]+(sc.z[1]-sc.z[0])*e,p=sc.p[0]+(sc.p[1]-sc.p[0])*e,s=Math.max(W/1376,H/768)*z,tx=(W-1376*s)*(.5+.5*p),ty=(H-768*s)*.5;L.e.style.transform=`translate(${tx}px,${ty}px) scale(${s})`}
+  /* 그림: 그림 칸(세로 화면은 위아래 10%씩 검은 여백)을 덮는 크기 × 천천히 확대, 같은 속도로 왼쪽→오른쪽 */
+  const bx=$('plBox'),BW=bx.clientWidth,BH=bx.clientHeight;
+  for(const L of PRO.L){if(!L.sc)continue;L.t+=dt;const u=Math.min(1,L.t/L.d),z=PRL_Z[0]+(PRL_Z[1]-PRL_Z[0])*u,s=Math.max(BW/1376,BH/768)*z,iw=1376*s,lo=BW/2,hi=iw-BW/2,D=Math.min(PRL_V*768*s*L.d,Math.max(0,hi-lo)),a0=clamp(L.sc.c0*iw-D/2,lo,Math.max(lo,hi-D)),x=a0+D*u,tx=BW/2-x,ty=(BH-768*s)*.5;L.e.style.transform=`translate(${tx}px,${ty}px) scale(${s})`}
   if(PRO.ready&&!PRO.ending){PRO.ct+=dt;if(PRO.ct>=PRO.cd+(PRO.ci===0&&PRO.si>0?.7:.38))prlCap()}
   /* 재·불티 */
   const dpr=Math.min(1.5,devicePixelRatio||1),cv=$('plFx');if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
@@ -8407,7 +8411,7 @@ function startGame(cls,main,skip){
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   const go=()=>{if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}};
-  if(!S.test&&!S.skipStart&&!S.noGuide)prologPlay(go);else go()}/* v784: 첫 캐릭터(스토리 시작)는 프롤로그를 먼저 — 끝나면 1장 시작 연출 → 튜토리얼 질문 *//* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
+  if(!S.test&&!S.skipStart)prologPlay(go);else go()}/* v789: 새 캐릭터마다(31레벨 엔드게임 시작 제외) *//* v784: 첫 캐릭터(스토리 시작)는 프롤로그를 먼저 — 끝나면 1장 시작 연출 → 튜토리얼 질문 *//* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
 let demo=null;
