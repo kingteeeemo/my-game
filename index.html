@@ -2117,7 +2117,7 @@ const dr=()=>{if(NS())return nsDef().def;const a=gear().armor;return a/(a+70+chE
 function diff(){
   if(S.ch<NCH)return CH[S.ch];
   const t=S.duel?S.duel.tier:oT(S.tier),last=CH[EGB];/* v159: 결투장은 결투 위험도(일반 10 · 우버 40) 기준 */
-  return {...last,n:'끝없는 심연',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:(last.xp+.3*t)*(t>=100?.85:1)/* v380: 위험도 100~ 경험치 -15% */,drain:Math.min(.015,last.drain+.001*t)};
+  return {...last,n:'성역 아래',hp:egHp(t),dmg:egDmg(t),cap:last.cap,spawn:last.spawn,xp:(last.xp+.3*t)*(t>=100?.85:1)/* v380: 위험도 100~ 경험치 -15% */,drain:Math.min(.015,last.drain+.001*t)};
 }
 /* 엔드게임 위험도별 배율 (v29): 체력은 단계마다 약 12%씩 복리 + 선형 4% → 위험도 10 ≈ 5장의 4.4배, 20 ≈ 17배, 30 ≈ 66배
    피해는 단계마다 7% 복리. 높은 단계로 갈수록 요구 DPS가 가파르게 올라 장비·강화가 필요 */
@@ -2410,11 +2410,11 @@ ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const FINAL={n:'불타는 왕좌',boss:'성역의 주인',ground:[60,34,30],fog:0x1c0c0a,sty:{s:'flag',glow:0xff4a10,gl:.42},pt:'ember'},EGTHEME={ground:[34,44,52],fog:0x0a1016,sty:{s:'flag',glow:0x22c8b8,gl:.28},pt:'void'};
 /* v41 엔드게임 지역 5종. 관문 보스(위험도 5·10·…)를 넘을 때마다 지역이 바뀜 */
 const EGMAPS=[
-  {n:'끝없는 심연',ground:[34,44,52],fog:0x0a1016,sty:{s:'flag',glow:0x22c8b8,gl:.28},pt:'void',crys:'void',set:{crystal:3,pillar:3,rock:2,obelisk:1.2,bones:1},st:'obelisks'},
-  {n:'핏빛 황무지',ground:[70,40,32],fog:0x180c0a,sty:{s:'dirt',st:.3},pt:'ash',crys:'void',set:{rock:4,tree:3,bones:2.5,wall:1.2,brazier:.8},st:'ruins'},
-  {n:'서리 무덤',ground:[56,66,78],fog:0x101820,sty:{s:'flag',rough:.55},pt:'snow',crys:'ice',set:{crystal:3,tomb:3,rock:2,statue:.8,tree:1},st:'graves'},
-  {n:'용암 분지',ground:[58,36,28],fog:0x1c0e08,sty:{s:'flag',glow:0xff5a10,gl:.36},pt:'ember',crys:'void',set:{rock:4,pillar:2,brazier:1.4,bones:1.2},st:'lava'},
-  {n:'공허 신전',ground:[42,34,58],fog:0x110c1c,sty:{s:'flag',glow:0x9a4aff,gl:.3},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
+  {n:'추락의 심연',ground:[34,44,52],fog:0x0a1016,sty:{s:'flag',glow:0x22c8b8,gl:.28},pt:'void',crys:'void',set:{crystal:3,pillar:3,rock:2,obelisk:1.2,bones:1},st:'obelisks'},
+  {n:'꺾인 칼의 황야',ground:[70,40,32],fog:0x180c0a,sty:{s:'dirt',st:.3},pt:'ash',crys:'void',set:{rock:4,tree:3,bones:2.5,wall:1.2,brazier:.8},st:'ruins'},
+  {n:'얼어붙은 기사단 묘역',ground:[56,66,78],fog:0x101820,sty:{s:'flag',rough:.55},pt:'snow',crys:'ice',set:{crystal:3,tomb:3,rock:2,statue:.8,tree:1},st:'graves'},
+  {n:'불의 뿌리',ground:[58,36,28],fog:0x1c0e08,sty:{s:'flag',glow:0xff5a10,gl:.36},pt:'ember',crys:'void',set:{rock:4,pillar:2,brazier:1.4,bones:1.2},st:'lava'},
+  {n:'잠든 빛의 신전',ground:[42,34,58],fog:0x110c1c,sty:{s:'flag',glow:0x9a4aff,gl:.3},pt:'void',crys:'void',set:{pillar:3,statue:1.4,crystal:2,obelisk:1.2},st:'temple'}];
 /* 지역 순서: 한 사이클(5개) 안에서는 겹치지 않게 무작위, 사이클이 끝나면 다시 무작위 (이전 지역 바로 반복 금지). 첫 지역은 1번 */
 const MAP_EVERY=10;
 function egMapFor(t){return dBand(t);/* v621: 지역은 구간마다 고정 — 심연 · 황무지 · 서리 무덤 · 용암 분지 · 공허 신전 */if(!S.egMaps||!S.egMaps.length)S.egMaps=[0];const blk=Math.max(0,Math.floor((Math.max(1,t)-1)/MAP_EVERY));/* v392: 지역(맵)은 위험도 10단계마다 바뀜 */
@@ -2492,7 +2492,7 @@ const CHZ=[{/* 1장 재가 내리는 들판 */
   wk:[[129,8],[112,8],[100,13],[86,7],[72,14],[58,8],[44,13],[30,12],[18,6],[8,5],[0,5],[-10,9],[-26,14],[-44,8],[-60,13],[-76,6],[-92,12],[-104,7],[-129,9]],
   pk:[{k:'chest',z:86,side:1,d:6,r:4},{k:'tower',z:32,side:-1,d:6.5,r:5.4,id:1},{k:'tower',z:28,side:1,d:6.5,r:5.4,id:2},{k:'elite',z:-44,side:-1,d:6.5,r:5.2}],
   ev:[{k:'sgate',z:6},{k:'hold',z:-26,t:24,n:'빛의 제단 되살리기',h:'제단의 원 안에 머무르세요 — 원을 벗어나면 멈춥니다',sc:0xffe0a0,done:['제단에 빛이 돌아왔다','성역 안쪽의 봉인이 풀렸습니다']},{k:'camp',z:-92}],witness:1,
-  camp:[['','봉우리 꼭대기에서 불길이 치솟는다.'],['','불길 속에서 무언가가 떨어져 내린다. 부러진 칼, 찢긴 붉은 망토.'],['','「…카이렌!」'],['???','「그는 불 앞에 섰고, 불은 그를 삼켰다. 이제 그 길을 이을 자는 그대뿐이다.」']],
+  camp:[['','봉우리 꼭대기에서 불길이 치솟는다.'],['','불길 속에서 무언가가 떨어져 내린다. 부러진 칼, 찢긴 붉은 망토.'],['','「…카이렌!」'],['???','「그는 불 앞에 섰고… 끝내 무릎을 꿇었다. 이제 그 길을 이을 자는 그대뿐이다.」']],
   clr:['심연의 왕이 쓰러지자, 굳게 닫혀 있던 성의 정문이 천천히 열립니다.','그 너머로 루멘 성이 불길을 머금은 채 하늘로 솟아 있습니다. 꼭대기의 불타는 왕좌까지 — 이제 성을 오릅니다.'],
   wx:'fire',props:'sanctum',intro:'본래 빛을 모시던 루멘 성역. 지금은 꺼지지 않는 불이 차지한 곳. 왕좌가 머지않다.'},
   {/* 8장 불타는 회랑 — 성 1층. 도르래를 돌려 쇠창살 문을 올림 */indoor:1,
@@ -3931,13 +3931,13 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 /* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
 const HR='쉼터지기 하란',VO='???';
-const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 끝없는 심연부터다.']];
+const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.']];
 const REF_ALT=[[HR,'또 한 명이 내려왔군. 금빛 화로가 너를 알아보는 걸 보니, 먼저 온 녀석과 같은 길을 걷게 될 모양이야.'],[HR,'여긴 추락자의 쉼터. 올라갈 생각이라면 화로 앞에 서라.']];
 const REF_LORE=[
-  {k:'b5',ok:()=>(S.maxTier||0)>=5,l:[[HR,'심연을 벗어났다고? …정말로 올라가고 있군.'],[HR,'그 위는 핏빛 황무지. 우리처럼 떨어진 도전자들이 끝까지 싸우다 쓰러진 땅이다.'],[HR,'그중 한 검사는 아직도 칼을 놓지 못하고 떠돈다더군. 검귀 카이렌… 한때는 우리 대장이었지.']]},
-  {k:'b10',ok:()=>(S.maxTier||0)>=10,l:[[HR,'검귀를… 쉬게 해 줬군. 고맙다.'],[HR,'위는 서리 무덤. 성역의 불이 닿지 않아 모든 게 얼어붙은 곳이다.'],[HR,'그런데 요즘 화로에서 목소리가 들린다. 너도 들었나?'],[VO,'「불은 꺼지지 않는다. 다만 옮겨 갈 뿐.」']]},
-  {k:'b15',ok:()=>(S.maxTier||0)>=15,l:[[HR,'아귀가 쓰러졌다. 그 녀석이 삼킨 동료가 몇이나 될지…'],[HR,'이제 용암 분지다. 왕좌 바로 아래, 꺼지지 않는 불이 뿌리내린 곳이지.'],[HR,'거기까지 오른 자는 아무도 없었다. 화로가 이렇게 밝았던 적도 없고.']]},
-  {k:'b20',ok:()=>(S.maxTier||0)>=20,l:[[HR,'공허 신전… 성역이 세워지기 전부터 있던 옛 신전이다.'],[HR,'화로의 목소리가 거기서 들려온다. 너를 부르고 있어.'],[VO,'「거의 다 왔다. 그대의 불이 내게 닿는구나.」']]},
+  {k:'b5',ok:()=>(S.maxTier||0)>=5,l:[[HR,'심연을 벗어났다고? …정말로 올라가고 있군.'],[HR,'그 위는 꺾인 칼의 황야. 우리처럼 떨어진 도전자들이 끝까지 싸우다 쓰러진 땅이다.'],[HR,'그 끝에서 길을 막는 검사가 있다. 검귀 카이렌… 한때 우리 대장이었지.'],[HR,'불 앞에 무릎을 꿇고, 이제는 아쉬카르의 칼이 되어 올라오는 자들을 베고 있다.']]},
+  {k:'b10',ok:()=>(S.maxTier||0)>=10,l:[[HR,'검귀를 꺾었군. …대장도 이제야 그 불에서 놓여났기를.'],[HR,'위는 얼어붙은 기사단 묘역. 루멘을 지키던 빛의 기사단이 잠든 곳이다. 성역의 불이 닿지 않아 모든 게 얼어붙었지.'],[HR,'그런데 요즘 화로에서 목소리가 들린다. 너도 들었나?'],[VO,'「불은 꺼지지 않는다. 다만 옮겨 갈 뿐.」']]},
+  {k:'b15',ok:()=>(S.maxTier||0)>=15,l:[[HR,'아귀가 쓰러졌다. 그 녀석이 삼킨 동료가 몇이나 될지…'],[HR,'이제 불의 뿌리다. 왕좌 바로 아래, 꺼지지 않는 불이 뿌리내린 곳이지.'],[HR,'거기까지 오른 자는 아무도 없었다. 화로가 이렇게 밝았던 적도 없고.']]},
+  {k:'b20',ok:()=>(S.maxTier||0)>=20,l:[[HR,'잠든 빛의 신전… 성역이 세워지기 전부터 빛을 모시던 옛 신전이다.'],[HR,'화로의 목소리가 거기서 들려온다. 너를 부르고 있어.'],[VO,'「거의 다 왔다. 그대의 불이 내게 닿는구나.」']]},
   {k:'b21',ok:()=>!!S.d20,l:[[HR,'신전 깊은 곳에서 무언가를 봤다고?'],[VO,'「아직 때가 아니다. 그러나 곧, 그대는 다시 저 불 앞에 서게 될 것이다.」']]}];
 const refLv=()=>REF_LORE.filter(b=>b.ok()).length;
 function refLore(force){if(!refOn()||!inTown||(!force&&(S.test||S.demo))||talkOn())return;S.lore=S.lore||{};const L=S.lore;
@@ -7665,7 +7665,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v754';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v755';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8122,7 +8122,7 @@ $('bossExit').addEventListener('click',()=>{if(paused())return;const b=$('bossEx
 function retreatToCh5(){S.phase=5;save();mapLoad(`${NCH}장 · ${CH[LAST].n}`,'사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>toast(`${NCH}장 · ${CH[LAST].n}`,'장비를 모으고 강화한 뒤 「최종 결전 재도전」을 누르세요'))}
 function showFinalClear(){
   $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">최종 결전 · 불타는 왕좌</div><h1>${FINAL.boss} 처치</h1><div class="cb-s">메인 스토리 완료</div></div>
-    <div class="cb-low"><p>불타는 왕좌의 불길이 꺼졌습니다.</p><p class="nx">이제 위험도가 끝없이 오르는 파밍 지역이 열립니다.</p><button class="primary" id="toEndless">끝없는 심연으로</button></div></div>`;
+    <div class="cb-low"><p>불타는 왕좌의 불길이 꺼졌습니다.</p><p class="nx">이제 위험도가 끝없이 오르는 파밍 지역이 열립니다.</p><button class="primary" id="toEndless">성역 아래로</button></div></div>`;
   $('clear').hidden=false;releaseAll();
 }
 $('clearSheet').addEventListener('click',e=>{
@@ -8133,15 +8133,15 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
-    mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 불 켜진 집들이 나타난다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 상인도, 대장장이도 있으니 쉬어 가시오.」'],['문지기 오스릭','「준비가 되면 남쪽 문으로 오시오. 그 너머가 잊힌 자들의 묘역이오. 길은 내가 열어 주겠소.」']],()=>{toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
+    mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」']],()=>{toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
-  if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();$('clear').hidden=true;mapLoad('끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast('끝없는 심연','쓰러뜨릴수록 강해집니다');stageBanner()});return}
+  if(e.target.id==='toEndless'){S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);save();$('clear').hidden=true;mapLoad('성역 아래','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{toast('성역 아래','쓰러뜨릴수록 강해집니다');stageBanner()});return}
   if(e.target.id!=='nextCh')return;
   tele('chclear',{c:S.ch});S.ch++;S.phase=0;S.kills=0;if(S.ch>=NCH){S.ch=NCH;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1)}
-  save();$('clear').hidden=true;mapLoad(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
-  toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?'몰려드는 무리를 처치하라':'위험도 1 · 쓰러뜨릴수록 강해집니다');stageBanner()});
+  save();$('clear').hidden=true;mapLoad(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'성역 아래','다음 지역으로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{
+  toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'성역 아래',S.ch<NCH?'몰려드는 무리를 처치하라':'위험도 1 · 쓰러뜨릴수록 강해집니다');stageBanner()});
 });
 
 /* ================= 최종 결전 컷신 (v27) =================
@@ -8685,7 +8685,7 @@ function renderStage(){if(S.ch>=NCH)return renderStageB();
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${(1+mutPts()/100).toFixed(2)} · ${fmtG(mutCost())} 골드`:''}</button>`:''}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
-  ${eg?`<p class="hint">위험도마다 1,000마리를 처치하면 관문 보스가 나오고, 쓰러뜨리면 클리어입니다. 처음 클리어하면 다음 위험도가 열립니다.</p>${mutUI()}`:'<p class="hint">엔드게임(끝없는 심연)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
+  ${eg?`<p class="hint">위험도마다 1,000마리를 처치하면 관문 보스가 나오고, 쓰러뜨리면 클리어입니다. 처음 클리어하면 다음 위험도가 열립니다.</p>${mutUI()}`:'<p class="hint">엔드게임(성역 아래)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">구간이 바뀌면 지역과 나오는 최고 아이템 티어가 올라갑니다.<br>위험도 9·14·19는 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 구간이 열립니다.</small></div>`}
 /* v630: 위험도 창 (B안 · 스테퍼) — ‹ › 와 20칸 막대(1~5 · 6~10 · 11~15 · 16~20)로 고르고 아래 입장 버튼. 위험도 20이면 변이 칸 */
@@ -9160,7 +9160,7 @@ addEventListener('resize',sizeMini);sizeMini();
 let slotArm={i:-1,t:0};
 const nickSafe=n=>String(n).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,16),fmtPlay=sec=>{sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h}시간 ${m}분`:`${m}분`};
 function fmtTime(t){if(!t)return '';const d=new Date(t),p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`}
-function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 불타는 왕좌':'최종 보스 처치 완료'):s.ch>=NCH?`끝없는 심연 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
+function progressText(s){return s.ch===LAST&&s.phase===5?`${NCH}장 · 최종 결전 준비`:s.ch===LAST&&s.phase>=3?(s.phase===3?'최종 결전 · 불타는 왕좌':'최종 보스 처치 완료'):s.ch>=NCH?`성역 아래 · 위험도 ${s.tier}`:`${s.ch+1}장 ${CH[s.ch].n}${s.phase===1?' · 보스전':''}`}
 function showSlots(){
   if(curSlot!==null&&S.cls)save();/* v265: 플레이 시간이 최신으로 보이도록 */
   const canClose=curSlot!==null&&!!S.cls;
@@ -9233,7 +9233,7 @@ function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;
   else if(S.ch===LAST&&S.phase===4)showFinalClear();
   else if(S.ch===LAST&&S.phase===3)toast('최종 결전',`${FINAL.n} · ${FINAL.boss}를 쓰러뜨려라`);
   else if(S.ch===LAST&&S.phase===5)toast(`${NCH}장 · 최종 결전 준비`,'성장한 뒤 「최종 결전 재도전」을 누르세요');
-  else toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'끝없는 심연',S.ch<NCH?`길 끝 제단의 ${CH[S.ch].boss}를 처치하라`:`위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}`);
+  else toast(S.ch<NCH?`${S.ch+1}장 · ${CH[S.ch].n}`:'성역 아래',S.ch<NCH?`길 끝 제단의 ${CH[S.ch].boss}를 처치하라`:`위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}`);
   stageBanner();
   if(S.lvConv&&S.lvConv.told&&S.lvConv.told2===0){S.lvConv.told2=1;save();later(1.6,()=>toast('위험도 이동 제한 해제','해금된 위험도 안에서 자유롭게 이동할 수 있습니다 · 다시 클리어하면 그 단계에 귀속됩니다','#ffb070'))}/* v447 */
   if(S.lvConv&&!S.lvConv.told){const c=S.lvConv;c.told=1;save();later(1.6,()=>toast('레벨 환산',`예전 버전 ${c.from}레벨의 누적 경험치를 지금 기준으로 환산해 ${c.to}레벨로 조정했습니다 · 스탯 −${c.st} · 위험도는 해금 범위 안에서 자유 이동(다시 클리어하면 귀속) · 강화 단계·장비·골드·잿불 정수 강화도 같은 기준으로 조정`,'#ffb070'))}/* v435 */
