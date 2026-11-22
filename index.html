@@ -605,7 +605,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .slotmain .en{font-family:var(--en);font-stretch:87%;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
 .slotmain .badge{width:42px;height:42px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font:800 13px var(--en);font-stretch:87%;color:#111}
 .slotmain .badge.empty{background:#23232c;color:var(--muted);font-size:20px}
-#loadScr{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 60%,#2a130a 0,#0a0605 70%);display:flex;align-items:center;justify-content:center;transition:opacity .4s}#loadScr[hidden]{display:none}#loadScr .lw{width:min(78vw,380px);text-align:center}#loadScr .lt{font:800 30px var(--ko);color:var(--ink);letter-spacing:.08em;text-shadow:0 0 18px rgba(255,120,40,.6)}#loadScr .len{font-size:11px;letter-spacing:.3em;color:var(--muted);margin:4px 0 22px;text-transform:uppercase}#loadScr .lbar{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}#loadScr .lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7a2a,#ffc060)}#loadScr .ltip{margin-top:14px;font-size:12px;color:var(--muted)}#loadScr .lhint{margin:28px auto 0;max-width:320px;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}#loadScr .lhint .en{display:block;font-family:var(--en);font-stretch:87%;font-size:10px;letter-spacing:.3em;color:#cbbd9f;text-transform:uppercase;margin-bottom:7px}#loadScr .lhint p{margin:0;font-size:13.5px;line-height:1.55;color:#d8d0c2;word-break:keep-all;min-height:3.1em}@media (orientation:landscape) and (max-height:520px){#loadScr .len{margin-bottom:14px}#loadScr .lhint{margin-top:16px;padding-top:10px}#loadScr .lhint p{font-size:12.5px;min-height:0}}
+#loadScr{position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at 50% 60%,#2a130a 0,#0a0605 70%);display:flex;align-items:center;justify-content:center;transition:opacity .4s}#loadScr[hidden]{display:none}#loadScr .lw{width:min(78vw,380px);text-align:center}#loadScr .lt{font:800 30px var(--ko);color:var(--ink);letter-spacing:.08em;text-shadow:0 0 18px rgba(255,120,40,.6)}#loadScr .lt{margin-bottom:22px}#loadScr .len{font:500 13px/1.55 var(--ko);color:#cbbd9f;margin:-12px auto 20px;max-width:300px;word-break:keep-all}#loadScr .len[hidden]{display:none}#loadScr .lbar{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}#loadScr .lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff7a2a,#ffc060)}#loadScr .ltip{margin-top:14px;font-size:12px;color:var(--muted)}#loadScr .lhint{margin:24px auto 0;max-width:320px}#loadScr .lhint p{margin:0;font-size:13.5px;line-height:1.55;color:#d8d0c2;word-break:keep-all;min-height:2.6em}@media (orientation:landscape) and (max-height:520px){#loadScr .lt{margin-bottom:14px}#loadScr .len{margin:-6px auto 12px}#loadScr .lhint{margin-top:14px}#loadScr .lhint p{font-size:12.5px;min-height:0}}
 #nickIn{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.4);color:var(--ink);font:600 17px var(--ko);box-sizing:border-box}#nickIn:focus{outline:none;border-color:var(--ember)}.nickrow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;min-height:1.3em}.nickrow .bad,#nickCnt.bad{color:#ff8a70}.slotmain .st small.nk{color:var(--ink)}.slotmain .st small.nk.none{color:#ff9a6a}
 .slotdel{background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:0 12px;font:700 12px var(--ko);flex-shrink:0}
 .slotdel.arm{background:var(--hp);border-color:var(--hp);color:#fff}
@@ -1291,7 +1291,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 <div class="scrim" id="heir" hidden><div class="sheet" id="heirSheet"></div></div>
 <button class="mutebtn" hidden id="muteBtn" aria-label="소리 켜기/끄기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" fill-opacity=".25"/><g class="on"><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></g><g class="off"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g></svg></button><div class="title tapwait" id="title"><div class="tglow" aria-hidden="true"></div><div class="tsig" aria-hidden="true"><svg id="tsig" viewBox="-100 -100 200 200"><g fill="none" stroke="#d8b46a"><circle r="92" stroke-width=".6" opacity=".5"/><circle r="86" stroke-width="1.6" opacity=".75" stroke-dasharray="120 6 40 8 200 5"/><circle r="62" stroke-width=".8" opacity=".55"/><path d="M0-98V-70M0 70V98M-98 0H-70M70 0H98M-69-69L-50-50M50 50L69 69M-69 69L-50 50M50-50L69-69" stroke-width="1.2" opacity=".7"/></g><path d="M-30 -80 l12 18 -6 14 14 20 -4 18" stroke="#ff7a2a" stroke-width="1.4" fill="none" opacity=".9"/></svg></div><div class="emb" id="emb" aria-hidden="true"></div><div class="tash" id="tash" aria-hidden="true"></div><div class="thead"><h1>루멘하르</h1><div class="sub">Lumenhar</div><div class="ttag">빛이 머무는 땅</div><div class="tdesc">옛 빛의 신이 머물던 대륙.<br>지금은 꺼지지 않는 불과 재에 덮여 있다.</div></div><div class="tfoot"><div class="tline"></div><div class="ttap" id="tTap">화면을 터치하세요<small>TOUCH TO START</small></div><button class="primary go" id="goStart">게임 시작</button><small>WASD / 방향키 이동 · 터치 조이스틱</small><small id="verTag" style="opacity:.7;letter-spacing:.08em"></small></div></div>
 <div class="scrim center" id="slots" hidden><div class="sheet modal" id="slotSheet"></div></div>
-<div id="loadScr" hidden><div class="lw"><div class="lt">루멘하르</div><div class="len">Lumenhar</div><div class="lbar"><i id="loadBar"></i></div><div class="ltip" id="loadTip"></div><div class="lhint" id="loadHint"><span class="en">Tip</span><p id="loadHintT"></p></div></div></div>
+<div id="loadScr" hidden><div class="lw"><div class="lt" id="loadTitle">루멘하르</div><div class="len" id="loadSub" hidden></div><div class="lbar"><i id="loadBar"></i></div><div class="lhint" id="loadHint"><p id="loadHintT"></p></div></div></div>
 <div class="scrim center" id="nick" hidden style="z-index:60"><div class="sheet modal" id="nickSheet"></div></div>
 <div class="scrim center" id="bossAsk" hidden style="z-index:60"><div class="sheet modal" id="bossAskSheet"></div></div>
 <div class="scrim center" id="restart" hidden><div class="sheet modal" id="restartSheet">
@@ -4393,7 +4393,7 @@ function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBea
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
-  if(ldBusy){fn();after&&after();return}
+  if(ldBusy||noML){fn();after&&after();return}
   ldBusy=true;const f=$('regionFade');
   f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;P.cast=null;
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
@@ -7582,7 +7582,7 @@ function stashCurUI(){const c=stashCur(),T=S.test;return `<div class="tag">재�
 /* 넣기: 가진 만큼(창고 한도까지) · 꺼내기: 소지 한도 999까지 */
 function stashCurMove(dir,k){if(S.test)return;const c=stashCur(),mine=S[k]||0,st=c[k]||0;let n=dir==='in'?Math.min(mine,STASH_CMAX-st):Math.min(st,CUR_MAX-mine);if(n<=0)return;
   if(dir==='in'){S[k]=mine-n;c[k]=st+n}else{S[k]=mine+n;c[k]=st-n}stashSave();save();renderStash()}
-function openStash(){closeAllSheets();nsSheet();stashLoad();stashOpen=true;stashSel=null;stashSide=null;stashMulti=false;stashPicks=[];renderStash();$('nsSheet').hidden=false;releaseAll()}
+function openStash(){closeAllSheets();nsSheet();stashLoad();stashOpen=true;stashSel=null;stashSide=null;stashMulti=false;stashPicks=[];renderStash();$('nsSheet').hidden=false;releaseAll();guide('stash')}
 /* 옵션 리롤: 아이템 전체 단위 — 티어·베이스·줄 수·옵션 종류 유지, 수치만 티어 범위 안에서 다시 뽑음 */
 let rrOpen=false,rrSel=null;const RR_COST=1;
 function rerollItem(it){for(const l of it.lines)l.v=nRoll(nLineR(it,l),nLineDp(l))}
@@ -7674,7 +7674,7 @@ function renderLooks(){lookShots();
     h+=`<div class="lkc"><div class="lkimg${on?' on':''}" style="${lkImg(k)?`background-image:url(${lkImg(k)})`:''}"><span class="lkn">${L.n}</span>${on?'<span class="lkw">착용 중</span>':wp?`<span class="lkw" style="background:rgba(20,20,26,.8);color:#cfc5b4">${L.cn} 전용</span>`:''}</div>
       <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:cl?`<button class="lkbuy x" disabled>${L.cn} 전용</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
-function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll()}
+function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll();guide('look')}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
@@ -8268,26 +8268,26 @@ const GUIDES={
     {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 10장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`10장을 지나 성 꼭대기의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
     {t:'이동',tgt:isPC()?null:['@left'],d:isPC()?`${GB}W A S D</b>(또는 방향키)로 움직이고, ${GB}마우스</b>로 공격 방향을 정합니다.`:`화면 ${GB}왼쪽 아무 곳</b>이나 누른 채 끌면 그 방향으로 움직입니다.`},
     {t:'주력 스킬과 보스 모드',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다. 마나가 모자라면 같은 버튼으로 ${GB}기본 공격</b>이 나갑니다.`,d2:`${GB}「보스」</b> 버튼은 주력 스킬을 한 대상에 몰아치는 보스 모드를 켜고 끕니다. 켜져 있으면 테두리가 돕니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
-    {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 생명력·마나 물약은 ${GB}충전식</b> — 기본 3회, 몬스터를 처치하면 다시 채워지고 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
-    {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 포인트 분배 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
-    {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 장비 뽑기, 대장장이, 전승사가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
+    {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 생명력·마나 물약은 ${GB}충전식</b> — 스토리에서는 5회까지 들고 다닙니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
+    {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 확인 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
+    {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 조율사, 대장장이, 재단사, 창고가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}메뉴</b> → 「가이드」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
-  lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`스탯 포인트도 ${STAT_PER_LV}점 받습니다. ${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수로 하는 ${GB}2차 강화</b>가 열립니다.`}]},
-  skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}2차 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 골드로 이 창에서 올립니다. 실패는 없습니다.`}]},
-  stat:{n:'스탯',steps:()=>[{t:'스탯 분배',d:`${GB}힘</b> 최대 생명력·생명력 재생 · ${GB}민첩</b> 이동 속도·치명타 · ${GB}지능</b> 최대 마나·마나 재생.`,d2:`찍은 포인트는 되돌릴 수 없습니다. 자동 분배를 켜면 레벨업마다 고른 스탯에 알아서 들어갑니다. 엔드게임부터는 심연의 냉기로 생명력이 계속 줄어드니 힘(재생)도 챙기세요.`}]},
+  lvup:{n:'레벨업과 1차 강화',steps:()=>[{t:'레벨업!',d:`레벨이 오를 때마다 ${GB}주력 스킬 강화 하나</b>를 골라 1단계씩 올립니다. 강화마다 최대 ${GMAX}단계이고, 고른 강화는 되돌릴 수 없습니다.`,d2:`${GB}${ESS_LV}레벨</b>쯤 1차 강화가 모두 채워지면, 잿불 정수와 골드로 올리는 ${GB}추가 강화</b>가 열립니다.`}]},
+  skill:{n:'스킬 창',steps:()=>[{t:'스킬 창',d:`주력 스킬의 ${GB}1차 강화</b> 단계와 효과, 지금 ${GB}DPS</b>를 봅니다. 레벨업 강화를 자동으로 고르게 설정할 수도 있습니다.`,d2:`1차 강화를 모두 채우면 열리는 ${GB}추가 강화</b>는 엔드게임에서 얻는 ${GB}잿불 정수</b>와 ${GB}골드</b>로 이 창에서 올립니다. 실패는 없습니다.`}]},
+  stat:{n:'스탯',steps:()=>[{t:'스탯 창',d:`지금 캐릭터의 ${GB}능력치</b>를 확인하는 창입니다. 최대 생명력·마나, 재생, 공격력, 치명타, 이동 속도 같은 수치가 모여 있습니다.`,d2:`능력치는 ${GB}장비·오라·강화</b>로 정해지며, 포인트를 직접 나눠 주지는 않습니다.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
   town:{n:'마을',steps:()=>[{t:TOWN.n,v:townNpcHtml(),d:`마을 사람에게 가까이 가면 대화 버튼이 뜹니다. 오른쪽 작은 지도의 ${GB}빛나는 점</b>이 그 사람이 있는 자리입니다.`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
-  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 기본 3회, 여기서 ${GB}잿불 정수</b>로 충전 횟수를 최대 5회까지 늘립니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`몬스터를 처치하면 충전되고, 보스전은 가득 찬 채로 시작해 보스에게 준 피해만큼 다시 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
-  gacha:{n:'장비 뽑기',steps:()=>[{t:'장비 뽑기',d:`골드로 ${GB}현재 레벨에 맞는 전설 장비</b>를 뽑습니다. 원하는 부위를 고를 수 있고, 레벨이 오를수록 가격도 오릅니다.`,d2:`가끔 ${GB}특수 능력치(★)</b>가 붙어 나옵니다. 특수 능력치가 나오면 실수로 넘기지 않도록 「계속 뽑기」가 ${GB}2초간 잠깁니다</b>.`}]},
-  smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다.`,d2:`실패해도 단계는 내려가지 않고 골드만 듭니다. 강화 단계에는 제한이 없습니다.`}]},
-  heir:{n:'전승',steps:()=>[{t:'특수 능력치 전승',d:`★ 특수 능력치를 ${GB}같은 부위의 다른 전설 장비</b>로 옮깁니다. 레벨이 올라 더 좋은 장비를 얻어도 아끼던 능력치를 그대로 이어 쓸 수 있습니다.`,d2:`수치는 그대로 옮겨지고, ${GB}원래 장비는 사라집니다</b>. 결투장에서 얻은 ${GB}각인의 서</b>는 여기서 아무 전설 장비에나 새깁니다. 부위에 맞는 특수 능력치가 붙습니다(일반 8% · 상급 11%).`}]},
+  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 스토리에서는 5회까지 쓰고, 엔드게임은 3회로 시작해 ${GB}잿불 정수</b>로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`일반 몬스터 ${GB}40마리</b> 분량(정예·유니크는 더 많이 쳐줍니다)마다 1회 충전되고, 보스전은 가득 찬 채로 시작해 보스 체력을 ${GB}20%</b> 깎을 때마다 1회 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
+  smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다. 최대 ${GB}+20</b>까지 올립니다.`,d2:`성공률은 +4까지 100%, 이후 단계마다 낮아져 +16부터는 1%입니다. 실패해도 단계는 내려가지 않고 골드만 듭니다.`}]},
+  stash:{n:'창고',steps:()=>[{t:'창고',d:`장비를 ${GB}맡겨 두었다가 다른 캐릭터가 꺼내 갈 수</b> 있습니다. 창고는 모든 캐릭터가 함께 씁니다. 「선택」을 켜면 여러 개를 한 번에 옮깁니다.`,d2:`칸이 모자라면 골드로 5칸씩 늘립니다. 가방이 가득 차기 전에 아껴 둘 장비를 맡기는 데도 좋습니다.`},{t:'재화 보관',d:`${GB}잿불 정수 · 윤회의 불씨 · 성역의 인장 · 광휘의 파편</b>도 맡길 수 있습니다. 재화마다 창고에 최대 9,999개까지 쌓아 둘 수 있고, 다른 캐릭터가 꺼내 쓸 수 있습니다.`,d2:`꺼낼 때는 그 캐릭터의 소지 한도(999)까지만 가져갑니다.`}]},
+  look:{n:'외형 장비',steps:()=>[{t:'재단사 세라',d:`${GB}광휘의 파편</b>으로 ${GB}등 부착물(날개 등) · 무기 · 캐릭터</b>의 외형을 삽니다. 산 외형은 계속 가지고 있고, 언제든 바꿔 입을 수 있습니다.`,d2:`외형은 보이는 모습만 바꿉니다. 직업마다 어울리는 외형이 앞에 정렬됩니다.`}]},
+  mut:{n:'변이',steps:()=>[{t:'변이 — 더 강한 몬스터, 더 큰 보상',d:`엔드게임에서 ${GB}위험도 창</b>에 「변이」 목록이 열립니다. 켠 변이마다 ${GB}점수</b>가 쌓이고, 몬스터가 강해지는 대신 보상이 ${GB}1 + 점수÷100배</b>가 됩니다.`,d2:`보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다.`},{t:'변이 종류와 입장 비용',d:`강인함(체력 +60%) · 흉포함(피해 +40%) · 신속 · 방어 약화 · 사수 군단 · 정예 행렬 · 재생 봉인 · 유언의 탄막 · 물약 봉인. 모두 켜면 점수 200으로 보상 ×3입니다.`,d2:`입장할 때마다 점수에 따라 ${GB}골드</b>를 냅니다(점수가 낮으면 아주 쌉니다). 고른 변이는 그 판이 끝날 때까지 유지되고, 변이는 ${GB}마을에서만</b> 바꿀 수 있습니다.`}]},
   map:{n:'월드맵',steps:()=>[{t:'월드맵',d:`1장에서 10장까지 이어지는 ${GB}여정의 길</b>과 지금 위치를 보여줍니다. 진홍 실선은 이미 지나온 길입니다. 8~10장은 루멘 성 안을 오르는 길이고, 최종 결전 뒤에는 엔드게임 영역에 표시됩니다.`}]},
   stage:{n:'단계',steps:()=>[{t:'단계',d:`장과 위험도 목록, 지금 위치를 봅니다. 엔드게임에서는 여기서 ${GB}위험도</b>를 골라 사냥하고, ${GB}결투장</b>에 도전합니다.`,d2:`위험도가 높을수록 좋은 장비가 나옵니다.`}]}
 };
 Object.assign(GUIDES,{
-  t0:{n:'튜토리얼',steps:()=>[{t:'훈련장 튜토리얼',d:`짧은 훈련장에서 게임의 기본을 익힙니다. ${GB}몬스터 무리 처치 → 레벨업·스탯·스킬 → 물약 → 훈련 교관 처치</b> 순서로 진행됩니다.`,d2:`실제 장(1~10장)도 이처럼 ${GB}길을 따라 끝까지 가서 보스를 쓰러뜨리는</b> 방식입니다.`},
+  t0:{n:'튜토리얼',steps:()=>[{t:'훈련장 튜토리얼',d:`짧은 훈련장에서 게임의 기본을 익힙니다. ${GB}몬스터 무리 처치 → 레벨업·스킬 → 물약 → 훈련 교관 처치</b> 순서로 진행됩니다.`,d2:`실제 장(1~10장)도 이처럼 ${GB}길을 따라 끝까지 가서 보스를 쓰러뜨리는</b> 방식입니다.`},
     GUIDES.intro.steps()[1],Object.assign({},GUIDES.intro.steps()[2],{t:'첫 무리를 처치하세요'})]},
-  t1:{n:'튜토리얼 · 스탯',steps:()=>[{t:'스탯을 찍어 보세요',tgt:['#openStat'],d:`레벨업으로 스탯 포인트를 받았습니다. ${GB}「스탯」</b>을 눌러 원하는 스탯에 포인트를 넣어 보세요.`,d2:`${GB}힘</b> 생명력 · ${GB}민첩</b> 이동·치명타 · ${GB}지능</b> 마나. 숫자 배지는 남은 포인트입니다.`}]},
   t2:{n:'튜토리얼 · 스킬',steps:()=>[{t:'스킬 창을 열어 보세요',tgt:['#openMenu'],d:`방금 고른 강화는 ${GB}「스킬」</b> 창에서 확인합니다. 강화 단계와 효과, 지금 DPS가 나옵니다. 레벨업 강화를 미뤄 두었다면 여기서 「지금 고르기」로 고릅니다. 열어 본 뒤 닫으면 다음으로 넘어갑니다.`}]},
   t3:{n:'튜토리얼 · 물약',steps:()=>[{t:'물약을 써 보세요',tgt:['#bHp','#bMp','#autoBtn'],d:`앞의 무리는 조금 더 강합니다. 생명력이 줄면 ${GB}빨간 물약</b>, 마나가 부족하면 ${GB}파란 물약</b>을 누르세요.`,d2:`「자동」을 켜 두면 알아서 마십니다.`,k:'1 생명력 · 2 마나'}]},
   t4:{n:'튜토리얼 · 보스',steps:()=>[{t:'훈련 교관을 쓰러뜨리세요',d:`길 끝 제단에 ${GB}훈련 교관</b>이 기다립니다. 바닥에 빨간 장판이 깔리면 그 밖으로 피하세요.`,d2:`보스를 쓰러뜨리면 튜토리얼이 끝나고 ${GB}1장</b>이 시작됩니다.`}]},
@@ -8311,14 +8311,14 @@ const GV={
 Object.assign(GUIDES,{
   gskill:{n:'스킬 강화 시스템',steps:()=>[
     {t:'1차 강화 — 레벨업',v:GV.lv,d:`레벨이 오를 때마다 주력 스킬 강화 3가지 중 ${GB}하나를 1단계</b> 올립니다. 강화마다 최대 ${GMAX}단계이고, ${GB}${ESS_LV}레벨</b>쯤 모두 채워집니다.`,d2:`스킬 창에서 단계·효과·DPS를 보고, 자동으로 고르게 설정할 수도 있습니다.`},
-    {t:'추가 강화 — 잿불 정수',v:GV.ex,d:`1차 강화를 모두 채우면 ${GB}추가 강화</b>가 열립니다. 엔드게임에서 모은 ${GB}잿불 정수(◆)</b>로 스킬 창에서 올리며, 실패는 없습니다.`,d2:`첫 강화 24개부터 마지막 강화 94개까지 점점 비싸집니다.`},
+    {t:'추가 강화 — 잿불 정수',v:GV.ex,d:`1차 강화를 모두 채우면 ${GB}추가 강화</b>가 열립니다. 엔드게임에서 모은 ${GB}잿불 정수(◆)</b>와 ${GB}골드</b>로 스킬 창에서 올리며, 실패는 없습니다.`,d2:`강화마다 비용이 다르며(3~5단계 스킬은 24개에서 113개까지) 단계가 오를수록 비싸집니다. 정수와 함께 골드도 듭니다.`},
     {t:'오라 — 잿불 정수',v:GV.au,d:`스킬 창 ${GB}「오라」</b> 탭에서 정수로 오라를 배우고 1~10단계까지 올립니다(24개 → 94개). 켜 두면 ${GB}최대 마나의 일부를 차지</b>하는 대신 효과가 계속 유지됩니다.`,d2:`방어·회피·보호막 / 치명타·가속·피의 서약 / 생명력·마나 재생. 장비의 ${GB}마나 점유 효율</b>이 높을수록 차지하는 양이 줄어 여러 오라를 함께 켤 수 있습니다.`},
-    {t:'물약 충전 횟수 — 잿불 정수',d:`물약은 충전식(기본 3회)입니다. 마을 ${GB}물약 상점</b>에서 잿불 정수로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다.`}]},
+    {t:'물약 충전 횟수 — 잿불 정수',d:`물약은 충전식입니다. 엔드게임에서는 3회로 시작하고, 마을 ${GB}물약 상점</b>에서 잿불 정수로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다.`}]},
   gtier:{n:'티어 시스템',steps:()=>[
     {t:'장비 티어 1~6',v:GV.ld,d:`장비는 ${GB}1~6티어</b>로 나뉘고 ${GB}1티어가 가장 좋습니다</b>. 스토리에서는 5·6티어, 엔드게임에서는 위험도가 오를수록 높은 티어가 나옵니다.`,d2:`위험도 1~4 최고 5티어 · 5~9 4티어 · 10~14 3티어 · 15~19 2티어 · 20 1티어.`},
     {t:'줄마다 다른 티어',v:GV.ln,d:`옵션 ${GB}줄마다 티어를 따로</b> 뽑습니다. 아이템 티어는 그 아이템의 줄이 오를 수 있는 ${GB}최고 티어</b>입니다 — 2티어 아이템에 3·4·5티어 줄이 섞여 나올 수 있습니다.`,d2:`맨 위 기본옵(방어력·피해 등)은 아이템 티어로 고정됩니다. 줄 수(4·5·6줄)는 바꿀 수 없어 ${GB}6줄 아이템</b>이 좋은 바탕이 됩니다.`},
     {t:'완성까지의 순서',d:`① 원하는 부위의 ${GB}높은 티어 6줄</b> 아이템을 얻는다 → ② ${GB}윤회의 불씨</b>로 필요 없는 줄을 원하는 옵션으로 변환 → ③ ${GB}성역의 인장</b>으로 줄 티어를 아이템 티어까지 승급 → ④ 불씨로 수치를 다듬는다.`,d2:`대장장이 강화(골드, 최대 +20)는 기본옵에 붙습니다. 엔드게임 마을 ${GB}조율사</b>에서 ②~④를 합니다.`}]},
-  gember:{n:'윤회의 불씨 · 조율',steps:()=>[
+  gember:{n:'조율사 · 윤회의 불씨',steps:()=>[
     {t:'수치 조정 — 불씨 1개',v:GV.rr,d:`아이템의 ${GB}모든 줄 수치</b>를 각 줄 티어 범위 안에서 다시 뽑습니다. 옵션 종류와 줄 티어는 그대로입니다.`,d2:`조율사 창 「수치 조정」 탭에서 각 줄의 범위와 지금 수치의 위치를 볼 수 있습니다.`},
     {t:'옵션 변환 — 불씨 3~8개',v:GV.cv,d:`고른 ${GB}줄 하나의 옵션 종류</b>를 바꿉니다. 줄 티어는 그대로, 수치는 그 티어 범위에서 새로 뽑습니다. 접두어는 접두어로, 접미어는 접미어로만 바뀝니다.`,d2:`비용은 줄 티어에 따라 6티어 3개 · 5티어 4개 · … · 1티어 8개. 이미 붙어 있는 옵션은 나오지 않습니다.`}]},
   gseal:{n:'성역의 인장 · 티어 승급',steps:()=>[
@@ -8352,13 +8352,13 @@ function guideNext(){if(!GCUR){guideClose();return}if(GCUR.i<GCUR.steps.length-1
 function guideClose(){GCUR=null;$('guide').hidden=true;$('gCard').style.transform='';if(GDQ.length){const k=GDQ.shift();setTimeout(()=>guide(k,true),250)}}
 $('guide').addEventListener('click',e=>{const id=e.target.id;if(id==='gNext')guideNext();else if(id==='gPrev'&&GCUR){GCUR.i--;guideRender()}else if(id==='gSkip')guideClose();else if(e.target.dataset.gk){const k=e.target.dataset.gk;GCUR=null;GDQ.length=0;guide(k,true);if(!GCUR)guideClose()}});
 addEventListener('resize',()=>{if(GCUR)guideRender()});
-const GBOOK=[['기본',['intro','map','stage','skill','inv','bossm','town']],['성장 · 제작',['gskill','gtier','gember','gseal']],['마을 사람',['pot','gacha','smith','heir']]];/* v715: 메뉴 → 가이드 */
+const GBOOK=[['기본',['intro','map','stage','skill','inv','bossm','town']],['성장 · 제작',['gskill','gtier','gseal','mut']],['마을 사람',['pot','gember','smith','look','stash']]];/* v715: 메뉴 → 가이드 */
 function guideBook(){if(!S||!S.cls)return;GCUR={key:'book',steps:[{t:'가이드',d:'보고 싶은 안내를 고르세요. 「성장 · 제작」은 움직이는 그림으로 보여 줍니다.'}],i:0};GUIDES.book=GUIDES.book||{n:'Guide',steps:()=>[]};
   $('guide').hidden=false;guideRender();$('gCard').querySelector('p').insertAdjacentHTML('afterend',GBOOK.map(([h,ks])=>`<div class="glh">${h}</div><div class="glist">${ks.filter(k=>GUIDES[k]).map(k=>`<button data-gk="${k}" class="${['gskill','gtier','gember','gseal'].includes(k)?'gnew':''}">${GUIDES[k].n}</button>`).join('')}</div>`).join(''));$('gNext').textContent='닫기'}
 /* ===== v94 튜토리얼 훈련장: 1장 지도 앞부분만 사용. 무리1 → 레벨업·스탯·스킬 창 → 무리2(물약) → 훈련 교관 → 1장 시작 ===== */
 const TUT_ALT=STORY_L-100;/* 훈련 교관 위치(길 좌표 z) */
 function tutAsk(){$('noticeSheet').innerHTML=`<div><div class="chap">Tutorial</div><h2>튜토리얼을 진행할까요?</h2></div>
-  <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 스탯, 물약, 보스전을 직접 해 보며 익힙니다. 1분 남짓이면 끝납니다.</p>
+  <p class="hint">짧은 훈련장에서 이동·공격, 레벨업 강화, 물약, 보스전을 직접 해 보며 익힙니다. 1분 남짓이면 끝납니다.</p>
   <button class="primary" id="tutYes" style="width:100%">튜토리얼 시작 (추천)</button><button class="ghost" id="tutNo" style="width:100%">건너뛰고 1장으로</button>`;$('notice').hidden=false;releaseAll()}
 $('noticeSheet').addEventListener('click',e=>{if(e.target.id==='tutYes'||e.target.id==='tutNo')window.TUTPEND=0;if(e.target.id==='tutYes'){$('notice').hidden=true;S.tutor=1;S.tutStep=0;S.tut.intro=1;resetWorld();toast('튜토리얼 · 훈련장','길을 따라 나아가며 기본을 익히세요');setTimeout(()=>guide('t0'),900)}
   else if(e.target.id==='tutNo'){$('notice').hidden=true;S.tutor=0;save();toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();setTimeout(()=>guide('intro'),700)}});
@@ -8421,7 +8421,7 @@ function portFill(){const cards=[...document.querySelectorAll('#classSheet .card
   if(all&&cards.every(b=>{const K=SKN[b.dataset.c];return (portOk[b.dataset.c]||0)===(K&&K.st===2?2:1)})){portQ=0;return}
   if(all){portQ=0;return}requestAnimationFrame(portFill)}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st&&(testPick||!CLS[c].testOnly))skwLoad(c);
-  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고르고 스탯 포인트 1점을 받습니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
+  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
   for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSheet').classList.add('pend');clearTimeout(window.pendT);window.pendT=setTimeout(()=>$('classSheet').classList.remove('pend'),3000);$('classSel').hidden=false;releaseAll();
@@ -8600,28 +8600,32 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
     /* v329: 닉네임을 묻는 동안은 주력 스킬 선택 화면(시연)이 그대로 배경 — 확인하면 로딩 화면을 거쳐 1장으로 */
     askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;const pro=!(sk&&skipOk());/* v795: 순서 — 닉네임 → 프롤로그 → 로딩(오프닝 BGM이 여기서 페이드아웃) → 1장. 31레벨 엔드게임 시작은 프롤로그 없이 로딩 */demoEnd();S=fresh();const load=()=>{window.BGMHOLD=0;try{SFX.bgm(null)}catch(e){}showLoading(()=>startGame(c,m,sk))};if(pro){window.BGMHOLD=1;prologPlay(load)}else load()}})}});
 /* v802: 로딩 화면 팁 — 실제 게임 시스템 기준(가이드와 같이 점검) */
-const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습니다. 편한 방향으로 돌려 보세요.',
-  '마을의 창고에 장비를 맡기면 다른 캐릭터에게 옮길 수 있습니다. 잿불 정수·윤회의 불씨 같은 재화도 맡길 수 있고, 모든 캐릭터가 함께 씁니다.',
-  '물약은 충전식입니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.',
-  '「자동」을 켜 두면 생명력과 마나가 정한 비율 아래로 떨어질 때 알아서 물약을 마십니다.',
-  '레벨업할 때마다 주력 스킬 강화를 하나씩 고릅니다. 고른 강화는 되돌릴 수 없으니 신중하게 고르세요.',
-  '마나가 모자라면 주력 스킬 버튼이 기본 공격으로 바뀌어 나갑니다.',
-  '「보스」 버튼을 켜면 주력 스킬이 넓게 퍼지는 대신 한 대상에 몰아칩니다. 단단한 보스에게 쓰세요.',
-  '바닥에 빨간 장판이 깔리면 그 밖으로 피하세요. 보스는 큰 공격 전에 바닥을 먼저 표시합니다.',
-  '장비 티어는 숫자가 작을수록 좋습니다. 1티어가 가장 높은 등급입니다.',
-  '대장장이의 강화는 장비가 아니라 부위에 쌓입니다. 더 좋은 장비로 바꿔도 강화 단계가 그대로 남습니다.',
-  '조율사 카엘에게서 옵션 수치를 다시 뽑고, 옵션 종류를 바꾸고, 줄의 티어를 올릴 수 있습니다.',
-  '위험도는 최대 20단계이고, 높을수록 더 높은 티어의 장비가 나옵니다.',
-  '스킬 창의 「오라」 탭에서 오라를 켜면 최대 마나의 일부를 차지하는 대신 효과가 계속 유지됩니다.',
-  '마을에는 몬스터가 나오지 않습니다. 마을 버튼(T)을 한 번 더 누르면 하던 곳으로 돌아갑니다.',
-  '재단사 세라에게서 광휘의 파편으로 날개·무기 같은 외형 장비를 살 수 있습니다.',
-  '카메라는 마우스 휠이나 두 손가락 벌리기로 확대·축소할 수 있습니다. 설정에서 잠가 둘 수도 있습니다.',
-  '진행 내용은 자동으로 저장됩니다. 슬롯 선택에서 다른 슬롯으로 새 캐릭터를 키울 수도 있습니다.'];
+const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습니다.',
+  '창고에 맡긴 장비와 재화는 모든 캐릭터가 함께 씁니다.',
+  '물약은 몬스터를 처치하면 다시 채워집니다.',
+  '「자동」을 켜면 정해 둔 비율 아래에서 물약을 마십니다.',
+  '레벨업 때 고른 주력 스킬 강화는 되돌릴 수 없습니다.',
+  '마나가 모자라면 주력 스킬이 기본 공격으로 나갑니다.',
+  '「보스」를 켜면 주력 스킬이 한 대상에 집중됩니다.',
+  '바닥의 빨간 장판은 보스의 큰 공격 신호입니다.',
+  '장비 티어는 숫자가 작을수록 좋습니다.',
+  '대장장이 강화는 장비가 아닌 부위에 쌓입니다.',
+  '조율사에게서 장비 옵션을 다시 뽑을 수 있습니다.',
+  '위험도는 최대 20단계까지 있습니다.',
+  '오라는 최대 마나의 일부를 쓰는 대신 효과가 유지됩니다.',
+  '마을에는 몬스터가 나오지 않습니다.',
+  '재단사 세라에게서 외형 장비를 살 수 있습니다.',
+  '마우스 휠이나 두 손가락으로 화면을 확대·축소합니다.',
+  '진행 내용은 자동으로 저장됩니다.'];
 let loadTipI=-1;
-function showLoading(cb,msg){const L=$('loadScr'),bar=$('loadBar'),tip=$('loadTip'),T=2600;tip.textContent=msg||['잿불이 꺼진 성역으로 들어갑니다…','길 끝 제단에서 첫 번째 수호자가 기다립니다…','어둠이 짙어질수록 불씨는 더 밝게 탑니다…'][Math.floor(Math.random()*3)];
-  let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').textContent=LOAD_TIPS[n];
+function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o.T||2600;
+  $('loadTitle').textContent=o.title||'루멘하르';const sb=$('loadSub');sb.hidden=!o.sub;sb.textContent=o.sub||'';
+  let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').textContent=msg||LOAD_TIPS[n];/* v806: 문구는 한 줄만 — 메시지가 있으면 메시지, 없으면 팁 하나 */
   L.hidden=false;bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition=`width ${T-100}ms cubic-bezier(.3,.6,.4,1)`;bar.style.width='100%';
   setTimeout(()=>{try{cb()}finally{setTimeout(()=>{L.style.opacity='0';setTimeout(()=>{L.hidden=true;L.style.opacity=''},400)},150)}},T)}
+const TOWN_DESC={town:'무너진 도시들의 피난민이 모여 사는 대륙 외곽의 마을. 아직 꺼지지 않은 불빛이 남아 있습니다.',refuge:'성역 아래 깊은 동굴. 금빛 화로의 불씨가 추락한 자들을 맞이합니다.'};
+const willTown=d=>!!(d&&d.cls&&!d.tutor&&!d.test&&!d.demo&&!(d.ch===0&&!d.vil&&!d.skipStart)&&!(d.ch<NCH&&d.phase===2)&&!(d.ch===LAST&&d.phase===4)&&!(d.fld&&d.fld.bf));
+let noML=false;
 
 /* ================= level-up choice ================= */
 let offer=null,lvlSkill=null;
@@ -8640,7 +8644,7 @@ function showLevelUp(){
     h=`<div class="shead"><div><h2>강화할 스킬을 고르세요</h2><small class="lvsub">Lv ${Lv}</small></div><button class="close" id="lvClose">닫기</button></div><div class="cards">`;
     sk.forEach((s,i)=>{const n=openGems(s).length,tot=gemsFor(s).reduce((a,g)=>a+gl(s,g),0);
       h+=`<button class="card" data-k="${s}" ${n?'':'disabled'}><span class="badge2">${i+1}</span><span><span class="en">${SK[s].role} · ${SK[s].en}</span>${SK[s].n}<small>${n?`강화 합계 ${tot}단계 · 올릴 수 있는 강화 ${n}개`:'모든 강화가 최대 단계입니다'}</small></span></button>`});
-    h+=`</div><div class="lvft"><button class="ghost" id="lvSk">스킬 창</button><button class="agbtn${S.autoGem?' on':''}" id="lvAg">자동 분배 ${S.autoGem?'ON':'OFF'}</button></div><p class="hint">${S.autoStat?`스탯 포인트는 ${autoStatName(S.autoStat)}에 자동으로 들어갔습니다.`:`스탯 포인트 ${STAT_PER_LV}점도 받았습니다. 「스탯」에서 찍으세요.`}${S.pending>1?` 남은 레벨업 ${S.pending}회.`:''} 「자동 찍기」를 누르면 이후 레벨업도 균형으로 자동 분배되며, 「스킬」 메뉴에서 다시 끌 수 있습니다.</p>`;
+    h+=`</div><div class="lvft"><button class="ghost" id="lvSk">스킬 창</button><button class="agbtn${S.autoGem?' on':''}" id="lvAg">자동 분배 ${S.autoGem?'ON':'OFF'}</button></div><p class="hint">${S.pending>1?`남은 레벨업 ${S.pending}회. `:''}「자동 분배」를 켜면 이후 레벨업 강화도 알아서 고르며, 「스킬」 메뉴에서 다시 끌 수 있습니다.</p>`;
   }else{
     if(!offer)offer=makeOffer(lvlSkill);
     const s=lvlSkill;
@@ -8970,8 +8974,8 @@ let statOpen=false;
 function renderStat(){
   const pts=S.statPts,auto=S.autoStat;
   let h=`<div class="shead"><div><h2>스탯</h2></div><button class="close" id="sClose">닫기</button></div>
-  <p class="hint">레벨이 오를 때마다 ${STAT_PER_LV}포인트를 받습니다. 「전부」는 남은 포인트를 그 스탯에 한 번에 넣습니다. 찍은 포인트는 ${RESET_LV}레벨부터 골드로 초기화할 수 있어요. 수치는 1포인트당 효과입니다.</p>
-  <div class="ptsline"><span>남은 스탯 포인트</span><b>${pts}</b></div>${S.test?`<div class="testlv"><span>테스트 레벨</span><button class="pm" data-tlv="-10">−10</button><button class="pm" data-tlv="-1">−1</button><b>${S.lv}</b><button class="pm" data-tlv="1">+1</button><button class="pm" data-tlv="10">+10</button></div>`:''}<div class="gems">`;
+  <p class="hint">스탯 포인트는 더 이상 받지 않습니다. 능력치는 장비·오라·강화로 정해집니다.</p>
+  ${S.test?`<div class="testlv"><span>테스트 레벨</span><button class="pm" data-tlv="-10">−10</button><button class="pm" data-tlv="-1">−1</button><b>${S.lv}</b><button class="pm" data-tlv="1">+1</button><button class="pm" data-tlv="10">+10</button></div>`:''}<div class="gems">`;
   for(const k in STATS){const v=stN(k);
     h+=`<div class="grow"><span class="gd" style="background:${STATS[k].c}"></span><span class="t">${STATS[k].n} <span style="font:500 10px var(--en);font-stretch:87%;letter-spacing:.12em;color:var(--muted)">${STATS[k].en}</span><small class="lines">${STATS[k].d.map(x=>`<span>${x}</span>`).join('')}</small></span>
     <span class="lvp">${v}</span><button class="pm" data-sa="${k}" ${pts?'':'disabled'} aria-label="${STATS[k].n} 올리기">+</button><button class="pm wide" data-sx="${k}" ${pts?'':'disabled'}>전부</button></div>`}
@@ -9286,7 +9290,7 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
   const stTxt=clr?'<b class="ok">클리어</b>':open?'도전 가능':seal?`<b style="color:#c890ff">봉인 · ${blkName(pb)} 처치 필요</b>`:`잠김 · 위험도 ${t-1} 클리어 필요`;
   const trk=Array.from({length:D_MAX},(_,i)=>{const q=i+1,o=q<=(S.maxTier||0)||(S.test&&q<=TEST_TOP),c=(S.gates||[]).includes(q);return `<button class="sts${c?' c':o?' o':''}${q===t?' on':''}${q===S.tier&&S.ch>=NCH?' cur':''}" data-ss="${q}"></button>${q%5===0&&q<D_MAX?'<i class="stgap"></i>':''}`}).join('');
   const mutOn=true,pts=mutPts(),mm=pts>0;
-  const mut=!mutOn?'':!mutOpen()?`<div class="stmut"><div class="stmh"><span>변이</span></div><p class="hint" style="margin:0">위험도 20 관문지기를 처음 쓰러뜨리면 열립니다.</p></div>`:
+  const mut=!mutOn?'':!mutOpen()?`<div class="stmut"><div class="stmh"><span>변이</span></div><p class="hint" style="margin:0">엔드게임(추락자의 길)에서 열립니다.</p></div>`:
     `<div class="stmut"><div class="stmh"><span>변이</span><span>점수<b>${pts}</b> · 보상<b>×${(1+pts/100).toFixed(2)}</b></span></div>
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
@@ -9298,13 +9302,13 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
   <div class="stdet"><div><div>${stTxt}</div><small>1,000마리 + 관문 보스</small></div><div class="r">적정 <b>${fmtN(req)}</b> · 내 <b style="color:${r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a'}">${fmtN(me)}</b></div></div>
   ${mut}<div class="stsp"></div>
   <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${(1+pts/100).toFixed(2)}</span>`:''}</button>${S.test?`<button class="rrgo stgo" id="tmGo" style="margin-top:8px;background:#2a2a30;color:#e8e2d6" ${testMap?'disabled':''}>${testMap?'지금 테스트 맵에 있음':'테스트 맵으로 이동'}<span class="stsub">· 몬스터 없음</span></button>`:''}`}
-function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이 · 위험도 20 전용</div>';
-  if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">위험도 20 관문지기를 처음 쓰러뜨리면 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
+function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이</div>';
+  if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">엔드게임(추락자의 길)에서 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
   const pts=mutPts();
   return `<div class="mutbox">${H}<div class="muthd"><span>점수 <b>${pts}</b> / 200</span><span>보상 <b>×${(1+pts/100).toFixed(2)}</b></span><span>입장 ${ci('g')}<b>${fmtG(mutCost())}</b></span></div>
   <div class="mutl">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="mutr${on?' on':''}" data-mut="${k}"><span class="mc">${on?'✓':''}</span><span class="mn"><b>${m.n}</b><small>${m.d}</small></span><em>+${m.p}</em></button>`}).join('')}</div>
   <div class="mutft"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div>
-  <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. 위험도 20에 입장할 때마다 골드를 내고, 고른 변이는 그 판이 끝날 때까지 유지됩니다.</p></div>`}
+  <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. 입장할 때마다 골드를 내고, 고른 변이는 그 판이 끝날 때까지 유지됩니다.</p></div>`}
 $('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if((b.dataset.mut||b.dataset.mutall!==undefined)&&!inTown&&S.ch>=NCH&&!S.duel&&!S.runClr){toast('사냥 중에는 변이를 바꿀 수 없습니다','마을에서 바꾼 뒤 다시 입장하면 적용됩니다');return}
   if(b.dataset.ss){const q=+b.dataset.ss;if(q>=1&&q<=D_MAX){stSel=q;renderStage()}return}
@@ -9826,8 +9830,8 @@ $('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
-  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
-  if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
+  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);if(willTown(d)){const rf=d.ch>=NCH;showLoading(()=>{$('slots').hidden=true;noML=true;try{enterGame()}finally{noML=false}},null,{title:rf?REF.n:TOWN0.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:2200});return}$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
+  if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);showLoading(()=>{$('slots').hidden=true;showClassSel()},null,{T:1400});return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
     else slotArm={i,t:Date.now()};
