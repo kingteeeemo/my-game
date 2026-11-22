@@ -2356,7 +2356,7 @@ const SFX=(()=>{
     act++;src.onended=()=>{act--;try{src.disconnect();g.disconnect()}catch(e){}};
     return{stop(f){try{const c=ctx.currentTime;g.gain.cancelScheduledValues(c);g.gain.setValueAtTime(g.gain.value,c);g.gain.linearRampToValueAtTime(0,c+(f||.06));src.stop(c+(f||.06)+.02)}catch(e){}}}}
   /* v744: 배경음(BGM) — 긴 곡이라 미리 풀지 않고 오디오 요소로 흘려 재생(메모리 절약), 곡이 바뀌면 서서히 교차 */
-  const BGMF={title:'bgm/title.mp3',seren:'bgm/seren.mp3',refuge:'bgm/village.mp3',hunt1:'bgm/hunt1.mp3'};const BGML={hunt1:.85};/* v848: 곡별 음량 배율 — 사냥터 곡 -15% */let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
+  const BGMF={title:'bgm/title.mp3',seren:'bgm/seren.mp3',refuge:'bgm/village.mp3',hunt1:'bgm/hunt1.mp3'};const BGML={hunt1:.8};/* v848: 곡별 음량 배율 — 사냥터 곡 -20% */let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
   try{const v=localStorage.getItem('bgmVol');if(v!==null&&v!==''&&!isNaN(+v))bgmVol=Math.max(0,Math.min(100,+v))}catch(e){}
   function bgmPre(n){if(bgmT[n]||!BGMF[n])return bgmT[n];const el=new Audio();el.loop=true;el.preload='auto';el.src=BGMF[n];try{el.load()}catch(e){}return bgmT[n]={el,g:null,off:0}}
   function bgmTrack(n){const t=bgmPre(n);if(!t.g){t.g=ctx.createGain();t.g.gain.value=0;try{ctx.createMediaElementSource(t.el).connect(t.g)}catch(e){}t.g.connect(bgmM)}return t}
@@ -8181,7 +8181,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v853';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v854';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
