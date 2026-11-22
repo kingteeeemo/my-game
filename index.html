@@ -1956,7 +1956,7 @@ const NSK={rain:.66,quake:1.01,chainl:1.10,frost:1.43,whirl:3.74,volley:23.8};
 const nsSkillK0=id=>NSK[id]!==undefined?NSK[id]:(()=>{const b=BAL[id];return b?(SKM[id]||1)*b[1]*b[2]:1})();
 /* v725 스킬 밸런스 — 110 스펙(1티어) 기준 사냥(구울 12마리 무리) DPS를 한 줄로(NSF), 보스 DPS는 보스에게만 붙는 배율로 따로(NSB, 보스 모드가 있는 스킬은 켠 상태 기준) */
 const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,chainl:1.167,pillar:.682,wave:19.8},
-  NS_SKM={volley:.5,smite:6,boom:3,chainl:4,frost:2.2,quake:2.2,pillar:1.5}/* v846: 스킬별 기본 피해 배율(무리 사냥 속도 맞춤) — 보스는 NSBK를 같은 배율로 나눠 엔드게임 보스 시간 유지 */,NSBK0={whirl:.37,quake:.469,volley:.958,rain:1.231,frost:.353,wave:.653,smite:1.11,boom:.893,pillar:1.418,chainl:1.18}/* v846: 기본 피해 배율 반영 · 심판의 검·폭발 사격·사술 폭발·연쇄 번개 새로 측정 *//* v826: 추가 강화 0단계 보스 계수 — 스토리 장 보스를 목표 시간(10→20초)에 잡도록 측정 */,NSBK={smite:1.87/* v764: 심판의 검 보스 134만→약 257만(다른 스킬 250만 선에 맞춤) */,whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
+  NS_SKE={rain:1,pillar:2,boom:.6,frost:.5}/* v851: 강화를 찍어야 강해지는 스킬의 초반 보정 — 레벨 1에서 1+a배, 레벨 28에서 0으로 줄어듦 */,NS_SKM={volley:.5,smite:6,boom:3,chainl:4,frost:2.2,quake:2.2,pillar:1.5}/* v846: 스킬별 기본 피해 배율(무리 사냥 속도 맞춤) — 보스는 NSBK를 같은 배율로 나눠 엔드게임 보스 시간 유지 */,NSBK0={whirl:.37,quake:.469,volley:.958,rain:1.231,frost:.353,wave:.653,smite:1.11,boom:.893,pillar:1.418,chainl:1.18}/* v846: 기본 피해 배율 반영 · 심판의 검·폭발 사격·사술 폭발·연쇄 번개 새로 측정 *//* v826: 추가 강화 0단계 보스 계수 — 스토리 장 보스를 목표 시간(10→20초)에 잡도록 측정 */,NSBK={smite:1.87/* v764: 심판의 검 보스 134만→약 257만(다른 스킬 250만 선에 맞춤) */,whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
 const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;if(!id||!NS())return 1;const k1=(NSBK[id]||1)/(NS_SKM[id]||1),k0=NSBK0[id]||k1,gs=gems2For(id);let a=0,b=0;for(const g of gs){a+=Math.min(g2(g),g2Max(g));b+=g2Max(g)}const pr=b?a/b:1;return Math.exp(Math.log(k0)+(Math.log(k1)-Math.log(k0))*pr)};/* v826: 보스 피해 계수를 추가 강화 진행도에 따라 — 0단계(스토리·엔드게임 초반) NSBK0 → 모두 찍으면 NSBK (로그 보간) */
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
@@ -2257,7 +2257,7 @@ const GATE_EVERY=5;/* 위험도 5·10·15…를 넘어가려면 관문 보스를
 
 function skillStats(id){
   const b=SK[id],L=g=>gl(id,g);
-  const st={dmg:b.dmg*(NS()?(NS_SKM[id]||1):1),cd:b.cd,proj:b.proj||0,pierce:L('pierce'),chain:L('chain'),blast:L('blast')>0,br:1.8*(1+.2*L('blast')),bm:.4+.05*L('blast'),
+  const st={dmg:b.dmg*(NS()?(NS_SKM[id]||1)*(1+(NS_SKE[id]||0)*Math.max(0,(28-(S.lv||1))/27)):1),cd:b.cd,proj:b.proj||0,pierce:L('pierce'),chain:L('chain'),blast:L('blast')>0,br:1.8*(1+.2*L('blast')),bm:.4+.05*L('blast'),
     radius:(b.radius||0)*(1+.2*L('area')),echo:Math.ceil(L('echo')/3),echoMul:.55+.03*L('echo'),burn:L('burn')>0,burnDur:2.5+.15*L('burn'),burnMul:.6+.12*L('burn'),
     knock:L('knock')>0,hits:b.hits||0,vortex:b.kind==='whirl'&&L('swift')?{rm:1+.05*L('swift'),sp:3+.7*L('swift')}:null,
     so:{crit:.04*L('critup'),exec:.08*L('execute'),giant:.07*L('giant')},extra:Math.ceil(L('stack')/3),extraMul:.4+.03*L('stack')};
@@ -8181,7 +8181,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v850';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v851';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
