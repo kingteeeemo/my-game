@@ -4441,7 +4441,10 @@ function applyFld(f,full){if(!f)return;
 /* 접속 직후 보스전 — 로딩 후 일시정지 상태로 시작, 화면을 누르면 이어서 전투 */
 function showResume(){const el=$('resume');el.hidden=false;P.mv=null}
 function hideResume(){const el=$('resume');if(el.hidden)return;el.hidden=true;P.inv=Math.max(P.inv,2)}
-function leaveTown(){if(!inTown)return;inTown=false;toastOff();$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=S.fld;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
+/* v833: 스토리 장에서 마을 → 사냥터로 나갈 때 「재도전(장 처음부터, 몬스터·보스 새로) / 이어하기(떠난 자리·보스 체력 그대로)」 */
+const stRetryAsk=()=>S.ch<NCH&&!S.tutor&&!S.demo&&(!!S.fld||S.phase===3);
+function stRetry(){S.phase=0;S.kills=0;S.fld=null;S.duel=null;fldHold=false;save()}
+function leaveTown(force){if(!inTown)return;if(!force&&!ldBusy&&stRetryAsk()){const lb=S.ch===LAST&&S.phase===3;askConfirm(`${S.ch+1}장 · ${CH[S.ch].n}`,`<b style="color:var(--ink)">이어하기</b> · 떠났던 자리에서${lb?' 최종 결전을':', 보스 체력도 그대로'} 이어서 합니다.<br><b style="color:var(--ink)">재도전</b> · 이 장을 처음부터 다시 합니다. 길 처음 자리에서 시작하고 몬스터·보스가 모두 다시 나옵니다.`,'이어하기',()=>leaveTown(true),'재도전',()=>{stRetry();leaveTown(true)});return}inTown=false;toastOff();$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=S.fld;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
   stageBanner()/* v626: 배너와 겹치는 토스트(지역 · 위험도 / 사냥터로 돌아왔습니다) 삭제 */})}
 function toggleTown(){inTown?leaveTown():goTown()}
 /* v131: 마을에서는 아이콘·글자를 「사냥터」(검)로 — PC 상단 버튼 포함 */
@@ -8163,7 +8166,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v832';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v833';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
