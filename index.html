@@ -950,7 +950,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .nst .nls{display:flex;flex-direction:column}.nst .nlt{font-size:11.5px;color:#8a8577;letter-spacing:.04em;margin:6px 2px 5px}.nst .nlr{display:flex;justify-content:space-between;align-items:center;min-height:32px;padding:0 10px;border-radius:7px;font-size:13.5px}.nst .nlr:nth-child(even){background:#1d1d23}.nst .nlr b{font:800 15px var(--en);font-stretch:87%;color:var(--ink)}.nst .nlr b small{font-size:11px;color:#8a8577;margin-left:1px}
 .nst .nlr b.tH{color:#ff7a6a}.nst .nlr b.tM{color:#6aa8ff}.nst .nlr b.tS{color:#58b4ff}
 /* v645 상태창 */
-/* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}
+/* v609 옵션 조율 */.rrwrap2{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}.rri{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1.5px solid rgba(232,220,196,.22);border-radius:12px;background:#111116}.rri.empty{color:var(--muted);font-size:13px;padding:16px 12px}.rri .ii{width:48px;height:48px;border-radius:10px;background:#1e1e24;display:grid;place-items:center;flex:none}.rri .ii .ico{width:42px;height:42px}.rri small{display:block;font:600 10px var(--en);letter-spacing:.12em;color:#8a8577}.rri b{display:block;font-size:16px}.rri span{font-size:12px;color:#a59f90}.rri .rrpw{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:0 0 auto;text-align:right}.rrpw div{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.rrpw small{display:inline!important;font:700 9px var(--en);letter-spacing:.1em;color:#8a8577}.rrpw b{display:inline!important;font:800 13px var(--en);font-stretch:87%;color:#f1ece2;margin:0!important}.rrpw i{font:700 11px var(--en);font-style:normal;min-width:44px;text-align:right}.rrpw i.u{color:#7fe07a}.rrpw i.d{color:#ff6b5e}.rrpw i.z{color:#8a8577}.rrpw em{font-size:9.5px;font-style:normal;color:#8a8577}
 .rrseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08)}.rrseg button{height:36px;border:0;border-radius:9px;background:transparent;color:#8a8577;font:700 13px var(--ko)}.rrseg button.on{background:#e8dcc4;color:#141417}
 .rrsd{font-size:11.5px;color:#8a8577;margin:0 2px}.rrlines{overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#111116;padding:2px 6px}
 .rln{box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;height:46px;padding:0 8px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink);font:inherit;text-align:left}.rln+.rln{border-top-color:rgba(255,255,255,.05)}button.rln{cursor:pointer}.rln.sel{border-color:#e8dcc4;background:rgba(232,220,196,.07)}.rln.dim{opacity:.45}.rln.dead .rnm,.rln.dead .v{color:#77736a}
@@ -7631,8 +7631,14 @@ function rrRow(it,l,i,L){const t=l.t||it.tier,m=nLineMul(l,L),dead=nsDeadK(l.k),
   const fx=rrFlash===i+2,fxa=fx?' rfx':'';
   const inner=`<span class="tl${t===1?' t1':''}">${t}티어</span><span class="rnm">${tag}${ivName(l.k,it.slot,it)}${dead?'<span class="ddt">효과 없음</span>':''}</span><b class="v${fl}" style="--d:${i*60}ms">${nFmt(l.k,l.v*m)}</b>${right}`;
   return click?`<button class="rln${dead?' dead':''}${rrLine===i?' sel':''}${fxa}" data-rl="${i}">${inner}</button>`:`<div class="rln${dead?' dead':''}${fx?cls.replace(' dim',' dimx'):cls}${fxa}">${inner}</div>`}
+/* v848: 옵션 조율 — 이 아이템을 낀 상태의 DPS·EHP와 변화량(직전 조율 대비, 가방 아이템은 지금 장착 장비 대비) */
+let rrPw0=null;
+function rrPw(it){if(EQS.some(k=>S.eq[k]===it))return pwParts();const ek=eqKey(it),old=S.eq[ek];S.eq[ek]=it;try{return pwParts()}finally{S.eq[ek]=old}}
+function rrPwHtml(it){let cur,base=null,lab='';try{cur=rrPw(it);if(rrPw0&&rrPw0.id===it.id){base=rrPw0;lab='직전 대비'}else if(!EQS.some(k=>S.eq[k]===it)){base=pwParts();lab='장착 중 대비'}}catch(_){return ''}
+  const dl=(a,b)=>{if(!b)return '';const r=(a/b-1)*100;if(Math.abs(r)<.05)return '<i class="z">±0%</i>';return `<i class="${r>0?'u':'d'}">${r>0?'▲':'▼'}${Math.abs(r).toFixed(1)}%</i>`};
+  return `<div class="rrpw"><div><small>DPS</small><b>${fmtG4(cur.d)}</b>${base?dl(cur.d,base.d):''}</div><div><small>EHP</small><b>${Math.round(cur.e).toLocaleString('ko-KR')}</b>${base?dl(cur.e,base.e):''}</div>${lab?`<em>${lab}</em>`:EQS.some(k=>S.eq[k]===it)?'<em>장착 중</em>':''}</div>`}
 function rrCard(it){const L=enhL(nsItSlot(it));
-  return `<div class="rri"><span class="ii">${ico(icoSlot(it.slot,it))}</span><div><small>${SLOTEN[it.slot].toUpperCase()} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</small><b>${it.name}</b><span>${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}</span></div></div>
+  return `<div class="rri"><span class="ii">${ico(icoSlot(it.slot,it))}</span><div><small>${SLOTEN[it.slot].toUpperCase()} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</small><b>${it.name}</b><span>${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}</span></div>${rrPwHtml(it)}</div>
   <div class="rrseg">${[['rr','수치 조정'],['cv','옵션 변환'],['up','티어 승급']].map(([k,n])=>`<button class="${rrTab===k?'on':''}" data-rt="${k}">${n}</button>`).join('')}</div>
   <div class="rrsd">${rrTab==='rr'?'모든 줄의 수치를 각자 티어 범위 안에서 다시 뽑습니다':rrTab==='cv'?'바꿀 줄을 누르세요 · 티어는 그대로, 옵션 종류만 바뀜':`올릴 줄을 누르세요 · 아이템 티어(${it.tier}티어)까지`}</div>
   <div class="rrlines">${it.lines.map((l,i)=>rrRow(it,l,i,L)).join('')}</div>`}
@@ -7696,7 +7702,7 @@ function renderLooks(){lookShots();
       <div class="lkb"><div class="lkp${own?' own':''}">${own?'보유 중':`${ci('l')}${fmtG(L.pr||0)}`}</div>${own?`<button class="lkbuy w" data-lk="${on?'off':'on'},${k}" ${cl?'disabled':''}>${on?'해제':'착용'}</button>`:cl?`<button class="lkbuy x" disabled>${L.cn} 전용</button>`:`<button class="lkbuy" data-lk="buy,${k}" ${ok?'':'disabled'}>구매</button>`}</div></div>`}
   $('nsBody').innerHTML=h+'</div>'}
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll();guide('look')}
-function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
+function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrPw0=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(b.dataset.lkc!==undefined&&nsKind==='look'){LKCAT=b.dataset.lkc||null;renderLooks();const bd=$('nsBody');if(bd)bd.scrollTop=0;return}
@@ -7705,7 +7711,7 @@ function nsClick(b){const a=b.dataset.ns;
   if(a==='drw'&&rrOpen){if(rrSpin||!rrSel||performance.now()-drNoClick<400)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
   if(b.dataset.rl!==undefined&&rrOpen){if(rrSpin)return;const i=+b.dataset.rl;rrLine=rrLine===i?null:i;renderRR();return}
-  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,+id)}else{if(rrSpin)return;rrSel=+id;rrPrev=null;rrLine=null;rrDrUp=false;renderRR()}return}
+  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,+id)}else{if(rrSpin)return;rrSel=+id;rrPrev=null;rrPw0=null;rrLine=null;rrDrUp=false;renderRR()}return}
   if(stashOpen&&NS()&&(a==='move'||a==='multi')){
     if(a==='multi'){stashMulti=!stashMulti;if(!stashMulti)stashPicks=stashPicks.slice(0,1);renderStash();return}
     const inM=stashSide!=='s',from=inM?S.inv:stashD.items,to=inM?stashD.items:S.inv,cap=inM?stashD.cap:bagCap();let n=0;
@@ -7714,12 +7720,12 @@ function nsClick(b){const a=b.dataset.ns;
   if(a==='move'&&stashOpen){const from=stashSrc==='s'?stashD.items:S.inv,to=stashSrc==='s'?S.inv:stashD.items,cap=stashSrc==='s'?bagCap():stashD.cap,i=from.findIndex(x=>x.id===stashSel);
     if(i<0)return;if(to.length>=cap){toast('공간 부족',stashSrc==='s'?'가방이 가득 찼습니다':'창고가 가득 찼습니다');return}to.push(from.splice(i,1)[0]);stashSel=null;stashSave();save();renderStash();return}
   if(a==='expand'&&stashOpen){const c=stashCost(stashD.cap);if(S.gold<c){toast('골드 부족',`${fmtG(c)}G가 필요합니다`);return}S.gold-=c;stashD.cap+=5;stashSave();save();renderStash();return}
-  if((a==='rr'||a==='conv'||a==='up')&&rrOpen){if(rrSpin)return;const it=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===rrSel);if(!it)return;const T=TCUR(),snap=()=>({id:it.id,v:it.lines.map(l=>l.v),k:it.lines.map(l=>l.k),t:it.lines.map(l=>l.t)});
+  if((a==='rr'||a==='conv'||a==='up')&&rrOpen){if(rrSpin)return;const it=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===rrSel);if(!it)return;const T=TCUR(),snap=()=>({id:it.id,v:it.lines.map(l=>l.v),k:it.lines.map(l=>l.k),t:it.lines.map(l=>l.t)});let pw0=null;try{pw0={id:it.id,...rrPw(it)}}catch(_){}
     if(a==='rr'){if(!T){if((S.rr||0)<RR_COST)return;S.rr-=RR_COST}rrPrev=snap();rerollItem(it);rrFlash=1}
     else{const i=rrLine,l=it.lines[i];if(!l||l.b)return;const t=l.t||it.tier;
       if(a==='conv'){const c=convCost(t);if(!T&&(S.rr||0)<c)return;const pv=snap();if(!nsConvert(it,i))return;if(!T)S.rr-=c;rrPrev=pv}
       else{if(!T&&(S.seal||0)<SEAL_COST)return;const pv=snap();if(!nsUpgrade(it,i))return;if(!T)S.seal-=SEAL_COST;rrPrev=pv}rrFlash=i+2}
-    refreshMax();save();hudMoney&&hudMoney();renderRR();rrFlash=0;return}}
+    if(rrPrev&&rrPrev.id===it.id&&pw0)rrPw0=pw0;refreshMax();save();hudMoney&&hudMoney();renderRR();rrFlash=0;return}}
 /* v484 NS: 회전 베기 채널링 — 누르고 있는 동안 동작 시간마다 타격(타격마다 마나 소모), 화염 폭발은 쿨타임마다 */
 const WHK=6.4;/* 타격당 피해 배율(임시) — 110 스펙·2티어 중간·오라 없음에서 우버 아귀 허수아비(1.075억) 30초 기준. 강화 효과 조정(C안) 때 확정 */
 function nsWhirlTick(dt){if(knAppr)return false;const id=S&&S.cls?C().skills[0]:null;if(!NS()||!id||SK[id].kind!=='whirl')return false;
@@ -8174,7 +8180,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v847';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v848';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9066,7 +9072,7 @@ function nsRenderStat(){const g=gear(),am=k=>1+(auraOn(k)?.03*auraL(k):0)+(g[k+'
   $('statSheet').innerHTML=`<div class="nst"><div class="nhd"><div class="nid"><span class="lvt"><small>LV</small>${S.lv}</span><i></i><span class="cl">${cn}</span><b>${nk.replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';')}</b></div><button class="nx" id="sClose" aria-label="닫기">✕</button></div>
   <div class="nbig"><div class="ncd"><small>DPS</small><em>초당 피해</em><b>${fmtG4(skillDpsCache())}</b></div><div class="ncd iv"><small>EHP</small><em>유효 체력</em><b>${n(ehp)}</b></div></div>
   ${nstDonut(D,raw,esP,P.mhp,sh,n,pc)}
-  ${nstList('공격 · 이동',[['치명타 확률',pc(Math.min(1,nsCritCh())*100)],['치명타 피해',pc(nsCritMul()*100,0)],[S.cls==='mage'?'시전 속도':'공격 속도',sp(g.aspd||0)],['이동 속도',sp(spdEff(spdRaw()))]])}
+  ${nstList('공격 · 이동',[['치명타 확률',pc(Math.min(1,nsCritCh())*100)],['치명타 피해',pc(nsCritMul()*100,0)],[S.cls==='mage'?'시전 속도':'공격 속도',sp(g.aspd||0)],['쿨타임 감소',g.cdr>0?`−${pc((1-Math.exp(-g.cdr/358))*100)} <small>(${n(g.cdr)})</small>`:'0%'],['이동 속도',sp(spdEff(spdRaw()))]]/* v848: 쿨타임 감소 — 장비 수치 합계를 실제 감소율로 환산(0.15초 위 구간) */)}
   ${nstList('자원',[['생명력',n(P.mhp),'tH'],['마나',n(P.mmp),'tM'],['에너지 쉴드',n(sh),'tS'],['생명력 재생',rg(hpRegen())+'<small>/초</small>','tH'],['마나 재생',rg(mpRegen())+'<small>/초</small>','tM']])}
   ${(()=>{const X=[['보스 피해 증가',g.bossd,'+'],['스킬 범위 증가',g.area,'+'],['투사체 피해 감소',Math.min(40,g.projr),'−'],['처치 시 생명력 회복',g.killH,'+'],['처치 시 마나 회복',g.killM,'+'],['보호막 재충전 속도',g.esrc,'+'],['스킬 마나 소모 감소',g.mcr,'−'],['마나 점유 효율',g.res,'+']].filter(x=>x[1]>0);return X.length?nstList('보조',X.map(([a,v,sg])=>[a,sg+(+v).toFixed(v<10?1:0)+'%'])):''})()}
   ${S.duel?'<p class="nhint">보스전 기준(보스 방어 상수) 수치입니다</p>':''}</div>`}
