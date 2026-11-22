@@ -1967,7 +1967,7 @@ const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd
 /* 종합 평가: 줄마다 1티어 최상 대비 비율 (기본옵 ×2, 접두어 ×1.5) · 다른 직업 전용 옵션은 0 */
 function nsScore(it){let s=0;const own=NS_CDMG[S.cls],spd=S.cls==='mage'?'cspd':'aspd';for(const l of it.lines){if(['mdmg','pdmg','sdmg'].includes(l.k)&&l.k!==own)continue;if((l.k==='aspd'||l.k==='cspd')&&l.k!==spd)continue;const r=l.b?NSB[it.slot].r[0][1]:NSO[l.k]&&NSO[l.k].r?NSO[l.k].r[0][1]:1;s+=l.v/r*(l.b?2:l.o?1.5:1)}return s}
 /* 테스트 캐릭터 장비 (표준 빌드, 범위 가운데 값) */
-function nsTestGear(){const t=TS().ntier||2,bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=S.cls==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
+function nsTestGear(){const t=ntSel(),bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=S.cls==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
   const L={weapon:{o:['cc','cdm',sp],x:['bcrit','amp']},helm:{o:['cdr','hp',dp],x:['res','projr']},armor:{o:['cdr','hp','hpp'],x:['regen','mreg']},gloves:{o:['cc','cdm',cd],x:['bossd','killM']},
     boots:{o:['mspd','hp',dp],x:['regen','mreg']},amulet:{o:['cc','cdm',cd],x:['mcr','res']},ring:{o:['cdm',cd,'inc'],x:['mcr','res']},ring2:{o:['cdm',cd,'inc'],x:['mcr','res']},belt:{o:['hp','hpp',dp],x:['regen','killH']}};
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(S.cls),lt:t})}
@@ -8421,7 +8421,7 @@ function portFill(){const cards=[...document.querySelectorAll('#classSheet .card
   if(all&&cards.every(b=>{const K=SKN[b.dataset.c];return (portOk[b.dataset.c]||0)===(K&&K.st===2?2:1)})){portQ=0;return}
   if(all){portQ=0;return}requestAnimationFrame(portFill)}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st&&(testPick||!CLS[c].testOnly))skwLoad(c);
-  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
+  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p><div class="btns" id="tntSeg" style="margin:0 0 6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(t=>`<button data-tnt="${t}" class="${ntSel()===t?'primary':'ghost'}" style="flex:1;min-width:48px">${t}티어</button>`).join('')}</div><p class="hint" style="margin:0 0 8px">장비 티어(전 부위) · 줄별 옵션·티어·수치는 시작 후 대장장이 「테스트 · 직접 설정」에서 바꿀 수 있습니다</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
   for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSheet').classList.add('pend');clearTimeout(window.pendT);window.pendT=setTimeout(()=>$('classSheet').classList.remove('pend'),3000);$('classSel').hidden=false;releaseAll();
@@ -8452,7 +8452,7 @@ $('noticeSheet').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('devOk')&&
 /* v251 테스트 캐릭터 = 성능 비교용 고정 세팅: 90레벨(균형 자동 배분) · 1차·2차 강화 만렙 · 피해 증가(무한) 10 · 전 부위 90레벨 전설(옵션 고정, 특수 능력치 8%) +30 · 위험도 60.
    장비·지역은 고정 시드로 만들어 매번 같음. 레벨·강화 조절 등 기존 테스트 기능은 그대로 */
 const TSPECS={90:{tier:16,lv:90,ilvl:90,enh:30,wenh:35,sp:8,inf:10,ntier:3,nenh:12},110:{tier:19,lv:110,ilvl:110,enh:35,wenh:45,sp:11,inf:30,ntier:2,nenh:15}};/* v484: ntier = 새 장비 티어(테스트 캐릭터 전용) *//* v269: 테스트 스펙 선택 — 90레벨(장비 90·30강·무기 35강·특수 8%·피해증가 10) / 110레벨(장비 110·방어구 35강·무기 45강·특수 11%(상급 각인)·피해증가 30) */
-let testSpec=90;const TS=()=>TSPECS[testSpec]||TSPECS[90];
+let testSpec=90;const TS=()=>TSPECS[testSpec]||TSPECS[90];let testNT=0;/* v763: 테스트 시작 장비 티어(0이면 스펙 기본값) */const ntSel=()=>testNT||TS().ntier||2;
 function testItem(slot){const it={id:++uid,slot,ilvl:TS().ilvl,rar:3,name:'루멘 왕의 '+itemName(slot,4),base:Math.round(itemBase(slot,TS().ilvl)*RAR_M[3]),opts:[]};
   const ok=Object.keys(OPT).filter(k=>OPT[k].slots.includes(slot)),sp=ok.find(k=>RARE_OPT.includes(k)),nm=ok.filter(k=>!RARE_OPT.includes(k));
   if(sp)it.opts.push({k:sp,v:TS().sp});const r0=Math.random;Math.random=()=>.5;/* 일반 옵션은 범위 가운데 값 */
@@ -8474,7 +8474,7 @@ $('classSheet').addEventListener('pointermove',e=>{const d=pDrag;if(!d||e.pointe
 const pUp=e=>{const d=pDrag;if(!d||e.pointerId!==d.id)return;if(d.on)pDragEnd=Date.now();pDrag=null};
 $('classSheet').addEventListener('pointerup',pUp);$('classSheet').addEventListener('pointercancel',pUp);
 $('classSheet').addEventListener('click',e=>{if(Date.now()-pDragEnd<350&&e.target.closest('[data-c]')){e.stopPropagation();return}},true);
-$('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
+$('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;showClassSel();return}const tn=e.target.closest('[data-tnt]');if(tn){testNT=+tn.dataset.tnt;showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1'||localStorage.getItem('ember-sanctum-story')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&!d.test&&((d.duelWins||0)>0||(d.ch||0)>=NCH))return true}}catch(e){}return false};/* v676: 한 캐릭터라도 스토리를 마쳤으면(아쉬카르 결말) 부캐는 스토리 스킵 */
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
@@ -8559,7 +8559,7 @@ function startGame(cls,main,skip){
   chCineEnd();inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
-  const go=()=>{if(S.test)toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 저장되지 않음');else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}};
+  const go=()=>{if(S.test){/* v763: 테스트 캐릭터는 마을에서 시작 — 장비·강화·스킬을 정리한 뒤 문지기에게서 사냥터로 */goTown();setTimeout(()=>toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 대장장이에서 장비 티어·옵션을 직접 설정할 수 있습니다 · 저장되지 않음'),2600)}else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);if(!S.test)stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}};
   go()}/* v795: 프롤로그는 로딩 앞(닉네임 확인 직후)으로 옮김 — 시작 흐름은 askNick 확인 핸들러 참고 *//* v710: 튜토리얼 질문은 1장 시작 연출이 끝난 뒤(연출이 안 뜨면 20초 뒤) */
 /* ================= v82 주력 스킬 선택 + 최종 진화 시연 =================
    직업을 고른 뒤 그 직업의 주력 스킬 2개 중 하나를 고름. 고르는 동안 뒤 화면에서 그 스킬을 1차·2차 강화를 모두 채운 상태로 허수아비 무리에게 자동 시연 */
@@ -9537,7 +9537,7 @@ $('smithSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.dataset.sel){if(smithSel!==b.dataset.sel)smAutoStop();smithSel=b.dataset.sel;smithRes=null;smDrUp=false;renderSmith();return}
   if(b.id==='smBack'){smAutoStop();smithSel=null;smithRes=null;renderSmith();return}
   if(b.id==='smTk'){useTk=!useTk;renderSmith();return}
-  if(S.test&&smithSel){if(b.dataset.tenh){testSetEnh(smithSel,enhL(smithSel)+ +b.dataset.tenh);return}if(b.id==='tSpSet'){testSetSp(smithSel,$('tSpIn').value);return}if(b.id==='tSpDel'){testSetSp(smithSel,null);return}}
+  if(S.test&&smithSel){if(b.dataset.tenh){testSetEnh(smithSel,enhL(smithSel)+ +b.dataset.tenh);return}if(b.id==='tSpSet'){testSetSp(smithSel,$('tSpIn').value);return}if(b.id==='tSpDel'){testSetSp(smithSel,null);return}if(testNsClick(b))return}
   if(b.id==='smAuto'){smAuto?smAutoStop():smAutoStart();return}
   if(b.id==='smGo'){if(!smAuto)smithTry(false)}
   });
@@ -9546,7 +9546,36 @@ function testSmithPanel(k,L,it){const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OP
   return `<div class="ttool" style="display:flex;flex-direction:column;gap:6px;background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:8px 10px;font-size:12px">
     <b style="color:#5ad1c8">테스트 · 직접 설정</b>
     <span>강화 단계 <small style="opacity:.7">(숫자를 입력하면 바로 적용)</small></span><div style="display:flex;align-items:center;gap:4px"><button class="pm" data-tenh="-10">−10</button><button class="pm" data-tenh="-1">−1</button><input id="tEnhIn" type="number" inputmode="numeric" min="0" value="${L}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" data-tenh="1">+1</button><button class="pm" data-tenh="10">+10</button></div>
-    ${it&&spk&&!it.ns?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>'}</div>`}
+    ${it&&spk&&!it.ns?`<span>특수 능력치 · ${OPT[spk].n} <small style="opacity:.7">(강화 전 기본 %, 보통 3~8)</small></span><div style="display:flex;align-items:center;gap:4px"><input id="tSpIn" type="number" inputmode="decimal" min="0" step="1" value="${cur?cur.v:5}" style="flex:1;min-width:0;padding:5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:15px;text-align:center"><button class="pm" id="tSpSet" style="width:auto;padding:0 12px">${cur?'변경':'추가'}</button>${cur?'<button class="pm" id="tSpDel" style="width:auto;padding:0 12px">제거</button>':''}</div>`:(it&&it.ns?'':'<small style="opacity:.7">장비를 착용하면 특수 능력치를 설정할 수 있습니다</small>')}${it&&it.ns?testNsPanel(k,it):''}</div>`}
+
+/* v763: 테스트 — 새 장비(NS)의 티어·줄별 옵션·줄 티어·수치를 직접 설정 */
+const TNS_ST='padding:4px 5px;border-radius:7px;border:1px solid #3a4a55;background:#0c1218;color:#fff;font-size:13px;min-width:0';
+function testNsPanel(k,it){const C_=NSLOT[it.slot];if(!C_)return '';const used=new Set(it.lines.map(l=>l.k)),nP=it.lines.filter(l=>!l.b&&l.o).length,nX=it.lines.filter(l=>!l.b&&!l.o).length,
+    tsel=(a,i,cur)=>`<select ${a}="${i}" style="${TNS_ST}">${[1,2,3,4,5,6].map(t=>`<option value="${t}" ${t===cur?'selected':''}>${t}티어</option>`).join('')}</select>`,
+    on=x=>NSO[x].n+(NSO[x].u==='%'?' (%)':NSO[x].u==='%/초'?' (%/초)':''),
+    row=(l,i)=>{const r=nLineR(it,l),dp=nLineDp(l),
+      key=l.b?(it.bt?`<select data-tn-bt="1" style="${TNS_ST};flex:1">${['def','eva','es'].map(x=>`<option value="${x}" ${x===l.k?'selected':''}>기본 · ${NBT[x]}</option>`).join('')}</select>`:`<b style="flex:1;font-size:13px">기본 · ${nName(l.k,it)}</b>`)
+        :`<select data-tn-k="${i}" style="${TNS_ST};flex:1">${(l.o?C_.o:C_.x).filter(x=>x===l.k||!used.has(x)).map(x=>`<option value="${x}" ${x===l.k?'selected':''}>${l.o?'':'접미 · '}${on(x)}</option>`).join('')}</select>`;
+      return `<div style="display:flex;flex-direction:column;gap:3px;padding:5px 0;border-top:1px solid #2a3a45"><div style="display:flex;gap:4px;align-items:center">${key}${tsel('data-tn-t',i,l.t||it.tier)}${l.b?'':`<button class="pm" data-tn-del="${i}" style="width:auto;padding:0 9px" aria-label="줄 삭제">✕</button>`}</div>
+        <div style="display:flex;gap:4px;align-items:center"><input data-tn-v="${i}" type="number" inputmode="decimal" min="0" step="${dp?Math.pow(10,-dp):1}" value="${l.v}" style="${TNS_ST};flex:1;font-size:15px;text-align:center"><small style="opacity:.7;white-space:nowrap">${nFmt(l.k,r[0])} ~ ${nFmt(l.k,r[1])}</small><button class="pm" data-tn-max="${i}" style="width:auto;padding:0 9px">최대</button></div></div>`};
+  return `<div style="margin-top:4px;border-top:1px dashed #5ad1c8;padding-top:6px"><span>장비 티어 <small style="opacity:.7">(바꾸면 모든 줄이 그 티어로 맞춰짐 · 수치 위치는 유지)</small></span>
+    <div style="margin:4px 0">${tsel('data-tn-it','',it.tier).replace('data-tn-it=""','data-tn-it="1"')}</div>
+    ${it.lines.map(row).join('')}
+    <div style="display:flex;gap:6px;margin-top:6px">${nP<4&&C_.o.some(x=>!used.has(x))?'<button class="pm wide" data-tn-add="o" style="flex:1">+ 접두 추가</button>':''}${nX<2&&C_.x.some(x=>!used.has(x))?'<button class="pm wide" data-tn-add="x" style="flex:1">+ 접미 추가</button>':''}</div></div>`}
+function testNsEdit(k,fn){const it=S.eq[k];if(!it||!it.ns)return;fn(it);it.name=nItemName(it);smithRes=null;refreshMax();renderSmith()}
+const tnRetier=(it,l,t)=>{const r0=nLineR(it,l),q=r0[1]>r0[0]?(l.v-r0[0])/(r0[1]-r0[0]):.5;l.t=t;const r1=nLineR(it,l);l.v=nRound(r1[0]+(r1[1]-r1[0])*q,nLineDp(l))};
+function testNsChange(el){const k=smithSel,d=el.dataset,v=el.value;if(!k)return false;
+  if(d.tnIt){testNsEdit(k,it=>{const t=+v;it.tier=t;it.rar=NT_RAR[t];for(const l of it.lines)tnRetier(it,l,t)});return true}
+  if(d.tnBt){testNsEdit(k,it=>{const l=it.lines.find(x=>x.b);if(l){l.k=v;it.bt=v}});return true}
+  if(d.tnK!==undefined){testNsEdit(k,it=>{const l=it.lines[+d.tnK];if(!l)return;l.k=v;const r=nLineR(it,l);l.v=nRound((r[0]+r[1])/2,nLineDp(l))});return true}
+  if(d.tnT!==undefined){testNsEdit(k,it=>{const l=it.lines[+d.tnT];if(l)tnRetier(it,l,+v)});return true}
+  if(d.tnV!==undefined){testNsEdit(k,it=>{const l=it.lines[+d.tnV];if(l)l.v=Math.max(0,+v||0)});return true}
+  return false}
+function testNsClick(b){const k=smithSel,d=b.dataset;if(!k)return false;
+  if(d.tnMax!==undefined){testNsEdit(k,it=>{const l=it.lines[+d.tnMax];if(l)l.v=nLineR(it,l)[1]});return true}
+  if(d.tnDel!==undefined){testNsEdit(k,it=>{const l=it.lines[+d.tnDel];if(l&&!l.b)it.lines.splice(+d.tnDel,1)});return true}
+  if(d.tnAdd){testNsEdit(k,it=>{const o=d.tnAdd==='o',C_=NSLOT[it.slot],used=new Set(it.lines.map(l=>l.k)),key=(o?C_.o:C_.x).find(x=>!used.has(x));if(!key)return;const l={k:key,o:o?1:0,t:it.tier,v:0},r=nLineR(it,l);l.v=nRound((r[0]+r[1])/2,nLineDp(l));it.lines.push(l);if(o){/* 접두는 접미보다 앞에 */const xi=it.lines.findIndex(x=>!x.b&&!x.o);if(xi>=0&&xi<it.lines.length-1){it.lines.pop();it.lines.splice(xi,0,l)}}});return true}
+  return false}
 function testSetEnh(k,n){S.enh[k]=Math.max(0,Math.round(n)||0);smithRes=null;refreshMax();renderSmith()}
 function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT).find(x=>OPT[x].sp&&OPT[x].slots.includes(k));it.opts=it.opts.filter(o=>!(OPT[o.k]&&OPT[o.k].sp));if(v!==null&&spk)it.opts.unshift({k:spk,v:Math.max(0,+v||0)});refreshMax();renderSmith()}
 const GREAT_P=.2;/* v429 강화 대성공 확률 → v443: 10% → 30% → v461: 20% */
@@ -9592,7 +9621,7 @@ function enhFx(ok,cine){SFX.p(ok?(cine?'cut_ok':'enh_ok'):'enh_fail');const f=$(
   const a={x:5,z:-1.6};if(ok){ringFx(a,2.4,0xffd24a,.6);ringFx(P.pos,2,0xffd24a,.5);spray(PADD,{x:a.x,z:a.z},30,{sp:[2,6],up:[3,8],y:[.8,1.1],life:[.4,.8],s0:[.3,.5],s1:[.05,.1],c0:0xfff0a0,c1:0xff8a10,drag:1.5,grav:-12,tex:1});streaks({x:a.x,z:a.z},14,{sp:[5,12],up:[3,8],y:[.8,1],life:[.3,.6],w:.06,len:.6,c0:0xffffff,c1:0xffa020,drag:1,grav:-14})}
   else spray(PNRM,{x:a.x,z:a.z},8,{sp:[.5,1.5],up:[1,2],y:[.8,1],life:[.6,1],s0:[.5,.7],s1:[1,1.4],c0:0x4a4038,c1:0x1c1a18,a:.5,drag:1,tex:2})}
 $('smith').addEventListener('click',e=>{if(e.target.id==='smith')closeSmith()});
-$('smithSheet').addEventListener('change',e=>{if(S.test&&smithSel&&e.target.id==='tEnhIn')testSetEnh(smithSel,+e.target.value)});
+$('smithSheet').addEventListener('change',e=>{if(!S.test||!smithSel)return;if(e.target.id==='tEnhIn')testSetEnh(smithSel,+e.target.value);else testNsChange(e.target)});
 
 /* ================= 전승사 (v77): 특수 능력치를 같은 부위의 다른 전설 장비로 옮김 · 옛 장비는 사라짐 ================= */
 let heirSrc=null,heirMsg='',heirScr=-1,heirSlot=null;
