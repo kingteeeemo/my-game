@@ -2753,6 +2753,11 @@ function addArch(z){bannerMat=bannerMat||SM({color:0x6a1a1a,roughness:.95,side:T
 /* 로컬 좌표로 소품 배치 */
 const APL=(x,z,k,rot,arg,nc)=>{const w=L2W(x,z);addProp(w.x,w.z,k,(rot||0)+SROT,arg,nc)},ADL=(x,z)=>{const w=L2W(x,z);addDecal(w.x,w.z)};
 /* 스토리 맵 생성 */
+/* v825: 1장 시작 — 바다를 건너온 이방인이 닿은 해안. 시작 자리 뒤(+z, 지나온 바닷가 쪽)에 난파선, 둘레에 건져 낸 짐·해초·떠밀려 온 나무 */
+function seaStart(s_){APL(s_.x+.5,s_.z+3.5,'sand',.2,9,true);APL(s_.x-2.2,s_.z+5.6,'wreck',Math.PI/2+.25);
+  APL(s_.x+4.6,s_.z+1,'crate',-.4,3);APL(s_.x+5.6,s_.z+3,'barrel',.3,0);APL(s_.x+3.6,s_.z+3.6,'barrel',1.2,1);APL(s_.x-5.6,s_.z+4.6,'barrel',.6,1);
+  APL(s_.x+2.8,s_.z+5.8,'rope',.4,0,true);APL(s_.x-1.2,s_.z+1.2,'rope',2.2,0,true);APL(s_.x+5.2,s_.z+6.2,'drift',.9,3);APL(s_.x-6.4,s_.z+.6,'drift',-.3,2.2);
+  for(const [dx,dz] of [[2,7],[-5,6.5],[6.5,4.8],[-.5,5],[4,-1.5],[-3.5,-1],[1,2.6]])APL(s_.x+dx,s_.z+dz,'kelp',0,0,true)}
 function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),set=PROPSET[i];if(SBC[i])sbLoad(i);/* v725: 장 보스 모델 미리 받기 */propTheme=th.key;mapKind='story';storyParams(i);crysKind=CH[i].ice?'ice':'void';
   if(S.sRotCh!==S.ch||!(S.sRot>=0)){S.sRot=(Math.random()*8|0)*Math.PI/4;S.sRotCh=S.ch}SROT=S.sRot;SRC=Math.cos(SROT);SRS=Math.sin(SROT);
   setGround(130,2*STORY_L+30,2);
@@ -2760,7 +2765,7 @@ function buildStory(){clearProps();const th=curTheme(),i=Math.min(S.ch||0,LAST),
   for(let a=0;a<6;a++){const t=a/6*Math.PI*2+.3;APL(e.x+Math.cos(t)*9,e.z+Math.sin(t)*9,'firePillar')}
   if(!CH[i].indoor)APL(e.x,e.z-11,'statue',0);
   /* 시작 야영지 */
-  if(!CH[i].indoor){APL(s_.x-4,s_.z+2,'tent',.4);APL(s_.x+4.5,s_.z+1,'cart',-.5)}APL(s_.x+1.5,s_.z+4,'brazier');
+  if(!CH[i].indoor){APL(s_.x-4,s_.z+2,'tent',.4);if(i===0)seaStart(s_);else APL(s_.x+4.5,s_.z+1,'cart',-.5)}APL(s_.x+1.5,s_.z+4,'brazier');
   /* 길을 따라: 관문 아치 · 무너진 성벽 · 길 안 소품 */
   if(!CHZ[i])for(let z=STORY_L-26;z>-STORY_L+30;z-=rand(24,32))addArch(z);/* v691: 장 구성이 있는 장은 길 위를 가로지르는 아치 없음(시야 가림) */
   for(let z=STORY_L-14;z>-STORY_L+24;z-=rand(9,15)){const c=pathC(z),w=pathW(z),side=Math.random()<.5?-1:1;
@@ -3346,6 +3351,10 @@ function bowlTop(g,y){g.add(mesh(PG.bowl,PM.iron,0,y,0),mesh(PG.coal,PM.coal,0,y
 const PROPSET=[{rock:3,tree:3,pillar:1.5,bones:1.2,brazier:.8},{tomb:4,tree:2,rock:1,pillar:1,bones:1.4,brazier:.8},{tree:4,rock:2,bones:1.4,tomb:1,brazier:.6},{rock:3.5,crystal:3,tree:1.2,pillar:1,brazier:.8},{pillar:3.5,rock:2.5,bones:1.6,brazier:1.2,tree:1},{rock:4,pillar:2.5,bones:2,brazier:1},{crystal:3,pillar:3,rock:2,brazier:1,bones:1},{pillar:2,brazier:2,bones:1},{pillar:2,brazier:1.5,bones:.6},{pillar:2,brazier:2.5,bones:1}];
 /* v687: 비탈에 놓는 소품이 공중에 뜨지 않게 — 중심만이 아니라 둘레 8곳 중 가장 낮은 땅 높이에 놓음 */
 function gMin(x,z,r){let h=groundH(x,z);for(let i=0;i<8;i++){const a=i*Math.PI/4;h=Math.min(h,groundH(x+Math.cos(a)*r,z+Math.sin(a)*r))}return h}
+let SEA_MAT=null;function SEA_M(){if(SEA_MAT)return SEA_MAT;const c=mkCv(128),g=c.getContext('2d'),q=g.createRadialGradient(64,64,6,64,64,64);q.addColorStop(0,'rgba(176,150,104,.85)');q.addColorStop(.6,'rgba(150,126,88,.6)');q.addColorStop(1,'rgba(110,92,66,0)');g.fillStyle=q;g.fillRect(0,0,128,128);
+  for(let i=0;i<260;i++){g.fillStyle=Math.random()<.5?'rgba(60,48,34,.35)':'rgba(190,170,130,.3)';const a=Math.random()*6.3,d=Math.random()*56;g.fillRect(64+Math.cos(a)*d,64+Math.sin(a)*d,2,2)}
+  return SEA_MAT={hull:SM({color:0x4a382a,roughness:1}),sail:SM({color:0x9c9078,roughness:1,side:THREE.DoubleSide}),barrel:SM({color:0x5e4632,roughness:.9}),rope:SM({color:0x8a7650,roughness:1}),
+    kelp:SM({color:0x34502a,roughness:.55}),drift:SM({color:0x5e554a,roughness:1}),sand:new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,roughness:1})}}
 function addProp(x,z,kind,rot,arg,noCol){
   const g=new THREE.Group(),gh=groundH(x,z);g.position.set(x,(gh>0?gMin(x,z,.9):gh)-(mapKind==='story'&&gh>0?.15:0),z);let cr=0;
   if(kind==='rock'){const s=rand(.7,1.6),m=mesh(rockGeos[Math.random()*4|0],PM.stone,0,s*.3,0);m.scale.set(s,s*rand(.6,1),s);m.rotation.y=rand(0,6);g.add(m);cr=s*.9}
@@ -3374,6 +3383,24 @@ function addProp(x,z,kind,rot,arg,noCol){
   else if(kind==='tent'){const t=mesh(PG.tent,clothMat,0,1.1,0);t.rotation.y=Math.PI/4;g.add(t);g.add(mesh(PG.leg,PM.wood,0,1.6,0));g.rotation.y=rot||0;cr=1.4}
   else if(kind==='cart'){g.add(mesh(new THREE.BoxGeometry(1.4,.6,2.2),plankMat,0,.75,0));for(const sx of [-1,1]){const w=mesh(PG.wheel,PM.wood,sx*.78,.45,.4);w.rotation.z=Math.PI/2;g.add(w)}
     const sh=mesh(PG.leg,PM.wood,0,.5,1.6);sh.rotation.x=1.2;g.add(sh);g.rotation.y=rot||0;cr=1.2}
+  /* v825: 1장 시작 해안 — 이방인이 타고 온 배의 잔해(갈비뼈 같은 선체·용골·부러진 돛대와 찢긴 돛), 상자·통·밧줄 더미·해초·떠밀려 온 나무, 젖은 모래 자리 */
+  else if(kind==='wreck'){const M=SEA_M(),rib=new THREE.TorusGeometry(1.35,.09,6,14,Math.PI);
+    for(let k=0;k<7;k++){const zz=-2.25+k*.75,sc=1.15-Math.abs(zz)/3.6;if(k===5)continue;const a=Math.random()<.35?Math.PI*rand(.55,.8):Math.PI,r=new THREE.Mesh(a<Math.PI?new THREE.TorusGeometry(1.35,.09,6,14,a):rib,M.hull);r.rotation.z=Math.PI;r.position.set(0,1.25*sc,zz);r.scale.set(sc,sc,1);r.castShadow=true;g.add(r)}
+    g.add(mesh(new THREE.BoxGeometry(.28,.3,5.2),M.hull,0,-.1,0));const st=mesh(new THREE.BoxGeometry(.26,2.4,.3),M.hull,0,.9,2.55);st.rotation.x=-.35;g.add(st);
+    for(let k=0;k<4;k++){const pl=mesh(new THREE.BoxGeometry(.08,.32,rand(1.6,3)),plankMat,-.95+k*.06,.25+k*.3,rand(-.9,.6));pl.rotation.z=-.55-k*.1;g.add(pl)}
+    const ms=mesh(new THREE.CylinderGeometry(.11,.14,4.2,8),M.hull,1.9,.25,-1.2);ms.rotation.set(Math.PI/2,0,.4);ms.rotation.order='YXZ';ms.rotation.y=.5;g.add(ms);
+    const sl=new THREE.Mesh(new THREE.PlaneGeometry(1.8,1.3,4,3),M.sail);const sp=sl.geometry.attributes.position;for(let i=0;i<sp.count;i++)sp.setZ(i,Math.sin(sp.getX(i)*2.2+sp.getY(i))*.18);sl.geometry.computeVertexNormals();sl.position.set(2.5,.12,-.6);sl.rotation.set(-Math.PI/2+.12,0,.5);sl.castShadow=sl.receiveShadow=true;g.add(sl);
+    g.rotation.set(0,rot||0,.22);if(!noCol)for(let lz=-2.4;lz<=2.4;lz+=1.2)colliders.push({x:x+Math.sin(rot||0)*lz,z:z+Math.cos(rot||0)*lz,r:1.05})}
+  else if(kind==='crate'){const n=arg||1,P=[[0,.375,-.42,.75],[.12,.36,.42,.72],[.05,1.08,-.4,.66]];for(let k=0;k<Math.min(n,3);k++){const [px,py,pz,sz]=P[k],c=mesh(new THREE.BoxGeometry(sz,sz,sz),plankMat,px,py,n>1?pz:0);c.rotation.y=rand(-.4,.4);g.add(c);
+      for(const sy of [-1,1])c.add(mesh(new THREE.BoxGeometry(sz*1.03,.07,sz*1.03),PM.wood,0,sy*sz*.38,0))}g.rotation.y=rot||0;cr=n>1?.95:.55}
+  else if(kind==='barrel'){const M=SEA_M(),lie=arg===1,b=new THREE.Group(),body=mesh(new THREE.CylinderGeometry(.36,.36,.95,12),M.barrel,0,0,0);body.scale.set(1.08,1,1.08);b.add(body);
+    for(const y of [-.3,.3]){const h=mesh(new THREE.TorusGeometry(.385,.035,4,14),PM.iron,0,y,0);h.rotation.x=Math.PI/2;b.add(h)}
+    if(lie){b.rotation.z=Math.PI/2;b.position.y=.38}else b.position.y=.475;g.add(b);g.rotation.y=rot||0;cr=.45}
+  else if(kind==='rope'){const M=SEA_M();for(let k=0;k<3;k++){const t=mesh(new THREE.TorusGeometry(.42-k*.09,.06,5,16),M.rope,0,.06+k*.1,0);t.rotation.x=Math.PI/2;g.add(t)}
+    const tl=mesh(new THREE.CylinderGeometry(.05,.05,1.3,5),M.rope,.75,.05,.2);tl.rotation.set(Math.PI/2,0,1.1);g.add(tl);g.rotation.y=rot||0}
+  else if(kind==='kelp'){const M=SEA_M();for(let k=0;k<6;k++){const w=mesh(new THREE.BoxGeometry(.16,.04,rand(.8,1.6)),M.kelp,rand(-.5,.5),.02,rand(-.5,.5));w.rotation.y=rand(0,3.2);g.add(w)}g.rotation.y=rand(0,6)}
+  else if(kind==='drift'){const l=mesh(new THREE.CylinderGeometry(.16,.22,arg||2.6,7),SEA_M().drift,0,.18,0);l.rotation.set(Math.PI/2,0,0);g.add(l);const br=mesh(new THREE.CylinderGeometry(.06,.09,.9,5),SEA_M().drift,.3,.3,.5);br.rotation.set(Math.PI/2,0,-.9);g.add(br);g.rotation.y=rot||0;cr=.4}
+  else if(kind==='sand'){const r=arg||8,m=new THREE.Mesh(discGeo,SEA_M().sand);m.rotation.x=-Math.PI/2;m.position.y=.035;m.scale.set(r,r*.8,1);m.receiveShadow=true;g.add(m);g.rotation.y=rot||0}
   else if(kind==='lava'){const r=arg||3,m=new THREE.Mesh(discGeo,lavaMat);m.rotation.x=-Math.PI/2;m.position.y=.04;m.scale.set(r,r,1);g.add(m);
     const rim=mesh(rockGeos[0],PM.stone,0,0,0);rim.scale.set(r*1.15,.2,r*1.15);rim.position.y=-.08;g.add(rim);fires.push({x,z,y:1,a:{scale:{set(){}}},b:{scale:{set(){}}},ph:rand(0,9)});cr=r*.9}
   if(cr&&!noCol)colliders.push({x,z,r:cr});scene.add(g);propMeshes.push(g);
