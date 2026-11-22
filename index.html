@@ -2015,7 +2015,7 @@ const NS_HPM=[[0,.65],[10,.45],[20,.36],[30,.19],[40,.067],[50,.032],[60,.017],[
 const NS_DMM=[[0,.67],[10,.33],[20,.16],[30,.13],[40,.097],[50,.108],[60,.118],[70,.092],[80,.099],[90,.088],[100,.105],[110,.142],[120,.162]];
 /* v826 스토리 1~10장: 구울 체력 = 장별 표준 스펙(레벨·6/5티어·강화, 레벨만큼 스킬 강화) 직업 4종 평균 DPS × 0.4 · 장 보스 = 10초→20초 × 평균 DPS × 0.75 ÷ (받는 피해 ×0.8 반영) · 8~10장 값 추가(이전엔 NaN) */
 const NS_STG=[1080,1530,2570,3070,3460,3980,4610,5010,5970,6340],NS_STB=[16200,25400,47000,61300,74700,93200,115500,133700,169200,190300],NS_FB=761000,NS_STDM=[1,1,1,1,.7,.55,.45,.45,.45,.45];
-const nsHpMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STG[ch]/(ETYPES.grunt.hp*CH[ch].hp):S.duel?nLerpLog(S.duel.tier,NS_HPM):D_GH[dI(t)]/(ETYPES.grunt.hp*egHp(oT(t)));/* v621: 구울 체력을 표에 맞춤 */
+const NS_STK=.8/* v850: 스토리 일반 몬스터 체력 전체 −20% (장 보스·골드는 그대로) */,nsHpMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STK*NS_STG[ch]/(ETYPES.grunt.hp*CH[ch].hp):S.duel?nLerpLog(S.duel.tier,NS_HPM):D_GH[dI(t)]/(ETYPES.grunt.hp*egHp(oT(t)));/* v621: 구울 체력을 표에 맞춤 */
 const nsDmMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STDM[ch]:S.duel?nLerpLog(S.duel.tier,NS_DMM):D_BR[dI(t)]/(ETYPES.brute.dmg*RANK[2].dmg*1.2*egDmg(oT(t)));/* v621: 유니크 브루트 1타를 표에 맞춤 */
 /* 보스 체력·기준 수치 (기준 강화: 검귀 +20 · 아귀 +32 · 우버 검귀 +35 · 우버 아귀 +43) */
 const NS_BOSS={knight:{n:{hp:1284000,K:3440},u:{hp:41560000,K:8000}},maw:{n:{hp:10000000,K:5230},u:{hp:57160000,K:13480}}};/* v826: 체력 = 기존 목표 시간(12.5·51·38·70초) × 새 적정 DPS × 0.75, 기준 수치 = 새 방어 비율(×0.77·0.89·0.82·0.98) *//* v621: 체력 = 목표 처치 시간 × 담당 위험도(5·10·15·20) 적정 DPS × 0.75 *//* v603: 기준 수치를 방어 상수 3,000 스케일로 (담당 위험도 5·10·15·20 표준 스펙 = 50%) — 체력은 3단계(위험도 20단계)에서 */
@@ -8181,7 +8181,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v849';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v850';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
