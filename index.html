@@ -2323,7 +2323,7 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 const SFX=(()=>{
   const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1.3,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
   const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
   const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
@@ -2368,13 +2368,14 @@ const SFX=(()=>{
   function bgmPrime(){if(!ctx||!bgmM)return;for(const n in BGMF){if(n===bgmCur||n===bgmWant)continue;try{const t=bgmTrack(n);if(t.pr)continue;t.pr=1;/* v774: 곡마다 한 번만 — 전에는 스킬 버튼을 누를 때마다 곡을 틀었다 멈춰서 화면이 끊겼음 */t.g.gain.value=0;const pr=t.el.play();if(pr&&pr.then)pr.then(()=>{if(bgmCur!==n)try{t.el.pause();t.el.currentTime=0}catch(e){}}).catch(()=>{t.pr=0})}catch(e){}}}
   function bgm(n){bgmWant=n||null;bgmSync()}
   bgmPre('title');/* v750: 오프닝 곡을 페이지가 열리자마자 내려받아 둠 — 터치 순간 바로 재생 */
-  function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));if(bgmM)bgmM.gain.value=muted?0:bgmVol/100;try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
+  let duckF=1;function bgmApply(){if(!bgmM)return;const tg=muted?0:bgmVol/100*duckF;try{const c=ctx.currentTime;bgmM.gain.cancelScheduledValues(c);bgmM.gain.setTargetAtTime(tg,c,.12)}catch(e){bgmM.gain.value=tg}}/* v839: 강화 연출 동안 배경음 30% 낮춤 */function duck(b){duckF=b?.7:1;bgmApply()}
+  function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));bgmApply();try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
   document.addEventListener('visibilitychange',()=>{const t=bgmCur&&bgmT[bgmCur];if(!t)return;try{document.hidden?t.el.pause():t.el.play().catch(()=>{})}catch(e){}});
   function swing(o){let i;do{i=1+Math.random()*9|0}while(i===sw&&Math.random()<.9);sw=i;return p('swing'+i,o)}
   function hit(crit,quiet){if(!(typeof S!=='undefined'&&S&&S.cls==='musa'))return;/* 무사 한정 */p('hit',{v:quiet&&!crit?.6:crit?1.2:1});if(crit)p('crit')}
   function setVol(v){vol=Math.max(0,Math.min(100,+v||0));if(master)master.gain.value=muted?0:vol/100;try{localStorage.setItem('sfxVol',String(vol))}catch(e){}}
-  function setMute(b){muted=!!b;if(master)master.gain.value=muted?0:vol/100;if(bgmM)bgmM.gain.value=muted?0:bgmVol/100;try{localStorage.setItem('sndMute',muted?'1':'0')}catch(e){}}
-  return{p,swing,hit,setVol,bgm,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
+  function setMute(b){muted=!!b;if(master)master.gain.value=muted?0:vol/100;bgmApply();try{localStorage.setItem('sndMute',muted?'1':'0')}catch(e){}}
+  return{p,swing,hit,setVol,bgm,duck,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
 })();
 /* v779: 카메라 확대 — 0 = 기본(예전 −15% 거리), −15까지 멀리, +45까지 가까이. 가까워질수록 낮게 내려와 등 뒤에서 보는 백뷰 쪽으로 기움 */
 const CZ_MIN=-15,CZ_MAX=45;let CAM_Z=0,CAM_LOCK=false;try{const v=localStorage.getItem('camZ3');if(v!==null&&v!==''&&!isNaN(+v))CAM_Z=Math.max(CZ_MIN,Math.min(CZ_MAX,+v));CAM_LOCK=localStorage.getItem('camLock')==='1'}catch(e){}
@@ -8173,7 +8174,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v838';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v839';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9638,14 +9639,14 @@ function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),t
 /* 강화 연출: 성공 = 금빛 섬광 + 모루 불꽃, 실패 = 붉은 흔들림 */
 /* v95 15단계 이상 강화 성공: 전체 화면 컷신 (빛줄기·충격 고리·불꽃·숫자 등장). 15~19 금빛 · 20~24 주황 · 25~ 보랏빛 */
 let enhCineOn=0,enhCineEnd=0,smLastTry=0;/* v136: 컷신 재생 중에는 자동 강화가 다음 시도를 기다림 */
-function enhCine(k,L,ok,done,auto,great){enhCineOn=1;let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
+function enhCine(k,L,ok,done,auto,great){enhCineOn=1;try{SFX.duck(1)}catch(e){}let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
   const base=L>=26?'200,120,255':'255,150,50';el.style.setProperty('--ec',base);
   let sp='';for(let i=0;i<16;i++){sp+=`<i class="in" style="left:${10+Math.random()*80}%;top:${66+Math.random()*24}%;--x:${((Math.random()-.5)*8).toFixed(1)}vmin;--y:-${(28+Math.random()*26).toFixed(1)}vmin;animation-delay:${(Math.random()*1).toFixed(2)}s;width:${2+Math.random()*3|0}px;height:${2+Math.random()*3|0}px"></i>`}
   el.innerHTML=`<div class="cring"></div>${sp}<div class="orb"></div><div class="wait"><small>${L>=25?'MYTHIC':'LEGENDARY'} ENHANCE</small><b>+${L}</b><span>${SLOTN[k]} 강화 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   if(auto){el.classList.add('auto');const sb=document.createElement('button');sb.className='autostop';sb.textContent='자동 강화 끄기';sb.addEventListener('click',e=>{e.stopPropagation();smAutoStop('직접 종료');fin()});el.appendChild(sb)}
   document.body.appendChild(el);
   const bsnd=auto?null:SFX.p('cut_build',{fit:1.14});/* 쌓이는 소리: 모으는 시간(1.14초)에 맞춰 뒤쪽(고조되는 부분)부터 재생, 결과 순간 끊음 */
-  const fin=()=>{if(over)return;over=1;enhCineOn=0;enhCineEnd=Date.now();el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
+  const fin=()=>{if(over)return;over=1;enhCineOn=0;try{SFX.duck(0)}catch(e){}enhCineEnd=Date.now();el.style.transition='opacity .25s';el.style.opacity=0;setTimeout(()=>el.remove(),250)};
   /* v102: 모으는 중 클릭 = 결과로 건너뛰기 · 결과에서 클릭 = 닫기 · 자동으로 닫히지 않음 */
   const born=Date.now();el.addEventListener('click',ev=>{/* v229: 리스너를 바로 붙임(기기가 바쁠 때 0.15초 타이머가 늦어져 연타가 씹히던 문제) — 일반 클릭만 0.15초 보호 */
     if(Date.now()-born<150)return;if(!revealed&&rv)rv();else if(canClose)fin()});
