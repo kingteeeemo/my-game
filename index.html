@@ -1109,7 +1109,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 #curBar{zoom:1.1}#topStack .bossbar span{white-space:nowrap}
 @media (orientation:landscape){#curBar{zoom:1.2}}/* v573: 재화 글자 세로 +10% · 가로·PC +20% */
 #curBar .cr1,#curBar .cr2{display:flex;align-items:center;height:16px;white-space:nowrap}#curBar .cr2{gap:6px}
-#curBar span{display:inline-flex;align-items:center}#curBar .ci{width:13px;height:13px;margin-right:3px;vertical-align:0}
+#curBar span{display:inline-flex;align-items:center}#curBar span[hidden]{display:none}#curBar .ci{width:13px;height:13px;margin-right:3px;vertical-align:0}
 .ci{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.22em;flex:none;overflow:visible}.ci.big{width:26px;height:26px;display:block;margin:auto}/* v576 */
 #curBar b{font-weight:800}.cg{color:#f0c84a}.ce{color:#ff6a4a}.cf{color:#ff9a3c}.cs{color:#ffc27a}.cl{color:#ffeebd}
 #exitSlot{display:flex;grid-column:1;grid-row:5;min-width:0}#exitSlot:empty,#exitSlot:has(#bossExit[hidden]){display:none}
@@ -7598,7 +7598,7 @@ function renderStash2(){const d=stashD,side=stashSide,src=side==='s'?d.items:S.i
 /* v604: 창고 재화 칸 — 잿불 정수·윤회의 불씨·성역의 인장·광휘의 파편 (모든 캐릭터 공유, 재화별 9,999) */
 const STASH_CUR=[['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s'],['lumi','광휘의 파편','l']],STASH_CMAX=9999;
 const stashCur=()=>{const d=stashD;d.cur=d.cur||{};return d.cur};
-function stashCurUI(){const c=stashCur(),T=TCUR();return `<div class="tag">재화 보관</div><div class="stcur">${STASH_CUR.map(([k,n,ic])=>{const mine=S[k]||0,st=c[k]||0,canIn=!T&&mine>0&&st<STASH_CMAX,canOut=!T&&st>0&&mine<CUR_MAX;
+function stashCurUI(){const c=stashCur(),T=TCUR();return `<div class="tag">재화 보관</div><div class="stcur">${STASH_CUR.filter(x=>x[0]==='lumi'||refOn()).map(([k,n,ic])=>{const mine=S[k]||0,st=c[k]||0,canIn=!T&&mine>0&&st<STASH_CMAX,canOut=!T&&st>0&&mine<CUR_MAX;
   return `<div class="stc"><span class="stn">${ci(ic)}<b>${n}</b></span><span class="stv"><small>보유</small>${T?'∞':fmtC(mine)}</span><span class="stv"><small>창고</small>${st.toLocaleString('ko-KR')}</span><button class="ghost" data-sc="in,${k}" ${canIn?'':'disabled'}>넣기</button><button class="ghost" data-sc="out,${k}" ${canOut?'':'disabled'}>꺼내기</button></div>`}).join('')}</div>`}
 /* 넣기: 가진 만큼(창고 한도까지) · 꺼내기: 소지 한도 999까지 */
 function stashCurMove(dir,k){if(TCUR())return;const c=stashCur(),mine=S[k]||0,st=c[k]||0;let n=dir==='in'?Math.min(mine,STASH_CMAX-st):Math.min(st,CUR_MAX-mine);if(n<=0)return;
@@ -8174,7 +8174,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v842';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v843';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8215,7 +8215,7 @@ let envMin=false,envSeen=null;try{envMin=!!localStorage.getItem('envMin')}catch(
 const fmtG4=v=>v>=1e29?'∞':v<1e4?Math.floor(v).toLocaleString('ko-KR'):[[1e7,1e3,'K'],[1e10,1e6,'M'],[1e13,1e9,'B'],[1e16,1e12,'T'],[Infinity,1e15,'Qa']].map(([l,d,u])=>v<l?Math.floor(v/d).toLocaleString('ko-KR')+u:null).find(x=>x);
 const fmtC=v=>v>=1e29?'∞':v>CUR_MAX?CUR_MAX+'+':String(Math.floor(v));
 function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.textContent!==t)e.textContent=t};st('goldT',fmtG4(S.gold||0));
-  const T=TCUR();st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('sealT',T?'∞':fmtC(S.seal||0));st('lumiT',T?'∞':fmtC(S.lumi||0))}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
+  const T=TCUR();st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('sealT',T?'∞':fmtC(S.seal||0));st('lumiT',T?'∞':fmtC(S.lumi||0));/* v841: 1~10장은 골드·광휘의 파편만, 나머지 재화는 엔드게임부터 */const eg=refOn();for(const id of ['essT','rrT','sealT']){const e=$(id).parentNode;if(e.hidden===eg)e.hidden=!eg}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
   cineUiSync();/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&(!bossIntroOn()||knAppr===1);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML=XIC+'<span class="xl"> 나가기</span>'}}
@@ -8961,7 +8961,7 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   w.onclick=ev=>{if(ev.target===w||ev.target.closest('.skix'))w.remove()};document.body.appendChild(w)});
 function renderMenu(){
   const c=C();if(menuTab!=='aura')menuTab='sk';
-  const tabsH=`<div class="mtab">${[['sk','스킬'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}${menuTab==='aura'?`<span class="mes">${ci('e')} ${fmtG(S.ess||0)}</span>`:''}</div>`;
+  const tabsH=`<div class="mtab">${[['sk','스킬'],['aura','오라']].map(([k,t])=>`<button data-tab="${k}" class="${menuTab===k?'on':''}">${t}</button>`).join('')}${menuTab==='aura'&&refOn()?`<span class="mes">${ci('e')} ${fmtG(S.ess||0)}</span>`:''}</div>`;
   let h=`<div class="mstk"><div class="shead"><h2>${c.n} 스킬</h2><button class="close" id="mClose">닫기</button></div>${tabsH}</div>
   ${S.test?`<div class="ptsline" style="background:#14202a;border:1px dashed #5ad1c8;border-radius:10px;padding:10px 12px;flex-wrap:wrap;gap:6px"><span style="color:var(--ink);flex:1 1 100%">테스트 캐릭터 · 강화를 − 로 내리면 포인트·정수가 돌아옵니다 · 저장 안 됨</span><button class="ghost" id="tGod" style="padding:6px 10px;font-size:12px;flex:1;white-space:nowrap">체력 무한 ${S.testGod?'끄기':'켜기'}</button><button class="ghost" id="tMp" style="padding:6px 10px;font-size:12px;flex:1;white-space:nowrap">마나 무한 ${S.testMp?'끄기':'켜기'}</button><button class="ghost" id="tCur" style="padding:6px 10px;font-size:12px;flex:1;white-space:nowrap">재화 무한 ${TCUR()?'끄기':'켜기'}</button></div>`:''}
   ${S.pending?`<div class="ptsline" style="background:#2a2118;border:1px solid var(--ember);border-radius:10px;padding:10px 12px"><span style="color:var(--ink)">고르지 않은 레벨업 강화 <b>${S.pending}</b>회</span><button class="primary" id="mLvNow" style="padding:8px 12px;font-size:13px">지금 고르기</button></div>`:''}
@@ -9141,7 +9141,7 @@ let invFilter='weapon',lockMode=false,invSub=null,ddOpen=null;/* v131 가방 종
 function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=sc.length-a;
   if(a)o.push({n:'각인의 서',k:a,c:'#5ae0d0',i:'scr'});if(b)o.push({n:'상급 각인의 서',k:b,c:'#c890ff',i:'scrU'});
   if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffb070',i:'tk'});
-  {const cur=(n,v,c,sh)=>o.push({n,c,h:ci(sh,'big'),kt:TCUR()?'∞':fmtKM(v||0)});if(NS()){cur('윤회의 불씨',S.rr,'#ff9a4a','r');cur('성역의 인장',S.seal,'#ff8a2a','s')}cur('광휘의 파편',S.lumi,'#c890ff','l');if(NS()||S.ch>=NCH||(S.ess||0)>0)cur('잿불 정수',S.ess,'#ff5a3a','e')}
+  {/* v841: 없는 재화는 0으로 표기하지 않고 숨김, 정수·불씨·인장은 엔드게임부터 */const cur=(n,v,c,sh)=>{if(!TCUR()&&!(v>0))return;o.push({n,c,h:ci(sh,'big'),kt:TCUR()?'∞':fmtKM(v||0)})},eg=refOn();if(eg){cur('윤회의 불씨',S.rr,'#ff9a4a','r');cur('성역의 인장',S.seal,'#ff8a2a','s')}cur('광휘의 파편',S.lumi,'#c890ff','l');if(eg)cur('잿불 정수',S.ess,'#ff5a3a','e')}
   if(NS()){}/* v639: 물약은 충전식이라 기타 탭에서 뺌 */else for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
   return o}
 function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (장비 시스템만 테스트 캐릭터 전용) */
@@ -9160,7 +9160,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('belt')}${slot('boots')}${lockSlot('외형 (추가 예정)')}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>
-    <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span><span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span><span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
+    <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span>${refOn()?`<span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span>`:''}<span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','gloves','boots'],acc:['amulet','ring','belt']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
   const subOk=x=>!invSub||x.slot===invSub,subN=k=>k&&FG[invFilter]&&FG[invFilter].includes(k)?SLOTN[k]:'';
