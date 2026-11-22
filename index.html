@@ -8153,7 +8153,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v816';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v817';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8601,19 +8601,17 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
     askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;const pro=!(sk&&skipOk());/* v795: 순서 — 닉네임 → 프롤로그 → 로딩(오프닝 BGM이 여기서 페이드아웃) → 1장. 31레벨 엔드게임 시작은 프롤로그 없이 로딩 */demoEnd();S=fresh();const load=()=>{window.BGMHOLD=0;try{SFX.bgm(null)}catch(e){}showLoading(()=>startGame(c,m,sk))};if(pro){window.BGMHOLD=1;showLoading(()=>prologPlay(load),null,{T:1600})}else load()}})}});
 /* v802: 로딩 화면 팁 — 실제 게임 시스템 기준(가이드와 같이 점검) */
 const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습니다.',
-  '창고에 맡긴 장비와 재화는 모든 캐릭터가 함께 씁니다.',
+  '창고에 맡긴 장비는 다른 캐릭터에게 옮길 수 있습니다.',
+  '모든 재화는 계정 공유입니다.',
   '물약은 몬스터를 처치하면 다시 채워집니다.',
   '「자동」을 켜면 정해 둔 비율 아래에서 물약을 마십니다.',
-  '레벨업 때 고른 주력 스킬 강화는 되돌릴 수 없습니다.',
   '마나가 모자라면 주력 스킬이 기본 공격으로 나갑니다.',
   '「보스」를 켜면 주력 스킬이 한 대상에 집중됩니다.',
-  '바닥의 빨간 장판은 보스의 큰 공격 신호입니다.',
   '장비 티어는 숫자가 작을수록 좋습니다.',
   '대장장이 강화는 장비가 아닌 부위에 쌓입니다.',
   '조율사에게서 장비 옵션을 다시 뽑을 수 있습니다.',
   '위험도는 최대 20단계까지 있습니다.',
   '오라는 최대 마나의 일부를 쓰는 대신 효과가 유지됩니다.',
-  '마을에는 몬스터가 나오지 않습니다.',
   '재단사 세라에게서 외형 장비를 살 수 있습니다.',
   '마우스 휠이나 두 손가락으로 화면을 확대·축소합니다.',
   '진행 내용은 자동으로 저장됩니다.'];
