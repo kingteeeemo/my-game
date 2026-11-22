@@ -2343,7 +2343,7 @@ const SFX=(()=>{
     act++;src.onended=()=>{act--;try{src.disconnect();g.disconnect()}catch(e){}};
     return{stop(f){try{const c=ctx.currentTime;g.gain.cancelScheduledValues(c);g.gain.setValueAtTime(g.gain.value,c);g.gain.linearRampToValueAtTime(0,c+(f||.06));src.stop(c+(f||.06)+.02)}catch(e){}}}}
   /* v744: 배경음(BGM) — 긴 곡이라 미리 풀지 않고 오디오 요소로 흘려 재생(메모리 절약), 곡이 바뀌면 서서히 교차 */
-  const BGMF={title:'bgm/title.mp3',refuge:'bgm/refuge.mp3'};let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
+  const BGMF={title:'bgm/title.mp3',village:'bgm/village.mp3'};let bgmVol=50,bgmM=null,bgmWant=null,bgmCur=null;const bgmT={};
   try{const v=localStorage.getItem('bgmVol');if(v!==null&&v!==''&&!isNaN(+v))bgmVol=Math.max(0,Math.min(100,+v))}catch(e){}
   function bgmPre(n){if(bgmT[n]||!BGMF[n])return bgmT[n];const el=new Audio();el.loop=true;el.preload='auto';el.src=BGMF[n];try{el.load()}catch(e){}return bgmT[n]={el,g:null,off:0}}
   function bgmTrack(n){const t=bgmPre(n);if(!t.g){t.g=ctx.createGain();t.g.gain.value=0;try{ctx.createMediaElementSource(t.el).connect(t.g)}catch(e){}t.g.connect(bgmM)}return t}
@@ -10342,7 +10342,7 @@ document.querySelectorAll('#camLk button').forEach(b=>b.addEventListener('click'
     if(camSet(CAM_Z+(e.deltaY>0?-5:5)))try{camSegUI()}catch(_){}},{passive:true});
 })();
 
-{const chk=()=>{try{const on=window.BGMHOLD||['title','slots','classSel','skillSel','prolog'].some(id=>$(id)&&!$(id).hidden);const mb=$('muteBtn');if(mb)mb.hidden=!on;const fb=$('fsTitle');if(fb)fb.hidden=!on;SFX.bgm(on?'title':(inTown&&mapKind==='town')?'refuge':null)/* v765: 마을 BGM — 세렌 마을·추락자의 쉼터 공용 */}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
+{const chk=()=>{try{const on=window.BGMHOLD||['title','slots','classSel','skillSel','prolog'].some(id=>$(id)&&!$(id).hidden);const mb=$('muteBtn');if(mb)mb.hidden=!on;const fb=$('fsTitle');if(fb)fb.hidden=!on;SFX.bgm(on?'title':(inTown&&mapKind==='town')?'village':null)/* v765: 마을 BGM — 세렌 마을·추락자의 쉼터 공용 */}catch(e){}};setInterval(chk,400);addEventListener('click',chk);addEventListener('keyup',chk)}/* v749: 메뉴의 「처음 화면」처럼 누르는 순간 화면이 바뀌면 그 터치 안에서 바로 재생(폰 브라우저는 터치 밖의 재생 시작을 막음) *//* v744: 시작·슬롯·직업 선택 화면 = 오프닝 BGM */
 {const mb=$('muteBtn'),sh=()=>{mb.classList.toggle('muted',SFX.muted)};sh();mb.addEventListener('click',()=>{SFX.setMute(!SFX.muted);sh()})}/* v769: 음소거 버튼(시작·슬롯·직업·스킬 선택 화면) */
 {const r=$('bgmVol'),o=$('bgmVolO');const sh=()=>{r.value=SFX.bgmVol;o.textContent=SFX.bgmVol+'%';rngPc(r)};sh();r.addEventListener('input',()=>{SFX.setBgmVol(+r.value);sh()})}
 {const r=$('sfxVol'),o=$('sfxVolO');const sh=()=>{r.value=SFX.vol;o.textContent=SFX.vol+'%';rngPc(r)};sh();r.addEventListener('input',()=>{SFX.setVol(+r.value);sh()});r.addEventListener('change',()=>SFX.p('dodge'))}
