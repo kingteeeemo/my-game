@@ -8161,7 +8161,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v827';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v828';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9822,7 +9822,7 @@ function showSlots(keep){
   for(let i=0;i<SLOTS;i++){const d=D[i];
     if(d){const c=CLS[d.cls];h+=`<div class="scard" data-i="${i}" style="--cc:${c.c}"><canvas class="spc" data-c="${d.cls}"></canvas><span class="sctag">SLOT ${String(i+1).padStart(2,'0')}${curSlot===i?' · 플레이 중':''}</span><div class="scin"><span class="en">${c.en} · Lv ${d.lv}</span><h3>${d.nick?nickSafe(d.nick):'닉네임 미설정'}</h3><p class="scm">${progressText(d)}</p><div class="scst"><div><b>${d.lv}</b>레벨</div><div><b>${fmtPlay(d.playSec)}</b>플레이</div><div><b>${d.savedAt?fmtTime(d.savedAt):'-'}</b>저장</div></div></div></div>`}
     else h+=`<div class="scard empty" data-i="${i}"><div class="scin"><span class="plus">+</span><span class="en">Slot ${String(i+1).padStart(2,'0')}</span><h3>빈 슬롯</h3><p class="scm">새로 시작하기</p></div></div>`}
-  h+=`<button class="ghost sdel" id="slDel">삭제</button><div class="slbtns"><button class="primary" id="slGo">이어하기</button>${canClose?'<button class="ghost" id="slClose">닫기</button>':'<button class="ghost" id="slTitle">처음 화면</button>'}</div></div>`;h+=window.clRow?window.clRow():'';/* v516 */
+  h+=`<button class="ghost sdel" id="slDel">삭제</button><div class="slbtns"><button class="primary" id="slGo">이어하기</button><button class="ghost" id="slTitle">처음 화면</button></div></div>`;h+=window.clRow?window.clRow():'';/* v516 */
   $('slotSheet').className='sheet modal slx';$('slotSheet').innerHTML=h;$('slots').hidden=false;releaseAll();
   for(const c of document.querySelectorAll('#slotSheet canvas.spc')){const k=c.dataset.c,src=portCv[k];if(src&&portOk[k]){c.width=src.width;c.height=src.height;c.getContext('2d').drawImage(src,0,0);c._ok=portOk[k];c.classList.add('on')}}
   slotLayout();requestAnimationFrame(slotLayout);slotPortraits();
@@ -9870,7 +9870,7 @@ $('nickSheet').addEventListener('keydown',e=>{if(e.target.id==='nickIn'&&e.key==
 $('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.id==='nickOk')nickDone(true);else if(b.id==='nickNo')nickDone(false)});
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
-  if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
+  if(b.id==='slTitle'){if(curSlot!==null&&S&&S.cls)save();$('slots').hidden=true;$('title').hidden=false;return}
   if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);if(willTown(d)){const rf=d.ch>=NCH;window.BGMNOKEEP=1;/* v821: 기존 캐릭터 접속 로딩은 오프닝 곡을 빠르게 끊음 */showLoading(()=>{$('slots').hidden=true;noML=true;try{enterGame()}finally{noML=false}},null,{title:rf?REF.n:TOWN0.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:2200});return}$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
   if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
