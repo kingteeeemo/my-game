@@ -7283,7 +7283,7 @@ function wvFill(g,ri,ro,half,off,seg){const ps=g.attributes.position;for(let i=0
 const bmRad=L=>1.3+.36*L/* v672: 처음엔 작게(1.3m) → 10단계 4.9m(이전 최대와 같음) */,bmSpd=L=>1+.15*L/* v720: 가속 화살 10단계 +150% (v719 +80%) */,bmDmg=L=>1+.04*L,bmEmber=L=>({dur:1+.2*L,m:.3+.05*L}),/* 잔불: 폭발 자리에 불바닥 */
   bmMulti=L=>({n:Math.round(1+.8*L),m:1/(1+.12*L)}),/* v696: 5단계 — 2·3·3·4·5발 *//* 연발 폭격(4단계): 2·3·4·5발 */bmShrap=L=>({n:3+L,m:.3+.06*L});/* 파편 작렬(5단계) */
 const plRad=L=>2.4*(1+.08*L),plDmg=L=>1+.04*L,plEcho=L=>({n:Math.round(.6*L),m:.4+.06*L}),/* v696: 5단계 = 옛 3단계(3회 ×.70) *//* v195: 여진은 2차(최대 3단계) — 3단계 = 옛 10단계(3회 ×.70) */
-  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */plTwin=L=>{const k=L>=7?3:L>=4?2:L>=1?1:0;return {n:1+k,m:1+.05*(L-k)}};/* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
+  plChain=L=>({n:1+L,r:5+.5*L,m:.7+.05*L}),/* 연쇄 작렬(5단계): 폭발이 근처 적에게 L+1번 번짐 */PTW_K=[0,1,2,3,3,4,5,6,6,7,8],plTwin=L=>{const l=Math.max(0,Math.min(10,L|0)),k=PTW_K[l];return {n:1+k,m:1+.05*(l-k)}};/* v857: 10단계 9개 — 4·8단계만 기둥 대신 피해 +5%(10단계 ×1.10) *//* v195: 다중 기둥 1차(10단계) — 1·4·7단계에 2·3·4개 / v197: 감소 없음 / v201: 기둥이 늘지 않는 단계(2·3·5·6·8·9·10)마다 피해 +5% → 10단계 ×1.35 */
 const smRad=L=>2.3*(1+.1125*L)/* v762: 10단계 반경 +25% (3.9m→4.9m), 0단계 2.3m 그대로 */,smDmg=L=>1+.04*L,smArc=L=>({n:1+Math.floor(L/3),m:.3+.03*L,r:6.5}),/* 갈래 번개(10단계): 1·3·6·9단계에 번개 +1 */
   smField=L=>({dur:1+.2*L,iv:.25,m:.06+.02*L}),/* 폭풍의 잔향(5단계) */smTwin=L=>({n:L,m:.4+.06*L});/* 심판의 비(5단계): 단계마다 검 +1 → 5단계 총 6자루 */
 const SK_NEW={
@@ -7303,7 +7303,7 @@ Object.assign(GEMS,{
   srad:{n:'폭풍의 손길',t:'smite',c:'#9ac8ff',d:L=>`번개 반경 ${smRad(L).toFixed(1)}m · 피해 +${4*L}%`},
   sarc:{n:'갈래 번개',t:'smite',c:'#b0d8ff',d:L=>{if(!L)return '검이 꽂힐 때 주변의 다른 적에게 번개가 튐';const a=smArc(L);return `검이 꽂힐 때 ${a.r.toFixed(1)}m 안의 다른 적 ${a.n}명에게 번개가 튐 (피해 ×${a.m.toFixed(2)})`}},
   prad:{n:'작렬 확대',t:'pillar',c:'#d8a0ff',d:L=>`폭발 반경 ${plRad(L).toFixed(1)}m · 피해 +${4*L}%`},
-  ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})\n${L<10?([1,4,7].includes(L+1)?'다음 단계: 기둥 +1개':'다음 단계: 피해 +5%'):'최대'}`}}});
+  ptwin:{n:'다중 기둥',t:'pillar',c:'#c890ff',d:L=>{const t=plTwin(L);return `기둥 ${t.n}개가 서로 다른 적에게 동시에 떨어짐 (피해 ×${t.m.toFixed(2)})\n${L<10?(plTwin(L+1).n>t.n?'다음 단계: 기둥 +1개':'다음 단계: 피해 +5%'):'최대'}`}}});
 Object.assign(GEMS2,{
   wfan:{s:'wave',n:'매영조화',/* v664: 검기 확장 → 매영조화 */c:'#ffb0c8',d:L=>{const g=(typeof S!=='undefined'&&S&&S.sk&&S.sk.wave)||{},k=wvProg(g.wlen||0,g.wecho||0,L),a=wvShape(k,0,1).deg,b=wvShape(k,1,1).deg;return `검기가 더 넓게 퍼짐 — 발사 ${Math.round(a)}° → 사거리 끝 ${Math.round(b)}°\n(매화섬·낙화검도 크기를 조금 키움 · 모두 최대 ${WV_A0[1]}° → ${WV_A1[1]}°)`}},/* v645: 부채 검기 → 검기 확장 (같은 id라 기존 투자 단계 유지) */
   wburst:{s:'wave',n:'매화만개',c:'#ffb060',max:5,d:L=>{const b=wvBurst(L);return `검기가 사거리 끝에서 매화처럼 터짐 · 반경 ${b.r.toFixed(1)}m (피해 ×${b.m.toFixed(1)})\n붉은 결정과 함께 꽃잎이 흩날림`}},/* v664: 검기 폭발 → 매화만개, 3단계 → 5단계 */
@@ -7875,10 +7875,11 @@ function castFire(slot,id){
     const cand=pillarTargets(ap);/* v180: 사거리 22.4m(1.6배) */
     const n=st.twin.n,tg=cand.slice(0,n),hit=new Set(tg),ov={k:'pc',id:++volSeq,cap:n*(1+(st.pecho?st.pecho.n:0))};/* v725: 한 번 시전에 같은 적이 맞는 폭발은 (기둥 수 × (1+여진 수))번까지 온전히 = 보스 1마리가 받는 양 */
     const mk=(c,lk)=>pillarCast(c,{r:st.r,dmg:base*st.dmg*(n>1?st.twin.m:1),so:st.so,echo:st.pecho?{n:st.pecho.n,dmg:base*st.dmg*(n>1?st.twin.m:1)*st.pecho.m}:null,chain:st.pch,lock:lk,ov},hit,0);
-    /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 */
+    /* v178: 적이 기둥 수보다 적으면 남는 기둥은 같은 적에게 겹쳐 내리꽂음(1명이면 n개 전부 그 적) — 항상 n개가 터짐 / v857: 남는 기둥은 마지막에 고른 적이 아니라 맨 처음(가장 가까운) 적부터 돌아가며, 그 적이 죽었으면 살아 있는 적에게 */
     if(!cand.length){const c0=pcMode?{x:ap.x,z:ap.z}:{x:P.pos.x+Math.sin(P.face)*5,z:P.pos.z+Math.cos(P.face)*5};for(let i=0;i<n;i++){const o=i?{x:c0.x+rnd(-.9,.9),z:c0.z+rnd(-.9,.9)}:c0;i?later(i*.08,()=>mk(o)):mk(o)}return}
-    for(let i=0;i<n;i++){const e=cand[i%cand.length],rep=i>=cand.length,c={x:e.pos.x+(rep?rnd(-.7,.7):0),z:e.pos.z+(rep?rnd(-.7,.7):0)};
-      i?later(i*.08,()=>mk(c,e)):mk(c,e)}return}
+    const dl=n>5?.055:.08;for(let i=0;i<n;i++){const e0=cand[i%cand.length],rep=i>=cand.length;
+      const go=()=>{let e=e0;if(!(e.hp>0)){e=cand.find(x=>x.hp>0);if(!e)return mk({x:e0.pos.x+rnd(-.7,.7),z:e0.pos.z+rnd(-.7,.7)})}mk({x:e.pos.x+(rep?rnd(-.6,.6):0),z:e.pos.z+(rep?rnd(-.6,.6):0)},e)};
+      i?later(i*dl,go):go()}return}
   if(b.kind==='crush'){
     const t=pickTarget(4.2);
     const hit=mul=>{const tt=t&&t.hp>0?t:pickTarget(4.2);P.swing=.2;P.swingDir*=-1;swingFx();
@@ -8211,7 +8212,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v856';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v857';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
