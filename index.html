@@ -8153,7 +8153,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v808';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v809';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8620,10 +8620,10 @@ const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습�
 let loadTipI=-1;
 function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o.T||2600;
   $('loadTitle').textContent=o.title||'루멘하르';const sb=$('loadSub');sb.hidden=!o.sub;sb.textContent=o.sub||'';
-  let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').textContent=msg||LOAD_TIPS[n];/* v806: 문구는 한 줄만 — 메시지가 있으면 메시지, 없으면 팁 하나 */
+  let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').textContent=msg||LOAD_TIPS[n];$('loadHint').hidden=!!o.sub;/* v808: 마을 로딩은 이름+설명만, 일반 로딩은 팁 한 줄 *//* v806: 문구는 한 줄만 — 메시지가 있으면 메시지, 없으면 팁 하나 */
   L.hidden=false;bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition=`width ${T-100}ms cubic-bezier(.3,.6,.4,1)`;bar.style.width='100%';
   setTimeout(()=>{try{cb()}finally{setTimeout(()=>{L.style.opacity='0';setTimeout(()=>{L.hidden=true;L.style.opacity=''},400)},150)}},T)}
-const TOWN_DESC={town:'무너진 도시들의 피난민이 모여 사는 대륙 외곽의 마을. 아직 꺼지지 않은 불빛이 남아 있습니다.',refuge:'성역 아래 깊은 동굴. 금빛 화로의 불씨가 추락한 자들을 맞이합니다.'};
+const TOWN_DESC={town:'무너진 도시들의 피난민이 모인 대륙 외곽의 마을',refuge:'금빛 화로의 불씨가 지키는 성역 아래 동굴'};
 const willTown=d=>!!(d&&d.cls&&!d.tutor&&!d.test&&!d.demo&&!(d.ch===0&&!d.vil&&!d.skipStart)&&!(d.ch<NCH&&d.phase===2)&&!(d.ch===LAST&&d.phase===4)&&!(d.fld&&d.fld.bf));
 let noML=false;
 
@@ -9831,7 +9831,7 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){$('slots').hidden=true;$('title').hidden=false;return}
   if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);if(willTown(d)){const rf=d.ch>=NCH;showLoading(()=>{$('slots').hidden=true;noML=true;try{enterGame()}finally{noML=false}},null,{title:rf?REF.n:TOWN0.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:2200});return}$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
-  if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);showLoading(()=>{$('slots').hidden=true;showClassSel()},null,{T:1400});return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
+  if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
     else slotArm={i,t:Date.now()};
@@ -10272,7 +10272,7 @@ $('autoPop').addEventListener('change',e=>{if(e.target.dataset.apc){save();autoR
 document.querySelectorAll('#askSeg button').forEach(b=>b.addEventListener('click',()=>{S.autoSkSet=b.dataset.a==='1';if(!S.autoSkSet)S.autoSkOn=false;skAutoUi();save()}));
 $('pGuide').onclick=()=>{closePause();guideBook()};
 $('pProlog').onclick=()=>{closePause();prologPlay(null)};/* v784 */
-$('pSlots').onclick=()=>{save();closePause();closeAllSheets();showLoading(()=>showSlots(),`${S.nick||'캐릭터'}의 여정을 저장하고 나갑니다…`)};/* v781: 슬롯 선택 — 지금 캐릭터를 마치고 나가는 느낌으로 로딩 화면 *//* v71: 슬롯 버튼은 설정 창 안으로 */
+$('pSlots').onclick=()=>{save();closePause();closeAllSheets();showLoading(()=>showSlots())};/* v781: 슬롯 선택 — 지금 캐릭터를 마치고 나가는 느낌으로 로딩 화면 *//* v71: 슬롯 버튼은 설정 창 안으로 */
 function openPause(){if(!S.cls)return;releaseAll();skAutoUi();$('pause').hidden=false}
 function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
