@@ -2163,7 +2163,7 @@ function acctRead(){let a=null;try{a=JSON.parse(localStorage.getItem(ACCT_KEY))}
   if(!Array.isArray(a.gates))a.gates=[];if(!a.bclr||typeof a.bclr!=='object'){a.bclr={};const g={20:'kn',40:'mn',50:'ku',60:'mu'};for(const t in g)if((a.maxTier||0)>+t)a.bclr[g[t]]=1;/* v369: 이미 넘어선 봉인은 처치한 것으로 */try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}if((a.maxTier||0)>60&&!a.bclr.mu){a.bclr.mu=1;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v374: 우버 아귀 봉인 70→60 — 이미 61 이상이면 해제 처리 */return a}
 function acctApply(s){if(!s||s.test||s.demo)return;const a=acctRead();if(s.lvConv&&s.lvConv.rs){delete s.lvConv.rs;const t0=s.lvConv.tier[0];if((a.maxTier||0)<t0)a.maxTier=t0;const G=new Set(a.gates||[]);for(let t=GATE_EVERY;t<t0;t+=GATE_EVERY)G.add(t);a.gates=[...G].sort((x,y)=>x-y);try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}/* v438 */if(s.lvConv&&!s.lvConv.gd){s.lvConv.gd=1;const ck=s.lvConv.from+'@'+(s.savedAt||0);a.lvCv=a.lvCv||[];if(a.lvCv.includes(ck))s.lvConv.gd=2;else{a.lvCv.push(ck);const g0=a.gold||0;a.gold=Math.round(g0*s.lvConv.gr);s.lvConv.g0=g0;s.lvConv.g1=a.gold;try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}}/* v435: 만렙 초과 세이브 환산 — 계정 골드 레벨 비율로 1회 */s.gold=a.gold;/* v359: 폐지된 50% 물약은 판매가(3,000G)로 환급 */if(s.pots)for(const k of ['hp','mp']){const n=s.pots[k]&&s.pots[k].h;if(n>0)s.gold+=n*300;if(s.pots[k])delete s.pots[k].h}for(const k of ['autoHpSz','autoMpSz'])if(s[k]==='h')s[k]='a';s.maxTier=Math.min(D_MAX,Math.max(s.maxTier||0,a.maxTier||0));const g=new Set([...(s.gates||[]),...a.gates]);s.gates=[...g].sort((x,y)=>x-y);s.bclr={...(s.bclr||{}),...a.bclr}}
 function acctSave(){if(S.test||S.demo||!(S.gold>=0))return;const a=acctRead();a.gold=Math.round(S.gold);a.maxTier=Math.max(a.maxTier||0,S.maxTier||0);const g=new Set([...a.gates,...(S.gates||[])]);a.gates=[...g].sort((x,y)=>x-y);a.bclr={...a.bclr,...(S.bclr||{})};try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
-function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if(!fldHold&&!inTown)try{S.fld=fldSnap()}catch(e){}/* v452 */S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
+function save(){if(curSlot===null||!S.cls||S.demo)return;S.savedAt=Date.now();if(!fldHold&&!inTown&&!ldBusy)try{S.fld=fldSnap()}catch(e){}/* v852: 로딩 중에는 스냅샷을 건드리지 않음 *//* v452 */S.riftT=Math.max(1,Math.round(riftT));/* v419 */acctSave();try{localStorage.setItem(slotKey(curSlot),JSON.stringify(S))}catch(e){}}
 /* 예전 단일 저장 데이터는 1번 슬롯으로 옮김 */
 try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0))&&parseSave(old))localStorage.setItem(slotKey(0),old);localStorage.removeItem(KEY)}catch(e){}
 
@@ -4314,7 +4314,7 @@ function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL
   const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;$('talkN').className=vo?'vo':'';$('talkT').innerHTML=String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/(카이렌|모르딘|오스릭|하란|아쉬카르)/g,'<b class="pn">$1</b>');/* v809: 인물 이름 강조 */$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸';const H=$('talkH');if(T.i===0){H.style.opacity=.25;clearTimeout(T.ht);T.ht=setTimeout(()=>{H.style.opacity=''},1500)}else H.style.opacity=''}
 /* 엔드게임 마을로 — 결말(fall) · 부캐 시작(alt) · 결말 도중 재접속 */
 function toRefuge(kind){if(RZ)riftClear();clearPools();collectAll();wipeFx();for(const e of [...enemies])dropEnemy(e);for(const p of pickups)scene.remove(p.m);pickups.length=0;S.duel=null;bossAuto(false);S.fld=null;inTown=true;P.mv=null;townSync();
-  townLoad(()=>{setMap(true);applyTheme();P.pos.set(0,0,kind==='fall'?14.6:8.5);camT.copy(P.pos);P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;fldHold=false;save();
+  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,kind==='fall'?14.6:8.5);camT.copy(P.pos);P.mhp=heroMax();P.hp=P.mhp;P.mmp=heroMp();P.mp=P.mmp;fldHold=false;save();
     if(kind==='fall'){const b=$('ashBg');if(b){b.style.transition='opacity 1.8s';b.style.opacity=0;later(2,()=>{b.style.transition=''})}}},
   ()=>{if(kind==='fall'){toast('금빛이 사라진다','');refShieldFade();later(3.4,()=>{stageBanner();refLore()})}else{stageBanner();toast('스토리 스킵 · 31레벨','1차 강화 30회와 스텟 포인트 30점을 직접 찍으세요');later(2.4,()=>refLore())}})}
 function refShieldFade(){const g=ashShield();ASHC.g=null;g.visible=true;fx.push({m:g,t:0,dur:3.2,keep:1,upd(k){const U=g.userData,o=1-k*k;g.position.set(P.pos.x,P.pos.y+1.15,P.pos.z);U.a.material.opacity=.13*o;U.b.material.opacity=.24*o;U.hl.material.opacity=.22*o;U.lt.intensity=2.2*o;U.beam.material.opacity=0},end(){g.traverse(o=>{if(o.material)o.material.dispose();if(o.geometry)o.geometry.dispose()})}})}
@@ -4415,16 +4415,16 @@ function mapLoad(title,sub,fn,after){
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 const vilLock=()=>S&&S.ch===0&&!S.vil&&!S.test&&!S.skipStart;/* v710: 세렌 마을은 1장을 마치고 이야기로 도착한 뒤부터 */
 function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  townLoad(()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
+  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls||vilLock())return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
   const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;bossAuto(false);inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  townLoad(()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
+  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
 /* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
 let fldHold=false;
 const fldKind=e=>e.duel?'d':e.final?'f':e.chBoss?'c':e.gate?'g':null;
-function fldSnap(){if(S.tutor||S.demo||inTown||ldBusy||!(P.hp>0)||(S.ch<NCH&&S.phase===2)||(S.ch===LAST&&S.phase>=4))return null;
-  const f={x:+P.pos.x.toFixed(1),z:+P.pos.z.toFixed(1)};
+function fldSnap(){if(S.tutor||S.demo||inTown||ldBusy||!(P.hp>0)||(S.ch<NCH&&S.phase!==1&&S.phase!==3)||(S.ch===LAST&&S.phase>=4))return null;
+  const f={x:+P.pos.x.toFixed(1),z:+P.pos.z.toFixed(1),ch:S.ch};/* v852: 어느 장의 스냅샷인지 */
   if(S.duel||bossCtx()){f.bf=1;f.hp=Math.round(P.hp);f.mp=Math.round(P.mp)}
   const b=[];for(const e of enemies)if(e.boss&&e.hp>0&&!e.rift&&fldKind(e))b.push({k:fldKind(e),r:+(e.hp/e.mhp).toFixed(4),x:+e.pos.x.toFixed(1),z:+e.pos.z.toFixed(1),a:e.aggro?1:0});
   if(b.length)f.b=b;
@@ -4446,14 +4446,17 @@ function applyFld(f,full){if(!f)return;
 function showResume(){const el=$('resume');el.hidden=false;P.mv=null}
 function hideResume(){const el=$('resume');if(el.hidden)return;el.hidden=true;P.inv=Math.max(P.inv,2)}
 /* v833: 스토리 장에서 마을 → 사냥터로 나갈 때 「재도전(장 처음부터, 몬스터·보스 새로) / 이어하기(떠난 자리·보스 체력 그대로)」 */
-const stRetryAsk=()=>S.ch<NCH&&!S.tutor&&!S.demo&&(!!S.fld||S.phase===3);
+/* v852: 다른 장(앞 장 끝자리)의 스냅샷은 버림 — 예전 저장은 장 표시가 없어서, 장 보스가 살아 있는 기록일 때만 인정 */
+const fldOk=f=>!!f&&(S.ch>=NCH||(f.ch!=null?f.ch===S.ch:!!(f.b&&f.b.some(q=>q.k==='c'||q.k==='f'))));
+function fldFix(){if(S&&S.fld&&!fldOk(S.fld))S.fld=null}
+const stRetryAsk=()=>{fldFix();return S.ch<NCH&&!S.tutor&&!S.demo&&(!!S.fld||S.phase===3)};
 function stRetry(){S.phase=0;S.kills=0;S.fld=null;S.duel=null;fldHold=false;/* v834: 장 처음 자리(모닥불 체크포인트 지움) · 이 장의 사건(관문·모닥불·매복 등) 되돌림 · 몬스터 배치 새로 굴림 */if(S.chk&&S.chk.ch===S.ch)S.chk=null;if(S.chev){const pf=S.ch+':';for(const k of Object.keys(S.chev))if(k.startsWith(pf))delete S.chev[k]}S.sSeed=0;save()}
 /* v838: 엔드게임 — 진행 중인 사냥터가 있으면 마을에서 다시 나갈 때 이어할지 묻는다 */
 const egRun=()=>!!(S&&S.ch>=NCH&&!S.runClr&&!S.egFresh&&(S.tierKills||0)>0&&!S.duel);
 function egDrop(){S.fld=null;S.tierKills=0;S.egK=0;S.egFresh=1;save()}
 function egRunAsk(yes,no){const B='color:var(--ink)',pts=mutPts(S.mutRun||{}),n=Math.min(S.tierKills||0,tkFor(S.tier));
   askConfirm('진행 중인 사냥터가 있습니다',`<b style="${B}">위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}</b><br>처치 ${n.toLocaleString('ko-KR')} / ${tkFor(S.tier).toLocaleString('ko-KR')} · ${pts?`변이 ×${mutRw(pts).toFixed(2)}`:'변이 없음'}<br><br><b style="${B}">예</b> · 이어서 사냥합니다.<br><b style="${B}">아니오</b> · 진행 중인 사냥터는 사라지고, 위험도와 변이를 새로 골라 입장합니다.`,'예',yes,'아니오',no)}
-function leaveTown(force){if(!inTown)return;if(!force&&!ldBusy&&egRun()){egRunAsk(()=>leaveTown(true),()=>{egDrop();openStage()});return}S.egFresh=0;if(!force&&!ldBusy&&stRetryAsk()){const lb=S.ch===LAST&&S.phase===3;askConfirm(`${S.ch+1}장 · ${CH[S.ch].n}`,`<b style="color:var(--ink)">이어하기</b> · 떠났던 자리에서${lb?' 최종 결전을':', 보스 체력도 그대로'} 이어서 합니다.<br><b style="color:var(--ink)">재도전</b> · 이 장을 처음부터 다시 합니다. 길 처음 자리에서 시작하고 몬스터·보스가 모두 다시 나옵니다.`,'이어하기',()=>leaveTown(true),'재도전',()=>{stRetry();leaveTown(true)});return}inTown=false;toastOff();$('npcAct').hidden=true;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=S.fld;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
+function leaveTown(force){if(!inTown)return;if(!force&&!ldBusy&&egRun()){egRunAsk(()=>leaveTown(true),()=>{egDrop();openStage()});return}S.egFresh=0;if(!force&&!ldBusy&&stRetryAsk()){const lb=S.ch===LAST&&S.phase===3;askConfirm(`${S.ch+1}장 · ${CH[S.ch].n}`,`<b style="color:var(--ink)">이어하기</b> · 떠났던 자리에서${lb?' 최종 결전을':', 보스 체력도 그대로'} 이어서 합니다.<br><b style="color:var(--ink)">재도전</b> · 이 장을 처음부터 다시 합니다. 길 처음 자리에서 시작하고 몬스터·보스가 모두 다시 나옵니다.`,'이어하기',()=>leaveTown(true),'재도전',()=>{stRetry();leaveTown(true)});return}inTown=false;toastOff();$('npcAct').hidden=true;fldFix();const f0=S.fld;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=f0;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
   stageBanner()/* v626: 배너와 겹치는 토스트(지역 · 위험도 / 사냥터로 돌아왔습니다) 삭제 */})}
 function toggleTown(){inTown?leaveTown():goTown()}
 /* v131: 마을에서는 아이콘·글자를 「사냥터」(검)로 — PC 상단 버튼 포함 */
@@ -5647,7 +5650,7 @@ function dropEnemy(e,anim){e._rm=true;if(anim){e.lab.remove();const i=enemies.in
 /* v75: 스토리 장은 처음부터 길 전체에 몬스터를 배치하고 다시 생성하지 않음. 총 마릿수는 기존 처치 목표(goal)와 같음 */
 /* v205: 스토리 몬스터 수 ×3 (최종 보스 도착 시 약 31레벨) · 길 +15% · 몬스터는 플레이어 앞 PACK_AHEAD m 안에 들어올 때 생성(한꺼번에 수백 마리 생성 방지) */
 const GOAL_M=3,PACK_AHEAD=55;let packQ=[];
-function packTick(){if(!packQ.length||mapKind!=='story')return;const pz=W2L(P.pos.x,P.pos.z).z;while(packQ.length&&packQ[0].z>pz-PACK_AHEAD){const k=packQ.shift();for(const m of k.m){if(sKilled(m.id))continue;const w=L2W(m.x,m.z),e=spawnEnemy(m.t,w.x,w.z,m.rk);e.idle=true;e.pkid=m.id}}}
+function packTick(){if(!packQ.length||mapKind!=='story'||inTown)return;const pz=W2L(P.pos.x,P.pos.z).z;while(packQ.length&&packQ[0].z>pz-PACK_AHEAD){const k=packQ.shift();for(const m of k.m){if(sKilled(m.id))continue;const w=L2W(m.x,m.z),e=spawnEnemy(m.t,w.x,w.z,m.rk);e.idle=true;e.pkid=m.id}}}
 /* v705: 스토리 몬스터 배치를 장마다 고정 씨앗으로 만들고, 잡은 몬스터 번호를 저장 — 마을에 다녀오거나 쓰러져도 이미 잡은 곳은 다시 생기지 않음 */
 function sKillTab(){if(!S.sKill||S.sKill.ch!==S.ch||S.sKill.seed!==S.sSeed)S.sKill={ch:S.ch,seed:S.sSeed,ids:[]};return S.sKill}
 const sKilled=id=>id!=null&&sKillTab().ids.includes(id);
@@ -8684,6 +8687,8 @@ function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o
 const TOWN_DESC={town:'무너진 도시들의 피난민이 모인 대륙 외곽의 마을',refuge:'금빛 화로의 불씨가 지키는 성역 아래 동굴'};
 const willTown=d=>!!(d&&d.cls&&!d.tutor&&!d.test&&!d.demo&&!(d.ch===0&&!d.vil&&!d.skipStart)&&!(d.ch<NCH&&d.phase===2)&&!(d.ch===LAST&&d.phase===4)&&!(d.fld&&d.fld.bf));
 let noML=false;
+/* v852: 마을에 도착한 순간 남은 몹·대기 중인 소환·무리를 모두 지움(로딩 중 스토리 사건이 몹을 불러 마을에 남던 문제) */
+function townClean(){clearPools();for(const e of [...enemies])dropEnemy(e);packQ=[];timers.length=0}
 function townLoad(fn,after){/* v810: 마을로 갈 때는 항상 마을 로딩 화면(이름+설명) */
   if(ldBusy||noML){fn();after&&after();return}
   ldBusy=true;P.inv=99;P.mv=null;P.cast=null;const rf=refOn();
@@ -8788,7 +8793,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
-    townLoad(()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」'],...MOR_FIRST],()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
+    townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」'],...MOR_FIRST],()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
@@ -9931,7 +9936,7 @@ $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
 });
 function enterGame(){if(S){S.aura=S.aura||{};S.auraOn=S.auraOn||{};S.rr=S.rr||0;S.lumi=S.lumi||0;S.seal=S.seal||0}/* v520 */
 
-  tele('start');const FLD=S.fld;fldHold=true;
+  tele('start');fldFix();const FLD=S.fld;fldHold=true;
   riftT=(S.riftT>0&&S.riftT<=RIFT.gap[1])?S.riftT:rand(...RIFT.first);/* v419: 균열 쿨타임 유지(새로고침·재접속) */
   if(S.ch>=NCH)egMapFor(S.tier);
   inTown=false;$('npcAct').hidden=true;npcNear=null;
@@ -10021,7 +10026,7 @@ const EG_CAP=100,egCap=d=>{const v=d.cap*EGM()*egR();return S.ch>=NCH&&mapKind!=
 /* v235: 엔드게임 몬스터 생성량 설정 50~120% (기기별 localStorage egRate) — 생성 간격과 동시 최대 수에 함께 적용 */
 let EG_RATE=100;try{const v=+localStorage.getItem('egRate');if(v)EG_RATE=Math.max(50,Math.min(120,v))}catch(e){}
 const egR=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?EG_RATE/100:1;/* v108: 엔드게임 몬스터 수·젠 속도 ×3 */
-function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
+function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&!inTown&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
   let mx=input.x,mz=input.z;
