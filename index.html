@@ -2309,10 +2309,10 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 /* v134: 카메라 확대·축소 (설정) — +30% 확대(거리 0.7배) ~ −30% 축소(거리 1.3배) */
 /* v729: 효과음(SFX) — sfx/*.mp3 · 웹 오디오. 첫 터치에서 잠금 해제(iOS) 후 전부 미리 불러옴(약 340KB) */
 const SFX=(()=>{
-  const NM=['hit','crit','dodge','petal','plum','mondeath','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl'];
+  const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,mondeath:.2,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
-  const LIM={hit:[.12,5],mondeath:[.15,3],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:.9,enh_fail:.9,cut_build:.8,cut_ok:1,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
+  const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
   const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
   try{muted=localStorage.getItem('sndMute')==='1'}catch(e){}
@@ -2330,13 +2330,13 @@ const SFX=(()=>{
     if(!ctx||!buf[n]||vol<=0||ctx.state==='suspended'&&(ctx.resume(),false))return null;
     const key=n.startsWith('swing')?'swing':n,t=ctx.currentTime+(o.delay||0),lim=LIM[key]||[.05,3],h=hist[key]||(hist[key]=[]);
     while(h.length&&h[0]<t-lim[0])h.shift();
-    if(h.length>=lim[1])return null;
-    if(act>=14&&!FIX.has(n))return null;/* 동시에 울리는 소리 최대 14개 */
+    if(h.length>=lim[1]*(LIM[key]?1:2))return null;/* v808: 기본 같은 소리 3→6개 */
+    if(act>=24&&!FIX.has(n))return null;/* v808: 동시에 울리는 소리 최대 24개 */
     const k=h.length;h.push(t);
     const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=buf[n];
     const pr=o.pr!==undefined?o.pr:FIX.has(n)?0:.08;
     src.playbackRate.value=(o.rate||1)*(1+(Math.random()*2-1)*pr);
-    g.gain.value=(VOL[key]||.6)*(o.v||1)*(1/Math.sqrt(1+k*.6))*(FIX.has(n)?1:.9+Math.random()*.2);/* 겹치면 음량을 줄이고 ±10% 흔들기 */
+    g.gain.value=(VOL[key]||.6)*(o.v||1)*(1/Math.sqrt(1+k*.3))*(FIX.has(n)?1:.9+Math.random()*.2);/* 겹치면 음량을 줄이고 ±10% 흔들기 */
     src.connect(g);g.connect(ctx._in);
     const off=o.fit?Math.max(0,buf[n].duration-o.fit):0;
     try{src.start(t,off)}catch(e){return null}
@@ -6736,7 +6736,7 @@ function aoe(c,r,dmg,o={}){r*=NSX.area;/* v603: 스킬 범위 증가 (판정 범
 }
 function kill(e){
   if(NS()&&!S.demo&&(NSX.killH||NSX.killM)&&P.hp>0){if(NSX.killH)P.hp=Math.min(P.mhp,P.hp+P.mhp*NSX.killH);if(NSX.killM)P.mp=Math.min(P.mmp,P.mp+P.mmp*NSX.killM)}/* v603: 처치 시 생명력·마나 회복 */
-  if(e.boss||e.duel||e.final){bossFall(e)}else{SFX.p('mondeath');
+  if(e.boss||e.duel||e.final){bossFall(e)}else{
   dropEnemy(e,hitKind!=='ice'&&hitKind!=='rock'&&hitKind!=='zap');
   if(hitKind==='ice')shatterFx(e);else if(hitKind==='rock')rockShatter(e);else if(hitKind==='zap')zapDeath(e)}
   ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);
