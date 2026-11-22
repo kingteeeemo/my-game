@@ -2562,7 +2562,7 @@ const GSTY=[{s:'field'},{s:'grave'},{s:'mud'},{s:'snow'},{s:'cobble',glow:0xff5a
 const inArena=()=>!inTown&&(!!S.duel||S.ch===LAST&&(S.phase===3||S.phase===4));
 function curTheme(){if(inTown){townSync();return {key:TOWN.key,d:TOWN,pt:TOWN.pt}}if(inArena())return {key:'final',d:FINAL,pt:S.duel&&S.duel.b==='maw'?'deep':FINAL.pt};if(S.ch>=NCH){const m=egMapFor(S.tier),d=EGMAPS[m];return {key:'eg'+m,d,pt:d.pt,eg:m}}const i=Math.min(S.ch||0,LAST);return {key:'c'+i,d:Object.assign({sty:GSTY[i]},CH[i]),pt:GPT[i]}}
 let groundGlow=false,propTheme='',inTown=false;
-const TOWN={n:'세렌 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'창고'},TOWN_R=17;
+const TOWN={n:'세렌 마을',ground:[74,62,50],fog:0x16110d,sty:{s:'flag',rough:.85},pt:'ash',shop:'포션 상인 로웬',gear:'무기상 카엘',smith:'대장장이 브론',heir:'전승사 세라',stash:'창고',mor:'대마법사 모르딘'},TOWN_R=17;
 /* v676: 마을을 둘로 — 스토리(1~7장) = 세렌 마을, 아쉬카르에게 떨어진 뒤(S.ch>=NCH) = 추락자의 쉼터(성역 아래 동굴). 스토리를 마치면 세렌 마을로는 돌아가지 않음 */
 const TOWN0=Object.assign({key:'town'},TOWN,{sty:{s:'dirt',st:.42,rough:.9},gate:'문지기 오스릭'}),REF={key:'refuge',n:'추락자의 쉼터',ground:[42,44,54],fog:0x07080e,sty:{s:'rock',rough:.95},pt:'ash',shop:'약초꾼 미라',gear:'조율사 오린',smith:'외팔 대장장이 둔',heir:'재단사 이네',stash:'창고',hearth:'쉼터지기 하란'};
 const refOn=()=>!!S&&S.ch>=NCH;
@@ -4112,10 +4112,10 @@ function knTick(dt,t){const LY=KNA.lavaY;KNA.lt.offset.set(t*.004,t*.0025);KNA.g
 function setMap(fresh){const want=inTown?'town':inArena()?'arena':S.ch<NCH?'story':'field';if(fresh||want!==mapKind||((want==='story'||want==='field')&&propTheme!==curTheme().key))want==='town'?buildTown():want==='arena'?buildArena():want==='story'?buildStory():buildField()}
 /* 마을 (v29): 집 · 화로 · 우물 · 상인 · 대장장이. 몬스터 없음, 이동 스킬만 사용 가능 */
 const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,roughness:.9}),clothMat=SM({color:0x7a2a2a,roughness:.95,side:THREE.DoubleSide});
-const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:-1.5,ref:1},{id:'gate',x:2,z:19.4,vil:1}];
+const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:-1.5,ref:1},{id:'gate',x:2,z:19.4,vil:1},{id:'mor',x:-2.9,z:1.6,vil:1,c:0x2e2838,hat:0x1c1824}];/* v806: 대마법사 모르딘 — 세렌 마을 우물가, 이야기만 */
 const npcOn=n=>n.ref?refOn():n.vil?!refOn():true;/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
 const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관']},NSACT={gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기',hearth:'금빛 화로 · 사냥터',gate:'사냥터로 나가기'};
-const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관'],hearth:['쉼터지기 하란','금빛 화로 · 사냥터'],gate:['문지기 오스릭','사냥터 입구']};
+const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관'],hearth:['쉼터지기 하란','금빛 화로 · 사냥터'],gate:['문지기 오스릭','사냥터 입구'],mor:['대마법사 모르딘','이야기']};
 const npcName=id=>refOn()&&REF[id]?REF[id]:NS()&&NSNPC[id]?NSNPC[id][0]:(TOWN[id]||TOWN.smith),npcSub=id=>NS()&&NSNPC[id]?NSNPC[id][1]:NPCN[id][1];
 function stashMesh(n){const g=new THREE.Group(),W=PM.wood,I=PM.iron;/* v508: 창고 — 쇠띠 두른 큰 궤짝 + 상자 더미 + 통 */
   g.add(mesh(new THREE.BoxGeometry(1.9,.95,1.1),W,0,.48,0),mesh(new THREE.BoxGeometry(1.98,.16,1.18),W,0,1.02,0));
@@ -4134,6 +4134,7 @@ function npcMesh(n){if(n.id==='hearth')return hearthMesh(n);if(n.id==='gate'){co
   if(n.id==='smith'){g.add(mesh(new THREE.BoxGeometry(.9,.12,.5),SM({color:0x3a2a20}),0,1.25,.2));const h=mesh(new THREE.BoxGeometry(.12,.7,.12),PM.wood,.55,1.1,.2);h.rotation.z=.6;g.add(h,mesh(new THREE.BoxGeometry(.3,.18,.18),PM.iron,.78,1.4,.2))}
   else if(n.id==='gear'){const hat=mesh(new THREE.CylinderGeometry(.42,.42,.06,14),SM({color:n.hat}),0,1.9,0),top=mesh(new THREE.CylinderGeometry(.22,.26,.3,12),SM({color:n.hat}),0,2.05,0);g.add(hat,top);
     const sw=mesh(new THREE.BoxGeometry(.08,1.1,.08),PM.iron,.5,1.1,.1);sw.rotation.z=-.3;g.add(sw,mesh(new THREE.BoxGeometry(.6,.08,.3),SM({color:0x6a4a2a}),0,1.05,.25))}
+  else if(n.id==='mor'){/* v806: 모르딘 — 깊은 후드·긴 로브, 지팡이 끝에 희미한 보랏빛 */const hood=mesh(new THREE.ConeGeometry(.36,.7,10),SM({color:n.hat}),0,2.05,0),robe=mesh(new THREE.ConeGeometry(.5,1.5,10,1,true),SM({color:n.c,side:THREE.DoubleSide}),0,.75,0),st=mesh(new THREE.CylinderGeometry(.035,.05,2.1,6),SM({color:0x1a1410,roughness:.9}),.5,1.05,.12),orb=mesh(new THREE.SphereGeometry(.11,10,8),new THREE.MeshBasicMaterial({color:0x8a5ad0,transparent:true,opacity:.55}),.5,2.16,.12);g.add(hood,robe,st,orb)}
   else if(n.id==='heir'){const hood=mesh(new THREE.ConeGeometry(.36,.6,10),SM({color:n.hat}),0,2.02,0),st=mesh(new THREE.CylinderGeometry(.04,.05,1.9,6),PM.wood,.55,.95,.15),orb=mesh(new THREE.SphereGeometry(.16,12,10),new THREE.MeshBasicMaterial({color:0x5ae0d0}),.55,1.98,.15);g.add(hood,st,orb)}
   else{const hood=mesh(new THREE.ConeGeometry(.34,.55,10),SM({color:n.hat}),0,2,0);g.add(hood,mesh(new THREE.BoxGeometry(.5,.4,.3),PM.wood,.45,.9,.1))}
   g.position.set(n.x,0,n.z);g.rotation.y=Math.atan2(-n.x,8-n.z);return g}
@@ -4284,6 +4285,15 @@ function refLore(force){if(!refOn()||!inTown||(!force&&(S.test||S.demo))||talkOn
   const b=REF_LORE.find(b=>b.ok()&&!L[b.k]);if(b){L[b.k]=1;save();talk(b.l)}}
 /* 대화창 — 화면 아무 곳이나 누르면 다음 줄 */
 let TALK=null;const talkOn=()=>!!TALK;
+/* v806: 대마법사 모르딘(세렌 마을) — 겉으론 그날 밤 유일한 생존자, 실은 아쉬카르를 조종한 흑막. 대사는 다시 읽으면 다른 뜻이 되게.
+   첫 만남은 세렌 도착 장면에 바로 이어서(MOR_FIRST), 이후는 장 진행 대사(MOR_ST: S.ch 이상이면 한 번씩, 순서대로) → 다 보면 평소 대사(MOR_IDLE) */
+const MOR_N='대마법사 모르딘';
+const MOR_FIRST=[['','우물가에 앉아 있던 로브 차림의 노인이 지팡이를 짚고 천천히 일어선다.'],[MOR_N,'「바다 냄새가 나는군. …바다 건너에서 왔소? 그 먼 곳까지 부름이 닿았단 말인가.」'],[MOR_N,'「나는 모르딘. 그날 밤, 빛의 기사단과 함께 성역을 지키던 자요. …그리고 살아남은 유일한 자이기도 하지.」'],[MOR_N,'「용의 불은 빛을 먹고 타오르오. 그 불 앞에선 칼도, 마법도 소용없었소.」'],[MOR_N,'「왕좌로 가지 마시오. 그 길에 오른 자는 모두 불에 삼켜졌소. 카이렌도… 아마 마찬가지일 테지.」'],[MOR_N,'「그래도 가겠다면 막지는 않겠소. 다만, 너무 높이 오르지는 마시오.」']];
+const MOR_ST=[[4,[[MOR_N,'「봉화를 다시 밝혔다고? …그 불은 오래전에 꺼진 줄 알았건만.」']]],[5,[[MOR_N,'「왕도를 지나왔군. 그날 내가 서 있던 곳이오. …아무것도 남지 않았지.」']]],[7,[[MOR_N,'「카이렌이 그렇게 되었소? …안타깝군. 정말, 안타까워.」']]],[9,[[MOR_N,'「왕좌가 가까워질수록 불은 더 뜨거워지오.」'],[MOR_N,'「그대는 부디… 돌아오지 않기를.」']]]];
+const MOR_IDLE=['「재는 언젠가 그치겠지. 기다리는 것도 용기라오.」','「불에 맞서는 건 어리석은 일이오. 나만큼 그걸 잘 아는 자도 없지.」','「그날 밤의 일은… 떠올리고 싶지 않소.」'];
+function morTalk(){if(!S)return;if(!S.morMet){S.morMet=1;save();return talk(MOR_FIRST.slice(1))}
+  S.morSt=S.morSt||0;for(let i=0;i<MOR_ST.length;i++)if(!(S.morSt&1<<i)&&(S.ch||0)>=MOR_ST[i][0]){S.morSt|=1<<i;save();return talk(MOR_ST[i][1])}
+  talk([[MOR_N,MOR_IDLE[Math.floor(Math.random()*MOR_IDLE.length)]]])}
 function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const T=TALK;if(T&&T.i===0&&performance.now()-T.t0<1500)return;/* v748: 첫 줄은 1.5초 동안 넘기지 못함(실수로 바로 닫힘 방지) — 둘째 줄부터는 바로 */talkNext()})}
   TALK={l:lines,i:-1,done,t0:performance.now(),pz:mapKind==='story'};/* v748: 스토리 사냥터 대사(모닥불·흔적·구출 등) 동안 게임 일시정지 */releaseAll&&releaseAll();P.mv=null;o.hidden=false;$('npcAct').classList.add('talkhide');talkNext()}
 function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL').hidden=true;$('npcAct').classList.remove('talkhide');TALK=null;if(T.done)T.done();return}
@@ -8143,7 +8153,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v805';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v806';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8692,7 +8702,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
-    mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」']],()=>{toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
+    mapLoad(TOWN.n,'마을로 이동합니다',()=>{setMap(true);applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」'],...MOR_FIRST],()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
@@ -9224,7 +9234,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
