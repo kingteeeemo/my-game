@@ -8168,7 +8168,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v836';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v837';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8644,7 +8644,7 @@ $('skillSheet').addEventListener('click',e=>{const b=e.target.closest('button');
   if(b.id==='skGo'||b.id==='skGoSkip'){const c=demo.cls,m=demo.sk,sk=b.id==='skGoSkip';
     if(testPick){demoEnd();startGame(c,m,sk);return}
     /* v329: 닉네임을 묻는 동안은 주력 스킬 선택 화면(시연)이 그대로 배경 — 확인하면 로딩 화면을 거쳐 1장으로 */
-    askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;const pro=!(sk&&skipOk());/* v795: 순서 — 닉네임 → 프롤로그 → 로딩(오프닝 BGM이 여기서 페이드아웃) → 1장. 31레벨 엔드게임 시작은 프롤로그 없이 로딩 */demoEnd();S=fresh();const load=()=>{window.BGMHOLD=0;try{SFX.bgm(null)}catch(e){}showLoading(()=>startGame(c,m,sk))};if(pro){window.BGMHOLD=1;showLoading(()=>prologPlay(load),null,{T:1600})}else load()}})}});
+    askNick({title:'닉네임을 정하세요',init:'',cancel:'돌아가기',ok:n=>{pendNick=n;const pro=!(sk&&skipOk());/* v795: 순서 — 닉네임 → 프롤로그 → 로딩(오프닝 BGM이 여기서 페이드아웃) → 1장. 31레벨 엔드게임 시작은 프롤로그 없이 로딩 */demoEnd();S=fresh();const load=()=>{window.BGMHOLD=0;try{SFX.bgm(null)}catch(e){}showLoading(()=>startGame(c,m,sk))};if(pro){window.BGMHOLD=1;showLoading(()=>prologPlay(load),null,{T:1300})}else load()}})}});
 /* v802: 로딩 화면 팁 — 실제 게임 시스템 기준(가이드와 같이 점검) */
 const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습니다.',
   '창고에 맡긴 장비는 다른 캐릭터에게 옮길 수 있습니다.',
@@ -8662,7 +8662,7 @@ const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습�
   '마우스 휠이나 두 손가락으로 화면을 확대·축소합니다.',
   '진행 내용은 자동으로 저장됩니다.'];
 let loadTipI=-1;
-function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o.T||2600;delete L.dataset.busy;bar.className='';
+function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o.T||1300;delete L.dataset.busy;bar.className='';
   const tn=!!o.sub;L.classList.toggle('town',tn);$('loadTitle').hidden=!tn;$('loadTitle').textContent=o.title||'';const sb=$('loadSub');sb.hidden=!o.sub;sb.textContent=o.sub||'';
   let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').innerHTML=msg?'':'<span class="tg">Tip</span>';if(msg)$('loadHintT').textContent=msg;else $('loadHintT').append(LOAD_TIPS[n]);$('loadHint').hidden=!!o.sub;/* v808: 마을 로딩은 이름+설명만, 일반 로딩은 팁 한 줄 *//* v806: 문구는 한 줄만 — 메시지가 있으면 메시지, 없으면 팁 하나 */
   L.hidden=false;try{window._bgmChk&&_bgmChk()}catch(e){}bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition=`width ${T-100}ms cubic-bezier(.3,.6,.4,1)`;bar.style.width='100%';
@@ -8674,7 +8674,7 @@ let noML=false;
 function townLoad(fn,after){/* v810: 마을로 갈 때는 항상 마을 로딩 화면(이름+설명) */
   if(ldBusy||noML){fn();after&&after();return}
   ldBusy=true;P.inv=99;P.mv=null;P.cast=null;const rf=refOn();
-  showLoading(()=>{try{fn()}finally{P.inv=1.5;ldBusy=false}if(after)setTimeout(after,450)},null,{title:TOWN.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:1800})}
+  showLoading(()=>{try{fn()}finally{P.inv=1.5;ldBusy=false}if(after)setTimeout(after,450)},null,{title:TOWN.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:1300})}
 
 /* ================= level-up choice ================= */
 let offer=null,lvlSkill=null;
@@ -9909,7 +9909,7 @@ $('nickSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
 $('slotSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.id==='slClose'){closeSlots();return}
   if(b.id==='slTitle'){if(curSlot!==null&&S&&S.cls)save();$('slots').hidden=true;$('title').hidden=false;return}
-  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);if(willTown(d)){const rf=d.ch>=NCH;window.BGMNOKEEP=1;/* v821: 기존 캐릭터 접속 로딩은 오프닝 곡을 빠르게 끊음 */showLoading(()=>{$('slots').hidden=true;noML=true;try{enterGame()}finally{noML=false}},null,{title:rf?REF.n:TOWN0.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:2200});return}$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
+  if(b.dataset.play!==undefined){const i=+b.dataset.play,d=readSlot(i);if(!d)return showSlots(true);const go=()=>{curSlot=i;S=d;acctApply(S);if(willTown(d)){const rf=d.ch>=NCH;window.BGMNOKEEP=1;/* v821: 기존 캐릭터 접속 로딩은 오프닝 곡을 빠르게 끊음 */showLoading(()=>{$('slots').hidden=true;noML=true;try{enterGame()}finally{noML=false}},null,{title:rf?REF.n:TOWN0.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:1300});return}$('slots').hidden=true;enterGame()};if(d.nick){go();return}askNick({title:'닉네임을 정해 주세요',init:'',cancel:'돌아가기',ok:n=>{d.nick=n;try{localStorage.setItem(slotKey(i),JSON.stringify(d))}catch(err){}go()}});return}/* v265: 닉네임이 없는 기존 슬롯은 접속할 때 정하게 함 */
   if(b.dataset.new!==undefined){const i=+b.dataset.new;pendNick='';curSlot=i;S=fresh();for(const e of [...enemies])dropEnemy(e);$('slots').hidden=true;showClassSel();return}/* v328: 직업(·주력 스킬)을 먼저 고르고 마지막에 닉네임 */
   if(b.dataset.del!==undefined){const i=+b.dataset.del;
     if(slotArm.i===i&&Date.now()-slotArm.t<3000){try{localStorage.removeItem(slotKey(i))}catch(err){}if(curSlot===i){curSlot=null;S=fresh()}slotArm={i:-1,t:0}}
@@ -10427,7 +10427,7 @@ document.querySelectorAll('#camLk button').forEach(b=>b.addEventListener('click'
 (function(){const e=$('emb');for(let i=0;i<34;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;--dx:${(Math.random()*80-40)|0}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*10}s;opacity:${.4+Math.random()*.6}`;e.appendChild(d)}})();
 /* v745: 「화면을 터치하세요」 — 첫 터치로 소리 잠금을 풀고(오프닝 BGM 시작) 게임 시작 버튼을 보여 줌 */
 {const t=$('title'),go=e=>{if(!t.classList.contains('tapwait')||t.hidden)return;if(e&&e.target&&e.target.closest&&e.target.closest('#muteBtn,#fsTitle'))return;if(e&&t.contains(e.target)){if(e.cancelable)e.preventDefault();e.stopPropagation()}/* 로그인 창 등 다른 창을 누른 터치는 그 창에 그대로 전달 */t.classList.remove('tapwait');t.classList.add('tapdone')};addEventListener('pointerdown',go,{capture:true});addEventListener('keydown',e=>{if(!t.hidden&&t.classList.contains('tapwait'))go(e)})}
-$('goStart').onclick=()=>{showLoading(()=>{$('title').hidden=true;showSlots()},null,{T:1600})};/* v811: 게임시작 → 슬롯 선택 사이 일반 로딩 */
+$('goStart').onclick=()=>{showLoading(()=>{$('title').hidden=true;showSlots()},null,{T:1300})};/* v811: 게임시작 → 슬롯 선택 사이 일반 로딩 */
 setTimeout(skwPreload,600);
 hud();
 requestAnimationFrame(loop);
