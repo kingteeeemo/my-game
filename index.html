@@ -2323,7 +2323,7 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 const SFX=(()=>{
   const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:3,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:2.2,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6};
   const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
   const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
@@ -8174,7 +8174,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v846';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v847';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9668,7 +9668,7 @@ function enhCine(k,L,ok,done,auto,great){enhCineOn=1;try{SFX.duck(1)}catch(e){}l
     shake=Math.max(shake,ok?.3:.6);if(bsnd)bsnd.stop(.05);enhFx(ok,1);
     const a={x:5,z:-1.6};if(ok)for(let i=0;i<1;i++)later(i*.18,()=>{ringFx(a,3+i*1.5,0xffd24a,.5);spray(PADD,{x:a.x,z:a.z},12,{sp:[3,9],up:[5,12],y:[.8,1.2],life:[.6,1.1],s0:[.35,.6],s1:[.05,.1],c0:0xffffff,c1:ok?(L>=25?0xb060ff:0xff7020):0xff2010,drag:1.2,grav:-10,tex:1})});
   };tm=setTimeout(rv,T*1000)}
-function enhFx(ok,cine){SFX.p(ok?(cine?'cut_ok':'enh_ok'):'enh_fail');const f=$('buyFlash');f.className='buyflash';void f.offsetWidth;f.className='buyflash on'+(ok?' gold':' fail');
+let enhOkH=null;function enhFx(ok,cine){if(!ok&&enhOkH){try{enhOkH.stop(.12)}catch(e){}enhOkH=null}/* v846: 성공 직후 실패 — 울리던 성공음을 빠르게 줄여 실패음이 묻히지 않게 */const sh=SFX.p(ok?(cine?'cut_ok':'enh_ok'):'enh_fail');if(ok)enhOkH=sh;const f=$('buyFlash');f.className='buyflash';void f.offsetWidth;f.className='buyflash on'+(ok?' gold':' fail');
   const a={x:5,z:-1.6};if(ok){ringFx(a,2.4,0xffd24a,.6);ringFx(P.pos,2,0xffd24a,.5);spray(PADD,{x:a.x,z:a.z},30,{sp:[2,6],up:[3,8],y:[.8,1.1],life:[.4,.8],s0:[.3,.5],s1:[.05,.1],c0:0xfff0a0,c1:0xff8a10,drag:1.5,grav:-12,tex:1});streaks({x:a.x,z:a.z},14,{sp:[5,12],up:[3,8],y:[.8,1],life:[.3,.6],w:.06,len:.6,c0:0xffffff,c1:0xffa020,drag:1,grav:-14})}
   else spray(PNRM,{x:a.x,z:a.z},8,{sp:[.5,1.5],up:[1,2],y:[.8,1],life:[.6,1],s0:[.5,.7],s1:[1,1.4],c0:0x4a4038,c1:0x1c1a18,a:.5,drag:1,tex:2})}
 $('smith').addEventListener('click',e=>{if(e.target.id==='smith')closeSmith()});
