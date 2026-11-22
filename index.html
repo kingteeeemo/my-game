@@ -1305,6 +1305,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     <button data-t="v" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg>화면</button>
     <button data-t="s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>소리</button>
     <button data-t="c"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>전투</button>
+    <button data-t="x"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/></svg>테스트</button>
     <button data-t="a"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>계정</button>
     <span class="sx-ver" id="sxVer"></span>
   </nav><div class="sx-pane">
@@ -1334,6 +1335,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
         <input type="range" class="sx-rng" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량">
         <div class="sx-lbl"><span>50%</span><span>120%</span></div></div>
     </section>
+    <section data-p="x" hidden><div id="sxTest"></div></section>
     <section data-p="a" hidden>
       <div class="sx-sec">Help</div>
       <button class="sx-link" id="pGuide"><b>가이드 다시 보기</b><span>›</span></button>
@@ -8161,7 +8163,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v829';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v830';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8429,7 +8431,7 @@ function portFill(){const cards=[...document.querySelectorAll('#classSheet .card
   if(all&&cards.every(b=>{const K=SKN[b.dataset.c];return (portOk[b.dataset.c]||0)===(K&&K.st===2?2:1)})){portQ=0;return}
   if(all){portQ=0;return}requestAnimationFrame(portFill)}
 function showClassSel(){for(const c in SKC)if(!SKN[c].st&&(testPick||!CLS[c].testOnly))skwLoad(c);
-  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<div class="btns" id="tsSeg" style="margin:8px 0"><button data-ts="90" class="${testSpec===90?'primary':'ghost'}">테스트 · 90레벨 스펙</button><button data-ts="110" class="${testSpec===110?'primary':'ghost'}">테스트 · 110레벨 스펙</button></div><p class="hint" style="margin:0 0 8px">${testSpec===110?'110레벨(스탯 균형) · 2차 강화 피해 증가 30단계 · 전설 장비 110레벨(특수 능력치 11%, 상급 각인 적용) · 무기 +45 · 방어구 +35':'90레벨(스탯 균형) · 2차 강화 피해 증가 10단계 · 전설 장비 90레벨(특수 능력치 8%) · 무기 +35 · 방어구 +30'} · 위험도 ${TS().tier}에서 시작</p><div class="btns" id="tntSeg" style="margin:0 0 6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(t=>`<button data-tnt="${t}" class="${ntSel()===t?'primary':'ghost'}" style="flex:1;min-width:44px;padding-left:2px;padding-right:2px;white-space:nowrap">${t}티어</button>`).join('')}</div><div class="btns" id="tlvSeg" style="margin:0 0 6px;align-items:center;gap:6px"><span style="flex:none;font-size:12px;color:#a59f90">캐릭터 레벨</span>${[-10,-1].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">${d}</button>`).join('')}<input id="tLvIn" type="number" min="1" max="${LV_MAX}" value="${lvSel()}" style="flex:1;min-width:56px;text-align:center;font:700 14px var(--en);background:#14141a;color:#e8dcc4;border:1px solid #3a3833;border-radius:8px;padding:6px 4px">${[1,10].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">+${d}</button>`).join('')}</div><p class="hint" style="margin:0 0 8px">캐릭터 레벨 1~${LV_MAX}(기본 공격력·생명력·마나·이동 속도가 레벨에 따라 달라짐) · 장비 티어(전 부위) · 줄별 옵션·티어·수치는 시작 후 대장장이 「테스트 · 직접 설정」에서 바꿀 수 있습니다</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
+  let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<p class="hint" style="margin:8px 0">테스트 캐릭터 · 위험도 ${TS().tier}에서 시작 · 전 부위 강화 +${TS().nenh} (대장장이에서 변경)</p><div class="btns" id="tntSeg" style="margin:0 0 6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(t=>`<button data-tnt="${t}" class="${ntSel()===t?'primary':'ghost'}" style="flex:1;min-width:44px;padding-left:2px;padding-right:2px;white-space:nowrap">${t}티어</button>`).join('')}</div><div class="btns" id="tlvSeg" style="margin:0 0 6px;align-items:center;gap:6px"><span style="flex:none;font-size:12px;color:#a59f90">캐릭터 레벨</span>${[-10,-1].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">${d}</button>`).join('')}<input id="tLvIn" type="number" min="1" max="${LV_MAX}" value="${lvSel()}" style="flex:1;min-width:56px;text-align:center;font:700 14px var(--en);background:#14141a;color:#e8dcc4;border:1px solid #3a3833;border-radius:8px;padding:6px 4px">${[1,10].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">+${d}</button>`).join('')}</div><p class="hint" style="margin:0 0 8px">캐릭터 레벨 1~${LV_MAX}(기본 공격력·생명력·마나·이동 속도가 레벨에 따라 달라짐) · 장비 티어(전 부위) · 줄별 옵션·티어·수치는 시작 후 대장장이 「테스트 · 직접 설정」에서 바꿀 수 있습니다</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
   for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSheet').classList.add('pend');clearTimeout(window.pendT);window.pendT=setTimeout(()=>$('classSheet').classList.remove('pend'),3000);$('classSel').hidden=false;releaseAll();
@@ -8491,6 +8493,29 @@ const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1'||local
 function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};S.pending=gemsFor(m).length*GMAX;/* v229: 1차 강화는 직접 찍도록 레벨업 선택 30회로 지급 */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
+/* v830: 설정 「테스트」 — 오픈 전 임시 기능. 직업·주력 스킬 변경(장비는 그대로, 무기만 새 직업 무기로) */
+function convWeapon(it,cls){if(!it||it.slot!=='weapon')return it;if(!it.ns)return ownWeapon(it);const to=bc(cls),from=it.wc||to;if(from===to)return it;
+  for(const l of it.lines){if(l.b)continue;let nk=l.k===NS_CDMG[from]?NS_CDMG[to]:null;if(l.k==='aspd'&&to==='mage')nk='cspd';else if(l.k==='cspd'&&from==='mage'&&to!=='mage')nk='aspd';
+    if(!nk||nk===l.k||!NSO[nk]||it.lines.some(x=>x!==l&&x.k===nk))continue;const R0=nLineR(it,l),q=R0[1]>R0[0]?(l.v-R0[0])/(R0[1]-R0[0]):1;l.k=nk;const R1=nLineR(it,l);l.v=nRound(R1[0]+q*(R1[1]-R1[0]),nLineDp(l))}
+  it.wc=to;it.name=nItemName(it);return it}
+function testSwitch(cls,main){if(!CLS[cls]||!CLS[cls].opts.includes(main)||!S.cls)return false;const old=S.main||mainOf(C());if(cls===S.cls&&main===old)return false;
+  if(main!==old){let pts=S.skp[old]||0;for(const g in (S.sk[old]||{}))pts+=S.sk[old][g]||0;delete S.sk[old];delete S.skp[old];
+    for(const g of gems2For(old)){const L=S.sk2[g]||0;if(!S.test)for(let i=0;i<L;i++){S.ess=(S.ess||0)+g2Cost(g,i);S.gold=(S.gold||0)+g2Gold(g,i)}delete S.sk2[g]}
+    S.sk[main]={};if(S.test){for(const g of gemsFor(main))S.sk[main][g]=GMAX;S.skp[main]=0;for(const g of gems2For(main))S.sk2[g]=g2Max(g)}else S.skp[main]=pts}
+  S.cls=cls;S.main=main;if(S.autoGem&&S.autoGem.startsWith('g:'))S.autoGem='bal';if(!S.test&&S.autoGem)autoSpend(S.autoGem);
+  if(S.wlook&&!wlookOk(S.wlook,cls))S.wlook=null;if(S.blook&&!blookOk(S.blook,cls))S.blook=null;
+  for(const k of EQS)if(S.eq[k]&&S.eq[k].slot==='weapon')convWeapon(S.eq[k],cls);
+  wipeFx();input.held.s1=false;skwLoad&&SKN[cls]&&!SKN[cls].st&&skwLoad(cls);scene.remove(hero);hero=makeHero(cls);scene.add(hero);skwAttach(hero);applyGearLook();
+  labelButtons();refreshMax();P.hp=P.mhp;P.mp=P.mmp;for(const k in P.cd)P.cd[k]=0;save();return true}
+let sxtC=null,sxtS=null;
+function renderSxTest(){const el=$('sxTest');if(!el)return;if(!S.cls||S.demo){el.innerHTML='<div class="sx-sec">Test</div><p class="sx-note">캐릭터로 플레이 중일 때 쓸 수 있습니다.</p>';return}
+  const cl=Object.keys(CLS).filter(k=>!CLS[k].testOnly||S.test);if(!sxtC||!cl.includes(sxtC))sxtC=S.cls;const ops=CLS[sxtC].opts;if(!ops.includes(sxtS))sxtS=sxtC===S.cls&&ops.includes(S.main)?S.main:ops[0];
+  const same=sxtC===S.cls&&sxtS===S.main,nw=sxtC!==S.cls?NWC[bc(sxtC)]:'';
+  el.innerHTML=`<div class="sx-sec">Class</div><div class="sx-q" style="grid-template-columns:repeat(${Math.min(cl.length,4)},1fr)">${cl.map(k=>`<button data-xc="${k}" class="${k===sxtC?'on':''}"><b>${CLS[k].n}</b><small>${k===S.cls?'지금 직업':CLS[k].en}</small></button>`).join('')}</div>
+  <div class="sx-sec">Skill</div><div class="sx-q two">${ops.map(id=>`<button data-xs="${id}" class="${id===sxtS?'on':''}"><b>${SK[id].n}</b><small>${sxtC===S.cls&&id===S.main?'지금 스킬':SK[id].en||''}</small></button>`).join('')}</div>
+  <p class="sx-note">지금: <b style="color:var(--ink)">${CLS[S.cls].n} · ${SK[S.main].n}</b><br>장비는 그대로 두고, 무기만 고른 직업의 무기(${nw||NWC[bc(S.cls)]})로 바뀝니다. 무기의 직업 피해·공격/시전 속도 줄도 새 직업에 맞게 바뀝니다.<br>${S.test?'테스트 캐릭터는 새 스킬의 1차·2차 강화가 모두 채워집니다.':'주력 스킬을 바꾸면 1차 강화 포인트는 새 스킬에 남은 포인트로 돌려받고(스킬 창에서 다시 찍기), 2차 강화는 정수·골드로 돌려받습니다.'}</p>
+  <button class="sx-link" id="sxtGo" ${same?'disabled style="opacity:.45"':''}><b>${same?'지금 쓰는 직업·스킬입니다':`${CLS[sxtC].n} · ${SK[sxtS].n}(으)로 바꾸기`}</b><span>›</span></button>`}
+
 /* ===== v784 프롤로그: 캐릭터를 만든 직후 · 1장 시작 연출 전 — 그림 7장 슬라이드 (천천히 확대·좌우 이동, 재·불티, 명조 자막) =====
    p: 좌우 이동(−1 왼쪽 끝 ~ 1 오른쪽 끝, 세로 화면에서 크게 움직임) · z: 확대 · fx: 입자 · c: 자막(한 장면에 여러 줄을 차례로) */
 const PRL=[/* v792: c0 = 그림 가로 위치(0~1) · d = 시선 이동 방향(+1 왼→오른, −1 오른→왼; 장면별 원래 방향) — 속도·확대는 모든 장면 동일 */
@@ -10318,7 +10343,7 @@ document.querySelectorAll('#askSeg button').forEach(b=>b.addEventListener('click
 $('pGuide').onclick=()=>{closePause();guideBook()};
 $('pProlog').onclick=()=>{closePause();prologPlay(null)};/* v784 */
 $('pSlots').onclick=()=>{save();closePause();closeAllSheets();showLoading(()=>showSlots())};/* v781: 슬롯 선택 — 지금 캐릭터를 마치고 나가는 느낌으로 로딩 화면 *//* v71: 슬롯 버튼은 설정 창 안으로 */
-function openPause(){if(!S.cls)return;releaseAll();skAutoUi();$('pause').hidden=false}
+function openPause(){if(!S.cls)return;releaseAll();skAutoUi();sxtC=null;sxtS=null;renderSxTest();$('pause').hidden=false}
 function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN);$('fsTitleP').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
@@ -10368,8 +10393,8 @@ document.querySelectorAll('#gfxSeg button').forEach(b=>b.addEventListener('click
 function camSegUI(){const o=$('camZO');if(o)o.textContent=CAM_LOCK?'잠김':CAM_Z===0?'기본':(CAM_Z>0?'확대 ':'축소 ')+Math.round(Math.abs(CAM_Z)/(CAM_Z>0?CZ_MAX:-CZ_MIN)*100)+'%';document.querySelectorAll('#camLk button').forEach(b=>b.classList.toggle('on',(b.dataset.l==='1')===CAM_LOCK))}
 function rngPc(r){r.style.setProperty('--pc',((+r.value-+r.min)/(+r.max-+r.min)*100)+'%')}
 document.querySelectorAll('#camLk button').forEach(b=>b.addEventListener('click',()=>{CAM_LOCK=b.dataset.l==='1';try{localStorage.setItem('camLock',CAM_LOCK?'1':'0')}catch(_){}camSegUI()}));$('camRst').onclick=()=>{if(knAppr){toast('카메라','입장하는 동안은 바꿀 수 없습니다');return}camSet(0);camSegUI()};camSegUI();
-/* v777: 설정 탭 */{const T=$('sxTabs');const go=t=>{T.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('#pauseSheet section[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);try{localStorage.setItem('sxTab',t)}catch(_){}};T.addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b)go(b.dataset.t)});let t0='v';try{t0=localStorage.getItem('sxTab')||'v'}catch(_){}go(T.querySelector(`[data-t="${t0}"]`)?t0:'v');$('sxVer').textContent=APP_VER;
-  $('pX').onclick=()=>closePause();$('pSlots2').onclick=()=>$('pSlots').click();$('pFull').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else fsReq&&fsReq.call(fsRoot)}catch(_){}}}
+/* v777: 설정 탭 */{const T=$('sxTabs');const go=t=>{T.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('#pauseSheet section[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);try{localStorage.setItem('sxTab',t)}catch(_){}};T.addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b){go(b.dataset.t);if(b.dataset.t==='x')renderSxTest()}});let t0='v';try{t0=localStorage.getItem('sxTab')||'v'}catch(_){}go(T.querySelector(`[data-t="${t0}"]`)?t0:'v');$('sxVer').textContent=APP_VER;
+  $('pX').onclick=()=>closePause();$('sxTest').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.xc){sxtC=b.dataset.xc;sxtS=null;renderSxTest();return}if(b.dataset.xs){sxtS=b.dataset.xs;renderSxTest();return}if(b.id==='sxtGo'&&testSwitch(sxtC,sxtS)){closePause();toast(`${CLS[S.cls].n} · ${SK[S.main].n}`,S.test?'직업·스킬을 바꿨습니다':'직업·스킬을 바꿨습니다 · 스킬 창(I)에서 강화 포인트를 찍으세요')}});$('pSlots2').onclick=()=>$('pSlots').click();$('pFull').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else fsReq&&fsReq.call(fsRoot)}catch(_){}}}
 /* v534: PC — 창 상단(제목 줄)을 끌어 창 이동(다시 열면 처음 위치) · 마우스 휠로 카메라 거리 조절 */
 (()=>{const pc=()=>matchMedia('(hover:hover) and (pointer:fine)').matches;let D=null;
   document.addEventListener('pointerdown',e=>{if(!pc()||e.button!==0)return;const hd=e.target.closest&&e.target.closest('.scrim>.sheet>.shead');if(!hd||e.target.closest('button,input,select,a'))return;
