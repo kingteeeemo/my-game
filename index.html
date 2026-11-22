@@ -8174,7 +8174,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v843';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v844';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9518,7 +9518,7 @@ const tkNeed=(L,k)=>L>=50?10+(L-50):L>=45?7:L>=40?5:L>=35?3:L>=30?2:1,/* v378: 4
 let smAuto=null,smAutoN=0;
 function smAutoStop(msg){if(smAuto){clearInterval(smAuto);smAuto=null;if(msg)toast('자동 강화 종료',msg);if(smithOpen)renderSmith()}}
 function smAutoStart(){if(smAuto||!smithSel)return;useTk=false;smAutoN=0;const k=smithSel;
-  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(L>=29&&Date.now()-enhCineEnd<220)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=enhMax())return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
+  smAuto=setInterval(()=>{if(!smithOpen||smithSel!==k)return smAutoStop();if(enhCineOn)return;const L=enhL(k),c=enhCost(L,k);if(Date.now()-enhCineEnd<220)return;/* v148→v150: 컷신이 끝난 뒤 0.53초(실측: 443ms 틱 때문에 약 0.9초) → v225: 50ms 틱·0.44초(실측 약 0.45초, 50%) */if(Date.now()-smLastTry<443)return;if(L>=enhMax())return smAutoStop('최대 단계입니다');if(S.gold<c)return smAutoStop(`골드가 부족합니다 · ${SLOTN[k]} +${L} · ${smAutoN}회 시도`);smithTry(true)},50);renderSmith()}/* v138: 0.35초 → 0.403초(15% 느리게) → v147: 0.443초(10% 더 느리게) */
 /* v126: 쿨타임 감소는 장비 합계 40%가 상한 — 투구 강화 창에 안내 */
 function cdrCapNote(){const x=gear().cdr;if(!x)return '';return `<p class="hint" style="margin:6px 0 0">쿨타임 감소 옵션 합계 ${x}% → 실제 쿨타임 <b>-${(Math.round((1-cdMul())*1000)/10)}%</b> · 많이 쌓을수록 효율이 줄며 최대 80%에 수렴합니다(기본 공격·회전 베기). 그 외 스킬은 쿨타임 ${(s=>s.toFixed(2))(cdCurve(CD_U*(1-hasteP()*GMAX),x))}초(가속 10단계 기준, 0.25초에 수렴) — 쿨타임이 길어진 만큼 피해가 올라 DPS는 같습니다.</p>`}/* v149 */
 function renderSmith(){if(NS())return renderSmithNS();
@@ -9632,7 +9632,7 @@ function testSetSp(k,v){const it=S.eq[k];if(!it)return;const spk=Object.keys(OPT
 const GREAT_P=.2;/* v429 강화 대성공 확률 → v443: 10% → 30% → v461: 20% */
 function smithTry(auto){let cine=0;const k=smithSel,L=enhL(k),need=tkNeed(L,k),tkUse=!auto&&useTk&&(S.tickets||0)>=need;const c=tkUse?tkGold(L,k):enhCost(L,k);if(L>=enhMax()||S.gold<c)return;S.gold-=c;goldFx={v:c,t:Date.now()};if(auto)smLastTry=Date.now();
     if(tkUse){S.tickets-=need;if((S.tickets||0)<tkNeed(L+1,k))useTk=false}/* v107: 확정 강화 주문서 · v131: 단계별 필요 개수, 골드 5배 */
-    if(auto)smAutoN++;const big=NS()?L>=10:L>=29;/* v767: 새 강화는 10→11부터 컷신 *//* v603: 새 강화는 16강(1%)부터 컷신 *//* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
+    if(auto)smAutoN++;const big=true;/* v844: 모든 구간 강화가 컷신 *//* v767: 새 강화는 10→11부터 컷신 *//* v603: 새 강화는 16강(1%)부터 컷신 *//* v136: 자동 강화도 컷신 구간이면 컷신 재생 · v147: 24→25 강화부터 컷신 */
     const pn=pityN(k),pHit=pn>=pityCap(L);const nat=!tkUse&&!pHit&&Math.random()<enhRate(L);if(tkUse||pHit||nat){const great=!NS()&&big&&nat&&Math.random()<GREAT_P,nl=L+(great?2:1);/* v429: 강화 대성공 — 컷신 구간(29→30~)에서 성공 시 +2단계 · v443: 확률 30%, 확정 강화 주문서·천장 성공은 제외(일반 확률로 성공했을 때만) */S.enh[k]=nl;if(S.pity)delete S.pity[k];smithRes={ok:true,L:nl,t:Date.now(),cine:big,great};refreshMax();if(big){cine=1;enhCine(k,nl,true,()=>renderSmith(),auto,great)}else enhFx(true);if(auto)feed(`${SLOTN[k]} +${nl} ${great?'대성공 ✦ +2단계':'강화 성공'} · 자동`,great?'#ffd24a':'#7fe07a');if(great)feed(`✦ 강화 대성공! ${SLOTN[k]} +${L} → +${nl}`,'#ffd24a');}
     else{(S.pity=S.pity||{})[k]={L,n:pn+1};smithRes={ok:false,c,t:Date.now(),cine:big};if(big){cine=1;enhCine(k,L+1,false,()=>renderSmith(),auto)}else enhFx(false)}
     if(L>=10&&!auto)tele('enh',{es:k,from:L,ok:smithRes.ok?1:0,gr:smithRes.great?1:0});save();if(!cine)renderSmith()}
@@ -9642,7 +9642,7 @@ let enhCineOn=0,enhCineEnd=0,smLastTry=0;/* v136: 컷신 재생 중에는 자동
 function enhCine(k,L,ok,done,auto,great){enhCineOn=1;try{SFX.duck(1)}catch(e){}let over=0,revealed=0,canClose=0,tm=0,rv=null;const el=document.createElement('div');el.className='ecine charge enh';
   const base=L>=26?'200,120,255':'255,150,50';el.style.setProperty('--ec',base);
   let sp='';for(let i=0;i<16;i++){sp+=`<i class="in" style="left:${10+Math.random()*80}%;top:${66+Math.random()*24}%;--x:${((Math.random()-.5)*8).toFixed(1)}vmin;--y:-${(28+Math.random()*26).toFixed(1)}vmin;animation-delay:${(Math.random()*1).toFixed(2)}s;width:${2+Math.random()*3|0}px;height:${2+Math.random()*3|0}px"></i>`}
-  el.innerHTML=`<div class="cring"></div>${sp}<div class="orb"></div><div class="wait"><small>${L>=25?'MYTHIC':'LEGENDARY'} ENHANCE</small><b>+${L}</b><span>${SLOTN[k]} 강화 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
+  el.innerHTML=`<div class="cring"></div>${sp}<div class="orb"></div><div class="wait"><small>${L>=25?'MYTHIC ENHANCE':L>=15?'LEGENDARY ENHANCE':'ENHANCE'}</small><b>+${L}</b><span>${SLOTN[k]} 강화 중…</span><em>클릭하면 건너뜁니다</em></div><div class="flashw" style="animation:none;opacity:0"></div>`;
   if(auto){el.classList.add('auto');const sb=document.createElement('button');sb.className='autostop';sb.textContent='자동 강화 끄기';sb.addEventListener('click',e=>{e.stopPropagation();smAutoStop('직접 종료');fin()});el.appendChild(sb)}
   document.body.appendChild(el);
   const bsnd=auto?null:SFX.p('cut_build',{fit:1.14});/* 쌓이는 소리: 모으는 시간(1.14초)에 맞춰 뒤쪽(고조되는 부분)부터 재생, 결과 순간 끊음 */
@@ -9659,7 +9659,7 @@ function enhCine(k,L,ok,done,auto,great){enhCineOn=1;try{SFX.duck(1)}catch(e){}l
     const fl=el.querySelector('.flashw');if(ok)fl.style.animation='ecFlash .6s ease-out forwards';else fl.remove();
     let b='';for(let i=0;i<(ok?12:0);i++){const a=Math.random()*6.28,d=14+Math.random()*16;b+=`<i style="--x:${(Math.cos(a)*d).toFixed(1)}vmin;--y:${(Math.sin(a)*d).toFixed(1)}vmin;animation-delay:${(Math.random()*.15).toFixed(2)}s;width:${3+Math.random()*7|0}px;height:${3+Math.random()*7|0}px${ok?'':';background:#ff8a50;box-shadow:0 0 10px #ff4020'}"></i>`}
     const core=document.createElement('div');core.className='core';
-    core.innerHTML=great?`<small>GREAT SUCCESS</small><b>+${L}</b><span>${SLOTN[k]} 강화 대성공!</span><em>화면을 누르면 닫힙니다</em>`:ok?`<small>${L>=25?'MYTHIC':'LEGENDARY'} ENHANCE</small><b>+${L}</b><span>${SLOTN[k]} 강화 성공!</span><em>화면을 누르면 닫힙니다</em>`:`<small>ENHANCE FAILED</small><b class="bad">실패</b><span>${SLOTN[k]} 강화 실패 · +${L-1} 유지</span><em>화면을 누르면 닫힙니다</em>`;
+    core.innerHTML=great?`<small>GREAT SUCCESS</small><b>+${L}</b><span>${SLOTN[k]} 강화 대성공!</span><em>화면을 누르면 닫힙니다</em>`:ok?`<small>${L>=25?'MYTHIC ENHANCE':L>=15?'LEGENDARY ENHANCE':'ENHANCE'}</small><b>+${L}</b><span>${SLOTN[k]} 강화 성공!</span><em>화면을 누르면 닫힙니다</em>`:`<small>ENHANCE FAILED</small><b class="bad">실패</b><span>${SLOTN[k]} 강화 실패 · +${L-1} 유지</span><em>화면을 누르면 닫힙니다</em>`;
     el.insertAdjacentHTML('beforeend',b);el.appendChild(core);
     if(ok)el.insertAdjacentHTML('afterbegin','<div class="ring"></div>');
     if(great){let mo='';for(let n=0;n<28;n++)mo+=`<i class="mote" style="left:${8+Math.random()*84}%;--d:${(3+Math.random()*2.5).toFixed(1)}s;--w:${(Math.random()*2).toFixed(2)}s;--x:${((Math.random()-.5)*12).toFixed(1)}vmin"></i>`;
