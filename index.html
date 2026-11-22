@@ -1722,6 +1722,7 @@ const NCH=CH.length,LAST=NCH-1;
 /* 이전 5장 기준 진행도(0~4)로 환산: 레어·유니크 비율, 무리 크기 등 기존 공식에 사용. 엔드게임 = 5 */
 const chF=c=>c<=EGB?c*4/EGB:Math.min(5,4+(c-EGB)/3),/* v713: 1~7장 그대로, 8~10장은 4→5(엔드게임 입구) */chE=()=>S.ch>=NCH?5:chF(S.ch);
 /* 등급: 기본(흰) · 레어(파랑) · 유니크(노랑) · 고유(주황, 보스) */
+const NS_RKHP=[0,2,3.2,0];/* v849: 스토리 등급 체력 — 레어 ×2.6→×2 · 유니크 ×6→×3.2 (골드·엔드게임은 기존 배율) */
 const RANK=[
   {n:'기본',c:'#f2efe8',hex:0xf2efe8,hp:1,dmg:1,xp:1,sc:1},
   {n:'레어',c:'#6aa8ff',hex:0x6aa8ff,hp:2.6,dmg:1.35,xp:3.5,sc:1.15},
@@ -5377,7 +5378,7 @@ function spawnEnemy(type,x,z,rank=0,o={}){
   const sc=T.sc*R.sc;g.scale.setScalar(sc);g.add(blob(.6));g.position.set(x,0,z);scene.add(g);
   const base=type==='shooter'?(CH[ci].mob.grunt||'')+' 사수':CH[ci].mob[type]||'',name=o.name||(rank===3?CH[ci].boss:rank===2?`${UNI_PRE[Math.random()*UNI_PRE.length|0]} ${base}`:rank===1?`${RARE_PRE[Math.random()*RARE_PRE.length|0]} ${base}`:base);
   const xpCh=(S.ch===0?1.3:S.ch===1?1:.6)*.7;/* 1장 +30%, 2장 그대로, 3장~엔드게임 -40%, 전 구간 추가 -30% */
-  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()?nsHpMul():1)*(mutA('hp')&&!o.noMut?2.5:1)*(o.noMut?1:mutK()),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
+  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()&&S.ch<NCH&&NS_RKHP[rank]?NS_RKHP[rank]/R.hp:1)*(NS()?nsHpMul():1)*(mutA('hp')&&!o.noMut?2.5:1)*(o.noMut?1:mutK()),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
   const lab=document.createElement('div');lab.className='nm r'+rank;lab.innerHTML=`<span style="color:${R.c}"></span><i><b></b></i>`;lab.firstChild.textContent=name;namesEl.appendChild(lab);
   const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&oT(S.tier)>=30?2:1)*(mutA('spd')&&!o.noMut?1.4:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1)*(mutA('dmg')&&!o.noMut?2:1)*(o.noMut?1:mutK()),asp:mutA('spd')&&!o.noMut?1.4:1,r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
     boss:rank===3,chBoss:!!o.chBoss,aggro:rank!==3||!!o.aggro,skill:3.5,M,wk:Math.random()*6,atk:0};
@@ -8180,7 +8181,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v848';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v849';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
