@@ -1732,7 +1732,7 @@ const RANK=[
 ];
 const RARE_PRE=['광폭한','교활한','단단한','재빠른','굶주린'],UNI_PRE=['피에 굶주린','저주받은','불멸의','잔혹한','고대의'];
 /* v621 위험도 20단계 — 1~4 · 5~9 · 10~14 · 15~19 · 20 다섯 구간(구간마다 지역·최고 아이템 티어). oT = 대응하는 옛 위험도(0~100), 골드·경험치·지역 효과는 옛 곡선을 이 값으로 따름 */
-const NS_ITEM_K=.0036,D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d>=15?3:d>=10?2:d>=5?1:0,D_BANDS=[[1,4],[5,9],[10,14],[15,19],[20,20]],dTop=d=>Math.max(1,4-dBand(d))/* v826: 한 구간씩 당김 */,D_GATES=[4,9,14,19,20];
+const NS_ITEM_K=.0432/* v865: 필드 장비 ×3 (0.0144 → 0.0432) */,D_MAX=20,oT=d=>(Math.min(D_MAX,Math.max(1,d))-1)*100/19,dBand=d=>d>=20?4:d>=15?3:d>=10?2:d>=5?1:0,D_BANDS=[[1,4],[5,9],[10,14],[15,19],[20,20]],dTop=d=>Math.max(1,4-dBand(d))/* v826: 한 구간씩 당김 */,D_GATES=[4,9,14,19,20];
 /* 구울 체력(적정 DPS × 0.12) · 유니크 브루트 1타(감소 전) 목표 — 설계 문서 10장 표 */
 /* v826: 티어 배율·드롭 구간 변경 후 실측 재계산 — 위험도별 표준 스펙(Lv 31+4.4(d−1) · 강화 +4→+15 · 티어 4.3→1.1 · 1차 강화 완료) 직업 4종 평균 DPS × 엔드게임 성장분(1.0 → 위험도 20 봇 실측 기준 2.48), 구울 = 적정 DPS × 0.12
    유니크 브루트 1타 = 생명력 대비 목표(2.5 → 12%) ÷ (1 − 새 방어 감소율) */
@@ -1747,7 +1747,7 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
   /* v629: 변이 입장 비용 — 골드. 위험도 20 한 판(1,000마리)의 기본 골드 × 60% × (점수 ÷ 200)² — 전부 켜면 기본 골드의 60%(보상 ×3이라 남는 장사), 적게 켜면 아주 쌈. 골드 드랍을 조정해도 비용이 따라감 */
   runGold=d=>{const t=oT(d);return 1000*AVG_KILL_HP*egHp(t)*.012*goldAdjT(t)},mutCost=(o=S.mut,d=S.tier)=>{const p=mutPts(o),v=runGold(d)*1.0*(p/200)**2/* v835: 보상 ×5에 맞춰 0.6 → 1.0 */,u=v>=1e6?1e4:v>=1e3?10:1;return p?Math.max(1,Math.round(v/u)*u):0};/* v631: 그 위험도 한 판 기본 골드 기준 */
 function runPay(t){if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
-const tkFor=t=>1500/* v856: 1,000 → 1,500마리 */,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200:BAG;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+const tkFor=t=>1500/* v856: 1,000 → 1,500마리 */,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이'],musa:['낡은 대검','강철 대검','무사의 대검','룬 대검','매화 대검']};
@@ -1957,7 +1957,7 @@ const NSK={rain:.66,quake:1.01,chainl:1.10,frost:1.43,whirl:3.74,volley:23.8};
 const nsSkillK0=id=>NSK[id]!==undefined?NSK[id]:(()=>{const b=BAL[id];return b?(SKM[id]||1)*b[1]*b[2]:1})();
 /* v725 스킬 밸런스 — 110 스펙(1티어) 기준 사냥(구울 12마리 무리) DPS를 한 줄로(NSF), 보스 DPS는 보스에게만 붙는 배율로 따로(NSB, 보스 모드가 있는 스킬은 켠 상태 기준) */
 const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,chainl:1.167,pillar:.682,wave:19.8},
-  NS_SKS={whirl:.9}/* v860: 스토리 구간 전용 피해 배율 */,NS_SKE={rain:1,pillar:2,chainl:2,boom:.6,frost:.5}/* v851: 강화를 찍어야 강해지는 스킬의 초반 보정 — 레벨 1에서 1+a배, 레벨 28에서 0으로 줄어듦 */,NS_SKM={volley:.5,smite:6,boom:3,chainl:4,frost:2.2,quake:2.2,pillar:2}/* v846: 스킬별 기본 피해 배율(무리 사냥 속도 맞춤) — 보스는 NSBK를 같은 배율로 나눠 엔드게임 보스 시간 유지 */,NSBK0={whirl:.37,quake:.469,volley:.958,rain:1.231,frost:.353,wave:.653,smite:1.11,boom:.893,pillar:1.064/* v859: 사술 폭발 기본 피해 ×1.5→×2, 0단계 보스 계수는 같은 비율로 낮춰 보스 시간 유지 */,chainl:1.18}/* v846: 기본 피해 배율 반영 · 심판의 검·폭발 사격·사술 폭발·연쇄 번개 새로 측정 *//* v826: 추가 강화 0단계 보스 계수 — 스토리 장 보스를 목표 시간(10→20초)에 잡도록 측정 */,NSBK={smite:1.87/* v764: 심판의 검 보스 134만→약 257만(다른 스킬 250만 선에 맞춤) */,whirl:.612,quake:.592,volley:1.334,rain:.767,boom:1.214,frost:.334,chainl:.755,pillar:1.99,wave:1.342};
+  NS_SKG={quake:1.3}/* v866: 엔드게임 전용 피해 배율 — 대지 분쇄 ×1.3 */,NS_SKMP={frost:.65}/* v862: 얼음 보주 마나 소모 ×0.65 (봇 캠페인: 장당 마나 물약 14회, 다른 스킬 2~9회) */,NS_SKS={whirl:.9}/* v860: 스토리 구간 전용 피해 배율 */,NS_SKE={rain:2,pillar:2,chainl:2,boom:.6,frost:.5}/* v851: 강화를 찍어야 강해지는 스킬의 초반 보정 — 레벨 1에서 1+a배, 레벨 28에서 0으로 줄어듦 */,NS_SKM={rain:1.45/* v861: 화살비 ×1.3 · 얼음 보주 2.2→3.5 (봇 캠페인에서 가장 느림, 보스 계수는 같은 비율로 낮춤) */,volley:.45,smite:6,boom:2.7,chainl:3.6,frost:3.5,quake:2.2,pillar:1.8}/* v862: 궁수·마법사 편차 줄임 — 빠른 쪽(다발 사격·폭발 사격·연쇄 번개·사술 폭발) ×0.9, 화살비 1.3→1.45(초반 보정 1.3→2) *//* v846: 스킬별 기본 피해 배율(무리 사냥 속도 맞춤) — 보스는 NSBK를 같은 배율로 나눠 엔드게임 보스 시간 유지 */,NSBK0={whirl:.5/* v861: .37 → .5 (8~10장 보스 40~60초 → 봇 측정) */,quake:.469,volley:1.1,rain:.85,frost:.221,wave:.653,smite:1.11,boom:.99,pillar:.85/* v862: 사술 폭발 보스 8초 → 10초대 · 연쇄 번개 1.18→1 · 다발 사격 보스 약간 빠르게 */ /* v859: 사술 폭발 기본 피해 ×1.5→×2, 0단계 보스 계수는 같은 비율로 낮춰 보스 시간 유지 */,chainl:1}/* v846: 기본 피해 배율 반영 · 심판의 검·폭발 사격·사술 폭발·연쇄 번개 새로 측정 *//* v826: 추가 강화 0단계 보스 계수 — 스토리 장 보스를 목표 시간(10→20초)에 잡도록 측정 */,NSBK={smite:1.87/* v764: 심판의 검 보스 134만→약 257만(다른 스킬 250만 선에 맞춤) */,whirl:.612,quake:1.2/* v866: .592 → 1.2 (추가 강화가 오를수록 보스 계수가 오히려 줄던 문제) */,volley:1.334,rain:.767,boom:1.214,frost:.9/* v866: .334 → .9 (위험도 10~15 관문 보스 47~52초) */,chainl:.755,pillar:1.99,wave:1.342};
 const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;if(!id||!NS())return 1;const k1=(NSBK[id]||1)/(NS_SKM[id]||1),k0=NSBK0[id]||k1,gs=gems2For(id);let a=0,b=0;for(const g of gs){a+=Math.min(g2(g),g2Max(g));b+=g2Max(g)}const pr=b?a/b:1;return Math.exp(Math.log(k0)+(Math.log(k1)-Math.log(k0))*pr)};/* v826: 보스 피해 계수를 추가 강화 진행도에 따라 — 0단계(스토리·엔드게임 초반) NSBK0 → 모두 찍으면 NSBK (로그 보간) */
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
@@ -2257,14 +2257,14 @@ const egUp=t=>1.2+.01*t;
 const egHp0=t=>CH[EGB].hp*Math.pow(1.12,t)*(1+.04*t)*egUp(t);
 const goldAdjT=t=>{let f=(t>=40?1/1.3:1)*(t>=100?1/1.15:1)*(t>=110?1/1.2:1);/* v382: 위험도 100~ 체력 +15%만큼 골드 보정 */if(t>=50){const r=egHp0(t)/egHp0(50);f*=(1+.5*(r-1))/r}return f};
 /* v826: 스토리 처치 골드 — 장당 목표 1,200 → 6,600 (누적 3.9만, 판매 수입 별도) */
-const STORY_GM=[26.1,13.6,10.3,7.96,6.37,5.19,4.34,3.79,3.35,2.98];/* 장별 일반 몬스터 기대 골드(목표 처치 수 × 평균 체력 × 0.012) 대비 배율 */
+const STORY_GM=[32.62,17.68,14.94,12.74,11.15,9.34,8.25,7.58,7.04,6.71]/* v861: 봇 캠페인 측정(누적 21,800)을 목표(장당 1,200→6,600, 누적 39,000)에 맞춤 — 장별 ×1.25→×2.25 */;/* 장별 일반 몬스터 기대 골드(목표 처치 수 × 평균 체력 × 0.012) 대비 배율 */
 const goldAdj=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel?goldAdjT(oT(S.tier)):1;
 const egHp=t=>egHp0(t)*(t>=40?1.3:1)*(t>=100?1.15:1)*(t>=110?1.2:1),/* v386: 위험도 110~ 추가로 몬스터 체력 +20% */ /* v380: 위험도 100~ 몬스터 체력 +15% */egDmg=t=>CH[EGB].dmg*Math.pow(1.07,t)*egUp(t);
 const GATE_EVERY=5;/* 위험도 5·10·15…를 넘어가려면 관문 보스를 쓰러뜨려야 함 */
 
 function skillStats(id){
   const b=SK[id],L=g=>gl(id,g);
-  const st={dmg:b.dmg*(NS()?(NS_SKM[id]||1)*(S.ch<NCH&&NS_SKS[id]||1)*(1+(NS_SKE[id]||0)*Math.max(0,(28-(S.lv||1))/27)):1),cd:b.cd,proj:b.proj||0,pierce:L('pierce'),chain:L('chain'),blast:L('blast')>0,br:1.8*(1+.2*L('blast')),bm:.4+.05*L('blast'),
+  const st={dmg:b.dmg*(NS()?(NS_SKM[id]||1)*(S.ch<NCH&&NS_SKS[id]||1)*(S.ch>=NCH&&NS_SKG[id]||1)*(1+(NS_SKE[id]||0)*Math.max(0,(28-(S.lv||1))/27)):1),cd:b.cd,proj:b.proj||0,pierce:L('pierce'),chain:L('chain'),blast:L('blast')>0,br:1.8*(1+.2*L('blast')),bm:.4+.05*L('blast'),
     radius:(b.radius||0)*(1+.2*L('area')),echo:Math.ceil(L('echo')/3),echoMul:.55+.03*L('echo'),burn:L('burn')>0,burnDur:2.5+.15*L('burn'),burnMul:.6+.12*L('burn'),
     knock:L('knock')>0,hits:b.hits||0,vortex:b.kind==='whirl'&&L('swift')?{rm:1+.05*L('swift'),sp:3+.7*L('swift')}:null,
     so:{crit:.04*L('critup'),exec:.08*L('execute'),giant:.07*L('giant')},extra:Math.ceil(L('stack')/3),extraMul:.4+.03*L('stack')};
@@ -2305,7 +2305,7 @@ function clsBal(id){if(NS())return nsSkillK(id);const b=BAL[id];if(!b)return 1;c
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
 const mpLvK=s=>{const L=skillLv(s),max=gemsFor(s).length*GMAX;return L>max?1:L<=10?.6:L<=20?.75:L<=30?.9:1}/* v726: 스킬 레벨 1~10 −40% · 11~20 −25% · 21~30 −10% · 모두 강화하면 그대로 */
-const mpCost=s=>{if(NS()){const max=gemsFor(s).length*GMAX||1,g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+P.mmp*MP_PCT)*mpLvK(s)/(1+g.mcr/100)))}const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
+const mpCost=s=>{if(NS()){const max=gemsFor(s).length*GMAX||1,g=gear();return Math.max(1,Math.round(((NS_SKMP[s]||1)*SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+P.mmp*MP_PCT)*mpLvK(s)/(1+g.mcr/100)))}const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
 const MP_PCT=.02;/* v253: 무기 최종 피해(%)를 반올림한 값만큼 MP 소모 증가(31.8% → +32 · 128.2% → +128), 그 합에 반지 마나 소모 감소를 나눗셈으로 적용(100% = ½, 200% = ⅓) */
 const gemsFor=s=>SK[s].gems||Object.keys(GEMS).filter(g=>GEMS[g].t==='any'||GEMS[g].t===SK[s].tag);
 /* 레벨업: 먼저 강화할 스킬을 고르고, 그 스킬의 강화 3개 중 하나를 고름 */
@@ -6511,7 +6511,7 @@ function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tie
 function warmRegion(m){setTimeout(()=>{try{groundSet('eg'+m,EGMAPS[m])}catch(e){}},400)}
 function regionFx(){const f=$('regionFade');if(!f)return;f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}
 function spawnGate(){const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*12,-B+3,B-3),z=clamp(P.pos.z+Math.sin(a)*12,-B+3,B-3);
-  const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:true});e.gate=S.tier;e.hp=e.mhp=e.mhp*4;e.dmg*=1.2;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
+  const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:true});e.gate=S.tier;e.hp=e.mhp=e.mhp*4;e.dmg*=1.2*(S.tier===5?.78:S.tier===6?.88:1)/* v866: 구간이 바뀌는 위험도 5·6 관문 보스 피해 −22%·−12% (봇 측정: 전 직업 최저 체력이 가장 낮은 지점) */;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
   toast("관문 보스 출현",`${e.name} · 쓰러뜨리면 위험도 ${S.tier} 클리어`)}
 function gateClear(e){const t=e.gate;if(S.runClr)return;S.runClr=1;const first=!(S.gates||[]).includes(t);if(first)S.gates=(S.gates||[]).concat(t);
   for(let i=0;i<(first?2:1);i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2);tele('gate',{g:t});
@@ -7195,15 +7195,15 @@ const RR_MAX=999,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
 function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
-  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),RR_K=.0016,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
+  const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),RR_K=.05/* v865: 정수 기대량 × 0.05 */,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
-  {const r=rollN(ex*RR_K*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
+  {const r=rollN(ex*RR_K*rrD()*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
   {const q=rollN(ex*SEAL_P*sealD());if(q>0)sealAdd(q)}}/* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
-const SEAL_P=.000168,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
+const SEAL_P=.01/* v865: 정수 기대량 × 0.01 */,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */const rrD=()=>1+(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v864: 윤회의 불씨 위험도 보정 — 위험도 1 ×1 → 위험도 20 ×2 (인장처럼 위험도에 따라 계속 오름) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
@@ -7378,6 +7378,7 @@ function dropItem(p,boss,rar,_m){if(!_m&&NS()&&S.ch>=NCH&&rar===undefined&&!S.du
 /* 가방이 가득 차면 (v29): 가방 안의 기존 장비 중 가장 약한 것(지금 장비보다 좋은 ▲ 아이템은 제외, 낮은 등급 → 낮은 평가 순)을
    자동으로 팔고 새 장비를 받음 */
 /* v131: 잠근 아이템은 자동 판매하지 않음. 가방이 잠근 아이템으로 가득 차면 새 아이템을 대신 판매 */
+const T_OK=c=>(S.test&&TCUR())||(S.gold||0)>=c;/* v867: 골드 충분한지 (테스트 재화 무한이면 항상) */
 function makeRoom(){if(S.inv.length<bagCap())return true;const ul=S.inv.filter(x=>!x.lock);if(!ul.length)return false;const ups=new Set(upgrades()),c=ul.filter(x=>!ups.has(x)),pool=c.length?c:ul;
   let w=pool[0];for(const x of pool)if(x.rar<w.rar||(x.rar===w.rar&&score(x)<score(w)))w=x;
   S.gold+=sellPrice(w);S.inv.splice(S.inv.indexOf(w),1);return true}
@@ -7911,7 +7912,7 @@ function stashCurMove(dir,k){if(TCUR())return;const c=stashCur(),mine=S[k]||0,st
   if(dir==='in'){S[k]=mine-n;c[k]=st+n}else{S[k]=mine+n;c[k]=st-n}stashSave();save();renderStash()}
 function openStash(){closeAllSheets();nsSheet();stashLoad();stashOpen=true;stashSel=null;stashSide=null;stashMulti=false;stashPicks=[];renderStash();$('nsSheet').hidden=false;releaseAll();guide('stash')}
 /* 옵션 리롤: 아이템 전체 단위 — 티어·베이스·줄 수·옵션 종류 유지, 수치만 티어 범위 안에서 다시 뽑음 */
-let rrOpen=false,rrSel=null;const RR_COST=1;
+let rrOpen=false,rrSel=null;const RR_COST=1,rrCostOf=it=>[12,5,3,1,1,1][(it&&it.tier||6)-1]||1;/* v863: 수치 조정 비용 — 6·5·4티어 1 · 3티어 3 · 2티어 5 · 1티어 12 */
 function rerollItem(it){for(const l of it.lines)l.v=nRoll(nLineR(it,l),nLineDp(l))}
 /* v507: 리롤 카드 — 줄마다 현재 수치 + (기본값 · 범위), 리롤하면 기본값이 잠깐 돌아가다 멈춤 */
 let rrSpin=0,rrFlash=0,rrPrev=null;
@@ -7919,7 +7920,7 @@ const rrRange=(it,l)=>nLineR(it,l);
 const rrDp=l=>nLineDp(l);
 const rrNum=(l,v)=>{const d=rrDp(l);const x=Math.abs(v)>=1000?Math.round(v).toLocaleString('ko-KR'):v.toFixed(d);return x};
 /* v604: 제작 — 수치 리롤(불씨 1) · 옵션 변환(고른 줄의 종류만 바꿈, 티어 유지, 불씨 3~8) · 티어 승급(고른 줄 티어 +1, 성역의 인장 1) */
-let rrLine=null;const SEAL_COST=1,convCost=t=>9-t;/* 변환 비용: 6티어 줄 3 · 5티어 4 … 1티어 8 */
+let rrLine=null;const SEAL_COST=1,convCost=t=>[50,20,10,3,2,2][(t||6)-1]||2,sealCost=t=>[6,3,2,1,1][Math.max(1,(t||6)-1)-1]||1;/* v863: 변환 비용(불씨) 6·5티어 2 · 4티어 3 · 3티어 10 · 2티어 20 · 1티어 50 / 줄 티어 승급(인장, 올라갈 티어) 5·4티어 1 · 3티어 2 · 2티어 3 · 1티어 6 */
 function nsConvert(it,i){const l=it.lines[i];if(!l||l.b)return false;const pool=NSLOT[it.slot][l.o?'o':'x'],has=new Set(it.lines.map(x=>x.k)),c=pool.filter(k=>!has.has(k));if(!c.length)return false;
   const k=c[Math.random()*c.length|0];l.k=k;l.v=nRoll(NSO[k].r[(l.t||it.tier)-1],NSO[k].dp);return true}
 function nsUpgrade(it,i){const l=it.lines[i];if(!l||l.b)return false;const t=l.t||it.tier;if(t<=it.tier)return false;l.t=t-1;l.v=nRoll(NSO[l.k].r[l.t-1],NSO[l.k].dp);return true}
@@ -7933,7 +7934,7 @@ function rrRow(it,l,i,L){const t=l.t||it.tier,m=nLineMul(l,L),dead=nsDeadK(l.k),
   else if(l.b){right='<span class="lock">강화로만</span>';cls=' dim'}
   else if(rrTab==='cv'){right=`<span class="cost">${ci('r')}${convCost(t)}</span>`;click=true}
   else if(t<=it.tier){right='<span class="lock">최고 티어</span>';cls=' dim'}
-  else{right=`<span class="cost">${ci('s')}${SEAL_COST}</span>`;click=true}
+  else{right=`<span class="cost">${ci('s')}${sealCost(t)}</span>`;click=true}
   const fx=rrFlash===i+2,fxa=fx?' rfx':'';
   const inner=`<span class="tl${t===1?' t1':''}">${t}티어</span><span class="rnm">${tag}${ivName(l.k,it.slot,it)}${dead?'<span class="ddt">효과 없음</span>':''}</span><b class="v${fl}" style="--d:${i*60}ms">${nFmt(l.k,l.v*m)}</b>${right}`;
   return click?`<button class="rln${dead?' dead':''}${rrLine===i?' sel':''}${fxa}" data-rl="${i}">${inner}</button>`:`<div class="rln${dead?' dead':''}${fx?cls.replace(' dim',' dimx'):cls}${fxa}">${inner}</div>`}
@@ -7952,10 +7953,10 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   const ln=sel&&rrLine!==null?sel.lines[rrLine]:null,lt=ln?(ln.t||sel.tier):0;
   let ct='',btn='';
   if(!sel){ct='아래에서 조율할 아이템을 고르세요';btn='<button class="rrgo" disabled>아이템을 고르세요</button>'}
-  else if(rrTab==='rr'){const ok=!rrSpin&&(T||(S.rr||0)>=RR_COST);ct='<b>티어와 옵션 종류 고정</b>, 옵션 수치 재조정';btn=`<button class="rrgo" data-ns="rr" ${ok?'':'disabled'}>${ci('r')}<b>${RR_COST}</b>수치 재조정</button>`}
+  else if(rrTab==='rr'){const ok=!rrSpin&&(T||(S.rr||0)>=rrCostOf(sel));ct='<b>티어와 옵션 종류 고정</b>, 옵션 수치 재조정';btn=`<button class="rrgo" data-ns="rr" ${ok?'':'disabled'}>${ci('r')}<b>${rrCostOf(sel)}</b>수치 재조정</button>`}
   else if(rrTab==='cv'){const pool=ln&&!ln.b?NSLOT[sel.slot][ln.o?'o':'x'].filter(k=>!sel.lines.some(x=>x.k===k)):[],c=convCost(lt),ok=ln&&!ln.b&&pool.length&&(T||(S.rr||0)>=c);
     ct=ln&&!ln.b?(pool.length?`<b>${ivName(ln.k,sel.slot,sel)}</b>를 다른 옵션으로 바꿉니다 · ${lt}티어 유지`:'바꿀 수 있는 다른 옵션이 없습니다'):'바꿀 줄을 고르세요';btn=`<button class="rrgo" data-ns="conv" ${ok?'':'disabled'}>${ci('r')}<b>${ln&&!ln.b?c:'—'}</b>옵션 변환</button>`}
-  else{const can=ln&&!ln.b&&lt>sel.tier,ok=can&&(T||(S.seal||0)>=SEAL_COST);ct=can?`<b>${ivName(ln.k,sel.slot,sel)}</b> · ${lt}티어 → <b>${lt-1}티어</b>`:'올릴 줄을 고르세요';btn=`<button class="rrgo" data-ns="up" ${ok?'':'disabled'}>${ci('s')}<b>${SEAL_COST}</b>티어 승급</button>`}
+  else{const can=ln&&!ln.b&&lt>sel.tier,ok=can&&(T||(S.seal||0)>=sealCost(lt));ct=can?`<b>${ivName(ln.k,sel.slot,sel)}</b> · ${lt}티어 → <b>${lt-1}티어</b>`:'올릴 줄을 고르세요';btn=`<button class="rrgo" data-ns="up" ${ok?'':'disabled'}>${ci('s')}<b>${ln&&!ln.b&&lt>sel.tier?sealCost(lt):'—'}</b>티어 승급</button>`}
   const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=invSort(S.inv.filter(x=>x.ns)),up=rrDrUp||!sel;
   const tl=(it,src)=>`<div class="rrt">${nsTile(it,it.id===rrSel,src)}<span>${SLOTN[it.slot]}${src==='e'&&enhL(nsItSlot(it))?` +${enhL(nsItSlot(it))}`:''}</span></div>`;
   const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
@@ -8027,10 +8028,10 @@ function nsClick(b){const a=b.dataset.ns;
     if(i<0)return;if(to.length>=cap){toast('공간 부족',stashSrc==='s'?'가방이 가득 찼습니다':'창고가 가득 찼습니다');return}to.push(from.splice(i,1)[0]);stashSel=null;stashSave();save();renderStash();return}
   if(a==='expand'&&stashOpen){const c=stashCost(stashD.cap);if(S.gold<c){toast('골드 부족',`${fmtG(c)}G가 필요합니다`);return}S.gold-=c;stashD.cap+=5;stashSave();save();renderStash();return}
   if((a==='rr'||a==='conv'||a==='up')&&rrOpen){if(rrSpin)return;const it=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===rrSel);if(!it)return;const T=TCUR(),snap=()=>({id:it.id,v:it.lines.map(l=>l.v),k:it.lines.map(l=>l.k),t:it.lines.map(l=>l.t)});let pw0=null;try{pw0={id:it.id,...rrPw(it)}}catch(_){}
-    if(a==='rr'){if(!T){if((S.rr||0)<RR_COST)return;S.rr-=RR_COST}rrPrev=snap();rerollItem(it);rrFlash=1}
+    if(a==='rr'){if(!T){const c=rrCostOf(it);if((S.rr||0)<c)return;S.rr-=c}rrPrev=snap();rerollItem(it);rrFlash=1}
     else{const i=rrLine,l=it.lines[i];if(!l||l.b)return;const t=l.t||it.tier;
       if(a==='conv'){const c=convCost(t);if(!T&&(S.rr||0)<c)return;const pv=snap();if(!nsConvert(it,i))return;if(!T)S.rr-=c;rrPrev=pv}
-      else{if(!T&&(S.seal||0)<SEAL_COST)return;const pv=snap();if(!nsUpgrade(it,i))return;if(!T)S.seal-=SEAL_COST;rrPrev=pv}rrFlash=i+2}
+      else{const sc=sealCost(t);if(!T&&(S.seal||0)<sc)return;const pv=snap();if(!nsUpgrade(it,i))return;if(!T)S.seal-=sc;rrPrev=pv}rrFlash=i+2}
     if(rrPrev&&rrPrev.id===it.id&&pw0)rrPw0=pw0;refreshMax();save();hudMoney&&hudMoney();renderRR();rrFlash=0;return}}
 /* v484 NS: 회전 베기 채널링 — 누르고 있는 동안 동작 시간마다 타격(타격마다 마나 소모), 화염 폭발은 쿨타임마다 */
 const WHK=6.4;/* 타격당 피해 배율(임시) — 110 스펙·2티어 중간·오라 없음에서 우버 아귀 허수아비(1.075억) 30초 기준. 강화 효과 조정(C안) 때 확정 */
@@ -8487,7 +8488,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v868';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v869';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9491,7 +9492,8 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
     if(!shown.length)bag+=`<div class="iv2empty">${invSub?SLOTN[invSub]:({weapon:'무기',armor:'방어구',acc:'장신구'})[invFilter]}이(가) 가방에 없습니다</div>`}
   bag+=`</div>`;
   const lowN=S.inv.filter(x=>x.rar<=1&&!x.lock),allN=S.inv.filter(x=>!x.lock);
-  const foot=`<div class="iv2foot"><span class="cnt">${S.inv.length} / ${bagCap()}</span><span class="r"><button id="iSellLow" ${lowN.length?'':'disabled'}>${NS()?'5·6티어':'일반·마법'} 판매 <span class="gp">+${fmtG(lowN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button id="iSellAll" ${allN.length?'':'disabled'}>${clearArm?'한 번 더 누르면 판매':'모두 판매'} <span class="gp">+${fmtG(allN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button></span></div>`;
+  const bx=S.bagX||0,bup=NS()&&bx<3?`<button id="iBagUp" ${T_OK(BAG_UP[bx])?'':'disabled'}>가방 +100칸 <span class="gp">${fmtG(BAG_UP[bx])}G</span></button>`:'';
+  const foot=`<div class="iv2foot"><span class="cnt">${S.inv.length} / ${bagCap()}</span><span class="r">${bup}<button id="iSellLow" ${lowN.length?'':'disabled'}>${NS()?'5·6티어':'일반·마법'} 판매 <span class="gp">+${fmtG(lowN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button><button id="iSellAll" ${allN.length?'':'disabled'}>${clearArm?'한 번 더 누르면 판매':'모두 판매'} <span class="gp">+${fmtG(allN.reduce((a,x)=>a+sellPrice(x),0))}G</span></button></span></div>`;
   const look=invFilter==='etc'?lookRow():'';
   const panel=`<div class="iv2panel">${port?'<button class="iv2grab" id="iGrab" aria-label="가방 넓히기/줄이기"></button>':''}${tabs}<div class="iv2bag">${bag}${look}</div>${foot}</div>`;
   /* 선택 팝업: 가방 아이템 = 현재 장착과 비교 + 장착·잠금·판매 / 장착 칸 = 장착 장비 정보 */
@@ -9546,6 +9548,8 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
   if(b.id==='iDrop'){const it=S.inv.find(x=>x.id===invSel);if(it&&!it.lock){S.gold+=sellPrice(it);S.inv=S.inv.filter(x=>x!==it)}invSel=null;save();renderInv();refreshUpBtn();return}
+  if(b.id==='iBagUp'){const bx=S.bagX||0;if(!NS()||bx>=3)return;const c=BAG_UP[bx];if(!T_OK(c)){toast('골드 부족',`${fmtG(c)} 골드가 필요합니다`);return}
+    askConfirm('가방 확장',`골드 <b style="color:var(--ink)">${fmtG(c)}</b>으로 가방을 <b style="color:var(--ink)">${bagCap()} → ${bagCap()+100}칸</b>으로 늘립니다.`,'확장',()=>{if(!T_OK(c)||(S.bagX||0)!==bx)return;if(!(S.test&&TCUR()))S.gold-=c;S.bagX=bx+1;save();renderInv();hudMoney&&hudMoney();toast('가방 확장',`가방 ${bagCap()}칸`)},'취소',()=>{});return}
   if(b.id==='iSellLow'){const g=S.inv.filter(x=>x.rar<=1&&!x.lock).reduce((a,x)=>a+sellPrice(x),0);S.inv=S.inv.filter(x=>x.rar>=2||x.lock);S.gold+=g;invSel=null;save();renderInv();refreshUpBtn();if(g)toast('판매 완료',`+${fmtG(g)} 골드`);return}
   if(b.id==='iSellAll'){if(clearArm&&Date.now()-clearArm<3000){const g=S.inv.filter(x=>!x.lock).reduce((a,x)=>a+sellPrice(x),0);S.inv=S.inv.filter(x=>x.lock);S.gold+=g;clearArm=0;invSel=null;save();renderInv();refreshUpBtn();if(g)toast('모두 판매',`+${fmtG(g)} 골드`);return}clearArm=Date.now();renderInv();return}
   if(b.id==='iAuto'){equipBest();invSel=null;renderInv();return}
