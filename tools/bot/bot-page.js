@@ -33,6 +33,7 @@ function hookOnce(){if(BOT._hooked)return;BOT._hooked=1;
   const od=window.die;window.die=function(){if(BOT.on){BOT.M.deaths++;BOT.M.events.push([+BOT.M.t.toFixed(1),'사망',Math.round(W2L(P.pos.x,P.pos.z).z)])}return od.apply(this,arguments)};
   const op=window.nsPotUse;if(op)window.nsPotUse=function(k){const n0=P.pch&&P.pch[k];const r=op.apply(this,arguments);if(BOT.on&&P.pch&&P.pch[k]<n0){if(k==='hp')BOT.M.potHp++;else BOT.M.potMp++}return r};
   const ot=window.telegraph;window.telegraph=function(p,r){if(BOT.on)BOT.zones.push({x:p.x,z:p.z,r:r+.6,t:BOT.M.t,end:BOT.M.t+(typeof TELE_S!=='undefined'?TELE_S*1.4:2)});return ot.apply(this,arguments)};
+  const ogx=window.gainXp;window.gainXp=function(n){if(BOT.on&&BOT.EG&&n>0)BOT.EG.xp=(BOT.EG.xp||0)+n;return ogx.apply(this,arguments)};
   const omk=window.makeItem;window.makeItem=function(){const it=omk.apply(this,arguments);if(BOT.on&&BOT.EG&&it){BOT.EG.items++;if(it.tier)BOT.EG.tiers[it.tier]++}return it};
   /* 테스트 중에는 서버 기록을 보내지 않음 · 강화 컷신 생략 */
   window.tele=function(){};window.enhCine=function(k,l,ok,cb){try{cb&&cb()}catch(_){}};window.enhFx=function(){};window.renderSmith=function(){};
@@ -269,7 +270,7 @@ BOT.egSetup=function(o){
 BOT.egEnd=function(){
   const r=BOT.result();
   if(BOT.M.gateT!=null&&r.clear)r.bossT=+(r.t-BOT.M.gateT).toFixed(1);
-  return Object.assign(r,{kills:S.tierKills,spawned:S.egSp,gateT:BOT.M.gateT==null?null:+BOT.M.gateT.toFixed(1),gold:S.gold||0,rr:S.rr||0,seal:S.seal||0,ess:S.ess||0,lumi:S.lumi||0,items:BOT.EG.items,itemTiers:BOT.EG.tiers.slice(1),bag:S.inv.length,lvEnd:S.lv});
+  return Object.assign(r,{kills:S.tierKills,spawned:S.egSp,gateT:BOT.M.gateT==null?null:+BOT.M.gateT.toFixed(1),gold:S.gold||0,rr:S.rr||0,seal:S.seal||0,ess:S.ess||0,lumi:S.lumi||0,xp:Math.round(BOT.EG.xp||0),items:BOT.EG.items,itemTiers:BOT.EG.tiers.slice(1),bag:S.inv.length,lvEnd:S.lv});
 };
 
 /* 장비: 레벨/장에 맞는 평균 장비 (옵션 구성은 직업별 주력 옵션) */
