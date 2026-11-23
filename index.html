@@ -2039,9 +2039,7 @@ function mutBurst(e){const n=e.rank>=2?10:e.rank===1?8:6,a0=Math.random()*6.28;f
 function nsShotStep(dt){for(let i=nsShots.length-1;i>=0;i--){const o=nsShots[i];o.t+=dt;o.m.position.x+=o.vx*dt;o.m.position.z+=o.vz*dt;
   const hit=Math.hypot(o.m.position.x-P.pos.x,o.m.position.z-P.pos.z)<.7&&P.hp>0;if(hit&&!P.mv)hurtPlayer(o.dmg*(1-NSX.projr));/* v603: 투사체 피해 감소 */
   if(o.spin)o.m.scale.setScalar(1+Math.sin(o.t*14)*.12);if(hit&&!P.mv||o.t>(o.L||2)||inTown){scene.remove(o.m);nsShots.splice(i,1)}}}
-function auraRow(k){const tt=S.test;if(k==='pot'){const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0,D=`1회: 3초 동안 생명력 30% / 마나 ${Math.round(npotP('mp')*100)}%\n`+'처치 점수 40점(일반 1·정예 3·유니크 10)마다 1회 · 보스 체력 20%마다 1회 · 보스 입장 시 가득';
-    return mnRow({k:'au_pot',n:'물약 충전 횟수',L:m,M:5,cur:`최대 충전 ${m}회\n`+D,nx:m<5?`최대 충전 ${m+1}회`:'',btns:m>=5?`<button class="mbt" disabled>최대</button><span class="msp"></span>`:`<button class="mbt e" data-pu="1" ${(S.ess||0)>=c?'':'disabled'}><span class="mbl">${ci('e')}${c}</span></button><span class="msp"></span>`})}
-  const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
+function auraRow(k){const tt=S.test;  const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
   const st=k==='blood'?(on?(P.bloodAct?'발동 중':'대기 (생명력 50% 이상에서 켜짐)'):(bloodOk()?'':'장비 생명력 재생 9.4% 이상 필요')):'';
   return mnRow({k:'au_'+k,n:a.n,L,M:10,sub:a.r?`점유 ${(a.r/(1+gear().res/100)).toFixed(1)}%`:'',cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'')):'',btns:`${tt?`<button class="mbt sq" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}${L>=10?`<button class="mbt" disabled>최대</button>`:`<button class="mbt e" data-au="${k}" ${can?'':'disabled'}><span class="mbl">${ci('e')}${c}</span></button>`}<button class="msw${on?' on':''}" data-at="${k}" ${L?'':'disabled'} aria-label="${a.n} ${on?'끄기':'켜기'}"></button>`})}
 const AUGR=[['def','방어',['def','eva','es']],['dmg','피해',['crit','haste','blood']],['reg','재생',['hreg','mreg']]];
@@ -9364,7 +9362,6 @@ $('sheet').addEventListener('click',e=>{
   if(b.dataset.gostage){closeMenu();openStage();return}
   if(b.dataset.tab){menuTab=b.dataset.tab;renderMenu();return}
   if(b.dataset.aug){auG=b.dataset.aug;renderMenu();return}
-  if(b.dataset.pu){const m=potMaxN(),c=NPOT_UP[m-3];if(m<5&&(S.ess||0)>=c){S.ess-=c;S.potUp=(S.potUp||0)+1;save()}renderMenu();return}
   if(b.dataset.at){auraToggle(b.dataset.at);renderMenu();return}
   if(b.dataset.au){const k=b.dataset.au;if(auraUp(k)){feed(`${NAURA[k].n} Lv ${auraL(k)}`,NAURA[k].c);ringFx(P.pos,2.4,0xff5a3a,.5);refreshMax();save()}renderMenu();return}
   if(b.dataset.ad&&S.test){const k=b.dataset.ad,L=auraL(k);if(L>0){S.aura[k]=L-1;S.ess+=AURA_COST[L-1];if(L-1===0&&S.auraOn)S.auraOn[k]=false;refreshMax()}renderMenu();return}
@@ -9625,7 +9622,7 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
   const g=S.gold,l=gachaLv(),gp=gachaPrice(l),pot=shopKind==='pot';
   let h=`<div class="shead"><div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
   if(pot){h+=`<div class="gems">`;
-    if(NS()){nsPotInit();const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0;/* v507: 충전식 물약 — 상점에는 생명력·마나 물약(충전 횟수 확장)과 신속 물약만 */
+    if(NS()){nsPotInit();const m=potMaxN();/* v507: 충전식 물약 — 상점에는 생명력·마나 물약과 신속 물약만 (v879: 충전 횟수 확장 제거) */
       for(const k of ['hp','mp'])h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${NPOT[k].n} 물약<small>1회: 3초 동안 ${NPOT[k].n} ${Math.round(npotP(k)*100)}% 회복 · 충전 <b style="color:var(--ink)">${P.pch[k]}/${m}</b>회 · 몬스터 처치·보스 피해로 충전</small></span></div>`}
     else for(const k of ['hp','mp'])for(const z of PSZ){const p=POT[z],have=S.pots[k][z];
       h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
@@ -9658,7 +9655,6 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
-  if(b.dataset.pu){const m=potMaxN(),c=NPOT_UP[m-3];if(m<5&&(S.ess||0)>=c){S.ess-=c;S.potUp=(S.potUp||0)+1;save()}renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
   if(b.dataset.psell){const [k,z,n]=b.dataset.psell.split(','),cnt=n==='all'?S.pots[k][z]:Math.min(1,S.pots[k][z]);if(cnt){S.pots[k][z]-=cnt;S.gold+=potSell(z)*cnt;save()}renderShop();return}
