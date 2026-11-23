@@ -1879,6 +1879,9 @@ const NSO={
 /* 기본옵 (아이템 티어 고정 · 강화 적용): k가 null이면 방어구 베이스(방어/회피/에쉴) */
 const NSB={weapon:{k:'wd',r:nPct(280,300)},helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:null,r:nPct(400,430)},boots:{k:null,r:nPct(400,430)},
   amulet:{k:'inc',r:nPct(30,33)},ring:{k:'hp',r:nPctH(600,640)},belt:{k:'mp',r:nPctH(600,640)}};
+/* v879: 기본옵 + 전투 수치 옵션 ×1.5 (1티어 기준, 하위 티어는 티어 배율 그대로) — 쿨감·이동 속도·베이스 치명·처치 회복·재생·보호막 재충전·투사체 감소·마나 소모 감소·점유 효율·범위는 그대로 */
+const NS_X15=['wd','cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','hp','mp','hpp','defp','evap','esp','amp','bossd'],NS_XK=1.5;
+for(const k of NS_X15)for(const p of NSO[k].r){p[0]*=NS_XK;p[1]*=NS_XK}for(const k in NSB)for(const p of NSB[k].r){p[0]*=NS_XK;p[1]*=NS_XK}
 const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,gloves:NSB.gloves.r,boots:NSB.boots.r};
 /* 부위별 후보: o 접두어 · x 접미어 (기본옵 제외) */
 const NSLOT={weapon:{o:['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','mp'],x:['bcrit','amp','killH','killM','bossd']},
@@ -1893,9 +1896,9 @@ const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',a
 const nRound=(v,dp)=>{const m=Math.pow(10,dp);return Math.round(v*m)/m};
 const nRoll=(r,dp,q)=>nRound(r[0]+(r[1]-r[0])*(q===undefined?Math.random():q),dp);
 /* 강화: 기본옵에만. 성공 확률(현재 → 다음 단계)과 성공 시 오르는 양(%) */
-const NS_ENH_MAX=20;const enhMax=()=>NS()?NS_ENH_MAX:ENH_MAX0;
-const NS_RATE=[1,1,1,1,.8,.7,.6,.5,.4,.3,.15,.1,.07,.05,.03,.01,.01,.01,.01,.01];
-const NS_GAIN=[0,5,5,5,5,6,6,7,8,9,10,12,14,16,18,20,25,25,25,25,25];
+const NS_ENH_MAX=30;/* v879: 최대 +20 → +30 */const enhMax=()=>NS()?NS_ENH_MAX:ENH_MAX0;
+const NS_RATE=[1,1,1,1,.8,.7,.6,.5,.4,.3,.27,.23,.2,.17,.13,.1,.1,.1,.1,.1,.05,.03,.01,.01,.01,.01,.01,.01,.01,.01];/* v879: 9→10 30%에서 15→16 10%까지 선형, 15→20 10%, 20→21 5%, 21→22 3%, 22→23 ~ 29→30 1% */
+const NS_GAIN=[0,5,5,5,5,6,6,7,8,9,10,12,14,16,18,20,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25].map(v=>v*1.3);/* v879: 강화 상승치 전 구간 ×1.3 · 21~30강 단계당 25 기준 */
 const NS_EM=(()=>{const a=[1];for(let i=1;i<=NS_ENH_MAX;i++)a.push(a[i-1]+NS_GAIN[i]/100);return a})();
 const nsEM=L=>NS_EM[Math.max(0,Math.min(NS_ENH_MAX,Math.floor(L)))];
 const nMul=(k,L)=>1;/* 접두어·접미어는 강화 영향 없음(기본옵은 nsEM) */
@@ -1922,7 +1925,7 @@ const nLineR=(it,l)=>l.b?NSB[it.slot].r[(l.t||it.tier)-1]:NSO[l.k].r[(l.t||it.ti
 const nLineDp=l=>l.b&&(l.k==='def'||l.k==='eva'||l.k==='es'||l.k==='wd'||l.k==='hp'||l.k==='mp')?0:NSO[l.k].dp;
 /* 아이템 생성 — opt: {wc, bt, o:[키…], x:[키…], q:0~1(수치 위치), lt:줄 티어 고정} */
 function nsMakeItem(slot,tier,opt={}){tier=Math.max(1,Math.min(6,tier||6));const C_=NSLOT[slot],q=opt.q,B=NSB[slot];
-  const it={id:++uid,ns:1,nv:3,slot,tier,rar:NT_RAR[tier],ilvl:S.lv||1,base:0,opts:[],lines:[]};
+  const it={id:++uid,ns:1,nv:4,slot,tier,rar:NT_RAR[tier],ilvl:S.lv||1,base:0,opts:[],lines:[]};
   if(slot==='weapon'){const r=Math.random();it.wc=opt.wc||(r<.8?bc(S.cls):['warrior','archer','mage'].filter(c=>c!==bc(S.cls))[r<.9?0:1])}
   let bk=B.k;if(!bk){it.bt=opt.bt||['def','eva','es'][Math.random()*3|0];bk=it.bt}
   it.lines.push({k:bk,o:1,b:1,t:tier,v:nRoll(B.r[tier-1],bk==='inc'?1:0,q)});
@@ -2086,13 +2089,16 @@ let curSlot=null,S=fresh();
 /* v603: 시즌 2 장비 개편 이전의 새 장비 → 같은 부위·티어·베이스로 다시 만듦(남아 있는 옵션 종류는 최대한 유지, 획득량 옵션은 다른 옵션으로) · 강화는 최대 +20 */
 /* v826: 티어 배율 변경 전 장비(nv 2) → 굴림 위치를 그대로 두고 새 배율로 수치만 환산 (생명력·마나처럼 별도 배율 줄은 그대로) */
 function nsScale(it){for(const l of it.lines||[]){const R=l.b?NSB[it.slot]&&NSB[it.slot].r:NSO[l.k]&&NSO[l.k].r;if(!R||!l.t||!R[0][0])continue;if(Math.abs(R[5][0]/R[0][0]-NTM[5])>.01)continue;l.v=nRound(l.v*NTM[l.t-1]/NTM0[l.t-1],l.b?(l.k==='inc'?1:0):NSO[l.k].dp)}it.nv=3;return it}
-function nsMigItem(it,cls){if(it&&it.ns&&it.nv===2&&NSLOT[it.slot])return nsScale(it);if(!it||!it.ns||it.nv===3||!NSLOT[it.slot])return it;const P_=NSLOT[it.slot];
+/* v879: nv 3 장비 → 기본옵·전투 수치 줄 ×1.5 */
+function nsX15(it){for(const l of it.lines||[])if(l.b||NS_X15.includes(l.k))l.v=nRound(l.v*NS_XK,l.b?nLineDp(l):NSO[l.k].dp);it.nv=4;return it}
+function nsMigItem(it,cls){if(it&&it.ns&&it.nv===2&&NSLOT[it.slot])return nsX15(nsScale(it));if(it&&it.ns&&it.nv===3&&NSLOT[it.slot])return nsX15(it);if(!it||!it.ns||it.nv>=3||!NSLOT[it.slot])return it;const P_=NSLOT[it.slot];
   const map=k=>k==='aspd'&&it.slot==='weapon'&&it.wc==='mage'?'cspd':k;
   const oo=(it.lines||[]).filter(l=>l.o&&!['wd','def','eva','es'].includes(l.k)).map(l=>map(l.k)),xx=(it.lines||[]).filter(l=>!l.o).map(l=>l.k);
   const fill=(have,pool,n)=>{const o=[...new Set(have.filter(k=>pool.includes(k)))];for(const k of shuffle(pool.slice()))if(o.length<n&&!o.includes(k))o.push(k);return o.slice(0,n)};
   const nw=nsMakeItem(it.slot,it.tier,{wc:it.wc||bc(cls),bt:it.bt,o:fill(oo,P_.o,Math.max(2,Math.min(3,oo.length))),x:fill(xx,P_.x,Math.max(1,Math.min(2,xx.length))),lt:it.tier});
   nw.id=it.id;if(it.lock)nw.lock=it.lock;return nw}
-function nsMigSave(s){if(s.nv2){if(!s.nv3){s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig3]',e)}}return}s.nv2=s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
+function nsMigSave(s){nsMigSave0(s);if(!s.nv4){s.nv4=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig4]',e)}}}
+function nsMigSave0(s){if(s.nv2){if(!s.nv3){s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig3]',e)}}return}s.nv2=s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
 function migrate(s){
   nsMigSave(s);
   /* v713: 스토리 7장 → 10장. 예전 엔드게임(ch 7) → 새 엔드게임(ch 10). 예전 7장 보스를 잡고 최종 결전 앞이었으면(phase 3·5) → 8장부터, 아쉬카르까지 마쳤으면(phase 4) 그대로 결말 */
@@ -6441,7 +6447,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
 function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;bossAuto(false);save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
-function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11),U=!!(S.duel&&S.duel.uber);
+function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11*GOLD_K),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[]};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
@@ -7216,11 +7222,12 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
 const LUMI_MAX=999;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
 const SEAL_P=.01/* v865: 정수 기대량 × 0.01 */,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */const rrD=()=>1+(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v864: 윤회의 불씨 위험도 보정 — 위험도 1 ×1 → 위험도 20 ×2 (인장처럼 위험도에 따라 계속 오름) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
-const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
+const GOLD_K=5/3;/* v879: 획득 골드 전 구간 ×5/3 — 강화 비용 −40%와 같은 효과(비용 기준 골드 runGold는 그대로) */
+const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*GOLD_K*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
 const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
 const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
-const pouchAmt=t=>Math.round(300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
+const pouchAmt=t=>Math.round(GOLD_K*300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
 const pouchMatL=new THREE.MeshStandardMaterial({color:0x9a4ad8,emissive:0x44106e,roughness:.4,metalness:.5});
 function mkBeam(col){const bms=[],bm=new THREE.Group();
@@ -8500,7 +8507,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v880';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v881';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
