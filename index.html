@@ -3910,7 +3910,7 @@ function thBuild(){const T=THR,R=T.RF,G=thSet=new THREE.Group(),U=G.userData,hs=
     for(const sx of [-1,1]){put(im,n+(sx>0?0:1),sx*5.7,-4.6,hz+13,1.3,10,28,-.31,0,0,.42);put(im,n+(sx>0?2:3),sx*5.7,.55,hz+.2,1.7,1.5,1.7,0,0,0,.5)}im.castShadow=im.receiveShadow=true;im.frustumCulled=false;im.instanceColor.needsUpdate=true;G.add(im)}
   G.visible=false;scene.add(G)}
 /* v607: 아쉬카르가 솟아오르며 왕좌와 받침, 양옆 첨탑, 옆 기둥 둘을 무너뜨림 → 북쪽이 뚫려 용의 몸·앞발이 구조물을 뚫고 지나가지 않음. now=연출 없이 바로(재도전) */
-function thBreak(now){if(!thSet)return;const U=thSet.userData;if(!U.brk.visible)return;U.brk.visible=false;U.rub.visible=true;if(now)return;
+function thBreak(now){if(!thSet)return;const U=thSet.userData;if(!U.brk.visible)return;U.brk.visible=false;U.rub.visible=true;if(now)return;SFX.p('quake',{v:1.2});/* v868: 왕좌가 부서지는 소리 = 대지 분쇄 소리 */
   shake=1;const g=new THREE.Group(),ch=[],geo=new THREE.BoxGeometry(1,1,1);for(let i=0;i<26;i++){const m=new THREE.Mesh(geo,U.stoneT),sx=i%2?1:-1,col=i<8;m.position.set(col?sx*(10.5+rnd(-1,1)):rnd(-8,8),col?rnd(2,12):rnd(.5,9),col?-19.2+rnd(-1,1):rnd(-25,-21));m.scale.set(rnd(.8,2.6),rnd(.6,2),rnd(.8,2.4));m.rotation.set(rnd(0,6),rnd(0,6),rnd(0,6));g.add(m);ch.push({m,vx:(col?sx*rnd(1,5):rnd(-4,4)),vy:rnd(2,9),vz:col?rnd(-6,-1):rnd(-7,-2),rx:rnd(-3,3),rz:rnd(-3,3)})}
   scene.add(g);fx.push({m:g,t:0,dur:2.6,keep:1,geo,upd(k,dt){for(const c of ch){c.vy-=26*dt;c.m.position.x+=c.vx*dt;c.m.position.y+=c.vy*dt;c.m.position.z+=c.vz*dt;c.m.rotation.x+=c.rx*dt;c.m.rotation.z+=c.rz*dt}}});
   for(const p of [{x:-10.5,z:-19.2},{x:10.5,z:-19.2},{x:-4,z:-21},{x:4,z:-21},{x:0,z:-22}]){spray(PNRM,p,26,{r0:3,sp:[2,8],up:[2,9],y:[.3,5],life:[1,2],s0:[1.4,2.4],s1:[3.5,5.5],c0:0x6a5a50,c1:0x1a1210,a:.6,drag:1.6,grav:-1.5,tex:0});spray(PADD,p,18,{r0:2.5,sp:[2,9],up:[4,12],y:[.2,3],life:[.6,1.3],s0:[.25,.5],s1:[.05,.1],c0:0xffa040,c1:0x8a1a04,a:.9,drag:.8,grav:-14,tex:1})}}
@@ -8487,7 +8487,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v867';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v868';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
