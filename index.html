@@ -2101,7 +2101,7 @@ function nsMigItem(it,cls){if(it&&it.ns&&it.nv===2&&NSLOT[it.slot])return nsX15(
 function nsMigSave(s){nsMigSave0(s);if(!s.nv4){s.nv4=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig4]',e)}}}
 function nsMigSave0(s){if(s.nv2){if(!s.nv3){s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig3]',e)}}return}s.nv2=s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
 function migrate(s){
-  nsMigSave(s);
+  nsMigSave(s);if(s.potUp>0){s.ess=(s.ess||0)+NPOT_UP.slice(0,s.potUp).reduce((a,b)=>a+b,0);s.potUp=0}/* v879: 물약 충전 횟수 확장 폐지 — 쓴 정수 반환 */
   /* v713: 스토리 7장 → 10장. 예전 엔드게임(ch 7) → 새 엔드게임(ch 10). 예전 7장 보스를 잡고 최종 결전 앞이었으면(phase 3·5) → 8장부터, 아쉬카르까지 마쳤으면(phase 4) 그대로 결말 */
   if(!s.nchV){s.nchV=NCH;if(s.ch>=7)s.ch=NCH;else if(s.ch===6&&s.phase===4)s.ch=LAST;else if(s.ch===6&&(s.phase===3||s.phase===5)){s.ch=7;s.phase=0;s.kills=0;s.chk=null}}
   if(s.sk)return;s.sk={};s.skp={};s.stats={str:0,vit:0,agi:0,int:0};s.statPts=(s.lv-1)*STAT_PER_LV;
@@ -2225,7 +2225,7 @@ const heroMax=()=>NS()?(g=>Math.round((100+(S.lv-1)*7.5+g.hp)*(1+g.hpp/100)))(ge
 const heroMp=()=>NS()?Math.round(60+(S.lv-1)*4.1+gear().mp):Math.round(((60+(S.lv-1)*2.5)*C().mpm+gear().mp)*(1+.08/3*stN('int')));
 /* 기본 재생 없음: 힘·지능 스탯과 장비 옵션으로만 재생 */
 /* v43: 재생 특수 능력치 = 스탯(힘·지능)으로 얻는 초당 재생량 +5~30% */
-const mpRegen=()=>NS()?P.mmp*((S.ch<NCH?2:0)/* v826: 스토리 기본 재생 초당 2% (엔드게임 0) */+gear().mreg+(auraOn('mreg')?auraRegenP(auraL('mreg')):0))/100*(mutA('reg')?.5:1):P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(.4+gear().mreg/100)/* v471: 1+ → 0.4+ */;
+const mpRegen=()=>NS()?P.mmp*((S.ch<NCH?4:2)/* v879: 기본 마나 재생 초당 최대 마나의 스토리 4% · 엔드게임 2% *//* v826: 스토리 기본 재생 초당 2% (엔드게임 0) */+gear().mreg+(auraOn('mreg')?auraRegenP(auraL('mreg')):0))/100*(mutA('reg')?.5:1):P.mmp*.0015/* v254: 장비 마나 축소·스킬 소모 최대 마나 비례에 맞춰 ×4 → v255: 지능당 0.4% → 0.15% */*stN('int')/* v58: 3배 → v75: 절반 → v202: 다시 절반 */*(.4+gear().mreg/100)/* v471: 1+ → 0.4+ */;
 /* v134: 심연의 냉기 — 위험도 35까지 기존(최대 생명력 %) 그대로, 36부터 서서히 늘어 65에서 초당 1300, 그 뒤는 35~65 평균 증가량만큼 계속 증가 */
 /* v254: 36부터도 최대 생명력 % — 35에서 3%(×0.8 = 2.4%/초) → 65에서 6.25%(5%/초) 직선, 그 뒤 위험도당 +0.125%(+0.1%/초). 생명력 재생도 최대 생명력에 비례하므로 레벨·장비 생명력과 무관하게 힘·재생 옵션의 무게가 유지됨 */
 const COLD65P=.0625,coldAt=(t,d35)=>{if(t<=35)return d35;const p35=d35/P.mhp;return P.mhp*(t<=65?p35+(COLD65P-p35)*(t-35)/30:COLD65P+(COLD65P-p35)/30*(t-65+(t>90?.1*(t-90):0)))};/* v385: 위험도 90부터 냉기 증가량 ×1.1 (90 이후 증가분만 10% 가파르게, 90에서는 연속) */
@@ -7874,7 +7874,7 @@ function pillarCast(c,o,hit,depth){const after=()=>{
   pillarStrike(c,Object.assign({},o,{after}))}
 /* ===== v484 NS 충전식 물약 · 창고 · 옵션 리롤 (테스트 캐릭터 전용) ===== */
 const NPOT={hp:{p:.30,n:'생명력'},mp:{p:.20,n:'마나'}},npotP=k=>k==='mp'&&S&&S.ch<NCH?.70:NPOT[k].p/* v726: 스토리 구간 마나 물약 70% */,NPOT_T=3,NPOT_KILL=40,NPOT_UP=[94,94];/* 확장 비용(정수)은 임시값 */
-const potMaxN=k=>S&&S.ch<NCH?(k==='mp'?3:5):Math.min(5,3+((S.potUp)||0));/* v826: 스토리 마나 물약은 3충전 *//* v726: 스토리 구간은 5충전 */
+const potMaxN=k=>5;/* v879: 물약은 스토리·엔드게임 모두 기본 5충전 (충전 횟수 확장 폐지 — 이미 산 단계는 정수로 돌려줌) *//* v826: 스토리 마나 물약은 3충전 *//* v726: 스토리 구간은 5충전 */
 function nsPotInit(full){P.pch=P.pch||{hp:potMaxN('hp'),mp:potMaxN('mp')};{if(P.pch.hp>potMaxN('hp'))P.pch.hp=potMaxN('hp');if(P.pch.mp>potMaxN('mp'))P.pch.mp=potMaxN('mp')}if(full){P.pch.hp=potMaxN('hp');P.pch.mp=potMaxN('mp')}P.pkp=P.pkp||0}
 function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpWarn<=0){toast(`${NPOT[k].n} 물약이 비었습니다`,'몬스터를 처치하거나 보스에게 피해를 주면 충전됩니다');P.mpWarn=1.5}return}
   P.pch[k]--;P.cd.pot=.8;P.hot=P.hot||{};P.hot[k]=NPOT_T;if(k==='hp')dmgNum(P.pos,'회복','heal');else ringFx(P.pos,1.6,0x6a9aff,.35)}
@@ -8661,8 +8661,8 @@ const GUIDES={
   stat:{n:'스탯',steps:()=>[{t:'스탯 창',d:`지금 캐릭터의 ${GB}능력치</b>를 확인하는 창입니다. 최대 생명력·마나, 재생, 공격력, 치명타, 이동 속도 같은 수치가 모여 있습니다.`,d2:`능력치는 ${GB}장비·오라·강화</b>로 정해지며, 포인트를 직접 나눠 주지는 않습니다.`}]},
   inv:{n:'장비',steps:()=>[{t:'장비 교체',d:`가방의 아이템을 누르면 ${GB}현재 장착</b>과 ${GB}선택한 아이템</b>이 나란히 비교되고, 장착했을 때의 ${GB}DPS 변화</b>가 나옵니다.`,d2:`${GB}▲</b>는 지금보다 좋은 장비, ${GB}★</b>는 특수 능력치가 붙은 장비입니다. 더 좋은 장비는 자동으로 장착되고, 필요 없는 장비는 팔아서 골드로 바꿉니다.`}]},
   town:{n:'마을',steps:()=>[{t:TOWN.n,v:townNpcHtml(),d:`마을 사람에게 가까이 가면 대화 버튼이 뜹니다. 오른쪽 작은 지도의 ${GB}빛나는 점</b>이 그 사람이 있는 자리입니다.`},{t:'다시 사냥터로',tgt:['#openTown'],d:`같은 버튼을 한 번 더 누르면 하던 곳으로 돌아갑니다. 마을에 있는 동안 몬스터는 나오지 않습니다.`,k:'P 물약 상점 · T 사냥터로'}]},
-  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 스토리에서는 5회까지 쓰고, 엔드게임은 3회로 시작해 ${GB}잿불 정수</b>로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`일반 몬스터 ${GB}40마리</b> 분량(정예·유니크는 더 많이 쳐줍니다)마다 1회 충전되고, 보스전은 가득 찬 채로 시작해 보스 체력을 ${GB}20%</b> 깎을 때마다 1회 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
-  smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다. 최대 ${GB}+20</b>까지 올립니다.`,d2:`성공률은 +4까지 100%, 이후 단계마다 낮아져 +16부터는 1%입니다. 실패해도 단계는 내려가지 않고 골드만 듭니다.`}]},
+  pot:{n:'물약 상점',steps:()=>[{t:'물약 상점',d:`생명력·마나 물약은 ${GB}충전식</b>입니다. 스토리와 엔드게임 모두 ${GB}5회</b>까지 충전됩니다. ${GB}신속 물약</b>은 잠시 이동 속도를 크게 올려 줍니다.`,d2:`일반 몬스터 ${GB}40마리</b> 분량(정예·유니크는 더 많이 쳐줍니다)마다 1회 충전되고, 보스전은 가득 찬 채로 시작해 보스 체력을 ${GB}20%</b> 깎을 때마다 1회 채워집니다. 「자동」을 켜면 알아서 마십니다.`}]},
+  smith:{n:'대장장이',steps:()=>[{t:'부위 강화',d:`장비가 아니라 ${GB}부위</b>를 강화합니다. 더 좋은 장비로 바꿔도 강화 단계는 그대로 남습니다. 최대 ${GB}+30</b>까지 올립니다.`,d2:`성공률은 +4까지 100%, 이후 낮아져 +15→+20은 10%, +21 5%, +22 3%, +23부터는 1%입니다. 실패해도 단계는 내려가지 않고 골드만 듭니다.`}]},
   stash:{n:'창고',steps:()=>[{t:'창고',d:`장비를 ${GB}맡겨 두었다가 다른 캐릭터가 꺼내 갈 수</b> 있습니다. 창고는 모든 캐릭터가 함께 씁니다. 「선택」을 켜면 여러 개를 한 번에 옮깁니다.`,d2:`칸이 모자라면 골드로 5칸씩 늘립니다. 가방이 가득 차기 전에 아껴 둘 장비를 맡기는 데도 좋습니다.`},{t:'재화 보관',d:`${GB}잿불 정수 · 윤회의 불씨 · 성역의 인장 · 광휘의 파편</b>도 맡길 수 있습니다. 재화마다 창고에 최대 9,999개까지 쌓아 둘 수 있고, 다른 캐릭터가 꺼내 쓸 수 있습니다.`,d2:`꺼낼 때는 그 캐릭터의 소지 한도(9,999)까지만 가져갑니다.`}]},
   look:{n:'외형 장비',steps:()=>[{t:'재단사 세라',d:`${GB}광휘의 파편</b>으로 ${GB}등 부착물(날개 등) · 무기 · 캐릭터</b>의 외형을 삽니다. 산 외형은 계속 가지고 있고, 언제든 바꿔 입을 수 있습니다.`,d2:`외형은 보이는 모습만 바꿉니다. 직업마다 어울리는 외형이 앞에 정렬됩니다.`}]},
   mut:{n:'변이',steps:()=>[{t:'변이 — 더 강한 몬스터, 더 큰 보상',d:`엔드게임에서 ${GB}위험도 창</b>에 「변이」 목록이 열립니다. 켠 변이마다 ${GB}점수</b>가 쌓이고, 몬스터가 강해지는 대신 보상이 ${GB}(1 + 점수÷100) × (1 + 점수÷200)배</b>가 됩니다. 점수만큼 모든 몬스터의 체력·피해도 ${GB}1 + 점수÷200배</b>로 함께 오릅니다.`,d2:`보상 배율은 아이템 수 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용되고, 1티어 확률은 1 + 점수÷100배로 오릅니다.`},{t:'변이 종류와 입장 비용',d:`강인함(체력 +150%) · 흉포함(피해 +100%) · 신속(속도 +40%) · 방어 약화 · 사수 군단 · 정예 행렬 · 재생 봉인 · 유언의 탄막 · 물약 봉인. 모두 켜면 점수 200으로 보상 ×6, 몬스터 체력·피해는 개별 변이와 별도로 ×2가 더 곱해집니다.`,d2:`입장할 때마다 점수에 따라 ${GB}골드</b>를 냅니다(점수가 낮으면 아주 쌉니다). 고른 변이는 그 판이 끝날 때까지 유지되고, 변이는 ${GB}마을에서만</b> 바꿀 수 있습니다.`}]},
@@ -8696,8 +8696,7 @@ Object.assign(GUIDES,{
   gskill:{n:'스킬 강화 시스템',steps:()=>[
     {t:'1차 강화 — 레벨업',v:GV.lv,d:`레벨이 오를 때마다 주력 스킬 강화 3가지 중 ${GB}하나를 1단계</b> 올립니다. 강화마다 최대 ${GMAX}단계이고, ${GB}${ESS_LV}레벨</b>쯤 모두 채워집니다.`,d2:`스킬 창에서 단계·효과·DPS를 보고, 자동으로 고르게 설정할 수도 있습니다.`},
     {t:'추가 강화 — 잿불 정수',v:GV.ex,d:`1차 강화를 모두 채우면 ${GB}추가 강화</b>가 열립니다. 엔드게임에서 모은 ${GB}잿불 정수(◆)</b>와 ${GB}골드</b>로 스킬 창에서 올리며, 실패는 없습니다.`,d2:`강화마다 비용이 다르며(3~5단계 스킬은 24개에서 113개까지) 단계가 오를수록 비싸집니다. 정수와 함께 골드도 듭니다.`},
-    {t:'오라 — 잿불 정수',v:GV.au,d:`스킬 창 ${GB}「오라」</b> 탭에서 정수로 오라를 배우고 1~10단계까지 올립니다(24개 → 94개). 켜 두면 ${GB}최대 마나의 일부를 차지</b>하는 대신 효과가 계속 유지됩니다.`,d2:`방어·회피·보호막 / 치명타·가속·피의 서약 / 생명력·마나 재생. 장비의 ${GB}마나 점유 효율</b>이 높을수록 차지하는 양이 줄어 여러 오라를 함께 켤 수 있습니다.`},
-    {t:'물약 충전 횟수 — 잿불 정수',d:`물약은 충전식입니다. 엔드게임에서는 3회로 시작하고, 마을 ${GB}물약 상점</b>에서 잿불 정수로 충전 횟수를 ${GB}최대 5회</b>까지 늘립니다.`}]},
+    {t:'오라 — 잿불 정수',v:GV.au,d:`스킬 창 ${GB}「오라」</b> 탭에서 정수로 오라를 배우고 1~10단계까지 올립니다(24개 → 94개). 켜 두면 ${GB}최대 마나의 일부를 차지</b>하는 대신 효과가 계속 유지됩니다.`,d2:`방어·회피·보호막 / 치명타·가속·피의 서약 / 생명력·마나 재생. 장비의 ${GB}마나 점유 효율</b>이 높을수록 차지하는 양이 줄어 여러 오라를 함께 켤 수 있습니다.`}]},
   gtier:{n:'티어 시스템',steps:()=>[
     {t:'장비 티어 1~6',v:GV.ld,d:`장비는 ${GB}1~6티어</b>로 나뉘고 ${GB}1티어가 가장 좋습니다</b>. 스토리에서는 5·6티어, 엔드게임에서는 위험도가 오를수록 높은 티어가 나옵니다.`,d2:`위험도 1~4 최고 5티어 · 5~9 4티어 · 10~14 3티어 · 15~19 2티어 · 20 1티어.`},
     {t:'줄마다 다른 티어',v:GV.ln,d:`옵션 ${GB}줄마다 티어를 따로</b> 뽑습니다. 아이템 티어는 그 아이템의 줄이 오를 수 있는 ${GB}최고 티어</b>입니다 — 2티어 아이템에 3·4·5티어 줄이 섞여 나올 수 있습니다.`,d2:`맨 위 기본옵(방어력·피해 등)은 아이템 티어로 고정됩니다. 줄 수(4·5·6줄)는 바꿀 수 없어 ${GB}6줄 아이템</b>이 좋은 바탕이 됩니다.`},
@@ -9627,8 +9626,7 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
   let h=`<div class="shead"><div><h2>${pot?'물약 상점':'랜덤 장비'}</h2></div><button class="close" id="shClose">닫기</button></div>${goldBar()}`;
   if(pot){h+=`<div class="gems">`;
     if(NS()){nsPotInit();const m=potMaxN(),c=m<5?NPOT_UP[m-3]:0;/* v507: 충전식 물약 — 상점에는 생명력·마나 물약(충전 횟수 확장)과 신속 물약만 */
-      for(const k of ['hp','mp'])h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${NPOT[k].n} 물약<small>1회: 3초 동안 ${NPOT[k].n} ${Math.round(npotP(k)*100)}% 회복 · 충전 <b style="color:var(--ink)">${P.pch[k]}/${m}</b>회 · 몬스터 처치·보스 피해로 충전</small></span>
-      <span class="potbtns"><button class="pm wide" data-pu="1" ${m<5&&(S.ess||0)>=c?'':'disabled'}>${m>=5?'충전 횟수 최대':`충전 횟수 +1 <span style="color:#ff8a6a">${ci('e')} ${c}</span>`}</button></span></div>`}
+      for(const k of ['hp','mp'])h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${NPOT[k].n} 물약<small>1회: 3초 동안 ${NPOT[k].n} ${Math.round(npotP(k)*100)}% 회복 · 충전 <b style="color:var(--ink)">${P.pch[k]}/${m}</b>회 · 몬스터 처치·보스 피해로 충전</small></span></div>`}
     else for(const k of ['hp','mp'])for(const z of PSZ){const p=POT[z],have=S.pots[k][z];
       h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-buy="${k},${z},1" ${g>=p.price?'':'disabled'}>구매 ${p.price}G</button><button class="pm wide" data-buy="${k},${z},5" ${g>=p.price*5?'':'disabled'}>5개 ${p.price*5}G</button><button class="pm wide sell" data-psell="${k},${z},1" ${have?'':'disabled'}>판매 ${potSell(z)}G</button><button class="pm wide sell" data-psell="${k},${z},all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
