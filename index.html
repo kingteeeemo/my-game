@@ -8500,7 +8500,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v879';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v880';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8929,9 +8929,9 @@ const STSL={
     {img:'story/kai4_2.webp',alt:()=>prlNote(['봉화마다 불을 붙이며 왔지만','눈보라가 금세 꺼 버렸다.','뒤에 오는 이여, 다시 불을 붙여 다오.','불이 이어지면 얼음도 녹는다.','나는 먼저 왕도로 간다.'],'— 카이렌'),fy:.6,z:[1.02,1.07],fx:'snow',c:['천 조각 안쪽에 접힌 쪽지가 있다.','…카이렌.\n먼저 왕좌로 간 검사의 이름이다.']},
     {img:'story/kai4_3.webp',alt:'prolog/p7.webp',f:[.62,.66],fy:.3,z:[1.4,1.5],fx:'snow',c:['봉화에 불이 붙자, 눈보라 너머로\n멀리 불타는 봉우리가 보인다.','그가 지핀 불은, 아직 꺼지지 않았다.']}]},
   kai7:{tag:'Lumenhar · Chapter 7',sc:[
-    {img:'story/kai7_1.webp',alt:'prolog/p7.webp',f:[.7,.7],fy:.22,z:[1.6,1.75],fx:'fall',c:['봉우리 꼭대기에서 불길이 치솟는다.','불길 속에서 무언가가 떨어져 내린다.']},
-    {img:'story/kai7_2.webp',alt:'prolog/p6.webp',f:[.39,.37],fy:.6,z:[1.9,2.05],fx:'ash2',c:['부러진 칼. 찢긴 붉은 망토.','「…카이렌!」']},
-    {img:'story/kai7_3.webp',alt:'prolog/p4.webp',f:[.5,.52],fy:.45,z:[1.15,1.25],fx:'throne',c:['「그는 불 앞에 섰고…\n끝내 무릎을 꿇었다.」','「이제 그 길을 이을 자는,\n그대뿐이다.」']}]}};
+    {img:'story/kai7_1.webp',alt:'prolog/p7.webp',f:[.5,.54],fy:.42,z:[1.02,1.1],fx:'ash2',/* v874: 새 그림 — 불타는 성에서 떨어지는 카이렌, 모닥불 곁 주인공 */c:['봉우리 꼭대기에서 불길이 치솟는다.','불길 속에서 무언가가 떨어져 내린다.']},
+    {img:'story/kai7_2.webp',alt:'prolog/p6.webp',f:[.42,.5],fy:.56,z:[1.02,1.1],/* v874: 새 그림 — 재 위의 부러진 칼과 찢긴 망토 */fx:'ash2',c:['부러진 칼. 찢긴 붉은 망토.','「…카이렌!」']},
+    {img:'story/kai7_3.webp',alt:'prolog/p4.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],/* v874: 새 그림 — 왕좌의 용 앞에 무릎 꿇은 카이렌 */fx:'throne',c:['「그는 불 앞에 섰고…\n끝내 무릎을 꿇었다.」','「이제 그 길을 이을 자는,\n그대뿐이다.」']}]}};
 function storySlides(k,cb){if(PRO.on)return;releaseAll();P.mv=null;prologPlay(()=>{last=performance.now();cb&&cb()},STSL[k])}
 function startGame(cls,main,skip){
   chCineEnd();inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
