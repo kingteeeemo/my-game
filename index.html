@@ -1942,7 +1942,9 @@ const NS_GAIN=[0,5,5,5,5,6,6,7,8,9,10,12,14,16,18,20,25,25,25,25,25,25,25,25,25,
 const NS_EM=(()=>{const a=[1];for(let i=1;i<=NS_ENH_MAX;i++)a.push(a[i-1]+NS_GAIN[i]/100);return a})();
 const nsEM=L=>NS_EM[Math.max(0,Math.min(NS_ENH_MAX,Math.floor(L)))];
 const nMul=(k,L)=>1;/* 접두어·접미어는 강화 영향 없음(기본옵은 nsEM) */
-const nLineMul=(l,L)=>l.b?nsEM(L):1;
+/* v913: 방어구 고정 옵션(방어·회피·에너지 쉴드)은 +23부터 강화 상승치가 크게 오름 — 1티어 최적 + 오라 기준 +22 ≈ 90%, +30 ≈ 95% */
+const NS_ARMG=1.36,NS_EMA=NS_EM.map((v,i)=>i<=22?v:NS_EM[22]+NS_ARMG*(i-22)),nsEMA=L=>NS_EMA[Math.max(0,Math.min(NS_ENH_MAX,Math.floor(L)))],nsEMk=(k,L)=>k==='def'||k==='eva'||k==='es'?nsEMA(L):nsEM(L);
+const nLineMul=(l,L)=>l.b?nsEMk(l.k,L):1;
 const nFmt=(k,v)=>{const o=NSO[k];if(!o)return String(v);const x=Math.abs(v)>=1000?Math.round(v).toLocaleString('ko-KR'):(+v).toFixed(o.dp<1&&Math.abs(v)>=100?0:Math.max(o.dp,v<10&&o.dp?1:o.dp));return (k==='mcr'||k==='projr'||k==='dr'?'-':'+')+x+(o.u||'')};
 /* 줄 수: 4 / 5 / 6 각 1/3 · 기본옵 + 접두어 2~3 + 접미어 1~2 */
 function nLines(){/* v900: 고정 + 기본 1~3 + 특수 1~3, 합 3~6줄 (각 25%) */const t=3+(Math.random()*4|0),P={3:[[2,1],[1,2]],4:[[3,1],[2,2],[1,3]],5:[[3,2],[2,3]],6:[[3,3]]}[t],c=P[Math.random()*P.length|0];return[c[0]+1,c[1]]}
@@ -1988,8 +1990,8 @@ let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
 function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,dr:Math.min(.4,g.dr/100)}}
 /* 방어 유형 혼합: 주력 100% · 나머지 35%, 합산 후 x/(x+K) (상한 90%), 비율대로 배분 · v603: K 60,000 → 3,000, 상한 85% → 90%, 증가% 옵션은 오라와 더해서 곱함 */
 const NS_K=3000,NS_DCAP=.99;/* v909: 상한 사실상 없음(곡선이 100%에 닿지 않도록 안전값만) */const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
-/* v907·v909: 방어 곡선 — 감소율 = ρ^0.79/(ρ^0.79+1) (v910: 1티어 +30 최적 + 오라 10단계 ≈ 95%), ρ = 방어 합계 ÷ 기준값. 낮은 구간은 거의 그대로, 최상위(1티어 +22 최적)는 약 85%로 눌러 상한(90%)까지 여유를 둠 */
-const NS_DEXP=.79,nsDefCurve=x=>{const y=Math.pow(x,NS_DEXP);return y/(y+1)};
+/* v907·v909: 방어 곡선 — 감소율 = ρ^0.66/(ρ^0.66+1) (1티어 +22 최적 + 오라 10단계 ≈ 90%), ρ = 방어 합계 ÷ 기준값. 낮은 구간은 거의 그대로, 최상위(1티어 +22 최적)는 약 85%로 눌러 상한(90%)까지 여유를 둠 */
+const NS_DEXP=.66,nsDefCurve=x=>{const y=Math.pow(x,NS_DEXP);return y/(y+1)};
 function nsDef(){const g=gear(),mw=mutA('def')?.5:1,am=k=>(1+(g[k+'p']||0)/100)*(1+(auraOn(k)?.03*auraL(k):0))*mw/* v908: 오라는 장비 % 옵션과 따로 곱함(증폭) */,v={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},m=Object.keys(v).reduce((a,b)=>v[b]>v[a]?b:a,'def');
   const w={};let X=0;for(const k in v){w[k]=v[k]*(k===m?1:.35);X+=w[k]}const K=nsDefK(),r=X>0?Math.min(NS_DCAP,nsDefCurve(X/K)):0;
   const o={def:0,eva:0,es:0,main:m,total:r,X};if(X>0)for(const k in w)o[k]=r*w[k]/X;return o}
@@ -8956,7 +8958,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v910';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v913';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10371,7 +10373,7 @@ function renderSmith(){if(NS())return renderSmithNS();
     const rc=it?(it.ns?NT_C[it.tier]:RAR[it.rar].c):'#555',
       lv=`<div class="smlv"><small>강화</small><b class="enh">+${L}</b>${max?'':`<span class="arr">→</span><b class="nx">+${L+1}</b>`}</div>`,
       nm=`<b style="color:${it?rc:'var(--muted)'}">${it?it.name:'장비 없음 (강화는 부위에 남습니다)'}</b>`,
-      info=it?(it.ns?(bl=>`<div class="smcmp"><span>${nName(bl.k)} (고정 옵션)</span><b>${nFmt(bl.k,bl.v*nsEM(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEM(L+1))}</b>`}</div><div class="smcmp"><span>고정 옵션 배율</span><b>×${nsEM(L).toFixed(2)}</b>${max?'':`<span class="arr">→</span><b class="p">×${nsEM(L+1).toFixed(2)}</b>`}</div>`)(it.lines.find(l=>l.b)||it.lines[0])+itemList(it,L):`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*eMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*eMB(L+1,k))}</b>`}</div>${itemList(it,L)}`):'',
+      info=it?(it.ns?(bl=>`<div class="smcmp"><span>${nName(bl.k)} (고정 옵션)</span><b>${nFmt(bl.k,bl.v*nsEMk(bl.k,L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEMk(bl.k,L+1))}</b>`}</div><div class="smcmp"><span>고정 옵션 배율</span><b>×${nsEMk(bl.k,L).toFixed(2)}</b>${max?'':`<span class="arr">→</span><b class="p">×${nsEMk(bl.k,L+1).toFixed(2)}</b>`}</div>`)(it.lines.find(l=>l.b)||it.lines[0])+itemList(it,L):`<div class="smcmp"><span>${baseName(k)}</span><b>${Math.round(it.base*eMB(L,k))}</b>${max?'':`<span class="arr">→</span><b class="p">${Math.round(it.base*eMB(L+1,k))}</b>`}</div>${itemList(it,L)}`):'',
       bonus='',
       tkUI=max||NS()?'':`<div class="smtk"><span>✦ 확정 강화 주문서 <b style="color:${tk>=need?'#7fe07a':'#ff7a6a'}">${tk}/${need}</b></span>${tk>=need&&!smAuto?`<button class="pm wide${tkOn?' on':''}" id="smTk">${tkOn?`사용 중 · 성공 확정`:'사용 안 함'}</button>`:''}</div>`,
       rate='',rateBig=max?'':`<div class="smrate"><small>성공 확률</small><b style="color:${rt>=1||pityN(k)>=pityCap(L)?'#7fe07a':rt>=.5?'#f0d040':rt>=.2?'#ff9a5a':'#ff6a5a'}">${tkOn||pityN(k)>=pityCap(L)?'100':+(rt*100).toFixed(1)}%</b>${tkOn?'<small>(주문서)</small>':pityN(k)>=pityCap(L)?'<small>(천장)</small>':''}</div>${L>=29&&!NS()?`<div class="smgreat"><small>${tkOn||pityN(k)>=pityCap(L)?'천장·주문서 성공은 대성공 제외':`성공 시 ${Math.round(GREAT_P*100)}% 확률로 <b>대성공</b> (+2단계)`}</small></div>`:''}<div class="smpity${pityN(k)>=pityCap(L)?' full':''}"><small>천장</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${pityN(k)} / ${pityCap(L)}</b></div>${pityN(k)>=pityCap(L)?'<small class="pnote">이번 강화 확정 성공</small>':''}${tkUI}`,
@@ -10408,7 +10410,7 @@ function renderSmithNS(){const sh=$('smithSheet'),k=smithSel,up=smDrUp||!k,old=s
       ${max?'':`<div class="smrate"><small>성공 확률${useCat&&(S.cata||0)>=1&&!pf?' · 촉매 2회':''}</small><b>${pf?'100':+((useCat&&(S.cata||0)>=1?1-(1-rt)**2:rt)*100).toFixed(1)}%</b></div>`}</div>
       ${max?'':`<div class="smpity${pf?' full':''}"><small class="pl">강화 포인트</small><span class="pbar"><i style="width:${Math.min(100,pityN(k)/pityCap(L)*100)}%"></i></span><b>${Math.min(pityN(k),pityCap(L))} / ${pityCap(L)}</b></div>${pf?'<small class="pnote">이번 강화 확정 성공</small>':''}`}
       <div class="smnm"><b>${it?it.name:`${SLOTN[k]} 없음`}</b>${it?`<span style="color:${rc}">${it.tier}티어</span>`:''}</div>
-      ${bl?`<div class="smopts smbase"><div><span class="tl">${bl.t||it.tier}티어</span><span class="n"><em>고정</em>${nName(bl.k)}</span><b>${nFmt(bl.k,bl.v*nsEM(L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEM(L+1))}</b>`}</div></div>`:'<small class="smnote">장비가 없어도 강화 단계는 부위에 남습니다</small>'}
+      ${bl?`<div class="smopts smbase"><div><span class="tl">${bl.t||it.tier}티어</span><span class="n"><em>고정</em>${nName(bl.k)}</span><b>${nFmt(bl.k,bl.v*nsEMk(bl.k,L))}</b>${max?'':`<span class="arr">→</span><b class="p">${nFmt(bl.k,bl.v*nsEMk(bl.k,L+1))}</b>`}</div></div>`:'<small class="smnote">장비가 없어도 강화 단계는 부위에 남습니다</small>'}
       ${it?`<div class="smopts">${it.lines.filter(l=>l!==bl).map(l=>`<div><span class="tl">${l.t||it.tier}티어</span><span class="n">${l.o?'':'<em>특수</em>'}${ivName(l.k,it.slot,it)}${nsDeadK(l.k)?'<i>효과 없음</i>':''}</span><b>${nFmt(l.k,l.v)}</b></div>`).join('')}</div>`:''}${S.test?testSmithPanel(k,L,it):''}</div>`;
     foot=`<div class="rrfoot"><div class="smbtns">${max?'':`<button class="smau${useCat&&(S.cata||0)>=1?' on':''}" id="smCat" ${(S.cata||0)>=1?'':'disabled'} title="재점화의 촉매 — 골드 1회분으로 두 번 굴림, 실패 시 강화 포인트 2">촉매 ${fmtG(S.cata||0)}<br>${useCat&&(S.cata||0)>=1?'ON':'OFF'}</button><button class="smau${smAuto?' on':''}" id="smAuto">자동<br>${smAuto?`ON · ${smAutoN}회`:'OFF'}</button>`}<button class="rrgo" id="smGo" ${!max&&S.gold>=c&&!smAuto?'':'disabled'}>${max?'최대 단계':`${ci('g')}<b>${fmtG(c)}</b>강화`}</button></div></div>`}
   const tiles=EQS.map(q=>{const it=S.eq[q],L=enhL(q);return `<div class="rrt"><button class="tile${q===k?' sel':''}${it?'':' emp'}" data-sel="${q}" style="border-color:${it?NT_C[it.tier]:'#3a3833'};--tc:${it?NT_C[it.tier]:'#3a3833'}">${ico(icoSlot(kSlot(q),it))}<small>+${L}</small></button><span>${SLOTN[q]}</span></div>`}).join('');
