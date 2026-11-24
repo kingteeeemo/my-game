@@ -2392,7 +2392,7 @@ const SFX=(()=>{
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
   try{muted=localStorage.getItem('sndMute')==='1'}catch(e){}
   try{const v=localStorage.getItem('sfxVol');if(v!==null&&v!==''&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v))}catch(e){}
-  function init(){if(ctx)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;try{ctx=new AC({latencyHint:'balanced'})}catch(e){ctx=new AC()}/* v772: 오디오 버퍼를 조금 넉넉히 — 전투 중 폰이 바쁠 때 소리가 끊기는 현상 완화 */const cp=ctx.createDynamicsCompressor();try{cp.threshold.value=-12;cp.knee.value=12;cp.ratio.value=4;cp.attack.value=.004;cp.release.value=.18}catch(e){}/* 기본값(-24dB·12:1)은 큰 소리가 날 때 다른 소리를 확 눌러 끊기듯 들림 */master=ctx.createGain();master.gain.value=muted?0:vol/100;cp.connect(master);master.connect(ctx.destination);ctx._in=cp;bgmM=ctx.createGain();bgmM.gain.value=muted?0:bgmVol/100;bgmM.connect(ctx.destination)}catch(e){ctx=null}}
+  function init(){if(ctx)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;try{ctx=new AC({latencyHint:'balanced'})}catch(e){ctx=new AC()}/* v772: 오디오 버퍼를 조금 넉넉히 — 전투 중 폰이 바쁠 때 소리가 끊기는 현상 완화 */const cp=ctx.createDynamicsCompressor();try{cp.threshold.value=-12;cp.knee.value=12;cp.ratio.value=4;cp.attack.value=.004;cp.release.value=.18}catch(e){}/* 기본값(-24dB·12:1)은 큰 소리가 날 때 다른 소리를 확 눌러 끊기듯 들림 */master=ctx.createGain();master.gain.value=muted?0:vol/100;cp.connect(master);master.connect(ctx.destination);ctx._in=cp;ctx._d=ctx.createGain();ctx._d.connect(cp);/* v921: 획득음 외 효과음 묶음(획득음 동안 20% 낮춤) */bgmM=ctx.createGain();bgmM.gain.value=muted?0:bgmVol/100;bgmM.connect(ctx.destination)}catch(e){ctx=null}}
   function decode(a){return new Promise((ok,no)=>{try{const r=ctx.decodeAudioData(a,ok,no);if(r&&r.then)r.then(ok,no)}catch(e){no(e)}})}
   function loadAll(){if(loaded||!ctx)return;loaded=true;NM.forEach(n=>{fetch('sfx/'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(decode).then(b=>{buf[n]=b}).catch(()=>{})})}
   function unlock(){init();if(!ctx)return;if(ctx.state!=='running')try{ctx.resume()}catch(e){}
@@ -2412,7 +2412,7 @@ const SFX=(()=>{
     const pr=o.pr!==undefined?o.pr:FIX.has(n)?0:.08;
     src.playbackRate.value=(o.rate||1)*(1+(Math.random()*2-1)*pr);
     g.gain.value=(VOL[key]||.6)*(o.v||1)*(1/Math.sqrt(1+k*.3))*(FIX.has(n)?1:.9+Math.random()*.2);/* 겹치면 음량을 줄이고 ±10% 흔들기 */
-    src.connect(g);g.connect(ctx._in);
+    src.connect(g);g.connect(n==='loot'||!ctx._d?ctx._in:ctx._d);
     const off=o.fit?Math.max(0,buf[n].duration-o.fit):0;
     try{src.start(t,off)}catch(e){return null}
     act++;src.onended=()=>{act--;try{src.disconnect();g.disconnect()}catch(e){}};
@@ -2432,7 +2432,7 @@ const SFX=(()=>{
   let bgmFast=false;function bgm(n,f){bgmWant=n||null;bgmFast=!!f;bgmSync()}/* v843: f=true면 로딩 화면 때문에 끄는 것 — 아주 빠르게 */
   bgmPre('title');/* v750: 오프닝 곡을 페이지가 열리자마자 내려받아 둠 — 터치 순간 바로 재생 */
   let duckF=1,duckS=1,duckT=0;function bgmApply(tc){if(!bgmM)return;const tg=muted?0:bgmVol/100*duckF*duckS;try{const c=ctx.currentTime;bgmM.gain.cancelScheduledValues(c);bgmM.gain.setValueAtTime(bgmM.gain.value,c);bgmM.gain.setTargetAtTime(tg,c,tc||.12)}catch(e){bgmM.gain.value=tg}}/* v839: 강화 연출 동안 배경음 30% 낮춤 */function duck(b){duckF=b?.7:1;bgmApply()}
-  /* v916: 획득음 — 울리는 동안 배경음 20% 낮췄다가 끝나기 직전부터 서서히 원래대로 */function pd(n,o){const h=p(n,o);if(h&&buf[n]){duckS=.8;bgmApply(.25);clearTimeout(duckT);duckT=setTimeout(()=>{duckS=1;bgmApply(.6)},Math.max(.5,buf[n].duration-1.2)*1000)}return h}
+  /* v916: 획득음 — 울리는 동안 배경음 20% 낮췄다가 끝나기 직전부터 서서히 원래대로 */function sDk(v,tc){const d=ctx&&ctx._d;if(!d)return;try{const c=ctx.currentTime;d.gain.cancelScheduledValues(c);d.gain.setValueAtTime(d.gain.value,c);d.gain.setTargetAtTime(v,c,tc)}catch(e){d.gain.value=v}}function pd(n,o){const h=p(n,o);if(h&&buf[n]){duckS=.8;bgmApply(.25);clearTimeout(duckT);sDk(.8,.25);duckT=setTimeout(()=>{duckS=1;bgmApply(.6);sDk(1,.6)},Math.max(.5,buf[n].duration-1.2)*1000)}return h}
   function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));bgmApply();try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
   document.addEventListener('visibilitychange',()=>{const t=bgmCur&&bgmT[bgmCur];if(!t)return;try{document.hidden?t.el.pause():t.el.play().catch(()=>{})}catch(e){}});
   function swing(o){let i;do{i=1+Math.random()*9|0}while(i===sw&&Math.random()<.9);sw=i;return p('swing'+i,o)}
@@ -7548,14 +7548,14 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
   {const r=rollN(ex*RR_K*rrD()*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
-  {const q=S.test?(Math.random()<.01?1:0):rollN(ex*SEAL_P*sealD());if(q>0)dropSeal(e.pos,q)}/* v917: 테스트 캐릭터는 처치당 1% */}/* v892: 성역의 인장은 필드에 떨어지고 주워야 획득(빛기둥 + 획득 연출) *//* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
+  {const q=S.test?(Math.random()<.1?1:0):rollN(ex*SEAL_P*sealD());if(q>0)dropSeal(e.pos,q)}/* v917: 테스트 캐릭터는 처치당 1% */}/* v892: 성역의 인장은 필드에 떨어지고 주워야 획득(빛기둥 + 획득 연출) *//* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=CUR_MAX;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
 const SEAL_P=.01/* v865: 정수 기대량 × 0.01 */,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */const rrD=()=>1+(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v864: 윤회의 불씨 위험도 보정 — 위험도 1 ×1 → 위험도 20 ×2 (인장처럼 위험도에 따라 계속 오름) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const GOLD_K=5/3;/* v879: 획득 골드 전 구간 ×5/3 — 강화 비용 −40%와 같은 효과(비용 기준 골드 runGold는 그대로) */
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*GOLD_K*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
-const POUCH_P=1e-5,pouchP=()=>S.test?.01:POUCH_P/* v917: 테스트 캐릭터는 1% */,/* v892: 골드 주머니 부활 — 0.001%(10만 마리에 1개), 그 위험도 몬스터 3,000마리 평균 골드(pouchAmt = 300×0.12 = 3,000×처치당 0.012) *//* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
+const POUCH_P=1e-5,pouchP=()=>S.test?.1:POUCH_P/* v921: 테스트 캐릭터는 10% */,/* v892: 골드 주머니 부활 — 0.001%(10만 마리에 1개), 그 위험도 몬스터 3,000마리 평균 골드(pouchAmt = 300×0.12 = 3,000×처치당 0.012) *//* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
 const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
 const pouchAmt=t=>Math.round(GOLD_K*300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
@@ -8964,7 +8964,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v920';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v921';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
