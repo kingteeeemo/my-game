@@ -417,7 +417,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 #classSheet .cards.cg{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:10px}
 #classSheet .card.cls{flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:8px;padding:10px 8px 12px;flex:0 0 calc(50% - 5px);min-width:0}
 #classSheet .card.cls .cport{display:block;touch-action:pan-y;cursor:grab;-webkit-user-drag:none;user-select:none;width:100%;height:auto;aspect-ratio:180/230;max-height:46vh;border-radius:12px}
-#classSheet .card.cls .cnm{font:800 17px var(--ko)}#classSheet .card.cls .cnm .en{font-size:10px;margin-bottom:3px}
+#classSheet .card.cls .fsel{display:flex;gap:6px;justify-content:center}#classSheet .card.cls .fsel span{font:700 12px var(--ko);padding:4px 10px;border-radius:999px;border:1px solid #4a463d;color:#b8af9a;background:#17161b}#classSheet .card.cls .fsel span.on{border-color:#e0b060;color:#ffe2a8;background:#2a2416}#classSheet .card.cls .cnm{font:800 17px var(--ko)}#classSheet .card.cls .cnm .en{font-size:10px;margin-bottom:3px}
 @media (orientation:landscape),(min-width:760px){#classSheet{max-width:min(860px,calc(100% - 32px))}#classSheet .card.cls{flex:0 0 calc(33.333% - 7px)}#classSheet .card.cls .cport{width:auto;max-width:100%;height:calc(100vh - 250px);max-height:340px;min-height:130px}}
 @media (orientation:landscape) and (max-height:520px){#classSheet .hint{display:none}}
 @media (orientation:landscape){/* v772: 가로 화면은 직업 카드를 한 줄에 모두 — 초상화 양옆 여백을 줄이고 카드 폭을 초상화에 맞춤 */#classSheet{width:auto!important;max-width:calc(100% - 32px)}#classSheet .cards.cg{flex-wrap:nowrap;gap:12px}#classSheet .card.cls{flex:0 0 auto;width:auto;padding:10px 10px 12px}#classSheet .card.cls .cport{width:auto;max-width:none;min-height:0;height:min(340px,calc(100vh - 210px),calc((100vw - 140px - 34px*var(--cn,4)) / var(--cn,4) * 230 / 180))}}
@@ -5191,13 +5191,25 @@ const NM=(()=>{
   return {hero,mob,tex,flatten,kindOf,CK}})();
 
 function makeHero(cls){return NM.hero(cls)}
-const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135,swRef:1},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90},archer:{file:'models/archer.glb',S:1.76,wp:/bow/i,tip:[.05,0,0],lift:0},musa:{file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:1.6,knee:1.75,bl:1}/* v662: 무사 — 매화 검객 모델(전사 뼈대에 직접 리깅, 전사 동작 공유) */};SKC.priest=Object.assign({},SKC.mage);/* v882: 사제 — 임시로 마법사 모델 *//* v380: 궁수 3D 모델 */
+const SKC={warrior:{file:'models/warrior.glb',S:1.764,wp:/sword/i,tip:[0,0,1.13],lift:135,swRef:1},mage:{file:'models/mage.glb',S:1.70,wp:/staff/i,tip:[0,.66,0],lift:90},archer:{file:'models/archer.glb',S:1.76,wp:/bow/i,tip:[.05,0,0],lift:0,head:'f_silver'},musa:{file:'models/blossom.glb',S:1.614,wp:/sword/i,tip:[0,0,1.24],lift:135,col:1.6,knee:1.75,bl:1}/* v662: 무사 — 매화 검객 모델(전사 뼈대에 직접 리깅, 전사 동작 공유) */};SKC.priest=Object.assign({},SKC.mage);/* v882: 사제 — 임시로 마법사 모델 *//* v380: 궁수 3D 모델 */
 /* v770: 캐릭터 외형(몸 전체 스킨) — 재단사 세라 「캐릭터」 분류. S.blook = 착용 중인 스킨 id. 스킨마다 모델 상태(K)를 따로 두고(SKV), 지금 쓸 것을 SKN[cls]에 둠.
    은빛 발키리: Mixamo 리깅 모델에 전사 동작 12개를 옮겨 담음(뼈마다 '전사 바인드 → 전사 동작' 세계 회전 차이를 발키리 바인드에 곱함, 중지·약지·새끼는 검지 동작, 엉덩이 이동은 엉덩이 높이 비율) + 전사 대검을 같은 손 기준 자리에 */
-const BLOOKS={bsk_valk:{n:'은빛 발키리',cls:['warrior','mage','archer','musa'],pr:950,file:'models/valkyrie.glb',img:'models/valkyrie_thumb.jpg',S:1.764,col:1.3,knee:1.35,swCol:1.9,metal:.5,swRef:1,cn:'전 직업',
+const BLOOKS={bsk_valk:{n:'은빛 발키리',head:'',cls:['warrior','mage','archer','musa'],pr:950,file:'models/valkyrie.glb',img:'models/valkyrie_thumb.jpg',S:1.764,col:1.3,knee:1.35,swCol:1.9,metal:.5,swRef:1,cn:'전 직업',
   /* v804: 마법사·궁수용 대기(idle)는 원래 직업 대기 대신 전사 발키리의 대기를 그대로 씀(원래 대기는 다리를 곧게 편 굳은 자세라 어색함) */
   /* v802: 직업별 몸 파일 — 같은 발키리 몸에 그 직업 모델의 동작·무기를 옮겨 담음(뼈마다 기본 자세 방향을 맞춘 뒤 동작 회전을 옮김). 무기 색은 원래 직업 값 */
   per:{mage:{file:'models/valkyrie_mage.glb',swCol:1.9,swRef:0},archer:{file:'models/valkyrie_archer.glb',swCol:1.6,swRef:0},musa:{file:'models/valkyrie_musa.glb',swCol:1.6,swRef:[[-.01291026,.03369423,.06183060],[.91277843,.09348304,.29115931,-.27078166]]}}}};/* v790: swRef — 무기 외형(rel:'hand')을 손 뼈가 아니라 원래 대검 자리 기준으로(손 뼈 방향이 전사와 달라 검이 옆으로 벌어지던 것) */
+/* v894: 공용 얼굴(머리) — 스킨은 목 아래 몸만, 얼굴·머리카락은 따로 된 머리 파일(남캐·여캐 얼굴 풀)을 불러 그 몸의 뼈(이름이 같은 mixamorig 뼈)에 묶음. 머리 파일 = 스킨 메시 하나(뼈대 포함), 바인드 기준은 궁수 몸. 다른 몸에 붙이면 그 몸의 뼈 자리를 그대로 따라감 */
+const HEADS={f_silver:{file:'models/heads/f_silver.glb',col:1.15,g:'f',n:'은빛 웨이브'},f_dark:{file:'models/heads/f_dark.glb',col:1.25,g:'f',n:'흑단 생머리'}},HDG={};let pendFace={};
+/* 얼굴 고르기 — 직업 선택창에서는 카드에서 고른 얼굴(pendFace), 게임 중엔 캐릭터의 S.face. 그 직업 기본 얼굴과 성별(g)이 같은 얼굴만 */
+function hdWant(K){const d=K&&K.C.head;if(!d)return '';const cs=$('classSel'),w=cs&&!cs.hidden?pendFace[K.cls]:(S&&S.cls===K.cls?S.face:'');return w&&HEADS[w]&&HEADS[w].g===HEADS[d].g?w:d}
+function hdFaces(cls){const d=SKC[cls]&&SKC[cls].head;return d?Object.keys(HEADS).filter(k=>HEADS[k].g===HEADS[d].g):[]}
+function hdSync(K){if(!K||K.st!==2||!K.root)return;const w=hdWant(K);if(K.headId===w)return;if(K.headM){if(K.headM.parent)K.headM.parent.remove(K.headM);K.headM.material.dispose();K.headM=null}K.headId=w;portOk[K.cls]=0;if(w)hdAttach(K,K.root,w)}
+function hdGet(id,cb){const H=HEADS[id];if(!H||!THREE.GLTFLoader)return;const q=HDG[id]||(HDG[id]={st:0,cbs:[]});if(q.st===2)return cb(q.m);if(q.st===3)return;q.cbs.push(cb);if(q.st)return;q.st=1;
+  new THREE.GLTFLoader().load(H.file+'?'+APP_VER,g=>{let m=null;g.scene.traverse(o=>{if(o.isSkinnedMesh&&!m)m=o});q.m=m;q.st=m?2:3;const cs=q.cbs;q.cbs=[];if(m)for(const f of cs)try{f(m)}catch(e){}},undefined,()=>{q.st=3;q.cbs=[]})}
+function hdAttach(K,r,id){if(!id||K.headM)return;hdGet(id,src=>{if(K.headM||K.root!==r||K.headId!==id)return;let body=null;const bn={};r.traverse(o=>{if(o.isBone)bn[o.name]=o;if(o.isSkinnedMesh&&!body&&!/head_/.test(o.name))body=o});if(!body)return;
+  const bones=src.skeleton.bones.map(b=>bn[b.name]);if(bones.some(b=>!b))return;const mat=src.material.clone();mat.color.setScalar(HEADS[id].col||1);mat.side=THREE.DoubleSide;
+  const m=new THREE.SkinnedMesh(src.geometry,mat);m.name='head_'+id;m.frustumCulled=false;m.castShadow=true;body.parent.add(m);m.position.copy(body.position);m.quaternion.copy(body.quaternion);m.scale.copy(body.scale);
+  m.bind(new THREE.Skeleton(bones,src.skeleton.boneInverses.map(x=>x.clone())),body.bindMatrix.clone());K.headM=m;portOk[K.cls]=0;if(!$('classSel').hidden&&!portQ){portQ=1;requestAnimationFrame(portFill)}})}
 const bskOf=cls=>{if(!S||!S.blook)return null;const B=BLOOKS[S.blook],cs=$('classSel');return B&&B.cls.includes(cls)&&S.cls===cls&&(!cs||cs.hidden)?S.blook:null};
 const SKN={},SKV={};function skMk(cls){const sk=bskOf(cls),id=sk?cls+'@'+sk:cls;if(SKV[id])return SKN[cls]=SKV[id];const C=sk?Object.assign({},SKC[cls],BLOOKS[sk],(BLOOKS[sk].per||{})[cls]):SKC[cls];return SKN[cls]=SKV[id]={cls,sk,C,st:0,root:null,mx:null,acts:null,tip:null,swM:null,sw:null,cur:'idle',prev:null,fade:0,fadeT:0,tm:{},hitT:0,pp:null,S:C.S,_v:new THREE.Vector3(),_q:new THREE.Quaternion(),stQ:null}}
 const SKW=skMk('warrior');skMk('mage');skMk('archer');skMk('musa');/* SKW: 전사 상태(기존 이름 유지) */
@@ -5221,7 +5233,7 @@ function skwLoad(cls='warrior'){const K=skMk(cls),C=K.C;if(K.st||!THREE.GLTFLoad
     K.mx=new THREE.AnimationMixer(r);K.acts={};for(const c of g.animations){const a=K.mx.clipAction(c);a.play();a.paused=true;a.setEffectiveWeight(0);K.acts[c.name]=a}
     if(bc(cls)==='mage'&&sw){K.hand=sw.parent;K.root=r;skmGrip(K,r)}
     if(cls==='archer'&&sw){K.hand=sw.parent;K.bowQ0=sw.quaternion.clone();K.bowP0=sw.position.clone();K.bowBk=r.getObjectByName('archer_bow_back');K.bowA=1}/* v380: 활 — 쏠 때 방향(손 기준) 기억, 등에 멜 자리 *//* v342: 지팡이를 주먹 안에 고정하고 손가락을 쥐게 함 */
-    K.root=r;K.st=2;portOk[cls]=0;skwWarm(K);if(hero)skwAttach(hero);if(!$('classSel').hidden&&!portQ){portQ=1;requestAnimationFrame(portFill)}}catch(e){K.st=3}skwNext()},undefined,()=>{K.st=3;skwNext()})}
+    K.root=r;K.st=2;portOk[cls]=0;hdSync(K);skwWarm(K);if(hero)skwAttach(hero);if(!$('classSel').hidden&&!portQ){portQ=1;requestAnimationFrame(portFill)}}catch(e){K.st=3}skwNext()},undefined,()=>{K.st=3;skwNext()})}
 /* v348: 대검 칼자루가 칼날 축에서 약 14° 꺾여 있던 것(손잡이 중심이 -y로 최대 .063) → 손잡이 구간을 칼날 축 위로 당겨 일직선으로. 손이 쥐는 자리(z≈-.05)는 제자리가 되게 전체를 되밀어 둠 */
 function swStraight(sw){let mm=null;sw.traverse(o=>{if(o.isMesh&&!mm)mm=o});if(mm){const pa=mm.geometry.attributes.position,gy=.063*.536,gx=.017*.536;for(let i=0;i<pa.count;i++){const z=pa.getZ(i),t=clamp((.1-z)/.28,0,1);pa.setX(i,pa.getX(i)-.017*t+gx);pa.setY(i,pa.getY(i)+.063*t-gy)}pa.needsUpdate=true;mm.geometry.computeBoundingBox();mm.geometry.computeBoundingSphere()}}
 /* v349: 시작 시 미리 불러오기 — 제목 화면이 뜬 뒤 저장 슬롯의 직업부터 하나씩 순서대로 GLB를 받고, 받은 직후 셰이더 컴파일·텍스처 업로드(skwWarm)를 끝내 둠 → 게임에 들어갈 때·직업 선택창에서 멈춤이 없음 */
@@ -5573,7 +5585,7 @@ function lavaTick(dt){const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.lava)&&
       emit(PADD,{x:v.x,y:v.y,z:v.z,vy:rnd(1.2,3),life:rnd(.6,1.2),s0:.3,s1:.04,c0:0xffc050,c1:0x901c00,a:1,tex:1})}}}
 /*>WING*/
 function skOf(g){const u=g&&g.userData;if(!u||!SKC[u.cls])return null;const K=skMk(u.cls);if(u.sk&&u.sk!==K.root&&K.st!==2){/* v770: 바꾼 외형을 받는 동안은 지금 붙은 모델로 계속 */if(!K.st)skwLoad(u.cls);for(const id in SKV)if(SKV[id].root===u.sk)return SKV[id]}return K}
-function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;
+function skwAttach(g){const K=skOf(g);if(!K)return;const u=g.userData;if(!K.st){K.st=.5;setTimeout(()=>{K.st=0;skwLoad(K.cls)},0)}if(K.st!==2)return;hdSync(K);
   const r=K.root;if(u.sk&&u.sk!==r&&u.sk.parent===g)g.remove(u.sk);if(r.parent)r.parent.remove(r);g.add(r);u.sk=r;u.body.visible=false;
   for(const c of [...K.tip.children])K.tip.remove(c);
   K.cur='idle';K.prev=null;K.fadeT=0;K.tm={};K.hitT=0;K.pp=null;K.stQ=null;P.flinch=false;skwGear()}
@@ -8771,7 +8783,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v894';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v895';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9034,13 +9046,13 @@ function portFill(){const cards=[...document.querySelectorAll('#classSheet .card
   /* v785: 직업 카드 초상화를 한 번에 모두 그려 끼움(한 칸씩 다다닥 뜨던 것 제거) — 모델이 다 준비될 때까지 시트를 숨겼다가 한꺼번에 보임 */
   let all=true;for(const b of cards){const k=b.dataset.c,K=SKN[k],st=K&&K.st,want=st===2?2:1,have=portOk[k]||0,cur=b.querySelector('.cport');
     if(!(st===2||st===3))all=false;
-    if(cur&&have===want)continue;const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}
+    hdSync(K);if(cur&&have===want)continue;const cv=heroPortrait(k);if(cv){const ph=b.querySelector('.cport,.badge');if(ph&&ph!==cv)ph.replaceWith(cv);else if(!ph)b.prepend(cv)}}
   if(all)$('classSheet').classList.remove('pend');
   if(all&&cards.every(b=>{const K=SKN[b.dataset.c];return (portOk[b.dataset.c]||0)===(K&&K.st===2?2:1)})){portQ=0;return}
   if(all){portQ=0;return}requestAnimationFrame(portFill)}
 function showClassSel(){for(const c in SKC)if((!SKN[c]||!SKN[c].st)&&(testPick||!CLS[c].testOnly))skwLoad(c);
   let h=`<div><div class="chap">Lumenhar</div><h2>직업을 선택하세요</h2></div><p class="hint">직업마다 기본 공격과 주력 스킬이 다릅니다. 레벨업마다 주력 스킬의 강화 하나를 고릅니다.</p>${testPick?`<p class="hint" style="margin:8px 0">테스트 캐릭터 · 위험도 ${TS().tier}에서 시작 · 전 부위 강화 +${TS().nenh} (대장장이에서 변경)</p><div class="btns" id="tntSeg" style="margin:0 0 6px;flex-wrap:wrap">${[1,2,3,4,5,6].map(t=>`<button data-tnt="${t}" class="${ntSel()===t?'primary':'ghost'}" style="flex:1;min-width:44px;padding-left:2px;padding-right:2px;white-space:nowrap">${t}티어</button>`).join('')}</div><div class="btns" id="tlvSeg" style="margin:0 0 6px;align-items:center;gap:6px"><span style="flex:none;font-size:12px;color:#a59f90">캐릭터 레벨</span>${[-10,-1].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">${d}</button>`).join('')}<input id="tLvIn" type="number" min="1" max="${LV_MAX}" value="${lvSel()}" style="flex:1;min-width:56px;text-align:center;font:700 14px var(--en);background:#14141a;color:#e8dcc4;border:1px solid #3a3833;border-radius:8px;padding:6px 4px">${[1,10].map(d=>`<button data-tlv="${d}" class="ghost" style="flex:none;min-width:40px">+${d}</button>`).join('')}</div><p class="hint" style="margin:0 0 8px">캐릭터 레벨 1~${LV_MAX}(기본 공격력·생명력·마나·이동 속도가 레벨에 따라 달라짐) · 장비 티어(전 부위) · 줄별 옵션·티어·수치는 시작 후 대장장이 「테스트 · 직접 설정」에서 바꿀 수 있습니다</p>`:''}<div class="cards cg" style="--cn:${Object.keys(CLS).filter(k=>testPick||!CLS[k].testOnly).length}">`;
-  for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span></button>`}
+  for(const k in CLS){const c=CLS[k];if(c.testOnly&&!testPick)continue;const fs=hdFaces(k),fc=pendFace[k]&&fs.includes(pendFace[k])?pendFace[k]:fs[0];h+=`<button class="card cls" data-c="${k}"><span class="badge" style="background:${c.c}">${c.en.slice(0,2).toUpperCase()}</span><span class="cnm"><span class="en">${c.en}</span>${c.n}</span>${fs.length>1?`<span class="fsel">${fs.map((f,i)=>`<span data-face="${f}" data-fc="${k}" class="${f===fc?'on':''}">얼굴 ${i+1}</span>`).join('')}</span>`:''}</button>`}
   h+=`</div><button class="ghost" id="cBack">슬롯 선택으로 돌아가기</button>`;
   $('classSheet').innerHTML=h;$('classSheet').classList.add('pend');clearTimeout(window.pendT);window.pendT=setTimeout(()=>$('classSheet').classList.remove('pend'),3000);$('classSel').hidden=false;releaseAll();
   for(const b of document.querySelectorAll('#classSheet .card.cls')){const k=b.dataset.c,cv=portCv[k];if(cv&&portOk[k])b.querySelector('.badge').replaceWith(cv)}/* 이미 그려 둔 초상화는 바로 끼움 */
@@ -9094,6 +9106,7 @@ $('classSheet').addEventListener('pointermove',e=>{const d=pDrag;if(!d||e.pointe
 const pUp=e=>{const d=pDrag;if(!d||e.pointerId!==d.id)return;if(d.on)pDragEnd=Date.now();pDrag=null};
 $('classSheet').addEventListener('pointerup',pUp);$('classSheet').addEventListener('pointercancel',pUp);
 $('classSheet').addEventListener('click',e=>{if(Date.now()-pDragEnd<350&&e.target.closest('[data-c]')){e.stopPropagation();return}},true);
+$('classSheet').addEventListener('click',e=>{/* v895: 카드 안 얼굴 고르기 — 직업 선택으로 넘어가지 않게 막고 초상화만 바꿈 */const f=e.target.closest('[data-face]');if(!f)return;e.stopPropagation();e.preventDefault();const k=f.dataset.fc;pendFace[k]=f.dataset.face;for(const x of f.parentNode.children)x.classList.toggle('on',x===f);hdSync(SKN[k]);if(!portQ){portQ=1;requestAnimationFrame(portFill)}},true);
 $('classSheet').addEventListener('change',e=>{if(e.target.id!=='tLvIn')return;const v=Math.round(+e.target.value);testLv=v>=1?Math.min(LV_MAX,v):0;showClassSel()});
 $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;testLv=0;showClassSel();return}const tn=e.target.closest('[data-tnt]');if(tn){testNT=+tn.dataset.tnt;showClassSel();return}const tl=e.target.closest('[data-tlv]');if(tl){testLv=Math.max(1,Math.min(LV_MAX,lvSel()+ +tl.dataset.tlv));showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
@@ -9205,7 +9218,7 @@ const STSL={
     {img:'story/kai7_3.webp',alt:'prolog/p4.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],/* v874: 새 그림 — 왕좌의 용 앞에 무릎 꿇은 카이렌 */fx:'throne',c:['「그는 불 앞에 섰고…\n끝내 무릎을 꿇었다.」','「이제 그 길을 이을 자는,\n그대뿐이다.」']}]}};
 function storySlides(k,cb){if(PRO.on)return;releaseAll();P.mv=null;prologPlay(()=>{last=performance.now();cb&&cb()},STSL[k])}
 function startGame(cls,main,skip){
-  chCineEnd();inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
+  chCineEnd();inTown=false;const nk=testPick?'테스트':pendNick;pendNick='';S=fresh();if(!testPick&&curSlot!==null)acctApply(S);S.nick=nk;S.cls=cls;S.main=main;{const fs=hdFaces(cls);S.face=fs.length?(fs.includes(pendFace[cls])?pendFace[cls]:fs[0]):''}S.eq.weapon=ownWeapon(makeItem('weapon',1,0));S.eq.armor=makeItem('armor',1,0);if(testPick){S.test=true;/* v177: 신규 스킬 목록이 S.test로 유지되도록 먼저 켬 */testPick=false;applyTest()}else if(skip&&skipOk())applySkipStart();if(!S.test&&curSlot!==null&&otherChars())S.noGuide=1;/* v451 */save();
   scene.remove(hero);hero=makeHero(S.cls);scene.add(hero);skwAttach(hero);applyGearLook();
   setMap(true);applyTheme();resetWorld();labelButtons();$('classSel').hidden=true;
   const go=()=>{if(S.test){/* v763: 테스트 캐릭터는 마을에서 시작 — 장비·강화·스킬을 정리한 뒤 문지기에게서 사냥터로 */goTown();setTimeout(()=>toast(`테스트 캐릭터 · 위험도 ${TS().tier}`,'체력·마나 무한은 메뉴 창에서 켜고 끌 수 있습니다 · 스킬 창(I)에서 강화를 올리고 내릴 수 있습니다 · 대장장이에서 장비 티어·옵션을 직접 설정할 수 있습니다 · 저장되지 않음'),2600)}else if(S.skipStart)toRefuge('alt');else toast(`1장 · ${CH[0].n}`,`길 끝 제단의 ${CH[0].boss}를 처치하라`);if(!S.test)stageBanner();if(!S.test&&!S.skipStart&&!S.noGuide){window.TUTASK=1;setTimeout(()=>{if(window.TUTASK&&!CHC.on&&$('notice').hidden){window.TUTASK=0;tutAsk()}},20000)}};
