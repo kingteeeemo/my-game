@@ -1928,10 +1928,10 @@ const NSLOT={/* v900·v903: 기본 옵션 = 전투력(DPS·버티기)에 들어�
   gloves:{o:['inc','cc','cdm','aspd','cspd'],x:['killH','killM','mcr','area']},
   amulet:{o:['inc','cc','cdm','aspd','cspd','cdr'],x:['killH','killM','mcr','res']},
   ring:{o:['inc','cc','cdm','aspd','cspd','cdr'],x:['killH','killM','mcr','res']},
-  helm:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']},
-  armor:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']},
-  boots:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc','mspd']},
-  belt:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']}};
+  helm:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc']},
+  armor:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc']},
+  boots:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc','mspd']},
+  belt:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc']}};
 const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',archer:'활',mage:'지팡이'};
 const nRound=(v,dp)=>{const m=Math.pow(10,dp);return Math.round(v*m)/m};
 const nRoll=(r,dp,q)=>nRound(r[0]+(r[1]-r[0])*(q===undefined?Math.random():q),dp);
@@ -2020,7 +2020,7 @@ const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd
 function nsScore(it){let s=0;const own=NS_CDMG[S.cls],spd=bc(S.cls)==='mage'?'cspd':'aspd';for(const l of it.lines){if(['mdmg','pdmg','sdmg'].includes(l.k)&&l.k!==own)continue;if((l.k==='aspd'||l.k==='cspd')&&l.k!==spd)continue;const r=l.b?NSB[it.slot].r[0][1]:NSO[l.k]&&NSO[l.k].r?NSO[l.k].r[0][1]:1;s+=l.v/r*(l.b?2:l.o?1.5:1)}return s}
 /* 테스트 캐릭터 장비 (표준 빌드, 범위 가운데 값) */
 function nsTestGear(){const t=ntSel(),bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=bc(S.cls)==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
-  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','hpp'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
+  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','dr'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
     boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(S.cls),lt:t})}
 /* ===== v484 NS 오라 — 잿불 정수로 0→10단계, 스킬 창 「오라」 탭에서 켜고 끔 ===== */
@@ -8363,7 +8363,7 @@ function rrCard(it){const L=enhL(nsItSlot(it));
   <div class="rrlines">${it.lines.map((l,i)=>rrRow(it,l,i,L)).join('')}</div>`}
 /* v895: 장비 옵션표 — 부위마다 붙을 수 있는 옵션(NSLOT 기준, 티어 무관). 조율 중인 아이템의 부위 열과 가진 옵션을 강조 */
 const OPT_COLS=[['weapon','무기',0],['gloves','장갑',0],['amulet','목걸이',1],['ring','반지',1],['helm','투구',2],['armor','갑옷',2],['boots','신발',2],['belt','허리띠',2]],OPT_GC=['#c8605a','#a07ad0','#5a9ad8'],OPT_GN=['공격','장신구','방어'];
-const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['defp','evap','esp','방어·회피·에너지 쉴드 증가'],['hp'],['hpp'],['dr']],
+const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['defp','evap','esp','방어·회피·에너지 쉴드 증가'],['hp'],['dr']],
   x:[['mp'],['regen'],['mreg'],['esrc'],['mspd'],['killH'],['killM'],['mcr'],['res'],['area']]};
 function optTable(it){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
   const bt={warrior:'방어력',archer:'회피력',mage:'에쉴'}[bc(S.cls)]||'방어구',bn=k=>({weapon:'피해',gloves:'피해',amulet:'최대마나',ring:'최대생명'})[k]||bt;
