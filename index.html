@@ -2542,11 +2542,135 @@ uniform float t,k;varying vec2 vU;void main(){vec2 p=(vU-.5)*2.;float r=length(p
   const mo=motes(46,0xff6a48,{r0:.2,r1:.9,y0:.3,h:3.2,sp:.5,size:.09,op:.95,mode:'rise'});g.add(mo);
   g.userData.tick=(dt,T)=>{for(const m of [m1,m2,glow.material]){m.uniforms.t.value=T;m.uniforms.k.value=K}mo.userData.tick(dt,T)};return g}
 
+/* ---------- 4. 바람의 잔상 — 회피: 도는 깃날 + 마름모 결계, 옆으로 미끄러지는 잔상 ---------- */
+function makeVeil(){const g=new THREE.Group();
+  const veilMat=(base)=>new THREE.ShaderMaterial(Object.assign({uniforms:{t:{value:0},k:{value:1},b:{value:base}},
+    vertexShader:`varying vec3 vN,vV,vL;void main(){vL=position;vec4 wp=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-wp.xyz);gl_Position=projectionMatrix*viewMatrix*wp;}`,
+    fragmentShader:`${NOISE}
+uniform float t,k,b;varying vec3 vN,vV,vL;
+void main(){float fr=pow(1.-abs(dot(normalize(vN),vV)),2.3);
+  float ang=atan(vL.x,vL.z);vec2 uv=vec2(ang*2.4,vL.y*3.6);
+  /* 마름모(사선 교차) 격자 */
+  float d1=abs(fract(uv.x+uv.y)-.5),d2=abs(fract(uv.x-uv.y)-.5);float e=smoothstep(.06,.0,min(d1,d2));
+  /* 조각이 깜빡이며 사라졌다 나타남 — 빗겨 가는 느낌 */
+  vec2 cell=floor(vec2(uv.x+uv.y,uv.x-uv.y));float ph=fract(sin(dot(cell,vec2(12.9,78.2)))*437.5);
+  float blink=.35+.65*smoothstep(.2,.9,sin(t*2.2+ph*6.28)*.5+.5);
+  /* 옆으로 흘러가는 바람 결 */
+  float wind=smoothstep(.55,.85,fbm(vec2(ang*3.-t*1.6,vL.y*2.)));
+  float y=vL.y*.5+.5;
+  float a=(e*blink*(fr*.7+.08)+fr*.1+wind*fr*.5)*smoothstep(0.,.14,y)*smoothstep(1.,.75,y)*b;
+  vec3 col=mix(vec3(.45,.95,.72),vec3(.9,1.,.95),wind);gl_FragColor=vec4(col*a*k,1.);}`},ADD));
+  const m0=veilMat(1),sh=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),m0);sh.scale.set(1.1,1.8,1.1);sh.position.y=1.55;g.add(sh);
+  /* 잔상: 같은 결계가 옆으로 미끄러지며 흐려짐 */
+  const ghosts=[0,1].map(i=>{const m=veilMat(.5);const s=new THREE.Mesh(sh.geometry,m);s.scale.copy(sh.scale);s.position.y=1.55;g.add(s);return {s,m,i}});
+  /* 깃날 3개: 납작한 잎 모양, 기울어진 궤도로 빠르게 돌며 꼬리 잔상 두 개 */
+  const leaf=(()=>{const sp=new THREE.Shape();sp.moveTo(0,-.32);sp.quadraticCurveTo(.13,0,0,.32);sp.quadraticCurveTo(-.13,0,0,-.32);return new THREE.ShapeGeometry(sp,10)})();
+  const orbit=new THREE.Group();orbit.position.y=1.6;orbit.rotation.set(.22,0,-.12);g.add(orbit);
+  const blades=[];[0,1,2].forEach(i=>{for(let j=0;j<3;j++){const mat=new THREE.MeshBasicMaterial(Object.assign({color:j?0x7ff0b4:0xe8fff2,opacity:j?.32/j:.95,side:THREE.DoubleSide},ADD));
+    const m=new THREE.Mesh(leaf,mat);const piv=new THREE.Group();piv.add(m);m.position.z=1.12;m.rotation.set(0,Math.PI/2,Math.PI/2);orbit.add(piv);blades.push({piv,m,mat,i,j,o:mat.opacity})}});
+  const foot=new THREE.Mesh(new THREE.CircleGeometry(1,40),new THREE.ShaderMaterial(Object.assign({uniforms:{k:{value:1}},
+    vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float k;varying vec2 vP;void main(){float r=length(vP);gl_FragColor=vec4(vec3(.4,.95,.65)*pow(1.-r,2.)*.2*k,1.);}`},ADD)));
+  foot.rotation.x=-Math.PI/2;foot.position.y=.02;foot.scale.setScalar(1.2);g.add(foot);
+  const mo=motes(22,0xb8ffd6,{r0:.8,r1:1.3,y0:.2,h:2.9,sp:.3,size:.06,op:.8,mode:'spiral'});g.add(mo);
+  let rot=0;
+  g.userData.tick=(dt,T)=>{for(const m of [m0,...ghosts.map(x=>x.m)]){m.uniforms.t.value=T;m.uniforms.k.value=K}foot.material.uniforms.k.value=K;
+    ghosts.forEach(({s,m,i})=>{const p=((T*.55+i*.5)%1);const dir=i?-1:1;s.position.x=dir*p*.55;s.position.z=-p*.15;m.uniforms.b.value=.55*(1.-p)*(1.-p)});
+    rot+=dt*2.1;blades.forEach(({piv,mat,i,j,o})=>{piv.rotation.y=rot+i*Math.PI*2/3-j*.22;mat.opacity=o*K});
+    orbit.position.y=1.6+Math.sin(T*1.2)*.1;mo.userData.tick(dt,T)};return g}
 
-let G=null,FX=null,T=0;const KEYS=['def','haste','blood'];
+/* ---------- 5. 수정 장막 — 보호막: 도는 수정 + 삼각 격자 막, 맞은 자리에 물결 ---------- */
+function makeCrystal(){const g=new THREE.Group();
+  const dome=new THREE.ShaderMaterial(Object.assign({uniforms:{t:{value:0},k:{value:1},hp:{value:new THREE.Vector3(0,0,1)},ht:{value:9}},
+    vertexShader:`varying vec3 vN,vV,vL;void main(){vL=position;vec4 wp=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-wp.xyz);gl_Position=projectionMatrix*viewMatrix*wp;}`,
+    fragmentShader:`uniform float t,k,ht;uniform vec3 hp;varying vec3 vN,vV,vL;
+void main(){float fr=pow(1.-abs(dot(normalize(vN),vV)),2.);
+  vec2 p=vec2(atan(vL.x,vL.z)*2.8,vL.y*4.);
+  /* 삼각 격자: 60°씩 돌린 세 방향의 선 */
+  float l1=abs(fract(p.y*1.1547)-.5),l2=abs(fract(dot(p,vec2(.866,.5))*1.1547)-.5),l3=abs(fract(dot(p,vec2(-.866,.5))*1.1547)-.5);
+  float e=smoothstep(.05,0.,min(l1,min(l2,l3)));
+  /* 맞은 자리에서 퍼지는 물결 */
+  float d=acos(clamp(dot(normalize(vL),hp),-1.,1.));float rip=smoothstep(.12,0.,abs(d-ht*2.2))*max(0.,1.-ht/.9);float hot=smoothstep(.5,0.,d)*max(0.,1.-ht*2.5);
+  float pulse=.85+.15*sin(t*2.);float y=vL.y*.5+.5;
+  float a=(e*(fr*.6+.06+rip*1.6+hot)+fr*.28*pulse+rip*.35)*smoothstep(0.,.1,y)*smoothstep(1.,.8,y);
+  vec3 col=mix(vec3(.38,.6,1.),vec3(.85,.92,1.),clamp(rip+hot,0.,1.));gl_FragColor=vec4(col*a*k,1.);}`},ADD));
+  const sh=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),dome);sh.scale.set(1.15,1.82,1.15);sh.position.y=1.55;g.add(sh);
+  /* 수정 3개: 길쭉한 팔면체, 속에서 빛나는 심 */
+  const cg=new THREE.OctahedronGeometry(.17,0);
+  const glass=new THREE.MeshStandardMaterial({color:0x7d9cff,metalness:.2,roughness:.15,emissive:0x2840a0,emissiveIntensity:.8,transparent:true,opacity:.85});
+  const edgeMat=new THREE.LineBasicMaterial(Object.assign({color:0xbcd2ff,opacity:1},ADD));
+  const coreMat=new THREE.MeshBasicMaterial(Object.assign({color:0x9fc0ff,opacity:.7},ADD));
+  const orbit=new THREE.Group();orbit.position.y=1.65;g.add(orbit);
+  const cr=[0,1,2].map(i=>{const piv=new THREE.Group();piv.rotation.y=i*Math.PI*2/3;const m=new THREE.Group();
+    const c=new THREE.Mesh(cg,glass),ed=new THREE.LineSegments(new THREE.EdgesGeometry(cg),edgeMat),core=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),coreMat);
+    m.add(c,ed,core);m.scale.set(1,2.1,1);m.position.z=1.2;piv.add(m);orbit.add(piv);return {m,i}});
+  /* 발밑: 얇은 푸른 원 + 은은한 빛 */
+  const foot=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.ShaderMaterial(Object.assign({uniforms:{k:{value:1},t:{value:0}},
+    vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float k,t;varying vec2 vP;void main(){float r=length(vP);float ring=smoothstep(.03,0.,abs(r-.9))*(.6+.4*sin(t*2.));gl_FragColor=vec4(vec3(.45,.65,1.)*(pow(1.-r,2.)*.22+ring*.35)*k,1.);}`},ADD)));
+  foot.rotation.x=-Math.PI/2;foot.position.y=.02;foot.scale.setScalar(1.2);g.add(foot);
+  const mo=motes(16,0xc4d6ff,{r0:.85,r1:1.15,y0:.2,h:2.9,sp:.18,size:.06,op:.75,mode:'rise'});g.add(mo);
+  let next=.6,hitT=9;
+  g.userData.tick=(dt,T)=>{dome.uniforms.t.value=T;dome.uniforms.k.value=K;foot.material.uniforms.k.value=K;foot.material.uniforms.t.value=T;edgeMat.opacity=K;coreMat.opacity=.7*K*(.7+.3*Math.sin(T*4));
+    /* 맞은 것처럼 가끔 한 곳에서 물결이 퍼짐 */
+    hitT+=dt;next-=dt;if(next<=0){next=1.4+Math.random()*1.6;hitT=0;const a=Math.random()*6.28,y=(Math.random()-.3)*.8;dome.uniforms.hp.value.set(Math.cos(a),y,Math.sin(a)).normalize()}
+    dome.uniforms.ht.value=hitT;
+    orbit.rotation.y+=dt*.4;cr.forEach(({m,i})=>{m.position.y=Math.sin(T*1.1+i*2.1)*.18;m.rotation.y+=dt*1.2});mo.userData.tick(dt,T)};return g}
+
+/* ---------- 6. 예기의 칼날 — 치명타: 도는 단검 조각 + 깨진 결 무늬 결계, 가끔 X자 섬광 ---------- */
+function makeEdge(getCam){const g=new THREE.Group();
+  const dome=new THREE.ShaderMaterial(Object.assign({uniforms:{t:{value:0},k:{value:1},sa:{value:0},sy:{value:1},st:{value:9},sr:{value:.6}},
+    vertexShader:`varying vec3 vN,vV,vL;void main(){vL=position;vec4 wp=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-wp.xyz);gl_Position=projectionMatrix*viewMatrix*wp;}`,
+    fragmentShader:`uniform float t,k,sa,sy,st,sr;varying vec3 vN,vV,vL;
+vec2 hh(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return fract(sin(p)*43758.5453);}
+void main(){float fr=pow(1.-abs(dot(normalize(vN),vV)),2.3);
+  float ang=atan(vL.x,vL.z);vec2 uv=vec2(ang*2.2,vL.y*3.2);
+  /* 깨진 유리 같은 날카로운 조각 결(보로노이 경계) */
+  vec2 i=floor(uv),f=fract(uv);float d1=8.,d2=8.;
+  for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 o=vec2(x,y);vec2 r=o+.5+.42*sin(6.28*hh(i+o)+t*.6)-f;float d=dot(r,r);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}
+  float e=smoothstep(.07,0.,sqrt(d2)-sqrt(d1));
+  /* 반짝이는 조각: 몇 개만 잠깐씩 빛남 */
+  float cell=hh(i).x;float tw=smoothstep(.92,1.,sin(t*3.+cell*40.)*.5+.5);
+  /* X자 섬광 — 치명타 한 방 */
+  float da=mod(ang-sa+3.1416,6.2832)-3.1416;vec2 p=vec2(da*1.1,vL.y-sy);
+  float x1=abs(dot(p,normalize(vec2(1.,1.2)))),x2=abs(dot(p,normalize(vec2(1.,-1.2))));float len=smoothstep(sr,sr*.3,length(p));
+  float life=st<.6?smoothstep(0.,.04,st)*pow(1.-st/.6,1.5):0.;float grow=smoothstep(0.,.12,st);
+  float slash=(smoothstep(.05,0.,x1)+smoothstep(.05,0.,x2)+(smoothstep(.16,0.,x1)+smoothstep(.16,0.,x2))*.3)*len*grow*life;
+  float y=vL.y*.5+.5;
+  float a=(e*(fr*.6+.05)*(1.+tw*2.)+fr*.12)*smoothstep(0.,.12,y)*smoothstep(1.,.8,y)+slash*2.6;
+  vec3 col=mix(vec3(1.,.42,.16),vec3(1.,.92,.78),clamp(slash+tw*.6,0.,1.));gl_FragColor=vec4(col*a*k,1.);}`},ADD));
+  const sh=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),dome);sh.scale.set(1.1,1.8,1.1);sh.position.y=1.55;g.add(sh);
+  /* 단검 조각 4개: 가늘고 긴 날, 끝이 진행 방향을 향함 */
+  const bladeGeo=(()=>{const sp=new THREE.Shape();sp.moveTo(0,.36);sp.lineTo(.065,-.05);sp.lineTo(.03,-.2);sp.lineTo(-.03,-.2);sp.lineTo(-.065,-.05);sp.lineTo(0,.36);return new THREE.ExtrudeGeometry(sp,{depth:.025,bevelEnabled:false})})();
+  bladeGeo.translate(0,0,-.0125);
+  const steel=new THREE.MeshStandardMaterial({color:0xd9c8c0,metalness:.9,roughness:.25,emissive:0x6a2008,emissiveIntensity:.7});
+  const edgeMat=new THREE.LineBasicMaterial(Object.assign({color:0xffb070,opacity:1},ADD));
+  const orbit=new THREE.Group();orbit.position.y=1.65;g.add(orbit);
+  const blades=[0,1,2,3].map(i=>{const piv=new THREE.Group();piv.rotation.y=i*Math.PI/2;const m=new THREE.Group();
+    const b=new THREE.Mesh(bladeGeo,steel),ed=new THREE.LineSegments(new THREE.EdgesGeometry(bladeGeo),edgeMat);m.add(b,ed);
+    m.position.z=1.15;m.rotation.set(0,Math.PI/2,-Math.PI/2);piv.add(m);orbit.add(piv);return {piv,m,i}});
+  /* 발밑: 네 갈래 별빛(원 대신 날카로운 십자) */
+  const foot=new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6),new THREE.ShaderMaterial(Object.assign({uniforms:{k:{value:1},t:{value:0},fl:{value:0}},
+    vertexShader:`varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float k,t,fl;varying vec2 vU;void main(){vec2 p=(vU-.5)*2.;float r=length(p);
+  float a=atan(p.y,p.x)+t*.25;float star=pow(abs(cos(a*2.)),18.)*smoothstep(1.,.1,r);float c=pow(max(0.,1.-r*1.3),2.);
+  gl_FragColor=vec4(vec3(1.,.5,.2)*(star*(.35+fl*.8)+c*.18)*k,1.);}`},ADD)));
+  foot.rotation.x=-Math.PI/2;foot.position.y=.02;g.add(foot);
+  const mo=motes(24,0xffb46a,{r0:.4,r1:1.1,y0:.4,h:2.8,sp:.6,size:.05,op:.9,mode:'rise'});g.add(mo);
+  let rot=0,spin=0,st=9,next=.8;const v=new THREE.Vector3();
+  g.userData.tick=(dt,T)=>{dome.uniforms.t.value=T;dome.uniforms.k.value=K;foot.material.uniforms.k.value=K;foot.material.uniforms.t.value=T;edgeMat.opacity=K;
+    st+=dt;next-=dt;if(next<=0){next=1.3+Math.random()*1.5;st=0;spin=1;
+      /* 섬광은 카메라 쪽 면에 */
+      const c=getCam&&getCam();let a=Math.random()*6.28;if(c){g.updateMatrixWorld();v.copy(c.position);g.worldToLocal(v);a=Math.atan2(v.x,v.z)+(Math.random()-.5)*.9}
+      dome.uniforms.sa.value=a;dome.uniforms.sy.value=.45+Math.random()*.45;dome.uniforms.sr.value=.45+Math.random()*.2}
+    dome.uniforms.st.value=st;spin=Math.max(0,spin-dt*2.2);foot.material.uniforms.fl.value=st<.4?1-st/.4:0;
+    rot+=dt*(.7+spin*7);blades.forEach(({piv,m,i})=>{piv.rotation.y=rot+i*Math.PI/2;m.position.y=Math.sin(T*1.6+i*1.7)*.1;m.position.z=1.15+spin*.18});
+    mo.userData.tick(dt,T)};return g}
+
+let G=null,FX=null,T=0;const KEYS=['def','haste','blood','eva','es','crit'];
 return function(dt){const show=S&&S.cls&&!S.demo&&hero&&P.hp>0&&KEYS.some(k=>auraAct(k));
   if(!show){if(G)G.visible=false;return}
-  if(!G){G=new THREE.Group();FX=[makeSeal(),makeRings(),makeBlood()];FX.forEach(f=>{f.visible=false;G.add(f)})}
+  if(!G){G=new THREE.Group();FX=[makeSeal(),makeRings(),makeBlood(),makeVeil(),makeCrystal(),makeEdge(()=>camera)];FX.forEach(f=>{f.visible=false;G.add(f)})}
   if(G.parent!==scene)scene.add(G);G.visible=true;G.position.set(P.pos.x,P.pos.y,P.pos.z);T+=dt;
   KEYS.forEach((k,i)=>{const on=auraAct(k);FX[i].visible=on;if(on)FX[i].userData.tick(dt,T)})}})();
 function renderFrame(t){INVU.value=invOpen?1:0;ipFlush();novaFlush();fireFlush();
