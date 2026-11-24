@@ -275,8 +275,8 @@ BOT.egEnd=function(){
 
 /* 장비: 레벨/장에 맞는 평균 장비 (옵션 구성은 직업별 주력 옵션) */
 function gearSet(t,c,q){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=c==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+1);
-  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'projr','mdr'],x:['hp','regen']},armor:{o:[dp,'mdr','bdr'],x:['hp','mp']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
-   boots:{o:[dp,'projr','bdr'],x:['hp','mspd']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'projr','edr'],x:['hp','mreg']}};/* v900 옵션 구성(기본 3 + 특수 2)에 맞춤 */
+  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','hpp'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
+   boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(c),lt})}
 
 /* ---------- 진행 ---------- */

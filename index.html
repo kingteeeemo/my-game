@@ -1912,9 +1912,7 @@ const NSO={
   mreg:{n:'마나 재생',r:nPct(4.4,5.0),u:'%/초',dp:1},
   esrc:{n:'보호막 재충전 속도',r:nPct(40,44),u:'%',dp:1},
   projr:{n:'투사체 피해 감소',r:nPct(10,11),u:'%',dp:1},
-  mdr:{n:'근접 피해 감소',r:nPct(10,11),u:'%',dp:1},/* v900: 방어 부위 기본 옵션 — 적 근접 공격(보스 근접 포함) */
-  bdr:{n:'보스 피해 감소',r:nPct(10,11),u:'%',dp:1},/* v900: 보스 기술·보스 근접 */
-  edr:{n:'장판·함정 피해 감소',r:nPct(15,17),u:'%',dp:1},/* v900: 예고 장판·맵 함정·불길 벽·독 */
+  dr:{n:'피해 감소',r:nPct(8,9),u:'%',dp:1},/* v903: 받는 모든 피해 감소(합산 상한 40%) — 방어 부위 기본 옵션, 버티기(EHP)에 포함 */
   mcr:{n:'스킬 마나 소모 감소',r:nPct(30,33),u:'%',dp:0},
   res:{n:'마나 점유 효율',r:nPct(11.8,13.0),u:'%',dp:1}};
 /* 기본옵 (아이템 티어 고정 · 강화 적용): k가 null이면 방어구 베이스(방어/회피/에쉴) */
@@ -1925,15 +1923,15 @@ const NS_X15=['wd','cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','hp','mp'
 for(const k of NS_X15)for(const p of NSO[k].r){p[0]*=NS_XK;p[1]*=NS_XK}for(const k in NSB)for(const p of NSB[k].r){p[0]*=NS_XK;p[1]*=NS_XK}
 const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,boots:NSB.boots.r,belt:NSB.belt.r};
 /* 부위별 후보: o 접두어 · x 접미어 (기본옵 제외) */
-const NSLOT={/* v900: 기본 옵션(접두) — 공격 부위·장신구는 공격, 방어 부위는 방어 · 특수 옵션(접미) — 체력·마나·특수 */
+const NSLOT={/* v900·v903: 기본 옵션 = 전투력(DPS·버티기)에 들어가는 옵션(공격 부위·장신구는 공격, 방어 부위는 방어) · 특수 옵션 = 전투력 밖(마나·재생·회복·편의) */
   weapon:{o:['inc','cc','cdm','aspd','cspd','bcrit'],x:['killH','killM','mcr','area']},
   gloves:{o:['inc','cc','cdm','aspd','cspd'],x:['killH','killM','mcr','area']},
   amulet:{o:['inc','cc','cdm','aspd','cspd','cdr'],x:['killH','killM','mcr','res']},
   ring:{o:['inc','cc','cdm','aspd','cspd','cdr'],x:['killH','killM','mcr','res']},
-  helm:{o:['defp','evap','esp','projr','mdr','bdr','edr'],x:['hp','mp','regen','mreg','esrc']},
-  armor:{o:['defp','evap','esp','projr','mdr','bdr','edr'],x:['hp','mp','regen','mreg','esrc']},
-  boots:{o:['defp','evap','esp','projr','mdr','bdr','edr'],x:['hp','mp','regen','mreg','esrc','mspd']},
-  belt:{o:['defp','evap','esp','projr','mdr','bdr','edr'],x:['hp','mp','regen','mreg','esrc']}};
+  helm:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']},
+  armor:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']},
+  boots:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc','mspd']},
+  belt:{o:['defp','evap','esp','hp','hpp','dr'],x:['mp','regen','mreg','esrc']}};
 const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',archer:'활',mage:'지팡이'};
 const nRound=(v,dp)=>{const m=Math.pow(10,dp);return Math.round(v*m)/m};
 const nRoll=(r,dp,q)=>nRound(r[0]+(r[1]-r[0])*(q===undefined?Math.random():q),dp);
@@ -1945,7 +1943,7 @@ const NS_EM=(()=>{const a=[1];for(let i=1;i<=NS_ENH_MAX;i++)a.push(a[i-1]+NS_GAI
 const nsEM=L=>NS_EM[Math.max(0,Math.min(NS_ENH_MAX,Math.floor(L)))];
 const nMul=(k,L)=>1;/* 접두어·접미어는 강화 영향 없음(기본옵은 nsEM) */
 const nLineMul=(l,L)=>l.b?nsEM(L):1;
-const nFmt=(k,v)=>{const o=NSO[k];if(!o)return String(v);const x=Math.abs(v)>=1000?Math.round(v).toLocaleString('ko-KR'):(+v).toFixed(o.dp<1&&Math.abs(v)>=100?0:Math.max(o.dp,v<10&&o.dp?1:o.dp));return (k==='mcr'||k==='projr'||k==='mdr'||k==='bdr'||k==='edr'?'-':'+')+x+(o.u||'')};
+const nFmt=(k,v)=>{const o=NSO[k];if(!o)return String(v);const x=Math.abs(v)>=1000?Math.round(v).toLocaleString('ko-KR'):(+v).toFixed(o.dp<1&&Math.abs(v)>=100?0:Math.max(o.dp,v<10&&o.dp?1:o.dp));return (k==='mcr'||k==='projr'||k==='dr'?'-':'+')+x+(o.u||'')};
 /* 줄 수: 4 / 5 / 6 각 1/3 · 기본옵 + 접두어 2~3 + 접미어 1~2 */
 function nLines(){/* v900: 고정 + 기본 1~3 + 특수 1~3, 합 3~6줄 (각 25%) */const t=3+(Math.random()*4|0),P={3:[[2,1],[1,2]],4:[[3,1],[2,2],[1,3]],5:[[3,2],[2,3]],6:[[3,3]]}[t],c=P[Math.random()*P.length|0];return[c[0]+1,c[1]]}
 /* 줄 티어: 아이템 티어와 같음 30% · 1단계 아래 30% · 2단계 20% · 3단계 12% · 4단계 5% · 5단계 3% (6티어 아래로는 안 내려감) */
@@ -1979,15 +1977,15 @@ function nsMakeItem(slot,tier,opt={}){tier=Math.max(1,Math.min(6,tier||6));const
   it.name=nItemName(it);return it}
 /* 장비 합산 — 기본옵만 강화 반영. 직업 전용 옵션은 해당 직업만 */
 const NS_CDMG={warrior:'mdmg',archer:'pdmg',mage:'sdmg',musa:'mdmg',priest:'sdmg'};
-function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,mdmg:0,pdmg:0,sdmg:0,amp:0,bcrit:0,cdr:0,hp:0,mp:0,hpp:0,defp:0,evap:0,esp:0,mspd:0,regen:0,mreg:0,mcr:0,res:0,bossd:0,area:0,killH:0,killM:0,esrc:0,projr:0,mdr:0,bdr:0,edr:0};
+function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,mdmg:0,pdmg:0,sdmg:0,amp:0,bcrit:0,cdr:0,hp:0,mp:0,hpp:0,defp:0,evap:0,esp:0,mspd:0,regen:0,mreg:0,mcr:0,res:0,bossd:0,area:0,killH:0,killM:0,esrc:0,projr:0,dr:0};
   for(const k of EQS){const it=S.eq&&S.eq[k];if(!it||!it.ns)continue;if(it.slot==='weapon'&&it.wc&&it.wc!==bc(S.cls))continue;const L=enhL(k);for(const l of it.lines)if(l.k in g)g[l.k]+=l.v*nLineMul(l,L)}
   /* 공격/시전 속도: 마법사는 시전 속도, 전사·궁수는 공격 속도만 · 직업 피해(근접·투사체·주문)는 피해 증가와 같은 묶음 */
   g.aspd=bc(S.cls)==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
-let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,mdr:0,bdr:0,edr:0};
-function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,mdr:0,bdr:0,edr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,mdr:Math.min(.4,g.mdr/100),bdr:Math.min(.4,g.bdr/100),edr:Math.min(.5,g.edr/100)}}
+let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
+function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,dr:Math.min(.4,g.dr/100)}}
 /* 방어 유형 혼합: 주력 100% · 나머지 35%, 합산 후 x/(x+K) (상한 90%), 비율대로 배분 · v603: K 60,000 → 3,000, 상한 85% → 90%, 증가% 옵션은 오라와 더해서 곱함 */
 const NS_K=3000,NS_DCAP=.9;const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
 function nsDef(){const g=gear(),mw=mutA('def')?.5:1,am=k=>(1+(auraOn(k)?.03*auraL(k):0)+(g[k+'p']||0)/100)*mw,v={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},m=Object.keys(v).reduce((a,b)=>v[b]>v[a]?b:a,'def');
@@ -2022,8 +2020,8 @@ const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd
 function nsScore(it){let s=0;const own=NS_CDMG[S.cls],spd=bc(S.cls)==='mage'?'cspd':'aspd';for(const l of it.lines){if(['mdmg','pdmg','sdmg'].includes(l.k)&&l.k!==own)continue;if((l.k==='aspd'||l.k==='cspd')&&l.k!==spd)continue;const r=l.b?NSB[it.slot].r[0][1]:NSO[l.k]&&NSO[l.k].r?NSO[l.k].r[0][1]:1;s+=l.v/r*(l.b?2:l.o?1.5:1)}return s}
 /* 테스트 캐릭터 장비 (표준 빌드, 범위 가운데 값) */
 function nsTestGear(){const t=ntSel(),bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=bc(S.cls)==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
-  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'projr','mdr'],x:['hp','regen']},armor:{o:[dp,'mdr','bdr'],x:['hp','mp']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
-    boots:{o:[dp,'projr','bdr'],x:['hp','mspd']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'projr','edr'],x:['hp','mreg']}};/* v900 옵션 구성(기본 3 + 특수 2)에 맞춤 */
+  const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','hpp'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
+    boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(S.cls),lt:t})}
 /* ===== v484 NS 오라 — 잿불 정수로 0→10단계, 스킬 창 「오라」 탭에서 켜고 끔 ===== */
 const AURA_COST=[24,28,33,38,44,51,60,69,81,94];
@@ -2111,7 +2109,7 @@ function dpsWith(it){const sig=EQS.map(k=>S.eq[k]?S.eq[k].name+S.eq[k].base:'-')
    장비를 바꿔 껴서 전투력이 오를 때만 바꾸므로 두 장비를 번갈아 끼는 일이 생기지 않음. 결과는 장착 상태(아이템 id)로 기억 */
 const _pwM=new Map();
 function pwSig(){return EQS.map(k=>S.eq[k]?S.eq[k].id:'-').join(',')+'|'+S.lv+'|'+EQS.map(enhL).join(',')+'|'+C().skills[0]+'|'+JSON.stringify(S.sk||{})+'|'+JSON.stringify(S.aura||{})+JSON.stringify(S.auraOn||{})}
-function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp=heroMax(),D=nsDef(),sh=D.es>0?hp*D.es/(1-D.es):0;return {d:Math.max(1,d),e:(hp+sh)/Math.max(.05,1-(D.def+D.eva))}}
+function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp=heroMax(),D=nsDef(),sh=D.es>0?hp*D.es/(1-D.es):0,dr=NS()?Math.min(.4,(gear().dr||0)/100):0;return {d:Math.max(1,d),e:(hp+sh)/Math.max(.05,1-(D.def+D.eva))/(1-dr)/* v903: 피해 감소 */}}
 function pwWith(k,it){const key=pwSig()+'#'+k+'='+(it?it.id:'-');let v=_pwM.get(key);if(v)return v;const old=S.eq[k];S.eq[k]=it;try{v=pwParts()}finally{S.eq[k]=old}if(_pwM.size>4000)_pwM.clear();_pwM.set(key,v);return v}
 const pwNow=()=>pwWith(EQS[0],S.eq[EQS[0]]),pwV=x=>x.d*x.e;
 /* 이 아이템을 낄 때 가장 이득인 칸과 전투력 변화율 (반지는 두 칸 중 나은 쪽) */
@@ -6911,7 +6909,7 @@ function telegraph(p,r,dmg,noLava){
   const ring=flatMesh(ringThin(r),0xd04a3a,.8);ring.position.set(p.x,.07,p.z);ring.scale.set(r,r,1);
   const fill=flatMesh(discGeo,0xd04a3a,.25);fill.position.set(p.x,.06,p.z);
   const grp=new THREE.Group();grp.add(ring,fill);scene.add(grp);
-  fx.push({m:grp,t:0,dur:1.1*TELE_S,tg:1/* v640: 사이페 시작 때 지울 수 있게 표시 */,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg*(1-NSX.edr))/* v900: 장판 피해 감소 */}});
+  fx.push({m:grp,t:0,dur:1.1*TELE_S,tg:1/* v640: 사이페 시작 때 지울 수 있게 표시 */,upd(k){const s=Math.max(.01,r*k);fill.scale.set(s,s,1)},end(){ringFx(p,r,0xff6a4a,.4);shake=.25;if(!noLava)lavaFloor(p,r);if(Math.hypot(P.pos.x-p.x,P.pos.z-p.z)<r)hurtPlayer(dmg)}});
 }
 /* v236: 스토리 보스 원형 장판 — 예고만 있던 타격에 용암 바닥이 깔렸다 빠르게 식는 이펙트 (피해 판정은 그대로 순간 1회) */
 function lavaFloor(p,r){duelLava(p,0,Math.PI,r);decalFx(p,crackTex,0xff7a2a,r*1.05,1.4,.8,true);
@@ -7431,7 +7429,7 @@ function kill(e){
   gainXp(e.xp);progress(e);
 }
 /* v75: 최종 보스 직선 장판·돌진·브레스는 방어력과 무관하게 최대 체력의 일정 비율 */
-function hurtPct(pct,dot,env){if(P.inv>0||P.hp<=0||S.testGod)return;if(NS()){nsHurtPct(pct*(env?1-NSX.edr:1-NSX.bdr),false,dot);return}/* v900: 맵 사건(env)은 장판·함정 감소, 그 밖의 % 피해는 보스 기술 → 보스 피해 감소 */const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=.15;if(!dot)P.flinch=true;dmgNum(P.pos,d,'hurt');
+function hurtPct(pct,dot,env){if(P.inv>0||P.hp<=0||S.testGod)return;if(NS()){nsHurtPct(pct,false,dot);return}const d=Math.max(1,Math.round(P.mhp*pct));P.hp-=d;P.inv=.15;if(!dot)P.flinch=true;dmgNum(P.pos,d,'hurt');
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
 function hurtPlayer(d){
   if(P.inv>0||P.hp<=0||S.testGod)return;
@@ -7442,13 +7440,13 @@ function hurtPlayer(d){
 }
 /* v484 NS: 회피(엔트로피) → 방어 감소 → 에너지 쉴드 → 생명력 */
 /* v484 NS: 보스 % 피해 — 방어 적용(구르기 무적 무시 패턴 포함). 최대 생명력 15% 이상은 위험 패턴: 회피가 같은 비율의 피해 감소로 바뀜(스쳐 맞음) */
-function nsHurtPct(pct,raw,dot){const D=nsDef();let d=P.mhp*pct;if(P.zBlessU>time)d*=1-(P.zBlessV||0);
+function nsHurtPct(pct,raw,dot){const D=nsDef();let d=P.mhp*pct*(1-NSX.dr)/* v903: 피해 감소 */;if(P.zBlessU>time)d*=1-(P.zBlessV||0);
   if(pct>=.15)d*=1-D.def-D.eva;
   else{if(!raw&&!dot&&D.eva>0){if(P.evG===undefined)P.evG=Math.random()*100;P.evG+=D.eva*100;if(P.evG>=100){P.evG-=100;P.inv=.15;dmgNum(P.pos,'회피','');return}}d*=1-D.def}
   d=Math.max(1,Math.round(d));P.esT=4/NSX.esrc;if(P.es>0){const a=Math.min(P.es,d);P.es-=a;d-=a}
   P.inv=raw?Math.max(P.inv,.15):.15;if(!dot)P.flinch=true;if(d>0){P.hp-=d;dmgNum(P.pos,d,'hurt')}
   const f=$('flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),60);if(P.hp<=0)die()}
-function nsHurt(d,raw){const D=nsDef();if(P.zBlessU>time)d*=1-(P.zBlessV||0);/* v882: 성역 축복 */
+function nsHurt(d,raw){const D=nsDef();d*=1-NSX.dr;/* v903: 피해 감소 */if(P.zBlessU>time)d*=1-(P.zBlessV||0);/* v882: 성역 축복 */
   if(!raw&&D.eva>0){if(P.evG===undefined)P.evG=Math.random()*100;P.evG+=D.eva*100;if(P.evG>=100){P.evG-=100;P.inv=.15;dmgNum(P.pos,'회피','');return}}
   d=Math.max(1,Math.round(d*(1-D.def)*(raw?1:rand(.9,1.1))));P.esT=4/NSX.esrc;
   if(P.es>0){const a=Math.min(P.es,d);P.es-=a;d-=a}
@@ -8365,8 +8363,8 @@ function rrCard(it){const L=enhL(nsItSlot(it));
   <div class="rrlines">${it.lines.map((l,i)=>rrRow(it,l,i,L)).join('')}</div>`}
 /* v895: 장비 옵션표 — 부위마다 붙을 수 있는 옵션(NSLOT 기준, 티어 무관). 조율 중인 아이템의 부위 열과 가진 옵션을 강조 */
 const OPT_COLS=[['weapon','무기',0],['gloves','장갑',0],['amulet','목걸이',1],['ring','반지',1],['helm','투구',2],['armor','갑옷',2],['boots','신발',2],['belt','허리띠',2]],OPT_GC=['#c8605a','#a07ad0','#5a9ad8'],OPT_GN=['공격','장신구','방어'];
-const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['defp','evap','esp','방어·회피·에너지 쉴드 증가'],['projr'],['mdr'],['bdr'],['edr']],
-  x:[['hp'],['mp'],['regen'],['mreg'],['esrc'],['mspd'],['killH'],['killM'],['mcr'],['res'],['area']]};
+const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['defp','evap','esp','방어·회피·에너지 쉴드 증가'],['hp'],['hpp'],['dr']],
+  x:[['mp'],['regen'],['mreg'],['esrc'],['mspd'],['killH'],['killM'],['mcr'],['res'],['area']]};
 function optTable(it){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
   const bt={warrior:'방어력',archer:'회피력',mage:'에쉴'}[bc(S.cls)]||'방어구',bn=k=>({weapon:'피해',gloves:'피해',amulet:'최대마나',ring:'최대생명'})[k]||bt;
   const th=`<tr><th class="on"></th>${[0,1,2].map(g=>`<th class="g" colspan="${OPT_COLS.filter(c=>c[2]===g).length}" style="--gc:${OPT_GC[g]}">${OPT_GN[g]}</th>`).join('')}</tr><tr><th class="on">옵션</th>${OPT_COLS.map(c=>`<th class="${c[0]===sl?'cur':''}" style="--gc:${OPT_GC[c[2]]}">${c[1]}</th>`).join('')}</tr>`;
@@ -9856,7 +9854,7 @@ function nsRenderStat(){const g=gear(),am=k=>1+(auraOn(k)?.03*auraL(k):0)+(g[k+'
   ${nstDonut(D,raw,esP,P.mhp,sh,n,pc)}
   ${nstList('공격 · 이동',[['치명타 확률',pc(Math.min(1,nsCritCh())*100)],['치명타 피해',pc(nsCritMul()*100,0)],[bc(S.cls)==='mage'?'시전 속도':'공격 속도',sp(g.aspd||0)],['쿨타임 감소',g.cdr>0?`−${pc((1-Math.exp(-g.cdr/358))*100)} <small>(${n(g.cdr)})</small>`:'0%'],['이동 속도',sp(spdEff(spdRaw()))]]/* v848: 쿨타임 감소 — 장비 수치 합계를 실제 감소율로 환산(0.15초 위 구간) */)}
   ${nstList('자원',[['생명력',n(P.mhp),'tH'],['마나',n(P.mmp),'tM'],['에너지 쉴드',n(sh),'tS'],['생명력 재생',rg(hpRegen())+'<small>/초</small>','tH'],['마나 재생',rg(mpRegen())+'<small>/초</small>','tM']])}
-  ${(()=>{const X=[['보스 피해 증가',g.bossd,'+'],['스킬 범위 증가',g.area,'+'],['투사체 피해 감소',Math.min(40,g.projr),'−'],['근접 피해 감소',Math.min(40,g.mdr),'−'],['보스 피해 감소',Math.min(40,g.bdr),'−'],['장판·함정 피해 감소',Math.min(50,g.edr),'−'],['처치 시 생명력 회복',g.killH,'+'],['처치 시 마나 회복',g.killM,'+'],['보호막 재충전 속도',g.esrc,'+'],['스킬 마나 소모 감소',g.mcr,'−'],['마나 점유 효율',g.res,'+']].filter(x=>x[1]>0);return X.length?nstList('보조',X.map(([a,v,sg])=>[a,sg+(+v).toFixed(v<10?1:0)+'%'])):''})()}
+  ${(()=>{const X=[['보스 피해 증가',g.bossd,'+'],['스킬 범위 증가',g.area,'+'],['투사체 피해 감소',Math.min(40,g.projr),'−'],['피해 감소',Math.min(40,g.dr),'−'],['처치 시 생명력 회복',g.killH,'+'],['처치 시 마나 회복',g.killM,'+'],['보호막 재충전 속도',g.esrc,'+'],['스킬 마나 소모 감소',g.mcr,'−'],['마나 점유 효율',g.res,'+']].filter(x=>x[1]>0);return X.length?nstList('보조',X.map(([a,v,sg])=>[a,sg+(+v).toFixed(v<10?1:0)+'%'])):''})()}
   ${S.duel?'<p class="nhint">보스전 기준(보스 방어 상수) 수치입니다</p>':''}</div>`}
 /* v645 상태창 — 한 줄 목록(라벨 왼쪽 · 값 오른쪽 끝) + 방어 원그래프 */
 function nstList(t,rows){return `<div class="nls"><div class="nlt">${t}</div>${rows.map(([a,v,c])=>`<div class="nlr"><span>${a}</span><b${c?` class="${c}"`:''}>${v}</b></div>`).join('')}</div>`}
@@ -10986,7 +10984,7 @@ function update(dt){try{cosTick(dt)}catch(e){console.error('[cos]',e)}if(STC){st
       else e.g.rotation.y=ta}
     e.g.position.y=0;if(e.duel&&!frz)duelStep(e,dt);enemyAnim(e,dt,!frz&&!(e.kbT>0)&&!e.dA&&!(e.holdT>0)&&dd>(e.rng||e.r+.75)+ob);
     if(e.rng&&!ob){if(!frz){e.acd-=dt;if(dd<e.rng+.5&&e.acd<=0){e.acd=(e.type==='caster'?2.8:2.2)/(e.asp||1);e.atk=.35;nsShoot(e)}}}
-    else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=(e.boss?1.3:1.05)/(e.asp||1);e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg*(1-NSX.mdr)*(e.boss||e.duel||e.gate||e.chBoss?1-NSX.bdr:1))/* v900: 근접·보스 피해 감소 */}}
+    else if(!frz&&!e.chg&&!e.dA&&!e.maw){e.acd-=dt;if(dd<e.r+1+ob&&e.acd<=0){e.acd=(e.boss?1.3:1.05)/(e.asp||1);e.atk=.35;if(ob)riftHit(e);else hurtPlayer(e.dmg)}}
     if(e.boss&&!frz&&!e.duel){e.skill-=dt;if(e.skill<=0){e.skill=Math.max(2.2,3.8-chE()*.35)*(e.final?(e.rage?.55:.8):1)*BOSS_CD;telegraph({x:P.pos.x,z:P.pos.z},e.rage?4:3.2,e.dmg*1.5);sbSkill(e);if(e.final&&e.rage)for(let i=0;i<2;i++){const a=rand(0,6.3);telegraph({x:P.pos.x+Math.cos(a)*4.5,z:P.pos.z+Math.sin(a)*4.5},3,e.dmg*1.3)}}}
     if(e.final&&!frz){e.pat=(e.pat===undefined?4:e.pat)-dt;if(e.pat<=0&&!e.chg){e.pat=(e.rage?3.4:4.8)*BOSS_CD;e.patN=(e.patN||0)+1;const pk=e.patN%3;if(pk===1)bossCharge(e);else if(pk===2)bossSlam(e);else bossBreath(e)/* v563: 전방 브레스 추가 — 돌진 → 내려찍기 → 브레스 순 */}
       if(e.brW>0)e.brW-=dt;if(e.brT>0){e.brT-=dt;breathFx(e,dt)}}
