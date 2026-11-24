@@ -334,6 +334,8 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .bonusbtn small{background:rgba(18,10,26,.82);padding:4px 12px;border-radius:10px;color:#e8e0f0}/* v131 보상 문구 대비 */
 .bonusbtn{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:20px!important;background:linear-gradient(180deg,#ffb84a,#c8601a)!important;box-shadow:0 0 22px rgba(255,160,60,.55);animation:bnp 1.2s ease-in-out infinite}.bonusbtn small{font-size:13px;font-weight:700;opacity:.95}@keyframes bnp{50%{box-shadow:0 0 34px rgba(255,190,80,.95)}}
 .pouchfx{position:fixed;left:50%;top:47%;transform:translate(-50%,-50%);z-index:46;pointer-events:none;text-align:center;animation:pouchIn 3.2s ease-out forwards}.pouchfx small{display:block;font:800 13px var(--en);letter-spacing:.3em;color:#ffd24a}.pouchfx b{display:block;font:900 clamp(30px,8vmin,60px)/1.1 var(--ko);background:linear-gradient(180deg,#fff8d0,#ffd24a 55%,#a86a10);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,200,60,.6))}.pouchfx span{display:block;margin-top:4px;font:900 clamp(26px,6.5vmin,48px) var(--en);font-stretch:87%;color:#ffe9a0;text-shadow:0 0 12px rgba(255,190,40,.7),0 2px 4px #000}
+.sealfx .sfi{display:block;width:clamp(64px,15vmin,104px);height:auto;margin:0 auto 6px;filter:drop-shadow(0 0 18px rgba(255,120,30,.85));animation:sealSpin 3.2s ease-out forwards}.sealfx small{color:#ff9a4a}.sealfx b{white-space:nowrap;font-size:clamp(28px,8vmin,60px);background:linear-gradient(180deg,#fff0d8,#ffa040 55%,#a8380c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(255,120,30,.65))}.sealfx span{color:#ffd0a0;text-shadow:0 0 12px rgba(255,110,30,.75),0 2px 4px #000}.sealfx em{display:block;margin-top:2px;font:700 13px var(--ko);font-style:normal;color:#e0b890;opacity:.85}
+@keyframes sealSpin{0%{transform:rotateY(-180deg) scale(.4)}14%{transform:rotateY(0) scale(1.15)}22%{transform:scale(1)}100%{transform:scale(1)}}
 @keyframes pouchIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}10%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}18%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) scale(1)}}
 .ecine.dead{background:radial-gradient(circle at 50% 46%,rgba(150,0,0,.45),rgba(8,0,0,.95) 64%)}.ecine.dead .core b{font-family:var(--ko);font-weight:900;letter-spacing:.04em;background:linear-gradient(180deg,#fff0f0,#ff3a3a 55%,#6a0000);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,30,30,.6))}.ecine.dead .core small{color:#ff6a6a}.ecine.dead .core span{color:#ffd0d0}/* v131 보스전 사망 연출 */
 .vict .core b{font-size:clamp(70px,24vmin,170px)}.vict .core span{font-size:clamp(22px,5.4vmin,38px)}.vict .core small{font-size:clamp(14px,3vmin,20px)}
@@ -4562,7 +4564,7 @@ function buildTown(){townSync();if(refOn())return buildRefuge();return buildVill
   for(let i=0;i<14;i++){const t=rand(0,6.3),r=rand(2,11);addDecal(Math.cos(t)*r,Math.sin(t)*r)}
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town'}
 const npcLabs=NPCS.map(n=>{const d=document.createElement('div');d.className='nm npc';d.innerHTML='';d.hidden=true;$('names').appendChild(d);return d});
-function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBeam(p);if(p.kind==='pouch'&&p.acc){keepBeam(p);scene.remove(p.m);if(RZ)riftPouch(p);else S.gold+=p.amt;continue}if(p.kind==='pouch'){keepBeam(p);const a=p.amt,l=p.leg,rf=p.rift;setTimeout(()=>pouchFx(a,l,rf),fxN++*700)}if(p.kind==='tk')setTimeout(()=>tkFx(S.tickets||0),fxN++*700);scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')essAdd(p.amt);else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
+function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBeam(p);if(p.kind==='pouch'&&p.acc){keepBeam(p);scene.remove(p.m);if(RZ)riftPouch(p);else S.gold+=p.amt;continue}if(p.kind==='pouch'){keepBeam(p);const a=p.amt,l=p.leg,rf=p.rift;setTimeout(()=>pouchFx(a,l,rf),fxN++*700)}if(p.kind==='tk')setTimeout(()=>tkFx(S.tickets||0),fxN++*700);if(p.kind==='seal'){keepBeam(p);sealAdd(p.n);const n=p.n,t=S.seal||0;setTimeout(()=>sealFx(n,t),fxN++*700)}scene.remove(p.m);if(p.kind==='item')addItem(p.item);else if(p.kind==='gold'||p.kind==='pouch')S.gold+=p.amt;else if(p.kind==='tk')S.tickets=(S.tickets||0)+1;else if(p.kind==='ess')essAdd(p.amt);else if(p.kind==='spd')S.spdPot=(S.spdPot||0)+1;else if(p.kind==='seal'){}else if(S.pots[p.kind])S.pots[p.kind][p.size||'s']++}pickups.length=0}
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
@@ -7197,7 +7199,7 @@ function kill(e){
   if(rz)riftAcc(e);else{dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e))}
   if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(oT(S.tier)));
-  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss){if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(oT(S.tier))*POUCH_LX,true);if(Math.random()<TKD_P)dropTicket(e.pos)}/* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
+  /* v892: 전설 골드 주머니·확정 강화 주문서 필드 드랍 제거 *//* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
   const MD=S.ch<4?2:1,M3=S.ch<NCH?3:1;/* v115: 1~4장 마나 물약 드롭 ×2 / v124: 1~7장은 추가로 ×3 */
   const PD=NS()?0:S.ch>=NCH?(oT(S.tier)>=31?0:.054):.3;/* v358: 엔드게임은 등급별 물약 판정 폐지 → 아래 고정 0.7% *//* v75: 엔드게임 ×0.6 *//* v58: 엔드게임은 그 30%(70% 감소) */
@@ -7323,14 +7325,14 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
   if(n>0)lumiAdd(n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
   {const r=rollN(ex*RR_K*rrD()*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
-  {const q=rollN(ex*SEAL_P*sealD());if(q>0)sealAdd(q)}}/* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
+  {const q=rollN(ex*SEAL_P*sealD());if(q>0)dropSeal(e.pos,q)}}/* v892: 성역의 인장은 필드에 떨어지고 주워야 획득(빛기둥 + 획득 연출) *//* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=CUR_MAX;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
 const SEAL_P=.01/* v865: 정수 기대량 × 0.01 */,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */const rrD=()=>1+(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v864: 윤회의 불씨 위험도 보정 — 위험도 1 ×1 → 위험도 20 ×2 (인장처럼 위험도에 따라 계속 오름) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const GOLD_K=5/3;/* v879: 획득 골드 전 구간 ×5/3 — 강화 비용 −40%와 같은 효과(비용 기준 골드 runGold는 그대로) */
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*GOLD_K*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
-const POUCH_P=0,/* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
+const POUCH_P=1e-5,/* v892: 골드 주머니 부활 — 0.001%(10만 마리에 1개), 그 위험도 몬스터 3,000마리 평균 골드(pouchAmt = 300×0.12 = 3,000×처치당 0.012) *//* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
 const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
 const pouchAmt=t=>Math.round(GOLD_K*300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
@@ -7341,11 +7343,19 @@ function mkBeam(col){const bms=[],bm=new THREE.Group();
 function dropPouch(p,amt,leg,rift){const q=scatter(p),g=new THREE.Group(),pm=leg?pouchMatL:pouchMat,b=new THREE.Mesh(pouchGeo,pm);if(leg)g.scale.setScalar(1.35);b.scale.set(1,.9,1);g.add(b);const nk=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,.22,10),pm);nk.position.y=.42;g.add(nk);const ti=new THREE.Mesh(new THREE.TorusGeometry(.16,.04,6,14),coinMat);ti.rotation.x=Math.PI/2;ti.position.y=.36;g.add(ti);
   const {bm,bms}=mkBeam(leg?0xff5a00:0x2a6aff);/* v376: 일반=파랑 · 전설=주황 빛기둥 (획득 후에도 5초 유지) */
   bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
-  g.position.set(q.x,.45,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'pouch',amt,leg:!!leg,rift:rift===true,acc:rift==='acc'});ringFx(q,leg?3.6:2.6,leg?0xc080ff:0xffd24a,.8);flash(q,leg?0xc080ff:0xffd24a,leg?4:2.5);if(rift!=='acc')feed(leg?'전설 골드 주머니가 떨어졌습니다!':rift?'균열 보상 주머니가 떨어졌습니다!':'일반 골드 주머니가 떨어졌습니다!',leg?'#d09aff':'#ffd24a')}
+  g.position.set(q.x,.45,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'pouch',amt,leg:!!leg,rift:rift===true,acc:rift==='acc'});ringFx(q,leg?3.6:2.6,leg?0xc080ff:0xffd24a,.8);flash(q,leg?0xc080ff:0xffd24a,leg?4:2.5);if(rift!=='acc')feed(leg?'전설 골드 주머니가 떨어졌습니다!':rift?'균열 보상 주머니가 떨어졌습니다!':'골드 주머니가 떨어졌습니다!',leg?'#d09aff':'#ffd24a')}
 const tkGeo=new THREE.CylinderGeometry(.1,.1,.5,8),tkMat=new THREE.MeshStandardMaterial({color:0xf2e6c0,emissive:0x40d8c8,emissiveIntensity:.8,roughness:.5});
 function dropTicket(p){const q=scatter(p),g=new THREE.Group(),m=new THREE.Mesh(tkGeo,tkMat);m.rotation.z=Math.PI/2;g.add(m);for(const sx of[-.27,.27]){const c=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.06,8),coinMat);c.rotation.z=Math.PI/2;c.position.x=sx;g.add(c)}
   const {bm,bms}=mkBeam(0x2a6aff);bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'tk'});ringFx(q,1.8,0x60f0e0,.6);feed('확정 강화 주문서가 떨어졌습니다!','#7fe8d8')}
+const sealGeo=new THREE.CylinderGeometry(.4,.4,.14,6),sealMat=new THREE.MeshStandardMaterial({color:0x4a4038,emissive:0x1a0c04,roughness:.85,metalness:.15}),sealRimM=new THREE.MeshStandardMaterial({color:0xd8b070,emissive:0x5a3a10,roughness:.3,metalness:.8}),sealGlyM=new THREE.MeshBasicMaterial({color:0xff8a2a});
+function dropSeal(p,n){const q=scatter(p),g=new THREE.Group(),inn=new THREE.Group();inn.position.y=.45;inn.scale.setScalar(1.6);inn.rotation.x=-.35;g.add(inn);
+  const b=new THREE.Mesh(sealGeo,sealMat);b.rotation.x=Math.PI/2;inn.add(b);const rim=new THREE.Mesh(new THREE.TorusGeometry(.4,.035,4,6),sealRimM);rim.rotation.z=Math.PI/2;inn.add(rim);
+  for(const zf of[.075,-.075]){const gl=new THREE.Group();gl.position.z=zf;if(zf<0)gl.rotation.y=Math.PI;for(const yy of[.07,-.09])for(const sx of[-1,1]){const k=new THREE.Mesh(new THREE.BoxGeometry(.2,.045,.01),sealGlyM);k.position.set(sx*.068,yy,0);k.rotation.z=sx*Math.PI/4;gl.add(k)}const v=new THREE.Mesh(new THREE.BoxGeometry(.045,.36,.01),sealGlyM);gl.add(v);inn.add(gl)}
+  const gw=new THREE.Sprite(glowMat(0xff7a1a));gw.scale.setScalar(1.1);inn.add(gw);
+  const {bm,bms}=mkBeam(0xff7a1a);bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
+  g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'seal',n});ringFx(q,2.6,0xff8a2a,.8);flash(q,0xff8a2a,3);feed('성역의 인장이 떨어졌습니다!','#ff9a4a')}
+function sealFx(n,tot){const el=document.createElement('div');el.className='pouchfx sealfx';el.innerHTML=`<svg class="sfi" viewBox="5 4.5 54 56" aria-hidden="true"><use href="#cuSL" width="64" height="64"/></svg><small>SANCTUM SEAL</small><b>성역의 인장 획득!</b><span>+${n}</span><em>보유 ${fmtG(tot)}개</em>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
   fx.push({m:bm,t:0,dur:5,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
 /* ===== v398 잿불 균열 — 엔드게임 필드 돌발 이벤트 · v401: 성화 방어 방식으로 재구성 =====
@@ -7403,7 +7413,7 @@ function riftWave(n){const Z=RZ,W=RIFT.wave[n-1];Z.wave=n;const list=[...Array(W
   riftBig(`<small>WAVE ${n}/6</small><b style="font-size:clamp(24px,6vmin,40px)">${n===6?'마지막 웨이브':`${n}웨이브`}</b>`,1.4)}
 function riftAcc(e){const A=RZ.acc,tb=1+.03*Math.min(oT(S.tier),30),ex=[.015,.12,.5,3][e.rank]*tb*.3;A.k++;A.g+=goldOf(e)*RIFT.goldK;{const n=rollN(ex);A.e+=rollN(ex*nsGain('gEss'));A.l=(A.l||0)+n;A.r=(A.r||0)+rollN(ex*nsGain('gReroll'))}
   if(Math.random()<POUCH_P)dropPouch(e.pos,pouchAmt(oT(S.tier)),false,'acc');/* v407: 주머니는 빛기둥·끌려오는 연출 그대로, 알림 없이 정산에만 합산 */
-  if(Math.random()<POUCH_L)dropPouch(e.pos,pouchAmt(oT(S.tier))*POUCH_LX,true,'acc');
+  /* v892: 전설 골드 주머니 제거 */
   emit(PADD,{x:e.pos.x,y:1,z:e.pos.z,vy:2.5,life:.5,s0:.6,s1:.15,c0:0xffe080,c1:0xffa020,a:.9,tex:1})}/* 처치 시 금빛 불티만 — 실제 지급은 끝날 때 한 번에 */
 function riftPouch(p){const A=RZ.acc;if(p.leg){A.ln++;A.lg+=p.amt}else{A.pn++;A.pg+=p.amt}}/* 먹은 주머니를 정산에 합산 */
 function riftEcho(){const Z=RZ,q=Z.gates[Math.random()*Z.gates.length|0],W=RIFT.wave[Math.max(0,Z.wave-1)],e=riftMob(q,2,W.hp*3);e.name='균열 우두머리';e.lab.firstChild.textContent=e.name;e.M.root.scale.multiplyScalar(1.3);e.h*=1.3;e.r*=1.3;ringFx(q,3,0xff5a20,.6);toast('균열 우두머리 출현','균열에서 우두머리가 나타났습니다','#ff9a4a')}
@@ -7471,7 +7481,7 @@ function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST)
   M.root.traverse(o=>{if(o.isMesh)o.castShadow=o.parent===bd});
   e.g.remove(e.M.root);e.g.add(M.root);e.M=M;e.h=1.25*want+.35;e.quad=1}
 function tkFx(n){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small style="color:#7fe8d8">ENHANCE SCROLL</small><b style="background:linear-gradient(180deg,#e8fff9,#7fe8d8 55%,#1a8c7c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(90,224,208,.6))">확정 강화 주문서 획득!</b><span style="color:#7fe8d8">보유 ${n}개</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.15)}
-function pouchFx(amt,leg,rift){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=rift?`<small style="color:#ff9a4a">EMBER RIFT REWARD</small><b>균열 보상 주머니 획득!</b><span>+${fmtG(amt)} G</span>`:leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>일반 골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
+function pouchFx(amt,leg,rift){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=rift?`<small style="color:#ff9a4a">EMBER RIFT REWARD</small><b>균열 보상 주머니 획득!</b><span>+${fmtG(amt)} G</span>`:leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
 const sellPrice=it=>it.ns?Math.max(1,Math.round((4+(it.ilvl||1)*2.5)*(7-it.tier)/10)):Math.max(1,Math.round((4+it.ilvl*2.5)*[1,2,5,12][it.rar]/10));/* v411: 골드 1/10 */
 /* v41 바닥 장비: 부위 모양(검·투구·갑옷·장화·목걸이·반지) + 등급 빛무리 · 희귀 이상 빛기둥 */
@@ -8710,7 +8720,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v891';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v892';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10355,7 +10365,7 @@ function drawMiniTo(mctx,W,H,cx,cz,V,k,rot,full){
   if(mapKind==='arena'){mctx.strokeStyle='rgba(255,90,42,.7)';mctx.lineWidth=Math.max(1,Wd/90);mctx.beginPath();mctx.arc(mx(0),mz(0),ARENA_R*k,0,7);mctx.stroke()}
   const bp=S.ch<NCH&&S.phase===1;if(mapKind==='town')for(const n of NPCS){if(!npcOn(n))continue;mctx.fillStyle='#ffd24a';mctx.beginPath();mctx.arc(mx(n.x),mz(n.z),Math.max(2,Wd/40),0,7);mctx.fill()}
   if(mapKind==='story'){const ax=full?mx(ALTAR.x):clamp(mx(ALTAR.x),4,W-4),az=full?mz(ALTAR.z):clamp(mz(ALTAR.z),4,W-4);mctx.strokeStyle=bp?'#b080ff':'rgba(138,90,208,.6)';mctx.lineWidth=Math.max(1.5,Wd/60);mctx.beginPath();mctx.arc(ax,az,Math.max(3,3.4*k),0,7);mctx.stroke()}
-  for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':'#ffd24a';{const q=full?Math.max(k,3):k;mctx.fillRect(mx(p.m.position.x)-q/2,mz(p.m.position.z)-q/2,q,q)}}
+  for(const p of pickups){if(p.kind==='gold')continue;mctx.fillStyle=p.kind==='item'?(p.m.userData.sp?'#5ae0d0':RAR[p.item.rar].c):p.kind==='hp'?'#e0443a':p.kind==='mp'?'#4a8fe0':p.kind==='spd'?'#4ad06a':p.kind==='seal'?'#ff8a2a':'#ffd24a';{const q=full?Math.max(k,3):k;mctx.fillRect(mx(p.m.position.x)-q/2,mz(p.m.position.z)-q/2,q,q)}}
   for(const e of enemies){if(Math.abs(e.pos.x-cx)>V||Math.abs(e.pos.z-cz)>V)continue;const r=[1.1,1.5,2,3.2][e.rank]*k*(full?1.6:W/108)*1.1;mctx.fillStyle=RANK[e.rank].c;mctx.globalAlpha=e.idle?.5:1;mctx.beginPath();mctx.arc(mx(e.pos.x),mz(e.pos.z),Math.max(1,r),0,7);mctx.fill()}mctx.globalAlpha=1;
   if(full&&mapKind==='story'&&CHZS){/* 전체 지도: 모닥불(주황)·사건 지점(진홍) */const dot=(x,z,c,r)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc(mx(x),mz(z),r,0,7);mctx.fill()};if(CHZS.camp)dot(CHZS.camp.x,CHZS.camp.z,'#ff9a3a',5);const sp=startPt();dot(sp.x,sp.z,'rgba(232,220,196,.8)',4)}
   if(mapKind==='story'&&CHZS&&S.phase===1&&typeof evObjectives==='function'){const tt=performance.now()/1000;for(const o of evObjectives()){if(Math.abs(o.x-cx)>V||Math.abs(o.z-cz)>V)continue;const X=mx(o.x),Y=mz(o.z),r=(full?8:Math.max(4,W/26))*(1+.15*Math.sin(tt*4));mctx.fillStyle='#ffe0a0';mctx.strokeStyle='#1a1008';mctx.lineWidth=1.4;mctx.beginPath();mctx.moveTo(X,Y-r);mctx.lineTo(X+r*.72,Y);mctx.lineTo(X,Y+r);mctx.lineTo(X-r*.72,Y);mctx.closePath();mctx.fill();mctx.stroke()}}
@@ -10716,13 +10726,14 @@ function update(dt){if(STC){stcTick(dt)}packTick();wxTick(dt);wx2Tick(dt);if(map
       if(u.sp&&Math.random()<dt*14*QM())emit(PADD,{x:p.m.position.x+rnd(-.4,.4),y:.2,z:p.m.position.z+rnd(-.4,.4),vy:rnd(1.5,3.5),life:rnd(.6,1),s0:.4,s1:.05,c0:0xd0fff8,c1:0x2ac8b8,a:.9,tex:3});
       else if(u.rar>=3&&Math.random()<dt*10*QM())emit(PADD,{x:p.m.position.x+rnd(-.3,.3),y:.2,z:p.m.position.z+rnd(-.3,.3),vy:rnd(1,2.5),life:rnd(.5,.9),s0:.3,s1:.05,c0:0xffd090,c1:0xff5a10,a:.8,tex:1})}const dx=P.pos.x-p.m.position.x,dz=P.pos.z-p.m.position.z,dd=Math.hypot(dx,dz)||1;
     if(p.t>.35){/* v344: 몬스터가 죽으면 거리와 관계없이 캐릭터에게 날아와 자동 획득(살짝 튀어 오른 뒤 점점 빨라짐) */const sp=dt*(12+(p.t-.35)*34+heroSpd()*1.2);p.m.position.x+=dx/dd*Math.min(dd,sp);p.m.position.z+=dz/dd*Math.min(dd,sp)}
-    if(p.kind==='pouch'||p.kind==='tk'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
-    if(p.t>.35&&dd<1.8){if(p.kind==='pouch'||p.kind==='tk')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
+    if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
+    if(p.t>.35&&dd<1.8){if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
       if(p.kind==='item')addItem(p.item);
       else if(p.kind==='ess'){essAdd(p.amt)}
       else if(p.kind==='gold'){S.gold+=p.amt}
       else if(p.kind==='pouch'){if(p.acc&&RZ)riftPouch(p);else{S.gold+=p.amt;if(!p.acc)pouchFx(p.amt,p.leg,p.rift);save()}}
       else if(p.kind==='tk'){S.tickets=(S.tickets||0)+1;tkFx(S.tickets);save()}
+       else if(p.kind==='seal'){sealAdd(p.n);sealFx(p.n,S.seal||0);save()}
       else if(p.kind==='spd'){S.spdPot=(S.spdPot||0)+1;save()}
       else{const z=p.size||'s';S.pots[p.kind][z]++;save()}}}
 
