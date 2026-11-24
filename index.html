@@ -6649,7 +6649,7 @@ const BTITLE={t_kn:{n:'잿불을 꺾은 자',c:'#ffb050',how:'일반 검귀 카�
 const BFOOT={ft_ember:{n:'잿불 발자국',d:'걸을 때마다 불씨 자국이 남습니다',how:'검귀 카이렌 보상에서 낮은 확률',b:'knight'},ft_abyss:{n:'심연 안개',d:'발밑에서 보랏빛 안개가 피어오릅니다',how:'심연의 아귀 보상에서 낮은 확률',b:'maw'}};
 const BPET={pet_kn:{n:'작은 카이렌',how:'일반 검귀 카이렌 보상에서 낮은 확률',b:'knight',U:0},pet_ku:{n:'작은 카이렌 · 우버',how:'우버 검귀 카이렌 보상에서 낮은 확률',b:'knight',U:1},pet_mn:{n:'작은 아귀',how:'일반 심연의 아귀 보상에서 낮은 확률',b:'maw',U:0},pet_mu:{n:'작은 아귀 · 우버',how:'우버 심연의 아귀 보상에서 낮은 확률',b:'maw',U:1}};
 const BCOS_P={n:.005,u:.015},KSW_P={n:.003,u:.01};/* 굴림 1회당 외형 확률(이미 가진 것은 나오지 않음) */
-const BRW={kn:{rr:{p:.6,a:[25,45]},sl:{p:.6,a:[1,3]}},ku:{rr:{p:.6,a:[40,75]},sl:{p:.6,a:[4,8]}},mn:{ct:{p:.6,a:[4,9]}},mu:{ct:{p:.6,a:[12,22]}}};/* 굴림 1회당 확률 드랍(v888): 굴림마다 항목별로 따로 확률 판정, 성공하면 범위 내 수량 */
+const BRW={kn:{rr:{p:.4,a:[35,70]},sl:{p:.4,a:[2,4]}},ku:{rr:{p:.4,a:[60,110]},sl:{p:.4,a:[6,12]}},mn:{ct:{p:.4,a:[6,14]}},mu:{ct:{p:.4,a:[18,33]}}};/* 굴림 1회당 확률 드랍(v888): 굴림마다 항목별로 따로 확률 판정, 성공하면 범위 내 수량 */
 const bwTx=d=>`${Math.round(d.p*100)}% · ${d.a[0]===d.a[1]?d.a[0]:d.a.join('~')}`;
 function titleCheck(s,quiet){const c=s.bclr||{},o=s.bcos=s.bcos||{},g=[],add=k=>{if(!o[k]){o[k]=1;g.push(k)}},sx=s.bossS||{};
   if(c.kn||c.ku)add('t_kn');if(c.ku)add('t_ku');if(c.mn||c.mu)add('t_mn');if(c.mu)add('t_mu');if(Object.keys(sx).length)add('t_s');if(['kn','ku','mn','mu'].every(k=>sx[k]))add('t_sall');if((s.duelWins||0)>=100)add('t_100');
