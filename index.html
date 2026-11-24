@@ -2382,11 +2382,11 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 /* v134: 카메라 확대·축소 (설정) — +30% 확대(거리 0.7배) ~ −30% 축소(거리 1.3배) */
 /* v729: 효과음(SFX) — sfx/*.mp3 · 웹 오디오. 첫 터치에서 잠금 해제(iOS) 후 전부 미리 불러옴(약 340KB) */
 const SFX=(()=>{
-  const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl','wing','dfire','roar','volley'];
+  const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl','wing','dfire','roar','volley','loot'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:2.2,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6,wing:1,dfire:1.1,roar:1.1,volley:.9};
-  const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1]};/* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
-  const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok','wing','dfire','roar']);/* 음높이 흔들지 않는 소리 */
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:2.2,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6,wing:1,dfire:1.1,roar:1.1,volley:.9,loot:1};
+  const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1],loot:[14,1]};/* v916: 획득음은 울리는 동안 겹쳐 재생 안 함 *//* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
+  const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok','wing','dfire','roar','loot']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
   try{muted=localStorage.getItem('sndMute')==='1'}catch(e){}
   try{const v=localStorage.getItem('sfxVol');if(v!==null&&v!==''&&!isNaN(+v))vol=Math.max(0,Math.min(100,+v))}catch(e){}
@@ -2429,14 +2429,15 @@ const SFX=(()=>{
   function bgmPrime(){if(!ctx||!bgmM)return;for(const n in BGMF){if(n===bgmCur||n===bgmWant)continue;try{const t=bgmTrack(n);if(t.pr)continue;t.pr=1;/* v774: 곡마다 한 번만 — 전에는 스킬 버튼을 누를 때마다 곡을 틀었다 멈춰서 화면이 끊겼음 */t.g.gain.value=0;const pr=t.el.play();if(pr&&pr.then)pr.then(()=>{if(bgmCur!==n)try{t.el.pause();t.el.currentTime=0}catch(e){}}).catch(()=>{t.pr=0})}catch(e){}}}
   let bgmFast=false;function bgm(n,f){bgmWant=n||null;bgmFast=!!f;bgmSync()}/* v843: f=true면 로딩 화면 때문에 끄는 것 — 아주 빠르게 */
   bgmPre('title');/* v750: 오프닝 곡을 페이지가 열리자마자 내려받아 둠 — 터치 순간 바로 재생 */
-  let duckF=1;function bgmApply(){if(!bgmM)return;const tg=muted?0:bgmVol/100*duckF;try{const c=ctx.currentTime;bgmM.gain.cancelScheduledValues(c);bgmM.gain.setTargetAtTime(tg,c,.12)}catch(e){bgmM.gain.value=tg}}/* v839: 강화 연출 동안 배경음 30% 낮춤 */function duck(b){duckF=b?.7:1;bgmApply()}
+  let duckF=1,duckS=1,duckT=0;function bgmApply(tc){if(!bgmM)return;const tg=muted?0:bgmVol/100*duckF*duckS;try{const c=ctx.currentTime;bgmM.gain.cancelScheduledValues(c);bgmM.gain.setValueAtTime(bgmM.gain.value,c);bgmM.gain.setTargetAtTime(tg,c,tc||.12)}catch(e){bgmM.gain.value=tg}}/* v839: 강화 연출 동안 배경음 30% 낮춤 */function duck(b){duckF=b?.7:1;bgmApply()}
+  /* v916: 획득음 — 울리는 동안 배경음 20% 낮췄다가 끝나기 직전부터 서서히 원래대로 */function pd(n,o){const h=p(n,o);if(h&&buf[n]){duckS=.8;bgmApply(.25);clearTimeout(duckT);duckT=setTimeout(()=>{duckS=1;bgmApply(.6)},Math.max(.5,buf[n].duration-1.2)*1000)}return h}
   function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));bgmApply();try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
   document.addEventListener('visibilitychange',()=>{const t=bgmCur&&bgmT[bgmCur];if(!t)return;try{document.hidden?t.el.pause():t.el.play().catch(()=>{})}catch(e){}});
   function swing(o){let i;do{i=1+Math.random()*9|0}while(i===sw&&Math.random()<.9);sw=i;return p('swing'+i,o)}
   function hit(crit,quiet){if(!(typeof S!=='undefined'&&S&&S.cls==='musa'))return;/* 무사 한정 */p('hit',{v:quiet&&!crit?.6:crit?1.2:1});if(crit)p('crit')}
   function setVol(v){vol=Math.max(0,Math.min(100,+v||0));if(master)master.gain.value=muted?0:vol/100;try{localStorage.setItem('sfxVol',String(vol))}catch(e){}}
   function setMute(b){muted=!!b;if(master)master.gain.value=muted?0:vol/100;bgmApply();try{localStorage.setItem('sndMute',muted?'1':'0')}catch(e){}}
-  return{p,swing,hit,setVol,bgm,duck,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
+  return{p,pd,swing,hit,setVol,bgm,duck,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
 })();
 /* v779: 카메라 확대 — 0 = 기본(예전 −15% 거리), −15까지 멀리, +45까지 가까이. 가까워질수록 낮게 내려와 등 뒤에서 보는 백뷰 쪽으로 기움 */
 const CZ_MIN=-15,CZ_MAX=45;let CAM_Z=0,CAM_LOCK=false;try{const v=localStorage.getItem('camZ3');if(v!==null&&v!==''&&!isNaN(+v))CAM_Z=Math.max(CZ_MIN,Math.min(CZ_MAX,+v));CAM_LOCK=localStorage.getItem('camLock')==='1'}catch(e){}
@@ -7572,7 +7573,7 @@ function dropSeal(p,n){const q=scatter(p),g=new THREE.Group(),inn=new THREE.Grou
   const gw=new THREE.Sprite(glowMat(0xff7a1a));gw.scale.setScalar(1.1);inn.add(gw);
   const {bm,bms}=mkBeam(0xff3a0a);/* v896: 인장은 붉은 주황 — 골드 주머니 황금빛과 구분 */bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'seal',n});ringFx(q,2.6,0xff8a2a,.8);flash(q,0xff8a2a,3);feed('성역의 인장이 떨어졌습니다!','#ff9a4a')}
-function sealFx(n,tot){const el=document.createElement('div');el.className='pouchfx sealfx';el.innerHTML=`<svg class="sfi" viewBox="5 4.5 54 56" aria-hidden="true"><use href="#cuSL" width="64" height="64"/></svg><small>SANCTUM SEAL</small><b>성역의 인장 획득!</b><span>+${n}</span><em>보유 ${fmtG(tot)}개</em>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
+function sealFx(n,tot){SFX.pd('loot');const el=document.createElement('div');el.className='pouchfx sealfx';el.innerHTML=`<svg class="sfi" viewBox="5 4.5 54 56" aria-hidden="true"><use href="#cuSL" width="64" height="64"/></svg><small>SANCTUM SEAL</small><b>성역의 인장 획득!</b><span>+${n}</span><em>보유 ${fmtG(tot)}개</em>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
   fx.push({m:bm,t:0,dur:5,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
 /* ===== v398 잿불 균열 — 엔드게임 필드 돌발 이벤트 · v401: 성화 방어 방식으로 재구성 =====
@@ -7698,7 +7699,7 @@ function riftBeast(e,G){const M=NM.mob('runner',e.mat,e.rank,Math.min(S.ch,LAST)
   M.root.traverse(o=>{if(o.isMesh)o.castShadow=o.parent===bd});
   e.g.remove(e.M.root);e.g.add(M.root);e.M=M;e.h=1.25*want+.35;e.quad=1}
 function tkFx(n){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=`<small style="color:#7fe8d8">ENHANCE SCROLL</small><b style="background:linear-gradient(180deg,#e8fff9,#7fe8d8 55%,#1a8c7c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px rgba(90,224,208,.6))">확정 강화 주문서 획득!</b><span style="color:#7fe8d8">보유 ${n}개</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.15)}
-function pouchFx(amt,leg,rift){const el=document.createElement('div');el.className='pouchfx';el.innerHTML=rift?`<small style="color:#ff9a4a">EMBER RIFT REWARD</small><b>균열 보상 주머니 획득!</b><span>+${fmtG(amt)} G</span>`:leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
+function pouchFx(amt,leg,rift){SFX.pd('loot');const el=document.createElement('div');el.className='pouchfx';el.innerHTML=rift?`<small style="color:#ff9a4a">EMBER RIFT REWARD</small><b>균열 보상 주머니 획득!</b><span>+${fmtG(amt)} G</span>`:leg?`<small style="color:#d09aff">LEGENDARY GOLD POUCH</small><b style="color:#e0b8ff">전설 골드 주머니 획득!</b>`+`<span>+${fmtG(amt)} G</span>`:`<small>GOLD POUCH</small><b>골드 주머니 획득!</b><span>+${fmtG(amt)} G</span>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 const fmtG=v=>v>=1e29?'∞':Math.round(v).toLocaleString('ko-KR');/* v134: 테스트 캐릭터 무한 재화 */
 const sellPrice=it=>it.ns?Math.max(1,Math.round((4+(it.ilvl||1)*2.5)*(7-it.tier)/10)):Math.max(1,Math.round((4+it.ilvl*2.5)*[1,2,5,12][it.rar]/10));/* v411: 골드 1/10 */
 /* v41 바닥 장비: 부위 모양(검·투구·갑옷·장화·목걸이·반지) + 등급 빛무리 · 희귀 이상 빛기둥 */
@@ -8958,7 +8959,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v915';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v916';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
