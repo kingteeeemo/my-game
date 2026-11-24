@@ -1902,14 +1902,15 @@ const NS_X15=['wd','cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','hp','mp'
 for(const k of NS_X15)for(const p of NSO[k].r){p[0]*=NS_XK;p[1]*=NS_XK}for(const k in NSB)for(const p of NSB[k].r){p[0]*=NS_XK;p[1]*=NS_XK}
 const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,gloves:NSB.gloves.r,boots:NSB.boots.r};
 /* 부위별 후보: o 접두어 · x 접미어 (기본옵 제외) */
-const NSLOT={weapon:{o:['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','mp'],x:['bcrit','amp','killH','killM','bossd']},
-  helm:{o:['cdr','hp','mp','defp','evap','esp','inc'],x:['res','killH','esrc','projr']},
-  armor:{o:['cdr','hp','mp','hpp','defp','evap','esp'],x:['regen','mreg','killH','esrc','projr']},
-  gloves:{o:['cc','cdm','aspd','cspd','mdmg','pdmg','sdmg','hp','mp'],x:['killH','killM','bossd','area']},
-  boots:{o:['mspd','hp','mp','defp','evap','esp'],x:['regen','mreg','esrc','projr']},
-  amulet:{o:['cc','cdm','aspd','cspd','mdmg','pdmg','sdmg','hp','mp'],x:['mcr','res','killM','area']},
-  ring:{o:['cc','cdm','inc','mdmg','pdmg','sdmg','mp'],x:['mcr','res','killM','bossd']},
-  belt:{o:['hp','hpp','defp','evap','esp'],x:['regen','mreg','killH','esrc','projr']}};
+const NSLOT={/* v892: 부위 묶음 정리 — 공격(무기·장갑) · 장신구(목걸이·반지) · 방어(투구·갑옷·신발·허리띠), 최대 생명력 % 옵션 제외 */
+  weapon:{o:['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg'],x:['bcrit','amp','killH','bossd','area']},
+  gloves:{o:['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg'],x:['amp','killH','bossd','area']},
+  amulet:{o:['cc','cdm','aspd','cspd','hp','mp'],x:['mcr','res','killM']},
+  ring:{o:['cc','cdm','aspd','cspd','hp','mp'],x:['mcr','res','killM']},
+  helm:{o:['cdr','hp','mp','defp','evap','esp'],x:['regen','mreg','esrc','projr']},
+  armor:{o:['cdr','hp','mp','defp','evap','esp'],x:['regen','mreg','esrc','projr']},
+  boots:{o:['cdr','hp','mp','defp','evap','esp','mspd'],x:['regen','mreg','esrc','projr']},
+  belt:{o:['cdr','hp','mp','defp','evap','esp'],x:['mcr','res','killH','killM']}};
 const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',archer:'활',mage:'지팡이'};
 const nRound=(v,dp)=>{const m=Math.pow(10,dp);return Math.round(v*m)/m};
 const nRoll=(r,dp,q)=>nRound(r[0]+(r[1]-r[0])*(q===undefined?Math.random():q),dp);
@@ -1998,8 +1999,8 @@ const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd
 function nsScore(it){let s=0;const own=NS_CDMG[S.cls],spd=bc(S.cls)==='mage'?'cspd':'aspd';for(const l of it.lines){if(['mdmg','pdmg','sdmg'].includes(l.k)&&l.k!==own)continue;if((l.k==='aspd'||l.k==='cspd')&&l.k!==spd)continue;const r=l.b?NSB[it.slot].r[0][1]:NSO[l.k]&&NSO[l.k].r?NSO[l.k].r[0][1]:1;s+=l.v/r*(l.b?2:l.o?1.5:1)}return s}
 /* 테스트 캐릭터 장비 (표준 빌드, 범위 가운데 값) */
 function nsTestGear(){const t=ntSel(),bt={warrior:'def',archer:'eva',mage:'es'}[bc(S.cls)]||'def',q=.5,dp=bt+'p',sp=bc(S.cls)==='mage'?'cspd':'aspd',cd=NS_CDMG[S.cls];
-  const L={weapon:{o:['cc','cdm',sp],x:['bcrit','amp']},helm:{o:['cdr','hp',dp],x:['res','projr']},armor:{o:['cdr','hp','hpp'],x:['regen','mreg']},gloves:{o:['cc','cdm',cd],x:['bossd','killM']},
-    boots:{o:['mspd','hp',dp],x:['regen','mreg']},amulet:{o:['cc','cdm',cd],x:['mcr','res']},ring:{o:['cdm',cd,'inc'],x:['mcr','res']},ring2:{o:['cdm',cd,'inc'],x:['mcr','res']},belt:{o:['hp','hpp',dp],x:['regen','killH']}};
+  const L={weapon:{o:['cc','cdm',sp],x:['bcrit','amp']},helm:{o:['cdr','hp',dp],x:['regen','projr']},armor:{o:['cdr','hp',dp],x:['regen','mreg']},gloves:{o:['cc','cdm',cd],x:['bossd','amp']},
+    boots:{o:['mspd','hp',dp],x:['regen','mreg']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc',sp],x:['mcr','res']},ring2:{o:['cdm','cc',sp],x:['mcr','res']},belt:{o:['hp','cdr',dp],x:['killH','mcr']}};/* v892 옵션 묶음에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(S.cls),lt:t})}
 /* ===== v484 NS 오라 — 잿불 정수로 0→10단계, 스킬 창 「오라」 탭에서 켜고 끔 ===== */
 const AURA_COST=[24,28,33,38,44,51,60,69,81,94];
