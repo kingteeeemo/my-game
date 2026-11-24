@@ -1918,12 +1918,12 @@ const NSO={
   mcr:{n:'스킬 마나 소모 감소',r:nPct(30,33),u:'%',dp:0},
   res:{n:'마나 점유 효율',r:nPct(11.8,13.0),u:'%',dp:1}};
 /* 기본옵 (아이템 티어 고정 · 강화 적용): k가 null이면 방어구 베이스(방어/회피/에쉴) */
-const NSB={weapon:{k:'wd',r:nPct(280,300)},helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:null,r:nPct(400,430)},boots:{k:null,r:nPct(400,430)},
-  amulet:{k:'inc',r:nPct(30,33)},ring:{k:'hp',r:nPctH(600,640)},belt:{k:'mp',r:nPctH(600,640)}};
+const NSB={weapon:{k:'wd',r:nPct(280,300)},helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:'wd',r:nPct(280,300)}/* v901: 장갑 고정 옵션 = 피해(무기와 같음) */,boots:{k:null,r:nPct(400,430)},
+  amulet:{k:'mp',r:nPctH(600,640)}/* v901: 목걸이 = 최대 마나 */,ring:{k:'hp',r:nPctH(600,640)},belt:{k:null,r:nPct(400,430)}/* v901: 허리띠 = 방어구 */};
 /* v879: 기본옵 + 전투 수치 옵션 ×1.5 (1티어 기준, 하위 티어는 티어 배율 그대로) — 쿨감·이동 속도·베이스 치명·처치 회복·재생·보호막 재충전·투사체 감소·마나 소모 감소·점유 효율·범위는 그대로 */
 const NS_X15=['wd','cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','hp','mp','hpp','defp','evap','esp','amp','bossd'],NS_XK=1.5;
 for(const k of NS_X15)for(const p of NSO[k].r){p[0]*=NS_XK;p[1]*=NS_XK}for(const k in NSB)for(const p of NSB[k].r){p[0]*=NS_XK;p[1]*=NS_XK}
-const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,gloves:NSB.gloves.r,boots:NSB.boots.r};
+const NBASE={helm:NSB.helm.r,armor:NSB.armor.r,boots:NSB.boots.r,belt:NSB.belt.r};
 /* 부위별 후보: o 접두어 · x 접미어 (기본옵 제외) */
 const NSLOT={/* v900: 기본 옵션(접두) — 공격 부위·장신구는 공격, 방어 부위는 방어 · 특수 옵션(접미) — 체력·마나·특수 */
   weapon:{o:['inc','cc','cdm','aspd','cspd','bcrit'],x:['killH','killM','mcr','area']},
@@ -8368,7 +8368,7 @@ const OPT_COLS=[['weapon','무기',0],['gloves','장갑',0],['amulet','목걸이
 const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['defp','evap','esp','방어·회피·에너지 쉴드 증가'],['projr'],['mdr'],['bdr'],['edr']],
   x:[['hp'],['mp'],['regen'],['mreg'],['esrc'],['mspd'],['killH'],['killM'],['mcr'],['res'],['area']]};
 function optTable(it){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
-  const bt={warrior:'방어력',archer:'회피력',mage:'에쉴'}[bc(S.cls)]||'방어구',bn=k=>({weapon:'피해',amulet:'피해증가%',ring:'최대생명',belt:'최대마나'})[k]||bt;
+  const bt={warrior:'방어력',archer:'회피력',mage:'에쉴'}[bc(S.cls)]||'방어구',bn=k=>({weapon:'피해',gloves:'피해',amulet:'최대마나',ring:'최대생명'})[k]||bt;
   const th=`<tr><th class="on"></th>${[0,1,2].map(g=>`<th class="g" colspan="${OPT_COLS.filter(c=>c[2]===g).length}" style="--gc:${OPT_GC[g]}">${OPT_GN[g]}</th>`).join('')}</tr><tr><th class="on">옵션</th>${OPT_COLS.map(c=>`<th class="${c[0]===sl?'cur':''}" style="--gc:${OPT_GC[c[2]]}">${c[1]}</th>`).join('')}</tr>`;
   const base=`<tr class="bs"><td class="on">고정 옵션</td>${OPT_COLS.map(c=>`<td class="${c[0]===sl?'cur':''}">${bn(c[0])}</td>`).join('')}</tr>`;
   const sec=(kd,lab)=>`<tr class="sec"><td colspan="9">${lab}</td></tr>`+OPT_ROWS[kd].map(r=>{const ks=r.filter(k=>NSO[k]),nm=r.length>ks.length?r[r.length-1]:NSO[r[0]].n,mine=ks.some(k=>has.has(k));
