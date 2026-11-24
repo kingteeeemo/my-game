@@ -434,6 +434,15 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .binfo.uber{border-color:rgba(200,144,255,.55)}.binfo h3{margin:2px 0;font:800 17px var(--ko)}.binfo .brw{margin:6px 0;font:700 14px var(--ko)}.binfo button.primary{width:100%;padding:12px;margin-top:8px}
 
 .bwrap,.bleft,.bright{display:flex;flex-direction:column;gap:10px}
+.bxhero{position:relative;border-radius:16px;overflow:hidden;background:radial-gradient(circle at 50% 38%,var(--bg) 0%,#141018 70%);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;min-height:min(300px,40vh)}.bxtop{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 0;font:800 11px var(--en);font-stretch:87%;letter-spacing:.14em;color:#cfc5b4}.bxtop span:last-child{font:700 12px var(--ko);letter-spacing:0;padding:4px 9px;border-radius:999px;background:rgba(0,0,0,.45)}
+.bximg{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}.bximg img{width:100%;height:100%;max-height:min(230px,30vh);object-fit:contain}.bxbot{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:0 12px 12px}.bxbot>div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}.bxbot small{color:#cfc5b4;font:600 12px var(--ko)}.bxbot b{font:900 22px var(--ko);color:#fff;text-shadow:0 0 12px var(--ac)}.bxnav{display:flex;gap:6px}.bxnav button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.4);color:#fff;font-size:20px;cursor:pointer}
+.bxchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bxchip{height:50px;border-radius:12px;background:#1c1a21;border:1px solid #3a3540;color:#cfc5b4;font:800 14px var(--ko);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer}.bxchip em{font:900 12px var(--en);font-stretch:87%;font-style:normal}.bxchip.on{background:#2a2216;border:1.5px solid #ffd24a;color:#ffe9a8}.bxchip.u.on{background:#3a1430;border-color:#ff5aa8;color:#ffb0d8}
+.bxrec,.bxrw{padding:12px;border-radius:14px;background:#1c1a21;border:1px solid #3a3540;display:flex;flex-direction:column;gap:8px}.bxrow{display:flex;align-items:center;gap:12px}.bxmed{width:64px;height:64px;border-radius:50%;border:3px solid var(--gc);background:#0e0c12;display:flex;align-items:center;justify-content:center;flex:none}.bxmed b{font:900 36px var(--en);font-stretch:87%;color:var(--gc);line-height:1}.bxbest{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.bxbest small{font:600 11.5px var(--ko);color:#a89e8c}.bxbest b{font:900 26px var(--en);font-stretch:87%;line-height:1;color:#fff}.bxbest b span{font-size:15px;color:#a89e8c}
+.bxhist{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;align-items:end;width:70px;height:44px}.bxhist i{display:block;border-radius:3px 3px 1px 1px}.bxbar{height:9px;border-radius:5px;overflow:hidden;display:flex}.bxbar i{display:block}.bxlab{display:flex;justify-content:space-between;font:700 11px var(--ko);color:#a89e8c}
+.bxrh{display:flex;justify-content:space-between;align-items:baseline}.bxrh b{font:800 13px var(--ko)}.bxrh small{font:600 11.5px var(--ko);color:#a89e8c}.bxrg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.bxrg div{height:54px;border-radius:10px;background:#26222c;border:1px solid #3a3540;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}.bxrg b{font:800 15px var(--en);font-stretch:87%}.bxrg span{font:600 10.5px var(--ko);color:#cfc5b4}
+#bossSheet .bxgo{width:100%;padding:15px;font-size:16px}#bossSheet .bxgo.u{background:#ff7ac0;border-color:#ff7ac0;color:#1a0a14}
+@media (orientation:landscape) and (max-height:520px){.bxhero{min-height:0;flex:1}.bximg img{max-height:28vh}.bxbot b{font-size:17px}.bxnav button{width:36px;height:36px}.bxchip{height:40px}.bxrec,.bxrw{padding:8px 10px;gap:5px}.bxmed{width:48px;height:48px}.bxmed b{font-size:26px}.bxbest b{font-size:20px}.bxrg div{height:42px}#bossSheet .bxgo{padding:10px}}
+
 @media (orientation:landscape) and (max-height:520px){#bossP{align-items:center;padding-bottom:0}#bossSheet{border-radius:16px;border:1px solid var(--line);width:min(94vw,820px);max-width:none;max-height:calc(100vh - 20px);padding-top:8px;padding-bottom:8px;gap:6px}#bossSheet .shead h2{font-size:18px}#bossSheet .shead .chap{display:none}.bwrap{flex-direction:row;align-items:stretch;gap:12px}.bleft{flex:1.25 1 0;min-width:0;gap:6px}.bright{flex:1 1 0;min-width:0;justify-content:center;gap:6px}.bcard{padding:5px 5px 6px}.bcard .bimg{height:min(160px,36vh)}.bcard b{font-size:13px;margin-top:2px}.bcard small{display:none}.bdiff button{padding:8px;font-size:14px}.binfo{padding:10px 12px}.binfo h3{font-size:15px}.binfo .brw{margin:3px 0;font-size:13px}.binfo .hint{font-size:11px;margin:2px 0!important}.binfo button.primary{padding:9px;margin-top:4px}.bright .duelc{flex-direction:row;padding:6px 10px;gap:8px}.bright .duelc small{display:none}.bright .duelc button{padding:6px 12px;width:auto}}
 .duelc{display:flex;align-items:center;gap:12px}.duelc .dt{flex:1}.duelc b{font:800 15px var(--ko)}.duelc small{display:block;color:#a8a0b4;font-size:12px;margin-top:2px}
 .ecine{position:fixed;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 46%,rgba(var(--ec),.16),rgba(6,4,8,.93) 62%);animation:ecIn .25s ease-out}
@@ -6560,7 +6569,7 @@ function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFaile
 function duelLeave(){collectAll();S.duel=null;bossAuto(false);save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
 function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11*GOLD_K),U=!!(S.duel&&S.duel.uber);
   S.gold+=gold;
-  S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */const bk=(S.duel&&S.duel.b==='maw'?'m':'k')+(U?'u':'n'),sec=Math.max(.1,time-((e&&e.t0)||time)),gr=bGrade(bk,sec),rec=S.bossRec=S.bossRec||{},nr=!rec[bk]||sec<rec[bk];if(nr)rec[bk]=+sec.toFixed(1);if(gr[0]==='S')(S.bossS=S.bossS||{})[bk]=1;titleCheck(S);
+  S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */const bk=(S.duel&&S.duel.b==='maw'?'m':'k')+(U?'u':'n'),sec=Math.max(.1,time-((e&&e.t0)||time)),gr=bGrade(bk,sec),rec=S.bossRec=S.bossRec||{},nr=!rec[bk]||sec<rec[bk];if(nr)rec[bk]=+sec.toFixed(1);{const H=S.bossHist=S.bossHist||{};(H[bk]=H[bk]||[]).push(+sec.toFixed(1));if(H[bk].length>5)H[bk].shift()}if(gr[0]==='S')(S.bossS=S.bossS||{})[bk]=1;titleCheck(S);
   duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[],bk,sec,g:gr[0],rolls:gr[2],nr};
   later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 검귀 카이렌는 각인의 서만, 심연의 아귀는 확정 강화 주문서만 굴림(v227 분리) */
@@ -10002,23 +10011,37 @@ function bossPortrait(kind,U){const key=kind+(U?'u':'n');if(BOSS_IMG[key])return
     if(sv){const r=BKN.root;g.remove(r);if(sv.par)sv.par.add(r);r.rotation.y=sv.ry;r.position.y=sv.py;bkSword(sv.sw);bkColor(!!(S.duel&&S.duel.uber))}}catch(e){url=''}
   if(kind==='knight'&&BKN.st!==2){bkLoad();return url}
   return BOSS_IMG[key]=url}
-function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;
-  const card=(k,name,sub)=>{const U=bs.b===k&&bs.m==='u',img=bossPortrait(k,U);return `<button class="bcard${bs.b===k?' on':''}" data-bs="${k}"><div class="bimg">${img?`<img src="${img}" alt="">`:''}</div><b>${name}</b><small>${sub}</small></button>`};
-  let info='';
-  if(bs.m){const U=bs.m==='u',isMaw=bs.b==='maw',D=duelCfg(bs.m,isMaw?'maw':undefined),nm=(isMaw?MAW:DUEL).n;
-    const bk=(isMaw?'m':'k')+(U?'u':'n'),R=BRW[bk],rf=BREF[bk],bb=isMaw?'maw':'knight',cst=bossCost(bb,bs.m),hv=fragHave(bb),rec=(S.bossRec||{})[bk];
-    const rw=`${R.rr?`<span style="color:#ff9a4a">${ci('r')} 윤회의 불씨 ${R.rr}</span> · <span style="color:#7ad8ff">${ci('s')} 성역의 인장 ${R.sl[0]===R.sl[1]?R.sl[0]:R.sl.join('~')}</span>`:`<span style="color:#ffb070">✦ 재점화의 촉매 ${R.ct.join('~')}개</span>`} <small>(굴림 1회당)</small><br><small>처치 시간 등급 S(${(rf*.4).toFixed(0)}초 이하) 3회 · A(${(rf*.7).toFixed(0)}초 이하) 2회 · B 1회${rec?` · 최고 기록 ${rec}초`:''}</small><br><small style="color:#ff9ae8">❖ 낮은 확률: ${isMaw?'심연 안개':'잿불 발자국'} · 작은 ${isMaw?'아귀':'카이렌'}${isMaw?'':' · 카이렌의 대검'}</small>`;
-    const dis=!eg||S.duel||(isMaw&&mawOff)||(!S.test&&hv<cst);
-    info=`<div class="cmp2 binfo${U?' uber':''}"><h3>${U?'우버 ':'일반 '}${nm}</h3>
-      <p class="brw">보상: ${rw}</p>${U?'<p class="hint" style="color:#c890ff;margin:4px 0">☠ 입장 시 저주 — 최종 피해 −20%</p>':''}
-      ${isMaw&&mawOff?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}${!eg?'<small class="hint" style="color:#ff8a6a">엔드게임에서 입장할 수 있습니다</small>':''}
-      <p class="hint" style="margin:6px 0">${cst?`입장: ${fragNm(bb)} <b style="color:${hv>=cst?'#7fe07a':'#ff8a6a'}">${hv} / ${cst}</b> · 관문 보스를 잡을 때마다 조각 1개(검귀·아귀 반반)`:'첫 처치는 조각 없이 도전할 수 있습니다'}</p>
-      <button class="primary" data-enter="1" ${dis?'disabled':''}>${S.duel&&S.duel.m===bs.m&&((S.duel.b==='maw')===isMaw)?'도전 중':cst?`입장 · 조각 ${cst}개`:'입장'}</button></div>`}
-  else info='<p class="hint" style="text-align:center">아래에서 난이도를 고르면 보상이 표시됩니다.</p>';
+/* v887: 보스 창 — 보스 카드(좌우 넘기기) + 난이도 칩(일반·우버, 칩마다 최고 등급) + 기록 칸(등급 메달·최고·최근 5회·등급 구간) + 보상 4칸 + 입장. 격이 생기면 칩만 늘림 */
+const BDNG={kn:10,mn:15,ku:20,mu:20},BGC={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'};
+const bBest=bk=>{const r=(S.bossRec||{})[bk];return r?{sec:r,g:bGrade(bk,r)[0]}:null};
+function renderBoss(){const eg=S.ch>=NCH,bs=bossSel,mawOff=!!S.noMaw;if(!bs.b)bs.b='knight';if(!bs.m)bs.m='n';
+  const U=bs.m==='u',isMaw=bs.b==='maw',nm=(isMaw?MAW:DUEL).n,bk=(isMaw?'m':'k')+(U?'u':'n'),R=BRW[bk],rf=BREF[bk],bb=isMaw?'maw':'knight',cst=bossCost(bb,bs.m),hv=fragHave(bb),best=bBest(bk),hist=((S.bossHist||{})[bk]||[]).slice(-5),img=bossPortrait(bs.b,U);
+  const ac=U?'#ff5aa8':isMaw?'#a07aff':'#ff8a3d',fc=isMaw?'#b890ff':'#ffb050';
+  const chip=m=>{const k2=(isMaw?'m':'k')+m,b2=bBest(k2),on=bs.m===m;return `<button class="bxchip${m==='u'?' u':''}${on?' on':''}" data-bm="${m}"><span>${m==='u'?'우버':'일반'}</span><em style="color:${b2?BGC[b2.g]:'#6a6470'}">${b2?b2.g:'—'}</em></button>`};
+  const mx=Math.max(1,...hist),bars=[...Array(5)].map((_,i)=>{const v=hist[i-(5-hist.length)];return v==null?'<i style="height:8%;background:#2a2630"></i>':`<i style="height:${Math.max(10,v/mx*100)}%;background:${v<=rf*.4?'#5ae0ff':v<=rf*.7?'#4a8a40':'#4a4450'}"></i>`}).join('');
+  const span=rf*1.4,gcol=best?BGC[best.g]:'#6a6470',last=hist[hist.length-1];
+  const rws=R.rr?[[R.rr,'불씨','#ff9a4a'],[R.sl[0]===R.sl[1]?R.sl[0]:R.sl.join('~'),'인장','#7ad8ff'],[(BCOS_P[U?'u':'n']*100)+'%','외형','#ff9ae8'],[(KSW_P[U?'u':'n']*100)+'%','대검','#ffd24a']]:[[R.ct.join('~'),'촉매','#ffb070'],[(BCOS_P[U?'u':'n']*100)+'%','발밑','#ff9ae8'],[(BCOS_P[U?'u':'n']*100)+'%','동반','#ff9ae8']];
+  const dis=!eg||S.duel||(isMaw&&mawOff)||(!S.test&&hv<cst),inDuel=S.duel&&S.duel.m===bs.m&&((S.duel.b==='maw')===isMaw);
   const test=S.test?`<div class="cmp2 duelc" style="border-color:#5ad1c8"><div class="dt"><b>허수아비 (테스트)</b><small>우버 ${MAW.n} · 체력 우버의 5배 · 패턴 없음 · 보상 없음</small></div><button class="primary" data-duel="u" data-boss="maw" data-dummy="1" ${S.duel?'disabled':''}>${S.duel&&S.duel.dummy?'도전 중':'도전'}</button></div><div class="cmp2 duelc" style="border-color:#5ad1c8;margin-top:8px"><div class="dt"><b>${FINAL.boss} (테스트)</b><small>최종 보스 용 · 체력 우버 ${MAW.n}와 같음 · 등장 연출 포함 · 보상 없음</small></div><button class="primary" data-drg="1">${S.ch===LAST&&S.phase>=3&&!S.duel&&enemies.some(e=>e.final&&e.hp>0)?'다시 도전':'도전'}</button></div>`:'';/* v545: 테스트 — 최종 보스 바로 도전 */
   $('bossSheet').innerHTML=`<div class="shead"><div><h2>보스</h2></div><button class="close" id="bsClose">닫기</button></div>
-  <div class="bwrap"><div class="bleft"><div class="bcards">${card('knight',DUEL.n,'무너진 성채')}${card('maw',MAW.n,'심연의 밑바닥')}</div>
-  <div class="bdiff"><button class="${bs.m==='n'?'on':''}" data-bm="n">일반</button><button class="uber ${bs.m==='u'?'on':''}" data-bm="u">우버</button></div></div><div class="bright">${info}${test}</div></div>`}
+  <div class="bwrap"><div class="bleft">
+    <div class="bxhero" style="--ac:${ac};--bg:${U?'#3a1030':isMaw?'#2a1848':'#4a2410'}">
+      <div class="bxtop"><span>BOSS ${isMaw?2:1} / 2</span><span style="color:${fc}">${fragNm(bb)} ${hv}${cst?` / ${cst}`:''}</span></div>
+      <div class="bximg">${img?`<img src="${img}" alt="">`:''}</div>
+      <div class="bxbot"><div><small>${isMaw?'심연의 밑바닥':'무너진 성채'} · 위험도 ${BDNG[bk]}</small><b>${U?'우버 ':''}${nm}</b></div><div class="bxnav"><button data-bs="${isMaw?'knight':'maw'}" aria-label="이전 보스">‹</button><button data-bs="${isMaw?'knight':'maw'}" aria-label="다음 보스">›</button></div></div>
+    </div>
+    <div class="bxchips">${chip('n')}${chip('u')}</div>
+  </div><div class="bright">
+    <div class="bxrec"><div class="bxrow"><div class="bxmed" style="--gc:${gcol}"><b>${best?best.g:'—'}</b></div>
+      <div class="bxbest"><small>최고 기록</small><b>${best?best.sec.toFixed(1)+'<span>s</span>':'기록 없음'}</b><small style="color:${best?'#cfc5b4':'#a89e8c'}">${best?(last!=null?`최근 ${last.toFixed(1)}초`:''):'첫 처치 시 칭호 획득'}</small></div>
+      <div class="bxhist" aria-label="최근 5회 기록">${bars}</div></div>
+      <div class="bxbar"><i style="width:${(40/1.4).toFixed(1)}%;background:#1d5a68"></i><i style="width:${(30/1.4).toFixed(1)}%;background:#2e5a2a"></i><i style="flex:1;background:#3a3540"></i></div>
+      <div class="bxlab"><span style="color:#5ae0ff">S ≤ ${Math.round(rf*.4)}초 · 3회</span><span style="color:#7fe07a">A ≤ ${Math.round(rf*.7)}초 · 2회</span><span>B · 1회</span></div></div>
+    <div class="bxrw"><div class="bxrh"><b>보상 · 굴림 1회당</b><small>S등급이면 ×3</small></div><div class="bxrg">${rws.map(r=>`<div><b style="color:${r[2]}">${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div></div>
+    ${U?'<p class="hint" style="color:#ff9ad0;margin:0">☠ 입장 시 저주 — 최종 피해 −20%</p>':''}${isMaw&&mawOff?'<small class="hint" style="color:#ff8a6a">만렙 150을 넘긴 세이브는 도전할 수 없습니다</small>':''}${!eg?'<small class="hint" style="color:#ff8a6a">엔드게임에서 입장할 수 있습니다</small>':''}
+    <button class="primary bxgo${U?' u':''}" data-enter="1" ${dis?'disabled':''}>${inDuel?'도전 중':`${best?'기록 갱신 도전':'입장'}${cst?` · ${fragNm(bb)} ${cst}개`:' · 첫 처치 무료'}`}</button>
+    ${cst?`<small class="hint" style="text-align:center;margin:0">관문 보스를 잡을 때마다 조각 1개(검귀·아귀 반반)</small>`:''}${test}
+  </div></div>`}
 function openBoss(){closeAllSheets();bossOpen=true;renderBoss();$('bossP').hidden=false;releaseAll()}
 function closeBoss(){bossOpen=false;$('bossP').hidden=true}
 $('bossSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
