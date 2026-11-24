@@ -7400,7 +7400,7 @@ function mkBeam(col){const bms=[],bm=new THREE.Group();
   for(const [rt,rb,o] of [[.7,.9,.3],[.22,.26,.6]]){const mt=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:o,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});mt.userData.o=o;bms.push(mt);bm.add(new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,24,14,1,true),mt))}
   const bmt=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending});bmt.userData.o=.55;bms.push(bmt);const bd=new THREE.Mesh(new THREE.CircleGeometry(1.9,24),bmt);bd.rotation.x=-Math.PI/2;bd.position.y=-11.4;bm.add(bd);return{bm,bms}}
 function dropPouch(p,amt,leg,rift){const q=scatter(p),g=new THREE.Group(),pm=leg?pouchMatL:pouchMat,b=new THREE.Mesh(pouchGeo,pm);if(leg)g.scale.setScalar(1.35);b.scale.set(1,.9,1);g.add(b);const nk=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,.22,10),pm);nk.position.y=.42;g.add(nk);const ti=new THREE.Mesh(new THREE.TorusGeometry(.16,.04,6,14),coinMat);ti.rotation.x=Math.PI/2;ti.position.y=.36;g.add(ti);
-  const {bm,bms}=mkBeam(leg?0xff5a00:0x2a6aff);/* v376: 일반=파랑 · 전설=주황 빛기둥 (획득 후에도 5초 유지) */
+  const {bm,bms}=mkBeam(leg?0xff5a00:0xffc22a);/* v896: 골드 주머니 = 황금빛 기둥 *//* v376: 일반=파랑 · 전설=주황 빛기둥 (획득 후에도 5초 유지) */
   bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.45,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'pouch',amt,leg:!!leg,rift:rift===true,acc:rift==='acc'});ringFx(q,leg?3.6:2.6,leg?0xc080ff:0xffd24a,.8);flash(q,leg?0xc080ff:0xffd24a,leg?4:2.5);if(rift!=='acc')feed(leg?'전설 골드 주머니가 떨어졌습니다!':rift?'균열 보상 주머니가 떨어졌습니다!':'골드 주머니가 떨어졌습니다!',leg?'#d09aff':'#ffd24a')}
 const tkGeo=new THREE.CylinderGeometry(.1,.1,.5,8),tkMat=new THREE.MeshStandardMaterial({color:0xf2e6c0,emissive:0x40d8c8,emissiveIntensity:.8,roughness:.5});
@@ -7412,7 +7412,7 @@ function dropSeal(p,n){const q=scatter(p),g=new THREE.Group(),inn=new THREE.Grou
   const b=new THREE.Mesh(sealGeo,sealMat);b.rotation.x=Math.PI/2;inn.add(b);const rim=new THREE.Mesh(new THREE.TorusGeometry(.4,.035,4,6),sealRimM);rim.rotation.z=Math.PI/2;inn.add(rim);
   for(const zf of[.075,-.075]){const gl=new THREE.Group();gl.position.z=zf;if(zf<0)gl.rotation.y=Math.PI;for(const yy of[.07,-.09])for(const sx of[-1,1]){const k=new THREE.Mesh(new THREE.BoxGeometry(.2,.045,.01),sealGlyM);k.position.set(sx*.068,yy,0);k.rotation.z=sx*Math.PI/4;gl.add(k)}const v=new THREE.Mesh(new THREE.BoxGeometry(.045,.36,.01),sealGlyM);gl.add(v);inn.add(gl)}
   const gw=new THREE.Sprite(glowMat(0xff7a1a));gw.scale.setScalar(1.1);inn.add(gw);
-  const {bm,bms}=mkBeam(0xff7a1a);bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
+  const {bm,bms}=mkBeam(0xff3a0a);/* v896: 인장은 붉은 주황 — 골드 주머니 황금빛과 구분 */bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'seal',n});ringFx(q,2.6,0xff8a2a,.8);flash(q,0xff8a2a,3);feed('성역의 인장이 떨어졌습니다!','#ff9a4a')}
 function sealFx(n,tot){const el=document.createElement('div');el.className='pouchfx sealfx';el.innerHTML=`<svg class="sfi" viewBox="5 4.5 54 56" aria-hidden="true"><use href="#cuSL" width="64" height="64"/></svg><small>SANCTUM SEAL</small><b>성역의 인장 획득!</b><span>+${n}</span><em>보유 ${fmtG(tot)}개</em>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
