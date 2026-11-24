@@ -701,6 +701,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
 /* v709: 시작 화면 — 빛의 문장(제목 뒤에서 천천히 도는 금빛 태양 문장, 한쪽에 불길이 갈라진 금), 재가 내리고 불티가 오름 */
 .title{background:radial-gradient(ellipse at 50% 40%,#2a140c 0,#0d0809 55%,#060507 100%)}
 .title .abg{position:absolute;pointer-events:none;mix-blend-mode:screen;background:url(models/ash_title.webp) center/contain no-repeat;left:50%;top:0;height:100%;width:min(100vw,77.4vh);transform:translateX(-50%);opacity:.55;-webkit-mask-image:linear-gradient(#000 62%,transparent 98%);mask-image:linear-gradient(#000 62%,transparent 98%)}
+@media (min-aspect-ratio:928/1152){.title .abg{width:100vw;background-size:cover;background-position:50% 18%;opacity:.5}}
 .title .vig{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 42%,transparent 38%,rgba(5,3,2,.78) 100%)}
 .title .tsig,.title .tglow,.title .thead{z-index:2}
 .title .tglow{position:absolute;left:50%;top:36%;width:min(70vw,64vh);aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,120,40,.35),transparent 65%);pointer-events:none}
@@ -8709,7 +8710,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v889';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v890';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
