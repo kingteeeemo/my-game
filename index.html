@@ -953,7 +953,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .stmc b{font-size:12px;color:#a59f90}.stmc small{font-size:10px;color:#6f6a60}.stmc em{position:absolute;right:7px;top:6px;font:800 11px var(--en);font-stretch:87%;font-style:normal;color:#6f6a60}.stmc.on{border-color:#e8dcc4;background:#2a2924}.stmc.on b{color:var(--ink)}.stmc.on small{color:#a59f90}.stmc.on em{color:var(--ink)}
 .stcost{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:10px;background:#211c12;border:1px solid rgba(255,210,74,.3);font-size:12px;color:#c9b88a}.stcost b{font:800 15px var(--en);font-stretch:87%;color:#ffd24a}
 .stmall{display:flex;gap:6px;justify-content:flex-end}.stmall button{border:0;background:none;color:#8a8577;font:600 11.5px var(--ko);padding:2px 4px;text-decoration:underline}
-.stsp{flex:1 1 0;min-height:4px}.stsub{font-size:12px;font-weight:600;color:#a59f90;margin-left:6px}#stageSheet .stgo{flex:none;min-height:52px}
+.stmap{flex:none;height:min(48vh,420px);overflow-y:auto;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:#0e0c0b;-webkit-overflow-scrolling:touch}.stmap text{font-family:var(--ko)}.stmhd{display:flex;align-items:baseline;gap:8px;flex:none;padding:0 2px}.stmhd b{font:800 22px var(--en);font-stretch:87%;color:var(--ink)}.stmhd span{font-size:12.5px;color:#a59f90}/* v897 추락자의 지도 */.stsp{flex:1 1 0;min-height:4px}.stsub{font-size:12px;font-weight:600;color:#a59f90;margin-left:6px}#stageSheet .stgo{flex:none;min-height:52px}
 #lvlSheet .lvsub{display:block;margin-top:3px;font:600 12px var(--ko);color:#8a8577}#lvlSheet .autog{border-color:rgba(232,220,196,.35)!important;color:#e8dcc4!important}#lvlSheet .autog small{color:#8a8577!important}/* v639: 레벨업 창 — 새 UI 톤 */
 #lvlSheet{--iv:#e8dcc4;--ivd:#2c2a26;--ivm:#6e675a;--b2:#1f1f27;--b3:#2a2a32;--ln2:#24242b}#lvlSheet .lvrows{border-top:1px solid var(--ln2)}#lvlSheet .lvft{display:grid;grid-template-columns:1fr 1fr;gap:8px}#lvlSheet .lvft>*{height:44px;margin:0}#lvlSheet .lvft .agbtn{width:100%;font-size:13px}#lvlSheet .lvback{width:100%}
 #lvlSheet .lvrows .mr{padding:12px 0;gap:12px}#lvlSheet .lvrows .mi{width:46px;height:46px;padding:8px;border-radius:10px}#lvlSheet .lvrows .mn{font-size:15.5px}#lvlSheet .lvrows .ml{font-size:12.5px}#lvlSheet .lvrows .mm{gap:9px}#lvlSheet .lvrows .mbar{height:8px}#lvlSheet .lvrows .mb{width:auto}#lvlSheet .lvrows .mbt.sq{width:48px;height:48px;border-radius:11px;font-size:20px}/* v639: 레벨업 줄 크게 — 오른쪽 빈 칸 없이 막대가 버튼까지 */
@@ -8786,7 +8786,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v896';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v897';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9960,7 +9960,28 @@ function renderStage(){if(S.ch>=NCH)return renderStageB();
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">구간이 바뀌면 지역과 나오는 최고 아이템 티어가 올라갑니다.<br>위험도 9·14·19는 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 구간이 열립니다.</small></div>`}
 /* v630: 위험도 창 (B안 · 스테퍼) — ‹ › 와 20칸 막대(1~5 · 6~10 · 11~15 · 16~20)로 고르고 아래 입장 버튼. 위험도 20이면 변이 칸 */
-let stSel=1;
+let stSel=1,stSeal=0,stMapC=1;/* v897: 추락자의 지도(테스트 캐릭터) — stSeal = 봉인 칸(9·14·19) 선택, stMapC = 열 때 고른 칸으로 스크롤 */
+const SEAL_PL={9:'무너진 파수 성채',14:'검은 물',19:'왕좌 바로 아래'},MAPC=[['#8a8178','#17151a'],['#c4703a','#1e1410'],['#7fb3d6','#0f171e'],['#e2552b','#21100c'],['#a88be0','#16122a']];
+function stMapHtml(){const N=[];for(let t=1;t<=D_MAX;t++){N.push({t,b:dBand(t)});if(BLK[t])N.push({s:t,b:dBand(t)})}
+  const W=340,ST=54,top=64,H=top+ST*(N.length-1)+40,mx=+(S.maxTier||0),G=S.gates||[];
+  N.forEach((d,i)=>{d.y=H-40-i*ST;d.x=W/2+92*Math.sin(i*.85);
+    if(d.s){const ln=lockNeed(d.s);d.st=!ln?'c':(mx>=d.s&&G.includes(d.s))?'o':'l'}else d.st=G.includes(d.t)?'c':d.t<=mx?'o':'l';
+    d.on=d.s?stSeal===d.s:!stSeal&&stSel===d.t});
+  let h='',bs=[];N.forEach(d=>{const l=bs[bs.length-1];if(!l||l.b!==d.b)bs.push({b:d.b,a:d.y,z:d.y});else l.z=d.y});
+  bs.forEach((o,i)=>{const y1=i===bs.length-1?0:o.z-ST/2,y2=Math.min(H,o.a+ST/2),c=MAPC[o.b];h+=`<rect x="0" y="${y1}" width="${W}" height="${y2-y1}" fill="${c[1]}"/><text x="10" y="${y1+15}" font-size="11" fill="${c[0]}" opacity=".85">${EGMAPS[o.b].n}</text>`});
+  const P=a=>a.map((d,i)=>(i?'L':'M')+d.x.toFixed(1)+' '+d.y.toFixed(1)).join('');
+  let k=0;while(k<N.length&&N[k].st==='c')k++;
+  h+=`<path d="${P(N)}" fill="none" stroke="#4a4038" stroke-width="3" stroke-dasharray="4 5"/>`;if(k>0)h+=`<path d="${P(N.slice(0,Math.min(N.length,k+1)))}" fill="none" stroke="#e8c983" stroke-width="3"/>`;
+  N.forEach(d=>{const c=MAPC[d.b][0],sel=d.on?`<circle cx="${d.x}" cy="${d.y}" r="27" fill="none" stroke="#fff4d8" stroke-width="2"/>`:'';
+    if(d.s){const lk=d.st!=='c',o=BLK[d.s],nm=blkName(o),L=d.x>W/2;
+      h+=`<g data-mapseal="${d.s}" style="cursor:pointer"><circle cx="${d.x}" cy="${d.y}" r="27" fill="transparent"/>${sel}<rect x="${d.x-17}" y="${d.y-17}" width="34" height="34" rx="4" transform="rotate(45 ${d.x} ${d.y})" fill="#1a0f0c" stroke="${lk?(d.st==='o'?'#c890ff':'#6b5a4c'):c}" stroke-width="2"/>`+
+      (lk?`<path d="M${d.x-21} ${d.y-6}L${d.x+21} ${d.y+6}M${d.x-21} ${d.y+6}L${d.x+21} ${d.y-6}" stroke="#7d6c5c" stroke-width="2.5" stroke-dasharray="5 3"/>`:'')+
+      `<text x="${d.x}" y="${d.y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${lk?'#c9b6a2':c}">封</text><text x="${d.x+(L?-30:30)}" y="${d.y+4}" text-anchor="${L?'end':'start'}" font-size="12" font-weight="700" fill="${o.m==='u'?'#c890ff':c}">${nm}</text></g>`}
+    else{const top20=d.t===D_MAX,r=top20?17:15,f=d.st==='c'?c:d.st==='o'?'#e8c983':'#2a2420',tc=d.st==='l'?'#7a6a5c':'#1a120c',cur=S.ch>=NCH&&d.t===S.tier;
+      h+=`<g data-mapss="${d.t}" style="cursor:pointer"><circle cx="${d.x}" cy="${d.y}" r="26" fill="transparent"/>${sel}${d.st==='o'?`<circle cx="${d.x}" cy="${d.y}" r="${r+6}" fill="none" stroke="#e8c983" stroke-width="1.5" opacity=".55"/>`:''}<circle cx="${d.x}" cy="${d.y}" r="${r}" fill="${f}" stroke="${d.st==='l'?'#4a4038':'#f3e6cf'}" stroke-width="1"/><text x="${d.x}" y="${d.y+4.5}" text-anchor="middle" font-size="13" font-weight="800" fill="${tc}">${d.t}</text>`+
+      (cur?`<text x="${d.x}" y="${d.y-21}" text-anchor="middle" font-size="10" fill="#ffb050">현재</text>`:'')+(top20?`<text x="${d.x}" y="${d.y-26}" text-anchor="middle" font-size="12" fill="#a88be0">${tpn(20)}</text>`:'')+`</g>`}});
+  return `<div class="stmap" id="stMap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${h}</svg></div>`}
+function stMapScroll(){const m=$('stMap');if(!m)return;const g=m.querySelector(stSeal?`[data-mapseal="${stSeal}"]`:`[data-mapss="${stSel}"]`);if(!g)return;const sv=m.querySelector('svg'),vb=sv.viewBox.baseVal,sc=sv.getBoundingClientRect().width/vb.width,c=g.querySelector('circle');m.scrollTop=+c.getAttribute('cy')*sc-m.clientHeight/2}
 function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageReq(NCH,t),r=me/req,open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),clr=(S.gates||[]).includes(t),pb=BLK[t-1],seal=!open&&pb&&lockNeed(t-1)&&(S.maxTier||0)>=t-1;
   const stTxt=clr?'<b class="ok">클리어</b>':open?'도전 가능':seal?`<b style="color:#c890ff">봉인 · ${blkName(pb)} 처치 필요</b>`:`잠김 · 위험도 ${t-1} 클리어 필요`;
   const trk=Array.from({length:D_MAX},(_,i)=>{const q=i+1,o=q<=(S.maxTier||0)||(S.test&&q<=TEST_TOP),c=(S.gates||[]).includes(q);return `<button class="sts${c?' c':o?' o':''}${q===t?' on':''}${q===S.tier&&S.ch>=NCH?' cur':''}" data-ss="${q}"></button>${q%5===0&&q<D_MAX?'<i class="stgap"></i>':''}`}).join('');
@@ -9971,12 +9992,13 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
   const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?`위험도 <b>${t}</b> 입장`:t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
-  $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
-  <div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
-  <div class="sttrk">${trk}</div><div class="sttl"><span>1</span><span>6</span><span>11</span><span>16</span><span>20</span></div>
+  const sk=S.test&&stSeal,so=sk&&BLK[stSeal],sln=sk&&lockNeed(stSeal),sop=sk&&sln&&(S.maxTier||0)>=stSeal&&(S.gates||[]).includes(stSeal),y0=S.test&&$('stMap')?$('stMap').scrollTop:0;
+  $('stageSheet').innerHTML=`<div class="shead"><div><h2>${S.test?'추락자의 지도':'위험도'}</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
+  ${S.test?stMapHtml()+(sk?`<div class="stdet"><div><div><b style="color:${so.m==='u'?'#c890ff':'#ffd24a'}">봉인 · ${blkName(so)}</b></div><small>${SEAL_PL[stSeal]} · 쓰러뜨리면 위험도 ${stSeal+1}이 열립니다</small></div><div class="r">${sln?(sop?'도전 가능':'잠김'):'<b class="ok">봉인 해제</b>'}</div></div><div class="stsp"></div><button class="rrgo stgo" id="sealGo">${sln?(sop?'봉인에 도전':'봉인 도전 · 테스트'):'다시 도전'}</button>`:`<div class="stmhd"><b>위험도 ${t}</b><span>${tpn(t)} · ${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div>`):`<div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
+  <div class="sttrk">${trk}</div><div class="sttl"><span>1</span><span>6</span><span>11</span><span>16</span><span>20</span></div>`}${sk?'':`
   <div class="stdet"><div><div>${stTxt}</div><small>1,500마리 + 관문 보스</small></div><div class="r">적정 <b>${fmtN(req)}</b> · 내 <b style="color:${r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a'}">${fmtN(me)}</b></div></div>
   ${mut}<div class="stsp"></div>
-  <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${mutRw(pts).toFixed(2)}</span>`:''}</button>${S.test?`<button class="rrgo stgo" id="tmGo" style="margin-top:8px;background:#2a2a30;color:#e8e2d6" ${testMap?'disabled':''}>${testMap?'지금 테스트 맵에 있음':'테스트 맵으로 이동'}<span class="stsub">· 몬스터 없음</span></button>`:''}`}
+  <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${mutRw(pts).toFixed(2)}</span>`:''}</button>${S.test?`<button class="rrgo stgo" id="tmGo" style="margin-top:8px;background:#2a2a30;color:#e8e2d6" ${testMap?'disabled':''}>${testMap?'지금 테스트 맵에 있음':'테스트 맵으로 이동'}<span class="stsub">· 몬스터 없음</span></button>`:''}`}`;if(S.test){const m=$('stMap');if(m){if(stMapC){stMapC=0;requestAnimationFrame(stMapScroll)}else m.scrollTop=y0}}}
 function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이</div>';
   if(!mutOpen())return `<div class="mutbox">${H}<p class="hint">엔드게임(추락자의 길)에서 열립니다. 몬스터를 강하게 만드는 대신 보상이 늘어납니다.</p></div>`;
   const pts=mutPts();
@@ -9984,7 +10006,7 @@ function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이</div
   <div class="mutl">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="mutr${on?' on':''}" data-mut="${k}"><span class="mc">${on?'✓':''}</span><span class="mn"><b>${m.n}</b><small>${m.d}</small></span><em>+${m.p}</em></button>`}).join('')}</div>
   <div class="mutft"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div>
   <p class="hint">보상 배율은 아이템 수 · 1티어 확률 · 윤회의 불씨 · 성역의 인장 · 잿불 정수 · 골드에 적용됩니다. 입장할 때마다 골드를 내고, 고른 변이는 그 판이 끝날 때까지 유지됩니다.</p></div>`}
-$('stageSheet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+$('stageSheet').addEventListener('click',e=>{const mg=e.target.closest('[data-mapss],[data-mapseal]');if(mg){if(mg.dataset.mapseal){stSeal=+mg.dataset.mapseal}else{stSeal=0;stSel=+mg.dataset.mapss}renderStage();return}/* v897 */const b=e.target.closest('button');if(!b||b.disabled)return;if(b.id==='sealGo'){const o=BLK[stSeal];if(o){closeStage();duelEnter(o.m,o.b)}return}
   if((b.dataset.mut||b.dataset.mutall!==undefined)&&!inTown&&S.ch>=NCH&&!S.duel&&!S.runClr){toast('사냥 중에는 변이를 바꿀 수 없습니다','마을에서 바꾼 뒤 다시 입장하면 적용됩니다');return}
   if(b.dataset.ss){const q=+b.dataset.ss;if(q>=1&&q<=D_MAX){stSel=q;renderStage()}return}
   if(b.dataset.mut){S.mut=S.mut||{};S.mut[b.dataset.mut]=!S.mut[b.dataset.mut];save();const y=$('stageSheet').scrollTop;renderStage();$('stageSheet').scrollTop=y;return}
@@ -10007,7 +10029,7 @@ function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();if(k==='fb'){drgLoad();enterArena2()}/* v607: 테스트 이동도 실제와 같이 계단 → 등장 연출 */
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
-function openStage(){closeAllSheets();stageOpen=true;stSel=Math.max(1,Math.min(D_MAX,S.tier||1));stageExp=new Set([dBand(Math.max(1,S.ch>=NCH?S.tier:1))]);renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
+function openStage(){closeAllSheets();stageOpen=true;stSeal=0;stMapC=1;stSel=Math.max(1,Math.min(D_MAX,S.tier||1));stageExp=new Set([dBand(Math.max(1,S.ch>=NCH?S.tier:1))]);renderStage();$('stage').hidden=false;releaseAll();guide('stage');try{const c=document.querySelector('#stageSheet tr.cur');if(c)c.scrollIntoView({block:'center'})}catch(e){}}/* v365: 현재 위험도가 보이게 */
 function closeStage(){stageOpen=false;$('stage').hidden=true}
 $('stageChip').onclick=openStage;$('openBoss').onclick=openBoss;
 /* v318: 「보스」 창 — 왼쪽 검귀 카이렌 · 오른쪽 심연의 아귀 모델 → 일반/우버 → 보상 안내 → 입장 */
