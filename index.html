@@ -1987,9 +1987,9 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
 let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
 function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,dr:Math.min(.4,g.dr/100)}}
 /* 방어 유형 혼합: 주력 100% · 나머지 35%, 합산 후 x/(x+K) (상한 90%), 비율대로 배분 · v603: K 60,000 → 3,000, 상한 85% → 90%, 증가% 옵션은 오라와 더해서 곱함 */
-const NS_K=3000,NS_DCAP=.9;const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
-/* v907: 방어 곡선 — 감소율 = ρ^0.57/(ρ^0.57+1), ρ = 방어 합계 ÷ 기준값. 낮은 구간은 거의 그대로, 최상위(1티어 +22 최적)는 약 85%로 눌러 상한(90%)까지 여유를 둠 */
-const NS_DEXP=.57,nsDefCurve=x=>{const y=Math.pow(x,NS_DEXP);return y/(y+1)};
+const NS_K=3000,NS_DCAP=.99;/* v909: 상한 사실상 없음(곡선이 100%에 닿지 않도록 안전값만) */const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
+/* v907·v909: 방어 곡선 — 감소율 = ρ^0.66/(ρ^0.66+1) (1티어 +22 최적 + 오라 10단계 ≈ 90%), ρ = 방어 합계 ÷ 기준값. 낮은 구간은 거의 그대로, 최상위(1티어 +22 최적)는 약 85%로 눌러 상한(90%)까지 여유를 둠 */
+const NS_DEXP=.66,nsDefCurve=x=>{const y=Math.pow(x,NS_DEXP);return y/(y+1)};
 function nsDef(){const g=gear(),mw=mutA('def')?.5:1,am=k=>(1+(g[k+'p']||0)/100)*(1+(auraOn(k)?.03*auraL(k):0))*mw/* v908: 오라는 장비 % 옵션과 따로 곱함(증폭) */,v={def:g.def*am('def'),eva:g.eva*am('eva'),es:g.es*am('es')},m=Object.keys(v).reduce((a,b)=>v[b]>v[a]?b:a,'def');
   const w={};let X=0;for(const k in v){w[k]=v[k]*(k===m?1:.35);X+=w[k]}const K=nsDefK(),r=X>0?Math.min(NS_DCAP,nsDefCurve(X/K)):0;
   const o={def:0,eva:0,es:0,main:m,total:r,X};if(X>0)for(const k in w)o[k]=r*w[k]/X;return o}
@@ -2111,7 +2111,7 @@ function dpsWith(it){const sig=EQS.map(k=>S.eq[k]?S.eq[k].name+S.eq[k].base:'-')
    장비를 바꿔 껴서 전투력이 오를 때만 바꾸므로 두 장비를 번갈아 끼는 일이 생기지 않음. 결과는 장착 상태(아이템 id)로 기억 */
 const _pwM=new Map();
 function pwSig(){return EQS.map(k=>S.eq[k]?S.eq[k].id:'-').join(',')+'|'+S.lv+'|'+EQS.map(enhL).join(',')+'|'+C().skills[0]+'|'+JSON.stringify(S.sk||{})+'|'+JSON.stringify(S.aura||{})+JSON.stringify(S.auraOn||{})}
-function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp=heroMax(),D=nsDef(),sh=D.es>0?hp*D.es/(1-D.es):0,dr=NS()?Math.min(.4,(gear().dr||0)/100):0;return {d:Math.max(1,d),e:(hp+sh)/Math.max(.05,1-(D.def+D.eva))/(1-dr)/* v903: 피해 감소 */}}
+function pwParts(){let d=0;try{d=skillDps(C().skills[0]).main}catch(_){}const hp=heroMax(),D=nsDef(),sh=D.es>0?hp*D.es/(1-D.es):0,dr=NS()?Math.min(.4,(gear().dr||0)/100):0;return {d:Math.max(1,d),e:(hp+sh)/Math.max(.01,1-(D.def+D.eva))/(1-dr)/* v903: 피해 감소 */}}
 function pwWith(k,it){const key=pwSig()+'#'+k+'='+(it?it.id:'-');let v=_pwM.get(key);if(v)return v;const old=S.eq[k];S.eq[k]=it;try{v=pwParts()}finally{S.eq[k]=old}if(_pwM.size>4000)_pwM.clear();_pwM.set(key,v);return v}
 const pwNow=()=>pwWith(EQS[0],S.eq[EQS[0]]),pwV=x=>x.d*x.e;
 /* 이 아이템을 낄 때 가장 이득인 칸과 전투력 변화율 (반지는 두 칸 중 나은 쪽) */
@@ -8956,7 +8956,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v908';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v909';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9863,9 +9863,9 @@ function nstList(t,rows){return `<div class="nls"><div class="nlt">${t}</div>${r
 function nstDonut(D,raw,esP,hp,sh,n,pc){const R=34,C=2*Math.PI*R;let o=0,seg='';
   for(const [v,c] of [[D.def,'#e0554a'],[D.eva,'#7ed08a'],[D.es,'#58b4ff']]){if(v<=0)continue;const L=C*v;seg+=`<circle cx="44" cy="44" r="${R}" fill="none" stroke="${c}" stroke-width="10" stroke-dasharray="${L} ${C}" stroke-dashoffset="${-o}" transform="rotate(-90 44 44)"/>`;o+=L}
   const cap=C*NS_DCAP;
-  return `<div class="ndn"><svg width="96" height="96" viewBox="0 0 88 88"><circle cx="44" cy="44" r="${R}" fill="none" stroke="#2c2b28" stroke-width="10"/>${seg}<line x1="${44+Math.sin(NS_DCAP*2*Math.PI)*28}" y1="${44-Math.cos(NS_DCAP*2*Math.PI)*28}" x2="${44+Math.sin(NS_DCAP*2*Math.PI)*40}" y2="${44-Math.cos(NS_DCAP*2*Math.PI)*40}" stroke="#e8dcc4" stroke-width="1.6"/>
+  return `<div class="ndn"><svg width="96" height="96" viewBox="0 0 88 88"><circle cx="44" cy="44" r="${R}" fill="none" stroke="#2c2b28" stroke-width="10"/>${seg}
    <text x="44" y="45" text-anchor="middle" class="ndv">${pc(D.total*100)}</text><text x="44" y="58" text-anchor="middle" class="ndl">종합 방어</text></svg>
-   <div class="ndg"><div><span><i class="cD"></i>방어력 <em>${n(raw.def)}</em></span><b class="tH">피해 −${pc(D.def*100)}</b></div><div><span><i class="cE"></i>회피 <em>${n(raw.eva)}</em></span><b class="tE">회피 ${pc(D.eva*100)}</b></div><div><span><i class="cS"></i>에너지 쉴드 <em>${n(raw.es)}</em></span><b class="tS">보호막 +${pc(esP*100,0)}</b></div><small>상한 ${Math.round(NS_DCAP*100)}% · 생명력 ${n(hp)} + 쉴드 ${n(sh)}</small></div></div>`}
+   <div class="ndg"><div><span><i class="cD"></i>방어력 <em>${n(raw.def)}</em></span><b class="tH">피해 −${pc(D.def*100)}</b></div><div><span><i class="cE"></i>회피 <em>${n(raw.eva)}</em></span><b class="tE">회피 ${pc(D.eva*100)}</b></div><div><span><i class="cS"></i>에너지 쉴드 <em>${n(raw.es)}</em></span><b class="tS">보호막 +${pc(esP*100,0)}</b></div><small>생명력 ${n(hp)} + 쉴드 ${n(sh)}</small></div></div>`}
 function openStat(){closeAllSheets();statOpen=true;if(NS())nsRenderStat();else renderStat();$('stat').hidden=false;releaseAll();guide('stat')}
 function closeStat(){statOpen=false;$('stat').hidden=true}
 $('openStat').onclick=openStat;
