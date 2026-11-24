@@ -2384,7 +2384,7 @@ const CAM_OFF=new THREE.Vector3(0,17,12);
 const SFX=(()=>{
   const NM=['hit','crit','dodge','petal','plum','frost','chain','fire','arrow','arrowboom','enh_ok','enh_fail','cut_build','cut_ok','levelup','plumboom','zapboom','pillar','quake','orb','shard','whirl','wing','dfire','roar','volley','loot'];
   for(let i=1;i<=9;i++)NM.push('swing'+i);
-  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:2.2,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6,wing:1,dfire:1.1,roar:1.1,volley:.9,loot:1};
+  const VOL={hit:.5,crit:.75,dodge:.7,petal:.6,plum:.8,frost:.8,chain:.8,fire:.8,arrow:.55,arrowboom:.8,enh_ok:1.8,enh_fail:.54,cut_build:.8,cut_ok:2.2,levelup:.9,swing:.45,plumboom:1.04,zapboom:.8,pillar:.8,quake:.9,orb:.7,shard:.5,whirl:.6,wing:1,dfire:1.1,roar:1.1,volley:.9,loot:1.1};/* v918: 획득음 +10% */
   const LIM={hit:[.12,5],levelup:[.6,1],cut_ok:[.5,1],cut_build:[.5,1],enh_ok:[.3,1],enh_fail:[.3,1],loot:[14,1]};/* v916: 획득음은 울리는 동안 겹쳐 재생 안 함 *//* [창 초, 최대 동시 수] — 기본 0.05초에 3개 */
   const FIX=new Set(['levelup','enh_ok','enh_fail','cut_build','cut_ok','wing','dfire','roar','loot']);/* 음높이 흔들지 않는 소리 */
   let ctx=null,master=null,muted=false,act=0,vol=70,ready=false,loaded=false,sw=0;const buf={},hist={};
@@ -8959,7 +8959,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v917';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v918';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
