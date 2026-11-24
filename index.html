@@ -5661,13 +5661,14 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(u&&u.sk&&K&&K.s
   else if(K.hitT>0){st='hit';t=.45*(1-K.hitT/.35)}
   else if(spd>.6){st='run';rate=clamp(spd/5.5,.6,1.7)*(mage?1.15:1)}
   else st='idle';
+  let bkB=0;if(arc&&inTown&&(st==='idle'||st==='run'||st==='walk')){bkB=1;if(K.acts[st+'B'])st+='B'}/* v889: 마을(활을 등에 멤)에서는 팔을 내린 원래 대기·달리기(idleB·runB) */
   if(st!==K.cur){K.prev=K.cur;K.fade=K.fadeT=(st==='spin'||st==='roll'||st==='slash'||st==='slash2'||st==='slash3'||st==='slash4'||st==='cast'||st==='orb'||st==='chain'||st==='shot'||st==='sky')?.06:.14;K.cur=st;if(st==='die')K.tm.die=0}
   const A=K.acts,dur=k=>A[k]._clip.duration;
   if(t!==null)K.tm[st]=t;else if(st==='die')K.tm.die=Math.min(dur('die')-.01,(K.tm.die||0)+dt);else K.tm[st]=((K.tm[st]||0)+dt*rate)%dur(st);
   K.fadeT=Math.max(0,K.fadeT-dt);const f=K.fade>0?K.fadeT/K.fade:0;
   for(const k in A){const a=A[k],w=k===K.cur?1-(K.prev&&K.prev!==k?f:0):(k===K.prev?f:0);a.setEffectiveWeight(w);if(w>0)a.time=K.tm[k]||0}
   if(mage)skmPre(K);K.mx.update(0);if(mage){K.ftW=(K.ftW||0)+((st==='idle'&&!ASHC.lie?1:0)-(K.ftW||0))*(1-Math.exp(-dt*8));if(ASHC.lie)K.ftW=0;skFootFix(K,K.ftW)}
-  if(arc)skaBow(K,inTown&&(st==='idle'||st==='run'||st==='walk')?'back':/* v805: 마을에서는 서 있을 때·달릴 때 모두 활을 등에 */(st==='shot'||st==='sky'||st==='roll'||st==='die')?'aim':'carry',dt);
+  if(arc)skaBow(K,bkB?'back':/* v805: 마을에서는 서 있을 때·달릴 때 모두 활을 등에 */(st==='shot'||st==='sky'||st==='roll'||st==='die')?'aim':'carry',dt);
   if(mage){const free=st==='roll'||st==='hit'||st==='die'||!!ASHC.lie;/* v621: 쓰러진 동안은 지팡이를 하늘로 세우지 않고 손에 쥔 그대로 */skmStaff(K,aim,dt,free?0:st==='run'?45:aim>0?80:70,!free&&st!=='run',free?0:st==='run'?70:110)}
   /* 무기 끝: 기존 이펙트가 쓰는 u.weaponTip을 새 무기 끝 위치로 */
   if(u.weaponTip&&u.weaponTip.parent){u.sk.updateWorldMatrix(true,true);K.tip.getWorldPosition(K._v);const pr=u.weaponTip.parent;pr.updateWorldMatrix(true,false);u.weaponTip.position.copy(pr.worldToLocal(K._v))}
@@ -8708,7 +8709,7 @@ function verShow(j){if(verNote)return;const d=document.createElement('div');d.id
   verNote={t:setInterval(()=>{n--;if(n<=0)verApply();else up()},1000)}}
 async function verCheck(){if(verNote)return;try{const r=await fetch('version.json?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j&&/^v\d+$/.test(j.v||'')&&+j.v.slice(1)>+APP_VER.slice(1))verShow(j)}catch(e){}}
 setTimeout(verCheck,4000);setInterval(verCheck,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v888';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v889';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -8947,7 +8948,8 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
   /* v395: 배경 빛 스프라이트(dotTex) 삭제 — 모바일에서 배경에 색 점이 찍히던 원인 후보. 배경은 2D 캔버스 그라데이션으로 그리고 3D는 투명 배경으로 그려 위에 합성 */
   let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
-    if(bc(cls)==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k==='idle'?1:0);if(k==='idle')a.time=1}K.mx.update(0);if(bc(cls)==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!K.C.bl)skB.back=skwBack(r,K)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
+    const pIdle=cls==='archer'&&K.acts.idleB?'idleB':'idle';/* v889: 궁수 초상화는 활을 등에 멘 자세 */
+    if(bc(cls)==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k===pIdle?1:0);if(k===pIdle)a.time=1}K.mx.update(0);if(bc(cls)==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!K.C.bl)skB.back=skwBack(r,K)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
   const prev=renderer.getRenderTarget(),cc=new THREE.Color(),ca=renderer.getClearAlpha();renderer.getClearColor(cc);
   /* v394: 화면(캔버스)에 그린 뒤 복사하던 방식 → 전용 렌더 타깃에 그려 픽셀을 직접 읽음. 모바일 GPU에서 화면 버퍼에 남아 있던 색 점(이전 프레임 잔상)이 초상화 배경에 섞이던 문제 */
