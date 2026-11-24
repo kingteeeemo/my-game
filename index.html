@@ -1918,7 +1918,7 @@ const NSO={
   mcr:{n:'스킬 마나 소모 감소',r:nPct(30,33),u:'%',dp:0},
   res:{n:'마나 점유 효율',r:nPct(11.8,13.0),u:'%',dp:1}};
 /* 기본옵 (아이템 티어 고정 · 강화 적용): k가 null이면 방어구 베이스(방어/회피/에쉴) */
-const NSB={weapon:{k:'wd',r:nPct(280,300)},helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:'wd',r:nPct(280,300)}/* v901: 장갑 고정 옵션 = 피해(무기와 같음) */,boots:{k:null,r:nPct(400,430)},
+const NSB={weapon:{k:'wd',r:nPct(336,360)}/* v902: 무기·장갑 고정 피해 +20% */,helm:{k:null,r:nPct(480,516)},armor:{k:null,r:nPct(960,1032)},gloves:{k:'wd',r:nPct(336,360)}/* v901: 장갑 고정 옵션 = 피해(무기와 같음) · v902 +20% */,boots:{k:null,r:nPct(400,430)},
   amulet:{k:'mp',r:nPctH(600,640)}/* v901: 목걸이 = 최대 마나 */,ring:{k:'hp',r:nPctH(600,640)},belt:{k:null,r:nPct(400,430)}/* v901: 허리띠 = 방어구 */};
 /* v879: 기본옵 + 전투 수치 옵션 ×1.5 (1티어 기준, 하위 티어는 티어 배율 그대로) — 쿨감·이동 속도·베이스 치명·처치 회복·재생·보호막 재충전·투사체 감소·마나 소모 감소·점유 효율·범위는 그대로 */
 const NS_X15=['wd','cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','hp','mp','hpp','defp','evap','esp','amp','bossd'],NS_XK=1.5;
