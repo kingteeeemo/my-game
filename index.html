@@ -2460,14 +2460,14 @@ const SFX=(()=>{
   let bgmFast=false;function bgm(n,f){bgmWant=n||null;bgmFast=!!f;bgmSync()}/* v843: f=true면 로딩 화면 때문에 끄는 것 — 아주 빠르게 */
   bgmPre('title');/* v750: 오프닝 곡을 페이지가 열리자마자 내려받아 둠 — 터치 순간 바로 재생 */
   let duckF=1,duckS=1,duckT=0;function bgmApply(tc){if(!bgmM)return;const tg=muted?0:bgmVol/100*duckF*duckS;try{const c=ctx.currentTime;bgmM.gain.cancelScheduledValues(c);bgmM.gain.setValueAtTime(bgmM.gain.value,c);bgmM.gain.setTargetAtTime(tg,c,tc||.12)}catch(e){bgmM.gain.value=tg}}/* v839: 강화 연출 동안 배경음 30% 낮춤 */function duck(b){duckF=b?.7:1;bgmApply()}
-  /* v916: 획득음 — 울리는 동안 배경음 20% 낮췄다가 끝나기 직전부터 서서히 원래대로 */function sDk(v,tc){const d=ctx&&ctx._d;if(!d)return;try{const c=ctx.currentTime;d.gain.cancelScheduledValues(c);d.gain.setValueAtTime(d.gain.value,c);d.gain.setTargetAtTime(v,c,tc)}catch(e){d.gain.value=v}}function pd(n,o){const h=p(n,o);if(h&&buf[n]){duckS=.8;bgmApply(.25);clearTimeout(duckT);sDk(.8,.25);duckT=setTimeout(()=>{duckS=1;bgmApply(.6);sDk(1,.6)},Math.max(.5,buf[n].duration-1.2)*1000)}return h}
+  /* v916: 획득음 — 울리는 동안 배경음 20% 낮췄다가 끝나기 직전부터 서서히 원래대로 */function sDk(v,tc){const d=ctx&&ctx._d;if(!d)return;try{const c=ctx.currentTime;d.gain.cancelScheduledValues(c);d.gain.setValueAtTime(d.gain.value,c);d.gain.setTargetAtTime(v,c,tc)}catch(e){d.gain.value=v}}let pdH=null;function stopLoot(){/* v944: 화면·맵 이동 시 획득음을 짧게 줄여 끄고 낮췄던 소리를 원래대로 */if(!pdH)return;try{pdH.stop(.25)}catch(e){}pdH=null;clearTimeout(duckT);duckS=1;bgmApply(.5);sDk(1,.4)}function pd(n,o){const h=p(n,o);if(h&&buf[n]){pdH=h;duckS=.8;bgmApply(.25);clearTimeout(duckT);sDk(.8,.25);duckT=setTimeout(()=>{duckS=1;bgmApply(.6);sDk(1,.6)},Math.max(.5,buf[n].duration-1.2)*1000)}return h}
   function setBgmVol(v){bgmVol=Math.max(0,Math.min(100,+v||0));bgmApply();try{localStorage.setItem('bgmVol',String(bgmVol))}catch(e){}}
   document.addEventListener('visibilitychange',()=>{const t=bgmCur&&bgmT[bgmCur];if(!t)return;try{document.hidden?t.el.pause():t.el.play().catch(()=>{})}catch(e){}});
   function swing(o){let i;do{i=1+Math.random()*9|0}while(i===sw&&Math.random()<.9);sw=i;return p('swing'+i,o)}
   function hit(crit,quiet){if(!(typeof S!=='undefined'&&S&&S.cls==='musa'))return;/* 무사 한정 */p('hit',{v:quiet&&!crit?.6:crit?1.2:1});if(crit)p('crit')}
   function setVol(v){vol=Math.max(0,Math.min(100,+v||0));if(master)master.gain.value=muted?0:vol/100;try{localStorage.setItem('sfxVol',String(vol))}catch(e){}}
   function setMute(b){muted=!!b;if(master)master.gain.value=muted?0:vol/100;bgmApply();try{localStorage.setItem('sndMute',muted?'1':'0')}catch(e){}}
-  return{p,pd,swing,hit,setVol,bgm,duck,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
+  return{p,pd,stopLoot,swing,hit,setVol,bgm,duck,setBgmVol,setMute,get muted(){return muted},o:0,get vol(){return vol},get bgmVol(){return bgmVol}}
 })();
 /* v779: 카메라 확대 — 0 = 기본(예전 −15% 거리), −15까지 멀리, +45까지 가까이. 가까워질수록 낮게 내려와 등 뒤에서 보는 백뷰 쪽으로 기움 */
 const CZ_MIN=-15,CZ_MAX=45;let CAM_Z=0,CAM_LOCK=false;try{const v=localStorage.getItem('camZ3');if(v!==null&&v!==''&&!isNaN(+v))CAM_Z=Math.max(CZ_MIN,Math.min(CZ_MAX,+v));CAM_LOCK=localStorage.getItem('camLock')==='1'}catch(e){}
@@ -4810,7 +4810,7 @@ function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBea
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
   if(ldBusy||noML){fn();after&&after();return}
-  ldBusy=true;window.BGMNOKEEP=1;try{window._bgmChk&&_bgmChk()}catch(e){}const f=$('regionFade');
+  ldBusy=true;window.BGMNOKEEP=1;try{SFX.stopLoot()}catch(e){}try{window._bgmChk&&_bgmChk()}catch(e){}const f=$('regionFade');
   f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;P.cast=null;
   requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{P.inv=1.5}
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
@@ -9039,7 +9039,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v943';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v944';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9534,7 +9534,7 @@ const LOAD_TIPS=['화면을 가로로도, 세로로도 플레이할 수 있습�
   '마우스 휠이나 두 손가락으로 화면을 확대·축소합니다.',
   '진행 내용은 자동으로 저장됩니다.'];
 let loadTipI=-1;
-function showLoading(cb,msg,o){o=o||{};const L=$('loadScr'),bar=$('loadBar'),T=o.T||1300;delete L.dataset.busy;bar.className='';
+function showLoading(cb,msg,o){o=o||{};try{SFX.stopLoot()}catch(e){}const L=$('loadScr'),bar=$('loadBar'),T=o.T||1300;delete L.dataset.busy;bar.className='';
   const tn=!!o.sub;L.classList.toggle('town',tn);$('loadTitle').hidden=!tn;$('loadTitle').textContent=o.title||'';const sb=$('loadSub');sb.hidden=!o.sub;sb.textContent=o.sub||'';
   let n;do{n=Math.floor(Math.random()*LOAD_TIPS.length)}while(n===loadTipI&&LOAD_TIPS.length>1);loadTipI=n;$('loadHintT').innerHTML=msg?'':'<span class="tg">Tip</span>';if(msg)$('loadHintT').textContent=msg;else $('loadHintT').append(LOAD_TIPS[n]);$('loadHint').hidden=!!o.sub;/* v808: 마을 로딩은 이름+설명만, 일반 로딩은 팁 한 줄 *//* v806: 문구는 한 줄만 — 메시지가 있으면 메시지, 없으면 팁 하나 */
   L.hidden=false;try{window._bgmChk&&_bgmChk()}catch(e){}bar.style.transition='none';bar.style.transform='scaleX(0)';void bar.offsetWidth;bar.style.transition=`transform ${T-100}ms cubic-bezier(.3,.6,.4,1)`;bar.style.transform='scaleX(1)';
@@ -9547,7 +9547,7 @@ let noML=false;
 function townClean(){clearPools();for(const e of [...enemies])dropEnemy(e);packQ=[];timers.length=0}
 function townLoad(fn,after){/* v810: 마을로 갈 때는 항상 마을 로딩 화면(이름+설명) */
   if(ldBusy||noML){fn();after&&after();return}
-  ldBusy=true;window.BGMNOKEEP=1;/* v865: 마을 로딩은 이전 곡을 바로 끔 */P.inv=99;P.mv=null;P.cast=null;const rf=refOn();
+  ldBusy=true;window.BGMNOKEEP=1;try{SFX.stopLoot()}catch(e){}/* v865: 마을 로딩은 이전 곡을 바로 끔 */P.inv=99;P.mv=null;P.cast=null;const rf=refOn();
   showLoading(()=>{try{fn()}finally{P.inv=1.5;ldBusy=false}if(after)setTimeout(after,450)},null,{title:TOWN.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:1300})}
 
 /* ================= level-up choice ================= */
