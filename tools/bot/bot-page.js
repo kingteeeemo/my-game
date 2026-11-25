@@ -37,7 +37,7 @@ function hookOnce(){if(BOT._hooked)return;BOT._hooked=1;
   const omk=window.makeItem;window.makeItem=function(){const it=omk.apply(this,arguments);if(BOT.on&&BOT.EG&&it){BOT.EG.items++;if(it.tier)BOT.EG.tiers[it.tier]++}return it};
   /* 테스트 중에는 서버 기록을 보내지 않음 · 강화 컷신 생략 */
   window.tele=function(){};window.enhCine=function(k,l,ok,cb){try{cb&&cb()}catch(_){}};window.enhFx=function(){};window.renderSmith=function(){};
-  const oe=window.equipBest;window.equipBest=function(){const n0=S.inv.length;const r=oe.apply(this,arguments);return r};
+  const oe=window.equipBest;window.equipBest=function(){const n0=S.inv.length;try{identifyAll()}catch(_){}/* v926: 봇은 장착 전에 모두 감정 */const r=oe.apply(this,arguments);return r};
 }
 BOT.zones=[];
 
@@ -293,7 +293,7 @@ BOT.step=function(untilT){
     try{hero.position.copy(P.pos);update(DT);if(typeof updDmg==='function')updDmg(DT);frameCam(DT);scene.updateMatrixWorld(true)}catch(err){M.err=String(err&&err.stack||err).slice(0,300);return true}
     for(let i=BOT.zones.length-1;i>=0;i--)if(M.t>BOT.zones[i].end)BOT.zones.splice(i,1);
     M.t+=DT;
-    if(BOT.autoEq&&(CAMP.eqT=(CAMP.eqT||0)+DT)>=5){CAMP.eqT=0;try{if(upgrades().length)equipBest()}catch(_){}}
+    if(BOT.autoEq&&(CAMP.eqT=(CAMP.eqT||0)+DT)>=5){CAMP.eqT=0;try{identifyAll();if(upgrades().length)equipBest()}catch(_){}}
     const r=P.hp/P.mhp;if(r<M.minHp)M.minHp=r;
     const b=enemies.find(e=>e.chBoss&&e.hp>0);if(b&&b.aggro&&M.bossEngage===null)M.bossEngage=M.t;
     if((M._hpT=(M._hpT||0)+DT)>=1){M._hpT=0;M.hpTrace.push(Math.round(r*100));if(BOT.debug&&mapKind==='story'&&Math.round(M.t)%3===0){const pl=W2L(P.pos.x,P.pos.z);M.dbg=M.dbg||[];M.dbg.push([Math.round(M.t),D.why,Math.round(pl.z),+(pl.x-pathC(pl.z)).toFixed(1),+pathW(pl.z).toFixed(1),alive().length,D.s1?1:0,+input.x.toFixed(2),+input.z.toFixed(2),paused()?1:0,BOT.goal?(()=>{const g=W2L(BOT.goal.x,BOT.goal.z);return [Math.round(g.x-pathC(g.z)),Math.round(g.z)]})():null,BOT._navNull?1:0,(()=>{const c=navCell(P.pos.x,P.pos.z);return c&&NAV.ok?NAV.ok[c[1]*NAV.NX+c[0]]:-1})()])}}
