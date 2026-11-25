@@ -7481,7 +7481,7 @@ function kill(e){
   dropEnemy(e,hitKind!=='ice'&&hitKind!=='rock'&&hitKind!=='zap');
   if(hitKind==='ice')shatterFx(e);else if(hitKind==='rock')rockShatter(e);else if(hitKind==='zap')zapDeath(e)}
   ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);
-  if(uqOn('chain')&&!S.demo&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*.35,t:time+.06});/* v936: 연쇄 폭발의 손길 */
+  if(uqOn('chain')&&!S.demo&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*.35,t:time});/* v940: 시체 폭발처럼 같은 프레임에 연쇄까지 한 번에 *//* v936: 연쇄 폭발의 손길 */
   if(S.demo)return;
   const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
   if(NS())nsPotKill(e);
@@ -9039,7 +9039,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v939';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v940';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10997,7 +10997,7 @@ function chainBoom(c){if(chBfT!==time){chBfT=time;chBf=0}chBf++;const S=chBf>1?M
   const hk=hitKind;hitKind='';for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r)hurt(o,c.d,3);hitKind=hk}
 function uqTick(dt){if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=3;if(P.mvCh<3&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<3)P.cd.mv=mvCd()}}
   if((uqLblT-=dt)<=0){uqLblT=.15;try{const l=$('lMv');if(l){const t=uqOn('shadow')?`순간이동 ${P.mvCh}`:'구르기';if(l.textContent!==t)l.textContent=t}}catch(_){}}
-  if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<40;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
+  if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<60;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
 function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)}if(STC){stcTick(dt)}packTick();if(mapKind==='route'&&!inTown)rtTick(dt);wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&!inTown&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
