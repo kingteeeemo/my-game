@@ -5408,7 +5408,7 @@ const BLOOKS={bsk_valk:{n:'은빛 발키리',head:'',cls:['warrior','mage','arch
   per:{mage:{file:'models/valkyrie_mage.glb',swCol:1.9,swRef:0},archer:{file:'models/valkyrie_archer.glb',swCol:1.6,swRef:0},musa:{file:'models/valkyrie_musa.glb',swCol:1.6,swRef:[[-.01291026,.03369423,.06183060],[.91277843,.09348304,.29115931,-.27078166]]}}}};/* v790: swRef — 무기 외형(rel:'hand')을 손 뼈가 아니라 원래 대검 자리 기준으로(손 뼈 방향이 전사와 달라 검이 옆으로 벌어지던 것) */
 /* v894: 공용 얼굴(머리) — 스킨은 목 아래 몸만, 얼굴·머리카락은 따로 된 머리 파일(남캐·여캐 얼굴 풀)을 불러 그 몸의 뼈(이름이 같은 mixamorig 뼈)에 묶음. 머리 파일 = 스킨 메시 하나(뼈대 포함), 바인드 기준은 궁수 몸. 다른 몸에 붙이면 그 몸의 뼈 자리를 그대로 따라감 */
 let PFACE=null;const PCACHE={};/* v905: 저장 슬롯 초상화를 그 슬롯 캐릭터의 얼굴로 그릴 때 잠깐 지정 */
-const HEADS={f_silver:{file:'models/heads/f_silver.glb',col:1.265,g:'f',n:'은빛 웨이브'},f_dark:{file:'models/heads/f_dark.glb',col:.924,g:'f',n:'흑단 생머리'}},HDG={};let pendFace={};
+const HEADS={f_silver:{file:'models/heads/f_silver.glb',col:1.265,g:'f',n:'은빛 웨이브'},f_dark:{file:'models/heads/f_dark.glb',col:1,g:'f',n:'흑단 생머리'}},HDG={};let pendFace={};
 /* 얼굴 고르기 — 직업 선택창에서는 카드에서 고른 얼굴(pendFace), 게임 중엔 캐릭터의 S.face. 그 직업 기본 얼굴과 성별(g)이 같은 얼굴만 */
 function hdWant(K){const d=K&&K.C.head;if(!d)return '';const cs=$('classSel'),w=PFACE!==null?PFACE:cs&&!cs.hidden?pendFace[K.cls]:(S&&S.cls===K.cls?S.face:'');return w&&HEADS[w]&&HEADS[w].g===HEADS[d].g?w:d}
 function hdFaces(cls){const d=SKC[cls]&&SKC[cls].head;return d?Object.keys(HEADS).filter(k=>HEADS[k].g===HEADS[d].g):[]}
@@ -9019,7 +9019,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v931';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v932';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
