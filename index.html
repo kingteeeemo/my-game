@@ -2085,7 +2085,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   g.aspd=bc(S.cls)==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
   {const bn=bloodN();if(bn)g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100}/* v964: 혈조의 인장 공격·시전 속도 */
-  if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.5-1)*100;/* v936: 폭풍 소환사의 장갑 */
+  if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
 let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
@@ -2110,15 +2110,15 @@ const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,cha
 const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;if(!id||!NS())return 1;const k1=(NSBK[id]||1)/(NS_SKM[id]||1),k0=NSBK0[id]||k1,gs=gems2For(id);let a=0,b=0;for(const g of gs){a+=Math.min(g2(g),g2Max(g));b+=g2Max(g)}const pr=b?a/b:1;return Math.exp(Math.log(k0)+(Math.log(k1)-Math.log(k0))*pr)};/* v826: 보스 피해 계수를 추가 강화 진행도에 따라 — 0단계(스토리·엔드게임 초반) NSBK0 → 모두 찍으면 NSBK (로그 보간) */
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
-const nsCd=(u,h)=>(.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358))/(uqOn('storm')?1.5:1);
+const nsCd=(u,h)=>(.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358))/(uqOn('storm')?1.8:1);
 /* 획득량 옵션 */
 /* v936: 고유 장비 — 하나만 장착(S.uniq). 테스트 캐릭터는 장비 창 고유 칸을 눌러 고름 */
 const UNQ={gale:{n:'질풍의 장화',ic:'u_gale',d:'이동 속도 +100%',c:'#7fd8ff'},
-  shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 3회 충전',c:'#b49aff'},
+  shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 5회 충전 · 충전 1.5초',c:'#b49aff'},
   greed:{n:'탐욕의 인장',ic:'u_greed',d:'골드·재화 획득량 +30%',c:'#ffd24a'},
   chain:{n:'연쇄 폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#ff9a4a'},
   blood:{n:'혈조의 인장',ic:'u_blood',d:'5마리 처치할 때마다 이동 속도·공격 속도·캐릭터 크기 +3% 중첩 (최대 20중, 12초 유지, 피격 시 1/3 감소)',c:'#e8384f'},
-  storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.5 · 쿨타임 회복 ×1.5',c:'#9ae8ff',pw:1}};
+  storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.8 · 쿨타임 회복 ×1.8',c:'#9ae8ff',pw:1}};
 const uqOn=k=>!!(S&&S.uniq===k&&UNQ[k]);
 const bloodN=()=>uqOn('blood')&&P.bloodT>time?(P.bloodN||0):0,bloodHit=()=>{if(P.bloodN>0)P.bloodN=Math.floor(P.bloodN*2/3)};/* v964: 혈조의 인장 — 5마리 처치마다 1중첩(처치마다 12초 유지·갱신), 피격 시 중첩 1/3 감소 */
 const nsGain=k=>(k==='gGold'||k==='gEss'||k==='gReroll'||k==='gLumi'||k==='gSeal')&&uqOn('greed')?1.3:1;/* v603: 획득량 옵션 삭제 */
@@ -9294,7 +9294,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v966';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v967';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11198,7 +11198,7 @@ function pushOut(p,r){if(STC&&p===P.pos)return;
 /* ================= 구르기 (v122) =================
    전사·궁수·마법사 공통. 선딜레이 없이 즉시, 쿨타임 2.5초(레벨·재사용 감소 무관), 구르는 동안 무적. */
 const MV={musa:{n:'구르기',c:0xff8a94},warrior:{n:'구르기',c:0xffc08a},archer:{n:'구르기',c:0xb8f07a},mage:{n:'구르기',c:0xa08aff},priest:{n:'구르기',c:0xffe08a}},MV_DIST=6,MV_GO=.4;
-const mvCd=()=>2.5;
+const mvCd=()=>uqOn('shadow')?1.5:2.5;/* v967: 그림자 발걸음 충전 1.5초 */
 function moveDir(){let mx=input.x,mz=input.z;
   if(input.keys.KeyW||input.keys.ArrowUp)mz=-1;if(input.keys.KeyS||input.keys.ArrowDown)mz=1;
   if(input.keys.KeyA||input.keys.ArrowLeft)mx=-1;if(input.keys.KeyD||input.keys.ArrowRight)mx=1;
@@ -11208,11 +11208,11 @@ function moveDir(){let mx=input.x,mz=input.z;
   return {x:Math.sin(P.face),z:Math.cos(P.face)}}
 function cancelWhirl(){if(P.pose&&P.pose.id==='whirl')P.pose=null;P.wTok=(P.wTok||0)+1;P.spin=0;P.vortex=null;P.spinFire=false;P.dashT=0;P.swing=0;
   for(const f of P.wFx||[]){const i=fx.indexOf(f);if(i<0)continue;if(f.end)f.end();scene.remove(f.m);f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose();fx.splice(i,1)}P.wFx=null}
-function startMove(){const sh=uqOn('shadow');if(sh&&P.mvCh===undefined)P.mvCh=3;if(!S.cls||(sh?P.mvCh<=0:P.cd.mv>0)||P.mv||P.hp<=0||knAppr)return;const d=moveDir();
+function startMove(){const sh=uqOn('shadow');if(sh&&P.mvCh===undefined)P.mvCh=5;if(!S.cls||(sh?P.mvCh<=0:P.cd.mv>0)||P.mv||P.hp<=0||knAppr)return;const d=moveDir();
   P.cast=null;/* 시전 중이면 시전을 취소하고 구르기(마나·쿨타임은 이미 소모됨) */
   if(P.spin>0)cancelWhirl();/* 회전 베기 도중에도 구르기로 빠져나감 — 예약된 타격·이펙트 모두 취소 */
   
-  if(sh){/* v936: 그림자 발걸음 — 잔상을 남기며 순간이동(거리 같음), 3회 충전 */P.mvCh--;if(P.cd.mv<=0)P.cd.mv=mvCd();SFX.p('dodge');const x0=P.pos.x,z0=P.pos.z;P.face=Math.atan2(d.x,d.z);hero.rotation.y=P.face;
+  if(sh){/* v936: 그림자 발걸음 — 잔상을 남기며 순간이동(거리 같음), 5회 충전 */P.mvCh--;if(P.cd.mv<=0)P.cd.mv=mvCd();SFX.p('dodge');const x0=P.pos.x,z0=P.pos.z;P.face=Math.atan2(d.x,d.z);hero.rotation.y=P.face;
     for(let i=0;i<12;i++){P.pos.x+=d.x*MV_DIST/12;P.pos.z+=d.z*MV_DIST/12;pushOut(P.pos,.45)}P.inv=Math.max(P.inv,.3);shadowFx(x0,z0,P.pos.x,P.pos.z);return}
   SFX.p('dodge');P.cd.mv=mvCd();P.face=Math.atan2(d.x,d.z);P.mv={go:0,dx:d.x,dz:d.z};hero.rotation.y=P.face;P.inv=Math.max(P.inv,MV_GO);ringFx(P.pos,1.1,MV[S.cls].c,.25)}
 function mvStep(dt){const m=P.mv;if(!m)return;
@@ -11279,7 +11279,7 @@ function chainBoom(c){if(chBfT!==time){chBfT=time;chBf=0}chBf++;if(chBf<=4)try{S
   const n=chBf<=10?50:14;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(2,7)*S;emit(PADD,{x:c.x,y:.3,z:c.z,vx:Math.cos(a)*v,vy:rnd(.5,7),vz:Math.sin(a)*v,life:rnd(.4,.8),s0:rnd(.08,.15),s1:.02,c0:0xffffff,c1:Hc2,a:.95,drag:.9,grav:-6})}
   if(chBf<=12)for(let i=0;i<12;i++){const a=Math.random()*6.28;emit(PADD,{x:c.x+Math.cos(a)*.6,y:.2,z:c.z+Math.sin(a)*.6,vy:rnd(4,9)*S,life:rnd(.4,.7),s0:.35,s1:.05,c0:Hc0,c1:Hc3,a:.9,drag:.9})}
   const hk=hitKind;hitKind='';pgBoomNow=true;for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r&&o.chT!==time){o.chT=time;hurt(o,Math.min(c.d,o.mhp*.5),3)}pgBoomNow=false;hitKind=hk}/* v943: 한 순간에 적 하나는 폭발 피해를 한 번만, 최대 그 적 생명력의 50% — 맞지 않은 멀쩡한 적은 폭발 한 번으로 쓰러지지 않음 */
-function uqTick(dt){if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=3;if(P.mvCh<3&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<3)P.cd.mv=mvCd()}}
+function uqTick(dt){if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=5;if(P.mvCh<5&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<5)P.cd.mv=mvCd()}}
   if((uqLblT-=dt)<=0){uqLblT=.15;try{const l=$('lMv');if(l){const t=uqOn('shadow')?`순간이동 ${P.mvCh}`:'구르기';if(l.textContent!==t)l.textContent=t}}catch(_){}}
   if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<60;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
 function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)}if(STC){stcTick(dt)}packTick();if(mapKind==='route'&&!inTown)rtTick(dt);wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&!inTown&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
