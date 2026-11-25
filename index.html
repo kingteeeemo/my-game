@@ -2729,7 +2729,7 @@ return function(dt){const show=S&&S.cls&&!S.demo&&hero&&P.hp>0&&KEYS.some(k=>aur
   if(!G){G=new THREE.Group();FX=[makeSeal(),makeRings(),makeBlood(),makeVeil(),makeCrystal(),makeEdge(()=>camera)];FX.forEach(f=>{f.visible=false;G.add(f)})}
   if(G.parent!==scene)scene.add(G);G.visible=true;G.position.set(P.pos.x,P.pos.y,P.pos.z);T+=dt;
   KEYS.forEach((k,i)=>{const on=auraAct(k);FX[i].visible=on;if(on)FX[i].userData.tick(dt,T)})}})();
-function renderFrame(t){INVU.value=invOpen?1:0;ipFlush();novaFlush();fireFlush();
+function renderFrame(t){INVU.value=invOpen?1:0;{/* v938: 무기 외형 필드 밝기(fb배) — 장비창·초상화는 그대로 */const K=hero&&skOf(hero),mt=K&&K.wskM&&K.swM,u=mt&&mt.userData;if(u&&u.wcol)mt.color.setScalar(u.wcol*(invOpen?1:u.wf||1))}ipFlush();novaFlush();fireFlush();
   if(!GQS[GUQ].post){renderer.setRenderTarget(null);renderer.render(scene,camera);return}
   if(!PP.rt)ppSize();
   renderer.setRenderTarget(PP.rt);renderer.render(scene,camera);
@@ -5634,10 +5634,10 @@ const LCUR='광휘의 파편';LOOKS.wings.pr=700;LOOKS.wings_gold.pr=700;LOOKS.w
    원래 무기의 모든 메시(지팡이 막대·보석)를 숨기고 새 무기 하나로. gem:1이면 보석 빛(강화 단계 밝기·끝의 빛 알갱이)을 새 무기의 푸른 보석 마스크로 */
 const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],pr:900,boss:'검귀 카이렌 보상',/* v886: 판매 중단 — 검귀 카이렌 보상에서만 */file:'models/knight_sword.glb',node:'knight_sword',rel:'hand',L:1.15,pvF:-1,cn:'전사 · 무사'},
   /* v786: 전사·무사 「여명을 꿰뚫는 검」 — Meshy 모델(Dawnpiercer, 1.3만 삼각형·텍스처 1k). 검귀 대검과 같은 구조(손 기준 자리, 칼끝 −y, 칼끝까지 1.30)로 맞춰 둠. 발광 맵 = 푸른 보석만 */
-  wsk_dawn:{n:'여명을 꿰뚫는 검',cls:['warrior','musa'],pr:900,file:'models/dawnpiercer.glb',node:'dawnpiercer',rel:'hand',L:1.15,pvF:-1,col:1.05,cn:'전사 · 무사'},
-  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,cn:'마법사'},
+  wsk_dawn:{n:'여명을 꿰뚫는 검',cls:['warrior','musa'],pr:900,file:'models/dawnpiercer.glb',node:'dawnpiercer',rel:'hand',L:1.15,pvF:-1,col:1.05,fb:1.2,cn:'전사 · 무사'},
+  wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.5,fb:1.2,cn:'마법사'},
   /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
-  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,bk:[.2,0,0],cn:'궁수'}};
+  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,fb:1.2,bk:[.2,0,0],cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};/* v790: 전사 warrior.glb의 대검 노드(손 기준) — 다른 몸 스킨에서 무기 외형을 전사와 같은 방향으로 */const WSK_REF=new THREE.Matrix4().compose(new THREE.Vector3(0,.04085843,.00072696),new THREE.Quaternion(.91277843,.09348304,.29115931,-.27078166),new THREE.Vector3(1,1,1));const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
@@ -5652,7 +5652,7 @@ function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&
   if(W.ry)m.rotation.y=W.ry;/* 막대 축(+y) 둘레로 돌림 */
   if(W.rel==='hand'){K.sw.updateMatrix();const M=(K.C&&K.C.swRef?(Array.isArray(K.C.swRef)?(K.swRefM||(K.swRefM=new THREE.Matrix4().compose(new THREE.Vector3(...K.C.swRef[0]),new THREE.Quaternion(...K.C.swRef[1]),new THREE.Vector3(1,1,1)))):WSK_REF):K.sw.matrix).clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale)}K.sw.add(m);
   if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone();K.gemM0=K.gemM}
-  const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
+  const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.userData.wcol=W.col||1.9;mt.userData.wf=W.fb||1;mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
   if(W.gem){K.gemM=mt;mt.emissive.setHex(0xffffff);K.swLift=null}
   else if(mt.emissiveMap&&mt.emissiveMap.image){try{const im=mt.emissiveMap.image,cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const g2=cv.getContext('2d');g2.drawImage(im,0,0);g2.globalCompositeOperation='lighten';const l=K.C.lift||135;g2.fillStyle=`rgb(${l},${l},${l})`;g2.fillRect(0,0,cv.width,cv.height);const t=new THREE.CanvasTexture(cv);t.flipY=mt.emissiveMap.flipY;t.encoding=mt.emissiveMap.encoding;K.swLift=t}catch(e){K.swLift=null}}else K.swLift=null;
   if(W.tip)K.tip.position.set(...W.tip);else K.tip.position.copy(K.tip0).multiplyScalar(W.L||1);K.wskM=m;K.wsk=want;if(hero&&skOf(hero)===K)skwGear()}
@@ -9039,7 +9039,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v937';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v938';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9277,7 +9277,7 @@ function heroPortrait(cls,ry){try{const pr=renderer.getPixelRatio(),cw=renderer.
   const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0x8a96b8,0x1c140e,.7));const d=new THREE.DirectionalLight(0xb8c8e8,.7);d.position.set(-3,5,4);d.castShadow=true;d.shadow.mapSize.set(1024,1024);d.shadow.camera.left=d.shadow.camera.bottom=-2.2;d.shadow.camera.right=d.shadow.camera.top=2.6;d.shadow.camera.near=.5;d.shadow.camera.far=14;d.shadow.bias=-.0008;d.shadow.normalBias=.03;d.shadow.radius=3;sc.add(d);/* v934: 양면 재질(새 얼굴·활·화살통)이 자기 그림자에 줄무늬로 가려져(모바일 GPU) 파란 테두리 빛만 남던 것 */const w=new THREE.PointLight(0xffa25a,1.3,10,1.4);w.position.set(1.6,2.4,2.4);sc.add(w);
   const rim=new THREE.DirectionalLight(0x7aa8ff,1.1);rim.position.set(-2.2,3.2,-4);sc.add(rim);const gd=new THREE.Mesh(new THREE.PlaneGeometry(5,5),new THREE.ShadowMaterial({opacity:.42}));gd.rotation.x=-Math.PI/2;gd.receiveShadow=true;sc.add(gd);
   /* v395: 배경 빛 스프라이트(dotTex) 삭제 — 모바일에서 배경에 색 점이 찍히던 원인 후보. 배경은 2D 캔버스 그라데이션으로 그리고 3D는 투명 배경으로 그려 위에 합성 */
-  let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
+  let m,skB=null;const K=SKN[cls];if(K&&K.st===2){/* v332: 초상화도 새 모델(대기 자세) — 플레이어가 쓰는 모델을 잠시 빌려 그림 · v337: 마법사도 */{const mt=K.wskM&&K.swM,u=mt&&mt.userData;if(u&&u.wcol)mt.color.setScalar(u.wcol)}const r=K.root;skB={K,par:r.parent,sc:r.scale.x};m=new THREE.Group();r.parent&&r.parent.remove(r);r.scale.setScalar(PORT_S[cls]||1.48);m.add(r);const fl=new THREE.DirectionalLight(0xffe2c8,1.4);fl.position.set(1.5,2.5,5);sc.add(fl);
     const pIdle=cls==='archer'&&K.acts.idleB?'idleB':'idle';/* v889: 궁수 초상화는 활을 등에 멘 자세 */
     if(bc(cls)==='mage')skmPre(K);for(const k in K.acts){const a=K.acts[k];a.setEffectiveWeight(k===pIdle?1:0);if(k===pIdle)a.time=1}K.mx.update(0);if(bc(cls)==='mage')skFootFix(K,1);if(bc(cls)==='warrior'){if(!K.C.bl)skB.back=skwBack(r,K)}else if(cls==='archer')skB.back=skaBack(K);else if(K.sw){const f0=P.face;P.face=0;K.stQ=null;skmStaff(K,0,1,70);P.face=f0;if(K.gemM){K.gemM.emissive.setHex(GEMC[0]);K.gemM.emissiveIntensity=1.6}}}else{m=makeHero(cls);m.traverse(o=>{if(o.isMesh)o.castShadow=true})}m.rotation.y=ry===undefined?portRy0(cls):ry;m.traverse(o=>{if(o.isSprite&&o.material.map===dotTex&&o.scale.x===0)o.visible=false});sc.add(m);
   const cam=new THREE.PerspectiveCamera(30,Wd/Hd,.1,50);cam.position.set(1.6,1.95,6.3);cam.lookAt(0,1.24,0);
