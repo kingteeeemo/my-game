@@ -2370,7 +2370,7 @@ function skillStats(id){
   if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「심판의 검」 (v760 이름 변경: 옛 천뢰검) */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='ray'){const w=L('rwide'),sp=raySplit(L('rsplit'));st.w=rayW(w);st.len=rayLen(w);st.dmg*=(1+.03*w)*sp.m;st.beams=sp.n;const f=g2('rfocus'),a=g2('rafter');st.focus=f?.12*f:0;st.after=a?.12*a:0}
-  if(b.kind==='purge'){const r=L('prad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=L('pbrand');st.brand=br?.12*br:0;const nv=g2('pnova'),cp=g2('pcorpse');st.nova=nv?1+.4*nv:0;st.corpse=cp?.08+.03*cp:0}
+  if(b.kind==='purge'){const r=L('prad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=g2('pbrand');st.brand=.24*br;const nv=L('pnova'),cp=g2('pcorpse');st.nova=nv?1+.2*nv:0;st.corpse=cp?.08+.03*cp:0}
   if(b.kind==='sanct'){const r=L('zrad'),c=zCnt(L('zcnt'));st.r=zRad(r);st.dmg*=(1+.02*r)*c.m;st.zn=c.n;st.zdur=4+.15*L('zcnt');const bl=g2('zbell'),bs=g2('zbless');st.bell=bl?1.2+.5*bl:0;st.bless=bs}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
@@ -8021,20 +8021,20 @@ const RAY_TK=.25,SANCT_RANGE=14,PURGE_TK=.25,purgeR=L=>4.5*(1+.06*L),
 Object.assign(SK,{
   ray:{n:'빛의 광선',role:'다수 공격',tag:'ray',en:'Beam · Holy',kind:'ray',gems:['rwide','rsplit','haste'],mp:3,dmg:1,cd:RAY_TK,desc:'누르고 있는 동안 정면으로 빛줄기를 쏘아 일렬로 선 적을 모두 꿰뚫습니다. 쏘는 동안은 천천히 움직입니다.'},
   sanct:{n:'성역',role:'다수 공격',tag:'sanct',en:'Zone · Holy',kind:'sanct',gems:['zrad','zcnt','haste'],mp:14,dmg:.8,cd:1.1,desc:'적이 모인 자리에 빛의 원을 깝니다. 원 안의 적은 계속 피해를 받고, 내가 원 안에 서 있으면 생명력이 회복됩니다.'},
-  purge:{n:'정화의 오라',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['prad','pbrand','haste'],mp:2,dmg:1,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받고, 그때마다 마나가 소모됩니다.'}});
+  purge:{n:'정화의 오라',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['prad','pnova','haste'],mp:12,dmg:1,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받습니다. 켜 둔 동안에는 적이 없어도 마나가 계속 소모됩니다.'}});
 Object.assign(GEMS,{
   rwide:{n:'광휘 확장',t:'ray',c:'#ffe9a0',d:L=>`광선 굵기 ${rayW(L).toFixed(2)}m · 길이 ${rayLen(L).toFixed(1)}m · 피해 +${3*L}%`},
   rsplit:{n:'분광',t:'ray',c:'#fff0c0',d:L=>{const q=raySplit(L);return `광선 ${q.n}줄을 부채꼴로 쏨 (피해 ×${q.m.toFixed(2)})\n${L<10?(raySplit(L+1).n>q.n?'다음 단계: 광선 +1줄':'다음 단계: 피해 +4%'):'최대'}`}},
   zrad:{n:'성역 확장',t:'sanct',c:'#ffe090',d:L=>`성역 반경 ${zRad(L).toFixed(1)}m · 피해 +${2*L}%`},
   prad:{n:'정화 확장',t:'purge',c:'#ffe090',d:L=>`오라 반경 ${purgeR(L).toFixed(1)}m · 피해 +${2*L}%`},
-  pbrand:{n:'낙인',t:'purge',c:'#fff0b0',d:L=>`오라 안에 머문 적은 3초에 걸쳐 받는 오라 피해가 최대 +${12*L}%까지 오름 (벗어나면 처음부터)`},
+  pnova:{n:'정화의 파동',t:'purge',c:'#ffd870',d:L=>`2초마다 불꽃 파동이 오라 끝까지 밀려 나가 원 안의 적 모두에게 피해 (×${(1+.2*L).toFixed(1)})`},
   zcnt:{n:'겹친 성역',t:'sanct',c:'#fff4c8',d:L=>{const q=zCnt(L);return `성역을 동시에 ${q.n}곳까지 · 지속 ${(4+.15*L).toFixed(1)}초 (피해 ×${q.m.toFixed(2)})\n${L<10?(zCnt(L+1).n>q.n?'다음 단계: 성역 +1곳':'다음 단계: 피해 +4%'):'최대'}`}}});
 Object.assign(GEMS2,{
   rfocus:{s:'ray',n:'집속',c:'#fff6d0',d:L=>`광선을 계속 쏘면 2초에 걸쳐 피해가 최대 +${12*L}%까지 오름 (떼면 처음부터)`},
   rafter:{s:'ray',n:'잔광',c:'#ffd870',d:L=>`광선 끝자리에 빛이 남아 2초 동안 0.5초마다 주변 적에게 피해 (×${(.12*L).toFixed(2)})`},
   zbell:{s:'sanct',n:'심판의 종',c:'#ffd060',d:L=>`성역이 사라질 때 크게 폭발 (피해 ×${(1.2+.5*L).toFixed(1)})`},
-  pnova:{s:'purge',n:'정화의 파동',c:'#ffd870',d:L=>`2초마다 오라 끝까지 빛의 파동이 퍼져 원 안의 적 모두에게 피해 (×${(1+.4*L).toFixed(1)})`},
-  pcorpse:{s:'purge',n:'정화의 불씨',c:'#ffb060',d:L=>`오라 안에서 쓰러진 적이 폭발해 주변 적에게 그 적 최대 생명력의 ${8+3*L}% 피해 — 폭발로 쓰러진 적도 오라 안이면 연쇄로 폭발 (보스 제외 · 연쇄 폭발의 손길과 같은 폭발)`},
+  pbrand:{s:'purge',n:'낙인',c:'#fff0b0',d:L=>`오라 안에 머문 적은 3초에 걸쳐 받는 오라 피해가 최대 +${24*L}%까지 오름 (벗어나면 처음부터)`},
+  pcorpse:{s:'purge',n:'정화의 불씨',c:'#ffb060',d:L=>`오라 안에서 쓰러진 적이 폭발해 주변 적에게 그 적 최대 생명력의 ${8+3*L}% 피해 — 폭발로 쓰러진 적은 오라 밖이어도 연쇄로 폭발 (보스 제외 · 연쇄 폭발의 손길과 같은 폭발)`},
   zbless:{s:'sanct',n:'축복',c:'#fff0a0',d:L=>`성역 안에 서 있으면 받는 피해 -${4*L}% · 회복량 +${20*L}%`}});
 /* 성역·잔광 — 바닥의 빛의 원. fx로 돌며 iv초마다 aoe, 내가 안에 있으면 회복(축복이면 피해 감소) */
 const ZONES=[];let ZGEO=null;
@@ -8085,44 +8085,55 @@ function nsRayTick(dt){const id=S&&S.cls&&!S.demo?C().skills[0]:null;if(!id||!SK
     if((P.rayS=(P.rayS||0)+1)%3===1)try{SFX.p('zapboom')}catch(_){}}
   rayDraw({ox,oz,dirs,lens,w:st.w});if(Math.random()<.4)popFx(ox,1.15,oz,.3,.9,.18,0xfff0c0,.8);return true}
 /* v947: 정화의 오라(사제, 테스트) — 스킬 버튼으로 켜고 끔. 켜져 있는 동안 PURGE_TK초마다 주변 적 모두에게 피해 + 타격당 마나 소모. 자동 사용이면 근처에 적이 있는 동안 켜짐 */
-let pgG=null,pgPrev=false,pgNova=null;
-function pgCorpse(e){if(!P.purgeOn||!S||!S.cls)return 0;const id=C().skills[0];if(!SK[id]||SK[id].kind!=='purge'||!g2('pcorpse'))return 0;const st=skillStats(id);return Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<=st.r+e.r*.5?st.corpse:0}
+let pgG=null,pgPrev=false,pgNova=null,pgBoomNow=false;
+function pgCorpse(e){if(!P.purgeOn||!S||!S.cls)return 0;const id=C().skills[0];if(!SK[id]||SK[id].kind!=='purge'||!g2('pcorpse'))return 0;const st=skillStats(id);return pgBoomNow||Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<=st.r+e.r*.5?st.corpse:0}/* v949: 폭발로 쓰러진 적은 오라 밖이어도 연쇄로 폭발 */
 /* v948: 정화의 오라 외형 — 평평한 테두리·육각형 대신, 테두리에서 금빛 불꽃 벽이 일렁이고 바닥 가장자리가 타오르듯 빛남. 파동은 불꽃 벽이 밖으로 밀려 나가는 충격파 */
 const PG_N=`float pgh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float pgn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(pgh(i),pgh(i+vec2(1,0)),f.x),mix(pgh(i+vec2(0,1)),pgh(i+vec2(1,1)),f.x),f.y);}
 float pgf(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*pgn(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}`;
 const PG_VS=`varying vec2 vU;varying vec3 vP;void main(){vU=uv;vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
-const pgMat=(fs,u)=>new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:0},k:{value:1},cir:{value:20}},u||{}),vertexShader:PG_VS,fragmentShader:PG_N+fs,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-/* 불꽃 벽: 아래가 가장 밝고 위로 갈수록 혀처럼 갈라지며 사라짐 */
-const PG_WALL=`uniform float t,k,cir,hot;varying vec2 vU;
-void main(){float y=vU.y;vec2 q=vec2(vU.x*cir*1.4,y*2.2-t*1.8);float n=pgf(q)+pgf(q*2.3+vec2(3.1,-t*1.1))*.35;
-  float th=y*1.25+.28;float tongue=smoothstep(th,th+.1,n),core=smoothstep(th+.1,th+.32,n);float base=exp(-y*12.)*.55;
-  float a=(tongue*.5+core*.55+base)*k;vec3 c=mix(vec3(1.,.5,.12),vec3(1.,.95,.8),clamp(core+base*1.2+hot,0.,1.));gl_FragColor=vec4(c*a,1.);}`;
-/* 바닥: 가장자리로 갈수록 타오르는 띠 + 안쪽은 아주 옅은 빛의 결 */
+const pgMat=(fs,u)=>new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:0},k:{value:1},cir:{value:20},seed:{value:0}},u||{}),vertexShader:PG_VS,fragmentShader:PG_N+fs,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+/* 불꽃 벽(v949): 흔들리는 불길 — 위로 갈수록 바람에 휘고(도메인 워프), 자리마다 높이가 다르며, 온도에 따라 주황 → 금빛 → 흰빛 */
+const PG_WALL=`uniform float t,k,cir,hot,seed;varying vec2 vU;
+void main(){float y=vU.y,x=vU.x*cir+seed;
+  float warp=pgf(vec2(x*.5,y*1.5-t*.6+seed));
+  vec2 q=vec2(x*1.3+(warp-.5)*1.5*y,y*2.4-t*2.1);
+  float f=pgf(q)*.68+pgf(q*2.6+vec2(4.,-t*1.5))*.32;
+  float hgt=.4+.6*pgn(vec2(x*.4,t*.8+seed));
+  float d=clamp(f*1.55-y/hgt*1.1+.1,0.,1.)*smoothstep(1.,.8,y);
+  float temp=pow(d,1.4)+hot*.3;
+  vec3 c=mix(vec3(1.,.3,.04),vec3(1.,.58,.12),smoothstep(0.,.3,temp));c=mix(c,vec3(1.,.88,.55),smoothstep(.3,.7,temp));c=mix(c,vec3(1.,1.,.93),smoothstep(.75,1.1,temp));
+  gl_FragColor=vec4(c*smoothstep(.04,.3,d)*(.5+.5*temp)*k,1.);}`;
+/* 바닥(v949): 불길이 땅에 드리우는 빛(안팎으로 번짐) + 가장자리의 달아오른 숯불 자국(고르지 않게 끊김) */
 const PG_FLOOR=`uniform float t,k,cir;varying vec2 vU;varying vec3 vP;
-void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);float n=pgf(vec2(ang*cir*.19,r*3.-t*.8));
-  float edge=smoothstep(.86,.99,r+n*.06)*smoothstep(1.03,.985,r);float wisp=smoothstep(.6,.9,pgf(vec2(ang*3.+t*.15,r*4.-t*.5)))*.07*r;
-  float a=(edge*(.3+.5*n)+wisp+.015)*k;gl_FragColor=vec4(mix(vec3(1.,.62,.2),vec3(1.,.9,.65),edge*n)*a,1.);}`;
+void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);
+  float n=pgf(vec2(ang*cir*.16,t*.9)),n2=pgf(vec2(ang*cir*.5+3.,r*6.-t*1.2));
+  float glow=(r<1.?exp(-(1.-r)*7.)*.42:exp(-(r-1.)*11.)*.36)*(.55+.7*n);
+  float coal=smoothstep(.035,0.,abs(r-1.+(n-.5)*.03))*smoothstep(.35,.75,n2);
+  float wisp=smoothstep(.6,.9,pgf(vec2(ang*3.+t*.15,r*4.-t*.5)))*.05*smoothstep(1.,.7,r)*r;
+  float a=(glow+coal*.8+wisp+(r<1.?.012:0.))*k;gl_FragColor=vec4(mix(vec3(1.,.48,.1),vec3(1.,.88,.6),clamp(coal+glow*.6,0.,1.))*a,1.);}`;
 /* 파동 바닥: 앞쪽이 밝고 뒤로 흐려지는 충격 띠(노이즈로 찢어진 가장자리) */
 const PG_SHOCK=`uniform float t,k,cir,w;varying vec2 vU;varying vec3 vP;
-void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);float n=pgf(vec2(ang*cir*.3,t*2.));float d=1.-r+(n-.5)*.12;
+void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);float n=pgf(vec2(ang*cir*.1,t*2.));float d=1.-r+(n-.5)*.12;
   float a=(d<0.?exp(-d*d/(w*w*.08)):exp(-d/w)*.85)*smoothstep(1.06,1.,r)*(.6+.6*n)*k;gl_FragColor=vec4(mix(vec3(1.,.72,.3),vec3(1.,1.,.9),clamp(1.-d*6.,0.,1.))*a,1.);}`;
+const PG_LAYERS=[[.985,1.5,.5,0],[1,1.2,.6,17.3],[1.02,.9,.42,41.7]];/* 반지름 비·높이(m)·밝기·무늬 씨앗 — 세 겹이 어긋나며 겹쳐 두께감 */
 function pgBuild(){const cg=new THREE.CylinderGeometry(1,1,1,120,1,true);cg.translate(0,.5,0);
-  pgG=new THREE.Group();const floor=new THREE.Mesh(new THREE.CircleGeometry(1.03,96),pgMat(PG_FLOOR));floor.rotation.x=-Math.PI/2;floor.position.y=.04;
-  const wall=new THREE.Mesh(cg,pgMat(PG_WALL,{hot:{value:0}}));wall.scale.y=1.15;pgG.add(floor,wall);pgG.userData={floor,wall,t:0};
+  pgG=new THREE.Group();const floor=new THREE.Mesh(new THREE.CircleGeometry(1.3,96),pgMat(PG_FLOOR));floor.rotation.x=-Math.PI/2;floor.position.y=.04;pgG.add(floor);
+  const walls=PG_LAYERS.map(([rr,h,k,sd])=>{const w=new THREE.Mesh(cg,pgMat(PG_WALL,{hot:{value:0}}));w.scale.set(rr,h,rr);w.material.uniforms.k.value=k;w.material.uniforms.seed.value=sd;w.userData.h=h;pgG.add(w);return w});
+  pgG.userData={floor,walls,t:0};
   const ng=new THREE.Group(),sh=new THREE.Mesh(new THREE.CircleGeometry(1.06,96),pgMat(PG_SHOCK,{w:{value:.25}}));sh.rotation.x=-Math.PI/2;sh.position.y=.06;
   const nw=new THREE.Mesh(cg,pgMat(PG_WALL,{hot:{value:.6}}));ng.add(sh,nw);ng.visible=false;pgNova={g:ng,sh,nw,t:9,r:5}}
 function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;if(pgNova)pgNova.g.visible=false;return}
   if(!pgG)pgBuild();if(pgG.parent!==scene)scene.add(pgG);if(pgNova.g.parent!==scene)scene.add(pgNova.g);pgG.visible=true;const u=pgG.userData;u.t+=dt;
   pgG.position.set(P.pos.x,.02,P.pos.z);pgG.scale.set(r,1,r);
-  for(const m of [u.floor,u.wall]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=r*2}
-  u.wall.scale.y=1.1+.08*Math.sin(u.t*2.3);
+  for(const m of [u.floor,...u.walls]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=r*6}
+  u.walls.forEach((w,i)=>w.scale.y=w.userData.h*(1+.08*Math.sin(u.t*2.3+i*2)));
   /* 테두리 불티: 가장자리에서 금빛 불씨가 피어오름 */
-  if(dt>0&&Math.random()<dt*Math.min(40,r*5)){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r,y:.15,z:P.pos.z+Math.sin(a)*r,vx:rnd(-.3,.3),vy:rnd(1.2,2.6),vz:rnd(-.3,.3),life:rnd(.5,.9),s0:rnd(.08,.16),s1:.02,c0:0xfff4c8,c1:0xff9a30,a:.9,drag:.95})}
+  if(dt>0&&Math.random()<dt*Math.min(50,r*7)){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r,y:rnd(.1,.8),z:P.pos.z+Math.sin(a)*r,vx:rnd(-.4,.4),vy:rnd(1.4,3.2),vz:rnd(-.4,.4),life:rnd(.5,1),s0:rnd(.06,.14),s1:.02,c0:0xfff4c8,c1:0xff8a20,a:.9,drag:.95})}
   const N=pgNova;N.t+=dt;if(N.t<.6){N.g.visible=true;const k=N.t/.6,e=1-Math.pow(1-k,2.2),R=Math.max(.3,N.r*1.05*e),f=1-k;
-    N.g.position.set(N.x,.02,N.z);N.sh.scale.set(R,R,1);N.nw.scale.set(R,.3+1.7*f,R);
-    N.sh.material.uniforms.k.value=1.3*f;N.sh.material.uniforms.w.value=.12+.35*k;N.nw.material.uniforms.k.value=1.4*f*f;
-    for(const m of [N.sh,N.nw]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=R*2}}else N.g.visible=false}
+    N.g.position.set(N.x,.02,N.z);N.sh.scale.set(R,R,1);N.nw.scale.set(R,.4+2*f,R);
+    N.sh.material.uniforms.k.value=1.3*f;N.sh.material.uniforms.w.value=.12+.35*k;N.nw.material.uniforms.k.value=1.5*f*f;
+    for(const m of [N.sh,N.nw]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=R*6}}else N.g.visible=false}
 function purgeNova(r){if(!pgNova)pgBuild();const N=pgNova;N.t=0;N.r=r;N.x=P.pos.x;N.z=P.pos.z;
   flash({x:P.pos.x,z:P.pos.z},0xffe0a0,1.4);
   for(let i=0;i<60;i++){const a=Math.random()*6.28,v=rnd(r*1.2,r*2.2);emit(PADD,{x:P.pos.x+Math.cos(a)*.6,y:rnd(.2,1.2),z:P.pos.z+Math.sin(a)*.6,vx:Math.cos(a)*v,vy:rnd(.3,2.5),vz:Math.sin(a)*v,life:rnd(.35,.6),s0:rnd(.1,.22),s1:.02,c0:0xffffff,c1:0xffb040,a:.95,drag:.9})}
@@ -8136,9 +8147,10 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
   const b1=$('bS1');if(b1)b1.classList.toggle('auraon',!!P.purgeOn&&!S.autoSkSet);
   if(!P.purgeOn||paused()){purgeDraw(P.purgeOn&&!inTown,st.r,0);return true}
   purgeDraw(true,st.r,dt);P.pgT=Math.max(-.05,(P.pgT||0)-dt);P.pgNv=(P.pgNv||0)-dt;
-  if(P.pgT<=0){const cost=mpCost(id);
-    if(!(S.test&&S.testMp)&&P.mp<cost){toast('마나가 부족합니다','정화의 오라가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}
-    P.mp-=cost;const h=1-hasteP()*gl(id,'haste');P.pgT+=PURGE_TK*h/(1+gear().aspd/100);
+  const h=1-hasteP()*gl(id,'haste');
+  if(!(S.test&&S.testMp)){/* v949: 켜 둔 동안 시간에 따라 마나 소모 — 회전 베기와 같은 초당 소모(mpCost ÷ 타격 간격) */const use=mpCost(id)/nsAct(h)*dt;
+    if(P.mp<use){toast('마나가 부족합니다','정화의 오라가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}P.mp-=use}
+  if(P.pgT<=0){P.pgT+=PURGE_TK*h/(1+gear().aspd/100);
     const base=baseDmg()*st.dmg,q=(P.pgN=(P.pgN||0)+1)%2===0;
     for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||!(e.hp>0))continue;if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)>st.r+e.r*.5)continue;
       if(!(e.pgS>time-.45))e.pgIn=time;e.pgS=time;const fk=st.brand?1+st.brand*Math.min(1,(time-e.pgIn)/3):1;
@@ -11079,7 +11091,7 @@ function chainBoom(c){if(chBfT!==time){chBfT=time;chBf=0}chBf++;const S=(chBf>1?
   if(chBf<=20)chDisc(c.x,c.z,3.2*S,br*.8);
   const n=chBf<=10?50:14;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(2,7)*S;emit(PADD,{x:c.x,y:.3,z:c.z,vx:Math.cos(a)*v,vy:rnd(.5,7),vz:Math.sin(a)*v,life:rnd(.4,.8),s0:rnd(.08,.15),s1:.02,c0:0xffffff,c1:0x9a5aff,a:.95,drag:.9,grav:-6})}
   if(chBf<=12)for(let i=0;i<12;i++){const a=Math.random()*6.28;emit(PADD,{x:c.x+Math.cos(a)*.6,y:.2,z:c.z+Math.sin(a)*.6,vy:rnd(4,9)*S,life:rnd(.4,.7),s0:.35,s1:.05,c0:0xe8d0ff,c1:0x5a1aff,a:.9,drag:.9})}
-  const hk=hitKind;hitKind='';for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r&&o.chT!==time){o.chT=time;hurt(o,Math.min(c.d,o.mhp*.5),3)}hitKind=hk}/* v943: 한 순간에 적 하나는 폭발 피해를 한 번만, 최대 그 적 생명력의 50% — 맞지 않은 멀쩡한 적은 폭발 한 번으로 쓰러지지 않음 */
+  const hk=hitKind;hitKind='';pgBoomNow=true;for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r&&o.chT!==time){o.chT=time;hurt(o,Math.min(c.d,o.mhp*.5),3)}pgBoomNow=false;hitKind=hk}/* v943: 한 순간에 적 하나는 폭발 피해를 한 번만, 최대 그 적 생명력의 50% — 맞지 않은 멀쩡한 적은 폭발 한 번으로 쓰러지지 않음 */
 function uqTick(dt){if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=3;if(P.mvCh<3&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<3)P.cd.mv=mvCd()}}
   if((uqLblT-=dt)<=0){uqLblT=.15;try{const l=$('lMv');if(l){const t=uqOn('shadow')?`순간이동 ${P.mvCh}`:'구르기';if(l.textContent!==t)l.textContent=t}}catch(_){}}
   if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<60;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
