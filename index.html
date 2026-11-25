@@ -2370,7 +2370,7 @@ function skillStats(id){
   if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「심판의 검」 (v760 이름 변경: 옛 천뢰검) */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='ray'){const w=L('rwide'),sp=raySplit(L('rsplit'));st.w=rayW(w);st.len=rayLen(w);st.dmg*=(1+.03*w)*sp.m;st.beams=sp.n;const f=g2('rfocus'),a=g2('rafter');st.focus=f?.12*f:0;st.after=a?.12*a:0}
-  if(b.kind==='purge'){const r=L('purad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=g2('pbrand');st.brand=.24*br;const nv=L('pnova'),cp=g2('pcorpse');st.nova=nv?1+.2*nv:0;st.corpse=cp?.08+.03*cp:0}
+  if(b.kind==='purge'){const r=L('purad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=g2('pbrand');st.brand=.24*br;const nv=L('pnova'),cp=g2('pcorpse');st.nova=nv?.5-.1*(nv-1)/9:0;st.nvIv=nv?2-1.6*(nv-1)/9:2;/* v956: 파동 — 피해 ×0.5→×0.4로 낮추고, 간격 2초→0.4초(10단계) */st.corpse=cp?.08+.03*cp:0}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
 }
@@ -8027,7 +8027,7 @@ Object.assign(GEMS,{
   rwide:{n:'광휘 확장',t:'ray',c:'#ffe9a0',d:L=>`광선 굵기 ${rayW(L).toFixed(2)}m · 길이 ${rayLen(L).toFixed(1)}m · 피해 +${3*L}%`},
   rsplit:{n:'분광',t:'ray',c:'#fff0c0',d:L=>{const q=raySplit(L);return `광선 ${q.n}줄을 부채꼴로 쏨 (피해 ×${q.m.toFixed(2)})\n${L<10?(raySplit(L+1).n>q.n?'다음 단계: 광선 +1줄':'다음 단계: 피해 +4%'):'최대'}`}},
   purad:{n:'정화 확장',t:'purge',c:'#ffe090',d:L=>`오라 반경 ${purgeR(L).toFixed(1)}m · 피해 +${2*L}%`},
-  pnova:{n:'정화의 파동',t:'purge',c:'#ffd870',d:L=>`2초마다 불꽃 파동이 오라 끝까지 밀려 나가 원 안의 적 모두에게 피해 (×${(1+.2*L).toFixed(1)})`}});
+  pnova:{n:'정화의 파동',t:'purge',c:'#ffd870',d:L=>{const l=Math.max(1,L);return `${(2-1.6*(l-1)/9).toFixed(2)}초마다 불꽃 파동이 오라 끝까지 밀려 나가 원 안의 적 모두에게 피해 (×${(.5-.1*(l-1)/9).toFixed(2)})\n단계가 오를수록 파동 간격이 짧아짐 (10단계 0.4초)`}}});
 Object.assign(GEMS2,{
   rfocus:{s:'ray',n:'집속',c:'#fff6d0',d:L=>`광선을 계속 쏘면 2초에 걸쳐 피해가 최대 +${12*L}%까지 오름 (떼면 처음부터)`},
   rafter:{s:'ray',n:'잔광',c:'#ffd870',d:L=>`광선 끝자리에 빛이 남아 2초 동안 0.5초마다 주변 적에게 피해 (×${(.12*L).toFixed(2)})`},
@@ -8123,14 +8123,14 @@ function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;if(pgNova)pgNova.g.
   u.walls.forEach((w,i)=>w.scale.y=w.userData.h*(1+.08*Math.sin(u.t*2.3+i*2)));
   /* 테두리 불티: 가장자리에서 금빛 불씨가 피어오름 */
   if(dt>0&&Math.random()<dt*Math.min(50,r*7)){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r,y:rnd(.1,.8),z:P.pos.z+Math.sin(a)*r,vx:rnd(-.4,.4),vy:rnd(1.4,3.2),vz:rnd(-.4,.4),life:rnd(.5,1),s0:rnd(.06,.14),s1:.02,c0:0xfff4c8,c1:0xff8a20,a:.9,drag:.95})}
-  const N=pgNova;N.t+=dt;if(N.t<.6){N.g.visible=true;const k=N.t/.6,e=1-Math.pow(1-k,2.2),R=Math.max(.3,N.r*1.05*e),f=1-k;
+  const N=pgNova,ND=N.dur||.6;N.t+=dt;if(N.t<ND){N.g.visible=true;const k=N.t/ND,e=1-Math.pow(1-k,2.2),R=Math.max(.3,N.r*1.05*e),f=1-k;
     N.g.position.set(N.x,.02,N.z);N.sh.scale.set(R,R,1);N.nw.scale.set(R,.4+2*f,R);
     N.sh.material.uniforms.k.value=1.3*f;N.sh.material.uniforms.w.value=.12+.35*k;N.nw.material.uniforms.k.value=1.5*f*f;
     for(const m of [N.sh,N.nw]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=R*6}}else N.g.visible=false}
-function purgeNova(r){if(!pgNova)pgBuild();try{SFX.p('pnova')}catch(_){}const N=pgNova;N.t=0;N.r=r;N.x=P.pos.x;N.z=P.pos.z;
-  flash({x:P.pos.x,z:P.pos.z},0xffe0a0,1.4);
-  for(let i=0;i<60;i++){const a=Math.random()*6.28,v=rnd(r*1.2,r*2.2);emit(PADD,{x:P.pos.x+Math.cos(a)*.6,y:rnd(.2,1.2),z:P.pos.z+Math.sin(a)*.6,vx:Math.cos(a)*v,vy:rnd(.3,2.5),vz:Math.sin(a)*v,life:rnd(.35,.6),s0:rnd(.1,.22),s1:.02,c0:0xffffff,c1:0xffb040,a:.95,drag:.9})}
-  for(let i=0;i<14;i++){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r*.3,y:.3,z:P.pos.z+Math.sin(a)*r*.3,vx:Math.cos(a)*r*1.6,vz:Math.sin(a)*r*1.6,life:.5,s0:1.1,s1:.3,c0:0xffe8b0,c1:0x8a5010,a:.35,drag:.88})}}
+function purgeNova(r,iv){if(!pgNova)pgBuild();const q=Math.max(.35,Math.min(1,(iv||2)/1.5));try{SFX.p('pnova',{v:q>.6?1:.6})}catch(_){}const N=pgNova;N.t=0;N.r=r;N.x=P.pos.x;N.z=P.pos.z;N.dur=Math.min(.6,(iv||2)*.95);/* v956: 파동이 잦을수록 이펙트를 짧고 가볍게 */
+  flash({x:P.pos.x,z:P.pos.z},0xffe0a0,q>.6?1.4:.9);
+  for(let i=0;i<60*q;i++){const a=Math.random()*6.28,v=rnd(r*1.2,r*2.2);emit(PADD,{x:P.pos.x+Math.cos(a)*.6,y:rnd(.2,1.2),z:P.pos.z+Math.sin(a)*.6,vx:Math.cos(a)*v,vy:rnd(.3,2.5),vz:Math.sin(a)*v,life:rnd(.35,.6),s0:rnd(.1,.22),s1:.02,c0:0xffffff,c1:0xffb040,a:.95,drag:.9})}
+  for(let i=0;i<14*q;i++){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r*.3,y:.3,z:P.pos.z+Math.sin(a)*r*.3,vx:Math.cos(a)*r*1.6,vz:Math.sin(a)*r*1.6,life:.5,s0:1.1,s1:.3,c0:0xffe8b0,c1:0x8a5010,a:.35,drag:.88})}}
 function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||SK[id].kind!=='purge'){if(P.purgeOn){P.purgeOn=false;purgeDraw(false)}pgPrev=false;return false}
   const st=skillStats(id),held=!!input.held.s1;
   if(S.demo)P.purgeOn=!!nearestEnemy(P.pos,st.r+4);
@@ -8149,7 +8149,7 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
       if(!(e.pgS>time-.45))e.pgIn=time;e.pgS=time;const fk=st.brand?1+st.brand*Math.min(1,(time-e.pgIn)/3):1;
       if(Math.random()<.22)popFx(e.pos.x,1+Math.random(),e.pos.z,.15,.6,.3,0xfff0b0,.8);hurt(e,base*fk,q,st.so);}
     if(Math.random()<.5)popFx(P.pos.x+rnd(-1,1)*st.r*.6,.3,P.pos.z+rnd(-1,1)*st.r*.6,.15,.7,.5,0xfff4c0,.7)}
-  if(st.nova&&P.pgNv<=0){P.pgNv=2;purgeNova(st.r);aoe({x:P.pos.x,z:P.pos.z},st.r,baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
+  if(st.nova&&P.pgNv<=0){P.pgNv=st.nvIv;purgeNova(st.r,st.nvIv);aoe({x:P.pos.x,z:P.pos.z},st.r,baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
   return true}
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
@@ -9155,7 +9155,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v955';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v956';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9837,7 +9837,7 @@ function skillDps0(id){
   if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ret?hit*st.ret.m*st.ret.p:0/* v719: 회귀 화살 */,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 회귀':''}${sh?' · 파편':''}`}}
   if(b.kind==='smite'){const hit=base*st.dmg*crit,tw=st.stw?hit*st.stw.m*st.stw.n*.5:0,ar=st.arc?hit*st.arc.m*.5:0,fd=st.fld?hit*st.fld.m*Math.min(st.fld.dur,cd)/st.fld.iv*.6:0;return {main:(hit+tw+ar+fd)/cd,label:'검에 맞은 적 1명당',sub:`반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${tw?` · 검 ${1+st.stw.n}자루`:''}${ar?' · 갈래 번개':''}${fd?' · 잔향':''}`}}
   if(b.kind==='ray'){const h=1-hasteP()*gl(id,'haste'),iv=RAY_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.focus||0);return {main:hit*fk/iv,label:'광선에 맞은 적 1명당 (누르고 있는 동안)',sub:`${iv.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)} · 광선 ${st.beams}줄${st.focus?` · 집속 최대 ×${fk.toFixed(2)}`:''}`}}
-  if(b.kind==='purge'){const h=1-hasteP()*gl(id,'haste'),iv=PURGE_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.brand||0)*.8,nv=st.nova?hit*st.nova/2:0;return {main:hit*fk/iv+nv,label:'오라 안의 적 1명당 (켜져 있는 동안)',sub:`${iv.toFixed(2)}초마다 ${fmtN(hit)} · 반경 ${st.r.toFixed(1)}m${st.brand?` · 낙인 최대 ×${(1+st.brand).toFixed(2)}`:''}${st.nova?' · 정화의 파동':''}`}}
+  if(b.kind==='purge'){const h=1-hasteP()*gl(id,'haste'),iv=PURGE_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.brand||0)*.8,nv=st.nova?hit*st.nova/st.nvIv:0;return {main:hit*fk/iv+nv,label:'오라 안의 적 1명당 (켜져 있는 동안)',sub:`${iv.toFixed(2)}초마다 ${fmtN(hit)} · 반경 ${st.r.toFixed(1)}m${st.brand?` · 낙인 최대 ×${(1+st.brand).toFixed(2)}`:''}${st.nova?' · 정화의 파동':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
     return {main:hit/act+fl,label:'범위 안의 적 1명당 (누르고 있는 동안)',sub:`${act.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)}${fl?` · ${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*h,h).toFixed(2)}초마다`:''}`}}
