@@ -9155,7 +9155,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v958';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v959';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9583,7 +9583,7 @@ const STSL={
   kai4:{tag:'Lumenhar · Chapter 4',sc:[
     {img:'story/kai4_1.webp',alt:'prolog/p6.webp',f:[.36,.39],fy:.62,z:[1.75,1.9],fx:'snow',c:['봉화 아래, 먼저 다녀간 이의 흔적이 남아 있다.','눈에 반쯤 묻힌 부러진 칼집,\n바위에 묶인 검붉은 천 조각.']},
     {img:'story/kai4_2.webp',alt:()=>prlNote(['봉화마다 불을 붙이며 왔지만','눈보라가 금세 꺼 버렸다.','뒤에 오는 이여, 다시 불을 붙여 다오.','불이 이어지면 얼음도 녹는다.','나는 먼저 왕도로 간다.'],'— 카이렌'),fy:.6,z:[1.02,1.07],fx:'snow',c:['천 조각 안쪽에 접힌 쪽지가 있다.','…카이렌.\n먼저 왕좌로 간 검사의 이름이다.']},
-    {img:'story/kai4_3.webp',alt:'prolog/p7.webp',f:[.3,.64],fy:.42,z:[1.08,1.14],h:.45,fx:'snow',c:['봉화가 타오르자, 눈보라 속에서도\n불빛이 멀리까지 번진다.','이어진 불씨 끝에,\n그가 향한 봉우리가 붉게 타고 있다.']}]},
+    {img:'story/kai4_3.webp',alt:'prolog/p7.webp',f:[.3,.64],fy:.42,z:[1.08,1.14],fx:'snow',c:['봉화가 타오르자, 눈보라 속에서도\n불빛이 멀리까지 번진다.','이어진 불씨 끝에,\n그가 향한 봉우리가 붉게 타고 있다.']}]},
   kai7:{tag:'Lumenhar · Chapter 7',sc:[
     {img:'story/kai7_1.webp',alt:'prolog/p7.webp',f:[.5,.54],fy:.42,z:[1.02,1.1],fx:'ash2',/* v874: 새 그림 — 불타는 성에서 떨어지는 카이렌, 모닥불 곁 주인공 */c:['봉우리 꼭대기에서 불길이 치솟는다.','불길 속에서 무언가가 떨어져 내린다.']},
     {img:'story/kai7_2.webp',alt:'prolog/p6.webp',f:[.42,.5],fy:.56,z:[1.02,1.1],/* v874: 새 그림 — 재 위의 부러진 칼과 찢긴 망토 */fx:'ash2',c:['부러진 칼. 찢긴 붉은 망토.','「…카이렌!」']},
