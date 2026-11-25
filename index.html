@@ -2255,7 +2255,7 @@ try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0)
 /* v662: 무사 — 전사에서 분리한 새 직업(매화 검객 모델·매화참). base:'warrior' = 기본 공격·장비·동작은 전사 것을 그대로 씀(bc()). 아직 테스트 캐릭터 전용 */
 CLS.musa={base:'warrior',/* v722: 일반 모드 공개 */n:'무사',en:'Blade',d:'매화 가면을 쓴 검객. 대검을 크게 휘둘러 붉은 검기를 날리는 매화참으로 길 위의 적을 모두 벱니다.',opts:['wave'],get skills(){return [mainOf(this)]},basic:'melee',bn:'베기',mpm:.8,hp:1.3,dmg:1,spd:6.2,body:0x7a1420,hood:0x1a1618,c:'#e61833'};
 /* v882: 사제 — 테스트 전용. base:'mage' = 기본 공격·장비(지팡이·주문 피해·시전 속도)·모델은 마법사 것(모델은 임시) */
-CLS.priest={base:'mage',testOnly:true,n:'사제',en:'Priest',d:'빛의 신을 섬기는 사제. 빛의 광선으로 줄지어 선 적을 꿰뚫거나, 심판의 오라를 두르고 적 사이를 걷습니다.',opts:['ray','purge'],get skills(){return [mainOf(this)]},basic:'bolt',bn:'마력탄',mpm:1.4,hp:.95,dmg:1.1,spd:6.2,body:0xe8dcc0,hood:0xd8c890,c:'#f0d070'};
+CLS.priest={base:'mage',testOnly:true,n:'사제',en:'Priest',d:'빛의 신을 섬기는 사제. 정화의 빛을 두르고 적 사이를 걸으며 주변의 적을 태웁니다.',opts:['purge'],get skills(){return [mainOf(this)]},basic:'bolt',bn:'마력탄',mpm:1.4,hp:.95,dmg:1.1,spd:6.2,body:0xe8dcc0,hood:0xd8c890,c:'#f0d070'};
 function bc(c){return (CLS[c]&&CLS[c].base)||c}
 const C=()=>CLS[S.cls]||CLS.warrior;
 function mainOf(c){const m=typeof S!=='undefined'&&S&&S.main;return m&&c.opts.includes(m)?m:c.opts[0]}/* v82: 시작할 때 고른 주력 스킬 */
@@ -7485,7 +7485,7 @@ function kill(e){
   dropEnemy(e,hitKind!=='ice'&&hitKind!=='rock'&&hitKind!=='zap');
   if(hitKind==='ice')shatterFx(e);else if(hitKind==='rock')rockShatter(e);else if(hitKind==='zap')zapDeath(e)}
   if(!uqOn('chain')&&!pgCorpse(e))ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);/* v942: 연쇄 폭발 중엔 처치 고리 없음 */
-  {const pc=pgCorpse(e),cu=uqOn('chain')&&!S.demo?.35:0,cx=Math.max(pc,cu);if(cx>0&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*cx,t:time,gold:pc>=cu,sz:Math.max(.85,Math.min(2.4,(e.r||.55)/.55))})}/* v954: 시연에서도 정화의 불씨 폭발 · 정화의 불씨는 금빛 · 큰 적일수록 폭발 이펙트가 큼 *//* v948: 정화의 불씨(사제 심판의 오라 2차) — 오라 안에서 쓰러지면 같은 폭발 *//* v940: 시체 폭발처럼 같은 프레임에 연쇄까지 한 번에 *//* v936: 연쇄 폭발의 손길 */
+  {const pc=pgCorpse(e),cu=uqOn('chain')&&!S.demo?.35:0,cx=Math.max(pc,cu);if(cx>0&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*cx,t:time,gold:pc>=cu,sz:Math.max(.85,Math.min(2.4,(e.r||.55)/.55))})}/* v954: 시연에서도 정화의 불씨 폭발 · 정화의 불씨는 금빛 · 큰 적일수록 폭발 이펙트가 큼 *//* v948: 정화의 불씨(사제 정화의 빛 2차) — 오라 안에서 쓰러지면 같은 폭발 *//* v940: 시체 폭발처럼 같은 프레임에 연쇄까지 한 번에 *//* v936: 연쇄 폭발의 손길 */
   if(S.demo)return;
   const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
   if(NS())nsPotKill(e);
@@ -8022,7 +8022,7 @@ const RAY_TK=.25,PURGE_TK=.25,purgeR=L=>4.5*(1+.06*L),
   raySplit=L=>{const l=Math.max(0,Math.min(10,L|0)),k=[0,0,1,1,1,2,2,2,3,3,3][l];return {n:1+k,m:1+.04*(l-k)}},rayW=L=>.9+.06*L,rayLen=L=>14+.5*L;
 Object.assign(SK,{
   ray:{n:'빛의 광선',role:'다수 공격',tag:'ray',en:'Beam · Holy',kind:'ray',gems:['rwide','rsplit','haste'],mp:3,dmg:1,cd:RAY_TK,desc:'누르고 있는 동안 정면으로 빛줄기를 쏘아 일렬로 선 적을 모두 꿰뚫습니다. 쏘는 동안은 천천히 움직입니다.'},
-  purge:{n:'심판의 오라',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['purad','pnova','haste'],mp:12,dmg:1.3/* v957: ×1.3 */,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받습니다. 켜 둔 동안에는 적이 없어도 마나가 계속 소모됩니다.'}});
+  purge:{n:'정화의 빛',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['purad','pnova','haste'],mp:12,dmg:1.3/* v957: ×1.3 */,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받습니다. 켜 둔 동안에는 적이 없어도 마나가 계속 소모됩니다.'}});
 Object.assign(GEMS,{
   rwide:{n:'광휘 확장',t:'ray',c:'#ffe9a0',d:L=>`광선 굵기 ${rayW(L).toFixed(2)}m · 길이 ${rayLen(L).toFixed(1)}m · 피해 +${3*L}%`},
   rsplit:{n:'분광',t:'ray',c:'#fff0c0',d:L=>{const q=raySplit(L);return `광선 ${q.n}줄을 부채꼴로 쏨 (피해 ×${q.m.toFixed(2)})\n${L<10?(raySplit(L+1).n>q.n?'다음 단계: 광선 +1줄':'다음 단계: 피해 +4%'):'최대'}`}},
@@ -8077,10 +8077,10 @@ function nsRayTick(dt){const id=S&&S.cls&&!S.demo?C().skills[0]:null;if(!id||!SK
     if(st.after&&P.rayAf<=0){P.rayAf=.5;const a=P.face,L=far?fd:st.len*.8;zoneMake(ox+Math.sin(a)*L,oz+Math.cos(a)*L,{r:1.6,dur:2,iv:.5,dmg:baseDmg()*st.dmg*st.after*2,small:1,so:st.so})}
     if((P.rayS=(P.rayS||0)+1)%3===1)try{SFX.p('zapboom')}catch(_){}}
   rayDraw({ox,oz,dirs,lens,w:st.w});if(Math.random()<.4)popFx(ox,1.15,oz,.3,.9,.18,0xfff0c0,.8);return true}
-/* v947: 심판의 오라(사제, 테스트) — 스킬 버튼으로 켜고 끔. 켜져 있는 동안 PURGE_TK초마다 주변 적 모두에게 피해 + 타격당 마나 소모. 자동 사용이면 근처에 적이 있는 동안 켜짐 */
+/* v947: 정화의 빛(사제, 테스트) — 스킬 버튼으로 켜고 끔. 켜져 있는 동안 PURGE_TK초마다 주변 적 모두에게 피해 + 타격당 마나 소모. 자동 사용이면 근처에 적이 있는 동안 켜짐 */
 let pgG=null,pgPrev=false,pgNova=null,pgBoomNow=false;
 function pgCorpse(e){if(!P.purgeOn||!S||!S.cls)return 0;const id=C().skills[0];if(!SK[id]||SK[id].kind!=='purge'||!g2('pcorpse'))return 0;const st=skillStats(id);return pgBoomNow||Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)<=st.r+e.r*.5?st.corpse:0}/* v949: 폭발로 쓰러진 적은 오라 밖이어도 연쇄로 폭발 */
-/* v948: 심판의 오라 외형 — 평평한 테두리·육각형 대신, 테두리에서 금빛 불꽃 벽이 일렁이고 바닥 가장자리가 타오르듯 빛남. 파동은 불꽃 벽이 밖으로 밀려 나가는 충격파 */
+/* v948: 정화의 빛 외형 — 평평한 테두리·육각형 대신, 테두리에서 금빛 불꽃 벽이 일렁이고 바닥 가장자리가 타오르듯 빛남. 파동은 불꽃 벽이 밖으로 밀려 나가는 충격파 */
 const PG_N=`float pgh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float pgn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(pgh(i),pgh(i+vec2(1,0)),f.x),mix(pgh(i+vec2(0,1)),pgh(i+vec2(1,1)),f.x),f.y);}
 float pgf(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*pgn(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}`;
@@ -8135,14 +8135,14 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
   const st=skillStats(id),held=!!input.held.s1;
   if(S.demo)P.purgeOn=!!nearestEnemy(P.pos,st.r+4);
   else if(S.autoSkSet){P.purgeOn=!!(S.autoSkOn&&nearestEnemy(P.pos,st.r+6))}
-  else if(held&&!pgPrev&&!paused()&&!inTown&&P.hp>0){P.purgeOn=!P.purgeOn;feed(P.purgeOn?'심판의 오라 켜짐':'심판의 오라 꺼짐',P.purgeOn?'#ffe080':'#9ab');try{SFX.p(P.purgeOn?'pillar':'swing')}catch(_){}}
+  else if(held&&!pgPrev&&!paused()&&!inTown&&P.hp>0){P.purgeOn=!P.purgeOn;feed(P.purgeOn?'정화의 빛 켜짐':'정화의 빛 꺼짐',P.purgeOn?'#ffe080':'#9ab');try{SFX.p(P.purgeOn?'pillar':'swing')}catch(_){}}
   pgPrev=held;if(inTown||P.hp<=0||knAppr)P.purgeOn=false;
   const b1=$('bS1');if(b1)b1.classList.toggle('auraon',!!P.purgeOn&&!S.autoSkSet);
   if(!P.purgeOn||paused()){purgeDraw(P.purgeOn&&!inTown,st.r,0);return true}
   purgeDraw(true,st.r,dt);P.pgT=Math.max(-.05,(P.pgT||0)-dt);P.pgNv=(P.pgNv||0)-dt;
   const h=1-hasteP()*gl(id,'haste');
   if(!(S.test&&S.testMp)){/* v949: 켜 둔 동안 시간에 따라 마나 소모 — 회전 베기와 같은 초당 소모(mpCost ÷ 타격 간격) */const use=mpCost(id)/nsAct(h)*dt;
-    if(P.mp<use){toast('마나가 부족합니다','심판의 오라가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}P.mp-=use}
+    if(P.mp<use){toast('마나가 부족합니다','정화의 빛가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}P.mp-=use}
   if(P.pgT<=0){P.pgT+=PURGE_TK*h/(1+gear().aspd/100);
     const base=baseDmg()*st.dmg,q=(P.pgN=(P.pgN||0)+1)%2===0;
     for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||!(e.hp>0))continue;if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)>st.r+e.r*.5)continue;
@@ -9155,7 +9155,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v957';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v958';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11160,7 +11160,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
   if(S.autoHpOn&&P.cd.pot<=0&&P.hp/P.mhp*100<=(S.autoHpPct||30)&&potN('hp')>0)usePot('hp',S.autoHpSz);
   if(S.autoMpOn&&P.cd.pot<=0&&P.mmp>0&&P.mp/P.mmp*100<=(S.autoMpPct||30)&&potN('mp')>0)usePot('mp',S.autoMpSz);
-  }else{input.held.php=input.held.pmp=false;if(P.purgeOn||(pgG&&pgG.visible)){P.purgeOn=false;purgeDraw(false)}}/* v951: 마을에서는 심판의 오라가 꺼지고 이펙트도 사라짐 */
+  }else{input.held.php=input.held.pmp=false;if(P.purgeOn||(pgG&&pgG.visible)){P.purgeOn=false;purgeDraw(false)}}/* v951: 마을에서는 정화의 빛가 꺼지고 이펙트도 사라짐 */
   if(input.held.mv){input.held.mv=false;startMove()}
   if(input.held.psp){input.held.psp=false;useSpd()}
   if(P.hasteT>0){P.hasteT-=dt;if(ml>.05&&Math.random()<dt*30*QM())streak({x:P.pos.x+rnd(-.3,.3),y:rnd(.2,1.2),z:P.pos.z+rnd(-.3,.3),vx:-mx*rnd(3,6),vy:rnd(0,.5),vz:-mz*rnd(3,6),life:.25,w:.06,len:.7,c0:0xc0ffc8,c1:0x2a9a3a,drag:2});if(P.hasteT<=0)feed('신속 물약 효과 종료','#8ae08a')}
