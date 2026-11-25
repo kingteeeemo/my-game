@@ -2084,7 +2084,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   /* 공격/시전 속도: 마법사는 시전 속도, 전사·궁수는 공격 속도만 · 직업 피해(근접·투사체·주문)는 피해 증가와 같은 묶음 */
   g.aspd=bc(S.cls)==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
-  {const bn=bloodN();if(bn)g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100}/* v964: 혈조의 인장 공격·시전 속도 */
+  {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=3*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
   if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
@@ -2110,17 +2110,17 @@ const NSF={whirl:.948,quake:.981,volley:.944,rain:.853,boom:1.55,frost:1.371,cha
 const nsSkillK=id=>nsSkillK0(id)*(NSF[id]||1),nsBossK=()=>{const id=typeof S!=='undefined'&&S&&S.cls?C().skills[0]:null;if(!id||!NS())return 1;const k1=(NSBK[id]||1)/(NS_SKM[id]||1),k0=NSBK0[id]||k1,gs=gems2For(id);let a=0,b=0;for(const g of gs){a+=Math.min(g2(g),g2Max(g));b+=g2Max(g)}const pr=b?a/b:1;return Math.exp(Math.log(k0)+(Math.log(k1)-Math.log(k0))*pr)};/* v826: 보스 피해 계수를 추가 강화 진행도에 따라 — 0단계(스토리·엔드게임 초반) NSBK0 → 모두 찍으면 NSBK (로그 보간) */
 /* 공격·시전 속도 / 쿨타임 */
 const nsAct=h=>1.0*h/(1+gear().aspd/100);
-const nsCd=(u,h)=>(.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358))/(uqOn('storm')?1.8:1);
+const nsCd=(u,h)=>(.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358))/(uqOn('storm')?1.8:1)*(1-.03*bloodN());/* v968: 혈조의 인장 쿨타임 감소 스택당 3% */
 /* 획득량 옵션 */
 /* v936: 고유 장비 — 하나만 장착(S.uniq). 테스트 캐릭터는 장비 창 고유 칸을 눌러 고름 */
 const UNQ={gale:{n:'질풍의 장화',ic:'u_gale',d:'이동 속도 +100%',c:'#7fd8ff'},
   shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 5회 충전 · 충전 1.5초',c:'#b49aff'},
   greed:{n:'탐욕의 인장',ic:'u_greed',d:'골드·재화 획득량 +30%',c:'#ffd24a'},
   chain:{n:'연쇄 폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#ff9a4a'},
-  blood:{n:'혈조의 인장',ic:'u_blood',d:'5마리 처치할 때마다 이동 속도·공격 속도·캐릭터 크기 +3% 중첩 (최대 20중, 12초 유지, 피격 시 1/3 감소)',c:'#e8384f'},
+  blood:{n:'혈조의 인장',ic:'u_blood',d:'10마리 처치할 때마다 1스택 — 스택당 이동 속도·공격 속도·효과 범위 +3% · 쿨타임 −3% · 캐릭터 크기 +5% (최대 20중, 스택마다 20초 유지 후 개별 소멸, 피격 시 1/3 감소)',c:'#e8384f'},
   storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.8 · 쿨타임 회복 ×1.8',c:'#9ae8ff',pw:1}};
 const uqOn=k=>!!(S&&S.uniq===k&&UNQ[k]);
-const bloodN=()=>uqOn('blood')&&P.bloodT>time?(P.bloodN||0):0,bloodHit=()=>{if(P.bloodN>0)P.bloodN=Math.floor(P.bloodN*2/3)};/* v964: 혈조의 인장 — 5마리 처치마다 1중첩(처치마다 12초 유지·갱신), 피격 시 중첩 1/3 감소 */
+const bloodN=()=>{if(!uqOn('blood')||!P.bloodS)return 0;const a=P.bloodS;while(a.length&&a[0]<=time)a.shift();return a.length},bloodHit=()=>{const n=bloodN();if(n>0)P.bloodS.splice(0,n-Math.floor(n*2/3))};/* v969: 혈조의 인장 — 10마리 처치마다 1스택, 스택마다 얻은 뒤 20초 유지(개별 만료), 최대 20, 피격 시 오래된 스택부터 1/3 제거 */
 const nsGain=k=>(k==='gGold'||k==='gEss'||k==='gReroll'||k==='gLumi'||k==='gSeal')&&uqOn('greed')?1.3:1;/* v603: 획득량 옵션 삭제 */
 /* 아이템 표시 */
 const nLineTxt=(l,L,it)=>{const v=l.v*nLineMul(l,L);return `${nName(l.k,it)} ${nFmt(l.k,v)}${l.b&&L>0?` <small class="obase">(기본 ${nFmt(l.k,l.v)})</small>`:''}`};
@@ -7572,7 +7572,7 @@ function kill(e){
   if(!chainUq()&&!pgCorpse(e))ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);/* v942: 연쇄 폭발 중엔 처치 고리 없음 */
   {const pc=pgCorpse(e),cu=chainUq()&&!S.demo?.35:0,cx=Math.max(pc,cu);if(cx>0&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*cx,t:time,gold:pc>=cu,sz:Math.max(.85,Math.min(2.4,(e.r||.55)/.55))})}/* v954: 시연에서도 정화의 불씨 폭발 · 정화의 불씨는 금빛 · 큰 적일수록 폭발 이펙트가 큼 *//* v948: 정화의 불씨(사제 정화의 빛 2차) — 오라 안에서 쓰러지면 같은 폭발 *//* v940: 시체 폭발처럼 같은 프레임에 연쇄까지 한 번에 *//* v936: 연쇄 폭발의 손길 */
   if(S.demo)return;
-  if(uqOn('blood')){if(!(P.bloodT>time)){P.bloodN=0;P.bloodK=0}P.bloodK=(P.bloodK||0)+1;if(P.bloodK>=5){P.bloodK=0;P.bloodN=Math.min(20,(P.bloodN||0)+1)}P.bloodT=time+12}
+  if(uqOn('blood')){if(time>(P.bloodKT||0)+20)P.bloodK=0;P.bloodKT=time;P.bloodK=(P.bloodK||0)+1;if(P.bloodK>=10){P.bloodK=0;const a=P.bloodS=P.bloodS||[];bloodN();if(a.length>=20)a.shift();a.push(time+20)}}
   const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
   if(NS())nsPotKill(e);
   if(mutA('burst')&&!e.boss&&!e.rift&&!e.gate)mutBurst(e);/* v624 유언의 탄막 */
@@ -9294,7 +9294,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v969';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v970';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9338,7 +9338,7 @@ function hudMoney(){if(!S||!S.cls)return;const st=(id,t)=>{const e=$(id);if(e.te
   const T=TCUR();st('essT',T?'∞':fmtC(S.ess||0));st('rrT',T?'∞':fmtC(S.rr||0));st('sealT',T?'∞':fmtC(S.seal||0));st('lumiT',T?'∞':fmtC(S.lumi||0));/* v841: 1~10장은 골드·광휘의 파편만, 나머지 재화는 엔드게임부터 */const eg=refOn();for(const id of ['essT','rrT','sealT']){const e=$(id).parentNode;if(e.hidden===eg)e.hidden=!eg}}/* v134: 창이 열려 있어도(일시정지) 골드·정수 실시간 반영 */
 function hud(){placeEnv();placePort();
   cineUiSync();/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
-  {const bc=$('bloodChip'),bn=bloodN();if(bc){if(bc.hidden===!!bn)bc.hidden=!bn;if(bn){if(!bc.firstChild.firstChild)bc.firstChild.innerHTML=ico('u_blood');const nm=$('bloodNum');if(nm.textContent!==String(bn))nm.textContent=bn;$('bloodBar').style.width=Math.max(0,Math.min(100,(P.bloodT-time)/12*100))+'%';bc.style.boxShadow='0 0 '+(4+bn*.8)+'px rgba(232,56,79,'+(.25+bn*.03)+')'}}}/* v964: 혈조의 인장 스택 칩 */
+  {const bc=$('bloodChip'),bn=bloodN();if(bc){if(bc.hidden===!!bn)bc.hidden=!bn;if(bn){if(!bc.firstChild.firstChild)bc.firstChild.innerHTML=ico('u_blood');const nm=$('bloodNum');if(nm.textContent!==String(bn))nm.textContent=bn;$('bloodBar').style.width=Math.max(0,Math.min(100,(P.bloodS[0]-time)/20*100))+'%';bc.style.boxShadow='0 0 '+(4+bn*.8)+'px rgba(232,56,79,'+(.25+bn*.03)+')'}}}/* v964: 혈조의 인장 스택 칩 */
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&(!bossIntroOn()||knAppr===1);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML=XIC+'<span class="xl"> 나가기</span>'}}
   skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
@@ -11279,7 +11279,7 @@ function chainBoom(c){if(chBfT!==time){chBfT=time;chBf=0}chBf++;if(chBf<=4)try{S
   const n=chBf<=10?50:14;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=rnd(2,7)*S;emit(PADD,{x:c.x,y:.3,z:c.z,vx:Math.cos(a)*v,vy:rnd(.5,7),vz:Math.sin(a)*v,life:rnd(.4,.8),s0:rnd(.08,.15),s1:.02,c0:0xffffff,c1:Hc2,a:.95,drag:.9,grav:-6})}
   if(chBf<=12)for(let i=0;i<12;i++){const a=Math.random()*6.28;emit(PADD,{x:c.x+Math.cos(a)*.6,y:.2,z:c.z+Math.sin(a)*.6,vy:rnd(4,9)*S,life:rnd(.4,.7),s0:.35,s1:.05,c0:Hc0,c1:Hc3,a:.9,drag:.9})}
   const hk=hitKind;hitKind='';pgBoomNow=true;for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r&&o.chT!==time){o.chT=time;hurt(o,Math.min(c.d,o.mhp*.5),3)}pgBoomNow=false;hitKind=hk}/* v943: 한 순간에 적 하나는 폭발 피해를 한 번만, 최대 그 적 생명력의 50% — 맞지 않은 멀쩡한 적은 폭발 한 번으로 쓰러지지 않음 */
-function uqTick(dt){if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=5;if(P.mvCh<5&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<5)P.cd.mv=mvCd()}}
+function uqTick(dt){if(uqOn('blood')||P.bloodShown){const bn=bloodN();if(bn!==P.bloodShown){P.bloodShown=bn;nsxUpd()}}/* v968: 스택이 변하면 범위(NSX) 갱신 */if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=5;if(P.mvCh<5&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<5)P.cd.mv=mvCd()}}
   if((uqLblT-=dt)<=0){uqLblT=.15;try{const l=$('lMv');if(l){const t=uqOn('shadow')?`순간이동 ${P.mvCh}`:'구르기';if(l.textContent!==t)l.textContent=t}}catch(_){}}
   if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<60;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
 function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)}if(STC){stcTick(dt)}packTick();if(mapKind==='route'&&!inTown)rtTick(dt);wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&!inTown&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
@@ -11322,7 +11322,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
     if(auraOn('blood')){if(!bloodOk()||(P.bloodAct&&P.hp<=P.mhp*.2))P.bloodAct=false;else if(!P.bloodAct&&P.hp>=P.mhp*.5)P.bloodAct=true;if(P.bloodAct&&P.hp>0)P.hp=Math.max(1,P.hp-P.mhp*.094*dt)}else P.bloodAct=false}else{P.es=0;P.esMax=0}
   /* v426: 생명력 재생과 환경 피해(심연의 냉기)를 매 프레임 순증감(재생-냉기)으로 합쳐 부드럽게 적용 — 재생력 ≥ 냉기면 생명력이 줄지 않는 것처럼 보임. 환경만으로는 1 이하로 떨어지지 않음 */
   {const dr_=envDrain();let h_=P.hp+(hpRegen()-dr_)*dt;if(dr_>0)h_=Math.max(h_,Math.min(P.hp,1));P.hp=Math.min(P.mhp,h_)}
-  hero.position.copy(P.pos);{const bs=uqOn('blood')?1+.03*bloodN():1,cs=hero.scale.x;if(cs!==bs)hero.scale.setScalar(Math.abs(bs-cs)<.004?bs:cs+(bs-cs)*Math.min(1,dt*8))}/* v964: 혈조의 인장 크기 스택당 +3% (부드럽게 변화) */try{auraFx(dt)}catch(_){}
+  hero.position.copy(P.pos);{const bs=uqOn('blood')?1+.05*bloodN():1,cs=hero.scale.x;if(cs!==bs)hero.scale.setScalar(Math.abs(bs-cs)<.004?bs:cs+(bs-cs)*Math.min(1,dt*8))}/* v964→v968: 혈조의 인장 크기 스택당 +5% (부드럽게 변화) */try{auraFx(dt)}catch(_){}
   hero.rotation.order='YXZ';/* v122: 구르기 — 진행 방향으로 앞구르기(몸 중심을 축으로 한 바퀴) */
   if(P.mv&&!hero.userData.sk){const a=Math.PI*2*Math.min(1,P.mv.go/MV_GO),f=P.face,o=-.9*Math.sin(a);hero.rotation.x=a;hero.position.set(P.pos.x+Math.sin(f)*o,P.pos.y+.9-.9*Math.cos(a),P.pos.z+Math.cos(f)*o)}else hero.rotation.x=0;
   if(ASHC.lie)ashLie();
