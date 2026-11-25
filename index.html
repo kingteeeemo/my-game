@@ -255,7 +255,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.s2{width:62px;height:62px;right:18px;bottom:96px;color:#e8c07a}
 .act.down{background:rgba(60,56,64,.9)}
 .act.nomp{opacity:.45}
-.act.s1.autoon::after,.act.pot.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}/* v126: 자동 복용이 켜진 물약 버튼 */
+.act.s1.auraon{box-shadow:0 0 0 3px #ffe080,0 0 18px rgba(255,224,128,.7)}.act.s1.autoon::after,.act.pot.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}/* v126: 자동 복용이 켜진 물약 버튼 */
 @keyframes apSpin{to{transform:rotate(360deg)}}
 .act.pot b{font:800 13px var(--en);font-stretch:87%;color:var(--ink);line-height:1;margin-top:-5px;text-shadow:0 1px 2px #000}
 .flask{width:36px;height:36px;margin-top:-4px;flex:none;filter:drop-shadow(0 0 5px var(--glow))}
@@ -2255,7 +2255,7 @@ try{const old=localStorage.getItem(KEY);if(old&&!localStorage.getItem(slotKey(0)
 /* v662: 무사 — 전사에서 분리한 새 직업(매화 검객 모델·매화참). base:'warrior' = 기본 공격·장비·동작은 전사 것을 그대로 씀(bc()). 아직 테스트 캐릭터 전용 */
 CLS.musa={base:'warrior',/* v722: 일반 모드 공개 */n:'무사',en:'Blade',d:'매화 가면을 쓴 검객. 대검을 크게 휘둘러 붉은 검기를 날리는 매화참으로 길 위의 적을 모두 벱니다.',opts:['wave'],get skills(){return [mainOf(this)]},basic:'melee',bn:'베기',mpm:.8,hp:1.3,dmg:1,spd:6.2,body:0x7a1420,hood:0x1a1618,c:'#e61833'};
 /* v882: 사제 — 테스트 전용. base:'mage' = 기본 공격·장비(지팡이·주문 피해·시전 속도)·모델은 마법사 것(모델은 임시) */
-CLS.priest={base:'mage',testOnly:true,n:'사제',en:'Priest',d:'빛의 신을 섬기는 사제. 빛의 광선으로 줄지어 선 적을 꿰뚫거나, 성역을 깔고 그 위에서 버팁니다.',opts:['ray','sanct'],get skills(){return [mainOf(this)]},basic:'bolt',bn:'마력탄',mpm:1.4,hp:.95,dmg:1.1,spd:6.2,body:0xe8dcc0,hood:0xd8c890,c:'#f0d070'};
+CLS.priest={base:'mage',testOnly:true,n:'사제',en:'Priest',d:'빛의 신을 섬기는 사제. 빛의 광선으로 줄지어 선 적을 꿰뚫거나, 성역을 깔고 그 위에서 버티거나, 정화의 오라를 두르고 적 사이를 걷습니다.',opts:['ray','sanct','purge'],get skills(){return [mainOf(this)]},basic:'bolt',bn:'마력탄',mpm:1.4,hp:.95,dmg:1.1,spd:6.2,body:0xe8dcc0,hood:0xd8c890,c:'#f0d070'};
 function bc(c){return (CLS[c]&&CLS[c].base)||c}
 const C=()=>CLS[S.cls]||CLS.warrior;
 function mainOf(c){const m=typeof S!=='undefined'&&S&&S.main;return m&&c.opts.includes(m)?m:c.opts[0]}/* v82: 시작할 때 고른 주력 스킬 */
@@ -2370,6 +2370,7 @@ function skillStats(id){
   if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「심판의 검」 (v760 이름 변경: 옛 천뢰검) */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='ray'){const w=L('rwide'),sp=raySplit(L('rsplit'));st.w=rayW(w);st.len=rayLen(w);st.dmg*=(1+.03*w)*sp.m;st.beams=sp.n;const f=g2('rfocus'),a=g2('rafter');st.focus=f?.12*f:0;st.after=a?.12*a:0}
+  if(b.kind==='purge'){const r=L('prad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=L('pbrand');st.brand=br?.12*br:0;const nv=g2('pnova'),cm=g2('pcalm');st.nova=nv?1+.4*nv:0;st.calm=.05*cm;st.mkill=.003*cm}
   if(b.kind==='sanct'){const r=L('zrad'),c=zCnt(L('zcnt'));st.r=zRad(r);st.dmg*=(1+.02*r)*c.m;st.zn=c.n;st.zdur=4+.15*L('zcnt');const bl=g2('zbell'),bs=g2('zbless');st.bell=bl?1.2+.5*bl:0;st.bless=bs}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
@@ -8014,21 +8015,26 @@ Object.assign(GEMS2,{
   pchain:{s:'pillar',n:'연쇄 작렬',c:'#e0b0ff',d:L=>{const c=plChain(L);return `폭발 뒤 ${c.r.toFixed(1)}m 안의 다른 적에게 기둥이 ${c.n}번 더 번짐 (번진 폭발 피해 ×${c.m.toFixed(2)})`}},
   pecho:{s:'pillar',n:'여진',c:'#f0c0ff',d:L=>{const e=plEcho(L);return `기둥이 꽂힌 자리에서 잔폭발 ${e.n}회 (피해 ×${e.m.toFixed(2)})`}}});
 /* v882: 사제(테스트 전용) — 빛의 광선: 누르고 있는 동안 정면으로 꿰뚫는 광선(채널링, nsRayTick) / 성역: 지정한 자리에 빛의 원(안의 적 지속 피해, 내가 서 있으면 회복) */
-const RAY_TK=.25,SANCT_RANGE=14,
+const RAY_TK=.25,SANCT_RANGE=14,PURGE_TK=.25,purgeR=L=>4.5*(1+.06*L),
   raySplit=L=>{const l=Math.max(0,Math.min(10,L|0)),k=[0,0,1,1,1,2,2,2,3,3,3][l];return {n:1+k,m:1+.04*(l-k)}},rayW=L=>.9+.06*L,rayLen=L=>14+.5*L,
   zCnt=L=>{const l=Math.max(0,Math.min(10,L|0)),k=[0,0,0,1,1,1,2,2,2,3,3][l];return {n:1+k,m:1+.04*(l-k)}},zRad=L=>2.8*(1+.06*L);
 Object.assign(SK,{
   ray:{n:'빛의 광선',role:'다수 공격',tag:'ray',en:'Beam · Holy',kind:'ray',gems:['rwide','rsplit','haste'],mp:3,dmg:1,cd:RAY_TK,desc:'누르고 있는 동안 정면으로 빛줄기를 쏘아 일렬로 선 적을 모두 꿰뚫습니다. 쏘는 동안은 천천히 움직입니다.'},
-  sanct:{n:'성역',role:'다수 공격',tag:'sanct',en:'Zone · Holy',kind:'sanct',gems:['zrad','zcnt','haste'],mp:14,dmg:.8,cd:1.1,desc:'적이 모인 자리에 빛의 원을 깝니다. 원 안의 적은 계속 피해를 받고, 내가 원 안에 서 있으면 생명력이 회복됩니다.'}});
+  sanct:{n:'성역',role:'다수 공격',tag:'sanct',en:'Zone · Holy',kind:'sanct',gems:['zrad','zcnt','haste'],mp:14,dmg:.8,cd:1.1,desc:'적이 모인 자리에 빛의 원을 깝니다. 원 안의 적은 계속 피해를 받고, 내가 원 안에 서 있으면 생명력이 회복됩니다.'},
+  purge:{n:'정화의 오라',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['prad','pbrand','haste'],mp:2,dmg:1,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받고, 그때마다 마나가 소모됩니다.'}});
 Object.assign(GEMS,{
   rwide:{n:'광휘 확장',t:'ray',c:'#ffe9a0',d:L=>`광선 굵기 ${rayW(L).toFixed(2)}m · 길이 ${rayLen(L).toFixed(1)}m · 피해 +${3*L}%`},
   rsplit:{n:'분광',t:'ray',c:'#fff0c0',d:L=>{const q=raySplit(L);return `광선 ${q.n}줄을 부채꼴로 쏨 (피해 ×${q.m.toFixed(2)})\n${L<10?(raySplit(L+1).n>q.n?'다음 단계: 광선 +1줄':'다음 단계: 피해 +4%'):'최대'}`}},
   zrad:{n:'성역 확장',t:'sanct',c:'#ffe090',d:L=>`성역 반경 ${zRad(L).toFixed(1)}m · 피해 +${2*L}%`},
+  prad:{n:'정화 확장',t:'purge',c:'#ffe090',d:L=>`오라 반경 ${purgeR(L).toFixed(1)}m · 피해 +${2*L}%`},
+  pbrand:{n:'낙인',t:'purge',c:'#fff0b0',d:L=>`오라 안에 머문 적은 3초에 걸쳐 받는 오라 피해가 최대 +${12*L}%까지 오름 (벗어나면 처음부터)`},
   zcnt:{n:'겹친 성역',t:'sanct',c:'#fff4c8',d:L=>{const q=zCnt(L);return `성역을 동시에 ${q.n}곳까지 · 지속 ${(4+.15*L).toFixed(1)}초 (피해 ×${q.m.toFixed(2)})\n${L<10?(zCnt(L+1).n>q.n?'다음 단계: 성역 +1곳':'다음 단계: 피해 +4%'):'최대'}`}}});
 Object.assign(GEMS2,{
   rfocus:{s:'ray',n:'집속',c:'#fff6d0',d:L=>`광선을 계속 쏘면 2초에 걸쳐 피해가 최대 +${12*L}%까지 오름 (떼면 처음부터)`},
   rafter:{s:'ray',n:'잔광',c:'#ffd870',d:L=>`광선 끝자리에 빛이 남아 2초 동안 0.5초마다 주변 적에게 피해 (×${(.12*L).toFixed(2)})`},
   zbell:{s:'sanct',n:'심판의 종',c:'#ffd060',d:L=>`성역이 사라질 때 크게 폭발 (피해 ×${(1.2+.5*L).toFixed(1)})`},
+  pnova:{s:'purge',n:'정화의 파동',c:'#ffd870',d:L=>`2초마다 오라 끝까지 빛의 파동이 퍼져 원 안의 적 모두에게 피해 (×${(1+.4*L).toFixed(1)})`},
+  pcalm:{s:'purge',n:'고요한 기도',c:'#fff4c8',d:L=>`오라의 마나 소모 -${5*L}% · 오라로 적을 처치하면 최대 마나의 ${(.3*L).toFixed(1)}% 회복`},
   zbless:{s:'sanct',n:'축복',c:'#fff0a0',d:L=>`성역 안에 서 있으면 받는 피해 -${4*L}% · 회복량 +${20*L}%`}});
 /* 성역·잔광 — 바닥의 빛의 원. fx로 돌며 iv초마다 aoe, 내가 안에 있으면 회복(축복이면 피해 감소) */
 const ZONES=[];let ZGEO=null;
@@ -8078,6 +8084,36 @@ function nsRayTick(dt){const id=S&&S.cls&&!S.demo?C().skills[0]:null;if(!id||!SK
     if(st.after&&P.rayAf<=0){P.rayAf=.5;const a=P.face,L=far?fd:st.len*.8;zoneMake(ox+Math.sin(a)*L,oz+Math.cos(a)*L,{r:1.6,dur:2,iv:.5,dmg:baseDmg()*st.dmg*st.after*2,small:1,so:st.so})}
     if((P.rayS=(P.rayS||0)+1)%3===1)try{SFX.p('zapboom')}catch(_){}}
   rayDraw({ox,oz,dirs,lens,w:st.w});if(Math.random()<.4)popFx(ox,1.15,oz,.3,.9,.18,0xfff0c0,.8);return true}
+/* v947: 정화의 오라(사제, 테스트) — 스킬 버튼으로 켜고 끔. 켜져 있는 동안 PURGE_TK초마다 주변 적 모두에게 피해 + 타격당 마나 소모. 자동 사용이면 근처에 적이 있는 동안 켜짐 */
+let pgG=null,pgPrev=false;
+function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;return}
+  if(!pgG){if(!ZGEO)ZGEO={d:new THREE.CircleGeometry(1,40),r:new THREE.RingGeometry(.9,1,48),h:new THREE.RingGeometry(.52,.6,6,1),h2:new THREE.RingGeometry(.3,.34,32)};
+    pgG=new THREE.Group();const mk=(c,op)=>new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+    const disc=new THREE.Mesh(ZGEO.d,mk(0xffd870,.13)),ring=new THREE.Mesh(ZGEO.r,mk(0xfff4d0,.75)),ring2=new THREE.Mesh(ZGEO.r,mk(0xffe090,.35)),hex=new THREE.Mesh(ZGEO.h,mk(0xfff0c0,.5)),h2=new THREE.Mesh(ZGEO.h2,mk(0xfff0c0,.45));
+    for(const [m,y] of [[disc,0],[ring,.02],[ring2,.02],[hex,.03],[h2,.03]]){m.rotation.x=-Math.PI/2;m.position.y=y;pgG.add(m)}pgG.userData={ring,ring2,hex,h2,t:0}}
+  if(pgG.parent!==scene)scene.add(pgG);pgG.visible=true;const u=pgG.userData;u.t+=dt;
+  pgG.position.set(P.pos.x,.06,P.pos.z);pgG.scale.set(r,1,r);u.hex.rotation.z+=dt*.5;u.h2.rotation.z-=dt*.9;
+  u.ring.scale.setScalar(1+.02*Math.sin(u.t*6));const k=(u.t*.6)%1;u.ring2.scale.setScalar(.25+.75*k);u.ring2.material.opacity=.4*(1-k)}
+function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||SK[id].kind!=='purge'){if(P.purgeOn){P.purgeOn=false;purgeDraw(false)}pgPrev=false;return false}
+  const st=skillStats(id),held=!!input.held.s1;
+  if(S.demo)P.purgeOn=!!nearestEnemy(P.pos,st.r+4);
+  else if(S.autoSkSet){P.purgeOn=!!(S.autoSkOn&&nearestEnemy(P.pos,st.r+6))}
+  else if(held&&!pgPrev&&!paused()&&!inTown&&P.hp>0){P.purgeOn=!P.purgeOn;feed(P.purgeOn?'정화의 오라 켜짐':'정화의 오라 꺼짐',P.purgeOn?'#ffe080':'#9ab');try{SFX.p(P.purgeOn?'pillar':'swing')}catch(_){}}
+  pgPrev=held;if(inTown||P.hp<=0||knAppr)P.purgeOn=false;
+  const b1=$('bS1');if(b1)b1.classList.toggle('auraon',!!P.purgeOn&&!S.autoSkSet);
+  if(!P.purgeOn||paused()){purgeDraw(P.purgeOn&&!inTown,st.r,0);return true}
+  purgeDraw(true,st.r,dt);P.pgT=Math.max(-.05,(P.pgT||0)-dt);P.pgNv=(P.pgNv||0)-dt;
+  if(P.pgT<=0){const cost=Math.max(1,Math.round(mpCost(id)*(1-st.calm)));
+    if(!(S.test&&S.testMp)&&P.mp<cost){toast('마나가 부족합니다','정화의 오라가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}
+    P.mp-=cost;const h=1-hasteP()*gl(id,'haste');P.pgT+=PURGE_TK*h/(1+gear().aspd/100);
+    const base=baseDmg()*st.dmg,q=(P.pgN=(P.pgN||0)+1)%2===0;
+    for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e||!(e.hp>0))continue;if(Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z)>st.r+e.r*.5)continue;
+      if(!(e.pgS>time-.45))e.pgIn=time;e.pgS=time;const fk=st.brand?1+st.brand*Math.min(1,(time-e.pgIn)/3):1;
+      if(Math.random()<.22)popFx(e.pos.x,1+Math.random(),e.pos.z,.15,.6,.3,0xfff0b0,.8);hurt(e,base*fk,q,st.so);
+      if(!(e.hp>0)&&st.mkill)P.mp=Math.min(P.mmp,P.mp+P.mmp*st.mkill)}
+    if(Math.random()<.5)popFx(P.pos.x+rnd(-1,1)*st.r*.6,.3,P.pos.z+rnd(-1,1)*st.r*.6,.15,.7,.5,0xfff4c0,.7)}
+  if(st.nova&&P.pgNv<=0){P.pgNv=2;ringFx({x:P.pos.x,z:P.pos.z},st.r*1.05,0xffe080,.45);popFx(P.pos.x,1,P.pos.z,.6,st.r*1.3,.35,0xfff0c0,.7);aoe({x:P.pos.x,z:P.pos.z},st.r,baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
+  return true}
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
   PILLAR_FS=`precision mediump float;varying float vH;varying vec3 vN,vV;uniform float uT,uOp;uniform vec3 uCol,uCore;
@@ -8590,7 +8626,7 @@ function nsWhirlTick(dt){if(knAppr)return false;const id=S&&S.cls?C().skills[0]:
   const fl=g2('flame');if(fl&&P.flameT<=0){const f=flameSt(fl);P.flameT=S.demo?.25:nsCd(CD_U*h,h);/* v752: 시연에서는 화염 폭발이 초당 4번 */FLAME_SW=st.radius||6;explode({x:P.pos.x,z:P.pos.z},baseDmg()*st.dmg*f.m,null,st.radius*f.rm,whIce(),st.bossK);FLAME_SW=0}
   P.chan=true;return true}
 function castSkill(slot){if(knAppr)return;/* v590: 다리를 건너는 동안 스킬·물약·구르기 불가 */
-  const id=C().skills[slot==='s1'?0:1],b=SK[id],st=skillStats(id),base=baseDmg();if(NS()&&(b.kind==='whirl'||b.kind==='ray'))return;/* v484: 채널링은 nsWhirlTick / v882: 빛의 광선은 nsRayTick */
+  const id=C().skills[slot==='s1'?0:1],b=SK[id],st=skillStats(id),base=baseDmg();if(b.kind==='purge'||NS()&&(b.kind==='whirl'||b.kind==='ray'))return;/* v484: 채널링은 nsWhirlTick / v882: 빛의 광선은 nsRayTick */
   const cost=mpCost(id);
   if(!(S.test&&S.testMp)&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','기본 공격으로 싸웁니다');P.mpWarn=4}if(!P.cast&&!P.mv&&P.cd.atk<=0&&P.spin<=0&&!inTown)basicAttack();return}/* v439: 마나가 없으면 스킬 버튼으로 기본 공격 */
   if(P.cast||P.mv)return;
@@ -9699,6 +9735,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='boom'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.multi.n>1)parts.push(`화살 ${s.multi.n}발`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);}
   else if(b.kind==='smite'){parts.push(`번개 반경 ${s.r.toFixed(1)}m`);if(s.stw)parts.push(`검 ${1+s.stw.n}자루`);if(s.arc)parts.push(`갈래 번개 ${s.arc.n}줄기`);if(s.fld)parts.push(`지대 ${s.fld.dur.toFixed(1)}초`)}
   else if(b.kind==='ray'){parts.push(`길이 ${s.len.toFixed(1)}m · 굵기 ${s.w.toFixed(2)}m`);if(s.beams>1)parts.push(`광선 ${s.beams}줄`);if(s.focus)parts.push(`집속 +${Math.round(s.focus*100)}%`);if(s.after)parts.push('잔광')}
+  else if(b.kind==='purge'){parts.push(`반경 ${s.r.toFixed(1)}m`);if(s.brand)parts.push(`낙인 최대 +${Math.round(s.brand*100)}%`);if(s.nova)parts.push('정화의 파동');if(s.calm)parts.push(`마나 소모 -${Math.round(s.calm*100)}%`)}
   else if(b.kind==='sanct'){parts.push(`반경 ${s.r.toFixed(1)}m · ${s.zdur.toFixed(1)}초`);if(s.zn>1)parts.push(`최대 ${s.zn}곳`);if(s.bell)parts.push('심판의 종');if(s.bless)parts.push(`축복 -${4*s.bless}%`)}
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
@@ -9721,6 +9758,7 @@ function skillDps0(id){
   if(b.kind==='boom'){const hit=base*st.dmg*st.multi.m*crit*BM_OV*4/* v675: 겹쳐 맞음 — 줄기 위 적 평균 약 4번 */,em=st.ret?hit*st.ret.m*st.ret.p:0/* v719: 회귀 화살 */,sh=0,ov=1+(st.multi.n-1)*.4;return {main:(hit+em+sh)*ov/cd,label:'폭발에 맞은 적 1명당',sub:`화살 ${st.multi.n}발 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${em?' · 회귀':''}${sh?' · 파편':''}`}}
   if(b.kind==='smite'){const hit=base*st.dmg*crit,tw=st.stw?hit*st.stw.m*st.stw.n*.5:0,ar=st.arc?hit*st.arc.m*.5:0,fd=st.fld?hit*st.fld.m*Math.min(st.fld.dur,cd)/st.fld.iv*.6:0;return {main:(hit+tw+ar+fd)/cd,label:'검에 맞은 적 1명당',sub:`반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${tw?` · 검 ${1+st.stw.n}자루`:''}${ar?' · 갈래 번개':''}${fd?' · 잔향':''}`}}
   if(b.kind==='ray'){const h=1-hasteP()*gl(id,'haste'),iv=RAY_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.focus||0);return {main:hit*fk/iv,label:'광선에 맞은 적 1명당 (누르고 있는 동안)',sub:`${iv.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)} · 광선 ${st.beams}줄${st.focus?` · 집속 최대 ×${fk.toFixed(2)}`:''}`}}
+  if(b.kind==='purge'){const h=1-hasteP()*gl(id,'haste'),iv=PURGE_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.brand||0)*.8,nv=st.nova?hit*st.nova/2:0;return {main:hit*fk/iv+nv,label:'오라 안의 적 1명당 (켜져 있는 동안)',sub:`${iv.toFixed(2)}초마다 ${fmtN(hit)} · 반경 ${st.r.toFixed(1)}m${st.brand?` · 낙인 최대 ×${(1+st.brand).toFixed(2)}`:''}${st.nova?' · 정화의 파동':''}`}}
   if(b.kind==='sanct'){const hit=base*st.dmg*crit,bl=st.bell?hit*st.bell/st.zdur:0;return {main:hit/.5+bl,label:'성역 안의 적 1명당 (성역 1곳)',sub:`0.5초마다 ${fmtN(hit)} · ${st.zdur.toFixed(1)}초 · 최대 ${st.zn}곳${st.bell?' · 심판의 종':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
   if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
@@ -11036,7 +11074,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   if(nsShots.length)nsShotStep(dt);P.inv-=dt;P.swing-=dt;P.spin-=dt;P.dashT=(P.dashT||0)-dt;
   if(!inTown){
   /* v127: 스킬은 누를 때마다 한 번만 발동(꾹 눌러도 연발 없음) — 눌렀을 때 fireNow('s1')에서 처리 */
-  if(!nsWhirlTick(dt)&&!nsRayTick(dt)&&input.held.s1&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');
+  if(!nsWhirlTick(dt)&&!nsRayTick(dt)&&!nsPurgeTick(dt)&&input.held.s1&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused())castSkill('s1');
   if(S.autoSkSet&&S.autoSkOn&&S.cls&&P.cd.s1<=0&&!P.cast&&!P.mv&&P.spin<=0&&P.hp>0&&!paused()){const t=nearestEnemy(P.pos,15);if(t){if(pcMode){mouseW.x=t.pos.x;mouseW.z=t.pos.z}castSkill('s1')}}/* v278: 모든 스킬이 꾹 누르고 있으면 쿨타임마다 계속 발동(v273에서 회전 베기 한정 → 전체로 확대) */
   if(input.held.php){input.held.php=false;usePot('hp')}
   if(input.held.pmp){input.held.pmp=false;usePot('mp')}
