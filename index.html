@@ -8270,7 +8270,7 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
   if(!P.purgeOn||paused()){purgeDraw(P.purgeOn&&!inTown,st.r,0);return true}
   purgeDraw(true,st.r,dt);P.pgT=Math.max(-.05,(P.pgT||0)-dt);P.pgNv=(P.pgNv||0)-dt;
   const h=1-hasteP()*gl(id,'haste');
-  if(!(S.test&&S.testMp)){/* v949: 켜 둔 동안 시간에 따라 마나 소모 — 회전 베기와 같은 초당 소모(mpCost ÷ 타격 간격) */const use=mpCost(id)/nsAct(h)*dt;
+  if(!(S.test&&S.testMp)){/* v949: 켜 둔 동안 시간에 따라 마나 소모 — 회전 베기와 같은 초당 소모(mpCost ÷ 타격 간격) */const use=mpCost(id)/Math.max(.2,st.cd)*dt;/* v978: 다른 직업과 같게 — 1회 마나 ÷ 쿨타임 (전에는 회전 베기 타격 간격으로 나눠 약 1.4배 빨랐음) */
     if(P.mp<use){toast('마나가 부족합니다','정화의 빛가 꺼졌습니다');P.purgeOn=false;purgeDraw(false);return true}P.mp-=use}
   if(P.pgT<=0){P.pgT+=PURGE_TK*h/(1+gear().aspd/100);
     const base=baseDmg()*st.dmg,q=(P.pgN=(P.pgN||0)+1)%2===0;
@@ -9336,7 +9336,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v977';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v978';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9411,7 +9411,7 @@ function hud(){placeEnv();placePort();
   {const tb=$('openTown');const t=inTown?'사냥터':'마을';if(tb.lastChild.textContent!==t){tb.lastChild.textContent=t;townIcon(tb)}const pb=$('lsStrip').querySelector('[data-px=openTown]');if(pb){const tn=[...pb.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());if(tn&&tn.textContent!==t){tn.textContent=t;townIcon(pb)}}$('acts').classList.toggle('town',inTown)}
   const boss=enemies.find(e=>e.boss&&e.aggro)||(RZ&&RZ.boss&&RZ.boss.hp>0&&enemies.includes(RZ.boss)?RZ.boss:null);/* v404: 균열 군주도 상단 체력바 */$('bossbar').hidden=!boss||bossIntroOn();/* v553: 등장 연출이 끝나면 체력바 */
   if(boss){$('bossname').textContent=`${boss.name} · ${Math.ceil(boss.hp/boss.mhp*100)}%`;$('bossb').style.width=(boss.hp/boss.mhp*100)+'%'}
-  $('ptsBadge').hidden=!S.statPts;$('ptsBadge').textContent=S.statPts;
+  $('ptsBadge').hidden=NS()||!S.statPts;$('ptsBadge').textContent=S.statPts;/* v978: 스탯 포인트 폐지 — 남은 값이 있어도 점 표시 안 함 */
   const sk=C().skills;
   $('bS1').style.setProperty('--p',P.cd.s1/skillStats(sk[0]).cd);$('bMv').style.setProperty('--p',uqOn('shadow')&&P.mvCh>0?0:P.cd.mv/mvCd());
 
@@ -9665,7 +9665,7 @@ $('classSheet').addEventListener('change',e=>{if(e.target.id!=='tLvIn')return;co
 $('classSheet').addEventListener('click',e=>{const ts=e.target.closest('[data-ts]');if(ts){testSpec=+ts.dataset.ts;testLv=0;showClassSel();return}const tn=e.target.closest('[data-tnt]');if(tn){testNT=+tn.dataset.tnt;showClassSel();return}const tl=e.target.closest('[data-tlv]');if(tl){testLv=Math.max(1,Math.min(LV_MAX,lvSel()+ +tl.dataset.tlv));showClassSel();return}if(e.target.id==='cBack'){testPick=false;$('classSel').hidden=true;showSlots();return}const b=e.target.closest('[data-c]');if(!b)return;
   $('classSel').hidden=true;openSkillSel(b.dataset.c)});
 const skipOk=()=>{try{if(localStorage.getItem('ember-sanctum-skip')==='1'||localStorage.getItem('ember-sanctum-story')==='1')return true;for(let i=0;i<SLOTS;i++){const d=readSlot(i);if(d&&!d.test&&((d.duelWins||0)>0||(d.ch||0)>=NCH))return true}}catch(e){}return false};/* v676: 한 캐릭터라도 스토리를 마쳤으면(아쉬카르 결말) 부캐는 스토리 스킵 */
-function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};for(const g of gemsFor(m))S.sk[m][g]=GMAX;S.pending=0;/* v963: 스킵하면 1차 강화는 모두 끝난 상태(전에는 30회 직접 선택) */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=30*STAT_PER_LV;S.tut={intro:1};S.n31=1;S.n5=1;
+function applySkipStart(){const m=S.main;S.lv=31;S.xp=0;S.sk={};S.sk[m]={};for(const g of gemsFor(m))S.sk[m][g]=GMAX;S.pending=0;/* v963: 스킵하면 1차 강화는 모두 끝난 상태(전에는 30회 직접 선택) */S.skp={};S.stats={str:0,agi:0,int:0};S.statPts=0;/* v978: 스탯 포인트는 폐지 — 스킵 시작에도 지급 안 함 */S.tut={intro:1};S.n31=1;S.n5=1;
   for(const k of EQS){S.eq[k]=makeItem(k,30,2,0);if(k==='weapon')ownWeapon(S.eq[k])}S.ch=NCH;S.phase=0;S.kills=0;S.tier=1;S.tierKills=0;S.egSp=0;S.maxTier=Math.max(S.maxTier||0,1);S.egK=0;S.skipStart=1;refreshMax();P.hp=P.mhp;P.mp=P.mmp}/* v228: 스토리 스킵 시작 — 31레벨·1차 강화 완료·스토리 클리어 수준 장비·엔드게임 위험도 1 */
 const ownWeapon=it=>{if(it&&it.slot==='weapon'&&it.wc!==bc(S.cls)){it.wc=bc(S.cls);it.name=nItemName(it)}return it};/* v520: 시작·스킵 무기는 항상 내 직업 무기 */
 /* v830: 설정 「테스트」 — 오픈 전 임시 기능. 직업·주력 스킬 변경(장비는 그대로, 무기만 새 직업 무기로) */
