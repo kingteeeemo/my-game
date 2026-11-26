@@ -977,10 +977,10 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 @media (orientation:landscape) and (min-height:521px){.sbanner.duel{margin-top:calc(17vh/var(--hz,1.7) - 98px)}}/* v572: PC는 HUD zoom(--hz) 때문에 px·vh 값이 zoom배로 커져 보임 → 문구 중심이 화면 높이의 17%에 오도록 zoom으로 나눠 맞춤 */
 /* v70 월드맵 */
 #stcF{position:fixed;inset:0;z-index:58;background:radial-gradient(ellipse at 50% 40%,#3a1206,#000 70%);opacity:0;pointer-events:none;transition:opacity 1.4s;display:flex;align-items:center;justify-content:center}#stcF.on{opacity:1}#stcF p{color:#f0dcc0;font:500 15px var(--ko);letter-spacing:.06em}body.stc .hud,body.stc .rcol,body.stc #toast{opacity:0;pointer-events:none;transition:opacity .4s}#wmapSheet{max-width:560px}.amwrap{display:flex;justify-content:center;border-radius:12px;background:#0f1014;border:1px solid var(--line);overflow:hidden}#amC{display:block}.amleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}.amleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-sizing:border-box}.wmwrap{display:flex;flex-direction:column;gap:10px}
-.wm{width:100%;height:auto;max-height:62vh;display:block;border-radius:12px;background:#0e0d0c;border:1px solid #3a352e}
+.wm{width:100%;height:auto;max-height:62vh;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;border-radius:12px;background:#0e0d0c;border:1px solid #3a352e}.wmbox{position:relative}.wmbox .wmz{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}.wmz button{width:34px;height:34px;border-radius:9px;border:1px solid #6a5a40;background:rgba(20,16,12,.85);color:#efe1c8;font:700 18px/1 var(--en);cursor:pointer}.wmz button:active{background:#3a2c1c}.wmbox .wmzl{position:absolute;left:10px;bottom:10px;font:600 11px var(--ko);color:#d8c9aa;background:rgba(20,16,12,.7);padding:3px 8px;border-radius:8px;pointer-events:none}
 .wminfo{display:flex;flex-direction:column;gap:6px}.wminfo b.cur{font-size:17px;color:#efe1c8}.wminfo .wmbar{height:6px;border-radius:4px;background:#2a2a33;overflow:hidden}.wminfo .wmbar i{display:block;height:100%;background:linear-gradient(90deg,#8a2228,#c23a3f)}
 @keyframes wmflow{to{stroke-dashoffset:-20}}.wm .fut{animation:wmflow 1.2s linear infinite}
-@media (orientation:landscape) and (max-height:560px){#wmapSheet{max-width:820px}.wmwrap{flex-direction:row;align-items:stretch}.wm{flex:1;min-width:0;max-height:70vh}.wminfo{flex:0 0 34%}}
+@media (orientation:landscape) and (max-height:560px){#wmapSheet{max-width:820px}.wmwrap{flex-direction:row;align-items:stretch}.wmbox{flex:1;min-width:0}.wm{max-height:70vh}.wminfo{flex:0 0 34%}}
 .tjump{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px dashed #5ad1c8;border-radius:10px;background:#14202a;font-size:13px}.tjump span{color:#5ad1c8;font-weight:700;white-space:nowrap}.tjump select{flex:1;min-width:0;background:#0f1014;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit}
 /* v78 장비 화면 */
 .ivcmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -9518,7 +9518,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1012';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1013';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10907,6 +10907,22 @@ function wmLab(x,y,k,t,st){const fs=19,w=Math.round([...t].reduce((a,c)=>a+(c===
   return `<g><rect x="${(cx-w/2).toFixed(1)}" y="${cy-h/2}" width="${w}" height="${h}" rx="3" fill="${C[0]}" fill-opacity=".82" stroke="${C[1]}" stroke-width="1.4"/><rect x="${(cx-w/2+3).toFixed(1)}" y="${cy-h/2+3}" width="${w-6}" height="${h-6}" rx="2" fill="none" stroke="${C[1]}" stroke-width=".6" opacity=".5"/><text x="${cx.toFixed(1)}" y="${cy+6.5}" text-anchor="middle" font-family="${WMF}" font-size="${fs}" font-weight="700" letter-spacing="1" fill="${C[2]}">${t}</text></g>`}
 function wmSeal(x,y,n,st){const C=st==='cur'?['#8a1f1c','#ffcf8a','#fff4e0']:st==='done'?['#7a2420','#d7a45f','#f6e6c8']:['#1a1511','#8f7a5a','#cbbfa8'],r=st==='cur'?17:14;
   return `${st==='cur'?`<circle cx="${x}" cy="${y}" r="${r+9}" fill="none" stroke="#ffb35a" stroke-width="2" opacity=".55"><animate attributeName="r" values="${r+5};${r+14};${r+5}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0;.6" dur="2s" repeatCount="indefinite"/></circle>`:''}<circle cx="${x}" cy="${y}" r="${r+3}" fill="#0b0908" opacity=".55"/><circle cx="${x}" cy="${y}" r="${r}" fill="${C[0]}" stroke="${C[1]}" stroke-width="2"/><text x="${x}" y="${y+6}" text-anchor="middle" font-family="${WMF}" font-size="${r+2}" font-weight="700" fill="${C[2]}">${n}</text>`}
+/* v1010: 월드맵 확대·이동 — 최대 2.5배. 한 손가락 드래그 이동, 두 손가락 핀치·휠·더블탭·+/− 버튼 확대 */
+function wmZoomInit(){const svg=document.querySelector('#wmapSheet svg.wm');if(!svg)return;const W=1200,H=896,ZMAX=2.5;let Z=1,X=0,Y=0;const ps=new Map();let pd=0,mv=0;
+  const ap=()=>{const vw=W/Z,vh=H/Z;X=clamp(X,0,W-vw);Y=clamp(Y,0,H-vh);svg.setAttribute('viewBox',`${X.toFixed(1)} ${Y.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);svg.style.cursor=Z>1?'grab':'default'},
+    geo=()=>{const r=svg.getBoundingClientRect(),vw=W/Z,vh=H/Z,s=Math.min(r.width/vw,r.height/vh);return{r,s,ox:(r.width-vw*s)/2,oy:(r.height-vh*s)/2,vw,vh}},
+    zoomAt=(nz,cx,cy)=>{nz=clamp(nz,1,ZMAX);if(nz===Z)return;const g=geo(),fx=(cx-g.r.left-g.ox)/(g.vw*g.s),fy=(cy-g.r.top-g.oy)/(g.vh*g.s),px=X+fx*g.vw,py=Y+fy*g.vh;Z=nz;X=px-fx*W/Z;Y=py-fy*H/Z;ap()},
+    mid=()=>{const r=svg.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+  svg.addEventListener('pointerdown',e=>{ps.set(e.pointerId,[e.clientX,e.clientY]);try{svg.setPointerCapture(e.pointerId)}catch(_){}pd=ps.size===2?Math.hypot(...[...ps.values()].reduce((a,b)=>[a[0]-b[0],a[1]-b[1]]).map(Math.abs)):0;mv=0});
+  svg.addEventListener('pointermove',e=>{const o=ps.get(e.pointerId);if(!o)return;const nx=e.clientX,ny=e.clientY;
+    if(ps.size===1){const g=geo();mv+=Math.abs(nx-o[0])+Math.abs(ny-o[1]);if(Z>1){X-=(nx-o[0])/g.s;Y-=(ny-o[1])/g.s;ap()}ps.set(e.pointerId,[nx,ny])}
+    else if(ps.size===2){ps.set(e.pointerId,[nx,ny]);const [a,b]=[...ps.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd>0)zoomAt(Z*d/pd,(a[0]+b[0])/2,(a[1]+b[1])/2);pd=d;mv=99}});
+  const up=e=>{ps.delete(e.pointerId);pd=0};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Z*(e.deltaY<0?1.18:1/1.18),e.clientX,e.clientY)},{passive:false});
+  svg.addEventListener('dblclick',e=>{if(mv>20)return;zoomAt(Z>1.2?1:ZMAX,e.clientX,e.clientY)});
+  const zi=document.getElementById('wmZi'),zo=document.getElementById('wmZo');
+  if(zi)zi.addEventListener('click',()=>zoomAt(Z*1.4,...mid()));if(zo)zo.addEventListener('click',()=>zoomAt(Z/1.4,...mid()));
+  svg._wz=(z,fx,fy)=>{const r=svg.getBoundingClientRect();zoomAt(z,r.left+r.width*fx,r.top+r.height*fy)};ap()}
 function renderMap(){
   const v=wmPos(),eg=S.ch>=NCH,leg=Math.min(NCH-1,Math.floor(v)),fr=eg?1:v-leg,INK='#9e2a26';
   let g=`<image href="story/worldmap.webp" x="0" y="0" width="1200" height="896" preserveAspectRatio="xMidYMid slice"/><rect width="1200" height="896" fill="#000" opacity=".08"/>`;
@@ -10934,10 +10950,11 @@ function renderMap(){
   const sub=S.tutor?'훈련장 · 여정을 떠나기 전 튜토리얼':eg?`위험도 ${S.tier} · 여정의 끝, 엔드게임 영역`:S.phase===0?'출발':S.phase===1?`길 끝 제단의 보스가 기다립니다 · 길 ${Math.round(storyProg*100)}% 지남`:S.phase===2?'다음 길이 열렸습니다':(S.ch===LAST?'최종 결전':'다음 길로');
   const pct=eg?100:Math.round(v/NCH*100);
   $('wmapSheet').innerHTML=`<div class="shead"><div><h2>루멘하르</h2></div><button class="close" id="wmClose">닫기</button></div>
-   <div class="wmwrap"><svg class="wm" viewBox="0 0 1200 896" role="img" aria-label="루멘하르 지도">${g}${lines}${nodes}${mk}</svg>
+   <div class="wmwrap"><div class="wmbox"><svg class="wm" viewBox="0 0 1200 896" role="img" aria-label="루멘하르 지도">${g}${lines}${nodes}${mk}</svg><div class="wmz"><button id="wmZi" aria-label="확대">+</button><button id="wmZo" aria-label="축소">−</button></div><div class="wmzl">드래그 이동 · 두 손가락 · 더블탭 확대</div></div>
    <div class="wminfo"><span class="chap">현재 위치</span><b class="cur">${info}</b><span class="hint" style="margin:0">${sub}</span>
    <div class="wmbar"><i style="width:${pct}%"></i></div><span class="hint" style="margin:0">여정 ${eg?'완주 · 엔드게임 진행 중':`${S.ch+1} / ${NCH}단계`}</span>
    <span class="hint" style="margin:6px 0 0">남서쪽 해안에 닿아 세렌 마을을 지나고, 대륙을 한 바퀴 돌아 가운데 봉우리 루멘 성 꼭대기의 불타는 왕좌까지 오릅니다. 진홍 실선은 이미 지나온 길입니다.</span></div></div>`;
+  wmZoomInit();
   const me=$('wmMe');
   if(eg)me.setAttribute('transform',`translate(${ex},${ey})`);
   else{const p=document.getElementById('wmL'+leg);if(p){const q=p.getPointAtLength(p.getTotalLength()*fr);me.setAttribute('transform',`translate(${q.x},${q.y})`)}}
