@@ -11541,7 +11541,7 @@ function chainBoom(c){if(chBfT!==time){chBfT=time;chBf=0}chBf++;if(chBf<=4)try{S
   const hk=hitKind;hitKind='';pgBoomNow=true;for(const o of enemies)if(o.hp>0&&!o.boss&&!o.duel&&!o.final&&!o.dummy&&!o.air&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<c.r+o.r&&o.chT!==time){o.chT=time;hurt(o,Math.min(c.d,o.mhp*.5),3)}pgBoomNow=false;hitKind=hk}/* v943: 한 순간에 적 하나는 폭발 피해를 한 번만, 최대 그 적 생명력의 50% — 맞지 않은 멀쩡한 적은 폭발 한 번으로 쓰러지지 않음 */
 function uqTick(dt){if(uqOn('blood')||P.bloodShown){const bn=bloodN();if(bn!==P.bloodShown){P.bloodShown=bn;nsxUpd()}}/* v968: 스택이 변하면 범위(NSX) 갱신 */if(uqOn('shadow')){if(P.mvCh===undefined)P.mvCh=5;if(P.mvCh<5&&P.cd.mv<=0){P.mvCh++;if(P.mvCh<5)P.cd.mv=mvCd()}}
   if((uqLblT-=dt)<=0){uqLblT=.15;try{const l=$('lMv');if(l){const t=uqOn('shadow')?`순간이동 ${P.mvCh}`:'구르기';if(l.textContent!==t)l.textContent=t}}catch(_){}}
-  if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<60;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
+  if(CHX.length){let n=0;for(let i=0;i<CHX.length&&n<240;){const c=CHX[i];if(c.t<=time){CHX.splice(i,1);n++;chainBoom(c)}else i++}}}
 function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)}if(STC){stcTick(dt)}packTick();if(mapKind==='route'&&!inTown)rtTick(dt);wxTick(dt);wx2Tick(dt);if(mapKind==='story'&&!inTown&&S.ch<NCH&&CHZ[S.ch])chzTick(dt);
   time+=dt;
   if(pcMode)updMouseWorld();
