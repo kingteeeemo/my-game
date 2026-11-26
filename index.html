@@ -2096,7 +2096,7 @@ const NSLOT={/* v900·v903: 기본 옵션 = 전투력(DPS·버티기)에 들어�
   armor:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc','res']},
   boots:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc','res','mspd']},
   belt:{o:['defp','evap','esp','hp','dr'],x:['mp','regen','mreg','esrc','res']}};
-const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',archer:'활',mage:'지팡이'};
+const NBT={def:'방어',eva:'회피',es:'에너지 쉴드'},NWC={warrior:'검',archer:'활',mage:'지팡이'},wcN=(wc,c)=>wc==='mage'&&(c||(typeof S!=='undefined'&&S&&S.cls))==='priest'?'성서':NWC[wc];/* v1001: 사제 무기는 성서(옵션은 지팡이와 동일) */
 const nRound=(v,dp)=>{const m=Math.pow(10,dp);return Math.round(v*m)/m};
 const nRoll=(r,dp,q)=>nRound(r[0]+(r[1]-r[0])*(q===undefined?Math.random():q),dp);
 /* 강화: 기본옵에만. 성공 확률(현재 → 다음 단계)과 성공 시 오르는 양(%) */
@@ -2125,7 +2125,7 @@ function nTierW(t){if(S.ch<NCH){const c=S.ch;return c>=9?[0,0,0,10,35,55]:c>=8?[
   const w4=lerp(t,[[1,10],[39,30],[70,35],[100,40]]),w6=t>=100?0:lerp(t,[[1,55],[39,25],[99,5]]);
   return[w1,w2,w3,w4,Math.max(0,100-w1-w2-w3-w4-w6),w6]}
 function nRollTier(){const w=nTierW(S.tier||1);let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<6;i++){r-=w[i];if(r<=0)return i+1}return 6}
-const nItemName=(it)=>{const t=it.tier;const nm=it.slot==='weapon'?['','잿불','룬','기사의','강철','사냥꾼의','녹슨'][t]+' '+NWC[it.wc]:['','잿불','룬','기사','판금','가죽','누더기'][t]+' '+SLOTN[it.slot];return nm};
+const nItemName=(it)=>{const t=it.tier;const nm=it.slot==='weapon'?['','잿불','룬','기사의','강철','사냥꾼의','녹슨'][t]+' '+wcN(it.wc):['','잿불','룬','기사','판금','가죽','누더기'][t]+' '+SLOTN[it.slot];return nm};
 /* 줄의 범위: 기본옵은 부위별 범위, 나머지는 옵션 범위 — 줄 티어 기준 */
 const nLineR=(it,l)=>l.b?NSB[it.slot].r[(l.t||it.tier)-1]:NSO[l.k].r[(l.t||it.tier)-1];
 const nLineDp=l=>l.b&&(l.k==='def'||l.k==='eva'||l.k==='es'||l.k==='wd'||l.k==='hp'||l.k==='mp')?0:NSO[l.k].dp;
@@ -2194,7 +2194,7 @@ const nLineTxt=(l,L,it)=>{const v=l.v*nLineMul(l,L);return `${nName(l.k,it)} ${n
 const nTT=(l,it)=>{const t=l.t||it.tier;return `<i class="ltt" style="--tc:${NT_C[t]}">${t}T</i>`};
 /* 아이템이 장착된 칸(반지는 두 칸 중 하나) — 가방 아이템은 같은 종류의 첫 칸 */
 const nsItSlot=it=>EQS.find(k=>S.eq&&S.eq[k]===it)||it.slot;
-function nsItemList(it,L=0){return `<ul><li class="spopt"><span>${it.tier}티어</span>${it.slot==='weapon'?NWC[it.wc]+(it.wc!==bc(S.cls)?' (착용 불가)':''):it.bt?NBT[it.bt]+' 베이스':SLOTN[it.slot]}</li>${(()=>{const li=l=>`<li class="${l.b?'nsb':l.o?'':'nsx'}">${nTT(l,it)}${l.b?'<i class="nsxi nsbi">고정</i> ':''}${nLineTxt(l,L,it)}</li>`;return it.lines.filter(l=>l.b).map(li).join('')+(it.uid?'<li class="optsec u">? 옵션 미확인 · 가방에서 감정</li>':'<li class="optsec a">기본 옵션</li>'+it.lines.filter(l=>!l.b&&l.o).map(li).join('')+'<li class="optsec s">특수 옵션</li>'+it.lines.filter(l=>!l.b&&!l.o).map(li).join(''))})()}</ul>`}
+function nsItemList(it,L=0){return `<ul><li class="spopt"><span>${it.tier}티어</span>${it.slot==='weapon'?wcN(it.wc)+(it.wc!==bc(S.cls)?' (착용 불가)':''):it.bt?NBT[it.bt]+' 베이스':SLOTN[it.slot]}</li>${(()=>{const li=l=>`<li class="${l.b?'nsb':l.o?'':'nsx'}">${nTT(l,it)}${l.b?'<i class="nsxi nsbi">고정</i> ':''}${nLineTxt(l,L,it)}</li>`;return it.lines.filter(l=>l.b).map(li).join('')+(it.uid?'<li class="optsec u">? 옵션 미확인 · 가방에서 감정</li>':'<li class="optsec a">기본 옵션</li>'+it.lines.filter(l=>!l.b&&l.o).map(li).join('')+'<li class="optsec s">특수 옵션</li>'+it.lines.filter(l=>!l.b&&!l.o).map(li).join(''))})()}</ul>`}
 function nsVals(it){const L=enhL(nsItSlot(it)),m={};for(const l of it.lines)m[l.k]=(m[l.k]||0)+l.v*nLineMul(l,L);return m}
 const nsDpsRel=it=>it.slot==='weapon'||it.lines.some(l=>['cc','cdm','aspd','cspd','inc','mdmg','pdmg','sdmg','amp','bcrit'].includes(l.k));
 /* 종합 평가: 줄마다 1티어 최상 대비 비율 (기본옵 ×2, 접두어 ×1.5) · 다른 직업 전용 옵션은 0 */
@@ -8767,7 +8767,7 @@ function rrPwHtml(it){let cur,base=null,lab='';try{cur=rrPw(it);if(rrPw0&&rrPw0.
   const dl=(a,b)=>{if(!b)return '';const r=(a/b-1)*100;if(Math.abs(r)<.05)return '<i class="z">±0%</i>';return `<i class="${r>0?'u':'d'}">${r>0?'▲':'▼'}${Math.abs(r).toFixed(1)}%</i>`};
   return `<div class="rrpw"><div><small>DPS</small><b>${fmtG4(cur.d)}</b>${base?dl(cur.d,base.d):''}</div><div><small>EHP</small><b>${Math.round(cur.e).toLocaleString('ko-KR')}</b>${base?dl(cur.e,base.e):''}</div>${lab?`<em>${lab}</em>`:EQS.some(k=>S.eq[k]===it)?'<em>장착 중</em>':''}</div>`}
 function rrCard(it){const L=enhL(nsItSlot(it));
-  return `<div class="rri"><span class="ii">${ico(icoSlot(it.slot,it))}</span><div><small>${SLOTEN[it.slot].toUpperCase()} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</small><b>${it.name}</b><span>${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}</span></div>${rrPwHtml(it)}</div>
+  return `<div class="rri"><span class="ii">${ico(icoSlot(it.slot,it))}</span><div><small>${SLOTEN[it.slot].toUpperCase()} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</small><b>${it.name}</b><span>${it.tier}티어 · ${it.slot==='weapon'?wcN(it.wc):it.bt?NBT[it.bt]:SLOTN[it.slot]}</span></div>${rrPwHtml(it)}</div>
   <div class="rrseg">${[['rr','수치 조정'],['cv','옵션 변환'],['up','티어 승급']].map(([k,n])=>`<button class="${rrTab===k?'on':''}" data-rt="${k}">${n}</button>`).join('')}</div>
   <div class="rrsd">${rrTab==='rr'?'모든 줄의 수치를 각자 티어 범위 안에서 다시 뽑습니다':rrTab==='cv'?'바꿀 줄을 누르세요 · 티어는 그대로, 옵션 종류만 바뀜':`올릴 줄을 누르세요 · 아이템 티어(${it.tier}티어)까지`}</div>
   <div class="rrlines">${(()=>{const ix=it.lines.map((l,i)=>[l,i]),g=f=>ix.filter(([l])=>f(l)).map(([l,i])=>rrRow(it,l,i,L)).join('');return g(l=>l.b)+`<div class="optsec a">기본 옵션</div>`+g(l=>!l.b&&l.o)+`<div class="optsec s">특수 옵션</div>`+g(l=>!l.b&&!l.o)})()}</div>`}
@@ -9498,7 +9498,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1004';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1005';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9853,10 +9853,10 @@ function testSwitch(cls,main){if(!CLS[cls]||!CLS[cls].opts.includes(main)||!S.cl
 let sxtC=null,sxtS=null;
 function renderSxTest(){const el=$('sxTest');if(!el)return;if(!S.cls||S.demo){el.innerHTML='<div class="sx-sec">Test</div><p class="sx-note">캐릭터로 플레이 중일 때 쓸 수 있습니다.</p>';return}
   const cl=Object.keys(CLS).filter(k=>!CLS[k].testOnly||S.test);if(!sxtC||!cl.includes(sxtC))sxtC=S.cls;const ops=CLS[sxtC].opts;if(!ops.includes(sxtS))sxtS=sxtC===S.cls&&ops.includes(S.main)?S.main:ops[0];
-  const same=sxtC===S.cls&&sxtS===S.main,nw=sxtC!==S.cls?NWC[bc(sxtC)]:'';
+  const same=sxtC===S.cls&&sxtS===S.main,nw=sxtC!==S.cls?wcN(bc(sxtC),sxtC):'';
   el.innerHTML=`<div class="sx-sec">Class</div><div class="sx-q" style="grid-template-columns:repeat(${Math.min(cl.length,4)},1fr)">${cl.map(k=>`<button data-xc="${k}" class="${k===sxtC?'on':''}"><b>${CLS[k].n}</b><small>${k===S.cls?'지금 직업':CLS[k].en}</small></button>`).join('')}</div>
   <div class="sx-sec">Skill</div><div class="sx-q two">${ops.map(id=>`<button data-xs="${id}" class="${id===sxtS?'on':''}"><b>${SK[id].n}</b><small>${sxtC===S.cls&&id===S.main?'지금 스킬':SK[id].en||''}</small></button>`).join('')}</div>
-  <p class="sx-note">지금: <b style="color:var(--ink)">${CLS[S.cls].n} · ${SK[S.main].n}</b><br>장비는 그대로 두고, 무기만 고른 직업의 무기(${nw||NWC[bc(S.cls)]})로 바뀝니다. 무기의 직업 피해·공격/시전 속도 줄도 새 직업에 맞게 바뀝니다.<br>주력 스킬을 바꾸면 1차·2차 강화 단계가 새 스킬로 그대로 옮겨집니다(같은 강화는 그대로, 나머지는 순서대로 짝지어 같은 단계).</p>
+  <p class="sx-note">지금: <b style="color:var(--ink)">${CLS[S.cls].n} · ${SK[S.main].n}</b><br>장비는 그대로 두고, 무기만 고른 직업의 무기(${nw||wcN(bc(S.cls))})로 바뀝니다. 무기의 직업 피해·공격/시전 속도 줄도 새 직업에 맞게 바뀝니다.<br>주력 스킬을 바꾸면 1차·2차 강화 단계가 새 스킬로 그대로 옮겨집니다(같은 강화는 그대로, 나머지는 순서대로 짝지어 같은 단계).</p>
   <button class="sx-link" id="sxtGo" ${same?'disabled style="opacity:.45"':''}><b>${same?'지금 쓰는 직업·스킬입니다':`${CLS[sxtC].n} · ${SK[sxtS].n}(으)로 바꾸기`}</b><span>›</span></button>`}
 
 /* ===== v784 프롤로그: 캐릭터를 만든 직후 · 1장 시작 연출 전 — 그림 7장 슬라이드 (천천히 확대·좌우 이동, 재·불티, 명조 자막) =====
@@ -10470,7 +10470,7 @@ function ivCardNS(it,role,L){const bl=it.lines.find(l=>l.b),os=it.lines.filter(l
   const col=(a,c,lab)=>`<div class="ivcol2"><div class="ivch ${c}">${lab}</div>${a.length?a.map(row).join(''):'<div class="ivo none">—</div>'}</div>`;
   const pwc=role==='sel'&&!it.uid?pwChip(it):'';
   return `<div class="ivc ${role} ns3${it.tier<=2?' tpx':''}${pwc?' haspw':''}" style="--tc:${NT_C[it.tier]}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span>${pwc}<span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
-    <b class="ivn" style="color:${NT_C[it.tier]}">${it.name}</b><span class="ivs">${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}</span>
+    <b class="ivn" style="color:${NT_C[it.tier]}">${it.name}</b><span class="ivs">${it.tier}티어 · ${it.slot==='weapon'?wcN(it.wc):it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}</span>
     ${bl?`<div class="ivfx"><span class="lb">고정 옵션</span><div class="fv"><span>${ivName(bl.k,it.slot,it)}</span><b>${nFmt(bl.k,bl.v*nLineMul(bl,L))}</b></div>${L?`<small>강화 +${L} 적용 · 기본 ${nFmt(bl.k,bl.v)}</small>`:''}</div>`:''}
     ${it.uid?`<div class="ivseals"><div class="ivseal"><b>?</b>기본 옵션<small>미확인</small></div><div class="ivseal"><b>?</b>특수 옵션<small>미확인</small></div></div>`:`<div class="ivcols${it.idT&&Date.now()-it.idT<1500?' reveal':''}">${col(os,'a','기본 옵션')}${col(xs,'s','특수 옵션')}</div>`}</div>`}
 function ivCard(it,role,other){
@@ -10485,7 +10485,7 @@ function ivCard(it,role,other){
   else if(role==='sel'&&osp)spl=`<div class="ivl"><span class="spb off">특수</span><span style="color:var(--muted)">없음</span><span class="d bad">▼ ${OPT[osp.k].n} ${OPT[osp.k].f(osp.v)}</span></div><div class="ivhint">전승사에서 지금 장비의 특수 능력치를 옮길 수 있습니다</div>`;
   if(it.ns)return ivCardNS(it,role,L);/* v900: 고정 옵션 + 기본·특수 두 칸 */
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
-    <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
+    <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?wcN(it.wc):it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
 function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()&&it.uid)return `<div class="ivact"><div class="ivdps uid"><span>옵션 미확인</span><b>감정하면 옵션이 공개됩니다</b></div>
   <div class="btns"><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button><button class="primary" id="iIdent" style="white-space:nowrap">감정하기</button></div></div>`;
   if(it.ns&&NS()){
@@ -10600,7 +10600,7 @@ $('invSheet').addEventListener('click',e=>{
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
   if(b.dataset.uq){uqPicker();return}
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','gloves','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:kSlot(k)}renderInv();return}
-  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i];if(it.uid){toast('감정 필요','옵션을 감정한 뒤 장착할 수 있습니다');return}const ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)){toast('착용 불가',`${NWC[it.wc]}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
+  if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i];if(it.uid){toast('감정 필요','옵션을 감정한 뒤 장착할 수 있습니다');return}const ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)){toast('착용 불가',`${wcN(it.wc)}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.wlook){S.wlook=S.wlook===b.dataset.wlook?null:b.dataset.wlook;save();renderInv();return}
   if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
