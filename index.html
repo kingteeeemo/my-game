@@ -1426,7 +1426,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   <div id="topStack"><div class="bossbar" id="bossbar" hidden><span id="bossname"></span><div class="bar"><i id="bossb"></i></div></div><button id="bossExit" hidden aria-label="나가기"><svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="xl"> 나가기</span></button><div id="riftHud" hidden></div></div><div class="stagechip" id="stageChip"><div class="scrow"><b id="scN"></b><span id="scT"></span></div><div class="scpg" id="scPgW" hidden><i id="scPg"></i></div><em id="scD"></em></div>
     <div class="lcol">
       <div class="bldnm"><small id="clsNm"></small><b id="bldNm"></b></div><div class="pid"><span class="lvt"><small>LV</small><b id="pLv">1</b></span><i class="sep"></i><small id="pCls"></small><b id="nickNm"></b></div>
-      <div id="curBar"><div class="cr1"><span class="cg"><svg class="ci" viewBox="4.2 5 55.5 55.5"><use href="#cuGC" width="64" height="64"/></svg><b id="goldT">0</b></span></div><div class="cr2"><span class="ce"><svg class="ci" viewBox="5.2 5.4 53.6 53.6"><use href="#cuEA" width="64" height="64"/></svg><b id="essT">0</b></span><span class="cf"><svg class="ci" viewBox="3.8 5.8 56.4 56.4"><use href="#cuFC" width="64" height="64"/></svg><b id="rrT">0</b></span><span class="cs"><svg class="ci" viewBox="5 4.5 54 56"><use href="#cuSL" width="64" height="64"/></svg><b id="sealT">0</b></span><span class="cl"><svg class="ci" viewBox="3.8 4.1 56.4 56.4"><use href="#cuRC" width="64" height="64"/></svg><b id="lumiT">0</b></span></div></div><div id="exitSlot"><div id="bloodChip" hidden><span class="bci"></span><b id="bloodNum">0</b><span class="bcb"><i id="bloodBar"></i></span></div></div>
+      <div id="curBar"><div class="cr1"><span class="cg"><svg class="ci" viewBox="4.2 5 55.5 55.5"><use href="#cuGC" width="64" height="64"/></svg><b id="goldT">0</b></span></div><div class="cr2"><span class="cl"><svg class="ci" viewBox="3.8 4.1 56.4 56.4"><use href="#cuRC" width="64" height="64"/></svg><b id="lumiT">0</b></span><span class="ce"><svg class="ci" viewBox="5.2 5.4 53.6 53.6"><use href="#cuEA" width="64" height="64"/></svg><b id="essT">0</b></span><span class="cf"><svg class="ci" viewBox="3.8 5.8 56.4 56.4"><use href="#cuFC" width="64" height="64"/></svg><b id="rrT">0</b></span><span class="cs"><svg class="ci" viewBox="5 4.5 54 56"><use href="#cuSL" width="64" height="64"/></svg><b id="sealT">0</b></span></div></div><div id="exitSlot"><div id="bloodChip" hidden><span class="bci"></span><b id="bloodNum">0</b><span class="bcb"><i id="bloodBar"></i></span></div></div>
       <div class="vitals">
         <div class="lvbox"><small>LV</small><span id="lv">1</span></div>
         <div class="bars">
@@ -7834,7 +7834,7 @@ function capAdd(k,n,nm){if(!n||n<=0)return;const o=S[k]||0;if(S.test){S[k]=o+n;r
 function essAdd(n){capAdd('ess',n,'잿불 정수')}
 const RR_MAX=CUR_MAX,RR_TIER=40;function rrAdd(n){capAdd('rr',n,'윤회의 불씨')}
 const rollN=x=>Math.floor(x)+(Math.random()<x%1?1:0);
-function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
+function dropEss(e){if(S.ch<NCH){/* v1013: 1~10장 광휘의 파편 — 모든 장 동일, 위험도 1 드롭 확률(정수 기대값 × 위험도 1 보정 1.0) */const n0=rollN((e.final||e.gate?5:[.015,.12,.5,3][e.rank])*.3);if(n0>0)lumiAdd(uqOn('greed')?rollN(n0*nsGain('gLumi')):n0);return}/* v209: 잿불 정수는 엔드게임(위험도 모드)에서만 */const tb=S.ch>=NCH?1+.03*Math.min(oT(S.tier),30):1;/* v131: 위험도 30부터 정수 드롭 고정 */
   /* v35: 드롭량 70% 감소 (기대 개수 ×0.3, 소수점은 확률로) */
   const ex=(e.final||e.gate?5:[.015,.12,.5,3][e.rank])*tb*.3*mutM(),RR_K=.05/* v865: 정수 기대량 × 0.05 */,n=rollN(ex);for(let i=0,m=rollN(ex*nsGain('gEss'));i<m;i++)dropEssAt(e.pos,1);/* v520: 정수 획득량 옵션 */
   /* v508: 광휘의 파편(외형 재화) — 잿불 정수와 같은 확률로 같이 떨어짐, 소지 한도 1000 */
@@ -8744,7 +8744,7 @@ function renderStash2(){const d=stashD,side=stashSide,cur=stashTab==='cur',src=c
   const bd0=$('nsBody'),o1=bd0.querySelector('.stscroll'),o2=bd0.querySelector('.stR'),t1=o1?o1.scrollTop:0,t2=o2?o2.scrollTop:0;/* v1007: 다시 그려도 스크롤 위치 유지 */
   bd0.innerHTML=h;const n1=bd0.querySelector('.stscroll'),n2=bd0.querySelector('.stR');if(n1)n1.scrollTop=t1;if(n2)n2.scrollTop=t2}
 /* v604: 창고 재화 칸 — 잿불 정수·윤회의 불씨·성역의 인장·광휘의 파편 (모든 캐릭터 공유, 재화별 9,999) */
-const STASH_CUR=[['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s'],['lumi','광휘의 파편','l']],STASH_CMAX=9999;
+const STASH_CUR=[['lumi','광휘의 파편','l'],['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s']],STASH_CMAX=9999;
 const stashCur=()=>{const d=stashD;d.cur=d.cur||{};return d.cur};
 function stashCurUI(){const c=stashCur(),T=TCUR();const L=STASH_CUR.filter(x=>x[0]==='lumi'||refOn());return `<div class="tag">재화 보관</div><div class="stcur" style="--n:${L.length}">${L.map(([k,n,ic])=>{const mine=S[k]||0,st=c[k]||0,canIn=!T&&mine>0&&st<STASH_CMAX,canOut=!T&&st>0&&mine<CUR_MAX;
   return `<div class="stc"><span class="stn">${ci(ic)}<b>${n}</b></span><div class="stvs"><span class="stv"><small>보유</small>${T?'∞':fmtC(mine)}</span><span class="stv"><small>창고</small>${st.toLocaleString('ko-KR')}</span></div><div class="stbt"><button class="ghost" data-sc="in,${k}" ${canIn?'':'disabled'}>넣기</button><button class="ghost" data-sc="out,${k}" ${canOut?'':'disabled'}>꺼내기</button></div></div>`}).join('')}</div>`}
@@ -8899,7 +8899,7 @@ function openDex(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT='d
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll();guide('look')}
 /* v879: 화폐 거래소(환전상 벨로) — 잿불 정수·광휘의 파편·윤회의 불씨·성역의 인장을 드롭 기대값 비율로 서로 교환, 수수료 없음.
    기준 위험도 = 최고 위험도. 정수 1개가 떨어질 때 파편 1개 · 불씨 0.05×rrD · 인장 0.01×sealD 가 함께 나오므로, 재화 1개의 가치(정수 단위) = 1 / 그 비율 */
-const XC_FEE=0,XCK=[['ess','잿불 정수','e'],['lumi','광휘의 파편','l'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s']];
+const XC_FEE=0,XCK=[['lumi','광휘의 파편','l'],['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s']];
 let xcA='ess',xcB='rr',xcMsg='';
 const xcD=()=>Math.min(D_MAX,Math.max(1,S.maxTier||S.tier||1)),
   xcV=(k,d=xcD())=>k==='rr'?1/(.05*(1+(d-1)/19)):k==='seal'?1/(.01*(.1+.9*(d-1)/19)):1,
@@ -10527,7 +10527,7 @@ function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=s
   if(a)o.push({n:'각인의 서',k:a,c:'#5ae0d0',i:'scr'});if(b)o.push({n:'상급 각인의 서',k:b,c:'#c890ff',i:'scrU'});
   for(const c of ['weapon','armor','acc'])for(const t of [6,5,4,3,2,1]){const n=disPc(c,t);if(n>0)o.push({n:`${t}티어 ${DIS_CAT[c].n} 분해 조각`,k:n,c:NT_C[t],i:'scr'})}/* v944 */
   if(S.tickets>0)o.push({n:'확정 강화 주문서',k:S.tickets,c:'#ffb070',i:'tk'});if(S.cata>0)o.push({n:'재점화의 촉매',k:S.cata,c:'#ffb070',i:'tk'});{const f=S.frag||{};if(f.k>0)o.push({n:'검귀 조각',k:f.k,c:'#ffb050',i:'scr'});if(f.m>0)o.push({n:'아귀 조각',k:f.m,c:'#b890ff',i:'scrU'})}
-  {/* v841: 없는 재화는 0으로 표기하지 않고 숨김, 정수·불씨·인장은 엔드게임부터 */const cur=(n,v,c,sh)=>{if(!TCUR()&&!(v>0))return;o.push({n,c,h:ci(sh,'big'),kt:TCUR()?'∞':fmtKM(v||0)})},eg=refOn();if(eg){cur('윤회의 불씨',S.rr,'#ff9a4a','r');cur('성역의 인장',S.seal,'#ff8a2a','s')}cur('광휘의 파편',S.lumi,'#c890ff','l');if(eg)cur('잿불 정수',S.ess,'#ff5a3a','e')}
+  {/* v841: 없는 재화는 0으로 표기하지 않고 숨김, 정수·불씨·인장은 엔드게임부터 */const cur=(n,v,c,sh)=>{if(!TCUR()&&!(v>0))return;o.push({n,c,h:ci(sh,'big'),kt:TCUR()?'∞':fmtKM(v||0)})},eg=refOn();cur('광휘의 파편',S.lumi,'#c890ff','l');if(eg){cur('잿불 정수',S.ess,'#ff5a3a','e');cur('윤회의 불씨',S.rr,'#ff9a4a','r');cur('성역의 인장',S.seal,'#ff8a2a','s')}}
   if(NS()){}/* v639: 물약은 충전식이라 기타 탭에서 뺌 */else for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z})}
   return o}
 /* v936: 고유 장비 칸 — 테스트 캐릭터는 목록에서 골라 장착·해제, 일반 캐릭터는 장착한 고유 장비 정보만 */
@@ -10554,7 +10554,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const nU=S.inv.filter(x=>x.uid).length;
   const top=`<div class="iv2top"><span class="iv2acts"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>${nU?`<button class="iv2auto iv2id" id="iIdAll">🔍 모두 감정 <b>${nU}</b></button>`:''}</span>
-    <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span>${refOn()?`<span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span>`:''}<span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
+    <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span><span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span>${refOn()?`<span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span>`:''}</span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','gloves','boots'],acc:['amulet','ring','belt']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
   const subOk=x=>!invSub||x.slot===invSub,subN=k=>k&&FG[invFilter]&&FG[invFilter].includes(k)?SLOTN[k]:'';
