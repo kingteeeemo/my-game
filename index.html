@@ -3198,7 +3198,10 @@ const L2W=(x,z)=>({x:x*SRC+z*SRS,z:-x*SRS+z*SRC}),W2L=(x,z)=>({x:x*SRC-z*SRS,z:x
 const endPtL=()=>({x:pathC(-STORY_L+12),z:-STORY_L+12}),startPtL=()=>({x:pathC(STORY_L-8),z:STORY_L-8});
 const endPt=()=>{const q=endPtL();return L2W(q.x,q.z)},startPt=()=>{const q=startPtL();return L2W(q.x,q.z)};
 /* 길 밖으로 얼마나 벗어났는지 (0 = 걸을 수 있는 곳) — 로컬 좌표 */
-function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathW(z),dz=Math.max(0,Math.abs(z)-STORY_L);
+/* v1002: 길 양 끝 너머로 이어지는 길 — 시작 뒤(STO_S: 이전 길, 2장부터)와 끝 뒤(STO_E: 보스를 잡은 뒤 열리는 다음 길). 야외 장만 */
+const ST_EXT=64;let STO_S=0,STO_E=0,STEXT=null;
+function stOpenEnd(){if(mapKind!=='story'||STO_E||!STEXT)return;STO_E=ST_EXT;try{setGround(130,2*(STORY_L+ST_EXT)+30,2);STEXT(-1);const q=L2W(pathC(-STORY_L-8),-STORY_L-8);shake=Math.max(shake,.7);ringFx(q,9,0xc8b8a0,.9)}catch(e){console.log('stOpenEnd',e)}}
+function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathW(z),dz=Math.max(0,z>0?z-STORY_L-STO_S:-z-STORY_L-STO_E);
   const de=Math.hypot(x-e.x,z-e.z)-ARENA_END.r,ds=Math.hypot(x-s_.x,z-s_.z)-START_R;let dp=1e9;if(MP.pk)for(const q of MP.pk)dp=Math.min(dp,Math.hypot(x-q.x,z-q.z)-q.r,pkSegD(x,z,q)-2.4);return Math.max(dz,Math.min(dc,de,ds,dp))}
 function storyOut(x,z){const q=W2L(x,z);return sOutL(q.x,q.z)}
 function groundHL(x,z){const d=sOutL(x,z);if(MP.indoor){/* v713: 성 안 — 길 밖은 곧게 선 벽(높이 4.2), 끝 제단 뒤는 위층 계단 자리만 비워 두고 벽이 높아짐 */const e=endPtL();if(z<-STORY_L+3&&Math.abs(x-e.x)<4.3)return 0;if(d<=0)return 0;return Math.min(4.2+(z<-STORY_L+6?Math.min(8,(-STORY_L+6-z)*.8):0),d*4)}if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
@@ -3229,7 +3232,7 @@ function arenaHole(R){if(mapKind!=='arena'||R===groundHoleR)return;for(const m o
 const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.6,1.05,.75],[1.7,1.45,1.0],[1.35,1.1,1.7],[.5,.44,.42],[.5,.5,.58],[.48,.38,.36]];
 /* 맵 경계 안으로 밀어 넣기 */
 function mapClamp(p,r){
-  if(pathMap()){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L+r,STORY_L-r);
+  if(pathMap()){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L-STO_E+r,STORY_L+STO_S-r);
     if(sOutL(q.x,q.z)>0){const c=pathC(q.z),w=Math.max(1,pathW(q.z)-r),cx={x:clamp(q.x,c-w,c+w),z:q.z};let best=cx,bd=Math.abs(q.x-cx.x);
       if(MP.pk)for(const k of MP.pk){{const R=k.r-r,d=Math.hypot(q.x-k.x,q.z-k.z);if(d>1e-4){const c={x:k.x+(q.x-k.x)/d*Math.min(d,R),z:k.z+(q.z-k.z)/d*Math.min(d,R)},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
         {const nn=pkSegNear(q.x,q.z,k),px=nn.x,pz=nn.z,d=nn.d,R=Math.max(.2,2.4-r),c=d>R?{x:px+(q.x-px)/d*R,z:pz+(q.z-pz)/d*R}:{x:q.x,z:q.z},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
@@ -3257,10 +3260,11 @@ function seaStart(s_){APL(s_.x+.5,s_.z+3.5,'sand',.2,9,true);APL(s_.x-2.2,s_.z+5
   for(const [dx,dz] of [[2,7],[-5,6.5],[6.5,4.8],[-.5,5],[4,-1.5],[-3.5,-1],[1,2.6]])APL(s_.x+dx,s_.z+dz,'kelp',0,0,true)}
 function buildStory(){clearProps();STORY_L=STORY_L0;const th=curTheme(),i=Math.min(S.ch||0,LAST),set=PROPSET[i];if(SBC[i])sbLoad(i);/* v725: 장 보스 모델 미리 받기 */propTheme=th.key;mapKind='story';storyParams(i);crysKind=CH[i].ice?'ice':'void';
   if(S.sRotCh!==S.ch||!(S.sRot>=0)){S.sRot=(Math.random()*8|0)*Math.PI/4;S.sRotCh=S.ch}SROT=S.sRot;SRC=Math.cos(SROT);SRS=Math.sin(SROT);
-  setGround(130,2*STORY_L+30,2);
+  const ind=!!CH[i].indoor;STO_S=(!ind&&i>0&&!S.tutor)?ST_EXT:0;STO_E=(!ind&&S.phase===2)?ST_EXT:0;STEXT=null;/* v1002 */
+  setGround(130,2*(STORY_L+ST_EXT)+30,2);
   const e=endPtL(),s_=startPtL(),ew=endPt();ALTAR.x=ew.x;ALTAR.z=ew.z;altarRing.position.set(ew.x,.04,ew.z);altarLight.position.set(ew.x,3,ew.z);
   for(let a=0;a<6;a++){const t=a/6*Math.PI*2+.3;APL(e.x+Math.cos(t)*9,e.z+Math.sin(t)*9,'firePillar')}
-  if(!CH[i].indoor)APL(e.x,e.z-11,'statue',0);
+  if(!ind)for(const sd of [-1,1])APL(e.x+sd*(pathW(e.z-9)+2.8),e.z-9,'statue',0);/* v1002: 석상은 길 한가운데가 아니라 양옆에 — 보스를 잡으면 길이 그 사이로 열림 */
   /* 시작 야영지 */
   if(!CH[i].indoor){APL(s_.x-4,s_.z+2,'tent',.4);if(i===0)seaStart(s_);else APL(s_.x+4.5,s_.z+1,'cart',-.5)}APL(s_.x+1.5,s_.z+4,'brazier');
   /* 길을 따라: 관문 아치 · 무너진 성벽 · 길 안 소품 */
@@ -3273,7 +3277,13 @@ function buildStory(){clearProps();STORY_L=STORY_L0;const th=curTheme(),i=Math.m
   if(!CH[i].indoor)for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1)continue;APL(x,z,'rock',0,0,true)}
   /* 언덕: 양옆 비탈에 나무·바위·수정, 언덕 위 감시탑 */
   const slope=[{tree:3,rock:3},{tree:2,tomb:3,rock:1},{tree:4,rock:2},{crystal:3,rock:3,tree:1},{rock:4,pillar:1.5,bones:1},{rock:5,pillar:1,bones:1.5},{crystal:3,rock:2,pillar:1.5},{},{},{}][i];
-  if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
+  if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;if(z<-STORY_L&&Math.abs(x-pathC(z))-pathW(z)<-z-STORY_L+.5)continue;/* v1002: 끝 뒤 열릴 길 위에 뜨지 않게 */APL(x,z,pickW(slope),rand(0,6),1,true)}
+  if(!ind){STEXT=sg=>{const z0=sg>0?STORY_L:-STORY_L,lim=STORY_L+ST_EXT;/* v1002: 열린 길 너머 꾸밈 */
+    for(let z=z0;Math.abs(z)<lim-6;z+=sg*rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;APL(pathC(z)+side*(pathW(z)+rand(.3,1.4)),z,'rock',0,0,true)}
+    for(let n=0;n<40;n++){const z=z0+sg*rand(0,ST_EXT-4),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
+    for(let n=0;n<16;n++){const z=z0+sg*rand(0,ST_EXT-8);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
+    for(let z=z0+sg*20;Math.abs(z)<lim-12;z+=sg*24){const c=pathC(z),w=pathW(z);APL(c+(Math.random()<.5?-1:1)*(w-1.2),z,'brazier')}};
+    if(STO_S)STEXT(1);if(STO_E)STEXT(-1)}
   if(!CH[i].indoor)for(let z=STORY_L-35;z>-STORY_L+20;z-=rand(38,50)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,'tower',rand(0,6),1,true)}
   for(let n=0;n<70;n++){const z=rand(-STORY_L,STORY_L);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
   chzBuild(i);reachFix();
@@ -4063,7 +4073,7 @@ function buildField(){clearProps();mapKind='field';setGround(96,96,96);ALTAR.x=0
 function pathMap(){return mapKind==='story'||mapKind==='route'}function rtOn(){return !!(S&&S.ch>=NCH&&!S.duel&&S.rtRun)}
 const RT_SLOPE=[{crystal:3,rock:3,obelisk:1,pillar:1},{rock:4,tree:3,bones:1.5},{tree:2,tomb:3,rock:2,crystal:1.5},{rock:5,pillar:1.5,bones:1},{pillar:2,crystal:3,rock:2,statue:.6}];
 let RTD=new Set();
-function buildRoute(){clearProps();STORY_L=RT_L;const th=curTheme(),m=th.eg|0,eg=th.d,set=eg.set;propTheme=th.key;mapKind='route';crysKind=eg.crys||'void';
+function buildRoute(){clearProps();STORY_L=RT_L;STO_S=STO_E=0;STEXT=null;const th=curTheme(),m=th.eg|0,eg=th.d,set=eg.set;propTheme=th.key;mapKind='route';crysKind=eg.crys||'void';
   storyParams(60+(S.tier|0));MP.w0+=2.5;/* 무리가 넉넉히 서도록 스토리 길보다 조금 넓게 */SROT=(((S.tier|0)*3)%8)*Math.PI/4;SRC=Math.cos(SROT);SRS=Math.sin(SROT);
   egLight(m);setGround(130,2*STORY_L+30,2);
   const e=endPtL(),s_=startPtL(),ew=endPt();ALTAR.x=ew.x;ALTAR.z=ew.z;altarRing.position.set(ew.x,.04,ew.z);altarLight.position.set(ew.x,3,ew.z);
@@ -7778,7 +7788,7 @@ function progress(e){if(e.pkid!=null&&mapKind==='story'){const t=sKillTab();if(!
   if(S.ch<NCH){
     if(S.phase===3){if(e.final){S.phase=4;later(2.3,()=>victory('격파!',`${FINAL.boss} 처치`,'255,206,74',showFinalClear))}}
     else if(S.phase===0){S.kills++;if(S.kills>=CH[S.ch].goal){S.phase=1;toast('메인 퀘스트 갱신',`길 끝 제단에 ${CH[S.ch].boss}가 나타났다`);spawnBoss()}}
-    else if(S.phase===1&&e.chBoss){S.phase=2;later(1.6,showClear)}/* v785: 격파 컷신 없이 바로 장 완료 배너 */
+    else if(S.phase===1&&e.chBoss){S.phase=2;stOpenEnd();later(1.6,showClear)}/* v785: 격파 컷신 없이 바로 장 완료 배너 */
   }else{if(e.gate){gateClear(e);return save()}if(e.rift){/* v409: 균열 몬스터는 위험도 상승·에코 보스 카운트에 포함하지 않음 */}else{if(!e.boss&&++S.egK>=EG_BOSS_KILLS&&!enemies.some(x=>x.boss)){S.egK=0;spawnEchoBoss()}if(!e.boss){S.tierKills++}/* v856: 에코 보스 처치는 마릿수에 넣지 않음 — 일반 몹이 남은 채 관문 보스가 나오던 원인 */;if(!riftBusy())tierCheck()}}/* v405: 균열 중엔 위험도 상승·관문 판정을 미룸 */
   save();
 }
