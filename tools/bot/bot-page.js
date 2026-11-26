@@ -177,6 +177,8 @@ function decide(){
   /* 물약 */
   D.php=hpR<BOT.cfg.potHp&&P.cd.pot<=0&&P.pch&&P.pch.hp>0;
   D.pmp=!D.php&&mpR<BOT.cfg.potMp&&P.cd.pot<=0&&P.pch&&P.pch.mp>0&&!!tgt;
+  /* 특수 물약: 싸우는 중이고 효과가 꺼져 있으면 충전된 것부터 사용 */
+  D.xp=-1;if(!D.php&&!D.pmp&&tgt&&td<14&&P.cd.pot<=0&&typeof xpS==='function'){const x=xpS();for(let i=0;i<3;i++){const id=x.eq[i];if(id&&x.own[id]&&!(P.xb&&P.xb[id]>0)&&P.xch&&P.xch[id]>=1){D.xp=i;break}}}
 }
 
 /* ---------- 입력 넣기 ---------- */
@@ -189,6 +191,8 @@ function apply(){
   if(D.php){input.held.php=true;D.php=false}
   if(D.pmp){input.held.pmp=true;D.pmp=false}
   if(D.roll){input.held.mv=true;D.roll=false;BOT.M.rolls++}
+  if(D.xp>=0){try{xpUse(D.xp);BOT.M.xpN=(BOT.M.xpN||0)+1}catch(_){}D.xp=-1}
+  if(P.xb&&typeof xpS==='function'){const x=xpS();for(const id of x.eq)if(id&&P.xb[id]>0){BOT.M.xpT=BOT.M.xpT||{};BOT.M.xpT[id]=(BOT.M.xpT[id]||0)+DT}}
 }
 
 /* ---------- 한 판 준비 ---------- */
@@ -258,15 +262,17 @@ BOT.egSetup=function(o){
   hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
   testPick=false;startGame(o.cls,o.main);S.test=false;S.tutor=false;S.demo=false;S.noGuide=1;S.autoGem='bal';
   S.lv=o.lv;S.xp=0;S.pending=o.lv-1;S.sk={};try{autoSpend('bal')}catch(_){}S.pending=0;
-  S.enh={};for(const k of EQS)S.enh[k]=o.enh||0;gearSet(o.tier,o.cls,o.q==null?.5:o.q);
+  S.enh={};for(const k of EQS)S.enh[k]=o.enh||0;gearSet(o.tier,o.cls,o.q==null?.5:o.q,o.lo);
   /* 추가 강화(2차): 위험도에 따라 진행도 비율만큼 */
   const id=C().skills[0];S.sk2={};for(const g of (typeof gems2For==='function'?gems2For(id):[]))S.sk2[g]=Math.round(g2Max(g)*(o.g2||0));
   if(o.aura){S.aura={};S.auraOn={};for(const q of String(o.aura).split('+')){const [k,l]=q.split(':');S.aura[k]=+l||10;S.auraOn[k]=true}}/* --aura area:10+haste:10 */
   S.ch=NCH;S.tier=o.d;S.maxTier=o.d;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.autoUp=false;S.duel=null;
   S.mut={};if(o.mut)for(const k in MUT)S.mut[k]=1;S.mutRun=Object.assign({},S.mut);
   S.gold=0;S.rr=0;S.seal=0;S.ess=0;S.lumi=0;S.inv=[];
+  /* 특수 물약: --xp dmg,crit,def → 소유·장착(옵션은 시드 난수로 굴림) */
+  S.xpt={own:{},eq:[null,null,null],opt:{}};if(o.xp){const ids=String(o.xp).split('+').filter(Boolean).slice(0,3);ids.forEach((id,i)=>{S.xpt.own[id]=1;S.xpt.eq[i]=id})}
   inTown=false;noML=true;try{setMap(true);applyTheme();resetWorld()}finally{noML=false}
-  refreshMax();P.hp=P.mhp;P.mp=P.mmp;P.pch=null;nsPotInit(true);try{pcMode=false}catch(_){}
+  refreshMax();P.hp=P.mhp;P.mp=P.mmp;P.pch=null;nsPotInit(true);P.xch={};P.xb={};try{xpInit(true)}catch(_){}try{pcMode=false}catch(_){}
   BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;
   BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};
   return {d:o.d,lv:S.lv,tier:o.tier,enh:o.enh,g2:o.g2,mut:mutPts(S.mutRun),dps:Math.round(pwParts().d),ehp:Math.round(pwParts().e),hp:Math.round(P.mhp),map:mapKind};
@@ -274,11 +280,12 @@ BOT.egSetup=function(o){
 BOT.egEnd=function(){
   const r=BOT.result();
   if(BOT.M.gateT!=null&&r.clear)r.bossT=+(r.t-BOT.M.gateT).toFixed(1);
+  const xo=typeof xpS==='function'?xpS():null;r.xpN=BOT.M.xpN||0;r.xpUp=xo?Object.fromEntries(xo.eq.filter(Boolean).map(id=>[id+':'+(xo.opt&&xo.opt[id]),Math.round((BOT.M.xpT&&BOT.M.xpT[id]||0)/Math.max(1,BOT.M.t)*100)])):{};
   return Object.assign(r,{kills:S.tierKills,spawned:S.egSp,gateT:BOT.M.gateT==null?null:+BOT.M.gateT.toFixed(1),gold:S.gold||0,rr:S.rr||0,seal:S.seal||0,ess:S.ess||0,lumi:S.lumi||0,xp:Math.round(BOT.EG.xp||0),items:BOT.EG.items,itemTiers:BOT.EG.tiers.slice(1),bag:S.inv.length,lvEnd:S.lv});
 };
 
 /* 장비: 레벨/장에 맞는 평균 장비 (옵션 구성은 직업별 주력 옵션) */
-function gearSet(t,c,q){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=bc(c)==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+1);
+function gearSet(t,c,q,lo){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=bc(c)==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+(lo==null?1:lo));
   const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','dr'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
    boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(c),lt})}
