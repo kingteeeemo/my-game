@@ -2163,7 +2163,7 @@ const UNQ={gale:{n:'질풍의 장화',ic:'u_gale',d:'이동 속도 +100%',c:'#7f
   shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 5회 충전 · 충전 1.5초',c:'#b49aff'},
   greed:{n:'탐욕의 인장',ic:'u_greed',d:'골드·재화 획득량 +30%',c:'#ffd24a'},
   chain:{n:'연쇄 폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#ff9a4a'},
-  blood:{n:'혈조의 인장',ic:'u_blood',d:'20마리 처치할 때마다 1스택 — 스택당 이동 속도·효과 범위·캐릭터 크기 +5% · 공격 속도 +3% · 쿨타임 −3% (최대 20중, 스택마다 20초 유지 후 개별 소멸)',c:'#e8384f'},
+  blood:{n:'혈조의 인장',ic:'u_blood',d:'20마리 처치할 때마다 1스택 — 스택당 이동 속도·캐릭터 크기 +7% · 효과 범위 +5% · 공격 속도 +3% · 쿨타임 −3% (최대 20중, 스택마다 20초 유지 후 개별 소멸)',c:'#e8384f'},
   storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.8 · 쿨타임 회복 ×1.8',c:'#9ae8ff',pw:1}};
 const uqOn=k=>!!(S&&S.uniq===k&&UNQ[k]);
 const bloodN=()=>{if(!uqOn('blood')||!P.bloodS)return 0;const a=P.bloodS;while(a.length&&a[0]<=time)a.shift();return a.length},bloodHit=()=>{};/* v971: 혈조의 인장 — 20마리 처치마다 1스택, 스택마다 얻은 뒤 20초 유지(개별 만료), 최대 20, 피격 감소 없음 */
@@ -2440,7 +2440,7 @@ const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>NS()?P.mhp*((S.ch<NCH?2:0)+gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>NS()?.17*(S.lv-1)+gear().mspd:.5*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
-const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.05*bloodN());/* v936: 질풍의 장화 · v971: 혈조의 인장 이속 스택당 5% */
+const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.07*bloodN());/* v936: 질풍의 장화 · v971: 혈조의 인장 이속 스택당 5% → v982: 7% */
 function spdCapNote(){return ''}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
@@ -9370,7 +9370,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v981';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v982';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11402,7 +11402,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
     if(auraOn('blood')){if(!bloodOk()||(P.bloodAct&&P.hp<=P.mhp*.2))P.bloodAct=false;else if(!P.bloodAct&&P.hp>=P.mhp*.5)P.bloodAct=true;if(P.bloodAct&&P.hp>0)P.hp=Math.max(1,P.hp-P.mhp*.094*dt)}else P.bloodAct=false}else{P.es=0;P.esMax=0}
   /* v426: 생명력 재생과 환경 피해(심연의 냉기)를 매 프레임 순증감(재생-냉기)으로 합쳐 부드럽게 적용 — 재생력 ≥ 냉기면 생명력이 줄지 않는 것처럼 보임. 환경만으로는 1 이하로 떨어지지 않음 */
   {const dr_=envDrain();let h_=P.hp+(hpRegen()-dr_)*dt;if(dr_>0)h_=Math.max(h_,Math.min(P.hp,1));P.hp=Math.min(P.mhp,h_)}
-  hero.position.copy(P.pos);{const bs=uqOn('blood')?1+.05*bloodN():1,cs=hero.scale.x;if(cs!==bs)hero.scale.setScalar(Math.abs(bs-cs)<.004?bs:cs+(bs-cs)*Math.min(1,dt*8))}/* v964→v968: 혈조의 인장 크기 스택당 +5% (부드럽게 변화) */try{auraFx(dt)}catch(_){}
+  hero.position.copy(P.pos);{const bs=uqOn('blood')?1+.07*bloodN():1,cs=hero.scale.x;if(cs!==bs)hero.scale.setScalar(Math.abs(bs-cs)<.004?bs:cs+(bs-cs)*Math.min(1,dt*8))}/* v964→v968: 혈조의 인장 크기 스택당 +5% (부드럽게 변화) */try{auraFx(dt)}catch(_){}
   hero.rotation.order='YXZ';/* v122: 구르기 — 진행 방향으로 앞구르기(몸 중심을 축으로 한 바퀴) */
   if(P.mv&&!hero.userData.sk){const a=Math.PI*2*Math.min(1,P.mv.go/MV_GO),f=P.face,o=-.9*Math.sin(a);hero.rotation.x=a;hero.position.set(P.pos.x+Math.sin(f)*o,P.pos.y+.9-.9*Math.cos(a),P.pos.z+Math.cos(f)*o)}else hero.rotation.x=0;
   if(ASHC.lie)ashLie();
