@@ -9509,7 +9509,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1005';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1006';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11866,7 +11866,7 @@ $('resume').addEventListener('pointerdown',e=>{e.preventDefault();hideResume()})
 const paused=()=>window.CL_PAUSE||(window.PRO&&window.PRO.on)||(TALK&&TALK.pz)||(typeof stashOpen!=='undefined'&&(stashOpen||rrOpen))||!$('guide').hidden||!$('resume').hidden||!$('riftRes').hidden||!$('cine').hidden||!$('pause').hidden||menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||heirOpen||!$('slots').hidden||!$('title').hidden||!$('nick').hidden||!$('bossAsk').hidden||!$('lvl').hidden||!$('clear').hidden||!$('notice').hidden||mapOpen||!$('classSel').hidden||cinePause>0||document.hidden;
 let last=performance.now();
 /* v45: 마을 상점·대장간 창이 열려 있어도 이펙트·흔들림은 계속 재생 (게임 진행은 멈춘 채) */
-const fxOnly=()=>inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden;
+const fxOnly=()=>(inTown&&(shopOpen||smithOpen||heirOpen)&&$('pause').hidden)||(!$('clear').hidden&&$('pause').hidden&&!document.hidden);/* v1006: 장 완료 창 뒤에서도 보스 쓰러지는 연출 계속 */
 function fxTick(dt){time+=dt;pfxUpdate(dt);if(fx.length>FX_CAP){let over=fx.length-FX_CAP;for(let i=0;i<fx.length&&over>0;i++){const f=fx[i];if(f.cos&&f.t<f.dur*.9){f.t=f.dur;over--}}}for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=Math.min(1,f.t/f.dur);f.upd(k,dt);if(k>=1){if(f.end)f.end();scene.remove(f.m);if(!f.keep)f.m.traverse(o=>{if(o.material)mfree(o.material)});if(f.geo)f.geo.dispose();fx.splice(i,1)}}
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const fn=timers[i].fn;timers.splice(i,1);fn()}}}
 /* v194 셰이더 예열: 이펙트 재질을 처음 쓰는 순간 셰이더 컴파일로 끊기던 것을 시작할 때 미리 컴파일. 풀도 미리 채움 */
