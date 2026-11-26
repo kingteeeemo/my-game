@@ -8274,14 +8274,29 @@ void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);float n=pgf(vec2(ang*cir*.
   float a=(d<0.?exp(-d*d/(w*w*.08)):exp(-d/w)*.85)*smoothstep(1.06,1.,r)*(.6+.6*n)*k;gl_FragColor=vec4(mix(vec3(1.,.72,.3),vec3(1.,1.,.9),clamp(1.-d*6.,0.,1.))*a,1.);}`;
 /* v985: 정화의 빛 발밑 문양 — 오라 스킬답게 캐릭터 둘레에 빛의 원: 겹 고리 + 천천히 도는 눈금 + 안쪽 빛 번짐 (캐릭터 크기를 따라감) */
 const PG_SEAL=`uniform float t,k;varying vec3 vP;
-void main(){float r=length(vP.xy)/2.6,a=atan(vP.y,vP.x);
-  float ring1=smoothstep(.022,0.,abs(r-.96)),ring2=smoothstep(.014,0.,abs(r-.8))*.8,ring3=smoothstep(.012,0.,abs(r-.46))*.7;
-  float tk=smoothstep(.5,.42,abs(fract(a*16./6.2832+t*.06)-.5))*smoothstep(.03,0.,abs(r-.88))*1.1;
-  float dash=step(.45,fract(a*7./6.2832-t*.1))*smoothstep(.016,0.,abs(r-.62))*.9;
-  float pulse=.78+.22*sin(t*2.4);
-  float glow=(exp(-r*2.6)*.34+smoothstep(1.,.86,r)*smoothstep(.5,.96,r)*.2)*pulse;
-  float v=(ring1+ring2+ring3+tk+dash+glow)*smoothstep(1.,.93,r);
-  vec3 c=mix(vec3(1.,.62,.16),vec3(1.,.94,.72),clamp(ring1+tk+dash+glow*1.6,0.,1.));gl_FragColor=vec4(c*v*k,1.);}`;
+float sg(vec2 p,vec2 a,vec2 b){vec2 pa=p-a,ba=b-a;return length(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.));}
+float ln(float d,float w){return smoothstep(w,0.,d);}
+float tri(vec2 p,float R,float rot){float m=0.;for(int i=0;i<3;i++){float th=rot+float(i)*2.0944;vec2 n=vec2(cos(th),sin(th)),tg=vec2(-n.y,n.x);float d=abs(dot(p,n)-R*.5);float e=smoothstep(R*.866+.01,R*.866-.01,abs(dot(p,tg)));m=max(m,ln(d,.011)*e);}return m;}
+void main(){vec2 p=vP.xy/2.6;float r=length(p),a=atan(p.y,p.x),T=6.2832;
+  float o1=ln(abs(r-.97),.022),o2=ln(abs(r-.92),.008)*.7,m1=ln(abs(r-.7),.014)*.85,m2=ln(abs(r-.65),.007)*.55;
+  float ta=a+t*.12,cell=fract(ta*72./T);
+  float tick=ln(abs(cell-.5)*T*.88/72.,.006)*smoothstep(.015,0.,abs(r-.89)-.03);
+  float cb=fract(ta*12./T);float tickB=ln(abs(cb-.5)*T*.88/12.,.008)*smoothstep(.015,0.,abs(r-.885)-.055);
+  float ra=a-t*.18,rc=ra*18./T,ri=floor(rc),ru=(fract(rc)-.5)*.272,rv=r-.78,g=0.;int gi=int(mod(ri,3.));
+  if(gi==0){g=max(ln(sg(vec2(ru,rv),vec2(0.,-.034),vec2(0.,.034)),.0045),ln(sg(vec2(ru,rv),vec2(-.016,-.01),vec2(.016,.012)),.0045));}
+  else if(gi==1){g=max(ln(sg(vec2(ru,rv),vec2(-.02,-.034),vec2(0.,0.)),.0045),max(ln(sg(vec2(ru,rv),vec2(0.,0.),vec2(-.02,.034)),.0045),ln(sg(vec2(ru,rv),vec2(.012,-.034),vec2(.012,.034)),.0045)));}
+  else{g=max(ln(sg(vec2(ru,rv),vec2(-.022,.034),vec2(0.,-.034)),.0045),max(ln(sg(vec2(ru,rv),vec2(0.,-.034),vec2(.022,.034)),.0045),ln(sg(vec2(ru,rv),vec2(-.015,.008),vec2(.015,.008)),.0045)));}
+  g*=smoothstep(.05,.035,abs(rv));
+  float st=max(tri(p,.64,t*.22),tri(p,.64,t*.22+3.1416))*.95;
+  float st2=max(tri(p,.64,-t*.22+.5236),tri(p,.64,-t*.22+3.6652))*.5;
+  float i1=ln(abs(r-.36),.012)*.85;
+  float sa=fract((a+t*.5)*8./T);float arc=step(sa,.55)*ln(abs(r-.29),.01)*.95;
+  float pulse=.8+.2*sin(t*2.4);
+  float gl=(exp(-r*3.2)*.5+exp(-pow(max(r-.9,0.),2.)*400.)*.0+smoothstep(1.,.8,r)*smoothstep(.45,.95,r)*.14)*pulse;
+  float core=smoothstep(.07,0.,r)*1.2;
+  float line=o1+o2+m1+m2+tick+tickB*1.1+g*.9+st+st2+i1+arc;
+  float v=(line+gl+core)*smoothstep(1.,.95,r);
+  vec3 c=mix(vec3(1.,.66,.2),vec3(1.,.95,.76),clamp(o1+tickB+st*.7+arc+core+gl*1.2,0.,1.));gl_FragColor=vec4(c*v*k,1.);}`;
 let pgSeal=null;
 const PG_LAYERS=[[.985,1.5,.5,0],[1,1.2,.6,17.3],[1.02,.9,.42,41.7]];/* 반지름 비·높이(m)·밝기·무늬 씨앗 — 세 겹이 어긋나며 겹쳐 두께감 */
 function pgBuild(){const cg=new THREE.CylinderGeometry(1,1,1,120,1,true);cg.translate(0,.5,0);
@@ -9381,7 +9396,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v985';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v986';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
