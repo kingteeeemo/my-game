@@ -5980,7 +5980,7 @@ function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.
   if(K.gemG.parent!==K.tip)K.tip.add(K.gemG);K.gemG.material.color.setHex(c);K.gemG.material.opacity=.35+.5*k;K.gemG.scale.setScalar((.25+1.1*k)*pl*(1+.6*boost))}
 /* v380: 궁수 활 — 마을에서 서 있을 때·직업 선택 초상화는 등에 멤(archer_bow_back, Spine2 아래). 그 외에는 왼손.
    손에 든 활: 쏘기·화살비·구르기·사망은 손을 그대로 따라가고(GLB에 맞춘 쏘는 방향), 평소(대기·달리기·피격)에는 세계 기준으로 세워 듦(활대 수직, 배가 앞쪽) — 둘 사이는 부드럽게 전환 */
-const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415,musa:1.4,priest:1.355}/* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
+const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415,musa:1.4,priest:1.64}/* v975: 사제 초상화 배율 1.355→1.64 — 모델 파일 원본이 작아 필드 S(2.057)에 맞춰 키움 */ /* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
 function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;if(K.wskM){/* v777: 외형 활을 등에 멜 때 자리(bk) — 시위 쪽으로 무게가 쏠린 활을 등 가운데로 */const b=WLOOKS[K.wsk]&&WLOOKS[K.wsk].bk;if(mode==='back'&&b)K.wskM.position.set(...b);else K.wskM.position.set(0,0,0)}
   if(mode==='back'&&K.bowBk){if(sw.parent!==K.bowBk){K.bowBk.add(sw);sw.position.set(0,0,0);sw.quaternion.identity()}return}
   if(sw.parent!==K.hand){K.hand.add(sw);sw.position.copy(K.bowP0);sw.quaternion.copy(K.bowQ0);K.bowA=1}
@@ -9306,7 +9306,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v974';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v975';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
