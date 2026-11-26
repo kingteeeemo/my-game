@@ -2134,7 +2134,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste');if(auraOn('area'))g.area+=4*auraL('area')}
   {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=5*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
   if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
-  {const b=typeof P!=='undefined'&&P&&P.xb;if(b){if(b.def>0)g.defp+=30;if(b.eva>0)g.evap+=30;if(b.es>0)g.esp+=30;if(b.dmg>0)g.inc+=40;if(b.crit>0)g.bcrit+=10}}/* v987: 특수 물약 효과 */
+  {const b=typeof P!=='undefined'&&P&&P.xb;if(b){if(b.def>0)g.defp+=xpE('def');if(b.eva>0)g.evap+=xpE('eva');if(b.es>0)g.esp+=xpE('es');if(b.dmg>0)g.inc+=xpE('dmg');if(b.crit>0)g.bcrit+=xpE('crit')}}/* v987: 특수 물약 효과 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
 let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
@@ -2443,7 +2443,7 @@ const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>NS()?P.mhp*((S.ch<NCH?2:0)+gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>NS()?.17*(S.lv-1)+gear().mspd:.5*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
-const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.07*bloodN());/* v936: 질풍의 장화 · v971: 혈조의 인장 이속 스택당 5% → v982: 7% */
+const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1+xpE('spd')/100:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.07*bloodN());/* v936: 질풍의 장화 · v971: 혈조의 인장 이속 스택당 5% → v982: 7% */
 function spdCapNote(){return ''}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
@@ -8012,13 +8012,19 @@ const potN=k=>NS()?(nsPotInit(),P.pch[k]):PSZ.reduce((a,z)=>a+(S.pots[k][z]||0),
 /* v43 신속 물약: 4초간 이동 속도 +60% (다시 마시면 4초로 갱신) */
 const SPD_POT={n:'신속 물약',price:12,dur:4};
 /* v987: 특수 물약 — 6종 중 3개를 장착(단축키 3·4·5). 윤회의 불씨 10개로 한 번 사면 충전식(몬스터 처치로 충전, 최대 3회) */
-const XPOT={spd:{n:'신속',c:'#4ad06a',dur:4,d:'이동 속도 +60%'},def:{n:'철벽',c:'#8fa8d8',dur:8,d:'방어력 증가 +30%'},eva:{n:'환영',c:'#b08cff',dur:8,d:'회피력 증가 +30%'},es:{n:'수호',c:'#4fd6e0',dur:8,d:'에너지 쉴드 가득 채움 + 최대치 +30%'},dmg:{n:'격노',c:'#ff7a4a',dur:8,d:'피해 증가 +40%'},crit:{n:'집중',c:'#ffd24a',dur:8,d:'치명타 확률 +10%p'}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=3;
+const XPOT={spd:{n:'신속',c:'#4ad06a',dur:4,e:60,f:e=>`이동 속도 +${e}%`},def:{n:'철벽',c:'#8fa8d8',dur:8,e:30,f:e=>`방어력 증가 +${e}%`},eva:{n:'환영',c:'#b08cff',dur:8,e:30,f:e=>`회피력 증가 +${e}%`},es:{n:'수호',c:'#4fd6e0',dur:8,e:30,f:e=>`에너지 쉴드 가득 채움 + 최대치 +${e}%`},dmg:{n:'격노',c:'#ff7a4a',dur:8,e:40,f:e=>`피해 증가 +${e}%`},crit:{n:'집중',c:'#ffd24a',dur:8,e:10,f:e=>`치명타 확률 +${e}%p`}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=3,XP_CD=1,XP_REROLL=3;
+/* v988: 특수 물약 옵션 한 줄 — 지속↑·효과↓ / 지속↓·효과↑ / 최대 충전 +2 / 처치 충전량 +50%. 수호는 지속·효과 교환 옵션 제외 */
+const XPOPT={long:{n:'지속시간 +50% · 효과 −20%',d:1.5,e:.8},short:{n:'지속시간 −40% · 효과 +40%',d:.6,e:1.4},max:{n:'최대 충전 +2회'},kill:{n:'처치 시 충전량 +50%'}};
+const xpPool=id=>id==='es'?['max','kill']:['long','short','max','kill'];
+function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
+const xpM=id=>{const o=xpS().own[id]?XPOPT[xpOpt(id)]:null;return {d:o&&o.d||1,e:o&&o.e||1}};
+const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?2:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1.5:1;
 const xpS=()=>{S.xp=S.xp||{own:{},eq:[null,null,null]};S.xp.own=S.xp.own||{};if(!Array.isArray(S.xp.eq))S.xp.eq=[null,null,null];return S.xp};
-function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=XP_MAX;P.xch[id]=Math.min(XP_MAX,P.xch[id])}}
+function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=xpMax(id);P.xch[id]=Math.min(xpMax(id),P.xch[id])}}
 function xpUse(i){if(!NS()||knAppr)return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','포션 상인에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
-  xpInit();if(P.cd.pot>0)return;const X=XPOT[id];if(!(P.xch[id]>0)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
-  P.xch[id]--;P.cd.pot=.5;P.xb[id]=X.dur;if(id==='spd')P.hasteT=X.dur;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
-  ringFx(P.pos,1.8,parseInt(X.c.slice(1),16),.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xffffff,c1:parseInt(X.c.slice(1),16),drag:2,tex:1});feed(`${X.n} 물약 · ${X.dur}초간 ${X.d}`,X.c)}
+  xpInit();if(P.cd.pot>0)return;const X=XPOT[id];if(!(P.xch[id]>=1)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
+  const D=xpD(id);P.xch[id]--;P.cd.pot=XP_CD;P.xb[id]=D;P.xbm=P.xbm||{};P.xbm[id]=D;if(id==='spd')P.hasteT=D;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
+  ringFx(P.pos,1.8,parseInt(X.c.slice(1),16),.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xffffff,c1:parseInt(X.c.slice(1),16),drag:2,tex:1});feed(`${X.n} 물약 · ${D}초간 ${X.f(xpE(id))}`,X.c)}
 function useSpd(){if(!S.spdPot){if(P.mpWarn<=0){toast('신속 물약이 없습니다','포션 상인에게서 살 수 있어요');P.mpWarn=1.5}return}
   S.spdPot--;P.hasteT=SPD_POT.dur;ringFx(P.pos,1.8,0x5ad06a,.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xd0ffd8,c1:0x2a9a3a,drag:2,tex:1});feed('신속 물약 · 4초간 이동 속도 +60%','#8ae08a');save()}
 function usePot(k,sz){if(knAppr)return;if(NS())return nsPotUse(k);
@@ -8625,16 +8631,16 @@ const NPOT={hp:{p:.30,n:'생명력'},mp:{p:.20,n:'마나'}},npotP=k=>k==='mp'&&S
 const potMaxN=k=>5;/* v879: 물약은 스토리·엔드게임 모두 기본 5충전 (충전 횟수 확장 폐지 — 이미 산 단계는 정수로 돌려줌) *//* v826: 스토리 마나 물약은 3충전 *//* v726: 스토리 구간은 5충전 */
 function nsPotInit(full){P.pch=P.pch||{hp:potMaxN('hp'),mp:potMaxN('mp')};{if(P.pch.hp>potMaxN('hp'))P.pch.hp=potMaxN('hp');if(P.pch.mp>potMaxN('mp'))P.pch.mp=potMaxN('mp')}if(full){P.pch.hp=potMaxN('hp');P.pch.mp=potMaxN('mp')}P.pkp=P.pkp||0;xpInit(full)}
 function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpWarn<=0){toast(`${NPOT[k].n} 물약이 비었습니다`,'몬스터를 처치하거나 보스에게 피해를 주면 충전됩니다');P.mpWarn=1.5}return}
-  P.pch[k]--;P.cd.pot=.8;P.hot=P.hot||{};P.hot[k]=NPOT_T;if(k==='hp')dmgNum(P.pos,'회복','heal');else ringFx(P.pos,1.6,0x6a9aff,.35)}
+  P.pch[k]--;P.cd.pot=XP_CD;P.hot=P.hot||{};P.hot[k]=NPOT_T;if(k==='hp')dmgNum(P.pos,'회복','heal');else ringFx(P.pos,1.6,0x6a9aff,.35)}
 function nsPotTick(dt){if(P.xb)for(const id in P.xb)if(P.xb[id]>0)P.xb[id]-=dt;if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k]>0))continue;const t=Math.min(dt,P.hot[k]);P.hot[k]-=dt;const f=npotP(k)*t/NPOT_T;
   if(k==='hp'){P.hp=Math.min(P.mhp,P.hp+P.mhp*f);if(P.esMax>0)P.es=Math.min(P.esMax,(P.es||0)+P.esMax*f)}else P.mp=Math.min(P.mmp,P.mp+P.mmp*f)}}
-const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n);for(const id of XP_IDS)if(xpS().own[id])P.xch[id]=Math.min(XP_MAX,(P.xch[id]||0)+n)};
+const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n);for(const id of XP_IDS)if(xpS().own[id])P.xch[id]=Math.min(xpMax(id),(P.xch[id]||0)+n*xpKillM(id))};
 function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*(mutA('pot')?.5:1);while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
 function nsPotBoss(e,amt){if(!e.duel||e.dummy)return;e.potAcc=(e.potAcc||0)+amt/e.mhp;while(e.potAcc>=.2){e.potAcc-=.2;nsPotAdd(1)}}
 /* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
 function xpHud(){if(!NS())return;const x=xpS();xpInit();for(let i=0;i<3;i++){const id=x.eq[i],B=$('bX'+i);if(!B)continue;const on=!!(id&&x.own[id]);B.classList.toggle('emp',!on);if(!on){delete B.dataset.xid;B.style.removeProperty('--xc');B.style.removeProperty('--liq');B.style.removeProperty('--glow');continue}
   const X=XPOT[id];if(B.dataset.xid!==id){B.dataset.xid=id;B.style.setProperty('--xc',X.c);B.style.setProperty('--liq',X.c);B.style.setProperty('--glow',X.c+'8c');B.setAttribute('aria-label',X.n+' 물약')}
-  const c=P.xch[id]||0;$('nX'+i).textContent=c;B.classList.toggle('empty',!c);B.style.setProperty('--p',P.xb[id]>0?1-P.xb[id]/X.dur:0)}}
+  const c=Math.floor(P.xch[id]||0);$('nX'+i).textContent=c;B.classList.toggle('empty',!c);B.style.setProperty('--p',P.xb[id]>0?1-P.xb[id]/((P.xbm&&P.xbm[id])||X.dur):0)}}
 const potFlask=f=>`<svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" style="clip-path:inset(${(1-f)*100}% 0 0 0)" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg>`;
 function potSeg(c,m){const r=17.2,g=m>1?16:0;let h='';for(let i=0;i<m;i++){const a0=(-90+i*360/m+g/2)*Math.PI/180,a1=(-90+(i+1)*360/m-g/2)*Math.PI/180,x0=20+r*Math.cos(a0),y0=20+r*Math.sin(a0),x1=20+r*Math.cos(a1),y1=20+r*Math.sin(a1);
   h+=`<path class="${i<c?'on':''}" d="M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${(360/m-g)>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}"/>`}return `<svg class="pseg" viewBox="0 0 40 40" aria-hidden="true">${h}</svg>`}
@@ -9416,7 +9422,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v987';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v988';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9471,7 +9477,7 @@ function hud(){placeEnv();placePort();
   $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';{const rs=NS()&&nsReserve()>0;$('mpt').textContent=rs?`${Math.floor(P.mp)}/${P.mmp} · 점유${nsReserve().toFixed(0)}%`:`${Math.floor(P.mp)} / ${P.mmp}`}/* v569: 좁은 칸에 맞게 */
   if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);}
   hudMoney();/* v569: 새 시즌에서도 재화 칸 갱신 */
-  xpHud();$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
+  xpHud();$('bHp').style.setProperty('--p',P.cd.pot/XP_CD);$('bMp').style.setProperty('--p',P.cd.pot/XP_CD);
   {const c1=mpCost(C().skills[0]);$('bS1').classList.toggle('nomp',P.mp<c1);const t='MP '+c1;if($('cS1').textContent!==t)$('cS1').textContent=t}
   if(S.ch<NCH){const c=CH[S.ch];$('qtag').textContent=`Main Quest · ${S.ch+1}장 ${c.n}`;
     if(S.phase===5){$('qtitle').textContent='최종 결전 준비 · 성장 후 재도전';$('qprog').textContent=''}
@@ -10556,8 +10562,8 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
       h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-buy="${k},${z},1" ${g>=p.price?'':'disabled'}>구매 ${p.price}G</button><button class="pm wide" data-buy="${k},${z},5" ${g>=p.price*5?'':'disabled'}>5개 ${p.price*5}G</button><button class="pm wide sell" data-psell="${k},${z},1" ${have?'':'disabled'}>판매 ${potSell(z)}G</button><button class="pm wide sell" data-psell="${k},${z},all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
     if(NS()){const x=xpS();h+=`<div class="grow" style="justify-content:space-between"><span class="t">특수 물약 <b style="color:var(--ink)">${x.eq.filter(Boolean).length}/3</b>칸 장착<small>산 물약은 눌러서 장착·해제 · 단축키 3·4·5 · 처치로 충전(최대 ${XP_MAX}회)</small></span><span class="t" style="text-align:right">${ci('r')} <b style="color:var(--ink)">${fmtC(S.rr||0)}</b></span></div>`;
-      for(const id of XP_IDS){const X=XPOT[id],own=!!x.own[id],eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${X.dur}초간 ${X.d}${own?` · 충전 <b style="color:var(--ink)">${(P.xch&&P.xch[id])??XP_MAX}/${XP_MAX}</b>회`:''}</small></span>
-        <span class="potbtns">${own?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button>`:`<button class="pm wide" data-xbuy="${id}" ${(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}}
+      for(const id of XP_IDS){const X=XPOT[id],own=!!x.own[id],eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${xpD(id)}초간 ${X.f(xpE(id))}${own?` · 충전 <b style="color:var(--ink)">${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회<br><span style="color:var(--ink)">${XPOPT[xpOpt(id)].n}</span>`:` · 구매하면 옵션이 한 줄 붙습니다`}</small></span>
+        <span class="potbtns">${own?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button><button class="pm wide" data-xrr="${id}" ${(S.rr||0)>=XP_REROLL?'':'disabled'}>${ci('r')} ${XP_REROLL} 옵션 변경</button>`:`<button class="pm wide" data-xbuy="${id}" ${(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}}
     h+=`</div>`}
   else if(!shopSel){
     /* v46: 부위 선택 화면 — 고르면 그 부위 뽑기 화면만 표시 */
@@ -10584,7 +10590,8 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
-  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(S.rr||0)>=XP_PRICE){S.rr-=XP_PRICE;x.own[id]=1;if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=XP_MAX;save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
+  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(S.rr||0)>=XP_PRICE){S.rr-=XP_PRICE;x.own[id]=1;x.opt=x.opt||{};delete x.opt[id];xpOpt(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
+  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(S.rr||0)>=XP_REROLL){S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpInit();save();toast(`${XPOT[id].n} 물약`,XPOPT[x.opt[id]].n)}renderShop();return}
   if(b.dataset.xeq){const id=b.dataset.xeq,x=xpS(),i=x.eq.indexOf(id);if(i>=0)x.eq[i]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
