@@ -10614,7 +10614,7 @@ let shopOpen=false,shopLast=null;
 const gachaLv=()=>Math.max(1,S.lv);
 const gachaPrice=l=>Math.max(1,Math.round((150+l*l*4)/10));/* v411: 골드 1/10 */
 /* v41: 포션 상인(물약)과 무기상(랜덤 전설 장비) 분리. 보유 골드는 창 위쪽에 고정 표시, 구입 시 차감액이 떠오름 */
-let shopKind='pot',goldFx=null,shopSel=null;
+let shopKind='pot',goldFx=null,shopSel=null,xpTab='buy',xpSel=null,xpPrev=null,xpFlash=0;
 const LAND=()=>matchMedia('(orientation:landscape) and (max-height:520px)').matches;
 let _rsL=null;addEventListener('resize',()=>{try{const l=LAND();if(l===_rsL)return;_rsL=l;/* v230: 스크롤 중 주소창 크기 변화로 시트가 다시 그려져 스크롤이 끊기던 문제 → 가로/세로가 바뀔 때만 */if(!$('shop').hidden&&shopKind!=='pot'&&shopSel)renderShop();if(!$('smith').hidden&&smithSel)renderSmith()}catch(e){}});_rsL=LAND();
 const spLegend=`<p class="hint" style="margin:0"><span class="spleg spb">특수</span> 부위 전용 능력치 · <span class="spleg rg">범위</span> 이 레벨에서 붙을 수 있는 수치 · <span class="spleg pr">확률</span> 전설 장비에 붙을 확률</p>`;
@@ -10628,9 +10628,24 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
     else for(const k of ['hp','mp'])for(const z of PSZ){const p=POT[z],have=S.pots[k][z];
       h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-buy="${k},${z},1" ${g>=p.price?'':'disabled'}>구매 ${p.price}G</button><button class="pm wide" data-buy="${k},${z},5" ${g>=p.price*5?'':'disabled'}>5개 ${p.price*5}G</button><button class="pm wide sell" data-psell="${k},${z},1" ${have?'':'disabled'}>판매 ${potSell(z)}G</button><button class="pm wide sell" data-psell="${k},${z},all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
-    if(NS()){const x=xpS();h+=`<div class="grow" style="justify-content:space-between"><span class="t">특수 물약 <b style="color:var(--ink)">${x.eq.filter(Boolean).length}/3</b>칸 장착<small>산 물약은 눌러서 장착·해제 · 단축키 3·4·5 · 처치로 충전(최대 ${XP_MAX}회)</small></span><span class="t" style="text-align:right">${ci('r')} <b style="color:var(--ink)">${fmtC(S.rr||0)}</b></span></div>`;
-      for(const id of XP_IDS){const X=XPOT[id],own=!!x.own[id],eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${xpD(id)}초간 ${X.f(xpE(id))}${own?` · 충전 <b style="color:var(--ink)">${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회<br><span style="color:var(--ink)">${XPOPT[xpOpt(id)].n}</span>`:` · 구매하면 옵션이 한 줄 붙습니다`}</small></span>
-        <span class="potbtns">${own?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button><button class="pm wide" data-xrr="${id}" ${(S.rr||0)>=XP_REROLL?'':'disabled'}>${ci('r')} ${XP_REROLL} 옵션 변경</button>`:`<button class="pm wide" data-xbuy="${id}" ${(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}}
+    if(NS()){const x=xpS(),own=id=>!!x.own[id],tab=xpTab,sel=tab==='opt'&&xpSel&&own(xpSel)?xpSel:null;
+      h+=`<div class="grow" style="justify-content:space-between"><span class="t">특수 물약 <b style="color:var(--ink)">${x.eq.filter(Boolean).length}/3</b>칸 장착<small>단축키 3·4·5 · 처치로 충전(최대 ${XP_MAX}회)</small></span><span class="t" style="text-align:right">${ci('r')} <b style="color:var(--ink)">${fmtC(S.rr||0)}</b></span></div>
+      <div class="rrseg" style="grid-template-columns:1fr 1fr"><button class="${tab==='buy'?'on':''}" data-xtab="buy">구매·장착</button><button class="${tab==='opt'?'on':''}" data-xtab="opt">옵션 변경</button></div>`;
+      if(tab==='buy'){
+        for(const id of XP_IDS){const X=XPOT[id],ow=own(id),eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${xpD(id)}초간 ${X.f(xpE(id))}${ow?` · 충전 <b style="color:var(--ink)">${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회<br><span style="color:var(--ink)">${XPOPT[xpOpt(id)].n}</span>`:` · 구매하면 옵션이 한 줄 붙습니다`}</small></span>
+          <span class="potbtns">${ow?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button>`:`<button class="pm wide" data-xbuy="${id}" ${(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}}
+      else{
+        const have=XP_IDS.filter(own);
+        h+=`<div class="rrsd">바꿀 물약을 고르세요 · 옵션 한 줄을 다른 옵션으로 바꿉니다 (지금 옵션은 제외하고 뽑음)</div>`;
+        if(!have.length)h+=`<div class="grow" style="justify-content:center;color:var(--muted);font-size:12.5px;padding:18px">구매한 특수 물약이 없습니다 · 구매 탭에서 먼저 사세요</div>`;
+        else{
+          h+=`<div class="rrlines">${have.map(id=>{const X=XPOT[id],pv=xpPrev&&xpPrev.id===id;return `<button class="rln${sel===id?' sel':''}${xpFlash&&pv?' rfx':''}" data-xsel="${id}" style="height:auto;min-height:46px;padding:6px 8px"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="rnm" style="flex-direction:column;align-items:flex-start;gap:1px;white-space:normal"><span>${X.n} 물약</span><span style="font-size:11px;color:#a59f90">${XPOPT[xpOpt(id)].n}</span></span></button>`}).join('')}</div>`;
+          if(sel){const X=XPOT[sel],cur=xpOpt(sel),pool=xpPool(sel),oth=pool.filter(k=>k!==cur),pv=xpPrev&&xpPrev.id===sel?xpPrev.old:null;
+            h+=`<div class="rri"><span class="gd" style="background:${X.c};border-radius:50%;transform:none;width:14px;height:14px"></span><div><small>SPECIAL POTION</small><b>${X.n} 물약</b><span>${xpD(sel)}초간 ${X.f(xpE(sel))} · 충전 ${xpMax(sel)}회</span></div></div>
+            <div class="rrsd">나올 수 있는 옵션 · 지금 옵션 외 ${oth.length}종이 같은 확률(각 ${(100/oth.length).toFixed(0)}%)</div>
+            <div class="rrlines">${pool.map(k=>`<div class="rln${k===cur?' sel':''}${xpFlash&&k===cur&&pv?' rfx':''}"><span class="rnm">${k===cur?'<em>현재</em>':pv===k?'<em>이전</em>':''}${XPOPT[k].n}</span>${k===cur?'':`<span class="lock">${(100/oth.length).toFixed(0)}%</span>`}</div>`).join('')}</div>`}
+          const ok=sel&&(S.rr||0)>=XP_REROLL;
+          h+=`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${fmtC(S.rr||0)}</b></span></div><div class="rrct" style="font-size:12px;color:#a59f90">${sel?(xpPrev&&xpPrev.id===sel?`<b>${XPOPT[xpPrev.old].n}</b> → <b>${XPOPT[xpOpt(sel)].n}</b>`:`<b>${XPOPT[xpOpt(sel)].n}</b>을(를) 다른 옵션으로 바꿉니다`):'바꿀 물약을 고르세요'}</div><button class="rrgo" data-xrr="${sel||''}" ${ok?'':'disabled'}>${ci('r')}<b>${sel?XP_REROLL:'—'}</b>옵션 변환</button></div>`}}}
     h+=`</div>`}
   else if(!shopSel){
     /* v46: 부위 선택 화면 — 고르면 그 부위 뽑기 화면만 표시 */
@@ -10658,7 +10673,9 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(S.rr||0)>=XP_PRICE){S.rr-=XP_PRICE;x.own[id]=1;x.opt=x.opt||{};delete x.opt[id];xpOpt(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
-  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(S.rr||0)>=XP_REROLL){S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpInit();save();toast(`${XPOT[id].n} 물약`,XPOPT[x.opt[id]].n)}renderShop();return}
+  if(b.dataset.xtab){xpTab=b.dataset.xtab;xpPrev=null;renderShop();return}
+  if(b.dataset.xsel){xpSel=xpSel===b.dataset.xsel?null:b.dataset.xsel;xpPrev=null;renderShop();return}
+  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(S.rr||0)>=XP_REROLL){S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpInit();save();xpPrev={id,old};xpFlash=1;toast(`${XPOT[id].n} 물약`,XPOPT[x.opt[id]].n)}renderShop();xpFlash=0;return}
   if(b.dataset.xeq){const id=b.dataset.xeq,x=xpS(),i=x.eq.indexOf(id);if(i>=0)x.eq[i]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
@@ -10679,7 +10696,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
   spray(PADD,q,20,{sp:[1,3],up:[4,8],y:[.3,1],life:[.8,1.3],s0:[.3,.5],s1:[.05,.1],c0:0xffe8a0,c1:0xff8a20,drag:1.5,grav:-6,tex:1});
   flash(q,0x5ae0d0,2.6);shake=.25}
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
-function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
+function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;xpTab='buy';xpSel=null;xpPrev=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
 $('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
