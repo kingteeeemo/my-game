@@ -3234,7 +3234,7 @@ function arenaHole(R){if(mapKind!=='arena'||R===groundHoleR)return;for(const m o
 const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.6,1.05,.75],[1.7,1.45,1.0],[1.35,1.1,1.7],[.5,.44,.42],[.5,.5,.58],[.48,.38,.36]];
 /* 맵 경계 안으로 밀어 넣기 */
 function mapClamp(p,r){
-  if(pathMap()){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L+r,STORY_L-r);/* v1006: 열어 둔 시작·끝 너머 길은 보기만 — 들어갈 수 없음 */
+  if(pathMap()){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L+r,STORY_L+(STO_SEA?STO_S:0)-r);/* v1006: 열어 둔 시작·끝 너머 길은 보기만 — 들어갈 수 없음(1장 선착장 다리만 예외) */
     if(sOutL(q.x,q.z)>0){const c=pathC(q.z),w=Math.max(1,pathWS(q.z)-r),cx={x:clamp(q.x,c-w,c+w),z:q.z};let best=cx,bd=Math.abs(q.x-cx.x);
       if(MP.pk)for(const k of MP.pk){{const R=k.r-r,d=Math.hypot(q.x-k.x,q.z-k.z);if(d>1e-4){const c={x:k.x+(q.x-k.x)/d*Math.min(d,R),z:k.z+(q.z-k.z)/d*Math.min(d,R)},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
         {const nn=pkSegNear(q.x,q.z,k),px=nn.x,pz=nn.z,d=nn.d,R=Math.max(.2,2.4-r),c=d>R?{x:px+(q.x-px)/d*R,z:pz+(q.z-pz)/d*R}:{x:q.x,z:q.z},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
