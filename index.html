@@ -7919,7 +7919,8 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
   feed(`균열 정화 · 등급 ${gr}`,RGC[gr]);setTimeout(showRes,900)}
 function riftResClose(){if($('riftRes').hidden)return;$('riftRes').hidden=true;last=performance.now()}
 $('riftRes').addEventListener('click',e=>{if(e.target.id==='riftResOk'||e.target.id==='riftRes')riftResClose()});
-function riftTick(dt){if(testMap)return;/* v646 */
+const RIFT_OFF=true;/* v991: 잿불 균열 이벤트 폐지 — 생성·카운트 모두 중단(남아 있던 균열은 정리) */
+function riftTick(dt){if(RIFT_OFF){riftNow=0;if(RZ)riftClear();return}if(testMap)return;/* v646 */
   if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
   if(!riftOk()){if(RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();return}
@@ -9460,7 +9461,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v992';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v993';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10736,7 +10737,7 @@ $('stageSheet').addEventListener('click',e=>{const mg=e.target.closest('[data-ma
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.id==='tmGo'){testMapGo();return}/* v646 */
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
-  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const run=()=>{if(t!==S.tier||S.runClr||S.egFresh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save()}closeStage();leaveTown(true)};if(egRun())egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
+  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==(S.egPat==='route'?'route':'field')/* v991: 패턴을 바꿨으면 새 판으로 입장 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save()}closeStage();leaveTown(true)};if(egRun()&&!patCh)egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(!runPay(t))return;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
