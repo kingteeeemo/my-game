@@ -2095,7 +2095,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   for(const k of EQS){const it=S.eq&&S.eq[k];if(!it||!it.ns)continue;if(it.slot==='weapon'&&it.wc&&it.wc!==bc(S.cls))continue;const L=enhL(k);for(const l of it.lines)if(l.k in g)g[l.k]+=l.v*nLineMul(l,L)}
   /* 공격/시전 속도: 마법사는 시전 속도, 전사·궁수는 공격 속도만 · 직업 피해(근접·투사체·주문)는 피해 증가와 같은 묶음 */
   g.aspd=bc(S.cls)==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
-  if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
+  if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste');if(auraOn('area'))g.area+=7*auraL('area')}
   {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=5*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
   if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
@@ -2160,6 +2160,7 @@ const NAURA={
   es:{n:'보호막의 오라',r:50,c:'#6aa8ff',d:L=>`에너지 쉴드 ×${(1+.03*L).toFixed(2)} 증폭 (장비 % 옵션과 따로 곱함)`},
   crit:{n:'치명타의 오라',r:50,c:'#ff8a6a',d:L=>`치명타 확률 합계·치명타 데미지 합계 +${auraCritAdd(L)}%`},
   haste:{n:'가속의 오라',r:50,c:'#f0d040',d:L=>`${S&&bc(S.cls)==='mage'?'시전':'공격'} 속도 +${4*L}%`},
+  area:{n:'확장의 오라',r:25,c:'#c89aff',d:L=>`스킬 효과 범위 +${7*L}%`},/* v976: 효과 범위 단계당 +7% (10단계 70%), 마나 점유 25% */
   hreg:{n:'생명력 재생의 오라',r:35,c:'#ff7a6a',d:L=>`초당 최대 생명력의 ${auraRegenP(L).toFixed(2)}% 회복`},
   mreg:{n:'마나 재생의 오라',r:35,c:'#6aa8ff',d:L=>`초당 최대 마나의 ${auraRegenP(L).toFixed(2)}% 회복`},
   blood:{n:'피의 서약',r:0,c:'#d0303a',d:L=>`피해 증폭 +${8*L}%\n초당 최대 생명력 −9.4% (쉴드 무시)`}};
@@ -2208,7 +2209,7 @@ function nsShotStep(dt){for(let i=nsShots.length-1;i>=0;i--){const o=nsShots[i];
 function auraRow(k){const tt=S.test;  const a=NAURA[k],L=auraL(k),on=auraOn(k),c=L<10?AURA_COST[L]:0,can=L<10&&(S.ess||0)>=c;
   const st=k==='blood'?(on?(P.bloodAct?'발동 중':'대기 (생명력 50% 이상에서 켜짐)'):(bloodOk()?'':'장비 생명력 재생 9.4% 이상 필요')):'';
   return mnRow({k:'au_'+k,n:a.n,L,M:10,sub:a.r?`점유 ${(a.r/(1+gear().res/100)).toFixed(1)}%`:'',cur:L?a.d(L)+(a.r?`\n마나 점유 ${a.r}%`:'')+(st?`\n${st}`:''):'',nx:L<10?a.d(L+1)+(L?'':(a.r?`\n마나 점유 ${a.r}%`:'')):'',btns:`${tt?`<button class="mbt sq" data-ad="${k}" ${L?'':'disabled'}>−</button>`:''}${L>=10?`<button class="mbt" disabled>최대</button>`:`<button class="mbt e" data-au="${k}" ${can?'':'disabled'}><span class="mbl">${ci('e')}${c}</span></button>`}<button class="msw${on?' on':''}" data-at="${k}" ${L?'':'disabled'} aria-label="${a.n} ${on?'끄기':'켜기'}"></button>`})}
-const AUGR=[['def','방어',['def','eva','es']],['dmg','피해',['crit','haste','blood']],['reg','재생',['hreg','mreg']]];
+const AUGR=[['def','방어',['def','eva','es']],['dmg','피해',['crit','haste','area','blood']],['reg','재생',['hreg','mreg']]];
 let auG='def';
 function auraTabHtml(){const res=gear().res,rv=nsReserve(),act=Object.keys(NAURA).filter(k=>auraOn(k));
   let h=`<div class="mmana"><div class="mlb"><span>마나 점유 ${rv.toFixed(1)}% · 효율 +${res.toFixed(1)}%</span><span>잔여 마나 <b>${Math.max(0,100-rv).toFixed(1)}%</b></span></div><div class="mbr"><i style="width:${Math.min(100,rv)}%"></i></div></div>
@@ -2466,7 +2467,7 @@ function skillStats(id){
   if(b.kind==='smite'){const r=L('srad'),a=L('sarc'),f=g2('sfield'),t=g2('stwin');st.r=smRad(r);st.dmg*=smDmg(r);st.arc=a?smArc(a):null;st.fld=f?smField(f):null;st.stw=t?smTwin(t):null}/* v757: 전사 「심판의 검」 (v760 이름 변경: 옛 천뢰검) */
   if(b.kind==='pillar'){const r=L('prad'),e=g2('pecho');st.r=plRad(r);st.dmg*=plDmg(r);st.pecho=e?plEcho(e):null;const c=g2('pchain');st.pch=c?plChain(c):null;st.twin=plTwin(L('ptwin'))}
   if(b.kind==='ray'){const w=L('rwide'),sp=raySplit(L('rsplit'));st.w=rayW(w);st.len=rayLen(w);st.dmg*=(1+.03*w)*sp.m;st.beams=sp.n;const f=g2('rfocus'),a=g2('rafter');st.focus=f?.12*f:0;st.after=a?.12*a:0}
-  if(b.kind==='purge'){const r=L('purad');st.r=purgeR(r);st.dmg*=1+.02*r;const br=g2('pbrand');st.brand=.24*br;const nv=L('pnova'),cp=g2('pcorpse');st.nova=nv?.5-.1*(nv-1)/9:0;st.nvIv=nv?2-1.6*(nv-1)/9:2;/* v956: 파동 — 피해 ×0.5→×0.4로 낮추고, 간격 2초→0.4초(10단계) */st.corpse=cp?.08+.03*cp:0}
+  if(b.kind==='purge'){const r=L('purad');st.r=purgeR(r)*(NSX&&NSX.area||1)/* v976: 효과 범위(장비·혈조의 인장·확장의 오라)가 오라 반경에도 적용 */;st.dmg*=1+.02*r;const br=g2('pbrand');st.brand=.24*br;const nv=L('pnova'),cp=g2('pcorpse');st.nova=nv?.5-.1*(nv-1)/9:0;st.nvIv=nv?2-1.6*(nv-1)/9:2;/* v956: 파동 — 피해 ×0.5→×0.4로 낮추고, 간격 2초→0.4초(10단계) */st.corpse=cp?.08+.03*cp:0}
   if(b.kind==='proj'){const r=g2('boomer'),c=gl(id,'chpierce'),x=g2('lblast');st.ret=r?retSt(r):null;if(c){const q=chpSt(c);st.split={n:q.n,m:q.m};st.pierce=q.p}else{st.split=null;st.pierce=0}st.blast=x>0;st.bolt=x>0&&arEl()!=='fire';if(x){const z=lbSt(x);st.br=z.r;st.bm=z.m}}
   return st;
 }
@@ -8248,7 +8249,7 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
       if(!(e.pgS>time-.45))e.pgIn=time;e.pgS=time;const fk=st.brand?1+st.brand*Math.min(1,(time-e.pgIn)/3):1;
       if(Math.random()<.22)popFx(e.pos.x,1+Math.random(),e.pos.z,.15,.6,.3,0xfff0b0,.8);hurt(e,base*fk,q,st.so);}
     if(Math.random()<.5)popFx(P.pos.x+rnd(-1,1)*st.r*.6,.3,P.pos.z+rnd(-1,1)*st.r*.6,.15,.7,.5,0xfff4c0,.7)}
-  if(st.nova&&P.pgNv<=0){P.pgNv=st.nvIv;purgeNova(st.r,st.nvIv);aoe({x:P.pos.x,z:P.pos.z},st.r,baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
+  if(st.nova&&P.pgNv<=0){P.pgNv=st.nvIv;purgeNova(st.r,st.nvIv);aoe({x:P.pos.x,z:P.pos.z},st.r/(NSX.area||1),baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
   return true}
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
@@ -9306,7 +9307,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v975';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v976';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10091,7 +10092,7 @@ const SKIG={
   flask:'<path d="M19 4h10M20 4v12L9 38a4 4 0 0 0 4 6h22a4 4 0 0 0 4-6L28 16V4"/><path d="M13 32h22" opacity=".6"/><path d="M15 36h18l2 4H13z" fill="currentColor" stroke="none" opacity=".5"/>',
   gem:'<path d="M24 4l14 14-14 26L10 18z"/><path d="M10 18h28M24 4l-6 14 6 26 6-26z" opacity=".5"/>'
 };
-const SKIGK={au_def:'shield',au_eva:'feather',au_es:'bubble',au_crit:'eye',au_haste:'chev',au_hreg:'heart',au_mreg:'drop',au_blood:'blood',au_pot:'flask',haste:'chev',power:'target',critup:'eye',execute:'axe',stack:'slash',giant:'giant',
+const SKIGK={au_def:'shield',au_eva:'feather',au_es:'bubble',au_crit:'eye',au_haste:'chev',au_area:'rings',au_hreg:'heart',au_mreg:'drop',au_blood:'blood',au_pot:'flask',haste:'chev',power:'target',critup:'eye',execute:'axe',stack:'slash',giant:'giant',
   area:'rings',swift:'spiral',vortex:'spiral',echo:'echo',burn:'flame',knock:'shock',
   qlen:'crack',qmag:'lava',aftsh:'shock',qspread:'spikes',
   rarea:'rainW',rdens:'rainD',meteor2:'split',relem:'rainBolt',

@@ -12,8 +12,8 @@ BOT.PRESETS={
   poor:{react:.4,dodge:.3,rollUse:.2,potHp:.3,potMp:.1,retreatHp:.12,kiteMin:2.5,engage:9}
 };
 /* 근접: 적에게 붙어서 싸움 / 원거리: 거리를 둠 */
-const MELEE={whirl:1,smite:1,quake:1,wave:1};
-const KEEP={whirl:1.6,smite:2.2,quake:3,wave:3,volley:7,rain:6,boom:7,frost:7,chainl:7,pillar:6};
+const MELEE={whirl:1,smite:1,quake:1,wave:1,purge:1};
+const KEEP={purge:1.6,whirl:1.6,smite:2.2,quake:3,wave:3,volley:7,rain:6,boom:7,frost:7,chainl:7,pillar:6};
 
 /* ---------- 시드 고정 난수(로드 전에 Math.random 교체는 runner가 함) ---------- */
 
@@ -112,7 +112,7 @@ let D={mx:0,mz:0,s1:false,atk:false,roll:false},decT=0,lastZ=null,stuckT=0,stuck
 function decide(){
   const C=BOT.C,sk=C.skills,main=sk,melee=!!MELEE[main];let keep=KEEP[main]||5;
   /* 근접 스킬도 사거리가 있으면 그만큼 떨어져서 씀 (회전 베기 반경·균열 길이·검기 길이) — 보스 몸통 공격 범위(몸 반경+1m) 밖을 유지 */
-  let reach=keep+2.5;if(melee){try{const st=skillStats(main);reach=main==='whirl'?st.radius:main==='quake'?st.len*.55:main==='wave'?st.len*.5:main==='smite'?(st.r||4)+3:reach}catch(_){}}
+  let reach=keep+2.5;if(melee){try{const st=skillStats(main);reach=main==='whirl'?st.radius:main==='quake'?st.len*.55:main==='wave'?st.len*.5:main==='smite'?(st.r||4)+3:main==='purge'?st.r:reach}catch(_){}}
   const es=alive(),pos=P.pos;let tgt=null,td=1e9;
   for(const e of es){const d=dist(e.pos,pos)-(e.r||0);if(d<td){td=d;tgt=e}}
   const near=es.filter(e=>dist(e.pos,pos)<BOT.cfg.engage);
@@ -172,6 +172,8 @@ function decide(){
   const rng=melee?Math.max(keep+1.5,reach*.9):14;
   const canSk=P.mp>=(skillStats(main).mp||0);
   D.s1=!!(tgt&&td<rng&&canSk);D.atk=!!(tgt&&td<rng&&!canSk);
+  /* 정화의 빛(켜고 끄는 오라): 오라 반경+2m 안에 적이 있고 마나가 있으면 켜 둠, 아니면 끔 — 상태가 다를 때만 버튼을 한 번 누름 */
+  if(SK[main]&&SK[main].kind==='purge'){const want=!!(tgt&&td<reach+2&&P.mp>(skillStats(main).mp||0)*.1);D.pg=want;D.s1=false;D.atk=!!(tgt&&td<14&&!want)}
   /* 물약 */
   D.php=hpR<BOT.cfg.potHp&&P.cd.pot<=0&&P.pch&&P.pch.hp>0;
   D.pmp=!D.php&&mpR<BOT.cfg.potMp&&P.cd.pot<=0&&P.pch&&P.pch.mp>0&&!!tgt;
@@ -183,6 +185,7 @@ function apply(){
   if(typeof camYaw!=='undefined'&&camYaw){const c=Math.cos(camYaw),n=Math.sin(camYaw);const x=mx*c-mz*n,z=mx*n+mz*c;mx=x;mz=z}/* 게임이 camYaw만큼 돌리므로 반대로 */
   input.x=mx;input.z=mz;
   input.held.s1=D.s1;input.held.atk=D.atk;
+  if(D.pg!==undefined&&SK[BOT.C.skills]&&SK[BOT.C.skills].kind==='purge'){input.held.s1=D.pg!==!!P.purgeOn&&!input._pgDown;input._pgDown=input.held.s1;if(P.purgeOn)BOT.M.pgT=(BOT.M.pgT||0)+DT}
   if(D.php){input.held.php=true;D.php=false}
   if(D.pmp){input.held.pmp=true;D.pmp=false}
   if(D.roll){input.held.mv=true;D.roll=false;BOT.M.rolls++}
@@ -258,6 +261,7 @@ BOT.egSetup=function(o){
   S.enh={};for(const k of EQS)S.enh[k]=o.enh||0;gearSet(o.tier,o.cls,o.q==null?.5:o.q);
   /* 추가 강화(2차): 위험도에 따라 진행도 비율만큼 */
   const id=C().skills[0];S.sk2={};for(const g of (typeof gems2For==='function'?gems2For(id):[]))S.sk2[g]=Math.round(g2Max(g)*(o.g2||0));
+  if(o.aura){S.aura={};S.auraOn={};for(const q of String(o.aura).split('+')){const [k,l]=q.split(':');S.aura[k]=+l||10;S.auraOn[k]=true}}/* --aura area:10+haste:10 */
   S.ch=NCH;S.tier=o.d;S.maxTier=o.d;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.autoUp=false;S.duel=null;
   S.mut={};if(o.mut)for(const k in MUT)S.mut[k]=1;S.mutRun=Object.assign({},S.mut);
   S.gold=0;S.rr=0;S.seal=0;S.ess=0;S.lumi=0;S.inv=[];
@@ -274,7 +278,7 @@ BOT.egEnd=function(){
 };
 
 /* 장비: 레벨/장에 맞는 평균 장비 (옵션 구성은 직업별 주력 옵션) */
-function gearSet(t,c,q){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=c==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+1);
+function gearSet(t,c,q){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=bc(c)==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+1);
   const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','dr'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
    boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
   for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(c),lt})}
@@ -308,7 +312,7 @@ BOT.result=function(){
   const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>[k,Math.round(v/Math.max(1,M.dmgInTot)*100)]);
   const pl=W2L(P.pos.x,P.pos.z);
   return {clear:M.clear,t:+M.t.toFixed(1),bossT:M.bossT==null?null:+M.bossT.toFixed(1),deaths:M.deaths,minHp:Math.round(M.minHp*100),potHp:M.potHp,potMp:M.potMp,rolls:M.rolls,
-    kills:M.kills,dmgOut:Math.round(M.dmgOut),dps:Math.round(M.dmgOut/Math.max(1,M.t)),dmgIn:Math.round(M.dmgInTot),hits:M.hits,src:top,stuck:M.stuck,
+    kills:M.kills,pgOn:M.pgT?Math.round(M.pgT/Math.max(1,M.t)*100):null,dmgOut:Math.round(M.dmgOut),dps:Math.round(M.dmgOut/Math.max(1,M.t)),dmgIn:Math.round(M.dmgInTot),hits:M.hits,src:top,stuck:M.stuck,
     gold:(S.gold||0)-M.gold0,lv:[M.lv0,S.lv],prog:mapKind==='story'?Math.round(100*(STORY_L-8-pl.z)/(2*STORY_L-20)):S.tierKills,events:M.events.slice(0,20),err:M.err||null,hpTrace:M.hpTrace,dbg:M.dbg,goal:BOT.goal&&BOT.goal.why};
 };
 })();
