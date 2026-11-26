@@ -8694,8 +8694,10 @@ function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpW
   P.pch[k]--;P.cd.pot=XP_CD;P.hot=P.hot||{};P.hot[k]=NPOT_T;if(k==='hp')dmgNum(P.pos,'회복','heal');else ringFx(P.pos,1.6,0x6a9aff,.35)}
 function nsPotTick(dt){if(P.xb)for(const id in P.xb)if(P.xb[id]>0)P.xb[id]-=dt;if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k]>0))continue;const t=Math.min(dt,P.hot[k]);P.hot[k]-=dt;const f=npotP(k)*t/NPOT_T;
   if(k==='hp'){P.hp=Math.min(P.mhp,P.hp+P.mhp*f);if(P.esMax>0)P.es=Math.min(P.esMax,(P.es||0)+P.esMax*f)}else P.mp=Math.min(P.mmp,P.mp+P.mmp*f)}}
-const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n);for(const id of XP_IDS)if(xpS().own[id])P.xch[id]=Math.min(xpMax(id),(P.xch[id]||0)+n*xpKillM(id))};
-function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*(mutA('pot')?.5:1);while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
+const XP_KILL=100;/* v1023: 특수 물약은 몬스터 100마리 처치마다 1회(정예·유니크도 1마리로 셈) — 예전엔 생명력·마나 물약과 같은 40점(정예 3점·유니크 10점, 실제 약 11마리)마다 충전 */
+const xpAdd=n=>{xpInit();for(const id of XP_IDS)if(xpS().own[id])P.xch[id]=Math.min(xpMax(id),(P.xch[id]||0)+n*xpKillM(id))};
+const nsPotAdd=(n,noXp)=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n);if(!noXp)xpAdd(n)};
+function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();const mp=mutA('pot')?.5:1;P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*mp;while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1,1)}P.xkp=(P.xkp||0)+mp;while(P.xkp>=XP_KILL){P.xkp-=XP_KILL;xpInit();xpAdd(1)}}
 function nsPotBoss(e,amt){if(!e.duel||e.dummy)return;e.potAcc=(e.potAcc||0)+amt/e.mhp;while(e.potAcc>=.2){e.potAcc-=.2;nsPotAdd(1)}}
 /* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
 function xpHud(){if(!NS())return;const x=xpS();xpInit();for(let i=0;i<3;i++){const id=x.eq[i],B=$('bX'+i);if(!B)continue;const on=!!(id&&x.own[id]);B.classList.toggle('emp',!on);if(!on){delete B.dataset.xid;B.style.removeProperty('--xc');B.style.removeProperty('--liq');B.style.removeProperty('--glow');continue}

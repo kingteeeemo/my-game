@@ -29,6 +29,7 @@ function hookOnce(){if(BOT._hooked)return;BOT._hooked=1;
   for(const n of ['hurtPlayer','hurtPct','hurtPctRaw','nsHurtPct']){const o=window[n];if(typeof o!=='function')continue;
     window[n]=function(){const h0=hpBefore();const r=o.apply(this,arguments);const d=h0-hpBefore();if(d>0&&BOT.on){const k=srcName();BOT.M.dmgIn[k]=(BOT.M.dmgIn[k]||0)+d;BOT.M.dmgInTot+=d;BOT.M.hits++}return r}}
   const oh=window.hurt;window.hurt=function(e,amt){const h0=e.hp;const r=oh.apply(this,arguments);const d=Math.max(0,h0-Math.max(0,e.hp));if(BOT.on){BOT.M.dmgOut+=d;if(e.chBoss||e.gate)BOT.M.dmgBoss+=d}return r};
+  const opk=window.nsPotKill;if(opk)window.nsPotKill=function(e){if(BOT.on&&!(e.duel||e.boss)){BOT.M.kp=(BOT.M.kp||0)+(e.rank>=2?10:e.rank===1?3:1);BOT.M.kr=BOT.M.kr||[0,0,0];BOT.M.kr[Math.min(2,e.rank||0)]++}return opk.apply(this,arguments)};
   const ok=window.kill;window.kill=function(e){if(BOT.on&&!e.boss)BOT.M.kills++;return ok.apply(this,arguments)};
   const od=window.die;window.die=function(){if(BOT.on){BOT.M.deaths++;BOT.M.events.push([+BOT.M.t.toFixed(1),'사망',Math.round(W2L(P.pos.x,P.pos.z).z)])}return od.apply(this,arguments)};
   const op=window.nsPotUse;if(op)window.nsPotUse=function(k){const n0=P.pch&&P.pch[k];const r=op.apply(this,arguments);if(BOT.on&&P.pch&&P.pch[k]<n0){if(k==='hp')BOT.M.potHp++;else BOT.M.potMp++}return r};
@@ -280,7 +281,7 @@ BOT.egSetup=function(o){
 BOT.egEnd=function(){
   const r=BOT.result();
   if(BOT.M.gateT!=null&&r.clear)r.bossT=+(r.t-BOT.M.gateT).toFixed(1);
-  const xo=typeof xpS==='function'?xpS():null;r.xpN=BOT.M.xpN||0;r.xpUp=xo?Object.fromEntries(xo.eq.filter(Boolean).map(id=>[id+':'+(xo.opt&&xo.opt[id]),Math.round((BOT.M.xpT&&BOT.M.xpT[id]||0)/Math.max(1,BOT.M.t)*100)])):{};
+  const xo=typeof xpS==='function'?xpS():null;r.xpN=BOT.M.xpN||0;r.kp=BOT.M.kp||0;r.kr=BOT.M.kr;r.xpUp=xo?Object.fromEntries(xo.eq.filter(Boolean).map(id=>[id+':'+(xo.opt&&xo.opt[id]),Math.round((BOT.M.xpT&&BOT.M.xpT[id]||0)/Math.max(1,BOT.M.t)*100)])):{};
   return Object.assign(r,{kills:S.tierKills,spawned:S.egSp,gateT:BOT.M.gateT==null?null:+BOT.M.gateT.toFixed(1),gold:S.gold||0,rr:S.rr||0,seal:S.seal||0,ess:S.ess||0,lumi:S.lumi||0,xp:Math.round(BOT.EG.xp||0),items:BOT.EG.items,itemTiers:BOT.EG.tiers.slice(1),bag:S.inv.length,lvEnd:S.lv});
 };
 
