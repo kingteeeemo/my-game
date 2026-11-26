@@ -3199,12 +3199,14 @@ const endPtL=()=>({x:pathC(-STORY_L+12),z:-STORY_L+12}),startPtL=()=>({x:pathC(S
 const endPt=()=>{const q=endPtL();return L2W(q.x,q.z)},startPt=()=>{const q=startPtL();return L2W(q.x,q.z)};
 /* 길 밖으로 얼마나 벗어났는지 (0 = 걸을 수 있는 곳) — 로컬 좌표 */
 /* v1002: 길 양 끝 너머로 이어지는 길 — 시작 뒤(STO_S: 이전 길, 2장부터)와 끝 뒤(STO_E: 보스를 잡은 뒤 열리는 다음 길). 야외 장만 */
-const ST_EXT=64;let STO_S=0,STO_E=0,STEXT=null;
+const ST_EXT=64,PIER_W=2.5,PIER_L=44;let STO_S=0,STO_E=0,STEXT=null,STO_SEA=0;/* v1004: 1장 시작 뒤는 바다 — 선착장 다리가 바다 위로 PIER_L만큼 뻗음 */
+const pathWS=z=>STO_SEA&&z>STORY_L?PIER_W:pathW(z);
 function stOpenEnd(){if(mapKind!=='story'||STO_E||!STEXT)return;STO_E=ST_EXT;try{setGround(130,2*(STORY_L+ST_EXT)+30,2);STEXT(-1);const q=L2W(pathC(-STORY_L-8),-STORY_L-8);shake=Math.max(shake,.7);ringFx(q,9,0xc8b8a0,.9)}catch(e){console.log('stOpenEnd',e)}}
-function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathW(z),dz=Math.max(0,z>0?z-STORY_L-STO_S:-z-STORY_L-STO_E);
+function sOutL(x,z){const e=endPtL(),s_=startPtL();const dc=Math.abs(x-pathC(z))-pathWS(z),dz=Math.max(0,z>0?z-STORY_L-STO_S:-z-STORY_L-STO_E);
   const de=Math.hypot(x-e.x,z-e.z)-ARENA_END.r,ds=Math.hypot(x-s_.x,z-s_.z)-START_R;let dp=1e9;if(MP.pk)for(const q of MP.pk)dp=Math.min(dp,Math.hypot(x-q.x,z-q.z)-q.r,pkSegD(x,z,q)-2.4);return Math.max(dz,Math.min(dc,de,ds,dp))}
 function storyOut(x,z){const q=W2L(x,z);return sOutL(q.x,q.z)}
-function groundHL(x,z){const d=sOutL(x,z);if(MP.indoor){/* v713: 성 안 — 길 밖은 곧게 선 벽(높이 4.2), 끝 제단 뒤는 위층 계단 자리만 비워 두고 벽이 높아짐 */const e=endPtL();if(z<-STORY_L+3&&Math.abs(x-e.x)<4.3)return 0;if(d<=0)return 0;return Math.min(4.2+(z<-STORY_L+6?Math.min(8,(-STORY_L+6-z)*.8):0),d*4)}if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
+function groundHL(x,z){if(STO_SEA&&z>STORY_L-4){const d=sOutL(x,z);if(d<=0)return 0;const t=Math.min(1,(z-STORY_L+4)/6);return groundHL0(x,z)*(1-t)-.7*Math.min(1,d/1.6)*t}return groundHL0(x,z)}/* v1004: 시작 뒤 바다 — 기슭에서 바닥이 가라앉아 바닷속으로 */
+function groundHL0(x,z){const d=sOutL(x,z);if(MP.indoor){/* v713: 성 안 — 길 밖은 곧게 선 벽(높이 4.2), 끝 제단 뒤는 위층 계단 자리만 비워 두고 벽이 높아짐 */const e=endPtL();if(z<-STORY_L+3&&Math.abs(x-e.x)<4.3)return 0;if(d<=0)return 0;return Math.min(4.2+(z<-STORY_L+6?Math.min(8,(-STORY_L+6-z)*.8):0),d*4)}if(d<=0)return 0;if(MP.lake&&z<MP.lake[0]&&z>MP.lake[1]&&Math.abs(x-pathC(z))<MP.lake[2]){const e=Math.min(z-MP.lake[1],MP.lake[0]-z),dx=Math.abs(x-pathC(z));return -.55*Math.min(1,e/3)*Math.min(1,(MP.lake[2]-dx)/3)}const n=Math.sin(x*.21+z*.13)*Math.sin(z*.17-x*.09);return Math.min(18,d*.9+d*d*.05)*(.75+.25*n)+(d>1?n*.8:0)}
 function groundH(x,z){if(mapKind==='town'&&inTown&&TLY)return refHt(x,z);if(!pathMap())return 0;const q=W2L(x,z);return groundHL(q.x,q.z)}
 function spawnPt(){if(inArena())return {x:FB_START.x,z:FB_START.z};if(mapKind==='story')return S.chk&&S.chk.ch===S.ch?{x:S.chk.x,z:S.chk.z}:startPt();if(mapKind==='route')return rtSpawnPt();return {x:0,z:0}}
 /* 바닥 메시를 맵 크기로 다시 만들고 높이(언덕)를 입힘 (스토리는 로컬 좌표로 만들고 메시를 θ만큼 회전) */
@@ -3233,7 +3235,7 @@ const HILL_TINT=[[1.45,1.7,.95],[1.25,1.35,1.5],[1.1,1.45,.9],[1.7,1.85,2.1],[1.
 /* 맵 경계 안으로 밀어 넣기 */
 function mapClamp(p,r){
   if(pathMap()){const q=W2L(p.x,p.z);q.z=clamp(q.z,-STORY_L-STO_E+r,STORY_L+STO_S-r);
-    if(sOutL(q.x,q.z)>0){const c=pathC(q.z),w=Math.max(1,pathW(q.z)-r),cx={x:clamp(q.x,c-w,c+w),z:q.z};let best=cx,bd=Math.abs(q.x-cx.x);
+    if(sOutL(q.x,q.z)>0){const c=pathC(q.z),w=Math.max(1,pathWS(q.z)-r),cx={x:clamp(q.x,c-w,c+w),z:q.z};let best=cx,bd=Math.abs(q.x-cx.x);
       if(MP.pk)for(const k of MP.pk){{const R=k.r-r,d=Math.hypot(q.x-k.x,q.z-k.z);if(d>1e-4){const c={x:k.x+(q.x-k.x)/d*Math.min(d,R),z:k.z+(q.z-k.z)/d*Math.min(d,R)},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
         {const nn=pkSegNear(q.x,q.z,k),px=nn.x,pz=nn.z,d=nn.d,R=Math.max(.2,2.4-r),c=d>R?{x:px+(q.x-px)/d*R,z:pz+(q.z-pz)/d*R}:{x:q.x,z:q.z},dd=Math.hypot(q.x-c.x,q.z-c.z);if(dd<bd){bd=dd;best=c}}}
       for(const o of [[endPtL(),ARENA_END.r],[startPtL(),START_R]]){const e=o[0],R=o[1]-r,d=Math.hypot(q.x-e.x,q.z-e.z);if(d>1e-4){const k={x:e.x+(q.x-e.x)/d*R,z:e.z+(q.z-e.z)/d*R},dd=Math.hypot(q.x-k.x,q.z-k.z);if(dd<bd){bd=dd;best=k}}}
@@ -3260,7 +3262,7 @@ function seaStart(s_){APL(s_.x+.5,s_.z+3.5,'sand',.2,9,true);APL(s_.x-2.2,s_.z+5
   for(const [dx,dz] of [[2,7],[-5,6.5],[6.5,4.8],[-.5,5],[4,-1.5],[-3.5,-1],[1,2.6]])APL(s_.x+dx,s_.z+dz,'kelp',0,0,true)}
 function buildStory(){clearProps();STORY_L=STORY_L0;const th=curTheme(),i=Math.min(S.ch||0,LAST),set=PROPSET[i];if(SBC[i])sbLoad(i);/* v725: 장 보스 모델 미리 받기 */propTheme=th.key;mapKind='story';storyParams(i);crysKind=CH[i].ice?'ice':'void';
   if(S.sRotCh!==S.ch||!(S.sRot>=0)){S.sRot=(Math.random()*8|0)*Math.PI/4;S.sRotCh=S.ch}SROT=S.sRot;SRC=Math.cos(SROT);SRS=Math.sin(SROT);
-  const ind=!!CH[i].indoor;STO_S=(!ind&&i>0&&!S.tutor)?ST_EXT:0;STO_E=(!ind&&S.phase===2)?ST_EXT:0;STEXT=null;/* v1002 */
+  const ind=!!CH[i].indoor;STO_SEA=(!ind&&i===0)?1:0;STO_S=STO_SEA?PIER_L:(!ind&&i>0&&!S.tutor)?ST_EXT:0;STO_E=(!ind&&S.phase===2)?ST_EXT:0;STEXT=null;/* v1002 */
   setGround(130,2*(STORY_L+ST_EXT)+30,2);
   const e=endPtL(),s_=startPtL(),ew=endPt();ALTAR.x=ew.x;ALTAR.z=ew.z;altarRing.position.set(ew.x,.04,ew.z);altarLight.position.set(ew.x,3,ew.z);
   for(let a=0;a<6;a++){const t=a/6*Math.PI*2+.3;APL(e.x+Math.cos(t)*9,e.z+Math.sin(t)*9,'firePillar')}
@@ -3274,20 +3276,29 @@ function buildStory(){clearProps();STORY_L=STORY_L0;const th=curTheme(),i=Math.m
     for(let k=0;k<2;k++){const zz=z+rand(-5,5),cc=pathC(zz),ww=pathW(zz),off=rand(.35,.85)*(Math.random()<.5?-1:1);APL(cc+off*(ww-1),zz,pickW(set))}
     if(Math.random()<.35)APL(c+rand(-.5,.5)*w,z+rand(-4,4),'brazier')}
   /* 길 가장자리 바위 줄 (경계가 한눈에 보이도록) */
-  if(!CH[i].indoor)for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1)continue;APL(x,z,'rock',0,0,true)}
+  if(!CH[i].indoor)for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1||(STO_SEA&&z>STORY_L-4))continue;APL(x,z,'rock',0,0,true)}
   /* 언덕: 양옆 비탈에 나무·바위·수정, 언덕 위 감시탑 */
   const slope=[{tree:3,rock:3},{tree:2,tomb:3,rock:1},{tree:4,rock:2},{crystal:3,rock:3,tree:1},{rock:4,pillar:1.5,bones:1},{rock:5,pillar:1,bones:1.5},{crystal:3,rock:2,pillar:1.5},{},{},{}][i];
-  if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;if(z<-STORY_L&&Math.abs(x-pathC(z))-pathW(z)<-z-STORY_L+.5)continue;/* v1002: 끝 뒤 열릴 길 위에 뜨지 않게 */APL(x,z,pickW(slope),rand(0,6),1,true)}
+  if(!CH[i].indoor)for(let n=0;n<150;n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;if(STO_SEA&&z>STORY_L-4)continue;if(z<-STORY_L&&Math.abs(x-pathC(z))-pathW(z)<-z-STORY_L+.5)continue;/* v1002: 끝 뒤 열릴 길 위에 뜨지 않게 */APL(x,z,pickW(slope),rand(0,6),1,true)}
   if(!ind){STEXT=sg=>{const z0=sg>0?STORY_L:-STORY_L,lim=STORY_L+ST_EXT;/* v1002: 열린 길 너머 꾸밈 */
     for(let z=z0;Math.abs(z)<lim-6;z+=sg*rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;APL(pathC(z)+side*(pathW(z)+rand(.3,1.4)),z,'rock',0,0,true)}
     for(let n=0;n<40;n++){const z=z0+sg*rand(0,ST_EXT-4),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(slope),rand(0,6),1,true)}
     for(let n=0;n<16;n++){const z=z0+sg*rand(0,ST_EXT-8);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
     for(let z=z0+sg*20;Math.abs(z)<lim-12;z+=sg*24){const c=pathC(z),w=pathW(z);APL(c+(Math.random()<.5?-1:1)*(w-1.2),z,'brazier')}};
-    if(STO_S)STEXT(1);if(STO_E)STEXT(-1)}
+    if(STO_S&&!STO_SEA)STEXT(1);if(STO_E)STEXT(-1)}
   if(!CH[i].indoor)for(let z=STORY_L-35;z>-STORY_L+20;z-=rand(38,50)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,'tower',rand(0,6),1,true)}
   for(let n=0;n<70;n++){const z=rand(-STORY_L,STORY_L);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
-  chzBuild(i);reachFix();
+  chzBuild(i);reachFix();if(STO_SEA)seaPier();
   altarRing.visible=altarLight.visible=true;arenaRing.visible=false;for(const l of arenaLights)l.visible=false}
+/* v1004: 1장 시작 뒤 바다와 선착장 다리 — 바다 면(은은히 일렁임) · 판자 깐 다리 · 말뚝 · 등불 · 난파선 */
+function seaPier(){const L0=STORY_L-10,L1=STORY_L+ST_EXT+15,zc=(L0+L1)/2,wc=L2W(0,zc),mk=(col,op,add)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(130,L1-L0),add?new THREE.MeshBasicMaterial({map:refLavaTex,color:col,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}):new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));m.rotation.set(-Math.PI/2,0,SROT);m.position.set(wc.x,add?-.12:-.14,wc.z);scene.add(m);propMeshes.push(m);return m};
+  mk(0x1a333c,.95,0);const sh=mk(0x78b4c8,.11,1);CHZS.lakeT=sh.material.map;
+  const plank=SM({color:0x5a4430,roughness:1}),dark=SM({color:0x3a2c20,roughness:1}),pw=PIER_W*2+.5,zb=STORY_L-2,za=STORY_L+PIER_L;
+  for(let z=zb;z<za;z+=.55){const c=pathC(z),w0=L2W(c,z),z2=z-.55,w2=L2W(pathC(z2),z2),pl=mesh(new THREE.BoxGeometry(pw,.12,.46),Math.random()<.2?dark:plank,0,0,0);pl.position.set(w0.x,.02,w0.z);pl.rotation.y=Math.atan2(w2.x-w0.x,w2.z-w0.z);pl.rotation.z=rand(-.03,.03);scene.add(pl);propMeshes.push(pl)}
+  for(let z=zb+1;z<za;z+=3)for(const sd of [-1,1]){const w0=L2W(pathC(z)+sd*(PIER_W+.1),z),p_=mesh(new THREE.CylinderGeometry(.1,.13,1.9,6),dark,w0.x,.2,w0.z);scene.add(p_);propMeshes.push(p_)}
+  for(let z=zb+8;z<za-2;z+=14)for(const sd of [-1,1])APL(pathC(z)+sd*(PIER_W-.35),z,'brazier');
+  APL(pathC(za-10)+7,za-10,'wreck',Math.PI/2+.5);APL(pathC(za-26)-8,za-26,'wreck',Math.PI/2-.35);
+  for(let z=zb+6;z<za+12;z+=rand(5,9))for(const sd of [-1,1])if(Math.random()<.7)APL(pathC(z)+sd*rand(5,14),z,'kelp',0,0,true)}
 let crysKind='void';
 /* v721: 길 막힘 검사 — 소품이 무작위로 놓이다 길·곁가지 연결길·봉화 같은 목표를 막는 일이 없게, 맵을 지은 뒤 0.5칸 격자로 시작점에서 걸어서 닿는지 확인.
    못 닿는 목표가 있으면 막는 소품의 충돌만 없앰(모습은 그대로): 1차 곁가지 안·연결길 위, 2차 걸을 수 있는 땅 위 전부. 막는 문(bar)은 열린 것으로 봄 */
@@ -4083,7 +4094,7 @@ function buildRoute(){clearProps();STORY_L=RT_L;STO_S=STO_E=0;STEXT=null;const t
   for(let z=STORY_L-14;z>-STORY_L+24;z-=rand(9,15)){const c=pathC(z),w=pathW(z),side=Math.random()<.5?-1:1;
     if(Math.random()<.5){const dx=pathC(z-1)-c;APL(c+side*(w-1.2),z,m===1?'wall':pickW(set),Math.atan2(dx,-1),rand(4,7))}
     if(Math.random()<.3)APL(c+side*(w-2.2),z+rand(-4,4),'brazier')}
-  for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1)continue;APL(x,z,m===4?pickW({rock:2,pillar:1}):'rock',0,0,true)}
+  for(let z=STORY_L;z>-STORY_L;z-=rand(2.2,3.6))for(const side of [-1,1]){if(Math.random()<.25)continue;const x=pathC(z)+side*(pathW(z)+rand(.3,1.4));if(Math.hypot(x-e.x,z-e.z)<ARENA_END.r+1||Math.hypot(x-s_.x,z-s_.z)<START_R+1||(STO_SEA&&z>STORY_L-4))continue;APL(x,z,m===4?pickW({rock:2,pillar:1}):'rock',0,0,true)}
   const sl=RT_SLOPE[m]||set;for(let n=0;n<Math.round(150*STORY_L/STORY_L0);n++){const z=rand(-STORY_L-8,STORY_L+8),side=Math.random()<.5?-1:1,x=pathC(z)+side*(pathW(z)+rand(1.5,26));if(sOutL(x,z)<1)continue;APL(x,z,pickW(sl),rand(0,6),1,true)}
   for(let z=STORY_L-40;z>-STORY_L+30;z-=rand(45,60)){const side=Math.random()<.5?-1:1;APL(pathC(z)+side*(pathW(z)+rand(8,13)),z,m===4?'statue':'tower',rand(0,6),1,true)}
   for(let n=0;n<Math.round(70*STORY_L/STORY_L0);n++){const z=rand(-STORY_L,STORY_L);ADL(pathC(z)+rand(-1,1)*pathW(z),z)}
