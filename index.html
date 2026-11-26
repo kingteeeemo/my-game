@@ -8014,8 +8014,8 @@ const SPD_POT={n:'신속 물약',price:12,dur:4};
 /* v987: 특수 물약 — 6종 중 3개를 장착(단축키 3·4·5). 윤회의 불씨 10개로 한 번 사면 충전식(몬스터 처치로 충전, 최대 3회) */
 const XPOT={spd:{n:'신속',c:'#4ad06a',dur:6,e:60,f:e=>`이동 속도 +${e}%`},def:{n:'철벽',c:'#8fa8d8',dur:6,e:30,f:e=>`방어력 증가 +${e}%`},eva:{n:'환영',c:'#b08cff',dur:6,e:30,f:e=>`회피력 증가 +${e}%`},es:{n:'수호',c:'#4fd6e0',dur:6,e:30,f:e=>`에너지 쉴드 가득 채움 + 최대치 +${e}%`},dmg:{n:'격노',c:'#ff7a4a',dur:6,e:40,f:e=>`피해 증가 +${e}%`},crit:{n:'집중',c:'#ffd24a',dur:6,e:10,f:e=>`치명타 확률 +${e}%p`}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=3,XP_CD=1,XP_REROLL=3;
 /* v988: 특수 물약 옵션 한 줄 — 지속↑·효과↓ / 지속↓·효과↑ / 최대 충전 +2 / 처치 충전량 +50%. 수호는 지속·효과 교환 옵션 제외 */
-const XPOPT={long:{n:'지속시간 +50% · 효과 −20%',d:1.5,e:.8},short:{n:'지속시간 −40% · 효과 +40%',d:.6,e:1.4},max:{n:'최대 충전 +2회'},kill:{n:'처치 시 충전량 +50%'}};
-const xpPool=id=>id==='es'?['max','kill']:['long','short','max','kill'];
+const XPOPT={long:{n:'지속시간 +50% · 효과 −20%',d:1.5,e:.8},short:{n:'지속시간 −40% · 효과 +40%',d:.6,e:1.4},max:{n:'최대 충전 +2회'},kill:{n:'처치 시 충전량 +50%'},none:{n:'옵션 없음'}};
+const xpPool=id=>id==='es'?['max','kill','none']:['long','short','max','kill','none'];
 function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
 const xpM=id=>{const o=xpS().own[id]?XPOPT[xpOpt(id)]:null;return {d:o&&o.d||1,e:o&&o.e||1}};
 const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?2:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1.5:1;
@@ -9422,7 +9422,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v989';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v990';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
