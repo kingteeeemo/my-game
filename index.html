@@ -9370,7 +9370,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v980';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v981';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11575,20 +11575,21 @@ function ivBgBuild(g,bg,fl){bg.visible=false;fl.visible=false;g.userData.bg0=[bg
     plat(2.4,.22,.005,'vec3(.30,.285,.27)',`float gl=smoothstep(.035,0.,abs(r-2.0))+smoothstep(.025,0.,abs(r-1.72))*.8+smoothstep(.02,0.,abs(r-.95))*.6;float rn=step(1.76,r)*step(r,1.96)*step(.45,fract((an+t*.06)*7.64))*step(fract((an+t*.06)*30.56),.5);float sp=0.;for(int k=0;k<4;k++){float aa=float(k)*.7854+t*.04;vec2 n=vec2(cos(aa),sin(aa));sp+=smoothstep(.02,0.,abs(dot(q,n)))*step(.95,r)*step(r,1.72);}c+=vec3(.91,.86,.77)*(gl+rn*.8+sp*.5)*(.8+.2*sin(t*1.6));`);
     shadow(.6,1.0);embers(40,0xe8dcc4,.045)}
   G.traverse(o=>o.layers.set(1))}
-function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0);camera.clearViewOffset();resize()}
+function invStudioOff(){if(!IVS.on)return;IVS.on=false;camera.layers.set(0);camera.far=120;camera.clearViewOffset();resize()}
 /* v490: 세로 모드 게임 카메라(시야각 73°)를 그대로 기울여 쓰면 화면 위쪽에서 위아래로 늘어나 보임 → 장비창은 좁은 시야각(망원)으로 정면에서 찍고, 카메라를 기울이지 않고 화면을 평행 이동해 캐릭터 자리를 잡음 */
 function invCam(){if(IVS.snap||IVS.ra==null)IVS.ra=IVS.rot;else IVS.ra+=(IVS.rot-IVS.ra)*.35;/* v532: 각도를 부드럽게 따라가고 카메라는 항상 같은 거리의 원 위에 — 빨리 돌려도 캐릭터가 커지지 않음(전에는 위치를 직선으로 따라가 원 안쪽을 가로질렀음) */const f=(P.face||0)+IVS.ra,dx=Math.sin(f),dz=Math.cos(f),W=innerWidth,Hh=innerHeight,port=W<Hh;
   const g=invStudio();if(!IVS.on){IVS.on=true;IVS.snap=true;camera.layers.set(1)}
+  const K=hero.scale.x||1;g.scale.setScalar(K);if(camera.far!==120*K){camera.far=120*K}/* v981: 혈조의 인장으로 캐릭터가 커져도 장비창에서는 기본 배율처럼 보이도록 — 무대와 카메라를 같은 배율로 키움(실제 캐릭터 크기는 그대로) */
   const Y=P.mv?(P.pos.y||0):hero.position.y;/* v733: 피난처 마을처럼 지면이 높은 곳에서도 카메라가 캐릭터 높이를 따라감(전에는 높이 0 기준이라 캐릭터가 위로 밀려 잘림) */g.position.set(P.pos.x,Y,P.pos.z);hero.traverse(o=>{if(o.geometry===shadowGeo)o.layers.disable(1);else o.layers.enable(1)});/* v532: 장비창에서는 발밑 그림자 없음 */
   const u=g.userData;u.key.position.set(dx*4-dz*2.5,5,dz*4+dx*2.5);u.rim.position.set(-dx*4+dz*2,3.5,-dz*4-dx*2);
   const pf=.57;/* v499: 가방을 넓혀도 캐릭터 크기·위치는 그대로(가방이 아래를 덮음) */
   const FOV=port?26:28,ch=port?.46*(pf/.57)*Hh:Hh,want=(port?4.15:3.8)/.85;/* v496: 세로 캐릭터 영역 57%(넓힐 때 34%) — 캐릭터 크기는 57%일 때 v493과 같게, 줄면 같이 작아짐 · /* v493: 캐릭터 15% 작게 ·  want = 캐릭터 영역 높이에 보일 세계 높이(m) — 캐릭터 키 약 2.7m + 이름표·하단 요약 여백 */
   if(camera.fov!==FOV){camera.fov=FOV;scene.fog.near=900;scene.fog.far=1000}
-  const pk=port?clamp((IVS.ph-IVS_PH[0])/(IVS_PH[1]-IVS_PH[0]),0,1):0,visH=want*Hh/ch/(1-.05*pk);if(IVS.snap)IVS.zs=IVS.zoom;else IVS.zs+=(IVS.zoom-IVS.zs)*.3;const zk=Math.max(0,1-1/IVS.zs),pyM=1.35*zk;IVS.py=clamp(IVS.py,-pyM,pyM);const D=visH/2/Math.tan(FOV*Math.PI/360)/IVS.zs,ly=1.45+.85*zk+IVS.py;/* v501: 가방을 올리면 캐릭터 5% 작게 */
+  const pk=port?clamp((IVS.ph-IVS_PH[0])/(IVS_PH[1]-IVS_PH[0]),0,1):0,visH=want*Hh/ch/(1-.05*pk)*K;if(IVS.snap)IVS.zs=IVS.zoom;else IVS.zs+=(IVS.zoom-IVS.zs)*.3;const zk=Math.max(0,1-1/IVS.zs),pyM=1.35*zk;IVS.py=clamp(IVS.py,-pyM,pyM);const D=visH/2/Math.tan(FOV*Math.PI/360)/IVS.zs,ly=(1.45+.85*zk+IVS.py)*K;/* v501: 가방을 올리면 캐릭터 5% 작게 */
   /* 캐릭터 영역 중심이 화면 중심에서 얼마나 떨어졌는지(px) — 세로: 위 46% 영역 중심, 가로: 가방 왼쪽 영역 중심 */
-  const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy0=port?(.5-(pf/2+.025))*Hh:-.02*Hh,oy=port?Math.max(oy0,Hh/2+1.45*Hh/visH-((1-IVS.ph)*Hh-14)):oy0;/* v501: 가방 윗선이 발을 가리면 그만큼 캐릭터를 위로 */
+  const bagW=port?0:Math.min(.46*W,540),ox=port?0:bagW/2,oy0=port?(.5-(pf/2+.025))*Hh:-.02*Hh,oy=port?Math.max(oy0,Hh/2+1.45*K*Hh/visH-((1-IVS.ph)*Hh-14)):oy0;/* v501: 가방 윗선이 발을 가리면 그만큼 캐릭터를 위로 */
   camera.setViewOffset(W,Hh,ox,oy,W,Hh);camera.updateProjectionMatrix();if(g.userData.bgU){g.userData.bgv.rotation.y=P.face||0;g.userData.bgU.t.value=performance.now()/1000;g.userData.bgv.children.forEach(o=>{if(o.userData.rise){const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++){let y=a.getY(i)+.012;if(y>5)y=0;a.setY(i,y)}a.needsUpdate=true}})}
-  _icp.set(P.pos.x+dx*D,Y+ly+.25,P.pos.z+dz*D);camera.position.copy(_icp);IVS.snap=false;
+  _icp.set(P.pos.x+dx*D,Y+ly+.25*K,P.pos.z+dz*D);camera.position.copy(_icp);IVS.snap=false;
   _icl.set(P.pos.x,Y+ly,P.pos.z);camera.lookAt(_icl)}
 /* 캐릭터 쪽을 좌우로 드래그하면 돌려 봄 */
 const ivPinD=()=>{const [a,b]=[...IVS.pts.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1};
