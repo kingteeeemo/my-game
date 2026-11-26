@@ -2317,6 +2317,8 @@ function nsMigItem(it,cls){if(it&&it.ns&&it.nv===2&&NSLOT[it.slot])return nsX15(
 function nsMigSave(s){nsMigSave0(s);if(!s.nv4){s.nv4=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig4]',e)}}}
 function nsMigSave0(s){if(s.nv2){if(!s.nv3){s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls))}catch(e){console.error('[nsMig3]',e)}}return}s.nv2=s.nv3=1;try{for(const k in (s.eq||{}))s.eq[k]=nsMigItem(s.eq[k],s.cls);s.inv=(s.inv||[]).map(x=>nsMigItem(x,s.cls));if(s.enh)for(const k in s.enh)s.enh[k]=Math.min(NS_ENH_MAX,s.enh[k]||0);s.pity={}}catch(e){console.error('[nsMig]',e)}}
 function migrate(s){
+  /* v995: v987~v994에서 특수 물약 데이터가 s.xp(경험치)에 섞여 저장된 세이브 복구 — 객체면 s.xpt로 옮기고, 문자열·NaN으로 깨진 경험치는 0으로 */
+  if(s.xp&&typeof s.xp==='object'){if(!s.xpt)s.xpt=s.xp;s.xp=0}else if(typeof s.xp!=='number'||!isFinite(s.xp))s.xp=0;
   nsMigSave(s);if(s.tickets>0){s.cata=(s.cata||0)+s.tickets*3;s.tickets=0}/* v886: 확정 강화 주문서 폐지 — 1개당 재점화의 촉매 3개 */try{titleCheck(s,true)}catch(_){}if(s.potUp>0){s.ess=(s.ess||0)+NPOT_UP.slice(0,s.potUp).reduce((a,b)=>a+b,0);s.potUp=0}/* v879: 물약 충전 횟수 확장 폐지 — 쓴 정수 반환 */
   /* v713: 스토리 7장 → 10장. 예전 엔드게임(ch 7) → 새 엔드게임(ch 10). 예전 7장 보스를 잡고 최종 결전 앞이었으면(phase 3·5) → 8장부터, 아쉬카르까지 마쳤으면(phase 4) 그대로 결말 */
   if(!s.nchV){s.nchV=NCH;if(s.ch>=7)s.ch=NCH;else if(s.ch===6&&s.phase===4)s.ch=LAST;else if(s.ch===6&&(s.phase===3||s.phase===5)){s.ch=7;s.phase=0;s.kills=0;s.chk=null}}
@@ -8031,7 +8033,8 @@ const xpPool=id=>id==='es'?['max','kill','none']:['long','short','max','kill','n
 function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
 const xpM=id=>{const o=xpS().own[id]?XPOPT[xpOpt(id)]:null;return {d:o&&o.d||1,e:o&&o.e||1}};
 const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?2:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1.5:1;
-const xpS=()=>{S.xp=S.xp||{own:{},eq:[null,null,null]};S.xp.own=S.xp.own||{};if(!Array.isArray(S.xp.eq))S.xp.eq=[null,null,null];return S.xp};
+/* v995: 특수 물약 저장소는 S.xpt — 예전엔 S.xp(경험치 숫자)와 이름이 겹쳐 own이 undefined로 터졌음 */
+const xpS=()=>{if(!S.xpt||typeof S.xpt!=='object')S.xpt={own:{},eq:[null,null,null]};S.xpt.own=S.xpt.own||{};if(!Array.isArray(S.xpt.eq))S.xpt.eq=[null,null,null];return S.xpt};
 function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=xpMax(id);P.xch[id]=Math.min(xpMax(id),P.xch[id])}}
 function xpUse(i){if(!NS()||knAppr)return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','포션 상인에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
   xpInit();if(P.cd.pot>0)return;const X=XPOT[id];if(!(P.xch[id]>=1)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
@@ -9465,7 +9468,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v994';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v995';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
