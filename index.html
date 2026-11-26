@@ -2821,11 +2821,40 @@ void main(){float fr=pow(1.-abs(dot(normalize(vN),vV)),2.3);
     rot+=dt*(.7+spin*7);blades.forEach(({piv,m,i})=>{piv.rotation.y=rot+i*Math.PI/2;m.position.y=Math.sin(T*1.6+i*1.7)*.1;m.position.z=1.15+spin*.18});
     mo.userData.tick(dt,T)};return g}
 
-let G=null,FX=null,T=0;const KEYS=['def','haste','blood','eva','es','crit'];
+/* ---------- 7. 확장의 파문 — 확장의 오라: 발밑에서 밖으로 퍼지는 보라 물결 + 바깥을 가리키는 화살 문양 + 허리에서 넓어지는 빛의 고리 (v977) ---------- */
+function makeExpand(){const g=new THREE.Group();const mats=[];
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(2.6,96),new THREE.ShaderMaterial(Object.assign({uniforms:{t:{value:0},k:{value:1}},
+    vertexShader:`varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float t,k;varying vec2 vP;
+void main(){float r=length(vP)/2.6,a=atan(vP.y,vP.x);
+  /* 밖으로 퍼지는 물결 3겹 */
+  float w=0.;for(int i=0;i<3;i++){float ph=fract(t*.42+float(i)/3.);float d=abs(r-ph);w+=smoothstep(.035,0.,d)*(1.-ph)*smoothstep(0.,.12,ph);}
+  /* 안쪽 문양 고리: 끊어진 선이 천천히 돔 */
+  float ring=smoothstep(.012,0.,abs(r-.42))*step(.35,fract(a*12./6.2832+t*.15));
+  float ring2=smoothstep(.008,0.,abs(r-.47))*.6;
+  /* 바깥을 가리키는 화살(쐐기) 4개 — 밖으로 미끄러지며 사라짐 */
+  float sec=mod(a+.7854+t*.25,1.5708)-.7854;float pr=fract(t*.55);float rr=r-(.52+pr*.32);
+  float chev=smoothstep(.02,0.,abs(rr+abs(sec)*.55-.02))*step(abs(sec),.32)*(1.-pr)*smoothstep(0.,.15,pr);
+  float glow=pow(1.-r,3.)*.18;
+  float v=(w*.9+ring*.8+ring2+chev*1.3+glow)*smoothstep(1.,.9,r);
+  vec3 c=mix(vec3(.62,.36,1.),vec3(.92,.84,1.),clamp(w+chev,0.,1.)*.6);gl_FragColor=vec4(c*v*k,1.);}`},ADD)));
+  floor.rotation.x=-Math.PI/2;floor.position.y=.04;g.add(floor);mats.push(floor.material);
+  /* 허리 높이에서 넓어지며 흐려지는 빛의 고리 2개 (번갈아) */
+  const halo=()=>{const m=new THREE.ShaderMaterial(Object.assign({uniforms:{k:{value:1},f:{value:0}},side:THREE.DoubleSide,
+    vertexShader:`varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float k,f;varying vec2 vU;void main(){float c=1.-abs(vU.y-.5)*2.;c=pow(max(c,0.),1.4);float s=.75+.25*sin(vU.x*6.2832*8.);
+      gl_FragColor=vec4(mix(vec3(.7,.45,1.),vec3(1.),c*.5)*c*s*f*k,1.);}`},ADD));mats.push(m);
+    const h=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.1,80,1,true),m);g.add(h);return h};
+  const hs=[halo(),halo()];
+  const mo=motes(40,0xc8a0ff,{r0:.5,r1:1.9,y0:.05,h:1.6,sp:.5,size:.07,op:.85,mode:'rise'});g.add(mo);
+  g.userData.tick=(dt,T)=>{for(const m of mats){if(m.uniforms.t)m.uniforms.t.value=T;m.uniforms.k.value=K}
+    hs.forEach((h,i)=>{const p=(T*.5+i*.5)%1;const r=.7+p*1.5;h.scale.set(r,1,r);h.position.y=1.15+p*.25;h.material.uniforms.f.value=Math.sin(p*Math.PI)*.9});mo.userData.tick(dt,T)};return g}
+
+let G=null,FX=null,T=0;const KEYS=['def','haste','blood','eva','es','crit','area'];
 return function(dt){const show=S&&S.cls&&!S.demo&&hero&&P.hp>0&&KEYS.some(k=>auraAct(k));
   if(!show){if(G)G.visible=false;return}
-  if(!G){G=new THREE.Group();FX=[makeSeal(),makeRings(),makeBlood(),makeVeil(),makeCrystal(),makeEdge(()=>camera)];FX.forEach(f=>{f.visible=false;G.add(f)})}
-  if(G.parent!==scene)scene.add(G);G.visible=true;G.position.set(P.pos.x,P.pos.y,P.pos.z);T+=dt;
+  if(!G){G=new THREE.Group();FX=[makeSeal(),makeRings(),makeBlood(),makeVeil(),makeCrystal(),makeEdge(()=>camera),makeExpand()];FX.forEach(f=>{f.visible=false;G.add(f)})}
+  if(G.parent!==scene)scene.add(G);G.visible=true;G.position.set(P.pos.x,P.pos.y,P.pos.z);G.scale.setScalar(hero.scale.x||1);/* v977: 혈조의 인장으로 커진 캐릭터 크기에 맞춰 오라도 같이 커짐 */T+=dt;
   KEYS.forEach((k,i)=>{const on=auraAct(k);FX[i].visible=on;if(on)FX[i].userData.tick(dt,T)})}})();
 function renderFrame(t){INVU.value=invOpen?1:0;{/* v938: 무기 외형 필드 밝기(fb배) — 장비창·초상화는 그대로 */const K=hero&&skOf(hero),mt=K&&K.wskM&&K.swM,u=mt&&mt.userData;if(u&&u.wcol)mt.color.setScalar(u.wcol*(invOpen?1:u.wf||1))}ipFlush();novaFlush();fireFlush();
   if(!GQS[GUQ].post){renderer.setRenderTarget(null);renderer.render(scene,camera);return}
@@ -9307,7 +9336,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v976';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v977';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
