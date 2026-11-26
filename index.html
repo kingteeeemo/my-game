@@ -2135,7 +2135,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
 let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
-function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:1+g.area/100,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,dr:Math.min(.4,g.dr/100)}}
+function nsxUpd(){if(!NS()||!S||!S.eq){NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};return}const g=gear();NSX={bossd:g.bossd/100,area:S.demo&&S.main==='purge'?1.2:1+g.area/100/* v984: 시연 영상의 정화의 빛은 효과 범위 +20%로 보여줌 */,projr:Math.min(.4,g.projr/100),killH:g.killH/100,killM:g.killM/100,esrc:1+g.esrc/100,dr:Math.min(.4,g.dr/100)}}
 /* 방어 유형 혼합: 주력 100% · 나머지 35%, 합산 후 x/(x+K) (상한 90%), 비율대로 배분 · v603: K 60,000 → 3,000, 상한 85% → 90%, 증가% 옵션은 오라와 더해서 곱함 */
 const NS_K=3000,NS_DCAP=.99;/* v909: 상한 사실상 없음(곡선이 100%에 닿지 않도록 안전값만) */const nsDefK=()=>{const B=S.duel?nsBossCfg():null;return B?B.K:NS_K};
 /* v907·v909: 방어 곡선 — 감소율 = ρ^0.66/(ρ^0.66+1) (1티어 +22 최적 + 오라 10단계 ≈ 90%), ρ = 방어 합계 ÷ 기준값. 낮은 구간은 거의 그대로, 최상위(1티어 +22 최적)는 약 85%로 눌러 상한(90%)까지 여유를 둠 */
@@ -9370,7 +9370,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v983';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v984';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
