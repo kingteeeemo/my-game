@@ -130,6 +130,15 @@ body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body
 .ivuid{margin-top:6px;padding:14px 10px;border-radius:10px;border:1px dashed rgba(255,210,74,.5);background:rgba(255,210,74,.06);text-align:center;font:800 15px var(--ko);color:#ffd24a}.ivuid small{display:block;margin-top:3px;font:600 11px var(--ko);color:#a89e8c}
 .ivdps.uid b{font-size:13px;color:#ffd24a}.iv2id{background:#3a3018;border-color:#8a7030;color:#ffd98a}
 .ivcols.reveal .ivo{animation:idRev .6s ease-out both}@keyframes idRev{0%{opacity:0;transform:translateY(6px);box-shadow:0 0 0 rgba(255,210,74,0)}60%{opacity:1;box-shadow:0 0 14px rgba(255,210,74,.6)}100%{transform:none;box-shadow:none}}
+/* v980: 장비창 — 상단 버튼 두 줄(세로) · 전투력은 카드 안 칩 */
+.iv2acts{display:contents}
+.iv2.p .iv2acts{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 50px);display:flex;justify-content:center;gap:8px;pointer-events:none;z-index:3}.iv2.p .iv2acts>*{pointer-events:auto;white-space:nowrap;flex:none}
+.iv2.p .iv2who{top:calc(env(safe-area-inset-top,0px) + 92px)}
+@media(max-width:380px){.iv2.p .iv2acts .iv2auto{padding:0 9px;font-size:11.5px}.iv2.p .iv2acts{gap:6px}}
+.ivpw{position:absolute;right:86px;top:12px;display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;text-align:right}
+.ivpw b{font:800 17px var(--en);font-stretch:87%}.ivpw small{font:700 9.5px var(--ko);color:#a89e8c}.ivpw span{font:600 9.5px var(--ko);color:#8a8070}
+.ivpw.good b{color:#7fe07a}.ivpw.bad b{color:#ff7a6a}.ivpw.same b{color:#c8c4bc;font-size:13px}
+.ivc.haspw .ivn,.ivc.haspw .k,.ivc.haspw .ivs{padding-right:168px}
 /* v979: 감정 UI — 티어 색 패널 · 봉인 칸 스캔 · 줄별 공개 */
 .ivc.ns3{--tc:#c9ad78;position:relative;overflow:hidden;border-color:var(--tc);background:linear-gradient(color-mix(in srgb,var(--tc) 15%,#13121a),color-mix(in srgb,var(--tc) 6%,#0f0e14));box-shadow:0 0 16px color-mix(in srgb,var(--tc) 26%,transparent)}
 .iv2pop .ivc.ns3,.ivc.ns3.sel,.ivc.ns3.cur{border-color:var(--tc);background:linear-gradient(color-mix(in srgb,var(--tc) 15%,#13121a),color-mix(in srgb,var(--tc) 6%,#0f0e14));box-shadow:0 0 16px color-mix(in srgb,var(--tc) 26%,transparent)}
@@ -9361,7 +9370,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v979';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v980';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10320,10 +10329,13 @@ Object.assign(ICO,{"u_blood": "<svg viewBox=\"-8 -8 144 144\" xmlns=\"http://www
 const icoC={};function ico(k,c){if(!ICO[k])return '';return `<img class="ico ${c||''}" alt="" draggable="false" src="${icoC[k]||(icoC[k]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(ICO[k]))}">`}
 const icoSlot=(s,it)=>it&&it.bt&&ICO[kSlot(s)+'_'+it.bt]?kSlot(s)+'_'+it.bt/* v639: 방어구는 기본옵 종류별 아이콘 — 판금(방어)·가죽(회피)·천(쉴드) */:s==='weapon'?({warrior:'sword',archer:'bow',mage:'staff'}[S&&S.cls]||'sword'):s==='ring2'?'ring':s;
 /* v900 장비 정보 — 고정 옵션(강화 적용)을 위에 따로, 그 아래 왼쪽 기본 옵션 · 오른쪽 특수 옵션. 비교는 전투력 변화로만 */
+function pwChip(it){const r=pwGain(it),b=pwNow(),g=r.g*100,c=Math.abs(g)<.1?'same':g>0?'good':'bad',dd=r.w?(r.w.d/b.d-1)*100:0,de=r.w?(r.w.e/b.e-1)*100:0,f=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(1)}%`;
+  return `<div class="ivpw ${c}"><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>장착 시 전투력</small><span>DPS ${f(dd)}</span><span>버티기 ${f(de)}</span></div>`}
 function ivCardNS(it,role,L){const bl=it.lines.find(l=>l.b),os=it.lines.filter(l=>!l.b&&l.o),xs=it.lines.filter(l=>!l.b&&!l.o);
   const row=l=>{const dead=nsDeadK(l.k);return `<div class="ivo${dead?' dead':''}${(l.t||it.tier)<=2&&!l.b?' hi':''}" style="--tc:${NT_C[l.t||it.tier]}"><div class="on">${nTT(l,it)}<span>${ivName(l.k,it.slot,it)}</span></div><b>${nFmt(l.k,l.v*nLineMul(l,L))}</b>${dead?'<small>효과 없음</small>':''}</div>`};
   const col=(a,c,lab)=>`<div class="ivcol2"><div class="ivch ${c}">${lab}</div>${a.length?a.map(row).join(''):'<div class="ivo none">—</div>'}</div>`;
-  return `<div class="ivc ${role} ns3${it.tier<=2?' tpx':''}" style="--tc:${NT_C[it.tier]}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
+  const pwc=role==='sel'&&!it.uid?pwChip(it):'';
+  return `<div class="ivc ${role} ns3${it.tier<=2?' tpx':''}${pwc?' haspw':''}" style="--tc:${NT_C[it.tier]}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span>${pwc}<span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
     <b class="ivn" style="color:${NT_C[it.tier]}">${it.name}</b><span class="ivs">${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}</span>
     ${bl?`<div class="ivfx"><span class="lb">고정 옵션</span><div class="fv"><span>${ivName(bl.k,it.slot,it)}</span><b>${nFmt(bl.k,bl.v*nLineMul(bl,L))}</b></div>${L?`<small>강화 +${L} 적용 · 기본 ${nFmt(bl.k,bl.v)}</small>`:''}</div>`:''}
     ${it.uid?`<div class="ivseals"><div class="ivseal"><b>?</b>기본 옵션<small>미확인</small></div><div class="ivseal"><b>?</b>특수 옵션<small>미확인</small></div></div>`:`<div class="ivcols${it.idT&&Date.now()-it.idT<1500?' reveal':''}">${col(os,'a','기본 옵션')}${col(xs,'s','특수 옵션')}</div>`}</div>`}
@@ -10342,8 +10354,8 @@ function ivCard(it,role,other){
     <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?NWC[it.wc]:it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
 function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()&&it.uid)return `<div class="ivact"><div class="ivdps uid"><span>옵션 미확인</span><b>감정하면 옵션이 공개됩니다</b></div>
   <div class="btns"><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button><button class="primary" id="iIdent" style="white-space:nowrap">감정하기</button></div></div>`;
-  if(it.ns&&NS()){const r=pwGain(it),b=pwNow(),g=r.g*100,c=Math.abs(g)<.1?'same':g>0?'good':'bad',dd=r.w?(r.w.d/b.d-1)*100:0,de=r.w?(r.w.e/b.e-1)*100:0,f=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(1)}%`;
-    return `<div class="ivact"><div class="ivdps ${c}"><span>장착 시 전투력</span><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>DPS ${f(dd)} · 버티기 ${f(de)}</small></div>
+  if(it.ns&&NS()){
+    return `<div class="ivact">
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
   const a=dpsWith(it),b=cur?dpsWith(cur):skillDps(C().skills[0]).main,p=b?(a-b)/b*100:0;
   const hv=x=>x?(x.slot==='ring'?x.base*eMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='hp').reduce((s,o)=>s+o.v,0):0,av=x=>x?(['armor','helm','boots'].includes(x.slot)?x.base*enhMB(enhL(x.slot),x.slot):0)+x.opts.filter(o=>o.k==='armor').reduce((s,o)=>s+o.v,0):0;
@@ -10386,7 +10398,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('belt')}${slot('boots')}${uqSlot()}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const nU=S.inv.filter(x=>x.uid).length;
-  const top=`<div class="iv2top"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>${nU?`<button class="iv2auto iv2id" id="iIdAll">🔍 모두 감정 <b>${nU}</b></button>`:''}
+  const top=`<div class="iv2top"><span class="iv2acts"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>${nU?`<button class="iv2auto iv2id" id="iIdAll">🔍 모두 감정 <b>${nU}</b></button>`:''}</span>
     <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span>${refOn()?`<span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span>`:''}<span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span></span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','gloves','boots'],acc:['amulet','ring','belt']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
