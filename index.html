@@ -8272,15 +8272,26 @@ void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);
 const PG_SHOCK=`uniform float t,k,cir,w;varying vec2 vU;varying vec3 vP;
 void main(){float r=length(vP.xy),ang=atan(vP.y,vP.x);float n=pgf(vec2(ang*cir*.1,t*2.));float d=1.-r+(n-.5)*.12;
   float a=(d<0.?exp(-d*d/(w*w*.08)):exp(-d/w)*.85)*smoothstep(1.06,1.,r)*(.6+.6*n)*k;gl_FragColor=vec4(mix(vec3(1.,.72,.3),vec3(1.,1.,.9),clamp(1.-d*6.,0.,1.))*a,1.);}`;
+/* v985: 정화의 빛 발밑 문양 — 오라 스킬답게 캐릭터 둘레에 빛의 원: 겹 고리 + 천천히 도는 눈금 + 안쪽 빛 번짐 (캐릭터 크기를 따라감) */
+const PG_SEAL=`uniform float t,k;varying vec3 vP;
+void main(){float r=length(vP.xy)/2.6,a=atan(vP.y,vP.x);
+  float ring1=smoothstep(.022,0.,abs(r-.96)),ring2=smoothstep(.014,0.,abs(r-.8))*.8,ring3=smoothstep(.012,0.,abs(r-.46))*.7;
+  float tk=smoothstep(.5,.42,abs(fract(a*16./6.2832+t*.06)-.5))*smoothstep(.03,0.,abs(r-.88))*1.1;
+  float dash=step(.45,fract(a*7./6.2832-t*.1))*smoothstep(.016,0.,abs(r-.62))*.9;
+  float pulse=.78+.22*sin(t*2.4);
+  float glow=(exp(-r*2.6)*.34+smoothstep(1.,.86,r)*smoothstep(.5,.96,r)*.2)*pulse;
+  float v=(ring1+ring2+ring3+tk+dash+glow)*smoothstep(1.,.93,r);
+  vec3 c=mix(vec3(1.,.62,.16),vec3(1.,.94,.72),clamp(ring1+tk+dash+glow*1.6,0.,1.));gl_FragColor=vec4(c*v*k,1.);}`;
+let pgSeal=null;
 const PG_LAYERS=[[.985,1.5,.5,0],[1,1.2,.6,17.3],[1.02,.9,.42,41.7]];/* 반지름 비·높이(m)·밝기·무늬 씨앗 — 세 겹이 어긋나며 겹쳐 두께감 */
 function pgBuild(){const cg=new THREE.CylinderGeometry(1,1,1,120,1,true);cg.translate(0,.5,0);
   pgG=new THREE.Group();const floor=new THREE.Mesh(new THREE.CircleGeometry(1.3,96),pgMat(PG_FLOOR));floor.rotation.x=-Math.PI/2;floor.position.y=.04;pgG.add(floor);
   const walls=PG_LAYERS.map(([rr,h,k,sd])=>{const w=new THREE.Mesh(cg,pgMat(PG_WALL,{hot:{value:0}}));w.scale.set(rr,h,rr);w.material.uniforms.k.value=k;w.material.uniforms.seed.value=sd;w.userData.h=h;pgG.add(w);return w});
-  pgG.userData={floor,walls,t:0};
+  pgG.userData={floor,walls,t:0};pgSeal=new THREE.Mesh(new THREE.CircleGeometry(2.6,96),pgMat(PG_SEAL));pgSeal.rotation.x=-Math.PI/2;pgSeal.position.y=.05;
   const ng=new THREE.Group(),sh=new THREE.Mesh(new THREE.CircleGeometry(1.06,96),pgMat(PG_SHOCK,{w:{value:.25}}));sh.rotation.x=-Math.PI/2;sh.position.y=.06;
   const nw=new THREE.Mesh(cg,pgMat(PG_WALL,{hot:{value:.6}}));ng.add(sh,nw);ng.visible=false;pgNova={g:ng,sh,nw,t:9,r:5}}
-function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;if(pgNova)pgNova.g.visible=false;return}
-  if(!pgG)pgBuild();if(pgG.parent!==scene)scene.add(pgG);if(pgNova.g.parent!==scene)scene.add(pgNova.g);pgG.visible=true;const u=pgG.userData;u.t+=dt;
+function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;if(pgSeal)pgSeal.visible=false;if(pgNova)pgNova.g.visible=false;return}
+  if(!pgG)pgBuild();if(pgG.parent!==scene)scene.add(pgG);if(pgNova.g.parent!==scene)scene.add(pgNova.g);pgG.visible=true;const u=pgG.userData;u.t+=dt;if(pgSeal.parent!==scene)scene.add(pgSeal);pgSeal.visible=true;{const hs=hero.scale.x||1;pgSeal.position.set(P.pos.x,.05,P.pos.z);pgSeal.scale.set(hs,hs,1);pgSeal.material.uniforms.t.value=u.t}
   pgG.position.set(P.pos.x,.02,P.pos.z);pgG.scale.set(r,1,r);
   for(const m of [u.floor,...u.walls]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=r*6}
   u.walls.forEach((w,i)=>w.scale.y=w.userData.h*(1+.08*Math.sin(u.t*2.3+i*2)));
@@ -8290,7 +8301,7 @@ function purgeDraw(on,r,dt){if(!on){if(pgG)pgG.visible=false;if(pgNova)pgNova.g.
     N.g.position.set(N.x,.02,N.z);N.sh.scale.set(R,R,1);N.nw.scale.set(R,.4+2*f,R);
     N.sh.material.uniforms.k.value=1.3*f;N.sh.material.uniforms.w.value=.12+.35*k;N.nw.material.uniforms.k.value=1.5*f*f;
     for(const m of [N.sh,N.nw]){m.material.uniforms.t.value=u.t;m.material.uniforms.cir.value=R*6}}else N.g.visible=false}
-function purgeNova(r,iv){if(!pgNova)pgBuild();const q=Math.max(.35,Math.min(1,(iv||2)/1.5));try{SFX.p('pnova',{v:q>.6?1:.6})}catch(_){}const N=pgNova;N.t=0;N.r=r;N.x=P.pos.x;N.z=P.pos.z;N.dur=Math.min(.6,(iv||2)*.95);/* v956: 파동이 잦을수록 이펙트를 짧고 가볍게 */
+function purgeNova(r,iv){if(!pgNova)pgBuild();const q=Math.max(.35,Math.min(1,(iv||2)/1.5));/* v985: 파동 소리 삭제 */const N=pgNova;N.t=0;N.r=r;N.x=P.pos.x;N.z=P.pos.z;N.dur=Math.min(.6,(iv||2)*.95);/* v956: 파동이 잦을수록 이펙트를 짧고 가볍게 */
   flash({x:P.pos.x,z:P.pos.z},0xffe0a0,q>.6?1.4:.9);
   for(let i=0;i<60*q;i++){const a=Math.random()*6.28,v=rnd(r*1.2,r*2.2);emit(PADD,{x:P.pos.x+Math.cos(a)*.6,y:rnd(.2,1.2),z:P.pos.z+Math.sin(a)*.6,vx:Math.cos(a)*v,vy:rnd(.3,2.5),vz:Math.sin(a)*v,life:rnd(.35,.6),s0:rnd(.1,.22),s1:.02,c0:0xffffff,c1:0xffb040,a:.95,drag:.9})}
   for(let i=0;i<14*q;i++){const a=Math.random()*6.28;emit(PADD,{x:P.pos.x+Math.cos(a)*r*.3,y:.3,z:P.pos.z+Math.sin(a)*r*.3,vx:Math.cos(a)*r*1.6,vz:Math.sin(a)*r*1.6,life:.5,s0:1.1,s1:.3,c0:0xffe8b0,c1:0x8a5010,a:.35,drag:.88})}}
@@ -8312,7 +8323,7 @@ function nsPurgeTick(dt){const id=S&&S.cls?C().skills[0]:null;if(!id||!SK[id]||S
       if(!(e.pgS>time-.45))e.pgIn=time;e.pgS=time;const fk=st.brand?1+st.brand*Math.min(1,(time-e.pgIn)/3):1;
       if(Math.random()<.22)popFx(e.pos.x,1+Math.random(),e.pos.z,.15,.6,.3,0xfff0b0,.8);hurt(e,base*fk,q,st.so);}
     if(Math.random()<.5)popFx(P.pos.x+rnd(-1,1)*st.r*.6,.3,P.pos.z+rnd(-1,1)*st.r*.6,.15,.7,.5,0xfff4c0,.7)}
-  if(st.nova&&P.pgNv<=0){P.pgNv=st.nvIv;purgeNova(st.r,st.nvIv);aoe({x:P.pos.x,z:P.pos.z},st.r/(NSX.area||1),baseDmg()*st.dmg*st.nova,{so:st.so});try{SFX.p('zapboom')}catch(_){}}
+  if(st.nova&&P.pgNv<=0){P.pgNv=st.nvIv;purgeNova(st.r,st.nvIv);aoe({x:P.pos.x,z:P.pos.z},st.r/(NSX.area||1),baseDmg()*st.dmg*st.nova,{so:st.so})}
   return true}
 /* 기둥 셰이더: 아래가 밝고 위로 갈수록 옅어지는 마력 광선 + 가장자리 프레넬 */
 const PILLAR_VS=`varying float vH;varying vec3 vN,vV;void main(){vH=position.y;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
@@ -9370,7 +9381,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v984';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v985';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
