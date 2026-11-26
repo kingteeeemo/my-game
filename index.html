@@ -8935,7 +8935,7 @@ let disFill=0;const disRst=()=>{disIn=false;disFill=0;disRes=null};
 let disBusy=false;const disT=[],disLater=(ms,f)=>{disT.push(setTimeout(()=>{try{f()}catch(e){}},ms*(window.DIS_TS||1)))};
 let disSkipF=null;function disAbort(){disT.forEach(clearTimeout);disT.length=0;disBusy=false;disDlg=null;if(disSkipF){const b=$('nsBody');b&&b.removeEventListener('click',disSkipF,true);disSkipF=null}}
 /* v1015: 분해 조각 아이콘 — 장비 모양 대신 룬석(부위별 룬 문양, 테두리·문양 색은 티어색) */
-const PCR={'weapon':'M32 14V49M22 25L32 14L42 25M25 36L32 29L39 36M27 44H37','armor':'M27 15V49M20 21H27M27 22L41 30L27 38M27 49L40 42M33 15L38 19','amulet':'M32 16L45 32L32 48L19 32ZM32 24L38 32L32 40L26 32Z'};
+const PCR={'weapon':'M32 14V50M23 26L32 14L41 26M24 39H40','armor':'M27 15V49M20 21H27M27 22L41 30L27 38M27 49L40 42M33 15L38 19','amulet':'M32 16L45 32L32 48L19 32ZM32 24L38 32L32 40L26 32Z'};
 const pcIco=rs=>{const g=PCR[rs]||PCR.weapon;return `<svg class="pcr" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3L57.1 17.5V46.5L32 61L6.9 46.5V17.5Z" fill="#1d1d26" stroke="var(--tc,#cbbd9f)" stroke-width="3" stroke-linejoin="round"/><path d="${g}" fill="none" stroke="var(--tc,#cbbd9f)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`};
 const disPicH=()=>{const C=DIS_CAT[disCat],rs=C.sl[0]==='weapon'?'weapon':C.sl[0]==='helm'?'armor':'amulet';return pcIco(rs)};
 function disDlgHtml(){if(!disDlg)return'';const C=DIS_CAT[disCat],pic=disPicH();
@@ -9522,7 +9522,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1018';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1019';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
