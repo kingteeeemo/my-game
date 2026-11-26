@@ -1259,6 +1259,7 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .dxtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.dxt{position:relative;aspect-ratio:1;border-radius:12px;background:#1b1724;border:1.5px solid #3a3346;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 2px 14px;color:var(--c,#cdb88c);overflow:hidden}
 .dxt svg{width:46%;height:46%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dxt small{position:absolute;left:2px;right:2px;bottom:3px;text-align:center;font:600 9px var(--ko);color:#cfc5b4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dxt.own{border-color:#cdb88c;background:linear-gradient(#2a2418,#1b1724)}.dxt.lock{background:#121018;border-style:dashed;border-color:#2c2638;color:#4a4058}.dxt.lock small{color:#5a5066}.dxt.lock::after{content:'?';position:absolute;right:5px;top:2px;font:800 11px var(--ko);color:#6a5a40}
+.dxt.lock img,.dxic.lock img{filter:brightness(0) opacity(.4)}.dxt img{width:58%;height:58%;object-fit:contain}.dxic img{width:70%;height:70%;object-fit:contain}
 .dxt.sel{outline:2px solid #e8dcc4;outline-offset:1px}.dxt .dxim{position:absolute;inset:0 0 14px;background:center/cover no-repeat;border-radius:10px 10px 0 0}.dxt.lock .dxim{filter:brightness(0) opacity(.45)}.dxon{position:absolute;right:3px;top:3px;font:800 8px var(--ko);padding:1px 4px;border-radius:6px;background:#c890ff;color:#1a1410}
 .dxdet{margin-top:12px;border-radius:14px;padding:12px;background:linear-gradient(#211c2c,#17131f);border:1px solid #3a3346}.dxr{display:flex;gap:10px;align-items:center}.dxic{position:relative;width:56px;height:56px;border-radius:12px;background:#1b1724;border:2px solid #cdb88c;display:grid;place-items:center;flex:none;color:#cdb88c;overflow:hidden}.dxic.lock{border-style:dashed;border-color:#4a3e58;color:#4a4058}.dxic svg{width:56%;height:56%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dxic .dxim{position:absolute;inset:0;background:center/cover no-repeat}.dxic.lock .dxim{filter:brightness(0) opacity(.45)}
 .dxr b{display:block;font:800 16px var(--ko);color:#f3e7cd}.dxr span{font:500 11.5px var(--ko);color:#a89a80}.dxhow{margin:9px 0;border-radius:9px;background:#0f0d14;padding:8px 10px;font:500 12.5px/1.6 var(--ko);color:#cfc5b4}.dxhow em{font-style:normal;color:#ffd98a;font-weight:800;margin-right:4px}.dxeq{width:100%}
@@ -8818,25 +8819,26 @@ function renderBossCos(){const o=S.bcos=S.bcos||{};titleCheck(S,true);const nOwn
   ${sec('칭호',BTITLE,S.title,'title','머리 위에 표시됩니다')}${sec('발밑 효과',BFOOT,S.foot,'foot')}${sec('동반',BPET,S.pet,'pet','뒤를 따라다닙니다')}`}
 /* v991: 도감 — 보스 전리품(칭호·발밑 효과·동반·무기·날개)을 모으는 단독 메뉴. 상점엔 '도감에서 획득 가능'으로만 표기 */
 let DXCAT='all',DXSEL=null;
-const DXI={title:'<path d="M6 3.5h12v17l-6-4-6 4z"/>',foot:'<path d="M8 4c2 0 3 2 3 4.5S9.5 12 8 12 5 10 5 7.5 6 4 8 4zM16 9c2 0 3 2 3 4.5S17.5 17 16 17s-3-2-3-4.5S14 9 16 9z"/><path d="M8 15.5v3M16 20.5v1"/>',pet:'<circle cx="7" cy="10" r="2"/><circle cx="12" cy="6.5" r="2"/><circle cx="17" cy="10" r="2"/><path d="M7.5 17c0-3 2-4.5 4.5-4.5s4.5 1.5 4.5 4.5c0 2-2 2.5-4.5 2.5S7.5 19 7.5 17z"/>',wpn:'<path d="M5 19l9-9M14 10l5-5v-1h-1l-5 5M7.5 16.5l-2 2M9 17.5l-1.5-1.5"/>',wing:'<path d="M12 20c-1-5-4-9-9-11 2 6 3 8 6 9-3-.5-4.5-2-5-3 1 4 4 6.5 8 5zM12 20c1-5 4-9 9-11-2 6-3 8-6 9 3-.5 4.5-2 5-3-1 4-4 6.5-8 5z"/>'};
-const DXCATS=[['all','전체'],['title','칭호'],['foot','발밑'],['pet','동반'],['wpn','무기'],['wing','날개']];
+const DXI={title:'<path d="M6 3.5h12v17l-6-4-6 4z"/>',foot:'<path d="M8 4c2 0 3 2 3 4.5S9.5 12 8 12 5 10 5 7.5 6 4 8 4zM16 9c2 0 3 2 3 4.5S17.5 17 16 17s-3-2-3-4.5S14 9 16 9z"/><path d="M8 15.5v3M16 20.5v1"/>',pet:'<circle cx="7" cy="10" r="2"/><circle cx="12" cy="6.5" r="2"/><circle cx="17" cy="10" r="2"/><path d="M7.5 17c0-3 2-4.5 4.5-4.5s4.5 1.5 4.5 4.5c0 2-2 2.5-4.5 2.5S7.5 19 7.5 17z"/>',uq:'<path d="M12 3l2.6 5.4 5.9.9-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.3l5.9-.9z"/>',wpn:'<path d="M5 19l9-9M14 10l5-5v-1h-1l-5 5M7.5 16.5l-2 2M9 17.5l-1.5-1.5"/>',wing:'<path d="M12 20c-1-5-4-9-9-11 2 6 3 8 6 9-3-.5-4.5-2-5-3 1 4 4 6.5 8 5zM12 20c1-5 4-9 9-11-2 6-3 8-6 9 3-.5 4.5-2 5-3-1 4-4 6.5-8 5z"/>'};
+const DXCATS=[['all','전체'],['title','칭호'],['foot','발밑'],['pet','동반'],['wpn','무기'],['wing','날개'],['uq','고유']];
 function dexList(){const o=S.bcos=S.bcos||{},pc=v=>Math.round(v*1000)/10+'%',L=[];
   for(const k in BTITLE){const d=BTITLE[k];L.push({k,t:'title',n:d.n,own:!!o[k],on:S.title===k,how:d.how,odds:'조건 달성 시 확정',tag:'머리 위 칭호',c:d.c,bc:'title'})}
   for(const k in BFOOT){const d=BFOOT[k];L.push({k,t:'foot',n:d.n,own:!!o[k],on:S.foot===k,how:d.how.replace(' 보상에서 낮은 확률',' 보상'),odds:'굴림당 일반 '+pc(BCOS_P.n)+' · 우버 '+pc(BCOS_P.u),tag:d.d,bc:'foot'})}
   for(const k in BPET){const d=BPET[k];L.push({k,t:'pet',n:d.n,own:!!o[k],on:S.pet===k,how:d.how.replace(' 보상에서 낮은 확률',' 보상'),odds:'굴림당 '+(d.U?'우버 '+pc(BCOS_P.u):'일반 '+pc(BCOS_P.n)),tag:'뒤를 따라다닙니다',bc:'pet'})}
   L.push({k:'wsk_knight',t:'wpn',n:WLOOKS.wsk_knight.n,own:lookOwn('wsk_knight'),on:S.wlook==='wsk_knight',how:'우버 검귀 카이렌 보상',odds:'굴림당 우버 '+pc(KSW_P.u),tag:'전사 · 무사 전용 무기 외형',lk:1,ok:wlookOk('wsk_knight',S.cls)});
   L.push({k:'wings_lava',t:'wing',n:LOOKS.wings_lava.n,own:lookOwn('wings_lava'),on:S.look==='wings_lava',how:'우버 검귀 카이렌 보상',odds:'굴림당 우버 '+pc(WG_P.u),tag:'등 부착물 · 날개',lk:1,ok:true});
+  {const ow=uqOwn();for(const k in UNQ){const u=UNQ[k];L.push({k:'uq:'+k,uk:k,t:'uq',n:u.n,own:!!ow[k],on:S.uniq===k,how:'필드 몬스터 드랍',odds:'처치당 '+Math.round(UQ_P*1e5)/1e3+'% · 하나만 장착',tag:u.d,ic:u.ic})}}
   return L}
 function renderDex(){const L=dexList();titleCheck(S,true);const all=dexList(),cn=c=>all.filter(x=>c==='all'||x.t===c),got=c=>cn(c).filter(x=>x.own).length;
   const sh=cn(DXCAT);let sel=all.find(x=>x.k===DXSEL);if(!sel||(DXCAT!=='all'&&sel.t!==DXCAT))sel=sh[0];DXSEL=sel&&sel.k;
-  const ic=x=>{const im=(x.t==='wpn'||x.t==='wing')&&lkImg(x.k);return im?`<i class="dxim" style="background-image:url(${im})"></i>`:`<svg viewBox="0 0 24 24">${DXI[x.t]}</svg>`};
+  const ic=x=>{if(x.ic)return ico(x.ic);const im=(x.t==='wpn'||x.t==='wing')&&lkImg(x.k);return im?`<i class="dxim" style="background-image:url(${im})"></i>`:`<svg viewBox="0 0 24 24">${DXI[x.t]}</svg>`};
   const tot=all.length,gt=got('all');
   let h=`<div class="shead"><div><h2>도감</h2></div><button class="close" data-ns="close">닫기</button></div>
-  <p class="hint">보스를 쓰러뜨려 얻는 전리품을 모읍니다</p>
+  <p class="hint">보스 전리품과 고유 장비를 모읍니다</p>
   <div class="dxpg"><span>수집 현황</span><b>${gt} / ${tot}</b></div><div class="dxbar"><i style="width:${gt/tot*100}%"></i></div>
   <div class="dxcats">${DXCATS.map(([c,n])=>`<button data-dxc="${c}" class="${DXCAT===c?'on':''}">${n}<i>${got(c)}/${cn(c).length}</i></button>`).join('')}</div>
   <div class="dxtiles">${sh.map(x=>`<button class="dxt${x.own?' own':' lock'}${x.on?' on':''}${x.k===DXSEL?' sel':''}" data-dxs="${x.k}" ${x.c&&x.own?`style="--c:${x.c}"`:''}>${ic(x)}<small>${x.own?x.n:'???'}</small>${x.on?'<b class="dxon">착용</b>':''}</button>`).join('')}</div>`;
-  if(sel){const x=sel,eq=x.lk?`data-lk="${x.on?'off':'on'},${x.k}"`:`data-bc="${x.bc},${x.on?'':x.k}"`;
+  if(sel){const x=sel,eq=x.uk?`data-dxu="${x.on?'':x.uk}"`:x.lk?`data-lk="${x.on?'off':'on'},${x.k}"`:`data-bc="${x.bc},${x.on?'':x.k}"`;
     h+=`<div class="dxdet"><div class="dxr"><div class="dxic${x.own?'':' lock'}">${ic(x)}</div><div><b${x.c&&x.own?` style="color:${x.c}"`:''}>${x.own?x.n:'? ? ?'}</b><span>${x.tag}</span></div></div>
     <div class="dxhow"><em>획득</em> ${x.how}<br><em>확률</em> ${x.odds}</div>
     ${x.own?`<button class="lkbuy w dxeq" ${eq} ${x.lk&&!x.ok?'disabled':''}>${x.lk&&!x.ok?'다른 직업 전용':x.on?'해제':'착용'}</button>`:'<button class="lkbuy x dxeq" disabled>미획득</button>'}</div>`}
@@ -8974,6 +8976,7 @@ function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
   if(b.dataset.dxc!==undefined&&nsKind==='look'){DXCAT=b.dataset.dxc;DXSEL=null;renderDex();return}
+  if(b.dataset.dxu!==undefined&&nsKind==='look'){S.uniq=b.dataset.dxu||null;P.mvCh=3;refreshMax();save();renderDex();return}
   if(b.dataset.dxs!==undefined&&nsKind==='look'){DXSEL=b.dataset.dxs;renderDex();return}
   if(b.dataset.bc!==undefined&&nsKind==='look'){const [kd,k]=b.dataset.bc.split(',');S[kd]=k||null;save();renderLooks();return}
   if(b.dataset.lkc!==undefined&&nsKind==='look'){LKCAT=b.dataset.lkc||null;renderLooks();const bd=$('nsBody');if(bd)bd.scrollTop=0;return}
@@ -9480,7 +9483,7 @@ PORT_MQ.addEventListener?PORT_MQ.addEventListener('change',placePort):PORT_MQ.ad
 /* v559: 메뉴 펼치기 패널 — 기존 버튼을 대신 눌러 줌(메뉴 추가 시 HMENU에 한 줄만 추가) */
 const SV={st:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20.5c.6-4.2 3.6-6.8 7.5-6.8s6.9 2.6 7.5 6.8"/>',ch:'<path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/>',home:'<path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z"/>'};
 /* v585: 메뉴는 고정 3줄 — [상태 장비 스킬 마을] [사냥터 보스 지도 설정] [캐릭터 변경 처음 화면 전체화면]. 마을/사냥터는 서로 바뀌지 않고 각자 자리에 고정 */
-const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['@dex','도감']],[['@town','마을'],['@hunt','사냥터'],['openBoss','보스'],['openMap','지도']],[['@guide','가이드'],['openPause','설정']],[['@char','캐릭터 변경'],['@title','처음 화면'],['@fs','전체화면']]];/* v991: 도감 메뉴 신설 — 스킬 오른쪽, 아래 줄들 한 칸씩 밀림 */
+const HMENU=[[['openStat','상태'],['openInv','장비'],['openMenu','스킬'],['@dex','도감']],[['@town','마을'],['@hunt','사냥터'],['openBoss','보스'],['openMap','지도']],[['@guide','가이드'],['openPause','설정'],['@title','처음 화면'],['@fs','전체화면']],[['@char','캐릭터 변경']]];/* v991: 도감 메뉴 신설 — 스킬 오른쪽, 아래 줄들 한 칸씩 밀림 */
 const HMDOT={openMenu:'lvBadge',openStat:'ptsBadge'};
 const HMICON={'@dex':()=>'<path d="M5 4.5h11a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3z"/><path d="M5 16.5a3 3 0 0 1 3-3h11"/><path d="M12.5 7.2l1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z"/>','@guide':()=>'<path d="M4 5.5c2.6-1.2 5.3-1.2 8 .4 2.7-1.6 5.4-1.6 8-.4v13c-2.6-1.2-5.3-1.2-8 .4-2.7-1.6-5.4-1.6-8-.4z"/><path d="M12 5.9v13"/>','@town':()=>TOWN_SVG,'@hunt':()=>HUNT_SVG,'@char':()=>SV.ch,'@title':()=>SV.home,'@fs':()=>$('openFs').querySelector('svg').innerHTML};
 function hmBuild(){$('hmG').innerHTML=HMENU.map(g=>`<div class="hmsec">${g.map(([id,t])=>{const sv=HMICON[id]?`<svg viewBox="0 0 24 24" aria-hidden="true">${HMICON[id]()}</svg>`:($(id)&&$(id).querySelector('svg')?$(id).querySelector('svg').outerHTML:'');return `<button data-hm="${id}">${sv}<span>${t}</span>${HMDOT[id]?'<b class="hdot" hidden></b>':''}</button>`}).join('')}</div>`).join('')}
