@@ -7654,6 +7654,7 @@ function kill(e){
   if(mutA('burst')&&!e.boss&&!e.rift&&!e.gate)mutBurst(e);/* v624 유언의 탄막 */
   if(rz)riftAcc(e);else{dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e))}
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.dummy&&Math.random()<UQ_P)dropUq(e.pos);/* v988: 고유 장비 — 몬스터 등급·위험도 상관없이 0.008% */
   if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<pouchP())dropPouch(e.pos,Math.round(pouchAmt(oT(S.tier))*nsGain('gGold')));
   /* v892: 전설 골드 주머니·확정 강화 주문서 필드 드랍 제거 *//* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
@@ -7781,14 +7782,14 @@ function dropEss(e){if(S.ch<NCH)return;/* v209: 잿불 정수는 엔드게임(�
   if(n>0)lumiAdd(uqOn('greed')?rollN(n*nsGain('gLumi')):n);
   /* v520: 윤회의 불씨(옵션 리롤 화폐) — 위험도 40부터, 정수와 같은 확률 · 윤회의 불씨 획득량 옵션 적용 */
   {const r=rollN(ex*RR_K*rrD()*nsGain('gReroll'));if(r>0)rrAdd(r)}/* v632: ×0.0016 — 위험도 20 변이 전부 시간당 약 22개(측정 기준) *//* v621: 윤회의 불씨는 위험도 1부터 */
-  {const q=rollN(ex*SEAL_P*sealD()*(e.rank===3?1/3:e.rank===2?.5:1)*nsGain('gSeal'));if(q>0)dropSeal(e.pos,q)}/* v937: 테스트 캐릭터도 원래 확률 */}/* v892: 성역의 인장은 필드에 떨어지고 주워야 획득(빛기둥 + 획득 연출) *//* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
+  {const q=rollN(ex*SEAL_P*sealD()*nsGain('gSeal'));if(q>0)dropSeal(e.pos,q)}/* v937: 테스트 캐릭터도 원래 확률 */}/* v892: 성역의 인장은 필드에 떨어지고 주워야 획득(빛기둥 + 획득 연출) *//* v621: 성역의 인장도 위험도 1부터 — 확률이 위험도에 따라 10% → 100% */
 const LUMI_MAX=CUR_MAX;function lumiAdd(n){capAdd('lumi',n,'광휘의 파편')}
 /* v604: 성역의 인장(줄 티어 승급) — 2티어 장비가 나오는 위험도부터, 윤회의 불씨의 약 1/10 (시간당 목표: 변이 전부 켠 최고 위험도 2.1개 · 3단계에서 보정) */
 const SEAL_P=.01/* v865: 정수 기대량 × 0.01 */,/* v632: 위험도 20 변이 전부 시간당 약 2.1개(측정: 기존 0.1에서 1,254개/시간) */sealD=()=>.1+.9*(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v621: 모든 보상은 위험도 1부터 나오고 단계가 오를수록 확률이 커짐 (확률은 3-3에서 측정 후 조정) */const rrD=()=>1+(Math.min(D_MAX,Math.max(1,S.tier||1))-1)/19;/* v864: 윤회의 불씨 위험도 보정 — 위험도 1 ×1 → 위험도 20 ×2 (인장처럼 위험도에 따라 계속 오름) */function sealAdd(n){capAdd('seal',n,'성역의 인장')}
 const GOLD_K=5/3;/* v879: 획득 골드 전 구간 ×5/3 — 강화 비용 −40%와 같은 효과(비용 기준 골드 runGold는 그대로) */
 const goldOf=e=>{const v=(e.gHp||e.mhp)*.012*GOLD_K*goldAdj()*mutM()*(NS()&&S.ch<NCH?STORY_GM[S.ch]:1)*rand(.8,1.2),n=Math.floor(v);return n+(Math.random()<v-n?1:0)};/* v411: 1/10 — 소수는 확률 반올림으로 기대값 유지 *//* v411: 골드 1/10 */
 /* v131 골드 주머니: 엔드게임 일반 몬스터 0.01% · 그 위험도 몬스터 300마리 평균 골드 (종류·등급 출현 비율 반영) */
-const POUCH_P=1e-5,pouchP=()=>POUCH_P/* v937: 테스트 캐릭터도 원래 확률 */,/* v892: 골드 주머니 부활 — 0.001%(10만 마리에 1개), 그 위험도 몬스터 3,000마리 평균 골드(pouchAmt = 300×0.12 = 3,000×처치당 0.012) *//* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
+const POUCH_P=3e-4/* v988: 0.03% */,pouchP=()=>POUCH_P/* v937: 테스트 캐릭터도 원래 확률 */,/* v892: 골드 주머니 부활 — 0.001%(10만 마리에 1개), 그 위험도 몬스터 3,000마리 평균 골드(pouchAmt = 300×0.12 = 3,000×처치당 0.012) *//* v520: 골드 주머니 폐지 → 윤회의 불씨 *//* v417: 8천 마리에 1개 *//* v235: 0.01% → 0.05% → v277: 0.018% */AVG_KILL_HP=(.3*16+.56*30+.14*90)*(.28+.6*2.6+.12*6);
 const POT_DROP_X=.003,/* v359: 초대형 물약 구간(위험도 31~)은 0.3% */POUCH_L=0,/* v417: 전설 주머니 20만 마리에 1개 *//* v377: 전설 주머니 0.0006% */POUCH_LX=40,TKD_P=1/8000;/* v417: 주문서 8천 마리에 1장 *//* v377: 주문서 0.03% */
 const pouchAmt=t=>Math.round(GOLD_K*300/* v411: 1/10 · v240: 골드 주머니 획득량 ×10 */*AVG_KILL_HP*egHp(t)*.12*goldAdjT(t));
 const pouchGeo=new THREE.SphereGeometry(.42,14,10),pouchMat=new THREE.MeshStandardMaterial({color:0xb8862a,emissive:0x5a3a00,roughness:.6,metalness:.3});
@@ -7811,6 +7812,11 @@ function dropSeal(p,n){const q=scatter(p),g=new THREE.Group(),inn=new THREE.Grou
   const gw=new THREE.Sprite(glowMat(0xff7a1a));gw.scale.setScalar(1.1);inn.add(gw);
   const {bm,bms}=mkBeam(0xff3a0a);/* v896: 인장은 붉은 주황 — 골드 주머니 황금빛과 구분 */bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'seal',n});ringFx(q,2.6,0xff8a2a,.8);flash(q,0xff8a2a,3);feed('성역의 인장이 떨어졌습니다!','#ff9a4a')}
+const UQ_P=8e-5;
+function dropUq(p){const ks=Object.keys(UNQ),k=ks[Math.random()*ks.length|0],u=UNQ[k],col=parseInt(u.c.slice(1),16),q=scatter(p),g=new THREE.Group();
+  const gw=new THREE.Sprite(glowMat(col));gw.scale.setScalar(1.6);gw.position.y=.6;g.add(gw);const b=new THREE.Mesh(new THREE.OctahedronGeometry(.34),new THREE.MeshBasicMaterial({color:col}));b.position.y=.6;g.add(b);
+  const {bm,bms}=mkBeam(col);bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;g.position.set(q.x,.2,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'uq',k});ringFx(q,3.2,col,.9);flash(q,col,3.5);feed(`고유 장비 「${u.n}」이 떨어졌습니다!`,u.c)}
+function uqGet(k){const u=UNQ[k];S.uqHave=S.uqHave||{};const dup=!!S.uqHave[k];S.uqHave[k]=1;if(!S.uniq||!UNQ[S.uniq]){S.uniq=k;try{refreshMax()}catch(_){}}SFX.pd('loot');toast(dup?'이미 가진 고유 장비':'고유 장비 획득!',`${u.n}${dup?'':S.uniq===k?' · 자동 장착':''}`,u.c);save()}
 function sealFx(n,tot){SFX.pd('loot');const el=document.createElement('div');el.className='pouchfx sealfx';el.innerHTML=`<svg class="sfi" viewBox="5 4.5 54 56" aria-hidden="true"><use href="#cuSL" width="64" height="64"/></svg><small>SANCTUM SEAL</small><b>성역의 인장 획득!</b><span>+${n}</span><em>보유 ${fmtG(tot)}개</em>`;document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2)}
 function keepBeam(p){const u=p.m.userData,bm=u.bm;if(!bm)return;bm.position.set(p.m.position.x,11.5-.0,p.m.position.z);scene.add(bm);/* 그룹에서 분리 */const bms=u.bms;
   fx.push({m:bm,t:0,dur:5,keep:true,upd:k=>{const f=k<.75?1:(1-k)/.25,pl=.85+.15*Math.sin(k*40);for(const mt of bms)mt.opacity=mt.userData.o*f*pl},end:()=>{bm.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}})}
@@ -9396,7 +9402,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v987';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v988';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10403,10 +10409,10 @@ function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=s
   return o}
 /* v936: 고유 장비 칸 — 테스트 캐릭터는 목록에서 골라 장착·해제, 일반 캐릭터는 장착한 고유 장비 정보만 */
 function uqPicker(){const old=document.querySelector('.uqm');if(old)old.remove();const cur=S.uniq&&UNQ[S.uniq]?S.uniq:null;
-  const card=(k,u)=>`<button class="uqi${k===cur?' on':''}" ${S.test?`data-uqk="${k}"`:'disabled'} style="--rc:${u.c}"><span class="ic">${ico(u.ic)}</span><span class="tx"><b style="color:${u.c}">${u.n}</b><small>${u.d}</small>${u.pw?'<em>전투력에 반영</em>':''}</span>${k===cur?'<i>장착 중</i>':''}</button>`;
-  const list=S.test?Object.entries(UNQ).map(([k,u])=>card(k,u)).join(''):cur?card(cur,UNQ[cur]):'<p class="uqn">장착한 고유 장비가 없습니다. 고유 장비는 하나만 장착할 수 있습니다.</p>';
-  const d=document.createElement('div');d.className='uqm';d.innerHTML=`<div class="uqc"><div class="shead"><div><h2>고유 장비</h2><small>하나만 장착할 수 있습니다${S.test?' · 테스트: 눌러서 장착':''}</small></div><button class="close">닫기</button></div><div class="uql">${list}</div>${S.test&&cur?'<button class="ghost uqoff" data-uqk="">고유 장비 해제</button>':''}</div>`;
-  d.addEventListener('click',e=>{const t=e.target.closest('[data-uqk]');if(t&&S.test){S.uniq=t.dataset.uqk||null;P.mvCh=3;refreshMax();save();d.remove();renderInv();return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
+  const card=(k,u)=>`<button class="uqi${k===cur?' on':''}" ${S.test||(S.uqHave&&S.uqHave[k])?`data-uqk="${k}"`:'disabled'} style="--rc:${u.c}"><span class="ic">${ico(u.ic)}</span><span class="tx"><b style="color:${u.c}">${u.n}</b><small>${u.d}</small>${u.pw?'<em>전투력에 반영</em>':''}</span>${k===cur?'<i>장착 중</i>':''}</button>`;
+  const own=Object.entries(UNQ).filter(([k])=>S.uqHave&&S.uqHave[k]),list=S.test?Object.entries(UNQ).map(([k,u])=>card(k,u)).join(''):own.length?own.map(([k,u])=>card(k,u)).join(''):'<p class="uqn">장착한 고유 장비가 없습니다. 고유 장비는 하나만 장착할 수 있습니다.</p>';
+  const d=document.createElement('div');d.className='uqm';d.innerHTML=`<div class="uqc"><div class="shead"><div><h2>고유 장비</h2><small>하나만 장착할 수 있습니다${S.test?' · 테스트: 눌러서 장착':' · 눌러서 교체'}</small></div><button class="close">닫기</button></div><div class="uql">${list}</div>${cur?'<button class="ghost uqoff" data-uqk="">고유 장비 해제</button>':''}</div>`;
+  d.addEventListener('click',e=>{const t=e.target.closest('[data-uqk]');if(t&&(S.test||!t.dataset.uqk||(S.uqHave&&S.uqHave[t.dataset.uqk]))){S.uniq=t.dataset.uqk||null;P.mvCh=3;refreshMax();save();d.remove();renderInv();return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
 function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (장비 시스템만 테스트 캐릭터 전용) */
   /* v484 장비창 개편 — 세로: 위 캐릭터·장착 칸 / 아래 가방, 가로·PC: 왼쪽 캐릭터·장착 칸 / 오른쪽 가방 */
   const sh=$('invSheet'),port=innerWidth<innerHeight;sh.className='sheet inv2';$('inv').classList.add('iv2on');$('inv').classList.remove('center');
@@ -11548,13 +11554,14 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
       if(u.sp&&Math.random()<dt*14*QM())emit(PADD,{x:p.m.position.x+rnd(-.4,.4),y:.2,z:p.m.position.z+rnd(-.4,.4),vy:rnd(1.5,3.5),life:rnd(.6,1),s0:.4,s1:.05,c0:0xd0fff8,c1:0x2ac8b8,a:.9,tex:3});
       else if(u.rar>=3&&Math.random()<dt*10*QM())emit(PADD,{x:p.m.position.x+rnd(-.3,.3),y:.2,z:p.m.position.z+rnd(-.3,.3),vy:rnd(1,2.5),life:rnd(.5,.9),s0:.3,s1:.05,c0:0xffd090,c1:0xff5a10,a:.8,tex:1})}const dx=P.pos.x-p.m.position.x,dz=P.pos.z-p.m.position.z,dd=Math.hypot(dx,dz)||1;
     if(p.t>.35){/* v344: 몬스터가 죽으면 거리와 관계없이 캐릭터에게 날아와 자동 획득(살짝 튀어 오른 뒤 점점 빨라짐) */const sp=dt*(12+(p.t-.35)*34+heroSpd()*1.2);p.m.position.x+=dx/dd*Math.min(dd,sp);p.m.position.z+=dz/dd*Math.min(dd,sp)}
-    if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
-    if(p.t>.35&&dd<1.8){if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
+    if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal'||p.kind==='uq'){const u=p.m.userData,pl=.8+.2*Math.sin(time*5);for(const mt of u.bms)mt.opacity=mt.userData.o*pl}
+    if(p.t>.35&&dd<1.8){if(p.kind==='pouch'||p.kind==='tk'||p.kind==='seal'||p.kind==='uq')keepBeam(p);scene.remove(p.m);pickups.splice(i,1);/* v58: 획득 반경 0.9→1.8m */
       if(p.kind==='item')addItem(p.item);
       else if(p.kind==='ess'){essAdd(p.amt)}
       else if(p.kind==='gold'){S.gold+=p.amt}
       else if(p.kind==='pouch'){if(p.acc&&RZ)riftPouch(p);else{S.gold+=p.amt;if(!p.acc)pouchFx(p.amt,p.leg,p.rift);save()}}
       else if(p.kind==='tk'){if(NS()){S.cata=(S.cata||0)+3;save()}else{S.tickets=(S.tickets||0)+1;tkFx(S.tickets);save()}}
+       else if(p.kind==='uq'){uqGet(p.k)}
        else if(p.kind==='seal'){sealAdd(p.n);sealFx(p.n,S.seal||0);save()}
       else if(p.kind==='spd'){S.spdPot=(S.spdPot||0)+1;save()}
       else{const z=p.size||'s';S.pots[p.kind][z]++;save()}}}
