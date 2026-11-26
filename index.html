@@ -238,7 +238,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-actio
 .act.atk small{display:none}
 .act.atk{color:#c9b9b0}.act.atk.autoon::after{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#ffd24a;border-right-color:rgba(255,210,74,.45);animation:apSpin 1.1s linear infinite;pointer-events:none}.act.atk.nob{opacity:.4}/* v439: 보스 모드 토글 — 켜지면 물약 자동과 같은 도는 테두리(v440 색 통일) */
 .act.pot{width:56px;height:56px;font-size:11px;gap:0}
-.act.pot.spot{width:46px;height:46px;right:40px;bottom:196px;color:#8ae08a;border-color:rgba(90,208,106,.5)}.act.pot.spot .flask{width:30px;height:30px}.spot{--liq:#4ad06a;--glow:rgba(74,208,106,.55)}
+.act.pot.xp{width:46px;height:46px;bottom:196px;border-color:var(--xc,rgba(255,255,255,.2));color:var(--xc,#8ae08a)}.act.pot.xp .flask{width:30px;height:30px}.act.pot.xp.x0{right:109px}.act.pot.xp.x1{right:55px}.act.pot.xp.x2{right:1px}.act.pot.xp.emp{opacity:.5;border-style:dashed;--xc:#6d6452}.act.pot.xp.emp .flask,.act.pot.xp.emp b{display:none}.act.pot.xp.emp::before{content:'+';font:300 22px var(--en);color:#8a8070;line-height:1}.apset{display:flex;flex-direction:column;gap:8px}
 .act.pot.ph{right:65px;bottom:126px;color:#ff8a7a;border-color:rgba(224,68,58,.5)}.act.pot.mpot{right:1px;bottom:132px;color:#8ab8ff;border-color:rgba(74,143,224,.5)}
 #topStack{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;width:min(272px,46vw);pointer-events:none}#topStack .bossbar{width:100%}.quest[hidden]{display:none}.autoeq .l2{display:block}.lstack{display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}.lstack .env{font-size:10.8px;line-height:1.35;text-align:left;max-width:100%;margin:0}.lstack .autoeq{margin-top:0}.env{pointer-events:auto;cursor:pointer}[hidden]{display:none!important}.env.min{padding:4px 10px;font-size:11px;width:max-content;max-width:100%}
 .rrs{text-align:center;padding:18px 16px 16px;gap:10px;align-items:stretch;max-width:360px}.rrs .rh{display:flex;flex-direction:column;align-items:center;gap:2px}.rrs .rh small{font:800 11px var(--en);letter-spacing:.3em}.rrs .rh b{font:900 28px/1.15 var(--ko)}.rrs .rh span{font:700 14px var(--ko)}
@@ -858,7 +858,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .act.s1{width:82px;height:82px;font-size:13px}
   .act.atk{width:48px;height:48px;right:103px;bottom:17px;font-size:11px}
   .act.pot{width:44px;height:44px}
-  .act.pot.spot{width:38px;height:38px;right:31px;bottom:153px}.autob{width:34px;height:34px;right:74px;bottom:153px;font-size:10px}.autopop{bottom:calc(170px + env(safe-area-inset-bottom,0px));max-height:calc(100vh - 190px);overflow-y:auto}.act.pot.spot .flask{width:24px;height:24px}
+  .act.pot.xp{width:38px;height:38px;bottom:153px}.act.pot.xp.x0{right:89px}.act.pot.xp.x1{right:45px}.act.pot.xp.x2{right:1px}.act.pot.xp .flask{width:24px;height:24px}
   .act.pot.ph{right:51px;bottom:99px}.act.pot.mpot{right:1px;bottom:103px}
   .flask{width:28px;height:28px;margin-top:-3px}.act.pot b{font-size:11px;margin-top:-4px}
   .act.mv{width:46px;height:46px;right:89px;bottom:66px;font-size:10px}.act.mv small{display:none}
@@ -947,7 +947,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
   .act.s1{width:82px;height:82px;font-size:13px}
   .act.atk{width:48px;height:48px;right:103px;bottom:17px;font-size:11px}
   .act.pot{width:44px;height:44px}
-  .act.pot.spot{width:38px;height:38px;right:31px;bottom:153px}.autob{width:34px;height:34px;right:74px;bottom:153px;font-size:10px}.autopop{bottom:calc(170px + env(safe-area-inset-bottom,0px));max-height:calc(100vh/1.7 - 190px);overflow-y:auto}.act.pot.spot .flask{width:24px;height:24px}
+  .act.pot.xp{width:38px;height:38px;bottom:153px}.act.pot.xp.x0{right:89px}.act.pot.xp.x1{right:45px}.act.pot.xp.x2{right:1px}.act.pot.xp .flask{width:24px;height:24px}
   .act.pot.ph{right:51px;bottom:99px}.act.pot.mpot{right:1px;bottom:103px}
   .flask{width:28px;height:28px;margin-top:-3px}.act.pot b{font-size:11px;margin-top:-4px}
   .act.mv{width:46px;height:46px;right:89px;bottom:66px;font-size:10px}.act.mv small{display:none}
@@ -1462,11 +1462,11 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
     <button class="act mv" id="bMv" data-k="mv"><span id="lMv">구르기</span><small>ROLL</small><small class="cdt" id="tMv"></small></button>
     <button class="act pot ph" id="bHp" data-k="php" aria-label="생명력 물약"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nHp">0</b></button>
     <button class="act pot mpot" id="bMp" data-k="pmp" aria-label="마나 물약"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nMp">0</b></button>
-    <button class="autob" id="autoBtn" aria-label="물약 자동 복용 설정">자동</button>
-    <button class="act pot spot" id="bSp" data-k="psp" aria-label="신속 물약"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nSp">0</b></button>
+    <button class="act pot xp x0 emp" id="bX0" data-k="px0" aria-label="특수 물약 1"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nX0">0</b></button>
+    <button class="act pot xp x1 emp" id="bX1" data-k="px1" aria-label="특수 물약 2"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nX1">0</b></button>
+    <button class="act pot xp x2 emp" id="bX2" data-k="px2" aria-label="특수 물약 3"><svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg><b id="nX2">0</b></button>
   </div>
 </div>
-<div class="autopop" id="autoPop" hidden></div>
 <div class="scrim" id="menu" hidden><div class="sheet" id="sheet"></div></div>
 <div class="scrim" id="inv" hidden><div class="sheet" id="invSheet"></div></div>
 <div class="scrim" id="shop" hidden><div class="sheet" id="shopSheet"></div></div>
@@ -1515,6 +1515,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
       <div class="sx-rh"><b>스킬 자동 사용</b></div>
       <div class="sx-q two" id="askSeg"><button data-a="0"><b>끄기</b><small>누를 때마다 직접</small></button><button data-a="1"><b>켜기</b><small>버튼으로 자동 전환</small></button></div>
       <p class="sx-note" id="askHint"></p>
+      <div class="sx-sec">Potion</div>
+      <div id="autoSet" class="apset"></div>
       <div class="sx-sec">Field</div>
       <div class="sx-row"><div class="sx-rh"><b>몬스터 생성량</b><output id="egRateO">100%</output></div>
         <input type="range" class="sx-rng" id="egRate" min="50" max="120" step="5" value="100" aria-label="엔드게임 몬스터 생성량">
@@ -1931,7 +1933,7 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
   /* v629: 변이 입장 비용 — 골드. 위험도 20 한 판(1,000마리)의 기본 골드 × 60% × (점수 ÷ 200)² — 전부 켜면 기본 골드의 60%(보상 ×3이라 남는 장사), 적게 켜면 아주 쌈. 골드 드랍을 조정해도 비용이 따라감 */
   runGold=d=>{const t=oT(d);return 1000*AVG_KILL_HP*egHp(t)*.012*goldAdjT(t)},mutCost=(o=S.mut,d=S.tier)=>{const p=mutPts(o),v=runGold(d)*1.0*(p/200)**2*.9/* v835: 보상 ×5에 맞춰 0.6 → 1.0 · v930: 처치 수 900마리로 줄며 10% 할인(섬멸·돌파 공통) */,u=v>=1e6?1e4:v>=1e3?10:1;return p?Math.max(1,Math.round(v/u)*u):0};/* v631: 그 위험도 한 판 기본 골드 기준 */
 function runPay(t){S.rtRun=S.egPat==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
-const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?300+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={priest:['나무 홀','은빛 홀','사제의 홀','룬 성구','잿불 성구'],warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이'],musa:['낡은 대검','강철 대검','무사의 대검','룬 대검','매화 대검']};
@@ -2132,6 +2134,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste');if(auraOn('area'))g.area+=4*auraL('area')}
   {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=5*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
   if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
+  {const b=typeof P!=='undefined'&&P&&P.xb;if(b){if(b.def>0)g.defp+=30;if(b.eva>0)g.evap+=30;if(b.es>0)g.esp+=30;if(b.dmg>0)g.inc+=40;if(b.crit>0)g.bcrit+=10}}/* v987: 특수 물약 효과 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
 let NSX={bossd:0,area:1,projr:0,killH:0,killM:0,esrc:1,dr:0};
@@ -2286,7 +2289,7 @@ function isBetter(it,cur){if(NS()&&it&&it.ns){if(it.uid)return false;if(!cur&&!S
 function score(it){if(it.ns)return nsScore(it);let s=it.base*(it.slot==='weapon'?3:it.slot==='amulet'?.3:it.slot==='ring'?.5:1);
   for(const o of it.opts){const op=OPT[o.k];if(!op)continue;s+=o.v*(OW[o.k]||1)*(op.sp?spW(o.k,it.ilvl||1):1)}return s}
 const KEY='ember-sanctum-arpg-v2';
-const fresh=()=>({nchV:NCH,nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,spdPot:2,cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
+const fresh=()=>({nchV:NCH,nick:'',playSec:0,v254hm:1,v256hm:1,tut:{},v118:1,v145q:1,v65arc:1,v60tri:1,v59tri:1,v40:1,v44ch:1,v44sp:1,xp:{own:{},eq:[null,null,null]},cls:null,lv:1,xp:0,sk:{},skp:{},stats:{str:0,agi:0,int:0},statPts:0,statV:3,autoStat:null,autoGem:null,egK:0,maxTier:0,autoTier:true,gates:[],enh:{},sk2:{},ess:0,pending:0,ch:0,phase:0,kills:0,tier:0,tierKills:0,inv:[],eq:{weapon:null,armor:null,helm:null,boots:null,amulet:null,ring:null},pots:{hp:{s:10,m:0,l:0},mp:{s:10,m:0,l:0}},gold:0,aura:{},auraOn:{},rr:0,lumi:0});
 const SLOTS=5,slotKey=i=>`ember-sanctum-slot-${i}`;
 let curSlot=null,S=fresh();
 /* v603: 시즌 2 장비 개편 이전의 새 장비 → 같은 부위·티어·베이스로 다시 만듦(남아 있는 옵션 종류는 최대한 유지, 획득량 옵션은 다른 옵션으로) · 강화는 최대 +20 */
@@ -8008,6 +8011,14 @@ const potSell=z=>Math.round(POT[z].price*.3);
 const potN=k=>NS()?(nsPotInit(),P.pch[k]):PSZ.reduce((a,z)=>a+(S.pots[k][z]||0),0);
 /* v43 신속 물약: 4초간 이동 속도 +60% (다시 마시면 4초로 갱신) */
 const SPD_POT={n:'신속 물약',price:12,dur:4};
+/* v987: 특수 물약 — 6종 중 3개를 장착(단축키 3·4·5). 윤회의 불씨 10개로 한 번 사면 충전식(몬스터 처치로 충전, 최대 3회) */
+const XPOT={spd:{n:'신속',c:'#4ad06a',dur:4,d:'이동 속도 +60%'},def:{n:'철벽',c:'#8fa8d8',dur:8,d:'방어력 증가 +30%'},eva:{n:'환영',c:'#b08cff',dur:8,d:'회피력 증가 +30%'},es:{n:'수호',c:'#4fd6e0',dur:8,d:'에너지 쉴드 가득 채움 + 최대치 +30%'},dmg:{n:'격노',c:'#ff7a4a',dur:8,d:'피해 증가 +40%'},crit:{n:'집중',c:'#ffd24a',dur:8,d:'치명타 확률 +10%p'}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=3;
+const xpS=()=>{S.xp=S.xp||{own:{},eq:[null,null,null]};S.xp.own=S.xp.own||{};if(!Array.isArray(S.xp.eq))S.xp.eq=[null,null,null];return S.xp};
+function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=XP_MAX;P.xch[id]=Math.min(XP_MAX,P.xch[id])}}
+function xpUse(i){if(!NS()||knAppr)return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','포션 상인에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
+  xpInit();if(P.cd.pot>0)return;const X=XPOT[id];if(!(P.xch[id]>0)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
+  P.xch[id]--;P.cd.pot=.5;P.xb[id]=X.dur;if(id==='spd')P.hasteT=X.dur;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
+  ringFx(P.pos,1.8,parseInt(X.c.slice(1),16),.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xffffff,c1:parseInt(X.c.slice(1),16),drag:2,tex:1});feed(`${X.n} 물약 · ${X.dur}초간 ${X.d}`,X.c)}
 function useSpd(){if(!S.spdPot){if(P.mpWarn<=0){toast('신속 물약이 없습니다','포션 상인에게서 살 수 있어요');P.mpWarn=1.5}return}
   S.spdPot--;P.hasteT=SPD_POT.dur;ringFx(P.pos,1.8,0x5ad06a,.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xd0ffd8,c1:0x2a9a3a,drag:2,tex:1});feed('신속 물약 · 4초간 이동 속도 +60%','#8ae08a');save()}
 function usePot(k,sz){if(knAppr)return;if(NS())return nsPotUse(k);
@@ -8612,15 +8623,18 @@ function pillarCast(c,o,hit,depth){const after=()=>{
 /* ===== v484 NS 충전식 물약 · 창고 · 옵션 리롤 (테스트 캐릭터 전용) ===== */
 const NPOT={hp:{p:.30,n:'생명력'},mp:{p:.20,n:'마나'}},npotP=k=>k==='mp'&&S&&S.ch<NCH?.70:NPOT[k].p/* v726: 스토리 구간 마나 물약 70% */,NPOT_T=3,NPOT_KILL=40,NPOT_UP=[94,94];/* 확장 비용(정수)은 임시값 */
 const potMaxN=k=>5;/* v879: 물약은 스토리·엔드게임 모두 기본 5충전 (충전 횟수 확장 폐지 — 이미 산 단계는 정수로 돌려줌) *//* v826: 스토리 마나 물약은 3충전 *//* v726: 스토리 구간은 5충전 */
-function nsPotInit(full){P.pch=P.pch||{hp:potMaxN('hp'),mp:potMaxN('mp')};{if(P.pch.hp>potMaxN('hp'))P.pch.hp=potMaxN('hp');if(P.pch.mp>potMaxN('mp'))P.pch.mp=potMaxN('mp')}if(full){P.pch.hp=potMaxN('hp');P.pch.mp=potMaxN('mp')}P.pkp=P.pkp||0}
+function nsPotInit(full){P.pch=P.pch||{hp:potMaxN('hp'),mp:potMaxN('mp')};{if(P.pch.hp>potMaxN('hp'))P.pch.hp=potMaxN('hp');if(P.pch.mp>potMaxN('mp'))P.pch.mp=potMaxN('mp')}if(full){P.pch.hp=potMaxN('hp');P.pch.mp=potMaxN('mp')}P.pkp=P.pkp||0;xpInit(full)}
 function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpWarn<=0){toast(`${NPOT[k].n} 물약이 비었습니다`,'몬스터를 처치하거나 보스에게 피해를 주면 충전됩니다');P.mpWarn=1.5}return}
   P.pch[k]--;P.cd.pot=.8;P.hot=P.hot||{};P.hot[k]=NPOT_T;if(k==='hp')dmgNum(P.pos,'회복','heal');else ringFx(P.pos,1.6,0x6a9aff,.35)}
-function nsPotTick(dt){if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k]>0))continue;const t=Math.min(dt,P.hot[k]);P.hot[k]-=dt;const f=npotP(k)*t/NPOT_T;
+function nsPotTick(dt){if(P.xb)for(const id in P.xb)if(P.xb[id]>0)P.xb[id]-=dt;if(!P.hot)return;for(const k of ['hp','mp']){if(!(P.hot[k]>0))continue;const t=Math.min(dt,P.hot[k]);P.hot[k]-=dt;const f=npotP(k)*t/NPOT_T;
   if(k==='hp'){P.hp=Math.min(P.mhp,P.hp+P.mhp*f);if(P.esMax>0)P.es=Math.min(P.esMax,(P.es||0)+P.esMax*f)}else P.mp=Math.min(P.mmp,P.mp+P.mmp*f)}}
-const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n)};
+const nsPotAdd=n=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.min(potMaxN(k),P.pch[k]+n);for(const id of XP_IDS)if(xpS().own[id])P.xch[id]=Math.min(XP_MAX,(P.xch[id]||0)+n)};
 function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*(mutA('pot')?.5:1);while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1)}}
 function nsPotBoss(e,amt){if(!e.duel||e.dummy)return;e.potAcc=(e.potAcc||0)+amt/e.mhp;while(e.potAcc>=.2){e.potAcc-=.2;nsPotAdd(1)}}
 /* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
+function xpHud(){if(!NS())return;const x=xpS();xpInit();for(let i=0;i<3;i++){const id=x.eq[i],B=$('bX'+i);if(!B)continue;const on=!!(id&&x.own[id]);B.classList.toggle('emp',!on);if(!on){delete B.dataset.xid;B.style.removeProperty('--xc');B.style.removeProperty('--liq');B.style.removeProperty('--glow');continue}
+  const X=XPOT[id];if(B.dataset.xid!==id){B.dataset.xid=id;B.style.setProperty('--xc',X.c);B.style.setProperty('--liq',X.c);B.style.setProperty('--glow',X.c+'8c');B.setAttribute('aria-label',X.n+' 물약')}
+  const c=P.xch[id]||0;$('nX'+i).textContent=c;B.classList.toggle('empty',!c);B.style.setProperty('--p',P.xb[id]>0?1-P.xb[id]/X.dur:0)}}
 const potFlask=f=>`<svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" style="clip-path:inset(${(1-f)*100}% 0 0 0)" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg>`;
 function potSeg(c,m){const r=17.2,g=m>1?16:0;let h='';for(let i=0;i<m;i++){const a0=(-90+i*360/m+g/2)*Math.PI/180,a1=(-90+(i+1)*360/m-g/2)*Math.PI/180,x0=20+r*Math.cos(a0),y0=20+r*Math.sin(a0),x1=20+r*Math.cos(a1),y1=20+r*Math.sin(a1);
   h+=`<path class="${i<c?'on':''}" d="M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${(360/m-g)>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}"/>`}return `<svg class="pseg" viewBox="0 0 40 40" aria-hidden="true">${h}</svg>`}
@@ -8628,9 +8642,9 @@ function nsPotHud(){nsPotInit();for(const [k,b,n] of [['hp','bHp','nHp'],['mp','
 /* 창고: 장비 이동용, 모든 캐릭터 공유. 30칸 시작, 5칸씩 확장 — 1억부터 ×2 (테스트 캐릭터는 테스트 전용 창고) */
 const STASH_KEY=()=>S&&S.test?'ember-sanctum-stash-test':'ember-sanctum-stash';
 let stashOpen=false,stashD=null,stashSel=null,stashSrc=null;
-function stashLoad(){try{stashD=JSON.parse(localStorage.getItem(STASH_KEY())||'null')}catch(_){stashD=null}if(!stashD||!Array.isArray(stashD.items))stashD={items:[],cap:30};else stashD.items=stashD.items.map(x=>nsMigItem(x,S.cls));return stashD}
+function stashLoad(){try{stashD=JSON.parse(localStorage.getItem(STASH_KEY())||'null')}catch(_){stashD=null}if(!stashD||!Array.isArray(stashD.items))stashD={items:[],cap:50,v50:1};else{stashD.items=stashD.items.map(x=>nsMigItem(x,S.cls));if(!stashD.v50){stashD.cap=(stashD.cap||30)+20;stashD.v50=1;stashSave()}}return stashD}/* v987: 창고 기본 50칸 — 이미 늘린 칸은 그대로 +20 평행이동 */
 function stashSave(){try{localStorage.setItem(STASH_KEY(),JSON.stringify(stashD))}catch(_){}}
-const stashCost=cap=>1e8*Math.pow(2,(cap-30)/5);
+const stashCost=cap=>1e8*Math.pow(2,(cap-50)/5);
 function nsSheet(){{const o=document.getElementById('nsBody');if(o)o.classList.remove('dismode')}let el=$('nsSheet');if(!el){el=document.createElement('div');el.className='scrim';el.id='nsSheet';el.hidden=true;el.innerHTML='<div class="sheet" id="nsBody"></div>';document.body.appendChild(el);
   el.addEventListener('click',e=>{if(e.target.id==='nsSheet')nsClose();const b=e.target.closest('button');if(b)nsClick(b)})}return el}
 function nsClose(){if(typeof disAbort==='function')disAbort();stashOpen=false;rrOpen=false;nsKind=null;const el=$('nsSheet');if(el)el.hidden=true;const bd=$('nsBody');if(bd){bd.classList.remove('rrmode');bd.classList.remove('dismode')}}
@@ -9316,7 +9330,7 @@ function overloadOrb(p,dmg,dur){const R=OV_R,Y=1.5,q=QM();
 function explode(p,dmg,skip,r=2.4,ice,bm,ov){r*=NSX.area;/* v983: 효과 범위(장비·혈조의 인장·확장의 오라)가 모든 폭발의 판정·그림에 적용 */SFX.p(ice==='bolt'?'zapboom':ice?(SFX.o?'shard':'frost'):'fire');blastFx(p,r,ice);const hk=hitKind;hitKind=ice&&ice!=='bolt'?'ice':null;for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e&&e!==skip&&Math.hypot(e.pos.x-p.x,e.pos.z-p.z)<r+e.r*.5)hurt(e,(bm&&(e.boss||e.duel||e.final)?dmg*bm:dmg)*ovlC(e,ov),true)}hitKind=hk}
 
 /* ================= input ================= */
-const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,psp:false,mv:false}};
+const input={x:0,z:0,keys:{},held:{atk:false,s1:false,s2:false,php:false,pmp:false,px0:false,px1:false,px2:false,mv:false}};
 const stick=$('stick'),knob=$('knob'),nub=$('nub');let sp=null,camPZ=null;
 function mouseBtn(e,down){
   if(Date.now()-lastTouch<900)return;
@@ -9363,7 +9377,7 @@ document.querySelectorAll('.act').forEach(b=>{const k=b.dataset.k;
 });
 /* v476: 스킬 자동 사용 — 설정에서 켜면 스킬 버튼을 눌러 자동 발동을 켜고 끔(켜진 동안 링 표시). 쿨타임·마나가 되고 적이 있으면 계속 발동 */
 function skAutoUi(){const on=!!(S&&S.autoSkSet);$('bS1').classList.toggle('autoon',on&&!!S.autoSkOn);document.querySelectorAll('#askSeg button').forEach(b=>b.classList.toggle('on',(+b.dataset.a===1)===on));const h=$('askHint');if(h)h.textContent=on?'스킬 버튼을 한 번 누르면 자동 사용이 켜지고(테두리가 돕니다), 다시 누르면 꺼집니다. 켜진 동안 적이 있으면 쿨타임마다 스킬을 계속 씁니다.':'꺼짐: 스킬 버튼을 누를 때마다 한 번씩 직접 씁니다.'}
-const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'psp',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
+const KEYMAP={KeyJ:'atk',Space:'atk',KeyK:'s1',Digit1:'php',Digit2:'pmp',Digit3:'px0',Digit4:'px1',Digit5:'px2',ShiftLeft:'mv',ShiftRight:'mv',KeyE:'mv'};
 addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'&&e.code!=='Escape')return;/* v229: 입력칸에 숫자를 칠 때 게임 키가 눌리지 않게 */if(!$('guide').hidden){if(e.code==='Escape')guideClose();else if(e.code==='Enter'||e.code==='Space'){e.preventDefault();guideNext()}return}if(e.code==='Escape'){if(!$('riftRes').hidden){riftResClose();return}if(!$('notice').hidden)return;if(!$('pause').hidden)closePause();else if(!$('lvl').hidden)closeLevelUp();else if(!$('slots').hidden)closeSlots();else if(menuOpen||!$('hmenu').hidden||invOpen||statOpen||shopOpen||restartOpen||stageOpen||bossOpen||smithOpen||mapOpen||heirOpen)closeAllSheets();else if($('clear').hidden&&$('classSel').hidden&&$('cine').hidden)openPause();return}if(!$('pause').hidden)return;if(e.code==='Space')e.preventDefault();input.keys[e.code]=true;if(e.code==='KeyM'&&S.cls)mapOpen?closeMap():openMap();if(e.code==='KeyC'&&S.cls)statOpen?closeStat():openStat();if(e.code==='KeyP'&&S.cls){if(shopOpen)closeShop();else if(inTown)openShop('pot');else toast('상점은 마을에 있습니다','「마을」 버튼(T)으로 이동하세요')}if(e.code==='KeyT'&&S.cls&&!paused())townAsk();if(e.code==='KeyG'&&S.cls)stageOpen?closeStage():openStage();if(e.code==='KeyH'&&S.cls)bossOpen?closeBoss():openBoss();if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=true;if(e.code==='KeyK'&&!e.repeat&&S.cls)fireNow('s1');if((e.code==='KeyJ'||e.code==='Space')&&!e.repeat&&S.cls)fireNow('atk');if(e.code==='KeyI'&&S.cls)menuOpen?closeMenu():openMenu();if(e.code==='KeyB'&&S.cls)invOpen?closeInv():openInv();if(e.code==='KeyF'&&S.cls)toggleFs()});
 addEventListener('keyup',e=>{input.keys[e.code]=false;if(KEYMAP[e.code])input.held[KEYMAP[e.code]]=false});
 /* ================= v128~v130: 새 버전 자동 감지 =================
@@ -9402,7 +9416,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v990';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v987';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -9448,7 +9462,7 @@ function hud(){placeEnv();placePort();
   cineUiSync();/* v592: 보스 등장 연출 동안 UI를 모두 숨겼다가 끝나면 다시 보임 */
   {const bc=$('bloodChip'),bn=bloodN();if(bc){if(bc.hidden===!!bn)bc.hidden=!bn;if(bn){if(!bc.firstChild.firstChild)bc.firstChild.innerHTML=ico('u_blood');const nm=$('bloodNum');if(nm.textContent!==String(bn))nm.textContent=bn;$('bloodBar').style.width=Math.max(0,Math.min(100,(P.bloodS[0]-time)/20*100))+'%';bc.style.boxShadow='0 0 '+(4+bn*.8)+'px rgba(232,56,79,'+(.25+bn*.03)+')'}}}/* v964: 혈조의 인장 스택 칩 */
   {const bx=$('bossExit'),on=!inTown&&!S.tutor&&(!!S.duel||S.ch===LAST&&S.phase===3)&&(!bossIntroOn()||knAppr===1);if(bx.hidden===on)bx.hidden=!on;if(!on&&bx.classList.contains('arm')){bx.classList.remove('arm');bx.innerHTML=XIC+'<span class="xl"> 나가기</span>'}}
-  skAutoUi();stageChip();$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
+  skAutoUi();stageChip();$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn);bossBtn();
   $('lvBadge').hidden=!S.pending;$('lvBadge').textContent=S.pending;
   $('lv').textContent=S.lv;
   $('hpb').style.width=Math.max(0,P.hp/P.mhp*100)+'%';$('hpt').textContent=`${Math.max(0,Math.ceil(P.hp))} / ${P.mhp}`;{const on=P.esMax>0,f=$('esF'),v=$('esV');if(f.hidden===on){f.hidden=v.hidden=!on}if(on){const r=Math.min(1,Math.max(0,(P.es||0)/P.mhp));f.style.width=r*100+'%';f.classList.toggle('full',r>=1);const t=String(Math.ceil(P.es||0));if(v.textContent!==t)v.textContent=t}}/* v582: 쉴드 = 체력바 위 반투명 막 + 오른쪽 끝 숫자 */
@@ -9457,7 +9471,7 @@ function hud(){placeEnv();placePort();
   $('mpb').style.width=Math.max(0,P.mp/P.mmp*100)+'%';{const rs=NS()&&nsReserve()>0;$('mpt').textContent=rs?`${Math.floor(P.mp)}/${P.mmp} · 점유${nsReserve().toFixed(0)}%`:`${Math.floor(P.mp)} / ${P.mmp}`}/* v569: 좁은 칸에 맞게 */
   if(NS())nsPotHud();else{for(const b of ['bHp','bMp']){const B=$(b);if(B.classList.contains('nsp')){B.classList.remove('nsp');delete B.dataset.seg;const o=B.querySelector('.pseg');if(o)o.remove()}}const nh=potN('hp'),nm=potN('mp');$('nHp').textContent=nh;$('nMp').textContent=nm;$('bHp').classList.toggle('empty',!nh);$('bMp').classList.toggle('empty',!nm);}
   hudMoney();/* v569: 새 시즌에서도 재화 칸 갱신 */
-  {const n=S.spdPot||0;$('nSp').textContent=n;$('bSp').classList.toggle('empty',!n);$('bSp').style.setProperty('--p',P.hasteT>0?1-P.hasteT/SPD_POT.dur:0)}$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
+  xpHud();$('bHp').style.setProperty('--p',P.cd.pot/.8);$('bMp').style.setProperty('--p',P.cd.pot/.8);
   {const c1=mpCost(C().skills[0]);$('bS1').classList.toggle('nomp',P.mp<c1);const t='MP '+c1;if($('cS1').textContent!==t)$('cS1').textContent=t}
   if(S.ch<NCH){const c=CH[S.ch];$('qtag').textContent=`Main Quest · ${S.ch+1}장 ${c.n}`;
     if(S.phase===5){$('qtitle').textContent='최종 결전 준비 · 성장 후 재도전';$('qprog').textContent=''}
@@ -9518,7 +9532,7 @@ const GUIDES={
     {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 10장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`10장을 지나 성 꼭대기의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
     {t:'이동',tgt:isPC()?null:['@left'],d:isPC()?`${GB}W A S D</b>(또는 방향키)로 움직이고, ${GB}마우스</b>로 공격 방향을 정합니다.`:`화면 ${GB}왼쪽 아무 곳</b>이나 누른 채 끌면 그 방향으로 움직입니다.`},
     {t:'주력 스킬과 보스 모드',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다. 마나가 모자라면 같은 버튼으로 ${GB}기본 공격</b>이 나갑니다.`,d2:`${GB}「보스」</b> 버튼은 주력 스킬을 한 대상에 몰아치는 보스 모드를 켜고 끕니다. 켜져 있으면 테두리가 돕니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
-    {t:'물약',tgt:['#bHp','#bMp','#bSp','#autoBtn'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b>, 초록은 잠시 빨라지는 ${GB}신속</b> 물약입니다. 생명력·마나 물약은 ${GB}충전식</b> — 스토리에서는 5회까지 들고 다닙니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}「자동」</b>을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3 신속'},
+    {t:'물약',tgt:['#bHp','#bMp','#bX0','#bX1','#bX2'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b> 물약이고, 그 위 세 칸은 포션 상인에게서 사서 장착하는 ${GB}특수 물약</b>(신속·철벽·환영·수호·격노·집중)입니다. 생명력·마나 물약은 ${GB}충전식</b> — 스토리에서는 5회까지 들고 다닙니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}설정</b>에서 자동 복용을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3·4·5 특수'},
     {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 확인 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
     {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 조율사, 대장장이, 재단사, 창고가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}메뉴</b> → 「가이드」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
@@ -9539,7 +9553,7 @@ Object.assign(GUIDES,{
   t0:{n:'튜토리얼',steps:()=>[{t:'훈련장 튜토리얼',d:`짧은 훈련장에서 게임의 기본을 익힙니다. ${GB}몬스터 무리 처치 → 레벨업·스킬 → 물약 → 훈련 교관 처치</b> 순서로 진행됩니다.`,d2:`실제 장(1~10장)도 이처럼 ${GB}길을 따라 끝까지 가서 보스를 쓰러뜨리는</b> 방식입니다.`},
     GUIDES.intro.steps()[1],Object.assign({},GUIDES.intro.steps()[2],{t:'첫 무리를 처치하세요'})]},
   t2:{n:'튜토리얼 · 스킬',steps:()=>[{t:'스킬 창을 열어 보세요',tgt:['#openMenu'],d:`방금 고른 강화는 ${GB}「스킬」</b> 창에서 확인합니다. 강화 단계와 효과, 지금 DPS가 나옵니다. 레벨업 강화를 미뤄 두었다면 여기서 「지금 고르기」로 고릅니다. 열어 본 뒤 닫으면 다음으로 넘어갑니다.`}]},
-  t3:{n:'튜토리얼 · 물약',steps:()=>[{t:'물약을 써 보세요',tgt:['#bHp','#bMp','#autoBtn'],d:`앞의 무리는 조금 더 강합니다. 생명력이 줄면 ${GB}빨간 물약</b>, 마나가 부족하면 ${GB}파란 물약</b>을 누르세요.`,d2:`「자동」을 켜 두면 알아서 마십니다.`,k:'1 생명력 · 2 마나'}]},
+  t3:{n:'튜토리얼 · 물약',steps:()=>[{t:'물약을 써 보세요',tgt:['#bHp','#bMp'],d:`앞의 무리는 조금 더 강합니다. 생명력이 줄면 ${GB}빨간 물약</b>, 마나가 부족하면 ${GB}파란 물약</b>을 누르세요.`,d2:`설정에서 자동 복용을 켜 두면 알아서 마십니다.`,k:'1 생명력 · 2 마나'}]},
   t4:{n:'튜토리얼 · 보스',steps:()=>[{t:'훈련 교관을 쓰러뜨리세요',d:`길 끝 제단에 ${GB}훈련 교관</b>이 기다립니다. 바닥에 빨간 장판이 깔리면 그 밖으로 피하세요.`,d2:`보스를 쓰러뜨리면 튜토리얼이 끝나고 ${GB}1장</b>이 시작됩니다.`}]},
   bossm:{n:'보스 모드',steps:()=>[{t:'보스 모드를 켰습니다',tgt:['#bAtk'],d:`${GB}「보스」</b> 버튼이 켜졌습니다. 주력 스킬이 넓게 퍼지는 대신 ${GB}한 대상에 몰아치는 모양</b>으로 바뀝니다.`,d2:`보스처럼 단단한 한 마리를 상대할 때 켜 두세요. 같은 버튼을 다시 누르면 꺼집니다. 피해 배율은 그대로이고 모양만 바뀝니다.`}]},
   tdone:{n:'튜토리얼 완료',steps:()=>GUIDES.intro.steps().slice(4)}
@@ -10541,8 +10555,9 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
     else for(const k of ['hp','mp'])for(const z of PSZ){const p=POT[z],have=S.pots[k][z];
       h+=`<div class="grow"><span class="gd" style="background:${k==='hp'?'#e0443a':'#4a8fe0'};border-radius:50%;transform:none"></span><span class="t">${p.n} ${k==='hp'?'생명력':'마나'} 물약<small>${k==='hp'?'생명력':'마나'} ${p.amt} 회복 · 보유 <b style="color:var(--ink)">${have||0}</b>개</small></span>
       <span class="potbtns"><button class="pm wide" data-buy="${k},${z},1" ${g>=p.price?'':'disabled'}>구매 ${p.price}G</button><button class="pm wide" data-buy="${k},${z},5" ${g>=p.price*5?'':'disabled'}>5개 ${p.price*5}G</button><button class="pm wide sell" data-psell="${k},${z},1" ${have?'':'disabled'}>판매 ${potSell(z)}G</button><button class="pm wide sell" data-psell="${k},${z},all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
-    {const have=S.spdPot||0,pr=SPD_POT.price;h+=`<div class="grow"><span class="gd" style="background:#4ad06a;border-radius:50%;transform:none"></span><span class="t">${SPD_POT.n}<small>${SPD_POT.dur}초간 이동 속도 +60% · 단축키 3 · 보유 <b style="color:var(--ink)">${have}</b>개</small></span>
-      <span class="potbtns"><button class="pm wide" data-sbuy="1" ${g>=pr?'':'disabled'}>구매 ${pr}G</button><button class="pm wide" data-sbuy="5" ${g>=pr*5?'':'disabled'}>5개 ${pr*5}G</button><button class="pm wide sell" data-ssell="1" ${have?'':'disabled'}>판매 ${Math.round(pr*.3)}G</button><button class="pm wide sell" data-ssell="all" ${have?'':'disabled'}>전부 판매</button></span></div>`}
+    if(NS()){const x=xpS();h+=`<div class="grow" style="justify-content:space-between"><span class="t">특수 물약 <b style="color:var(--ink)">${x.eq.filter(Boolean).length}/3</b>칸 장착<small>산 물약은 눌러서 장착·해제 · 단축키 3·4·5 · 처치로 충전(최대 ${XP_MAX}회)</small></span><span class="t" style="text-align:right">${ci('r')} <b style="color:var(--ink)">${fmtC(S.rr||0)}</b></span></div>`;
+      for(const id of XP_IDS){const X=XPOT[id],own=!!x.own[id],eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${X.dur}초간 ${X.d}${own?` · 충전 <b style="color:var(--ink)">${(P.xch&&P.xch[id])??XP_MAX}/${XP_MAX}</b>회`:''}</small></span>
+        <span class="potbtns">${own?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button>`:`<button class="pm wide" data-xbuy="${id}" ${(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}}
     h+=`</div>`}
   else if(!shopSel){
     /* v46: 부위 선택 화면 — 고르면 그 부위 뽑기 화면만 표시 */
@@ -10569,6 +10584,8 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
+  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(S.rr||0)>=XP_PRICE){S.rr-=XP_PRICE;x.own[id]=1;if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=XP_MAX;save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
+  if(b.dataset.xeq){const id=b.dataset.xeq,x=xpS(),i=x.eq.indexOf(id);if(i>=0)x.eq[i]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
   if(b.dataset.psell){const [k,z,n]=b.dataset.psell.split(','),cnt=n==='all'?S.pots[k][z]:Math.min(1,S.pots[k][z]);if(cnt){S.pots[k][z]-=cnt;S.gold+=potSell(z)*cnt;save()}renderShop();return}
@@ -11425,7 +11442,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   if(S.autoMpOn&&P.cd.pot<=0&&P.mmp>0&&P.mp/P.mmp*100<=(S.autoMpPct||30)&&potN('mp')>0)usePot('mp',S.autoMpSz);
   }else{input.held.php=input.held.pmp=false;if(P.purgeOn||(pgG&&pgG.visible)){P.purgeOn=false;purgeDraw(false)}}/* v951: 마을에서는 정화의 빛가 꺼지고 이펙트도 사라짐 */
   if(input.held.mv){input.held.mv=false;startMove()}
-  if(input.held.psp){input.held.psp=false;useSpd()}
+  for(let i=0;i<3;i++)if(input.held['px'+i]){input.held['px'+i]=false;xpUse(i)}
   if(P.hasteT>0){P.hasteT-=dt;if(ml>.05&&Math.random()<dt*30*QM())streak({x:P.pos.x+rnd(-.3,.3),y:rnd(.2,1.2),z:P.pos.z+rnd(-.3,.3),vx:-mx*rnd(3,6),vy:rnd(0,.5),vz:-mz*rnd(3,6),life:.25,w:.06,len:.7,c0:0xc0ffc8,c1:0x2a9a3a,drag:2});if(P.hasteT<=0)feed('신속 물약 효과 종료','#8ae08a')}
   P.mpWarn-=dt;
   P.mp=Math.min(P.mmp,P.mp+dt*mpRegen());
@@ -11722,27 +11739,24 @@ $('openFs').addEventListener('click',toggleFs);$('fsTitle').addEventListener('cl
   setInterval(()=>st.querySelectorAll('[data-px]').forEach(x=>{if(x._d){const s_=$(x._s);x._d.hidden=s_.hidden;if(x._d.textContent!==s_.textContent)x._d.textContent=s_.textContent}}),300)})();/* v131: PC 버튼에도 남은 포인트 숫자 표시 */
 /* v44 물약 자동 복용: 물약 버튼 옆 「자동」 버튼 → 생명력·마나 각각 켬/끔 · 기준 % · 사용할 물약 크기 */
 const AUTOK={hp:['autoHpOn','autoHpPct','autoHpSz','생명력'],mp:['autoMpOn','autoMpPct','autoMpSz','마나']};
-function autoRender(){let h=`<div class="aphd"><b>물약 자동 복용</b><button class="close" id="apX">닫기</button></div>`;
+function autoRender(){const el=$('autoSet');if(!el)return;let h=`<div class="aphd"><b>물약 자동 복용</b></div>`;
   for(const k of ['hp','mp']){const [on,pc,sz,nm]=AUTOK[k],v=S[pc]||30,z=S[sz]||'a';
     h+=`<div class="apblk ${k}${S[on]?'':' off'}"><div class="amph"><b>${nm} 물약</b><button class="seg1" data-aon="${k}" aria-checked="${!!S[on]}">${S[on]?'켬':'끔'}</button></div>
       <div class="ampr"><input type="range" data-apc="${k}" min="5" max="95" step="5" value="${v}" aria-label="${nm} 자동 사용 기준"><output>${v}%</output></div>
       ${NS()?`<small>${nm}이 <b>${v}%</b> 이하가 되면 ${nm} 물약을 마십니다 · 남은 충전 ${potN(k)}/${potMaxN(k)}</small>`:`<div class="apsz">${[['a','알맞게'],['s','소형'],['m','중형'],['l','대형'],['x','초대형']].map(([q,t])=>`<button data-asz="${k},${q}" class="${z===q?'on':''}">${t}${q!=='a'?` <i>${S.pots[k][q]||0}</i>`:''}</button>`).join('')}</div>
       <small>${nm}이 ${v}% 이하가 되면 ${z==='a'?'부족한 양에 알맞은 크기':POT[z].n+' 물약(없으면 다른 크기)'}을 마십니다</small>`}</div>`}/* v639: 물약이 하나로 통일 — 크기 고르기 없이 기준 %만 */
-  $('autoPop').innerHTML=h;$('autoBtn').classList.toggle('on',!!(S.autoHpOn||S.autoMpOn));$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn)}
-$('autoBtn').addEventListener('click',e=>{e.stopPropagation();const p=$('autoPop');if(p.hidden){autoRender();p.hidden=false}else p.hidden=true});
-$('autoPop').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.id==='apX'){$('autoPop').hidden=true;return}
+  el.innerHTML=h;$('bHp').classList.toggle('autoon',!!S.autoHpOn);$('bMp').classList.toggle('autoon',!!S.autoMpOn)}
+$('autoSet').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.aon){const [on,pc]=AUTOK[b.dataset.aon];S[on]=!S[on];if(!S[pc])S[pc]=30}
   else if(b.dataset.asz){const [k,q]=b.dataset.asz.split(',');S[AUTOK[k][2]]=q}
   save();autoRender()});
-document.addEventListener('pointerdown',e=>{const p=$('autoPop');if(p.hidden)return;if(p.contains(e.target)||$('autoBtn').contains(e.target))return;p.hidden=true},true);/* v138: 바깥을 누르면 닫힘 */
-$('autoPop').addEventListener('input',e=>{const k=e.target.dataset.apc;if(!k)return;S[AUTOK[k][1]]=+e.target.value;e.target.nextElementSibling.textContent=e.target.value+'%'});
-$('autoPop').addEventListener('change',e=>{if(e.target.dataset.apc){save();autoRender()}});
+$('autoSet').addEventListener('input',e=>{const k=e.target.dataset.apc;if(!k)return;S[AUTOK[k][1]]=+e.target.value;e.target.nextElementSibling.textContent=e.target.value+'%'});
+$('autoSet').addEventListener('change',e=>{if(e.target.dataset.apc){save();autoRender()}});
 document.querySelectorAll('#askSeg button').forEach(b=>b.addEventListener('click',()=>{S.autoSkSet=b.dataset.a==='1';if(!S.autoSkSet)S.autoSkOn=false;skAutoUi();save()}));
 $('pGuide').onclick=()=>{closePause();guideBook()};
 $('pProlog').onclick=()=>{closePause();prologPlay(null)};/* v784 */
 $('pSlots').onclick=()=>{save();closePause();closeAllSheets();showLoading(()=>showSlots())};/* v781: 슬롯 선택 — 지금 캐릭터를 마치고 나가는 느낌으로 로딩 화면 *//* v71: 슬롯 버튼은 설정 창 안으로 */
-function openPause(){if(!S.cls)return;releaseAll();skAutoUi();sxtC=null;sxtS=null;renderSxTest();$('pause').hidden=false}
+function openPause(){if(!S.cls)return;releaseAll();skAutoUi();autoRender();sxtC=null;sxtS=null;renderSxTest();$('pause').hidden=false}
 function closePause(){$('pause').hidden=true;last=performance.now()}
 $('openPause').addEventListener('click',openPause);$('pResume').addEventListener('click',closePause);$('pause').addEventListener('click',e=>{if(e.target.id==='pause')closePause()});
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('openFs').querySelector('path').setAttribute('d',fsOn()?FS_OUT:FS_IN);$('fsTitleP').setAttribute('d',fsOn()?FS_OUT:FS_IN)}));
