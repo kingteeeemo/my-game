@@ -1233,7 +1233,8 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
 .ci{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.22em;flex:none;overflow:visible}.ci.big{width:26px;height:26px;display:block;margin:auto}/* v576 */
 #curBar b{font-weight:800}.cg{color:#f0c84a}.ce{color:#ff6a4a}.cf{color:#ff9a3c}.cs{color:#ffc27a}.cl{color:#ffeebd}
 #exitSlot{display:flex;grid-column:1;grid-row:5;min-width:0}#exitSlot:empty,#exitSlot:has(#bossExit[hidden]):not(:has(#bloodChip:not([hidden]))){display:none}
-#bloodChip{pointer-events:none;position:relative;display:flex;align-items:center;gap:6px;padding:4px 10px 8px 6px;border-radius:12px;background:rgba(58,15,24,.85);border:1.5px solid #e8384f;color:#ffc0c8;font:800 15px var(--ko)}#bloodChip[hidden]{display:none}#bloodChip .bci{width:22px;height:22px;flex:none}#bloodChip .bci img{width:100%;height:100%;display:block}#bloodChip .bcb{position:absolute;left:8px;right:8px;bottom:3px;height:3px;border-radius:2px;background:#4a1a22;overflow:hidden}#bloodChip .bcb i{display:block;height:100%;width:100%;background:#ff6a7e}
+#exitSlot:has(#bloodChip:not([hidden])){position:relative;height:0;overflow:visible}/* v972: 칩은 HUD 칸에 붙여 재화 줄 바로 아래 — 계산값(--bxT)에 의존하지 않아 위치가 흔들리지 않음 */
+#bloodChip{pointer-events:none;position:absolute;left:0;top:9px;z-index:7;display:flex;align-items:center;gap:6px;padding:4px 10px 8px 6px;border-radius:12px;background:rgba(58,15,24,.85);border:1.5px solid #e8384f;color:#ffc0c8;font:800 15px var(--ko)}#bloodChip[hidden]{display:none}#bloodChip .bci{width:22px;height:22px;flex:none}#bloodChip .bci img{width:100%;height:100%;display:block}#bloodChip .bcb{position:absolute;left:8px;right:8px;bottom:3px;height:3px;border-radius:2px;background:#4a1a22;overflow:hidden}#bloodChip .bcb i{display:block;height:100%;width:100%;background:#ff6a7e}
 #exitSlot #bossExit{padding:7px 16px;border-radius:12px;font-size:13px}
 .top .stagechip{position:static;transform:none;grid-column:2;grid-row:1/5;justify-self:center;align-self:start;display:flex;flex-direction:column;align-items:center;gap:0;padding:10px 0 0;margin:0;background:none!important;border:0!important;box-shadow:none;border-radius:0;min-width:0;max-width:100%;text-align:center;text-shadow:0 1px 4px #000;white-space:nowrap;overflow:visible}
 .top .stagechip .scrow{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;max-width:100%}
@@ -1327,7 +1328,6 @@ body.demo .hud,body.demo .pchint,body.demo .acts{visibility:hidden}
   #exitSlot{grid-row:6;height:0;overflow:visible}
   #exitSlot #bossExit{position:fixed;left:14px;top:var(--bxT,144px);height:var(--bxH,52px);width:48px;padding:0;display:grid;place-items:center;border-radius:12px;font:800 20px var(--ko);z-index:7}
   #exitSlot #bossExit[hidden]{display:none}
-  #exitSlot #bloodChip{position:fixed;left:14px;top:var(--bxT,144px);height:var(--bxH,52px);box-sizing:border-box;z-index:7}
   #bossExit .xl{display:none}
   #topStack .bossbar{width:100%}
 }
@@ -1885,7 +1885,7 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
   /* v629: 변이 입장 비용 — 골드. 위험도 20 한 판(1,000마리)의 기본 골드 × 60% × (점수 ÷ 200)² — 전부 켜면 기본 골드의 60%(보상 ×3이라 남는 장사), 적게 켜면 아주 쌈. 골드 드랍을 조정해도 비용이 따라감 */
   runGold=d=>{const t=oT(d);return 1000*AVG_KILL_HP*egHp(t)*.012*goldAdjT(t)},mutCost=(o=S.mut,d=S.tier)=>{const p=mutPts(o),v=runGold(d)*1.0*(p/200)**2*.9/* v835: 보상 ×5에 맞춰 0.6 → 1.0 · v930: 처치 수 900마리로 줄며 10% 할인(섬멸·돌파 공통) */,u=v>=1e6?1e4:v>=1e3?10:1;return p?Math.max(1,Math.round(v/u)*u):0};/* v631: 그 위험도 한 판 기본 골드 기준 */
 function runPay(t){S.rtRun=S.egPat==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
-const tkFor=t=>RT_KILLS/* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
+const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?200+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
 const WNAME={priest:['나무 홀','은빛 홀','사제의 홀','룬 성구','잿불 성구'],warrior:['녹슨 검','강철 장검','기사의 검','룬 대검','잿불 대검'],archer:['사냥꾼의 활','주목 장궁','바람의 활','룬 장궁','잿불 활'],mage:['참나무 지팡이','마력 지팡이','현자의 지팡이','룬 지팡이','잿불 지팡이'],musa:['낡은 대검','강철 대검','무사의 대검','룬 대검','매화 대검']};
@@ -2084,7 +2084,7 @@ function nsGear(){const g={wd:0,def:0,eva:0,es:0,cc:0,cdm:0,aspd:0,cspd:0,inc:0,
   /* 공격/시전 속도: 마법사는 시전 속도, 전사·궁수는 공격 속도만 · 직업 피해(근접·투사체·주문)는 피해 증가와 같은 묶음 */
   g.aspd=bc(S.cls)==='mage'?g.cspd:g.aspd;g.inc+=g[NS_CDMG[S.cls]]||0;
   if(S.aura){const c=auraOn('crit')?auraCritAdd(auraL('crit')):0;g.cc+=c;g.cdm+=c;if(auraOn('haste'))g.aspd+=4*auraL('haste')}
-  {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=3*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
+  {const bn=bloodN();if(bn){g.aspd=((1+g.aspd/100)*(1+.03*bn)-1)*100;g.area+=5*bn}}/* v964: 혈조의 인장 공격·시전 속도 · v968: 효과 범위 스택당 +3% */
   if(uqOn('storm'))g.aspd=((1+g.aspd/100)*1.8-1)*100;/* v967: 1.5→1.8 · v936: 폭풍 소환사의 장갑 */
   g.wdmg=g.wd;g.armor=0;g.dmgPct=0;g.crit=0;g.fdmg=0;g.leech=0;g.spd=g.mspd;return g}
 /* 자주 쓰는 장비 효과(보스 피해·스킬 범위·투사체 피해 감소·처치 회복·보호막 재충전) — 장비가 바뀔 때(refreshMax) 갱신 */
@@ -2117,10 +2117,10 @@ const UNQ={gale:{n:'질풍의 장화',ic:'u_gale',d:'이동 속도 +100%',c:'#7f
   shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 5회 충전 · 충전 1.5초',c:'#b49aff'},
   greed:{n:'탐욕의 인장',ic:'u_greed',d:'골드·재화 획득량 +30%',c:'#ffd24a'},
   chain:{n:'연쇄 폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#ff9a4a'},
-  blood:{n:'혈조의 인장',ic:'u_blood',d:'10마리 처치할 때마다 1스택 — 스택당 이동 속도·공격 속도·효과 범위 +3% · 쿨타임 −3% · 캐릭터 크기 +5% (최대 20중, 스택마다 20초 유지 후 개별 소멸, 피격 시 1/3 감소)',c:'#e8384f'},
+  blood:{n:'혈조의 인장',ic:'u_blood',d:'20마리 처치할 때마다 1스택 — 스택당 이동 속도·효과 범위·캐릭터 크기 +5% · 공격 속도 +3% · 쿨타임 −3% (최대 20중, 스택마다 20초 유지 후 개별 소멸)',c:'#e8384f'},
   storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.8 · 쿨타임 회복 ×1.8',c:'#9ae8ff',pw:1}};
 const uqOn=k=>!!(S&&S.uniq===k&&UNQ[k]);
-const bloodN=()=>{if(!uqOn('blood')||!P.bloodS)return 0;const a=P.bloodS;while(a.length&&a[0]<=time)a.shift();return a.length},bloodHit=()=>{const n=bloodN();if(n>0)P.bloodS.splice(0,n-Math.floor(n*2/3))};/* v969: 혈조의 인장 — 10마리 처치마다 1스택, 스택마다 얻은 뒤 20초 유지(개별 만료), 최대 20, 피격 시 오래된 스택부터 1/3 제거 */
+const bloodN=()=>{if(!uqOn('blood')||!P.bloodS)return 0;const a=P.bloodS;while(a.length&&a[0]<=time)a.shift();return a.length},bloodHit=()=>{};/* v971: 혈조의 인장 — 20마리 처치마다 1스택, 스택마다 얻은 뒤 20초 유지(개별 만료), 최대 20, 피격 감소 없음 */
 const nsGain=k=>(k==='gGold'||k==='gEss'||k==='gReroll'||k==='gLumi'||k==='gSeal')&&uqOn('greed')?1.3:1;/* v603: 획득량 옵션 삭제 */
 /* 아이템 표시 */
 const nLineTxt=(l,L,it)=>{const v=l.v*nLineMul(l,L);return `${nName(l.k,it)} ${nFmt(l.k,v)}${l.b&&L>0?` <small class="obase">(기본 ${nFmt(l.k,l.v)})</small>`:''}`};
@@ -2393,7 +2393,7 @@ const envName=()=>diff().env||(S.ch>=NCH?'심연의 냉기':'');
 const hpRegen=()=>NS()?P.mhp*((S.ch<NCH?2:0)+gear().regen+(auraOn('hreg')?auraRegenP(auraL('hreg')):0))/100*(mutA('reg')?.5:1):P.mhp*.00075*stN('str')/* v58: 3배 → v75: 절반 */*(1+gear().regen/100);
 /* v131: 기본 이동 속도 -20% (신속 물약은 별도) */
 const SPD_CAP=180,SPD_K=150,spdRaw=()=>NS()?.17*(S.lv-1)+gear().mspd:.5*stN('agi')+gear().spd,spdEff=r=>SPD_CAP*(1-Math.exp(-Math.max(0,r)/SPD_K));/* v449: 이동 속도 상승 = 180 × (1 − e^(−합/150)) — 상한에 막히지 않고 점점 덜 오름 (기존: 합 그대로, +150% 상한) */
-const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.03*bloodN());/* v936: 질풍의 장화 · v964: 혈조의 인장 */
+const heroSpd=()=>C().spd*.8*1.07*/* v277: 기본 이동 속도 +7% */(1+spdEff(spdRaw())/100)*(P.hasteT>0?1.6:1)*(P.sandT>0?.55:1)*(uqOn('gale')?2:1)*(1+.05*bloodN());/* v936: 질풍의 장화 · v971: 혈조의 인장 이속 스택당 5% */
 function spdCapNote(){return ''}
 /* v149: 장비 쿨감은 가속 강화 뒤 남은 대기시간에 곱으로 적용. 옵션 합계 x% → 배율 0.2+0.8·0.5^(x/40)
    (x=40에서 옛 상한값 ×0.6과 동일, 무한히 쌓아도 ×0.2(최대 80% 감소)에 수렴 · 음수 불가) */
@@ -4601,7 +4601,7 @@ function knTick(dt,t){const LY=KNA.lavaY;KNA.lt.offset.set(t*.004,t*.0025);KNA.g
     const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0xff8a30,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));fl.position.set(p.x,LY+.6,p.z);scene.add(fl);const S0=big?7:4;fx.push({cos:1,m:fl,t:0,dur:big?1.4:.9,upd(k){fl.scale.setScalar(S0*(.6+.6*k));fl.material.opacity=(1-k)*(1-k)}})}
   /* 가장자리 거품 */
   KNA.bub-=dt;while(KNA.bub<=0){KNA.bub+=.07/Math.max(.3,QM());const a=rnd(0,6.283),r=rnd(KNA.R+2.8,KNA.R+9)*KNA.s;emit(PADD,{x:Math.cos(a)*r,y:LY+.05,z:Math.sin(a)*r,vy:rnd(.8,2.2),life:rnd(.3,.6),s0:rnd(.2,.4),s1:.05,c0:0xffa040,c1:0x801000,a:.8,grav:-6,tex:1})}}
-function setMap(fresh){const want=inTown?'town':inArena()?'arena':S.ch<NCH?'story':rtOn()?'route':'field';if(fresh||want!==mapKind||((want==='story'||want==='field'||want==='route')&&propTheme!==curTheme().key))want==='town'?buildTown():want==='arena'?buildArena():want==='story'?buildStory():want==='route'?buildRoute():buildField()}
+function setMap(fresh){try{if(P){P.bloodS=null;P.bloodK=0}}catch(_){}/* v971: 맵 이동(마을·보스방 등) 시 혈조의 인장 스택 초기화 */const want=inTown?'town':inArena()?'arena':S.ch<NCH?'story':rtOn()?'route':'field';if(fresh||want!==mapKind||((want==='story'||want==='field'||want==='route')&&propTheme!==curTheme().key))want==='town'?buildTown():want==='arena'?buildArena():want==='story'?buildStory():want==='route'?buildRoute():buildField()}
 /* 마을 (v29): 집 · 화로 · 우물 · 상인 · 대장장이. 몬스터 없음, 이동 스킬만 사용 가능 */
 const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,roughness:.9}),clothMat=SM({color:0x7a2a2a,roughness:.95,side:THREE.DoubleSide});
 const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:-1.5,ref:1},{id:'gate',x:2,z:19.4,vil:1},{id:'mor',x:-2.9,z:1.6,vil:1,c:0x2e2838,hat:0x1c1824},{id:'xchg',x:5.4,z:6.6,ref:1,c:0x4a3a22,hat:0xb08a3a}];/* v879: 환전상 벨로 — 쉼터 광장 남동쪽, 화폐 거래소 *//* v806: 대마법사 모르딘 — 세렌 마을 우물가, 이야기만 */
@@ -7572,7 +7572,7 @@ function kill(e){
   if(!chainUq()&&!pgCorpse(e))ringFx(e.pos,e.r*2.2,RANK[e.rank].hex,.3);/* v942: 연쇄 폭발 중엔 처치 고리 없음 */
   {const pc=pgCorpse(e),cu=chainUq()&&!S.demo?.35:0,cx=Math.max(pc,cu);if(cx>0&&!e.boss&&!e.duel&&!e.final&&!e.dummy&&CHX.length<240)CHX.push({x:e.pos.x,z:e.pos.z,r:2.4+e.r*1.2,d:e.mhp*cx,t:time,gold:pc>=cu,sz:Math.max(.85,Math.min(2.4,(e.r||.55)/.55))})}/* v954: 시연에서도 정화의 불씨 폭발 · 정화의 불씨는 금빛 · 큰 적일수록 폭발 이펙트가 큼 *//* v948: 정화의 불씨(사제 정화의 빛 2차) — 오라 안에서 쓰러지면 같은 폭발 *//* v940: 시체 폭발처럼 같은 프레임에 연쇄까지 한 번에 *//* v936: 연쇄 폭발의 손길 */
   if(S.demo)return;
-  if(uqOn('blood')){if(time>(P.bloodKT||0)+20)P.bloodK=0;P.bloodKT=time;P.bloodK=(P.bloodK||0)+1;if(P.bloodK>=10){P.bloodK=0;const a=P.bloodS=P.bloodS||[];bloodN();if(a.length>=20)a.shift();a.push(time+20)}}
+  if(uqOn('blood')){if(time>(P.bloodKT||0)+20)P.bloodK=0;P.bloodKT=time;P.bloodK=(P.bloodK||0)+1;if(P.bloodK>=20){P.bloodK=0;const a=P.bloodS=P.bloodS||[];bloodN();if(a.length>=20)a.shift();a.push(time+20)}}
   const rz=!!(e.rift&&RZ&&RZ.st==='on');/* v406: 균열 몬스터는 골드·정수·주머니를 땅에 떨구지 않고 정산에 쌓음 */
   if(NS())nsPotKill(e);
   if(mutA('burst')&&!e.boss&&!e.rift&&!e.gate)mutBurst(e);/* v624 유언의 탄막 */
@@ -9294,7 +9294,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v971';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v972';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10501,7 +10501,7 @@ function renderStage(){if(S.ch>=NCH)return renderStageB();$('stageSheet').classL
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${mutRw(mutPts()).toFixed(2)} · ${fmtG(mutCost())} 골드`:''}</button>`:''}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
-  ${eg?`<p class="hint">위험도마다 ${RT_KILLS.toLocaleString('ko-KR')}마리를 처치하면 관문 보스가 나오고, 쓰러뜨리면 클리어입니다. 처음 클리어하면 다음 위험도가 열립니다.</p>${mutUI()}`:'<p class="hint">엔드게임(추락자의 길)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
+  ${eg?`<p class="hint">위험도마다 정해진 수(1~10 ${RT_KILLS.toLocaleString('ko-KR')} · 11~15 1,500 · 16~ 2,000마리)를 처치하면 관문 보스가 나오고, 쓰러뜨리면 클리어입니다. 처음 클리어하면 다음 위험도가 열립니다.</p>${mutUI()}`:'<p class="hint">엔드게임(추락자의 길)에 들어가면 해금된 위험도 중 원하는 곳을 골라 사냥할 수 있습니다.</p>'}
   <div class="cmp2"><table class="stage"><tbody>${rows.join('')}</tbody></table>
   <small class="dpssub">구간이 바뀌면 지역과 나오는 최고 아이템 티어가 올라갑니다.<br>위험도 9·14·19는 보스 봉인 — 표시된 결투장 보스를 처치해야 다음 구간이 열립니다.</small></div>`}
 /* v630: 위험도 창 (B안 · 스테퍼) — ‹ › 와 20칸 막대(1~5 · 6~10 · 11~15 · 16~20)로 고르고 아래 입장 버튼. 위험도 20이면 변이 칸 */
@@ -10541,7 +10541,7 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>${S.test?'추락자의 지도':'위험도'}</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${S.test?'<div class="stlay"><div class="stL">'+stMapHtml()+'</div><div class="stR">'+(sk?`<div class="stdet"><div><div><b style="color:${so.m==='u'?'#c890ff':'#ffd24a'}">봉인 · ${blkName(so)}</b></div><small>${SEAL_PL[stSeal]} · 쓰러뜨리면 위험도 ${stSeal+1}이 열립니다</small></div><div class="r">${sln?(sop?'도전 가능':'잠김'):'<b class="ok">봉인 해제</b>'}</div></div>${mut?`<div class="stmoff">${mut}<small>봉인 전투에는 변이가 적용되지 않습니다</small></div>`:''}<div class="stsp"></div><button class="rrgo stgo" id="sealGo">${sln?(sop?'봉인에 도전':'봉인 도전 · 테스트'):'다시 도전'}</button>`:`<div class="stmhd"><b>위험도 ${t}</b><span>${tpn(t)} · ${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div>`):`<div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
   <div class="sttrk">${trk}</div><div class="sttl"><span>1</span><span>6</span><span>11</span><span>16</span><span>20</span></div>`}${sk?'':`
-  <div class="stdet"><div><div>${stTxt}</div><small>${pat==='route'?`길 위 ${RT_KILLS.toLocaleString('ko-KR')}마리 + 길 끝 관문 보스`:`${RT_KILLS.toLocaleString('ko-KR')}마리 + 관문 보스`}</small></div><div class="r">적정 <b>${fmtN(req)}</b> · 내 <b style="color:${r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a'}">${fmtN(me)}</b></div></div>
+  <div class="stdet"><div><div>${stTxt}</div><small>${pat==='route'?`길 위 ${tkFor(t).toLocaleString('ko-KR')}마리 + 길 끝 관문 보스`:`${tkFor(t).toLocaleString('ko-KR')}마리 + 관문 보스`}</small></div><div class="r">적정 <b>${fmtN(req)}</b> · 내 <b style="color:${r>=1?'#7fe07a':r>=.7?'#f0d040':'#ff7a6a'}">${fmtN(me)}</b></div></div>
   ${patH}${mut}<div class="stsp"></div>
   <button class="rrgo stgo" ${open&&!busy?`data-tier="${t}"`:'disabled'}>${lbl}${mm&&open&&!busy?`<span class="stsub">· 변이 ×${mutRw(pts).toFixed(2)}</span>`:''}</button>${S.test?`<button class="rrgo stgo" id="tmGo" style="margin-top:8px;background:#2a2a30;color:#e8e2d6" ${testMap?'disabled':''}>${testMap?'지금 테스트 맵에 있음':'테스트 맵으로 이동'}<span class="stsub">· 몬스터 없음</span></button>`:''}`}${S.test?'</div></div>':''}`;$('stageSheet').classList.toggle('stw',!!S.test);if(S.test){const m=$('stMap');if(m){if(stMapC){stMapC=0;requestAnimationFrame(stMapScroll)}else m.scrollTop=y0}}}
 function mutUI(){const H='<div class="tag" style="margin-bottom:8px">변이</div>';
