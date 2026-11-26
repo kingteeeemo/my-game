@@ -9468,7 +9468,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v997';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v998';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10856,7 +10856,8 @@ function renderMap(){
     nodes+=wmLab(x,y,WMT[i],CH[i].n,st)}
   for(let i=0;i<NCH;i++){const [x,y]=WM[i],st=eg||i<S.ch?'done':!eg&&i===S.ch?'cur':'';nodes+=wmSeal(x,y,i+1,st)}
   const [ex,ey]=WM_EG;
-  nodes+=wmLab(ex,ey,WMT[NCH],'끝나지 않는 심층','eg')+`<circle cx="${ex}" cy="${ey}" r="20" fill="#0b1413" stroke="${eg?'#5fe0cc':'#3f7a72'}" stroke-width="2.5"/><circle cx="${ex}" cy="${ey}" r="11" fill="none" stroke="#5fe0cc" stroke-width="2" stroke-dasharray="3 5" opacity=".85"><animateTransform attributeName="transform" type="rotate" from="0 ${ex} ${ey}" to="360 ${ex} ${ey}" dur="8s" repeatCount="indefinite"/></circle>`;
+  nodes+=`<path d="M${ex-10},${ey} l10,-10 l10,10 l-10,10z" fill="${eg?INK:'#1a1511'}" stroke="#d7a45f" stroke-width="1.5"/>`;/* 길 끝: 불타는 왕좌 */
+  /* v998: 엔드게임(끝나지 않는 심층)은 월드맵에 표시하지 않음 — 엔드게임 중엔 현재 위치를 10장(왕좌) 자리에 */
   const mk=`<g id="wmMe"><circle r="20" fill="#ffb35a" opacity=".3"><animate attributeName="r" values="12;26;12" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values=".45;0;.45" dur="1.6s" repeatCount="indefinite"/></circle><circle r="8" fill="#fff0d0" stroke="${INK}" stroke-width="3.5"/></g>`;
   const info=eg?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n}`:`${S.ch+1}장 · ${CH[S.ch].n}`;
   const sub=S.tutor?'훈련장 · 여정을 떠나기 전 튜토리얼':eg?`위험도 ${S.tier} · 여정의 끝, 엔드게임 영역`:S.phase===0?'출발':S.phase===1?`길 끝 제단의 보스가 기다립니다 · 길 ${Math.round(storyProg*100)}% 지남`:S.phase===2?'다음 길이 열렸습니다':(S.ch===LAST?'최종 결전':'다음 길로');
