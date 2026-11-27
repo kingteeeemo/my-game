@@ -8651,7 +8651,7 @@ const RAY_TK=.25,PURGE_TK=.25,purgeR=L=>4.5*(1+.06*L),
   raySplit=L=>{const l=Math.max(0,Math.min(10,L|0)),k=[0,0,1,1,1,2,2,2,3,3,3][l];return {n:1+k,m:1+.04*(l-k)}},rayW=L=>.9+.06*L,rayLen=L=>14+.5*L;
 Object.assign(SK,{
   ray:{n:'빛의 광선',role:'다수 공격',tag:'ray',en:'Beam · Holy',kind:'ray',gems:['rwide','rsplit','haste'],mp:3,dmg:1,cd:RAY_TK,desc:'누르고 있는 동안 정면으로 빛줄기를 쏘아 일렬로 선 적을 모두 꿰뚫습니다. 쏘는 동안은 천천히 움직입니다.'},
-  purge:{n:'정화의 빛',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['purad','pnova','haste'],mp:12,dmg:1.3/* v957: ×1.3 */,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받습니다. 켜 둔 동안에는 적이 없어도 마나가 계속 소모됩니다.'}});
+  purge:{n:'정화의 빛',role:'다수 공격',tag:'purge',en:'Aura · Holy',kind:'purge',gems:['purad','pnova','haste'],mp:12,dmg:1.43/* v957: ×1.3 · v1069: ×1.1 (근접 위험 보정) */,cd:PURGE_TK,desc:'버튼을 누르면 켜지고 다시 누르면 꺼집니다. 켜져 있는 동안 내 주위 원 안의 모든 적이 0.25초마다 피해를 받습니다. 켜 둔 동안에는 적이 없어도 마나가 계속 소모됩니다.'}});
 Object.assign(GEMS,{
   rwide:{n:'광휘 확장',t:'ray',c:'#ffe9a0',d:L=>`광선 굵기 ${rayW(L).toFixed(2)}m · 길이 ${rayLen(L).toFixed(1)}m · 피해 +${3*L}%`},
   rsplit:{n:'분광',t:'ray',c:'#fff0c0',d:L=>{const q=raySplit(L);return `광선 ${q.n}줄을 부채꼴로 쏨 (피해 ×${q.m.toFixed(2)})\n${L<10?(raySplit(L+1).n>q.n?'다음 단계: 광선 +1줄':'다음 단계: 피해 +4%'):'최대'}`}},
