@@ -9011,7 +9011,7 @@ function pillarCast(c,o,hit,depth){const after=()=>{
         later(.14,()=>pillarCast({x:t.pos.x,z:t.pos.z},o2,hit,depth+1))}}};
   pillarStrike(c,Object.assign({},o,{after}))}
 /* ===== v484 NS 충전식 물약 · 창고 · 옵션 리롤 (테스트 캐릭터 전용) ===== */
-const NPOT={hp:{p:.30,n:'생명력'},mp:{p:.20,n:'마나'}},npotP=k=>k==='mp'&&S&&S.ch<NCH?.70:NPOT[k].p/* v726: 스토리 구간 마나 물약 70% */,NPOT_T=3,NPOT_KILL=40,NPOT_UP=[94,94];/* 확장 비용(정수)은 임시값 */
+const NPOT={hp:{p:.60,n:'생명력'},mp:{p:.60,n:'마나'}},npotP=k=>NPOT[k].p/* v1065: 생명력·마나 물약 모두 최대치의 60%, 1초에 걸쳐 회복 (이전 생명력 30%·마나 20%(스토리 70%), 3초) */,NPOT_T=1,NPOT_KILL=40,NPOT_UP=[94,94];/* 확장 비용(정수)은 임시값 */
 const potMaxN=k=>5;/* v879: 물약은 스토리·엔드게임 모두 기본 5충전 (충전 횟수 확장 폐지 — 이미 산 단계는 정수로 돌려줌) *//* v826: 스토리 마나 물약은 3충전 *//* v726: 스토리 구간은 5충전 */
 function nsPotInit(full){P.pch=P.pch||{hp:potMaxN('hp'),mp:potMaxN('mp')};{if(P.pch.hp>potMaxN('hp'))P.pch.hp=potMaxN('hp');if(P.pch.mp>potMaxN('mp'))P.pch.mp=potMaxN('mp')}if(full){P.pch.hp=potMaxN('hp');P.pch.mp=potMaxN('mp')}P.pkp=P.pkp||0;xpInit(full)}
 function nsPotUse(k){nsPotInit();if(P.cd.pot>0)return;if(!(P.pch[k]>0)){if(P.mpWarn<=0){toast(`${NPOT[k].n} 물약이 비었습니다`,'몬스터를 처치하거나 보스에게 피해를 주면 충전됩니다');P.mpWarn=1.5}return}
