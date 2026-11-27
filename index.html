@@ -5895,8 +5895,8 @@ const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.725,fb:1.2,cn:'마법사'},
   /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
   /* v1036: 궁수 「서리달의 진혼곡」 — Meshy 모델(Frostmoon Requiem, 3.5만→1.6만 삼각형·텍스처 1k). 불사조 활과 같은 축·크기(높이 1.45, 쥐는 곳 = 원점, 시위 −x)로 미리 맞춤. 짙은 파란 보석만 발광 맵 */
-  wsk_frost:{n:'서리달의 진혼곡',cls:['archer'],pr:900,file:'models/frostmoon_bow.glb',node:'frostmoon_bow',rel:'sw',col:1.1,fb:1.309,pvB:1.091,/* 필드·판매창 20% 더 밝게(v1039) · 장비창 10% 더(v1040: col 1.1, 필드·판매창은 그대로가 되게 fb·pvB를 나눔) */cn:'궁수'},
-  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,fb:1.2,bk:[.2,0,0],cn:'궁수'}};
+  wsk_frost:{n:'서리달의 진혼곡',cls:['archer'],pr:900,file:'models/frostmoon_bow.glb',node:'frostmoon_bow',rel:'sw',col:1.1,fb:1.309,pvB:1.091,bk:[.092,-.016,.007],/* v1042: 등에 멜 때 등 가운데로 *//* 필드·판매창 20% 더 밝게(v1039) · 장비창 10% 더(v1040: col 1.1, 필드·판매창은 그대로가 되게 fb·pvB를 나눔) */cn:'궁수'},
+  wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,fb:1.2,bk:[.062,.024,-.009]/* v1042: 등 가운데로 다시 맞춤(전 .2는 오른쪽으로 치우침) */,cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
 const WSK={};/* v790: 전사 warrior.glb의 대검 노드(손 기준) — 다른 몸 스킨에서 무기 외형을 전사와 같은 방향으로 */const WSK_REF=new THREE.Matrix4().compose(new THREE.Vector3(0,.04085843,.00072696),new THREE.Quaternion(.91277843,.09348304,.29115931,-.27078166),new THREE.Vector3(1,1,1));const wskS=k=>WSK[k]||(WSK[k]={st:0,cb:[]});
@@ -6051,7 +6051,7 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
    lavaTick이 등 뼈를 따라 붙이고(기울기·비틀림 일부), 들썩임·회전 늦게 따라옴·달리면 뒤로 젖힘을 넘겨줌. 여기서는 숨쉬듯 천천히 펄럭이고, 달리면 뒤로 접히며 걸음마다 작게 퍼덕임.
    빛: 텍스처 자체를 약하게 발광 + 날개를 훑고 지나가는 빛 띠(셰이더). 반짝이 별은 lavaTick이 날개 표면에서 뿌림(ek) */
 const CWPV={value:1};/* v1035: 외형 상점 사진 찍을 때만 날개 밝기 */
-const CWC={S:2.0,sx:1.417,inv:.8,bend:[0,0],sz:1.3,dy:.04,/* v1034: 키(3.25)의 5%만큼 낮춤 */dz:-.2,fw:.45,x:.04,yaw:22,tilt:12,rt:[.055,-.36,0],file:'models/crystal_wing.glb',
+const CWC={S:2.1,/* v1049: 위아래·좌우 모두 5% 더 */sx:1.417,inv:.8,bend:[0,0],sz:1.3,dy:.04,/* v1034: 키(3.25)의 5%만큼 낮춤 */dz:-.2,fw:.45,x:.04,yaw:22,tilt:12,rt:[.055,-.36,0],file:'models/crystal_wing.glb',
   ek:{c0:0xffffff,c1:0x8a7cff,s0:.26,s1:.02,vy:[.15,.6],life:[.5,1],tex:3,rate:9,rmv:16}};
 function cwBuild(){const g=new THREE.Group(),C=CWC,U={uK:{value:0}},piv=[],D=Math.PI/180,sh={uT:{value:0},uK:{value:0}};g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   const tr=new THREE.Object3D();tr.material={uniforms:{uK:{value:0}}};g.userData.trail=tr;let fl=0,fv=0,ph=0;
@@ -6177,7 +6177,7 @@ function skwGem(K,wr,k,boost){if(!K.gemM)return;const c=GEMC[wr]||GEMC[0],pl=1+.
    손에 든 활: 쏘기·화살비·구르기·사망은 손을 그대로 따라가고(GLB에 맞춘 쏘는 방향), 평소(대기·달리기·피격)에는 세계 기준으로 세워 듦(활대 수직, 배가 앞쪽) — 둘 사이는 부드럽게 전환 */
 const SKA={col:1.6,tilt:.12,rate:12},PORT_S={warrior:1.48,mage:1.355,archer:1.415,musa:1.4,priest:1.549}/* v975: 사제 초상화 배율 1.355→1.64 — 모델 파일 원본이 작아 필드 S(2.057)에 맞춰 키움 */ /* v384: 직업 선택 초상화 배율 — 머리 꼭대기 높이 전사 > 마법사(-5%) > 궁수(마법사의 -5%) */,SKA_D=1.033;/* SKA_D: shot·sky 클립에서 완전히 당긴 시점(당기기 끝 = 놓기 시작) */
 function skaBow(K,mode,dt){const sw=K.sw;if(!sw||!K.hand)return;if(K.wskM){/* v777: 외형 활을 등에 멜 때 자리(bk) — 시위 쪽으로 무게가 쏠린 활을 등 가운데로 */const b=WLOOKS[K.wsk]&&WLOOKS[K.wsk].bk;if(mode==='back'&&b)K.wskM.position.set(...b);else K.wskM.position.set(0,0,0)}
-  if(mode==='back'&&K.bowBk){if(sw.parent!==K.bowBk){K.bowBk.add(sw);sw.position.set(0,0,0);sw.quaternion.identity()}return}
+  if(mode==='back'&&K.bowBk){if(sw.parent!==K.bowBk){K.bowBk.add(sw);sw.quaternion.identity()}if(K.wskM)sw.position.set(0,0,0);else sw.position.set(-.037,.006,-.003);/* v1042: 기본 활도 등 가운데로(외형 활은 bk로 따로) */return}
   if(sw.parent!==K.hand){K.hand.add(sw);sw.position.copy(K.bowP0);sw.quaternion.copy(K.bowQ0);K.bowA=1}
   const want=mode==='aim'?1:0;K.bowA+=(want-K.bowA)*(dt>=1?1:1-Math.exp(-dt*SKA.rate));
   if(K.bowA>.999){sw.quaternion.copy(K.bowQ0);return}
