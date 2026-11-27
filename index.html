@@ -1630,12 +1630,12 @@ async function flush(){
   const sent={};for(const k of keys){const v=rd(k);if(v!=null)sent[k]=v}
   CL.busy=true;let ok=false;
   try{
-    await db.runTransaction(async tx=>{
+    await tmo(db.runTransaction(async tx=>{/* v1038: 응답이 없으면 15초 뒤 포기(무한 대기 방지) */
       const l=await tx.get(uref());if(!l.exists||l.data().dev!==CL.dev)throw new Error('LOCK');
       for(const k in sent)tx.set(sref(k),{v:sent[k],t:localT(k)});
       for(const k of dels)tx.delete(sref(k));
       tx.update(uref(),{lt:Date.now()});
-    });
+    }),15000);
     for(const k in sent)if(rd(k)===sent[k])CL.dirty.delete(k);
     wr(DEL_KEY,JSON.stringify(J(DEL_KEY,[]).filter(k=>!dels.includes(k))));
     CL.last=CL.lastSync=Date.now();CL.offline=false;ok=true;
@@ -1661,7 +1661,7 @@ function loadBusyOff(){const L=document.getElementById('loadScr');if(!L||!L.data
 window.loadBusy=loadBusy;window.loadBusyOff=loadBusyOff;const $c=id=>document.getElementById(id),show=h=>{loadBusyOff();$c('clSheet').innerHTML=h;box.hidden=false;window.CL_PAUSE=true},hide=()=>{loadBusyOff();box.hidden=true;window.CL_PAUSE=false};
 const head=t=>`<div class="shead"><div><div class="chap">Lumenhar · Cloud</div><h2>${t}</h2></div></div>`;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function showBusy(t){if(t==='저장하는 중…'){show(head('잠시만요')+`<p class="hint">${t}</p>`);return}/* v829: 자동으로 기다리는 단계는 게임 로딩 화면으로 */box.hidden=true;window.CL_PAUSE=true;loadBusy(t)}
+function showBusy(t){CL.bAt=Date.now();if(t==='저장하는 중…'){show(head('잠시만요')+`<p class="hint">${t}</p>`);return}/* v829: 자동으로 기다리는 단계는 게임 로딩 화면으로 */box.hidden=true;window.CL_PAUSE=true;loadBusy(t)}
 function showFail(t,retry){show(head('연결할 수 없어요')+`<p class="hint">${t}</p>`+(retry?'<button class="primary" id="clRetry">다시 시도</button>':'')+(rd(UID_KEY)?'<button class="clsec" id="clOff">오프라인으로 계속 (저장은 이 기기에만 됩니다)</button>':''));
   const r=$c('clRetry');if(r)r.onclick=()=>location.reload();const o=$c('clOff');if(o)o.onclick=()=>{CL.offline=true;hide()}}
 
@@ -1740,6 +1740,7 @@ async function claim(){await tmo(uref().set({dev:CL.dev,lt:Date.now()},{merge:tr
 async function afterLogin(user){
   CL.uid=user.uid;CL.id=(user.email||'').replace(DOM,'');wr(ID_KEY,CL.id);CL.ok=false;CL.locked=false;
   showBusy('저장 데이터를 확인하는 중…');
+  let wd=0;const wdf=()=>{const L=document.getElementById('loadScr');if(CL.ok||CL.synced)return;if(L&&L.dataset.busy&&!L.hidden&&!$c('clGo')){if(Date.now()-(CL.bAt||0)>30000)showFail('서버 응답이 너무 늦어요. 네트워크 상태를 확인하고 다시 시도해 주세요.',true);else wd=setTimeout(wdf,5000)}else wd=setTimeout(wdf,5000)};wd=setTimeout(wdf,30000);/* v1038: 로딩 화면이 35초 넘게 그대로면 재시도 안내 */
   try{
     if(rd(UID_KEY)&&rd(UID_KEY)!==CL.uid)wipeLocal();/* 다른 계정이 쓰던 기기 → 기기 저장 비우기 */
     await claim();
@@ -1750,11 +1751,11 @@ async function afterLogin(user){
     CL.ok=true;CL.noSave=false;CL.last=0;
     if(unsub)try{unsub()}catch(e){}
     unsub=uref().onSnapshot(s=>{const d=s.data();if(d&&d.dev&&d.dev!==CL.dev&&CL.ok&&!CL.locked)lockOut()},()=>{});
-    if(CL.dirty.size||J(DEL_KEY,[]).length)await flush();
+    if(CL.dirty.size||J(DEL_KEY,[]).length)await Promise.race([flush(),new Promise(r=>setTimeout(r,12000))]);/* v1038: 업로드가 늦어도 입장은 계속(나머지는 뒤에서 이어서 올림) */
     if(r.down){const n=+(sessionStorage.getItem('es-cloud-rl')||0);if(n<2){sessionStorage.setItem('es-cloud-rl',String(n+1));showBusy('불러온 저장을 적용하는 중…');location.reload();return}}
     sessionStorage.removeItem('es-cloud-rl');
-    hide();CL.synced=true;
-  }catch(e){
+    hide();CL.synced=true;clearTimeout(wd);
+  }catch(e){clearTimeout(wd);
     console.warn('cloud',e);
     showFail('서버와 통신하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.<br><small style="opacity:.6">'+esc((e&&e.code)||(e&&e.message)||e)+'</small>',true)}}
 
@@ -1780,7 +1781,7 @@ document.addEventListener('click',e=>{if(e.target&&e.target.id==='clOut')doLogou
 /* ---------- 시작 ---------- */
 function start(){
   if(!window.firebase||!firebase.initializeApp){showFail('서버 연결 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.',true);return}
-  try{firebase.initializeApp(FB_CFG);auth=firebase.auth();db=firebase.firestore()}catch(e){showFail('초기화에 실패했어요.',true);return}
+  try{firebase.initializeApp(FB_CFG);auth=firebase.auth();db=firebase.firestore();try{db.settings({experimentalAutoDetectLongPolling:true,merge:true})}catch(e){}/* v1038: 모바일·통신사 망에서 실시간 연결이 막혀 멈추는 경우 자동으로 롱폴링으로 전환 */}catch(e){showFail('초기화에 실패했어요.',true);return}
   showBusy('연결하는 중…');
   let first=true;
   auth.onAuthStateChanged(u=>{
@@ -9599,7 +9600,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1037';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1038';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
