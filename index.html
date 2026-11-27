@@ -8150,9 +8150,14 @@ const XPOT={spd:{n:'신속',c:'#4ad06a',dur:6,e:60,f:e=>`이동 속도 +${e}%`},
 /* v988: 특수 물약 옵션 한 줄 — 지속↑·효과↓ / 지속↓·효과↑ / 최대 충전 +2 / 처치 충전량 +50%. 수호는 지속·효과 교환 옵션 제외 */
 const XPOPT={long:{n:'지속시간 +50% · 효과 −27%',d:1.5,e:.73},short:{n:'지속시간 −25% · 효과 +47%',d:.75,e:1.47},max:{n:'최대 충전 +2회'},kill:{n:'처치 시 충전량 +50%'},none:{n:'옵션 없음'}};
 const xpPool=id=>id==='es'?['max','kill','none']:['long','short','max','kill','none'];
+/* v1041: 옵션 수치는 구매·옵션 변환 때 범위 안에서 정수로 한 번 굴려 저장 — 지속 증가(지속 +45~55% · 효과 −25~−30%) / 효과 증가(지속 −22~−28% · 효과 +43~+53%) / 최대 충전 +1~3회 / 처치 충전량 +20~50% */
+const xpRI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function xpRoll(id,k){const x=xpS();x.ov=x.ov||{};x.ov[id]=k==='long'?{d:xpRI(45,55),e:-xpRI(25,30)}:k==='short'?{d:-xpRI(22,28),e:xpRI(43,53)}:k==='max'?{m:xpRI(1,3)}:k==='kill'?{k:xpRI(20,50)}:{}}
+function xpOv(id){const x=xpS(),k=xpOpt(id);x.ov=x.ov||{};if(!x.ov[id])xpRoll(id,k);return x.ov[id]}
+function xpOptN(id){const k=xpOpt(id),v=xpOv(id),sg=n=>(n>0?'+':'−')+Math.abs(n)+'%';return k==='long'||k==='short'?`지속시간 ${sg(v.d)} · 효과 ${sg(v.e)}`:k==='max'?`최대 충전 +${v.m}회`:k==='kill'?`처치 시 충전량 +${v.k}%`:XPOPT.none.n}
 function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
-const xpM=id=>{const o=xpS().own[id]?XPOPT[xpOpt(id)]:null;return {d:o&&o.d||1,e:o&&o.e||1}};
-const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?2:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1.5:1;
+const xpM=id=>{if(!xpS().own[id])return {d:1,e:1};const k=xpOpt(id);if(k!=='long'&&k!=='short')return {d:1,e:1};const v=xpOv(id);return {d:1+v.d/100,e:1+v.e/100}};
+const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?xpOv(id).m:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1+xpOv(id).k/100:1;
 /* v995: 특수 물약 저장소는 S.xpt — 예전엔 S.xp(경험치 숫자)와 이름이 겹쳐 own이 undefined로 터졌음 */
 const xpS=()=>{if(!S.xpt||typeof S.xpt!=='object')S.xpt={own:{},eq:[null,null,null]};S.xpt.own=S.xpt.own||{};if(!Array.isArray(S.xpt.eq))S.xpt.eq=[null,null,null];return S.xpt};
 const xpOn=id=>!!(P&&P.xb&&P.xb[id]>0)||(uqOn('elixir')&&xpS().own[id]&&xpS().eq.includes(id));/* v992: 끝없는 연금술사의 피 — 장착한 특수 물약 효과 상시 */
@@ -10752,7 +10757,7 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
       h+=`<div class="rrseg" style="grid-template-columns:1fr 1fr"><button class="${tab==='buy'?'on':''}" data-xtab="buy">구매·장착</button><button class="${tab==='opt'?'on':''}" data-xtab="opt">옵션 변경</button></div>`;
       if(tab==='buy'){
         h+=`<div class="grow" style="justify-content:space-between"><span class="t">특수 물약 <b style="color:var(--ink)">${x.eq.filter(Boolean).length}/3</b>칸 장착<small>단축키 3·4·5 · 처치로 충전(최대 ${XP_MAX}회)</small></span></div><div class="xpl">`;
-        for(const id of XP_IDS){const X=XPOT[id],ow=own(id),eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${xpD(id)}초간 ${X.f(xpE(id))}${ow?` · 충전 <b style="color:var(--ink)">${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회<br><span style="color:var(--ink)">${XPOPT[xpOpt(id)].n}</span>`:` · 구매하면 옵션이 한 줄 붙습니다`}</small></span>
+        for(const id of XP_IDS){const X=XPOT[id],ow=own(id),eq=x.eq.includes(id);h+=`<div class="grow"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="t">${X.n} 물약<small>${xpD(id)}초간 ${X.f(xpE(id))}${ow?` · 충전 <b style="color:var(--ink)">${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회<br><span style="color:var(--ink)">${xpOptN(id)}</span>`:` · 구매하면 옵션이 한 줄 붙습니다`}</small></span>
           <span class="potbtns">${ow?`<button class="pm wide${eq?' sell':''}" data-xeq="${id}">${eq?'해제':'장착'}</button>`:`<button class="pm wide" data-xbuy="${id}" ${TCUR()||(S.rr||0)>=XP_PRICE?'':'disabled'}>${ci('r')} ${XP_PRICE} 구매</button>`}</span></div>`}
         h+=`</div><div class="rrfoot" style="position:static">${bal}</div>`}
       else{
@@ -10760,7 +10765,7 @@ function renderShop(){$('shop').classList.toggle('gearK',shopKind!=='pot');
         if(!have.length)h+=`<div class="grow" style="justify-content:center;color:var(--muted);font-size:12.5px;padding:18px">구매한 특수 물약이 없습니다 · 구매 탭에서 먼저 사세요</div>`;
         else{
           h+=`<div class="xpt">`;
-          if(sel){const X=XPOT[sel];h+=`<div class="rri xpc${xpFlash?' xpfx':''}" style="--pc:${X.c}"><span class="gd" style="background:${X.c};border-radius:50%;transform:none;width:14px;height:14px"></span><div><small>SPECIAL POTION</small><b>${X.n} 물약</b><span>${xpD(sel)}초간 ${X.f(xpE(sel))} · 충전 ${xpMax(sel)}회</span><span style="display:block;color:var(--ink);margin-top:2px">${XPOPT[xpOpt(sel)].n}</span></div></div>`}
+          if(sel){const X=XPOT[sel];h+=`<div class="rri xpc${xpFlash?' xpfx':''}" style="--pc:${X.c}"><span class="gd" style="background:${X.c};border-radius:50%;transform:none;width:14px;height:14px"></span><div><small>SPECIAL POTION</small><b>${X.n} 물약</b><span>${xpD(sel)}초간 ${X.f(xpE(sel))} · 충전 ${xpMax(sel)}회</span><span style="display:block;color:var(--ink);margin-top:2px">${xpOptN(sel)}</span></div></div>`}
           else h+=`<div class="rrsd xpc">바꿀 물약을 고르세요</div>`;
           h+=`<div class="rrlines">${have.map(id=>{const X=XPOT[id];return `<button class="rln${sel===id?' sel':''}" data-xsel="${id}" style="height:auto;min-height:40px;padding:6px 8px"><span class="gd" style="background:${X.c};border-radius:50%;transform:none"></span><span class="rnm">${X.n} 물약</span></button>`}).join('')}</div>`;
           const ok=sel&&(TCUR()||(S.rr||0)>=XP_REROLL);
@@ -10791,10 +10796,10 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
-  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(TCUR()||(S.rr||0)>=XP_PRICE)){if(!TCUR())S.rr-=XP_PRICE;x.own[id]=1;x.opt=x.opt||{};delete x.opt[id];xpOpt(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
+  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(TCUR()||(S.rr||0)>=XP_PRICE)){if(!TCUR())S.rr-=XP_PRICE;x.own[id]=1;x.opt=x.opt||{};delete x.opt[id];if(x.ov)delete x.ov[id];xpOpt(id);xpOv(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
   if(b.dataset.xtab){xpTab=b.dataset.xtab;renderShop();return}
   if(b.dataset.xsel){xpSel=xpSel===b.dataset.xsel?null:b.dataset.xsel;renderShop();return}
-  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(TCUR()||(S.rr||0)>=XP_REROLL)){if(!TCUR())S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpInit();save();xpFlash=1;toast(`${XPOT[id].n} 물약`,XPOPT[x.opt[id]].n)}renderShop();xpFlash=0;return}
+  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(TCUR()||(S.rr||0)>=XP_REROLL)){if(!TCUR())S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpRoll(id,x.opt[id]);xpInit();save();xpFlash=1;toast(`${XPOT[id].n} 물약`,xpOptN(id))}renderShop();xpFlash=0;return}
   if(b.dataset.xeq){const id=b.dataset.xeq,x=xpS(),i=x.eq.indexOf(id);if(i>=0)x.eq[i]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
