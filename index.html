@@ -10084,7 +10084,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1096';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1097';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10526,17 +10526,17 @@ STSL.camp5={tag:'Lumenhar · Chapter 5',bgm:'refuge'/* v1001: 등대 야영지 �
 /* v1094: 엔드게임 최종전으로 가는 길 — 우버 검귀 → 카이렌의 불씨 · 우버 아귀 → 삼켜진 빛 · 둘 다 모으면 잠든 빛의 신전에서 빛의 신의 가호.
    그림(story/kai_f*, maw_f*, tmp_f*)이 아직 없으면 alt(프롤로그 그림)로 보여 줌 */
 STSL.uberK={tag:'Lumenhar · 카이렌의 불씨',bgm:'refuge',sc:[
-    {img:'story/kai_f1.webp',alt:'prolog/p7.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'ash2',c:['불에 삼켜졌던 검이,\n마침내 멈췄다.']},
-    {img:'story/kai_f2.webp',alt:'prolog/p6.webp',f:[.5,.48],fy:.5,z:[1.02,1.1],fx:'mote',c:['재 속에서, 작은 금빛 불씨 하나가 피어오른다.','「…이 불을, 이어 다오.」']},
-    {img:'story/kai_f3.webp',alt:'prolog/p8.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'mote',c:['카이렌의 불씨를 얻었다.']}]};
+    {img:'story/kai_f1.webp',alt:'prolog/p7.webp',f:[.38,.48],fy:.5,z:[1.02,1.1],fx:'ash2',c:['불에 삼켜졌던 검이,\n마침내 멈췄다.']},
+    {img:'story/kai_f2.webp',alt:'prolog/p6.webp',f:[.5,.5],fy:.46,z:[1.02,1.1],fx:'mote',c:['재 속에서, 작은 금빛 불씨 하나가 피어오른다.','「…이 불을, 이어 다오.」']},
+    {img:'story/kai_f3.webp',alt:'prolog/p8.webp',f:[.42,.6],fy:.45,z:[1.02,1.1],fx:'mote',c:['카이렌의 불씨를 얻었다.']}]};
 STSL.uberM={tag:'Lumenhar · 삼켜진 빛',bgm:'refuge',sc:[
-    {img:'story/maw_f1.webp',alt:'prolog/p5.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'snow',c:['심연이,\n마침내 입을 다물었다.']},
-    {img:'story/maw_f2.webp',alt:'prolog/p6.webp',f:[.5,.48],fy:.5,z:[1.02,1.1],fx:'mote',c:['그날 밤 삼켜졌던 빛이,\n다시 떠오른다.']},
-    {img:'story/maw_f3.webp',alt:'prolog/p8.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'mote',c:['꺼졌던 빛의 조각을 되찾았다.']}]};
+    {img:'story/maw_f1.webp',alt:'prolog/p5.webp',f:[.58,.5],fy:.5,z:[1.02,1.1],fx:'snow',c:['심연이,\n마침내 입을 다물었다.']},
+    {img:'story/maw_f2.webp',alt:'prolog/p6.webp',f:[.5,.5],fy:.42,z:[1.02,1.1],fx:'mote',c:['그날 밤 삼켜졌던 빛이,\n다시 떠오른다.']},
+    {img:'story/maw_f3.webp',alt:'prolog/p8.webp',f:[.52,.52],fy:.55,z:[1.02,1.1],fx:'mote',c:['꺼졌던 빛의 조각을 되찾았다.']}]};
 STSL.bless={tag:'Lumenhar · 잠든 빛의 신전',bgm:'refuge',sc:[
-    {img:'story/tmp_f1.webp',alt:'prolog/p1.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'mote',c:['불씨와 빛이,\n서로를 부른다.']},
-    {img:'story/tmp_f2.webp',alt:'prolog/p6.webp',f:[.5,.45],fy:.45,z:[1.02,1.1],fx:'mote',c:['「…드디어, 닿았구나.」']},
-    {img:'story/tmp_f3.webp',alt:'prolog/p8.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'mote',c:['「필멸의 몸으로도 저 용 앞에 설 수 있도록.」','「나의 가호를 주마.」']},
+    {img:'story/tmp_f1.webp',alt:'prolog/p1.webp',f:[.5,.5],fy:.55,z:[1.02,1.1],fx:'mote',c:['불씨와 빛이,\n서로를 부른다.']},
+    {img:'story/tmp_f2.webp',alt:'prolog/p6.webp',f:[.5,.5],fy:.4,z:[1.02,1.1],fx:'mote',c:['「…드디어, 닿았구나.」']},
+    {img:'story/tmp_f3.webp',alt:'prolog/p8.webp',f:[.5,.5],fy:.55,z:[1.02,1.1],fx:'mote',c:['「필멸의 몸으로도 저 용 앞에 설 수 있도록.」','「나의 가호를 주마.」']},
     {img:'story/tmp_f4.webp',alt:'prolog/p4.webp',f:[.5,.5],fy:.5,z:[1.02,1.1],fx:'throne',c:['빛의 신의 가호를 받았다.','이제, 저 불 앞으로.']}]};
 const egKai=()=>!!(S.bclr&&S.bclr.ku),egMaw=()=>!!(S.bclr&&S.bclr.mu),egBlessOk=()=>(S.maxTier||0)>=D_MAX&&egKai()&&egMaw();
 /* 쉼터에 들어올 때 아직 안 본 장면을 하나씩: 슬라이드 → 하란·목소리 대사 */
