@@ -4847,7 +4847,7 @@ function refTree(x,z){/* 꼭대기의 말라 죽은 큰 나무 — 가지가 비
   for(const a of [0,2.1,4.2]){const r=mesh(new THREE.CylinderGeometry(.06,.2,1.4,6),refMat.bark,Math.cos(a)*.6,.25,Math.sin(a)*.6);r.rotation.set(Math.sin(a)*1.1,0,-Math.cos(a)*1.1);g.add(r)}propSwap(g,'tree_dead_large',1.1);return refAdd(g,x,z,rand(0,6),.7)}
 function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync();setGround(130,130,.72);crysKind='ice';const lv=refLv();refA={lava:[],shroom:[]};
   /* 남쪽: 떨어진 자리 — 천장 틈 빛기둥, 돌무더기 */
-  {const sh=new THREE.Mesh(new THREE.CylinderGeometry(1.4,2.6,18,24,1,true),new THREE.MeshBasicMaterial({map:refShaftTex,color:0xfff0c8,transparent:true,opacity:.07,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));sh.position.set(0,9,14.6);scene.add(sh);propMeshes.push(sh);refPool(0,14.6,4,0xfff0c8,.28);
+  {const sh=new THREE.Mesh(new THREE.CylinderGeometry(1.2,2.6,150,24,1,true),new THREE.MeshBasicMaterial({map:refShaftTex,color:0xfff0c8,transparent:true,opacity:.07,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));sh.position.set(0,75,14.6);/* v1043: 카메라를 최대로 멀리해도 위가 끊기지 않게 150m */scene.add(sh);propMeshes.push(sh);refPool(0,14.6,4,0xfff0c8,.28);
     for(const [x,z,s] of [[-4.2,16.4,.9],[4.4,16.8,.8],[-2.8,18.6,.6],[3.2,13,.45],[-5.2,12.4,.5],[5.6,11.2,.55],[1.4,19.2,.7],[-6.4,15,.7],[6.8,14.6,.6]])refRock(x,z,s);}
   /* 가운데 광장: 금빛 화로 · 통나무 의자 · 깔개 · 짐 */
   for(const [x,z,ry] of [[-3.6,-2.4,.4],[3.6,-2.2,-.5],[2.6,1.6,.9]]){const g=new THREE.Group(),l=mesh(new THREE.CylinderGeometry(.28,.3,1.8,8),PM.wood,0,.28,0);l.rotation.z=Math.PI/2;g.add(l);refAdd(g,x,z,ry,.6)}
@@ -9608,7 +9608,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1042';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1043';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
