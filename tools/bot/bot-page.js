@@ -341,6 +341,7 @@ function progGear(d){const o=PG.o,sp=progSpec(d);
 function progEnh(){let n=0;for(;;){let kk=null,lo=99;for(const k of EQS){const L=enhL(k);if(L<NS_ENH_MAX&&L<lo){lo=L;kk=k}}if(!kk)break;const c=enhCost(lo,kk);if(S.gold<c)break;smithSel=kk;const g0=S.gold;smithTry(true);PG.spent+=g0-S.gold;if(++n>200000)break}return n}
 const progEnhStat=()=>{const a=EQS.map(k=>enhL(k));return {min:Math.min(...a),avg:+(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1),max:Math.max(...a)}};
 function botReset(){const id=C().skills[0];BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};BOT.M.gold0=S.gold||0}
+BOT.reset=()=>botReset();
 BOT.progSetup=function(o){
   hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
   window.defeatCine=function(sub,fn){BOT.pendTown=fn};/* 연출 생략 — 다음 프레임 맨 앞에서 마을로 */
