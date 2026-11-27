@@ -263,7 +263,7 @@ BOT.egSetup=function(o){
   hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
   testPick=false;startGame(o.cls,o.main);S.test=false;S.tutor=false;S.demo=false;S.noGuide=1;S.autoGem='bal';
   S.lv=o.lv;S.xp=0;S.pending=o.lv-1;S.sk={};try{autoSpend('bal')}catch(_){}S.pending=0;
-  S.enh={};for(const k of EQS)S.enh[k]=o.enh||0;gearSet(o.tier,o.cls,o.q==null?.5:o.q,o.lo);
+  S.enh={};for(const k of EQS)S.enh[k]=o.enh||0;gearSet(o.tier,o.cls,o.q==null?.5:o.q,o.lo,o.rnd);
   /* 추가 강화(2차): 위험도에 따라 진행도 비율만큼 */
   const id=C().skills[0];S.sk2={};for(const g of (typeof gems2For==='function'?gems2For(id):[]))S.sk2[g]=Math.round(g2Max(g)*(o.g2||0));
   if(o.aura){S.aura={};S.auraOn={};for(const q of String(o.aura).split('+')){const [k,l]=q.split(':');S.aura[k]=+l||10;S.auraOn[k]=true}}/* --aura area:10+haste:10 */
@@ -286,10 +286,10 @@ BOT.egEnd=function(){
 };
 
 /* 장비: 레벨/장에 맞는 평균 장비 (옵션 구성은 직업별 주력 옵션) */
-function gearSet(t,c,q,lo){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=bc(c)==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+(lo==null?1:lo));
+function gearSet(t,c,q,lo,rnd){const bt={warrior:'def',archer:'eva',mage:'es'}[bc(c)]||'def',dp=bt+'p',sp=bc(c)==='mage'?'cspd':'aspd',cd=NS_CDMG[c],lt=Math.min(6,t+(lo==null?1:lo));
   const L={weapon:{o:['cc','cdm',sp],x:['area','killH']},helm:{o:[dp,'hp','dr'],x:['mp','regen']},armor:{o:[dp,'hp','dr'],x:['mp','regen']},gloves:{o:['cc','cdm','inc'],x:['killM','mcr']},
    boots:{o:[dp,'hp','dr'],x:['mspd','regen']},amulet:{o:['cc','cdm',sp],x:['mcr','res']},ring:{o:['cdm','cc','cdr'],x:['mcr','res']},ring2:{o:['cdm','cc','cdr'],x:['mcr','res']},belt:{o:[dp,'hp','dr'],x:['mp','mreg']}};/* v903 옵션 구성(기본 3 + 특수 2)에 맞춤 */
-  for(const k of EQS)S.eq[k]=nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(c),lt})}
+  for(const k of EQS)S.eq[k]=rnd?nsMakeItem(kSlot(k),t,{q,bt,wc:bc(c)}):nsMakeItem(kSlot(k),t,{...L[k],q,bt,wc:bc(c),lt})}
 
 /* ---------- 진행 ---------- */
 const SRCN={update:'근접 공격','window.hurtPct':'맵 사건(불길 벽 등)','window.hurtPlayer':'기타',nsShotStep:'적 투사체',chzTickX:'맵 사건(불길 벽 등)','window.':'맵 사건(불길 벽 등)',telegraph:'장판',end:'보스 기술(폭발 등)',evTick:'맵 사건(함정 등)'};
