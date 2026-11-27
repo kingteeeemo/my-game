@@ -5881,6 +5881,8 @@ const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],
   wsk_dawn:{n:'여명을 꿰뚫는 검',cls:['warrior','musa'],pr:900,file:'models/dawnpiercer.glb',node:'dawnpiercer',rel:'hand',L:1.15,pvF:-1,col:1.21,fb:1.2,cn:'전사 · 무사'},
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.725,fb:1.2,cn:'마법사'},
   /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
+  /* v1036: 궁수 「서리달의 진혼곡」 — Meshy 모델(Frostmoon Requiem, 3.5만→1.6만 삼각형·텍스처 1k). 불사조 활과 같은 축·크기(높이 1.45, 쥐는 곳 = 원점, 시위 −x)로 미리 맞춤. 짙은 파란 보석만 발광 맵 */
+  wsk_frost:{n:'서리달의 진혼곡',cls:['archer'],pr:900,file:'models/frostmoon_bow.glb',node:'frostmoon_bow',rel:'sw',col:1,fb:1.44,pvB:1.2,/* 필드·판매창 20% 더 밝게 */cn:'궁수'},
   wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,fb:1.2,bk:[.2,0,0],cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
@@ -8906,7 +8908,7 @@ let nsKind=null;
 let LKIMG={};
 /* v739: 다른 직업 무기 미리보기 — 무기만 세워 둠(가장 긴 축을 세로로, 높이 3.6). pvF:-1이면 위아래 뒤집기 */
 function wlookPv(k){const W=WLOOKS[k],m=wskS(k).src.clone(true);m.position.set(0,0,0);m.quaternion.identity();m.scale.setScalar(1);
-  m.traverse(o=>{o.layers.enable(1);if(o.isMesh){o.material=o.material.clone();o.material.color.setScalar(W.col||1.9);o.material.emissive.setHex(0xffffff);o.material.emissiveIntensity=1.6;o.material.metalness=Math.min(o.material.metalness,.6);o.frustumCulled=false}});
+  m.traverse(o=>{o.layers.enable(1);if(o.isMesh){o.material=o.material.clone();o.material.color.setScalar((W.col||1.9)*(W.pvB||1));o.material.emissive.setHex(0xffffff);o.material.emissiveIntensity=1.6*(W.pvB||1);/* v1039: pvB = 판매창 사진 밝기 */o.material.metalness=Math.min(o.material.metalness,.6);o.frustumCulled=false}});
   m.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());m.position.copy(c).negate();
   const ax=sz.x>=sz.y&&sz.x>=sz.z?new THREE.Vector3(1,0,0):sz.y>=sz.z?new THREE.Vector3(0,1,0):new THREE.Vector3(0,0,1),len=Math.max(sz.x,sz.y,sz.z)||1;
   const piv=new THREE.Group();piv.add(m);piv.quaternion.setFromUnitVectors(ax.multiplyScalar(W.pvF||1),new THREE.Vector3(0,1,0));const g=new THREE.Group();g.add(piv);g.scale.setScalar(3.6/len);g.traverse(o=>o.layers.enable(1));return g}
@@ -9600,7 +9602,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1038';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1039';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
