@@ -8464,21 +8464,21 @@ const potN=k=>NS()?(nsPotInit(),P.pch[k]):PSZ.reduce((a,z)=>a+(S.pots[k][z]||0),
 /* v43 신속 물약: 4초간 이동 속도 +60% (다시 마시면 4초로 갱신) */
 const SPD_POT={n:'신속 물약',price:12,dur:4};
 /* v987: 특수 물약 — 6종 중 3개를 장착(단축키 3·4·5). 윤회의 불씨 10개로 한 번 사면 충전식(몬스터 처치로 충전, 최대 3회) */
-const XPOT={spd:{n:'신속',c:'#4ad06a',dur:6,e:60,f:e=>`이동 속도 +${e}%`},def:{n:'철벽',c:'#8fa8d8',dur:6,e:30,f:e=>`방어력 증가 +${e}%`},eva:{n:'환영',c:'#b08cff',dur:6,e:30,f:e=>`회피력 증가 +${e}%`},es:{n:'수호',c:'#4fd6e0',dur:6,e:30,f:e=>`에너지 쉴드 가득 채움 + 최대치 +${e}%`},dmg:{n:'격노',c:'#ff7a4a',dur:6,e:40,f:e=>`피해 증가 +${e}%`},crit:{n:'집중',c:'#ffd24a',dur:6,e:10,f:e=>`치명타 확률 +${e}%p`}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=1/* v1076: 특수 물약 최대 충전 1회 */,XP_CD=1,XP_REROLL=3;
+const XPOT={spd:{n:'신속',c:'#4ad06a',dur:6,e:60,f:e=>`이동 속도 +${e}%`},def:{n:'철벽',c:'#8fa8d8',dur:6,e:30,f:e=>`방어력 증가 +${e}%`},eva:{n:'환영',c:'#b08cff',dur:6,e:30,f:e=>`회피력 증가 +${e}%`},es:{n:'수호',c:'#4fd6e0',dur:6,e:30,f:e=>`에너지 쉴드 가득 채움 + 최대치 +${e}%`},dmg:{n:'격노',c:'#ff7a4a',dur:6,e:40,f:e=>`피해 증가 +${e}%`},crit:{n:'집중',c:'#ffd24a',dur:6,e:10,f:e=>`치명타 확률 +${e}%p`}},XP_IDS=['spd','def','eva','es','dmg','crit'],XP_PRICE=10,XP_MAX=3,XP_CD=1,XP_REROLL=3;
 /* v988: 특수 물약 옵션 한 줄 — 지속↑·효과↓ / 지속↓·효과↑ / 최대 충전 +2 / 처치 충전량 +50%. 수호는 지속·효과 교환 옵션 제외 */
 const XPOPT={long:{n:'지속시간 +50% · 효과 −27%',d:1.5,e:.73},short:{n:'지속시간 −25% · 효과 +47%',d:.75,e:1.47},max:{n:'최대 충전 +2회'},kill:{n:'처치 시 충전량 +50%'},none:{n:'옵션 없음'}};
 /* v1042: 특수 물약 아이콘 — 공통 유리병에 물약 색 액체 + 효과별 문양(신속 화살표·철벽 방패·환영 물결·수호 육각·격노 불꽃·집중 별) */
 const XPG={spd:'<path d="M8.2 13.2l3 2.6-3 2.6M12.4 13.2l3 2.6-3 2.6" />',def:'<path d="M12 12.6l3.6 1.3v2.6c0 1.7-1.6 2.7-3.6 3.5-2-.8-3.6-1.8-3.6-3.5v-2.6z" />',eva:'<path d="M7.8 14.2q2.1-2 4.2 0t4.2 0M7.8 17.6q2.1-2 4.2 0t4.2 0" />',es:'<path d="M12 12.4l3.4 2v3.9l-3.4 2-3.4-2v-3.9z" />',dmg:'<path d="M12 12.2c.4 2-2.8 2.9-2.8 5.4a2.8 2.8 0 0 0 5.6 0c0-1.3-.7-1.9-1.3-2.6-.1.8-.5 1.2-.9 1.3.5-1.7.1-3.2-.6-4.1z" />',crit:'<path d="M12 12.2l1.5 3.2 3.4.3-2.6 2.2.8 3.4L12 19.6l-3.1 1.7.8-3.4-2.6-2.2 3.4-.3z" />'};
 const xpIco=(id,z)=>{const c=XPOT[id].c;return `<svg class="xpi" viewBox="0 0 24 24" style="--pc:${c};width:${z||56}px;height:${z||56}px" aria-hidden="true"><path d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z" fill="${c}" fill-opacity=".34"/><path d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z" fill="none" stroke="#e8e2d4" stroke-opacity=".8" stroke-width=".9" stroke-linejoin="round"/><rect x="9.4" y="1.6" width="5.2" height="3.2" rx="1" fill="#8a6a46" stroke="#e8e2d4" stroke-opacity=".5" stroke-width=".5"/><g fill="${c}" fill-opacity=".5" stroke="${c}" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round">${XPG[id].replace(/ \/>/g,'/>')}</g><ellipse cx="8.8" cy="13.2" rx=".9" ry="1.8" fill="#fff" fill-opacity=".35"/></svg>`};
-const xpPool=id=>id==='es'?['kill','none']:['long','short','kill','none'];/* v1076: 「최대 충전」 옵션 삭제 */
+const xpPool=id=>id==='es'?['max','kill','none']:['long','short','max','kill','none'];
 /* v1041: 옵션 수치는 구매·옵션 변환 때 범위 안에서 정수로 한 번 굴려 저장 — 지속 증가(지속 +45~55% · 효과 −25~−30%) / 효과 증가(지속 −22~−28% · 효과 +43~+53%) / 최대 충전 +1~3회 / 처치 충전량 +20~50% */
 const xpRI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 function xpRoll(id,k){const x=xpS();x.ov=x.ov||{};x.ov[id]=k==='long'?{d:xpRI(45,55),e:-xpRI(25,30)}:k==='short'?{d:-xpRI(22,28),e:xpRI(43,53)}:k==='max'?{m:xpRI(1,3)}:k==='kill'?{k:xpRI(20,50)}:{}}
 function xpOv(id){const x=xpS(),k=xpOpt(id);x.ov=x.ov||{};if(!x.ov[id])xpRoll(id,k);return x.ov[id]}
 function xpOptN(id){const k=xpOpt(id),v=xpOv(id),sg=n=>(n>0?'+':'−')+Math.abs(n)+'%';return k==='long'||k==='short'?`지속시간 ${sg(v.d)} · 효과 ${sg(v.e)}`:k==='max'?`최대 충전 +${v.m}회`:k==='kill'?`처치 시 충전량 +${v.k}%`:XPOPT.none.n}
-function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(x.opt[id]==='max'){x.opt[id]='none';if(x.ov)delete x.ov[id]}/* v1076: 예전 「최대 충전」 옵션은 옵션 없음으로 */if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
+function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
 const xpM=id=>{if(!xpS().own[id])return {d:1,e:1};const k=xpOpt(id);if(k!=='long'&&k!=='short')return {d:1,e:1};const v=xpOv(id);return {d:1+v.d/100,e:1+v.e/100}};
-const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX,xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1+xpOv(id).k/100:1;
+const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?xpOv(id).m:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1+xpOv(id).k/100:1;
 /* v995: 특수 물약 저장소는 S.xpt — 예전엔 S.xp(경험치 숫자)와 이름이 겹쳐 own이 undefined로 터졌음 */
 const xpS=()=>{if(!S.xpt||typeof S.xpt!=='object')S.xpt={own:{},eq:[null,null,null]};S.xpt.own=S.xpt.own||{};if(!Array.isArray(S.xpt.eq))S.xpt.eq=[null,null,null];return S.xpt};
 const xpOn=id=>!!(P&&P.xb&&P.xb[id]>0)||(uqOn('elixir')&&xpS().own[id]&&xpS().eq.includes(id));/* v992: 끝없는 연금술사의 피 — 장착한 특수 물약 효과 상시 */
@@ -9999,7 +9999,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1077';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1076';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
