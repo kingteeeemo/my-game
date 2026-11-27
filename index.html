@@ -607,8 +607,8 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 @media (min-width:1000px) and (min-height:600px){#evHud{top:calc(env(safe-area-inset-top,0px) + 170px);padding:14px 30px;border-radius:16px;font-size:26px}#evHud b{margin-right:16px}}/* v785: PC — 장 사건 안내 창을 크게, 글자 2배 */
 #lvUp{position:fixed;left:0;top:0;z-index:7;pointer-events:none;text-align:center;transform:translate(-50%,-100%);opacity:0;white-space:nowrap}#lvUp b{display:inline;font:800 italic 14px/1 Archivo,sans-serif;font-stretch:87%;letter-spacing:.08em;background:linear-gradient(#fff6d8,#ffd36a 55%,#e08a20);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 5px rgba(255,190,80,.85)) drop-shadow(0 1px 1px rgba(0,0,0,.8))}#lvUp i{display:inline;margin-left:7px;font:700 normal 14px/1 var(--ko);color:#ffe9b8;text-shadow:0 0 8px rgba(255,180,60,.9),0 1px 2px #000}/* v785: 레벨업 문구 */
 /* v718: 장 완료 — 화면 가운데를 가로지르는 띠(배너형). 이야기와 버튼은 아래쪽 */
-#clear:has(.cban){background:rgba(6,6,9,.74)}
-#clearSheet:has(.cban){background:none;border:0;box-shadow:none;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border-radius:0;zoom:1;animation:none;overflow:visible;display:block}
+#clear:has(.cban){background:rgba(6,6,9,.74)}#clear:has(.rwc){background:radial-gradient(ellipse at 50% 28%,#1d140f 0,#09080a 70%)}
+#clearSheet:has(.cban),#clearSheet:has(.rwc){background:none;border:0;box-shadow:none;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border-radius:0;zoom:1;animation:none;overflow:visible;display:block}
 .cban{position:relative;width:100%;height:100%;text-align:center}
 .cb-band{position:absolute;left:0;right:0;top:36%;transform:translateY(-50%);padding:32px 16px 28px;background:linear-gradient(90deg,transparent,rgba(10,10,13,.94) 16%,rgba(10,10,13,.94) 84%,transparent);animation:cbIn .7s cubic-bezier(.2,.8,.2,1) both}
 .cb-band:before,.cb-band:after{content:"";position:absolute;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(232,220,196,.6),transparent)}
@@ -621,6 +621,22 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .cb-low .nx{font-size:13px;color:#a89c8c;margin:10px 0 18px}
 #clear .cb-low button{width:100%;height:52px;font-size:16px;font-weight:800}
 @media (orientation:landscape){#clear .cb-low button{display:block;width:max(220px,20vw);max-width:100%;margin:0 auto}}/* v785: 가로 화면(PC·폰 가로)은 버튼 폭을 화면의 20% */
+/* v1034: 보스 보상 창(rwc) */
+.rwc{height:100%;display:flex;flex-direction:column;align-items:center;padding:max(26px,env(safe-area-inset-top)) 18px max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));box-sizing:border-box;text-align:center;max-width:560px;margin:0 auto;animation:cbF .5s both}
+.rc-mid{flex:1;min-height:0;width:100%;padding:6px 8px 0;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center}
+.rwc .tt{font:700 12px var(--ko);letter-spacing:.16em;color:#a89c8c}.rwc h1{margin:8px 0 0;font:700 min(30px,7.6vw)/1.25 "Noto Serif KR","Noto Serif CJK KR",serif;letter-spacing:.06em;color:#e8dcc4}
+.rc-hex{position:relative;flex:none;width:128px;height:128px;margin:16px 0 6px;display:flex;align-items:center;justify-content:center}.rc-hex svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 14px var(--gc))}.rc-hex b{position:relative;font:900 54px var(--en);font-stretch:87%;color:var(--gc);text-shadow:0 0 20px var(--gc)}
+.rc-time{font:800 20px var(--en);font-stretch:87%;color:#e8dcc4}.rc-time em{font:700 11px var(--en);color:#7fe07a;margin-left:6px;font-style:normal;letter-spacing:.06em}.rc-sub{color:#a89c8c;font-size:11.5px;margin-top:4px;line-height:1.5}
+.rwc .lab{align-self:flex-start;font:700 11px var(--ko);letter-spacing:.14em;color:#8e8478;margin:16px 0 8px}
+.rc-grid{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 12px}
+.rct{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;color:#cfc5b4;font:500 10.5px/1.25 var(--ko)}
+.rct .rci{position:relative;width:100%;aspect-ratio:1;border-radius:12px;border:2px solid var(--c);background:#16161d;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 26%,transparent)}.rct .ci{width:30px;height:30px}
+.rct .rci b{position:absolute;right:4px;bottom:2px;font:800 12px var(--en);font-stretch:87%;color:#fff;text-shadow:0 1px 3px #000}.rct .rci i{position:absolute;left:-4px;top:-7px;background:var(--c);color:#111;font:800 9px var(--en);padding:1px 5px;border-radius:6px;font-style:normal}
+.rct.on .rci{box-shadow:0 0 0 2px rgba(255,255,255,.35),0 0 18px var(--c)}
+.rcinfo{width:100%;margin-top:14px;padding:11px 13px;border-radius:12px;background:#16161d;border:1px solid #2c2c36;font-size:12.5px;line-height:1.6;color:#cfc5b4;text-align:left}
+.rc-bot{width:100%;flex:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}#clear .rc-bot button{width:100%;margin:0;font-weight:800}#clear .rc-bot .primary{min-height:48px}
+@media (orientation:landscape) and (max-height:520px){.rc-hex{width:84px;height:84px;margin:8px 0 2px}.rc-hex b{font-size:36px}.rwc h1{font-size:22px}.rc-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media (orientation:landscape){.rc-bot button{max-width:420px;align-self:center}}
 .cban:before{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(transparent,rgba(6,6,9,.9) 38%,rgba(6,6,9,.96));animation:cbF .6s .6s both}
 @keyframes cbIn{from{opacity:0;transform:translateY(-50%) scaleY(.4)}to{opacity:1;transform:translateY(-50%) scaleY(1)}}
 @keyframes cbT{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.06em}}
@@ -7132,13 +7148,26 @@ function showDuelBanner(gold){collectAll();duelGoldV=gold;const b=duelBonus||{},
   $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${U?'우버 · ':''}위험도 ${S.duel?S.duel.tier:10}</div><h1>${duelDef().n} 처치</h1><div class="cb-s">${b.g?`처치 시간 ${b.sec.toFixed(1)}초 · <b style="color:${gc}">${b.g}등급</b>${b.nr?' · 최고 기록!':''}`:'격파 완료'}</div></div>
     <div class="cb-low"><p>기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p><button class="primary" id="duelRw">보상 확인</button></div></div>`;
   $('clear').hidden=false;releaseAll()}
+/* v1034: 보스 보상 창 — 등급 육각형 + 보상 칸(인벤토리 칸 모양). 칸을 누르면 아래에 설명 */
+let rcInfos=[];
+const rwInfo=r=>{if(r.t==='seal')return{ic:ci('s'),c:'#7ad8ff',nm:'성역의 인장',n:r.n,d:'조율사 카엘에게서 장비 옵션 한 줄을 지키는 데 씁니다'};
+  if(r.t==='cata')return{ic:'✦',c:'#ffb070',nm:'재점화의 촉매',n:r.n,d:'대장장이 강화 창에서 켜면 골드 1회분으로 강화를 두 번 굴립니다'};
+  if(r.t==='cos'){const [c,n]=cosNm(r.k);return{ic:'❖',c:'#ff9ae8',nm:n,n:1,nw:1,d:`${c} · 재단사의 외형 장비에서 착용`}}
+  if(r.t==='rr')return{ic:ci('r'),c:'#ff9a4a',nm:'윤회의 불씨',n:r.n,d:'조율사 카엘에게서 장비 옵션 수치를 다시 굴리는 데 씁니다'};
+  if(r.t==='scr'){const c=r.sc.v>=10?'#c890ff':'#5ae0d0';return{ic:'★',c,nm:`${scrName(r.sc)} (${r.sc.v}%)`,n:1,d:`아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용`}}
+  return{ic:'✦',c:'#ffd24a',nm:'확정 강화 주문서',n:r.n||1,d:'대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다'}};
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]},bb=S.duel&&S.duel.b==='maw'?'maw':'knight',m=S.duel&&S.duel.m||'n',R=BRW[b.bk]||{},rf=BREF[b.bk]||60,c=bossCost(bb,m),hv=fragHave(bb);
   const gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4',pv=R.rr?`${ci('r')} 불씨 ${bwTx(R.rr)} · ${ci('s')} 인장 ${bwTx(R.sl)}`:`✦ 촉매 ${R.ct?bwTx(R.ct):''}`;
-  $('clearSheet').innerHTML=`<div><div class="chap">Duel Clear · ${S.duel&&S.duel.uber?'우버':'일반'} · 위험도 ${S.duel?S.duel.tier:10}</div><h2>${duelDef().n} 격파!</h2></div>
-  ${b.g?`<div class="bgrade" style="--gc:${gc}"><b>${b.g}</b><div><span>처치 시간 <em>${b.sec.toFixed(1)}초</em>${b.nr?' <i>최고 기록!</i>':` · 최고 ${(S.bossRec||{})[b.bk]}초`}</span><small>S ${(rf*.4).toFixed(0)}초 이하 · A ${(rf*.7).toFixed(0)}초 이하 · 보상 굴림 S 3회 · A 2회 · B 1회</small></div></div>`:''}
-  <p class="hint">기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p>
-  ${b.rolled?(b.res.length?`<div class="dlist">${b.res.map(r=>`<div>${bonusLine(r)}</div>`).join('')}</div>`:''):`<button class="primary bonusbtn" id="bonusGo">보상 받기 · ${b.g||'B'}등급 ${b.rolls||1}회<small>회당 ${pv} · 외형 낮은 확률</small></button>`}
-  <button class="primary" id="duelAgain" ${!S.test&&hv<c?'disabled':''}>다시 도전${c?` · ${fragNm(bb)} ${c}개 (보유 ${hv})`:''}</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
+  rcInfos=[{ic:ci('g'),c:'#f0d040',nm:'골드',n:fmtG4(gold),d:'기본 보상 — 처치하면 항상 받습니다'}].concat(b.rolled?b.res.map(rwInfo):[]);
+  const tiles=rcInfos.map((x,k)=>`<button class="rct${k===(rcInfos.length>1?1:0)?' on':''}" data-rc="${k}" style="--c:${x.c}"><span class="rci">${x.ic}<b>${x.n}</b>${x.nw?'<i>NEW</i>':''}</span><small>${x.nm}</small></button>`).join('')+(b.rolled?'':`<div class="rct" style="--c:#4a4a58"><span class="rci" style="color:#6a6a78">?</span><small>보상 굴림 전</small></div>`);
+  const f=rcInfos[rcInfos.length>1?1:0];
+  $('clearSheet').innerHTML=`<div class="rwc"><div class="rc-mid"><div class="tt">${S.duel&&S.duel.uber?'우버 · ':''}위험도 ${S.duel?S.duel.tier:10}</div><h1>${duelDef().n} 처치</h1>
+  ${b.g?`<div class="rc-hex" style="--gc:${gc}"><svg viewBox="0 0 64 64"><path d="M32 3L57.1 17.5V46.5L32 61L6.9 46.5V17.5Z" fill="#14161d" stroke="${gc}" stroke-width="2"/></svg><b>${b.g}</b></div>
+  <div class="rc-time">${b.sec.toFixed(1)}<small style="font-size:12px"> 초</small>${b.nr?'<em>NEW RECORD</em>':''}</div><div class="rc-sub">${b.nr?'':`최고 ${(S.bossRec||{})[b.bk]}초 · `}S ${(rf*.4).toFixed(0)}초 이하 · A ${(rf*.7).toFixed(0)}초 이하 · 보상 굴림 S 3회 · A 2회 · B 1회</div>`:''}
+  <div class="lab">획득 보상</div><div class="rc-grid">${tiles}</div>
+  <div class="rcinfo" id="rcInfo"><b style="color:${f.c}">${f.nm}</b><br>${f.d}</div></div>
+  <div class="rc-bot">${b.rolled?'':`<button class="primary bonusbtn" id="bonusGo">보상 받기 · ${b.g||'B'}등급 ${b.rolls||1}회<small>회당 ${pv} · 외형 낮은 확률</small></button>`}
+  <button class="primary" id="duelAgain" ${!S.test&&hv<c?'disabled':''}>다시 도전${c?` · ${fragNm(bb)} ${c}개 (보유 ${hv})`:''}</button><button class="ghost" id="duelBack">엔드게임으로 돌아가기</button></div></div>`;$('clear').hidden=false;releaseAll()}
 function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('clearSheet').innerHTML=`<div><h2>결투에서 패배했습니다</h2></div>
   <p class="hint">${duelDef().n}의 체력이 모두 회복되었습니다.</p>
   <p class="hint">${S.duel&&S.duel.b==='maw'?'브레스는 구르기로 못 피하니 회전 방향 앞으로 달리세요. 흡입은 멀리, 파동은 초록 원 안으로. 잠수 뒤 6칸 공격은 마지막 칸에서 시작해 먼저 터진 칸으로 옮기세요.':'바닥의 빨간 경고 장판이 다 차기 전에 밖으로 피하세요. 점프 내려찍기는 원 밖으로, 검기는 부채꼴 옆으로 비켜서면 됩니다.'}</p>
@@ -9570,7 +9599,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1036';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1037';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10195,6 +10224,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='duelAgain'){const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b,was=!!(S.duel&&S.duel.fail);if(duelBonus&&!duelBonus.rolled)rollBonus();/* v886: 보상을 안 받고 넘어가도 자동 지급 */if(!was&&!bossPay(b==='maw'?'maw':'knight',m))return;/* v886: 이긴 뒤 다시 도전은 조각 5개 · 진 뒤엔 무료 */$('clear').hidden=true;S.duel={tier:duelCfg(m,b).tier,uber:m==='u',m,b};bossFailed.knight=bossFailed.maw=0;if(was)bossFailed[b==='maw'?'maw':'knight']=1;collectAll();resetWorld();return}
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){if(duelBonus&&!duelBonus.rolled&&S.duel&&!S.duel.fail)rollBonus();$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11*GOLD_K);bonusCine(()=>showDuelClear(g));return}
+  {const t=e.target.closest('.rct[data-rc]');if(t){const x=rcInfos[+t.dataset.rc];if(x){document.querySelectorAll('.rct.on').forEach(y=>y.classList.remove('on'));t.classList.add('on');$('rcInfo').innerHTML=`<b style="color:${x.c}">${x.nm}</b><br>${x.d}`}return}}
   if(e.target.closest('#duelRw')){showDuelClear(duelGoldV);return}
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
