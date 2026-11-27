@@ -77,6 +77,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivc.sel .ivlab{display:none}
 #otRing{position:fixed;z-index:9998;border:2.5px solid #ffc45a;border-radius:12px;box-shadow:0 0 10px rgba(255,196,90,.7);pointer-events:none;animation:otp 1.2s ease-in-out infinite}@keyframes otp{50%{box-shadow:0 0 16px rgba(255,196,90,.95);border-color:#ffe2a0}}
 #otCard{position:fixed;z-index:9999;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 24px));background:rgba(22,18,12,.97);border:1.5px solid #ffc45a;border-radius:14px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6);pointer-events:auto}#otCard.top{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto}
+#otCard .otok{text-decoration:none;text-align:center;margin-top:8px;width:100%;min-height:36px;border-radius:10px;border:0;background:#e8dcc4;color:#1a1208;font:800 13px var(--ko);cursor:pointer}
 #otCard>*{display:block;float:none;text-align:left}#otCard .chap{font:800 10.5px var(--ko);color:#ffc45a;letter-spacing:.04em}#otCard h3{margin:3px 0 4px;font:800 16px var(--ko);color:#f6ead0}#otCard p{margin:0;font-size:12.5px;line-height:1.5;color:#d8ccb4}#otCard p b{color:#ffd27a}#otCard button{margin-top:8px;background:none;border:0;color:#8a8070;font:600 11px var(--ko);padding:0;text-decoration:underline;cursor:pointer}
 .iv2pop.cmp2{width:min(420px,100%);gap:8px}.iv2pop.cmp2 .cmphd{display:flex;justify-content:flex-end;flex:none}.iv2pop.cmp2 .pclose{position:static;width:36px;height:36px;border-radius:10px;border:1px solid #3a3844;background:#1c1c24;color:#e8e0cc;display:flex;align-items:center;justify-content:center;font-size:0}
 .iv2pop.cmp2 .ivcmp.two{display:flex;flex-direction:column;gap:10px}.iv2pop.cmp2 .cmpc{position:relative;min-width:0;flex:1;display:flex}.iv2pop.cmp2 .cmpc>.ivc{flex:1;min-width:0}.iv2pop.cmp2 .pico{top:12px;right:12px}
@@ -4988,7 +4989,7 @@ function knTick(dt,t){const LY=KNA.lavaY;KNA.lt.offset.set(t*.004,t*.0025);KNA.g
 function setMap(fresh){try{if(P){P.bloodS=null;P.bloodK=0}}catch(_){}/* v971: 맵 이동(마을·보스방 등) 시 혈조의 인장 스택 초기화 */const want=inTown?'town':inArena()?'arena':S.ch<NCH?'story':rtOn()?'route':'field';if(fresh||want!==mapKind||((want==='story'||want==='field'||want==='route')&&propTheme!==curTheme().key))want==='town'?buildTown():want==='arena'?buildArena():want==='story'?buildStory():want==='route'?buildRoute():buildField()}
 /* 마을 (v29): 집 · 화로 · 우물 · 상인 · 대장장이. 몬스터 없음, 이동 스킬만 사용 가능 */
 const roofMat=SM({color:0x4a2a22,roughness:.85}),plankMat=SM({color:0x5a4434,roughness:.9}),clothMat=SM({color:0x7a2a2a,roughness:.95,side:THREE.DoubleSide});
-const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a},{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:-1.5,ref:1},{id:'gate',x:2,z:19.4,vil:1},{id:'mor',x:-2.9,z:1.6,vil:1,c:0x2e2838,hat:0x1c1824},{id:'xchg',x:5.4,z:6.6,ref:1,c:0x4a3a22,hat:0xb08a3a}];/* v879: 환전상 벨로 — 쉼터 광장 남동쪽, 화폐 거래소 *//* v806: 대마법사 모르딘 — 세렌 마을 우물가, 이야기만 */
+const NPCS=[{id:'shop',x:-6,z:-3,c:0x6a4a8a,hat:0x3a2a5a,ref:1}/* v1099: 스토리(세렌 마을)에는 포션 상인 없음 — 특수 물약은 쉼터 약초꾼 미라 */,{id:'gear',x:0,z:-5.6,c:0x2a4a6a,hat:0x8a6a2a},{id:'smith',x:6.5,z:-3,c:0x7a4a2a,hat:0x2a2420},{id:'heir',x:-6.8,z:3.4,c:0x2a6a6a,hat:0x123a3a},{id:'stash',x:6.8,z:3.4,c:0x6a4a2a,hat:0x2a2420},{id:'hearth',x:0,z:-1.5,ref:1},{id:'gate',x:2,z:19.4,vil:1},{id:'mor',x:-2.9,z:1.6,vil:1,c:0x2e2838,hat:0x1c1824},{id:'xchg',x:5.4,z:6.6,ref:1,c:0x4a3a22,hat:0xb08a3a}];/* v879: 환전상 벨로 — 쉼터 광장 남동쪽, 화폐 거래소 *//* v806: 대마법사 모르딘 — 세렌 마을 우물가, 이야기만 */
 const npcOn=n=>n.ref?refOn():n.vil?!refOn():true;/* v511: 같은 자리에 — 테스트 캐릭터는 창고 건물, 일반 모드는 재단사 세라(외형장비 판매) */
 const NSNPC={gear:['조율사 카엘','옵션 재조정'],heir:['재단사 세라','외형장비 판매'],stash:['창고','장비 보관'],xchg:['환전상 벨로','화폐 거래소']},NSACT={xchg:'화폐 교환',gear:'옵션 재조정',heir:'외형 장비',stash:'창고 열기',hearth:'금빛 화로 · 사냥터',gate:'사냥터로 나가기'};
 const NPCN={shop:['포션 상인','물약'],gear:['무기상','랜덤 장비'],smith:['대장장이','장비 강화'],heir:['전승사','특수 능력치 전승'],stash:['창고','장비 보관'],hearth:['쉼터지기 하란','금빛 화로 · 사냥터'],gate:['문지기 오스릭','사냥터 입구'],mor:['대마법사 모르딘','이야기'],xchg:['환전상 벨로','화폐 거래소']};
@@ -5345,11 +5346,11 @@ function mapLoad(title,sub,fn,after){
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 const vilLock=()=>S&&S.ch===0&&!S.vil&&!S.test&&!S.skipStart;/* v710: 세렌 마을은 1장을 마치고 이야기로 도착한 뒤부터 */
 function goTown(){if(inTown||!S.cls)return;if(TALK){afterTalk(goTown);return}/* v1086 */if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
+  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls||vilLock())return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
   const keep=S.fld;if(RZ)riftClear();collectAll();S.duel=null;bossAuto(false);inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
-  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
+  townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */S.fld=keep;fldHold=false;save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())});return true}
 /* v452: 사냥터·균열·보스전 스냅샷 — 마을에 다녀와도(또는 접속 직후 마을에서 시작해도) 이전 전투를 이어감 */
 let fldHold=false;
 const fldKind=e=>e.duel?'d':e.final?'f':e.chBoss?'c':e.gate?'g':null;
@@ -8540,12 +8541,12 @@ const xpE=id=>Math.round(XPOT[id].e*xpM(id).e*(uqOn('elixir')?1.25:1)),xpD=id=>M
 const xpS=()=>{if(!S.xpt||typeof S.xpt!=='object')S.xpt={own:{},eq:[null,null,null]};S.xpt.own=S.xpt.own||{};if(!Array.isArray(S.xpt.eq))S.xpt.eq=[null,null,null];return S.xpt};
 const xpOn=id=>!!(P&&P.xb&&P.xb[id]>0)||(uqOn('elixir')&&xpS().own[id]&&xpS().eq.includes(id));/* v992: 끝없는 연금술사의 피 — 장착한 특수 물약 효과 상시 */
 function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=xpMax(id);P.xch[id]=Math.min(xpMax(id),P.xch[id])}}
-function xpUse(i){if(!NS()||knAppr)return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','포션 상인에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
+function xpUse(i){if(!NS()||knAppr||!xpUiOn())return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','약초꾼 미라에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
   if(uqOn('elixir')){if(P.mpWarn<=0){toast('상시 적용 중','끝없는 연금술사의 피 — 물약을 쓸 필요가 없습니다');P.mpWarn=1.5}return}
   xpInit();/* v1080: 특수 물약은 공용 쿨타임 없음 — 종류별로 연달아 사용 */const X=XPOT[id];if(!(P.xch[id]>=1)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
   const D=xpD(id);P.xch[id]--;P.xb[id]=D;P.xbm=P.xbm||{};P.xbm[id]=D;if(id==='spd')P.hasteT=D;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
   ringFx(P.pos,1.8,parseInt(X.c.slice(1),16),.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xffffff,c1:parseInt(X.c.slice(1),16),drag:2,tex:1});feed(`${X.n} 물약 · ${D}초간 ${X.f(xpE(id))}`,X.c)}
-function useSpd(){if(!S.spdPot){if(P.mpWarn<=0){toast('신속 물약이 없습니다','포션 상인에게서 살 수 있어요');P.mpWarn=1.5}return}
+function useSpd(){if(!S.spdPot){if(P.mpWarn<=0){toast('신속 물약이 없습니다','약초꾼 미라에게서 살 수 있어요');P.mpWarn=1.5}return}
   S.spdPot--;P.hasteT=SPD_POT.dur;ringFx(P.pos,1.8,0x5ad06a,.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xd0ffd8,c1:0x2a9a3a,drag:2,tex:1});feed('신속 물약 · 4초간 이동 속도 +60%','#8ae08a');save()}
 function usePot(k,sz){if(knAppr)return;if(NS())return nsPotUse(k);
   if(P.cd.pot>0)return;
@@ -9160,7 +9161,9 @@ const nsPotAdd=(n,noXp)=>{nsPotInit();for(const k of ['hp','mp'])P.pch[k]=Math.m
 function nsPotKill(e){if(e.duel||e.boss)return;nsPotInit();const mp=mutA('pot')?.5:1;P.pkp+=(e.rank>=2?10:e.rank===1?3:1)*mp;while(P.pkp>=NPOT_KILL){P.pkp-=NPOT_KILL;nsPotAdd(1,1)}P.xkp=(P.xkp||0)+mp;while(P.xkp>=XP_KILL){P.xkp-=XP_KILL;xpInit();xpAdd(1)}}
 function nsPotBoss(e,amt){if(e.dummy)return;const st=e.duel||e.boss?.2:.5;/* v1073: 결투 보스·엔드게임 보스(관문·메아리)는 체력 20%마다, 유니크는 50%마다 물약 1회 충전 */e.potAcc=(e.potAcc||0)+Math.min(amt,Math.max(0,e.hp+amt))/e.mhp;while(e.potAcc>=st){e.potAcc-=st;nsPotAdd(st<.5?3:1)}}/* v1074: 보스는 20%마다 3회 */
 /* v494: 충전식 물약 아이콘 — 최대 충전 횟수만큼 테두리를 나눠 남은 횟수만큼 밝게 */
-function xpHud(){if(!NS())return;const x=xpS();xpInit();for(let i=0;i<3;i++){const id=x.eq[i],B=$('bX'+i);if(!B)continue;const on=!!(id&&x.own[id]);B.classList.toggle('emp',!on);if(!on){B.classList.remove('nsp');{const o=B.querySelector('.pseg');if(o)o.remove();delete B.dataset.seg}delete B.dataset.xid;B.style.removeProperty('--xc');B.style.removeProperty('--liq');B.style.removeProperty('--glow');continue}
+/* v1099: 특수 물약 칸은 쉼터(엔드게임)에서 약초꾼 미라의 물약 튜토리얼을 시작하면 열림 — 스토리에서는 안 보임. 이미 특수 물약을 가진 캐릭터·테스트는 바로 보임 */
+const xpUiOn=()=>!!(S&&NS()&&S.ch>=NCH&&(S.test||S.demo||(S.ptut&&(S.ptut.st||S.ptut.done))||Object.keys(xpS().own).length>0));
+function xpHud(){if(!NS())return;const x=xpS();xpInit();const sh=xpUiOn();for(let i=0;i<3;i++){const id=x.eq[i],B=$('bX'+i);if(!B)continue;if(B.hidden===sh)B.hidden=!sh;B.style.display=sh?'':'none';if(!sh)continue;const on=!!(id&&x.own[id]);B.classList.toggle('emp',!on);if(!on){B.classList.remove('nsp');{const o=B.querySelector('.pseg');if(o)o.remove();delete B.dataset.seg}delete B.dataset.xid;B.style.removeProperty('--xc');B.style.removeProperty('--liq');B.style.removeProperty('--glow');continue}
   const X=XPOT[id];if(B.dataset.xid!==id){B.dataset.xid=id;B.style.setProperty('--xc',X.c);B.style.setProperty('--liq',X.c);B.style.setProperty('--glow',X.c+'8c');B.setAttribute('aria-label',X.n+' 물약')}
   const c=Math.floor(P.xch[id]||0);$('nX'+i).textContent=uqOn('elixir')?'∞':c;const al=uqOn('elixir');{/* v1078: 충전 횟수를 생명력·마나 물약처럼 고리 칸으로 */const m=xpMax(id),cc=al?m:Math.min(c,m),key=id+':'+cc+'/'+m;B.classList.toggle('nsp',!al);if(B.dataset.seg!==key){B.dataset.seg=key;const o=B.querySelector('.pseg');if(o)o.remove();B.insertAdjacentHTML('beforeend',potSeg(cc,m))}const l=B.querySelector('.liq');if(l)l.style.clipPath=`inset(${(1-cc/m)*100}% 0 0 0)`}B.classList.toggle('empty',!c&&!al);B.classList.toggle('alw',al);B.style.setProperty('--p',al?1:P.xb[id]>0?1-P.xb[id]/((P.xbm&&P.xbm[id])||X.dur):0)}}
 const potFlask=f=>`<svg class="flask" viewBox="0 0 24 24" aria-hidden="true"><path class="liq" style="clip-path:inset(${(1-f)*100}% 0 0 0)" d="M5.91 14.4A6.2 6.2 0 1 0 18.09 14.4Z"/><path class="glass" d="M10.2 4.6h3.6v4.3a6.9 6.9 0 1 1-3.6 0z"/><rect class="cork" x="9.4" y="1.6" width="5.2" height="3.2" rx="1"/><ellipse class="shine" cx="9.2" cy="12.8" rx="1" ry="1.9"/></svg>`;
@@ -9372,7 +9375,7 @@ function openDex(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT='d
 function openLooks(){closeAllSheets();nsSheet();rrOpen=true;nsKind='look';LKCAT=null;renderLooks();$('nsSheet').hidden=false;releaseAll();guide('look')}
 /* v879: 화폐 거래소(환전상 벨로) — 잿불 정수·광휘의 파편·윤회의 불씨·성역의 인장을 드롭 기대값 비율로 서로 교환, 수수료 없음.
    기준 위험도 = 최고 위험도. 정수 1개가 떨어질 때 파편 1개 · 불씨 0.05×rrD · 인장 0.01×sealD 가 함께 나오므로, 재화 1개의 가치(정수 단위) = 1 / 그 비율 */
-const XC_FEE=0,XCK=[['lumi','광휘의 파편','l'],['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s']];
+const XC_FEE=0,XCK=[/* v1099: 광휘의 파편은 거래 불가 재화 — 환전소에서 뺌 */['ess','잿불 정수','e'],['rr','윤회의 불씨','r'],['seal','성역의 인장','s']];
 let xcA='ess',xcB='rr',xcMsg='';
 const xcD=()=>Math.min(D_MAX,Math.max(1,S.maxTier||S.tier||1)),
   xcV=(k,d=xcD())=>k==='rr'?1/(.05*(1+(d-1)/19)):k==='seal'?1/(.01*(.1+.9*(d-1)/19)):1,
@@ -9391,7 +9394,7 @@ function renderXchg(){const d=xcD(),r=xcR(xcA,xcB),f=v=>v>=100?Math.round(v).toL
   <div class="xcrate">${r>=1?`${xcIc(xcA)} ${xcNm(xcA)} <b>${f(r)}</b>개 → ${xcIc(xcB)} ${xcNm(xcB)} <b>1</b>개`:`${xcIc(xcA)} ${xcNm(xcA)} <b>1</b>개 → ${xcIc(xcB)} ${xcNm(xcB)} <b>${f(1/r)}</b>개`}<small>위험도 ${d} 드롭 기대값 기준 · 최고 위험도가 오를수록 불씨·인장이 싸집니다</small></div>
   <div class="xcl">${r>=1?'받을 수량':'보낼 수량'}</div><div class="xcrow xcn">`;
   for(const n of [1,10,100,'max']){const [p,q]=xcQ(n),ok=p>0&&q>0;h+=`<button class="xcgo" data-xn="${n}" ${ok?'':'disabled'}><b>${n==='max'?'최대':n+'개'}</b><span>${ok?`${xcIc(xcA)}${fmtG(p)} → ${xcIc(xcB)}${fmtG(q)}`:'부족'}</span></button>`}
-  h+=`</div>${xcMsg?`<div class="xcmsg">${xcMsg}</div>`:''}<p class="xcnote">재화는 ${fmtG(CUR_MAX)}개까지 가질 수 있어, 받는 재화가 가득 차면 그만큼만 교환됩니다.</p>`;
+  h+=`</div>${xcMsg?`<div class="xcmsg">${xcMsg}</div>`:''}<p class="xcnote">재화는 ${fmtG(CUR_MAX)}개까지 가질 수 있어, 받는 재화가 가득 차면 그만큼만 교환됩니다. 광휘의 파편은 거래할 수 없는 재화입니다.</p>`;
   $('nsBody').innerHTML=h}
 function xcClick(b){if(b.dataset.xa){xcA=b.dataset.xa;if(xcB===xcA)xcB=XCK.find(x=>x[0]!==xcA)[0];xcMsg=''}
   else if(b.dataset.xb){xcB=b.dataset.xb;xcMsg=''}
@@ -9522,23 +9525,25 @@ const OTS=[null,
   {t:'올릴 줄 고르기',d:'<b>5티어</b> 줄 하나를 누르세요. 줄은 아이템 티어(4티어)까지 올릴 수 있습니다.'},
   {t:'티어 승급',d:'<b>티어 승급</b>을 누르세요. 성역의 인장을 써서 그 줄을 한 티어 올리고, 수치도 새 티어 범위에서 다시 뽑습니다.'}];
 let otTm=0;
+const OTC={rr:{n:2,t:'바뀐 수치 확인',d:'수치가 다시 뽑혔습니다. 위쪽 줄에서 <b>달라진 수치</b>를 확인해 보세요. 확인했으면 아래 버튼을 누르세요.'},cv:{n:5,t:'바뀐 옵션 확인',d:'고른 줄의 <b>옵션 종류</b>가 바뀌었습니다. 티어는 그대로예요. 확인했으면 아래 버튼을 누르세요.'},up:{n:8,t:'올라간 티어 확인',d:'그 줄의 <b>티어가 한 단계 올랐고</b> 수치도 새 티어 범위에서 다시 뽑혔습니다. 확인했으면 아래 버튼을 누르세요.'}};
 function otStart(){clearInterval(otTm);otTm=setInterval(otTick,250);otTick()}
 function otSnap(it){return it.lines.map(l=>l.k+'|'+l.t+'|'+l.v).join(';')}
 function otTick(){const it=otItem();if(!otutOn()||!it||!(S.otut&&S.otut.st)){otHide();clearInterval(otTm);return}
   const O=S.otut;if(!rrOpen||nsKind){otHide();if(!rrOpen){clearInterval(otTm)}return}
   const sel=rrSel===it.id,need=(k,c)=>{if((S[k]||0)<c){S[k]=c;try{hudMoney()}catch(_){}renderRR()}};
   if(rrSpin)return;
+  if(O.ck){/* v1099: 바뀐 결과를 눈으로 확인한 뒤 다음 단계로 */const c=OTC[O.ck]||OTC.rr;otShow({t:c.t,d:c.d,ok:()=>{O.ck=0;save();otTick()}},'.rrlines',c.n,'조율 연습 · 확인',8);return}
   const ls=it.lines;
   if(O.st>=2&&!sel){otShow(OTS[1],`[data-pick$=",${it.id}"]`,1);return}
   if(O.st===1){if(sel){O.st=2;O.snap=otSnap(it);save()}else{otShow(OTS[1],`[data-pick$=",${it.id}"]`,1);return}}
   if(O.st===2){if(rrTab!=='rr'){otShow({t:'수치 조정',d:'위쪽 <b>수치 조정</b> 탭을 누르세요.'},'[data-rt="rr"]',2);return}need('rr',rrCostOf(it));
-    if(O.snap&&otSnap(it)!==O.snap&&ls.every((l,i)=>l.k===O.snap.split(';')[i].split('|')[0])){O.st=3;save()}else{otShow(OTS[2],'.rrgo[data-ns="rr"]',2);return}}
+    if(O.snap&&otSnap(it)!==O.snap&&ls.every((l,i)=>l.k===O.snap.split(';')[i].split('|')[0])){O.st=3;O.ck='rr';save()}else{otShow(OTS[2],'.rrgo[data-ns="rr"]',2);return}}
   if(O.st===3){if(rrTab==='cv'){O.st=4;save()}else{otShow(OTS[3],'[data-rt="cv"]',3);return}}
   if(O.st===4||O.st===5){if(rrTab!=='cv'){otShow(OTS[3],'[data-rt="cv"]',3);return}
-    if(O.st===5&&O.keys&&ls.map(l=>l.k).join()!==O.keys){O.st=6;save()}
+    if(O.st===5&&O.keys&&ls.map(l=>l.k).join()!==O.keys){O.st=6;O.ck='cv';save()}
     else{const ok=rrLine!=null&&ls[rrLine]&&!ls[rrLine].b;if(!ok){O.st=4;O.keys=ls.map(l=>l.k).join();otShow(OTS[4],'.rrlines',4);return}
       O.st=5;O.keys=O.keys||ls.map(l=>l.k).join();need('rr',convCost(ls[rrLine].t||it.tier));otShow(OTS[5],'.rrgo[data-ns="conv"]',5);return}}
-  if(O.st>=6&&O.st<=8){const tiers=ls.map(l=>l.t).join();if(O.st===8&&O.tiers&&tiers!==O.tiers){O.st=9;save()}
+  if(O.st>=6&&O.st<=8){const tiers=ls.map(l=>l.t).join();if(O.st===8&&O.tiers&&tiers!==O.tiers){O.st=9;O.ck='up';save()}
     else{if(rrTab!=='up'){O.st=6;otShow(OTS[6],'[data-rt="up"]',6);return}
       const el=ls.findIndex(l=>!l.b&&(l.t||it.tier)>it.tier),ok=rrLine!=null&&ls[rrLine]&&!ls[rrLine].b&&(ls[rrLine].t||it.tier)>it.tier;
       if(el<0){O.st=9;save()}
@@ -9547,7 +9552,7 @@ function otTick(){const it=otItem();if(!otutOn()||!it||!(S.otut&&S.otut.st)){otH
   if(O.st>=9){clearInterval(otTm);otHide();S.otut={done:1};save();setTimeout(()=>{nsClose();talk(otLines(OT_END).concat(otLines(OT_POT)),()=>{toast('조율 튜토리얼 완료','연습 반지는 가방에 그대로 있습니다 · 이제 약초꾼 미라에게 가 보세요','#7fe07a');if(!(S.ptut&&S.ptut.done)){S.ptut={st:0};save()}})},900)}}
 function otShow(st,sel,n,lab,tot,skip){let c=$('otCard'),r=$('otRing');if(!c){c=document.createElement('div');c.id='otCard';document.body.appendChild(c);r=document.createElement('div');r.id='otRing';document.body.appendChild(r)}
   const el=document.querySelector(sel),R=el&&el.offsetParent?el.getBoundingClientRect():null;
-  const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">${lab||'조율 연습'} · ${n}/${tot||8}</div><h3>${st.t}</h3><p>${st.d}</p><button id="otSkip">튜토리얼 건너뛰기</button>`;
+  const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">${lab||'조율 연습'} · ${n}/${tot||8}</div><h3>${st.t}</h3><p>${st.d}</p>${st.ok?'<button id="otOk" class="otok">확인했어요</button>':''}<button id="otSkip">튜토리얼 건너뛰기</button>`;const ob=c.querySelector('#otOk');if(ob)ob.onclick=st.ok;
     c.querySelector('#otSkip').onclick=skip||(()=>{askConfirm('튜토리얼 건너뛰기','조율 연습을 그만둡니다. 받은 장비와 재화는 그대로 가집니다.','건너뛰기',()=>{S.otut={done:1};save();clearInterval(otTm);otHide()})})}
   c.hidden=false;
   if(R){const p=6;r.hidden=false;Object.assign(r.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.width+p*2+'px',height:R.height+p*2+'px'});
@@ -9617,11 +9622,14 @@ function dtTick(){if(!dtutOn()||!S.dtut.st){otHide();clearInterval(dtTm);return}
   if(!disIn){show(8,'[data-dpin]');return}
   show(9,'[data-dup]')}
 /* 오린 머리 위 「!」 */
-let otBang=null;
+let otBang=null,otNav=null;
 function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),dt=dtutOn()&&!dtWin(),on=(otutOn()&&!(S.otut&&S.otut.st)||pm||dt)&&inTown&&mapKind==='town';
   /* v1091: 가야 할 NPC(하란→오린, 오린→미라) 머리 위에 보라 화살표 — 플레이어 발밑 보라 화살표와 같은 색·모양을 2배로 */
   if(!otBang){if(!on)return;const m=new THREE.Mesh(new THREE.ConeGeometry(.5,1.4,6),new THREE.MeshBasicMaterial({color:0x9a6ae0,depthTest:false,transparent:true,opacity:.96}));m.rotation.x=Math.PI;m.renderOrder=999;otBang=new THREE.Group();otBang.add(m);otBang.userData.m=m;scene.add(otBang)}
-  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(dt?'smith':pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+5+Math.sin(t*3)*.18,n.z);otBang.userData.m.rotation.y=t*1.6}
+  /* v1099: 주인공 머리 위 네비 화살표 — 가야 할 NPC(조율사·약초꾼·대장장이) 쪽을 가리킴. 가까워지면(6걸음 안) 사라짐 */
+  if(!otNav){const mt=new THREE.MeshBasicMaterial({color:0x9a6ae0,depthTest:false,transparent:true,opacity:.96}),c=new THREE.Mesh(new THREE.ConeGeometry(.34,1.1,6),mt),c2=new THREE.Mesh(new THREE.ConeGeometry(.34,1.1,6),mt);c.rotation.x=Math.PI/2;c.renderOrder=999;otNav=new THREE.Group();otNav.add(c);otNav.userData.c=c;scene.add(otNav)}
+  otBang.visible=on;if(!on){if(otNav)otNav.visible=false;return}const n=NPCS.find(q=>q.id===(dt?'smith':pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+5+Math.sin(t*3)*.18,n.z);otBang.userData.m.rotation.y=t*1.6;
+  {const dx=n.x-P.pos.x,dz=n.z-P.pos.z,d=Math.hypot(dx,dz)||1;otNav.visible=d>6&&!talkOn();otNav.scale.setScalar(1.5);otNav.position.set(P.pos.x+dx/d*1.4,P.pos.y+3.4+Math.sin(t*3)*.12,P.pos.z+dz/d*1.4);otNav.rotation.y=Math.atan2(dx,dz)}}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
@@ -10117,7 +10125,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1098';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1099';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10234,7 +10242,7 @@ const GUIDES={
     {t:'루멘하르에 오신 걸 환영합니다',d:`${GB}1장부터 10장까지${'</b>'} 이야기를 따라 나아갑니다. 각 장의 길을 따라 ${GB}끝까지 이동</b>하면 그 장의 보스가 기다립니다. 보스를 쓰러뜨리면 다음 장이 열립니다.`,d2:`10장을 지나 성 꼭대기의 최종 보스(용)를 쓰러뜨리면 ${GB}엔드게임</b>이 열리고, 위험도가 끝없이 오르는 지역에서 장비를 파밍합니다.`},
     {t:'이동',tgt:isPC()?null:['@left'],d:isPC()?`${GB}W A S D</b>(또는 방향키)로 움직이고, ${GB}마우스</b>로 공격 방향을 정합니다.`:`화면 ${GB}왼쪽 아무 곳</b>이나 누른 채 끌면 그 방향으로 움직입니다.`},
     {t:'주력 스킬과 보스 모드',tgt:['#bAtk','#bS1'],d:`${GB}주력 스킬</b>이 이 게임의 핵심입니다. 마나(MP)를 쓰며, 레벨업할 때마다 점점 강해집니다. 마나가 모자라면 같은 버튼으로 ${GB}기본 공격</b>이 나갑니다.`,d2:`${GB}「보스」</b> 버튼은 주력 스킬을 한 대상에 몰아치는 보스 모드를 켜고 끕니다. 켜져 있으면 테두리가 돕니다.`,k:'좌클릭 주력 스킬 · 우클릭 / Space 기본 공격 · Shift / E 이동기'},
-    {t:'물약',tgt:['#bHp','#bMp','#bX0','#bX1','#bX2'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b> 물약이고, 그 위 세 칸은 포션 상인에게서 사서 장착하는 ${GB}특수 물약</b>(신속·철벽·환영·수호·격노·집중)입니다. 생명력·마나 물약은 ${GB}충전식</b> — 스토리에서는 5회까지 들고 다닙니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}설정</b>에서 자동 복용을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:'1 생명력 · 2 마나 · 3·4·5 특수'},
+    {t:'물약',tgt:xpUiOn()?['#bHp','#bMp','#bX0','#bX1','#bX2']:['#bHp','#bMp'],d:`빨강은 ${GB}생명력</b>, 파랑은 ${GB}마나</b> 물약${xpUiOn()?`이고, 그 위 세 칸은 약초꾼 미라에게서 사서 장착하는 ${GB}특수 물약</b>(신속·철벽·환영·수호·격노·집중)입니다`:'입니다'}. 생명력·마나 물약은 ${GB}충전식</b> — 스토리에서는 5회까지 들고 다닙니다. 몬스터를 처치하면 다시 채워지고, 보스전은 가득 찬 채로 시작합니다.`,d2:`${GB}설정</b>에서 자동 복용을 켜 두면 생명력·마나가 정한 비율 아래로 떨어질 때 알아서 마십니다.`,k:xpUiOn()?'1 생명력 · 2 마나 · 3·4·5 특수':'1 생명력 · 2 마나'},
     {t:'성장 메뉴',tgt:['#openMenu','#openStat','#openInv'],d:`${GB}스킬</b> 강화 현황 · ${GB}스탯</b> 확인 · ${GB}장비</b> 교체를 여기서 합니다. 숫자 배지가 뜨면 할 일이 있다는 뜻입니다.`,k:'I 스킬 · C 스탯 · B 장비'},
     {t:'마을 · 단계 · 월드맵',tgt:['#openTown','#stageChip'],d:`${GB}마을</b>에는 물약 상점, 조율사, 대장장이, 재단사, 창고가 있습니다. 언제든 오갈 수 있고 진행은 그대로입니다.`,d2:`화면 위 가운데 ${GB}위험도 칸</b>을 누르면 지금 위치와 위험도 목록을, 오른쪽 위 지도 아이콘의 ${GB}월드맵</b>에서 여정의 현재 위치를 확인합니다. ${GB}보스</b> 버튼에서는 보스에 도전합니다.`,k:'T 마을 · G 위험도 · H 보스 · M 월드맵'},
     {t:'준비 완료!',tgt:['#openPause'],d:`이 안내는 ${GB}메뉴</b> → 「가이드」에서 언제든 다시 볼 수 있습니다. 새 기능을 처음 열 때마다 짧은 설명이 한 번씩 나옵니다.`}]},
