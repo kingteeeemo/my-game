@@ -4725,8 +4725,8 @@ function flyTick(dt){const T=(FLY.t+=dt),R=FLYT,t1=R.rise,t2=t1+R.gather,t3=t2+R
   if(T>=t3){const k=Math.min(1,(T-t3)/R.lift);up=3.2*k*k*(3-2*k)+Math.sin(T*3)*.15*k}
   if(T>=t4){const k=Math.min(1,(T-t4)/R.fly);fw=k*k*55+k*6;up+=k*k*16;FLY.drag=Math.min(1,k*3)}
   if(T<t4){FLY.d.set(dx,0,dz).normalize()}
-  P.pos.set(FLY.hx+FLY.d.x*fw,up,FLY.hz+FLY.d.z*fw);hero.position.copy(P.pos);
-  const tilt=T>=t4?Math.min(1,(T-t4)/.8):0;hero.rotation.x=-.95*tilt*tilt+(T>=t3&&T<t4?-.12:0);
+  P.pos.set(FLY.hx+FLY.d.x*fw,up+(T>=t3?Math.sin(T*2.2)*.18*Math.min(1,(T-t3)/1):0),FLY.hz+FLY.d.z*fw);hero.position.copy(P.pos);
+  const tilt=T>=t4?Math.min(1,(T-t4)/1.2):0,tq=tilt*tilt*(3-2*tilt);hero.rotation.x=-.38*tq-(T>=t3&&T<t4?.08*Math.min(1,(T-t3)/.6):0)+Math.sin(T*2.2)*.03*tq;/* v1057: 앞으로 살짝만 숙이고 떠 가는 느낌(예전 .95는 엎드려 나는 자세) */hero.rotation.z=Math.sin(T*1.6)*.05*tq;
   if(T>=t4&&Math.random()<dt*40){const v=new THREE.Vector3(rnd(-1.6,1.6),rnd(.6,2),rnd(-.4,.6));hero.localToWorld(v);emit(PADD,{x:v.x,y:v.y,z:v.z,vx:-FLY.d.x*3,vy:rnd(-.5,.5),vz:-FLY.d.z*3,life:rnd(.4,.8),s0:.3,s1:.05,c0:0xfff0c0,c1:0xffa020,a:.9,tex:1})}
   if(T>=t5){const k=Math.min(1,(T-t5)/(R.fade*.6));flyFade(k,k>.6?'<div>용의 섬으로</div><div style="font:600 14px var(--ko);letter-spacing:.02em;opacity:.8">가호의 날개가 바다를 건넌다</div>':'')}
   if(T>=t6+1.4)flyEnd()}
@@ -4736,7 +4736,7 @@ function flyCam(dt){const H=P.pos,T=FLY.t,R=FLYT,t4=R.rise+R.gather+R.spread+R.l
     else{const k=Math.min(1,(T-R.rise)/1.2);L.set(H.x+(port?2.5:5)-k*1.5,H.y+4.2-k*1.4,H.z+(port?11:10)-k*4);Q.set(H.x,H.y+1.6+(T>t4-R.lift?H.y*.5:0),H.z-1)}}
   else{const d=FLY.d,sx=-d.z,sz=d.x,k=Math.min(1,(T-t4)/1.5);L.set(H.x-d.x*(6+5*k)+sx*2.2,H.y+2.2+1.2*k,H.z-d.z*(6+5*k)+sz*2.2);Q.set(H.x+d.x*12,H.y+1-k*.5,H.z+d.z*12)}
   const a=Math.min(1,Math.max(dt,.016)*(T<t4?2.4:4));FLY.cP.lerp(L,a);FLY.cL.lerp(Q,a);camera.position.copy(FLY.cP);if(shake>0){camera.position.x+=rand(-.1,.1);camera.position.y+=rand(-.08,.08)}camera.lookAt(FLY.cL);scene.fog.near=60;scene.fog.far=260}
-function flyEnd(){const e=FLY.e;FLY.on=0;FLY.wing=0;FLY.drag=0;ASHC.on=0;knAppr=0;flyFade(0);hero.rotation.x=0;P.pos.set(0,0,4.5);hero.position.copy(P.pos);
+function flyEnd(){const e=FLY.e;FLY.on=0;FLY.wing=0;FLY.drag=0;ASHC.on=0;knAppr=0;flyFade(0);hero.rotation.x=0;hero.rotation.z=0;P.pos.set(0,0,4.5);hero.position.copy(P.pos);
   if(e){e.itl=null;e.fw=null;e.fy=0;e.pk=1;e.g.visible=true;if(e.lab)e.lab.style.visibility=''}toast('추격 연출 시험 끝','섬 맵이 생기면 여기서 이어집니다')}
 function ashInterStep(e,dt){if(e.itl.k==='flee')return ashFleeStep(e,dt);if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(!(L.pre>0))ashGuide(L,1);if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);ashGuide(L,1);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
   if(T<L.tt){L.big.visible=true;L.fl.visible=false;L.big.material.opacity=.2+.08*Math.sin(T*8);const pu=1+Math.sin(T*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);if(T>L.tt-1.2)shake=Math.max(shake,.15)}
@@ -6327,7 +6327,8 @@ function skwTick(dt){const u=hero&&hero.userData,K=skOf(hero);if(u&&u.sk&&K&&K.s
   const spd=K.pp&&dt>0?Math.hypot(P.pos.x-K.pp.x,P.pos.z-K.pp.z)/dt:0;K.pp={x:P.pos.x,z:P.pos.z};
   if(P.flinch){if(P.hp>0)K.hitT=.35;P.flinch=false}/* v333: 도트(냉기·독·브레스·웅덩이)로는 피격 모션 없음 — 직접 피격만 flinch */K.hitT-=dt;
   let st,t=null,rate=1,aim=0;
-  if(ASHC.lie)st='idle';/* v619: 쓰러져 실려 가는 동안은 달리기 동작 없음 */
+  if(FLY.on){st='idle';rate=.55}/* v1057: 날아서 추격하는 동안 달리기 대신 느린 대기 자세(몸이 떠 있는 느낌) */
+  else if(ASHC.lie)st='idle';/* v619: 쓰러져 실려 가는 동안은 달리기 동작 없음 */
   else if(invOpen&&IVS.on)st='idle';/* v492: 장비창(전용 공간)에서는 항상 대기 자세 */
   else if(P.hp<=0)st='die';
   else if(P.mv){st='roll';t=.4+1.15*Math.min(1,P.mv.go/MV_GO)}
@@ -9762,7 +9763,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1058';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1059';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
