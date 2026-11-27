@@ -9670,7 +9670,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1052';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1053';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11497,10 +11497,15 @@ function openAreaMap(){if(paused()&&!mapOpen)return;closeAllSheets();mapOpen=tru
     <div class="amwrap"><canvas id="amC"></canvas></div>
     <div class="amleg"><span><i style="background:#ffb070"></i>나</span>${mapKind==='story'?'<span><i style="border:2px solid #b080ff;background:none"></i>보스 제단</span><span><i style="background:#ffe0a0;border-radius:1px;transform:rotate(45deg) scale(.8)"></i>할 일</span><span><i style="background:#ff9a3a"></i>모닥불</span><span><i style="background:rgba(232,220,196,.8)"></i>출발</span>':''}${inTown?'<span><i style="background:#ffd24a"></i>마을 사람</span>':''}<span><i style="background:#c0392b"></i>적</span></div>
     <button class="ghost" id="amWorld" style="width:100%">루멘하르 지도 보기</button>`;
-  const cv=$('amC'),box=cv.parentElement.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),W=Math.max(200,box.width),H=Math.max(240,Math.min(window.innerHeight*.62,box.width*1.5));
+  /* v1053: 길 맵은 화면(미니맵)과 같은 방향 그대로 — 예전엔 길을 항상 세로로 세워서 왼→오른 맵이 아래→위로 보였음. 지도 창 비율도 맵 모양에 맞춤 */
+  let BB=null;if(pathMap()){let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;const ad=(x,z)=>{const w=L2W(x,z);x0=Math.min(x0,w.x);x1=Math.max(x1,w.x);z0=Math.min(z0,w.z);z1=Math.max(z1,w.z)};
+    for(let z=-STORY_L;z<=STORY_L;z+=2){ad(pathC(z)-pathW(z)-2,z);ad(pathC(z)+pathW(z)+2,z)}if(MP.pk)for(const q of MP.pk){ad(q.x-q.r-2,q.z-q.r-2);ad(q.x+q.r+2,q.z+q.r+2);if(q.pl)for(const[a,b] of q.pl)ad(a,b)}
+    {const e=endPtL(),s_=startPtL();ad(e.x-ARENA_END.r-2,e.z-ARENA_END.r-2);ad(e.x+ARENA_END.r+2,e.z+ARENA_END.r+2);ad(s_.x-START_R-2,s_.z-START_R-2);ad(s_.x+START_R+2,s_.z+START_R+2)}
+    BB={cx:(x0+x1)/2,cz:(z0+z1)/2,bw:Math.max(20,x1-x0),bh:Math.max(20,z1-z0)}}
+  const cv=$('amC'),box=cv.parentElement.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),W=Math.max(200,box.width),Hmax=Math.max(240,Math.min(window.innerHeight*.62,box.width*1.5)),H=BB?Math.max(220,Math.min(Hmax,W*BB.bh/BB.bw)):Hmax;
   cv.style.width=W+'px';cv.style.height=H+'px';cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);const ctx=cv.getContext('2d'),w=cv.width,h=cv.height;
-  if(pathMap()&&RTC){const k=Math.min(w/RTC.gw,h/RTC.gl)*.92;drawMiniTo(ctx,w,h,0,0,STORY_L+80,k,0,true)}
-  else if(pathMap()){let X=8;for(let z=-STORY_L;z<=STORY_L;z+=4)X=Math.max(X,Math.abs(pathC(z))+pathW(z)+3);if(MP.pk)for(const q of MP.pk)X=Math.max(X,Math.abs(q.x)+q.r+3);
+  if(BB){const k=Math.min(w/BB.bw,h/BB.bh)*.94;drawMiniTo(ctx,w,h,BB.cx,BB.cz,STORY_L+80,k,0,true)}
+  else if(0){let X=8;for(let z=-STORY_L;z<=STORY_L;z+=4)X=Math.max(X,Math.abs(pathC(z))+pathW(z)+3);if(MP.pk)for(const q of MP.pk)X=Math.max(X,Math.abs(q.x)+q.r+3);
     const Z=STORY_L+10,k=Math.min(w/(2*X),h/(2*Z)),c=L2W(0,0),R=Math.atan2(SRS,SRC)+(SRC<-.01?Math.PI:0);/* v785: 미니맵에서 아래로 내려가는 맵은 전체 지도도 위→아래로 */drawMiniTo(ctx,w,h,c.x,c.z,STORY_L+40,k,R,true)}
   else{let R=mapKind==='field'?B+2:inTown?TOWN_R+4:knOn?Math.max(KNA.R*KNA.s,Math.abs(KNB.z0))+4:thOn?THR.hz+24:mwOn?MWS.z1+8:ARENA_R+4;drawMiniTo(ctx,w,h,0,0,R+10,Math.min(w,h)/(2*R),0,true)}}
 $('wmap').addEventListener('click',e=>{if(e.target.id==='amWorld'){renderMap();guide('map')}});
