@@ -6016,7 +6016,7 @@ function twBuild(){const g=new THREE.Group(),C=TWC,U={uK:{value:0}},piv=[],D=Mat
 /* v1027 수정 날개(Meshy 모델 models/crystal_wing.glb: 앞에서 본 양 날개가 x-y 평면에 납작하게 펼쳐진 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림).
    lavaTick이 등 뼈를 따라 붙이고(기울기·비틀림 일부), 들썩임·회전 늦게 따라옴·달리면 뒤로 젖힘을 넘겨줌. 여기서는 숨쉬듯 천천히 펄럭이고, 달리면 뒤로 접히며 걸음마다 작게 퍼덕임.
    빛: 텍스처 자체를 약하게 발광 + 날개를 훑고 지나가는 빛 띠(셰이더). 반짝이 별은 lavaTick이 날개 표면에서 뿌림(ek) */
-const CWC={S:2.0,sx:1.3,inv:.8,dy:.2,dz:-.2,fw:.45,x:.04,yaw:22,tilt:12,rt:[.055,-.36,0],file:'models/crystal_wing.glb',
+const CWC={S:2.0,sx:1.3,inv:.8,bend:[0,0],sz:1.3,dy:.2,dz:-.2,fw:.45,x:.04,yaw:22,tilt:12,rt:[.055,-.36,0],file:'models/crystal_wing.glb',
   ek:{c0:0xffffff,c1:0x8a7cff,s0:.26,s1:.02,vy:[.15,.6],life:[.5,1],tex:3,rate:9,rmv:16}};
 function cwBuild(){const g=new THREE.Group(),C=CWC,U={uK:{value:0}},piv=[],D=Math.PI/180,sh={uT:{value:0},uK:{value:0}};g.userData.S=C.S;g.userData.C=C;g.userData.mem={material:{uniforms:U}};let mat=null;
   const tr=new THREE.Object3D();tr.material={uniforms:{uK:{value:0}}};g.userData.trail=tr;let fl=0,fv=0,ph=0;
@@ -6026,10 +6026,14 @@ function cwBuild(){const g=new THREE.Group(),C=CWC,U={uK:{value:0}},piv=[],D=Mat
     mat.onBeforeCompile=s=>{s.uniforms.uT=sh.uT;s.uniforms.uKs=sh.uK;s.uniforms.uInv=INVU;s.vertexShader=s.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvWP=position;');
       s.fragmentShader=s.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vWP;uniform float uT,uKs;').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n{float d=abs(vWP.x)*1.05+(vWP.y+.5)*.6;float b=fract(d*.55-uT*.32);float band=smoothstep(.0,.1,b)*(1.-smoothstep(.1,.24,b));float l=dot(diffuseColor.rgb,vec3(.33));totalEmissiveRadiance+=diffuseColor.rgb*band*(.4+.9*l)*.6*uKs;}').replace('uniform float uT,uKs;','uniform float uT,uKs,uInv;').replace('#include <dithering_fragment>','#include <dithering_fragment>\nif(uInv>.5)gl_FragColor.rgb*='+CWC.inv.toFixed(3)+';')};/* v1032: 장비창에서만 어둡게 */
     for(const sx of [1,-1]){const idx=[];for(let i=0;i<I.length;i+=3){const cx=P.getX(I[i])+P.getX(I[i+1])+P.getX(I[i+2]);if(cx*sx>0)idx.push(I[i],I[i+1],I[i+2])}
-      const g2=G.clone();g2.setIndex(idx);g2.computeBoundingSphere();const me=new THREE.Mesh(g2,mat);me.castShadow=true;me.frustumCulled=false;me.position.set(-C.rt[0]*sx,-C.rt[1],-C.rt[2]);/* 뿌리를 회전 중심으로 */
-      const p=new THREE.Group();p.rotation.order='YXZ';p.add(me);p.position.x=sx*C.x;p.scale.x=C.sx;/* v1032: 좌우로만 키움(뿌리 기준) */g.add(p);
-      const vs=new Set(idx),cand=[...vs].filter(v=>Math.abs(P.getX(v))>.12),n=Math.min(500,cand.length),pts=new Float32Array(n*3);
-      for(let k=0;k<n;k++){const v=cand[Math.floor(Math.random()*cand.length)];pts[k*3]=P.getX(v);pts[k*3+1]=P.getY(v);pts[k*3+2]=P.getZ(v)}piv.push({p,me,sx,pts})}
+      const g2=G.clone();g2.setIndex(idx);
+      /* v1033: 납작한 판을 진짜 날개처럼 휨 — 뿌리에서 멀수록 뒤(−z)로 둥글게 휘고(활 모양), 위쪽 끝은 조금 더 뒤로 젖혀져 옆에서 봐도 곡면이 보이게. 법선도 기울기만큼 돌림 */
+      {const pa=g2.attributes.position=g2.attributes.position.clone(),na=g2.attributes.normal=g2.attributes.normal?g2.attributes.normal.clone():null,B=C.bend;for(const v of new Set(idx)){const x=pa.getX(v),y=pa.getY(v),d=Math.max(0,(x-C.rt[0]*sx)*sx),h=Math.max(0,y-C.rt[1]);
+        pa.setZ(v,pa.getZ(v)-B[0]*d*d-B[1]*d*h);if(na){const gx=-(2*B[0]*d+B[1]*h)*sx,gy=-B[1]*d,nx=na.getX(v),ny=na.getY(v),nz=na.getZ(v),q=new THREE.Vector3(nx-gx*nz,ny-gy*nz,nz+gx*nx+gy*ny).normalize();na.setXYZ(v,q.x,q.y,q.z)}}}
+      g2.computeBoundingSphere();const me=new THREE.Mesh(g2,mat);me.castShadow=true;me.frustumCulled=false;me.position.set(-C.rt[0]*sx,-C.rt[1],-C.rt[2]);/* 뿌리를 회전 중심으로 */
+      const p=new THREE.Group();p.rotation.order='YXZ';p.add(me);p.position.x=sx*C.x;p.scale.x=C.sx;p.scale.z=C.sz;/* v1032: 좌우로만 키움(뿌리 기준) · v1033: 두께 ×3 — 옆에서 종이처럼 얇지 않게 */g.add(p);
+      const Q=g2.attributes.position,vs=new Set(idx),cand=[...vs].filter(v=>Math.abs(Q.getX(v))>.12),n=Math.min(500,cand.length),pts=new Float32Array(n*3);
+      for(let k=0;k<n;k++){const v=cand[Math.floor(Math.random()*cand.length)];pts[k*3]=Q.getX(v);pts[k*3+1]=Q.getY(v);pts[k*3+2]=Q.getZ(v)}piv.push({p,me,sx,pts})}
     g.userData.ready=1}catch(e){console.warn('cwing',e)}});
   /* 천천히 숨쉬듯 펄럭임 · 달리면 뒤로 젖혀 접히고 걸음 박자로 작게 퍼덕임 · 몸이 들썩이면 끝이 늦게 따라 출렁임 */
   g.userData.update=(t,o)=>{const mv=o.mv||0,dt=o.dt||0;ph+=dt*(1.5+5.5*mv);fl=Math.sin(ph);fv+=((o.bob||0)-fv)*(dt>0?1-Math.exp(-dt*10):0);
@@ -9557,7 +9561,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1032';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1033';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
