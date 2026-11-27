@@ -346,7 +346,7 @@ function botReset(){const id=C().skills[0];BOT.C={skills:id};NAV.ok=null;BOT._u=
 BOT.reset=()=>botReset();
 BOT.progSetup=function(o){
   hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
-  window.defeatCine=function(sub,fn){BOT.pendTown=fn};/* 연출 생략 — 다음 프레임 맨 앞에서 마을로 */
+  window.defeatCine=function(sub,fn){BOT.pendTown=fn};window.ptDeathBanner=function(t,l,loss,fn){BOT.pendTown=fn};/* 연출 생략 — 다음 프레임 맨 앞에서 마을로 */
   testPick=false;startGame(o.cls,o.main);S.test=false;S.tutor=false;S.demo=false;S.noGuide=1;S.autoGem='bal';
   S.ch=NCH;S.gates=[];S.pt=null;S.enh={};for(const k of EQS)S.enh[k]=o.enh0||0;
   S.mut={};S.mutRun={};S.gold=0;S.rr=0;S.seal=0;S.ess=0;S.lumi=0;S.inv=[];S.autoUp=false;S.duel=null;S.xpt={own:{},eq:[null,null,null],opt:{}};
