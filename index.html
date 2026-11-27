@@ -9526,20 +9526,44 @@ function otTick(){const it=otItem();if(!otutOn()||!it||!(S.otut&&S.otut.st)){otH
       if(el<0){O.st=9;save()}
       else if(!ok){O.st=7;O.tiers=tiers;otShow(OTS[7],`[data-rl="${el}"]`,7);return}
       else{O.st=8;O.tiers=O.tiers||tiers;need('seal',sealCost(ls[rrLine].t));otShow(OTS[8],'.rrgo[data-ns="up"]',8);return}}}
-  if(O.st>=9){clearInterval(otTm);otHide();S.otut={done:1};save();setTimeout(()=>{nsClose();talk(otLines(OT_END),()=>toast('조율 튜토리얼 완료','연습 반지는 가방에 그대로 있습니다','#7fe07a'))},900)}}
-function otShow(st,sel,n){let c=$('otCard'),r=$('otRing');if(!c){c=document.createElement('div');c.id='otCard';document.body.appendChild(c);r=document.createElement('div');r.id='otRing';document.body.appendChild(r)}
+  if(O.st>=9){clearInterval(otTm);otHide();S.otut={done:1};save();setTimeout(()=>{nsClose();talk(otLines(OT_END).concat(otLines(OT_POT)),()=>{toast('조율 튜토리얼 완료','연습 반지는 가방에 그대로 있습니다 · 이제 약초꾼 미라에게 가 보세요','#7fe07a');if(!(S.ptut&&S.ptut.done)){S.ptut={st:0};save()}})},900)}}
+function otShow(st,sel,n,lab,tot,skip){let c=$('otCard'),r=$('otRing');if(!c){c=document.createElement('div');c.id='otCard';document.body.appendChild(c);r=document.createElement('div');r.id='otRing';document.body.appendChild(r)}
   const el=document.querySelector(sel),R=el&&el.offsetParent?el.getBoundingClientRect():null;
-  const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">조율 연습 · ${n}/8</div><h3>${st.t}</h3><p>${st.d}</p><button id="otSkip">튜토리얼 건너뛰기</button>`;
-    c.querySelector('#otSkip').onclick=()=>{askConfirm('튜토리얼 건너뛰기','조율 연습을 그만둡니다. 받은 장비와 재화는 그대로 가집니다.','건너뛰기',()=>{S.otut={done:1};save();clearInterval(otTm);otHide()})}}
+  const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">${lab||'조율 연습'} · ${n}/${tot||8}</div><h3>${st.t}</h3><p>${st.d}</p><button id="otSkip">튜토리얼 건너뛰기</button>`;
+    c.querySelector('#otSkip').onclick=skip||(()=>{askConfirm('튜토리얼 건너뛰기','조율 연습을 그만둡니다. 받은 장비와 재화는 그대로 가집니다.','건너뛰기',()=>{S.otut={done:1};save();clearInterval(otTm);otHide()})})}
   c.hidden=false;
   if(R){const p=6;r.hidden=false;Object.assign(r.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.width+p*2+'px',height:R.height+p*2+'px'});const H=innerHeight;c.classList.remove('top');if((R.top+R.bottom)/2>H*.5){c.style.top='';c.style.bottom=Math.max(8,H-R.top+14)+'px'}else{c.style.bottom='auto';c.style.top=Math.min(H-150,R.bottom+14)+'px'}}else{r.hidden=true;c.style.top='';c.style.bottom='';c.classList.add('top')}}
+/* v1087: 물약 튜토리얼 — 조율 튜토리얼이 끝나면 오린이 약초꾼 미라에게 보냄 → 미라 머리 위 「!」 → 말을 걸면 신속 물약을 공짜로 사게 하고
+   옵션 변경을 세 번 직접 누르게 함(1·2번째는 일반 옵션, 3번째는 다시 「옵션 없음」) → 옵션 없는 신속 물약 하나가 남음. 진행 S.ptut={st} → 끝나면 {done:1} */
+const MIRA=()=>REF.shop;
+const OT_POT=[[()=>ORN(),'아, 그리고 — 물약도 손볼 수 있다. 화로 서쪽 빛버섯 숲의 약초꾼 미라에게 가 봐라.']];
+const PT_IN=[[()=>MIRA(),'오린이 보냈구나. 생명력·마나 물약 말고도, 내가 달인 특수 물약이 있어.'],[()=>MIRA(),'특수 물약은 윤회의 불씨로 사고, 불씨를 더 들여 효과의 성질 — 옵션 — 을 바꿀 수 있지.'],[()=>MIRA(),'처음이니 신속 물약 하나는 그냥 줄게. 옵션도 직접 몇 번 바꿔 봐.']];
+const PT_END=[[()=>MIRA(),'후후, 결국 처음 그대로네. 옵션은 운이야 — 좋은 게 나올 때까지 불씨를 들이는 거지.'],[()=>MIRA(),'옵션이 없어도 기본 효과는 그대로니 걱정 마. 그 신속 물약은 가져가.'],[()=>MIRA(),'장착은 가방의 기타 탭에서 할 수 있어.']];
+const ptutOn=()=>!!(S&&refOn()&&!S.test&&!S.demo&&!(S.ptut&&S.ptut.done)&&S.otut&&S.otut.done);/* 조율 튜토리얼을 이미 마친 캐릭터도 대상 */
+const PTS=[null,{t:'신속 물약 받기',d:'<b>신속 물약</b>의 구매 버튼을 누르세요. 이번에는 미라가 불씨를 대신 내 줍니다.'},{t:'옵션 변경',d:'위쪽 <b>옵션 변경</b> 탭을 누르세요.'},{t:'물약 고르기',d:'목록에서 <b>신속 물약</b>을 누르세요.'},{t:'옵션 변환',d:'<b>옵션 변환</b>을 누르세요. 효과의 성질이 무작위로 바뀝니다.'},{t:'한 번 더',d:'다시 <b>옵션 변환</b>을 누르세요. 바뀔 때마다 다른 옵션이 나옵니다.'},{t:'마지막으로',d:'한 번 더 <b>옵션 변환</b>을 누르세요.'}];
+const PT_FORCE=['long','kill','none'];/* 1·2번째는 일반 옵션, 3번째는 다시 옵션 없음 */
+let ptTm=0;
+function ptutShop(){if(!ptutOn())return openShop('pot');
+  if(S.ptut&&S.ptut.st){openShop('pot');ptStartT();return}
+  talk(otLines(PT_IN),()=>{S.ptut={st:1,n:0};save();openShop('pot');ptStartT()})}
+function ptStartT(){clearInterval(ptTm);ptTm=setInterval(ptTick,250);ptTick()}
+function ptSkip(){askConfirm('튜토리얼 건너뛰기','물약 연습을 그만둡니다. 받은 물약은 그대로 가집니다.','건너뛰기',()=>{if(S.ptut&&S.ptut.gv)S.rr=Math.max(0,(S.rr||0)-S.ptut.gv);S.ptut={done:1};save();clearInterval(ptTm);otHide()})}
+function ptTick(){if(!ptutOn()||!(S.ptut&&S.ptut.st)){otHide();clearInterval(ptTm);return}if(!shopOpen||shopKind!=='pot'){otHide();clearInterval(ptTm);return}
+  const O=S.ptut,x=xpS(),gv=need=>{if(!TCUR()&&(S.rr||0)<need){O.gv=(O.gv||0)+need-(S.rr||0);S.rr=need;save();renderShop();try{hudMoney()}catch(_){}}},own=!!x.own.spd,sh=(n,sel)=>otShow(PTS[n],sel,n,'물약 연습',6,ptSkip);
+  if(O.st===1){if(own){O.st=2;save()}else{if(xpTab!=='buy'){xpTab='buy';renderShop()}gv(XP_PRICE);sh(1,'[data-xbuy="spd"]');return}}
+  if(O.st===2){if(xpTab==='opt'){O.st=3;save()}else{sh(2,'[data-xtab="opt"]');return}}
+  if(O.st>=3){if(xpTab!=='opt'){sh(2,'[data-xtab="opt"]');return}if(xpSel!=='spd'){sh(3,'[data-xsel="spd"]');return}
+    if((O.n||0)>=3){clearInterval(ptTm);otHide();if(O.gv)S.rr=Math.max(0,(S.rr||0)-O.gv);/* 튜토리얼 동안 빌려준 불씨 회수 */S.ptut={done:1};save();setTimeout(()=>{closeShop();talk(otLines(PT_END),()=>toast('물약 튜토리얼 완료','신속 물약을 받았습니다 · 가방 기타 탭에서 장착','#7fe07a'))},1100);return}
+    gv(XP_REROLL);sh(4+(O.n||0),'[data-xrr="spd"]')}}
+/* 옵션 변환을 누를 때: 튜토리얼 중이면 정해 둔 결과로, 불씨는 들지 않음 */
+function ptForce(id){if(!ptutOn()||id!=='spd'||!S.ptut||S.ptut.st<3)return null;const n=S.ptut.n||0;if(n>=3)return null;S.ptut.n=n+1;return PT_FORCE[n]}
 function otHide(){const c=$('otCard'),r=$('otRing');if(c){c.hidden=true;c.dataset.k=''}if(r)r.hidden=true}
 /* 오린 머리 위 「!」 */
 let otBang=null;
-function otBangUpd(){const on=otutOn()&&inTown&&mapKind==='town'&&!(S.otut&&S.otut.st);if(!otBang){if(!on)return;const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
+function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),on=(otutOn()&&!(S.otut&&S.otut.st)||pm)&&inTown&&mapKind==='town';if(!otBang){if(!on)return;const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
     g.fillStyle='rgba(20,14,6,.85)';g.beginPath();g.arc(64,64,52,0,7);g.fill();g.lineWidth=7;g.strokeStyle='#ffc45a';g.stroke();g.fillStyle='#ffd27a';g.font='900 82px Archivo, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('!',64,68);
     otBang=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));otBang.scale.set(1.1,1.1,1);otBang.renderOrder=999;scene.add(otBang)}
-  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id==='gear'),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+3.3+Math.sin(t*3)*.12,n.z)}
+  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+3.3+Math.sin(t*3)*.12,n.z)}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
@@ -10035,7 +10059,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1086';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1087';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11250,10 +11274,10 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
-  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS();if(!x.own[id]&&(TCUR()||(S.rr||0)>=XP_PRICE)){if(!TCUR())S.rr-=XP_PRICE;x.own[id]=1;x.opt=x.opt||{};x.opt[id]='none';/* v1078: 처음 사면 옵션 없음 — 옵션은 다시 굴려서 붙임 */if(x.ov)delete x.ov[id];xpOv(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
+  if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS(),ptF=ptutOn()&&id==='spd'&&S.ptut.st===1;if(!x.own[id]&&(ptF||TCUR()||(S.rr||0)>=XP_PRICE)){if(!ptF&&!TCUR())S.rr-=XP_PRICE;/* 튜토리얼 구매는 불씨가 들지 않음 */x.own[id]=1;x.opt=x.opt||{};x.opt[id]='none';/* v1078: 처음 사면 옵션 없음 — 옵션은 다시 굴려서 붙임 */if(x.ov)delete x.ov[id];xpOv(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
   if(b.dataset.xtab){xpTab=b.dataset.xtab;renderShop();return}
   if(b.dataset.xsel){xpSel=xpSel===b.dataset.xsel?null:b.dataset.xsel;renderShop();return}
-  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS();if(x.own[id]&&(TCUR()||(S.rr||0)>=XP_REROLL)){if(!TCUR())S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=p[Math.floor(Math.random()*p.length)];xpRoll(id,x.opt[id]);xpInit();save();xpFlash=1;toast(`${XPOT[id].n} 물약`,xpOptN(id))}renderShop();xpFlash=0;return}
+  if(b.dataset.xrr){const id=b.dataset.xrr,x=xpS(),fc=ptForce(id);if(x.own[id]&&(fc||TCUR()||(S.rr||0)>=XP_REROLL)){if(!fc&&!TCUR())S.rr-=XP_REROLL;const old=xpOpt(id),p=xpPool(id).filter(k=>k!==old);x.opt[id]=fc||p[Math.floor(Math.random()*p.length)];xpRoll(id,x.opt[id]);xpInit();save();xpFlash=1;toast(`${XPOT[id].n} 물약`,xpOptN(id))}renderShop();xpFlash=0;return}
   if(b.dataset.xeq){const id=b.dataset.xeq,x=xpS(),i=x.eq.indexOf(id);if(i>=0)x.eq[i]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();renderShop();return}
   if(b.dataset.sbuy){const n=+b.dataset.sbuy,c=SPD_POT.price*n;if(S.gold>=c){S.gold-=c;S.spdPot=(S.spdPot||0)+n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
   if(b.dataset.ssell){const n=b.dataset.ssell==='all'?(S.spdPot||0):Math.min(1,S.spdPot||0);if(n){S.spdPot-=n;S.gold+=Math.round(SPD_POT.price*.3)*n;save()}renderShop();return}
@@ -11276,7 +11300,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;xpTab='buy';xpSel=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return otutGear();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return otutGear();if(NS()&&npcNear.id==='shop'&&ptutOn())return ptutShop();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
