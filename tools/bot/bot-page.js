@@ -90,7 +90,7 @@ function navNext(tx,tz,ahead){
 /* 다음 벽(바리케이드·철문·쇠창살·봉인) 앞쪽에서 해야 할 일 → 없으면 길 끝 제단 */
 function nextWallZ(pl){let best=-1e9;for(const c of colliders){if(!c.bar)continue;const z=W2L(c.x,c.z).z;if(z<pl.z+1&&z>best)best=z}return best}
 function taskGoal(){
-  if(mapKind!=='story'){/* 엔드게임: 가장 가까운 적(관문 보스 우선), 없으면 맵 가운데 */const es=enemies.filter(e=>e.hp>0&&!e.air);const g=es.find(e=>e.gate);if(g)return {x:g.pos.x,z:g.pos.z,why:'관문 보스'};let b=null,bd=1e9;for(const e of es){const d=Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z);if(d<bd){bd=d;b=e}}return b?{x:b.pos.x,z:b.pos.z,why:'몹 찾기'}:{x:0,z:0,why:'가운데'}}
+  if(mapKind!=='story'){/* 엔드게임: 가장 가까운 적(관문 보스 우선), 없으면 맵 가운데 */const es=enemies.filter(e=>e.hp>0&&!e.air);const g=es.find(e=>e.gate);if(g)return {x:g.pos.x,z:g.pos.z,why:'관문 보스'};let b=null,bd=1e9;for(const e of es){const d=Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z);if(d<bd){bd=d;b=e}}if(b)return {x:b.pos.x,z:b.pos.z,why:'몹 찾기'};if(mapKind==='route'){const pl=W2L(P.pos.x,P.pos.z),z=Math.max(-STORY_L+31,pl.z-25);return Object.assign(L2W(pathC(z),z),{why:'길 따라'})}return {x:0,z:0,why:'가운데'}}
   const pl=W2L(P.pos.x,P.pos.z),wz=nextWallZ(pl),T=[];
   const add=(w,why,o)=>{const L=W2L(w.x,w.z);if(L.z<wz-1)return;T.push(Object.assign({x:w.x,z:w.z,why,d:Math.hypot(w.x-P.pos.x,w.z-P.pos.z)},o||{}))};
   if(typeof CHZS!=='undefined'&&CHZS){
@@ -298,6 +298,7 @@ BOT.step=function(untilT){
   const M=BOT.M;
   while(M.t<untilT){
     clearPause();
+    if(BOT.pendTown){const f=BOT.pendTown;BOT.pendTown=null;try{f()}catch(e){M.err=String(e&&e.stack||e).slice(0,300)}return true}/* 진행 시뮬레이션: 죽어서 마을로 돌아감 */
     if(mapKind==='story'?S.phase>=2:S.runClr){M.clear=true;return true}
     if(mapKind!=='story'&&M.gateT==null&&enemies.some(e=>e.gate&&e.hp>0))M.gateT=M.t;
     if((decT-=DT)<=0){decide();decT=BOT.cfg.react}
@@ -323,4 +324,63 @@ BOT.result=function(){
     kills:M.kills,pgOn:M.pgT?Math.round(M.pgT/Math.max(1,M.t)*100):null,dmgOut:Math.round(M.dmgOut),dps:Math.round(M.dmgOut/Math.max(1,M.t)),dmgIn:Math.round(M.dmgInTot),hits:M.hits,src:top,stuck:M.stuck,
     gold:(S.gold||0)-M.gold0,lv:[M.lv0,S.lv],prog:mapKind==='story'?Math.round(100*(STORY_L-8-pl.z)/(2*STORY_L-20)):S.tierKills,events:M.events.slice(0,20),err:M.err||null,hpTrace:M.hpTrace,dbg:M.dbg,goal:BOT.goal&&BOT.goal.why};
 };
+
+/* ================= 진행 시뮬레이션: 돈벌기 → 강화 → 다음 위험도 (포탈 6개) =================
+   위험도 1부터 순서대로: 들어가서(포탈 1개 소모) 깨면 번 골드로 강화(가장 낮은 부위부터) → 다음 위험도. 죽으면 마을 → 강화 → 다시 입장.
+   포탈 6개를 다 쓰고도 못 깨면 다시 열기(변이 없음 = 무료)를 반복, 2회 소진되면 한 단계 아래 위험도를 한 판 돌아 골드를 벌고 돌아옴, 4회 소진이면 막힘으로 종료.
+   장비 기본 사양(레벨·티어·2차 강화·오라)은 위험도별 표준(eg.js와 같음), 강화 단계만 번 골드로 올림. */
+const PG={};
+BOT.PG=PG;
+const progSpec=d=>({lv:Math.round(31+4.4*(d-1)),tier:Math.max(1,Math.min(6,Math.round(4.3-3.2*(d-1)/19))),g2:+((d-1)/19).toFixed(2)});
+function progGear(d){const o=PG.o,sp=progSpec(d);
+  S.lv=sp.lv;S.xp=0;S.pending=sp.lv-1;S.sk={};try{autoSpend('bal')}catch(_){}S.pending=0;
+  gearSet(sp.tier,o.cls,.5,1,0);
+  const id=C().skills[0];S.sk2={};for(const g of (typeof gems2For==='function'?gems2For(id):[]))S.sk2[g]=Math.round(g2Max(g)*sp.g2);
+  const L=Math.min(10,Math.round(d/2));S.aura={};S.auraOn={};if(L){S.aura.crit=L;S.aura.area=L;S.auraOn.crit=true;S.auraOn.area=true}
+  refreshMax();PG.gearD=d}
+function progEnh(){let n=0;for(;;){let kk=null,lo=99;for(const k of EQS){const L=enhL(k);if(L<NS_ENH_MAX&&L<lo){lo=L;kk=k}}if(!kk)break;const c=enhCost(lo,kk);if(S.gold<c)break;smithSel=kk;const g0=S.gold;smithTry(true);PG.spent+=g0-S.gold;if(++n>200000)break}return n}
+const progEnhStat=()=>{const a=EQS.map(k=>enhL(k));return {min:Math.min(...a),avg:+(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1),max:Math.max(...a)}};
+function botReset(){const id=C().skills[0];BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};BOT.M.gold0=S.gold||0}
+BOT.progSetup=function(o){
+  hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
+  window.defeatCine=function(sub,fn){BOT.pendTown=fn};/* 연출 생략 — 다음 프레임 맨 앞에서 마을로 */
+  testPick=false;startGame(o.cls,o.main);S.test=false;S.tutor=false;S.demo=false;S.noGuide=1;S.autoGem='bal';
+  S.ch=NCH;S.gates=[];S.pt=null;S.enh={};for(const k of EQS)S.enh[k]=o.enh0||0;
+  S.mut={};S.mutRun={};S.gold=0;S.rr=0;S.seal=0;S.ess=0;S.lumi=0;S.inv=[];S.autoUp=false;S.duel=null;S.xpt={own:{},eq:[null,null,null],opt:{}};
+  Object.assign(PG,{o,d:1,cur:1,log:[],spent:0,att:0,deaths:0,exh:{},done:false,reason:'',tSim:0,sealSkip:[],clears:{}});
+  S.tier=1;S.maxTier=1;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.fld=null;
+  progGear(1);inTown=true;noML=true;try{setMap(true);applyTheme();resetWorld()}catch(e){return {err:String(e.stack||e).slice(0,300)}}
+  return {ok:1,map:mapKind,inTown};
+};
+function progEnter(){
+  if(PG.gearD!==PG.d)progGear(PG.d);
+  const t=PG.cur,pt0=ptLeft(t);
+  const st=progEnhStat();PG.attStart={d:t,enh:st,gold:S.gold||0,portal:pt0,t:PG.tSim};
+  townEnter(t,true);
+  if(inTown){PG.done=true;PG.reason='입장 실패 d'+t;return false}
+  refreshMax();P.hp=P.mhp;P.mp=P.mmp;P.pch=null;nsPotInit(true);P.xch={};P.xb={};try{xpInit(true)}catch(_){}
+  botReset();PG.att++;return true}
+function progEnd(res){const M=BOT.M,a=PG.attStart;PG.tSim+=M.t;const rec={d:a.d,res,portalLeft:ptLeft(a.d),enhMin:a.enh.min,enhAvg:a.enh.avg,t:+M.t.toFixed(0),kills:S.tierKills,gold:Math.round((S.gold||0)-a.gold),minHp:Math.round(M.minHp*100),deaths:M.deaths};PG.log.push(rec);BOT.on=false;return rec}
+function progTick(){
+  if(PG.done)return;
+  if(inTown){
+    progEnh();
+    if(!progEnter())return;
+    return}
+  const M=BOT.M;let r=BOT.step(M.t+20);
+  if(inTown&&!M.clear){/* 죽어서 마을로 돌아옴 */M.err=null;const d=PG.cur;PG.deaths++;progEnd('사망');
+    if(ptLeft(d)===0){PG.exh[d]=(PG.exh[d]||0)+1;
+      if(PG.exh[d]>=(PG.o.maxExh||12)){PG.done=true;PG.reason='막힘 d'+d+` (포탈 ${PG.exh[d]*6}개 소진)`;return}
+      if(PG.cur===PG.d&&PG.d>1){PG.cur=PG.d-1;PG.farmN=PG.o.farm||3}/* 6개를 다 쓰면 한 단계 아래 위험도를 몇 판 돌아 골드를 번 뒤 돌아옴 */}
+    return}
+  if(r&&M.clear){const d=PG.cur,rec=progEnd('클리어');PG.clears[d]=(PG.clears[d]||0)+1;
+    if(d<PG.d&&PG.farmN>1){PG.farmN--;try{goTown()}catch(e){PG.done=true;PG.reason='goTown '+e}return}/* 골드 벌이 중 */
+    if(d>=PG.d){if(!(S.maxTier>=d+1)&&d<D_MAX){S.maxTier=d+1;PG.sealSkip.push(d)}if(d>=D_MAX){PG.done=true;PG.reason='위험도 20 클리어';try{goTown()}catch(_){}return}PG.d=d+1;PG.cur=PG.d}else{PG.cur=PG.d}
+    try{goTown()}catch(e){PG.done=true;PG.reason='goTown '+e}return}
+  if(r&&M.err){PG.done=true;PG.reason='오류 '+M.err;return}
+  if(PG.tSim+M.t>(PG.o.maxT||144000)){PG.done=true;PG.reason='시간 제한(게임 시간 '+Math.round((PG.tSim+M.t)/3600)+'시간)';return}
+  if(M.t>=900){/* 한 판 15분(게임 시간) 넘으면 포기하고 마을로 */const dbg={n:enemies.length,alive:enemies.filter(e=>e.hp>0).length,boss:enemies.filter(e=>e.boss).map(e=>[e.name,e.gate,e.hp>0,e.aggro,Math.round(e.hp/e.mhp*100)]),egSp:S.egSp,tk:S.tierKills,goal:tkFor(S.tier),runClr:S.runClr,gp:gatePending(),pos:[Math.round(P.pos.x),Math.round(P.pos.z)],mapKind,hp:P.hp>0,wp:typeof paused==='function'?paused():null,spawnT:typeof spawnT!=='undefined'?spawnT:null,eglim:egLim(),room:typeof egRoom==='function'?egRoom():null};const rr0=progEnd('시간초과');rr0.dbg=dbg;try{goTown()}catch(e){PG.done=true;PG.reason='goTown '+e}}
+}
+BOT.progRun=function(wallMs){const t0=Date.now();while(!PG.done&&Date.now()-t0<wallMs)progTick();return BOT.progInfo()};
+BOT.progInfo=function(){return {done:PG.done,reason:PG.reason,d:PG.d,cur:PG.cur,att:PG.att,deaths:PG.deaths,spent:Math.round(PG.spent),gold:S.gold||0,tSim:Math.round(PG.tSim+(BOT.on?BOT.M.t:0)),enh:progEnhStat(),inTown,pt:S.pt,sealSkip:PG.sealSkip,log:PG.log}};
 })();
