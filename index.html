@@ -671,8 +671,22 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .rct.on .rci{box-shadow:0 0 0 2px rgba(255,255,255,.35),0 0 18px var(--c)}
 .rcinfo{width:100%;margin-top:14px;padding:11px 13px;border-radius:12px;background:#16161d;border:1px solid #2c2c36;font-size:12.5px;line-height:1.6;color:#cfc5b4;text-align:left}
 .rc-bot{width:100%;flex:none;display:flex;flex-direction:column;gap:8px;margin-top:12px}#clear .rc-bot button{width:100%;margin:0;font-weight:800}#clear .rc-bot .primary{min-height:48px}
+/* v1081: 보상 받기 버튼 — 등급 문장 + 본문 */
+.rc-mid{overflow-x:hidden}
+.rbtn{--ga:#e8c870;display:flex!important;align-items:stretch;padding:0!important;min-height:0!important;border-radius:14px;overflow:hidden;border:1.5px solid color-mix(in srgb,var(--ga) 75%,transparent)!important;background:#16120d!important;color:#f3e3bf;text-align:left;box-shadow:0 0 20px color-mix(in srgb,var(--ga) 24%,transparent);animation:rbp 2.2s ease-in-out infinite}@keyframes rbp{50%{box-shadow:0 0 30px color-mix(in srgb,var(--ga) 46%,transparent)}}
+.rbtn .rb-em{flex:none;width:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--ga) 30%,#21170c),#21170c);border-right:1px solid color-mix(in srgb,var(--ga) 45%,transparent)}
+.rbtn .rb-em i{width:44px;height:50px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(color-mix(in srgb,var(--ga) 100%,#fff 25%),color-mix(in srgb,var(--ga) 100%,#000 30%));display:flex;align-items:center;justify-content:center;font:900 24px var(--en);font-style:normal;color:#2a1a08}
+.rbtn .rb-em small{font:700 10px var(--ko);color:var(--ga);letter-spacing:.06em}
+.rbtn .rb-bd{flex:1;min-width:0;padding:11px 12px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:left}
+.rbtn .rb-t{display:flex;align-items:center;justify-content:space-between;font:700 19px "Noto Serif KR","Noto Serif CJK KR",serif;letter-spacing:.06em;color:#f3e3bf}.rbtn .rb-t em{font:800 11px var(--en);font-style:normal;color:#1a120b;background:var(--ga);border-radius:6px;padding:2px 7px}
+.rbtn .rb-od{display:flex;flex-direction:column;gap:3px}.rbtn .rb-od span{display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--ko);color:#d8ccb4}.rbtn .rb-od b{font:800 11.5px var(--en);font-stretch:87%;color:#ffd27a}.rbtn .rb-od .ci{width:16px;height:16px}
+.rsec{height:46px;border-radius:12px;border:1px solid #3a3844;background:#1a1a22;color:#e8e0cc;font:700 13.5px var(--ko);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}.rsec small{color:#a89c8c;font-weight:600;font-size:inherit}.rsec:disabled{opacity:.45}
+.rter{height:40px;border:0;background:none;color:#8a8577;font:700 12.5px var(--ko);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#clear .rc-bot .rbtn{min-height:0}
 @media (orientation:landscape) and (max-height:520px){.rc-hex{width:84px;height:84px;margin:8px 0 2px}.rc-hex b{font-size:36px}.rwc h1{font-size:22px}.rc-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media (orientation:landscape){.rc-bot button{max-width:420px;align-self:center}}
+@media (orientation:landscape) and (max-height:520px){.rbtn .rb-em{width:64px;padding:6px 0;gap:1px}.rbtn .rb-em i{width:32px;height:36px;font-size:18px}.rbtn .rb-em small{font-size:9px}.rbtn .rb-bd{padding:6px 12px;gap:3px}.rbtn .rb-t{font-size:16px}.rbtn .rb-od{flex-direction:row;flex-wrap:wrap;gap:2px 12px}.rbtn .rb-od span{font-size:11px}.rsec{height:36px}.rter{height:28px}.rc-bot{gap:5px;margin-top:6px}}
+
 .cban:before{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(transparent,rgba(6,6,9,.9) 38%,rgba(6,6,9,.96));animation:cbF .6s .6s both}
 @keyframes cbIn{from{opacity:0;transform:translateY(-50%) scaleY(.4)}to{opacity:1;transform:translateY(-50%) scaleY(1)}}
 @keyframes cbT{from{opacity:0;letter-spacing:.4em}to{opacity:1;letter-spacing:.06em}}
@@ -7448,7 +7462,7 @@ const rwInfo=r=>{if(r.t==='seal')return{ic:ci('s'),c:'#7ad8ff',nm:'성역의 인
   if(r.t==='scr'){const c=r.sc.v>=10?'#c890ff':'#5ae0d0';return{ic:'★',c,nm:`${scrName(r.sc)} (${r.sc.v}%)`,n:1,d:`아무 전설 장비에 그 부위의 특수 능력치를 새깁니다 · 마을 ${TOWN.heir}에게서 사용`}}
   return{ic:'✦',c:'#ffd24a',nm:'확정 강화 주문서',n:r.n||1,d:'대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다'}};
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]},bb=S.duel&&S.duel.b==='maw'?'maw':'knight',m=S.duel&&S.duel.m||'n',R=BRW[b.bk]||{},rf=BREF[b.bk]||60,c=bossCost(bb,m),hv=fragHave(bb);
-  const gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4',pv=R.rr?`${ci('r')} 불씨 ${bwTx(R.rr)} · ${ci('s')} 인장 ${bwTx(R.sl)}`:`✦ 촉매 ${R.ct?bwTx(R.ct):''}`;
+  const gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4',pv=R.rr?`${ci('r')} 불씨 ${bwTx(R.rr)} · ${ci('s')} 인장 ${bwTx(R.sl)}`:`✦ 촉매 ${R.ct?bwTx(R.ct):''}`,ga={S:'#5ae0ff',A:'#7fe07a',B:'#e8c870'}[b.g]||'#e8c870',bwH=d=>`<b>${Math.round(d.p*100)}%</b> · ${d.a[0]===d.a[1]?d.a[0]:d.a.join('~')}`,od=R.rr?`<span>${ci('r')}불씨 ${bwH(R.rr)}</span><span>${ci('s')}인장 ${bwH(R.sl)}</span><span>외형 낮은 확률</span>`:`<span>✦ 촉매 ${R.ct?bwH(R.ct):''}</span><span>외형 낮은 확률</span>`;
   rcInfos=[{ic:ci('g'),c:'#f0d040',nm:'골드',n:fmtG4(gold),d:'기본 보상 — 처치하면 항상 받습니다'}].concat(b.rolled?b.res.map(rwInfo):[]);
   const tiles=rcInfos.map((x,k)=>`<button class="rct${k===(rcInfos.length>1?1:0)?' on':''}" data-rc="${k}" style="--c:${x.c}"><span class="rci">${x.ic}<b>${x.n}</b>${x.nw?'<i>NEW</i>':''}</span><small>${x.nm}</small></button>`).join('')+(b.rolled?'':`<div class="rct" style="--c:#4a4a58"><span class="rci" style="color:#6a6a78">?</span><small>보상 굴림 전</small></div>`);
   const f=rcInfos[rcInfos.length>1?1:0];
@@ -7457,8 +7471,8 @@ function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:tru
   <div class="rc-time">${b.sec.toFixed(1)}<small style="font-size:12px"> 초</small>${b.nr?'<em>NEW RECORD</em>':''}</div><div class="rc-sub">${b.nr?'':`최고 ${(S.bossRec||{})[b.bk]}초 · `}S ${(rf*.4).toFixed(0)}초 이하 · A ${(rf*.7).toFixed(0)}초 이하 · 보상 굴림 S 3회 · A 2회 · B 1회</div>`:''}
   <div class="lab">획득 보상</div><div class="rc-grid">${tiles}</div>
   <div class="rcinfo" id="rcInfo"><b style="color:${f.c}">${f.nm}</b><br>${f.d}</div></div>
-  <div class="rc-bot">${b.rolled?'':`<button class="primary bonusbtn" id="bonusGo">보상 받기 · ${b.g||'B'}등급 ${b.rolls||1}회<small>회당 ${pv} · 외형 낮은 확률</small></button>`}
-  <button class="primary" id="duelAgain" ${!S.test&&hv<c?'disabled':''}>다시 도전${c?` · ${fragNm(bb)} ${c}개 (보유 ${hv})`:''}</button><button class="ghost" id="duelBack">엔드게임으로 돌아가기</button></div></div>`;$('clear').hidden=false;releaseAll()}
+  <div class="rc-bot">${b.rolled?'':`<button class="rbtn" id="bonusGo" style="--ga:${ga}"><span class="rb-em"><i>${b.g||'B'}</i><small>${b.g||'B'}등급</small></span><span class="rb-bd"><span class="rb-t">보상 받기<em>×${b.rolls||1}</em></span><span class="rb-od">${od}</span></span></button>`}
+  <button class="rsec" id="duelAgain" ${!S.test&&hv<c?'disabled':''}>다시 도전${c?`<small> · ${fragNm(bb)} ${c}개 (보유 ${hv})</small>`:''}</button><button class="rter" id="duelTown">마을로 돌아가기</button></div></div>`;$('clear').hidden=false;releaseAll()}
 function showDuelFail(){const me=skillDps(C().skills[0]).main,req=duelReq();$('clearSheet').innerHTML=`<div><h2>결투에서 패배했습니다</h2></div>
   <p class="hint">${duelDef().n}의 체력이 모두 회복되었습니다.</p>
   <p class="hint">${S.duel&&S.duel.b==='maw'?'브레스는 구르기로 못 피하니 회전 방향 앞으로 달리세요. 흡입은 멀리, 파동은 초록 원 안으로. 잠수 뒤 6칸 공격은 마지막 칸에서 시작해 먼저 터진 칸으로 옮기세요.':'바닥의 빨간 경고 장판이 다 차기 전에 밖으로 피하세요. 점프 내려찍기는 원 밖으로, 검기는 부채꼴 옆으로 비켜서면 됩니다.'}</p>
@@ -10010,7 +10024,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1080';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1081';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10633,6 +10647,7 @@ function showFinalClear(){
 $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='dummyAgain'){$('clear').hidden=true;S.duel={tier:duelCfg('u','maw').tier,uber:true,m:'u',b:'maw',dummy:1};collectAll();resetWorld();return}
   if(e.target.id==='duelAgain'){const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b,was=!!(S.duel&&S.duel.fail);if(duelBonus&&!duelBonus.rolled)rollBonus();/* v886: 보상을 안 받고 넘어가도 자동 지급 */if(!was&&!bossPay(b==='maw'?'maw':'knight',m))return;/* v886: 이긴 뒤 다시 도전은 조각 5개 · 진 뒤엔 무료 */$('clear').hidden=true;S.duel={tier:duelCfg(m,b).tier,uber:m==='u',m,b};bossFailed.knight=bossFailed.maw=0;if(was)bossFailed[b==='maw'?'maw':'knight']=1;collectAll();resetWorld();return}
+  if(e.target.closest('#duelTown')){if(duelBonus&&!duelBonus.rolled&&S.duel&&!S.duel.fail)rollBonus();$('clear').hidden=true;goTown();return}/* v1081: 보상 창 하단 — 마을로 돌아가기 */
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){if(duelBonus&&!duelBonus.rolled&&S.duel&&!S.duel.fail)rollBonus();$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11*GOLD_K);bonusCine(()=>showDuelClear(g));return}
   {const t=e.target.closest('.rct[data-rc]');if(t){const x=rcInfos[+t.dataset.rc];if(x){document.querySelectorAll('.rct.on').forEach(y=>y.classList.remove('on'));t.classList.add('on');$('rcInfo').innerHTML=`<b style="color:${x.c}">${x.nm}</b><br>${x.d}`}return}}
