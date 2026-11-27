@@ -7077,7 +7077,7 @@ function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=
   S.gold+=gold;
   S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */const bk=(S.duel&&S.duel.b==='maw'?'m':'k')+(U?'u':'n'),sec=Math.max(.1,time-((e&&e.t0)||time)-((e&&e.sipeOff)||0)),gr=bGrade(bk,sec),rec=S.bossRec=S.bossRec||{},nr=!rec[bk]||sec<rec[bk];if(nr)rec[bk]=+sec.toFixed(1);{const H=S.bossHist=S.bossHist||{};(H[bk]=H[bk]||[]).push(+sec.toFixed(1));if(H[bk].length>5)H[bk].shift()}if(gr[0]==='S')(S.bossS=S.bossS||{})[bk]=1;titleCheck(S);
   duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[],bk,sec,g:gr[0],rolls:gr[2],nr};
-  later(2.3,()=>victory('격파!',`${U?'우버 ':''}${duelDef().n} 처치`,U?'200,120,255':'255,206,74',()=>showDuelClear(gold)))}
+  later(2.3,()=>showDuelBanner(gold))}/* v1033: 격파 컷신 대신 스토리 장 완료와 같은 배너 */
 /* v107 추가 보상: 버튼을 누르면 컷신 → 각인의 서(30%) · 검귀 카이렌는 각인의 서만, 심연의 아귀는 확정 강화 주문서만 굴림(v227 분리) */
 const TK_P=.3;/* v245: 아귀 확정 강화 주문서 10% → 30% (+20%p, 일반·우버 공통) */let duelBonus=null;
 function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.res=[];const U=b.U,R=BRW[b.bk||((b.mb?'m':'k')+(U?'u':'n'))],ri=(a,c)=>a+Math.floor(Math.random()*(c-a+1));let rr=0,sl=0,ct=0;S.bcos=S.bcos||{};
@@ -7127,6 +7127,11 @@ function victory(title,sub,col,fn){const el=document.createElement('div');el.cla
 function dropGiven(p,it){const q=scatter(p),g=lootMesh(it);g.position.set(q.x,0,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'item',item:it,ph:Math.random()*6});ringFx(q,2.4,it.mx?0x5ae0d0:0xff8a3a,.7);flash(q,it.mx?0x5ae0d0:0xff8a3a,2)}
 function showDummyClear(sec,dps,hp){collectAll();
   $('clearSheet').innerHTML=`<div><h2>허수아비 처치</h2></div><div class="kv"><span>걸린 시간</span><b style="color:#5ad1c8">${sec.toFixed(1)}초</b><span>평균 DPS</span><b>${fmtN(dps)}</b><span>허수아비 체력</span><b>${fmtN(hp)}</b><span>주력 스킬</span><b>${SK[C().skills[0]].n}</b></div><p class="hint">첫 타격부터 처치까지의 시간입니다 · 보상 없음</p><button class="primary" id="dummyAgain">다시 도전</button><button class="ghost" id="duelBack" style="width:100%">엔드게임으로 돌아가기</button>`;$('clear').hidden=false;releaseAll()}
+let duelGoldV=0;
+function showDuelBanner(gold){collectAll();duelGoldV=gold;const b=duelBonus||{},U=!!(S.duel&&S.duel.uber),gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4';shake=Math.max(shake,.3);
+  $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${U?'우버 · ':''}위험도 ${S.duel?S.duel.tier:10}</div><h1>${duelDef().n} 처치</h1><div class="cb-s">${b.g?`처치 시간 ${b.sec.toFixed(1)}초 · <b style="color:${gc}">${b.g}등급</b>${b.nr?' · 최고 기록!':''}`:'격파 완료'}</div></div>
+    <div class="cb-low"><p>기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p><button class="primary" id="duelRw">보상 확인</button></div></div>`;
+  $('clear').hidden=false;releaseAll()}
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]},bb=S.duel&&S.duel.b==='maw'?'maw':'knight',m=S.duel&&S.duel.m||'n',R=BRW[b.bk]||{},rf=BREF[b.bk]||60,c=bossCost(bb,m),hv=fragHave(bb);
   const gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4',pv=R.rr?`${ci('r')} 불씨 ${bwTx(R.rr)} · ${ci('s')} 인장 ${bwTx(R.sl)}`:`✦ 촉매 ${R.ct?bwTx(R.ct):''}`;
   $('clearSheet').innerHTML=`<div><div class="chap">Duel Clear · ${S.duel&&S.duel.uber?'우버':'일반'} · 위험도 ${S.duel?S.duel.tier:10}</div><h2>${duelDef().n} 격파!</h2></div>
@@ -7841,7 +7846,7 @@ function autoSpend(mode){const am=mode||S.autoGem;if(!am||!S.cls)return 0;let n=
   if(n){refreshMax();offer=null;lvlSkill=null}return n}
 function progress(e){if(e.pkid!=null&&mapKind==='story'){const t=sKillTab();if(!t.ids.includes(e.pkid))t.ids.push(e.pkid)}if(e.pkid!=null&&mapKind==='route')rtKill(e.pkid);if(S.tutor){tutKill(e);save();return}if(e.duel){duelWin(e);save();return}
   if(S.ch<NCH){
-    if(S.phase===3){if(e.final){S.phase=4;later(2.3,()=>victory('격파!',`${FINAL.boss} 처치`,'255,206,74',showFinalClear))}}
+    if(S.phase===3){if(e.final){S.phase=4;later(2.3,showFinalClear)}}
     else if(S.phase===0){S.kills++;if(S.kills>=CH[S.ch].goal){S.phase=1;toast('메인 퀘스트 갱신',`길 끝 제단에 ${CH[S.ch].boss}가 나타났다`);spawnBoss()}}
     else if(S.phase===1&&e.chBoss){S.phase=2;stOpenEnd();later(1.6,showClear)}/* v785: 격파 컷신 없이 바로 장 완료 배너 */
   }else{if(e.gate){gateClear(e);return save()}if(e.rift){/* v409: 균열 몬스터는 위험도 상승·에코 보스 카운트에 포함하지 않음 */}else{if(!e.boss&&++S.egK>=EG_BOSS_KILLS&&!enemies.some(x=>x.boss)){S.egK=0;spawnEchoBoss()}if(!e.boss){S.tierKills++}/* v856: 에코 보스 처치는 마릿수에 넣지 않음 — 일반 몹이 남은 채 관문 보스가 나오던 원인 */;if(!riftBusy())tierCheck()}}/* v405: 균열 중엔 위험도 상승·관문 판정을 미룸 */
@@ -9565,7 +9570,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1035';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1036';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10190,6 +10195,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='duelAgain'){const m=S.duel&&S.duel.m||'n',b=S.duel&&S.duel.b,was=!!(S.duel&&S.duel.fail);if(duelBonus&&!duelBonus.rolled)rollBonus();/* v886: 보상을 안 받고 넘어가도 자동 지급 */if(!was&&!bossPay(b==='maw'?'maw':'knight',m))return;/* v886: 이긴 뒤 다시 도전은 조각 5개 · 진 뒤엔 무료 */$('clear').hidden=true;S.duel={tier:duelCfg(m,b).tier,uber:m==='u',m,b};bossFailed.knight=bossFailed.maw=0;if(was)bossFailed[b==='maw'?'maw':'knight']=1;collectAll();resetWorld();return}
   if(e.target.id==='duelBack'||e.target.closest('#duelBack')){if(duelBonus&&!duelBonus.rolled&&S.duel&&!S.duel.fail)rollBonus();$('clear').hidden=true;duelLeave();return}
   if(e.target.closest('#bonusGo')){if(!duelBonus||duelBonus.rolled)return;rollBonus();const g=Math.round(duelReq()*11*GOLD_K);bonusCine(()=>showDuelClear(g));return}
+  if(e.target.closest('#duelRw')){showDuelClear(duelGoldV);return}
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
