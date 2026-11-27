@@ -2352,7 +2352,7 @@ const NS_STG=[500,1008,1516,2024,2532,3040,3548,4056,4564,5072]/* v853: 1장 500
 const NS_STK=.85/* v860: 스토리 일반 몬스터 체력 −15% (장 보스는 그대로) */ /* v853: 체력 표(NS_STG)에 직접 반영 — */ /* v850: 스토리 일반 몬스터 체력 전체 −20% (장 보스·골드는 그대로) */,nsHpMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STK*NS_STG[ch]/(ETYPES.grunt.hp*CH[ch].hp):S.duel?nLerpLog(S.duel.tier,NS_HPM):D_GH[dI(t)]/(ETYPES.grunt.hp*egHp(oT(t)));/* v621: 구울 체력을 표에 맞춤 */
 const nsDmMul=(ch=S.ch,t=S.tier)=>ch<NCH?NS_STDM[ch]:S.duel?nLerpLog(S.duel.tier,NS_DMM):D_BR[dI(t)]/(ETYPES.brute.dmg*RANK[2].dmg*1.2*egDmg(oT(t)));/* v621: 유니크 브루트 1타를 표에 맞춤 */
 /* 보스 체력·기준 수치 (기준 강화: 검귀 +20 · 아귀 +32 · 우버 검귀 +35 · 우버 아귀 +43) */
-const NS_BOSS={knight:{n:{hp:1e7,K:3440},u:{hp:1e8,K:8000}},maw:{n:{hp:3e7,K:5230},u:{hp:1e8,K:13480}}};/* v1083: 체력 — 일반 검귀 1,000만 · 일반 아귀 3,000만 · 우버 검귀·우버 아귀 1억 *//* v826: 체력 = 기존 목표 시간(12.5·51·38·70초) × 새 적정 DPS × 0.75, 기준 수치 = 새 방어 비율(×0.77·0.89·0.82·0.98) *//* v621: 체력 = 목표 처치 시간 × 담당 위험도(5·10·15·20) 적정 DPS × 0.75 *//* v603: 기준 수치를 방어 상수 3,000 스케일로 (담당 위험도 5·10·15·20 표준 스펙 = 50%) — 체력은 3단계(위험도 20단계)에서 */
+const NS_BOSS={knight:{n:{hp:1e7,K:3440},u:{hp:1e8,K:8000}},maw:{n:{hp:35e6,K:5230},u:{hp:12e7,K:13480}}};/* v1091: 체력 — 일반 검귀 1,000만 · 일반 아귀 3,500만 · 우버 검귀 1억 · 우버 아귀 1.2억 *//* v826: 체력 = 기존 목표 시간(12.5·51·38·70초) × 새 적정 DPS × 0.75, 기준 수치 = 새 방어 비율(×0.77·0.89·0.82·0.98) *//* v621: 체력 = 목표 처치 시간 × 담당 위험도(5·10·15·20) 적정 DPS × 0.75 *//* v603: 기준 수치를 방어 상수 3,000 스케일로 (담당 위험도 5·10·15·20 표준 스펙 = 50%) — 체력은 3단계(위험도 20단계)에서 */
 const nsBossCfg=()=>S.duel?NS_BOSS[S.duel.b==='maw'?'maw':'knight'][S.duel.uber?'u':'n']:null;
 /* 원거리 몬스터(사수) 투사체 — 이동·구르기로 피할 수 있음, 회피 판정 */
 const nsShots=[];const shotMat=new THREE.MeshBasicMaterial({color:0xff9a4a}),shotGeo=new THREE.SphereGeometry(.18,8,6);
