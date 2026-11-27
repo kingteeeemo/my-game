@@ -83,6 +83,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivact{display:flex;flex-direction:column;gap:8px}
 .iv2pop .ivact .btns{display:grid;grid-template-columns:1fr 1.3fr 1.2fr;gap:6px;margin:0}
 .iv2pop .ivact .btns button{min-height:42px}
+.iv2pop .ivact .btns.etcbt{grid-template-columns:1fr}
 .iv2pop .ivdps{background:rgba(22,22,29,.98)}
 /* 가로·PC: 카드 촘촘하게, DPS·버튼을 한 줄로 */
 .iv2.l .iv2pop{width:min(460px,100%)}.iv2.l .iv2pop .ivc{padding:10px 13px;gap:2px}.iv2.l .iv2pop .ivl{font-size:12.5px}.iv2.l .iv2pop .ivc{padding-top:20px;padding-bottom:16px;gap:5px}.iv2.l .iv2pop .ivc .ivs{margin-bottom:8px}.iv2.l .iv2pop .ivc .ivn{font-size:15px}
@@ -1142,7 +1143,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .pcd .xpi{filter:drop-shadow(0 0 8px color-mix(in srgb,var(--pc) 45%,transparent))}.pcd .pn{font:700 13.5px var(--ko);color:var(--ink)}.pcd .pe{font-size:11px;color:#c9c2b2;line-height:1.35;min-height:30px}.pcd .po{font-size:10.5px;color:#8a8577;line-height:1.4;min-height:30px}.pcd .po b{color:var(--ink)}.pcd .pm.wide{width:100%;height:30px;margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:4px}
 @media (orientation:landscape) and (max-height:820px){.pgrid{gap:8px}.pcd{display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:8px;row-gap:1px;align-items:center;text-align:left;padding:7px 9px}.pcd .xpi{grid-row:1/4;grid-column:1;width:44px!important;height:44px!important}.pcd .pn,.pcd .pe,.pcd .po{grid-column:2}.pcd .pn{font-size:12.5px}.pcd .pe{min-height:0;font-size:10.5px}.pcd .po{min-height:0;font-size:10px}.pcd .pm.wide{grid-column:1/-1;height:24px;margin-top:4px}}
 @media (orientation:landscape) and (max-height:520px){.pgrid{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.pcd{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 4px 6px;gap:3px}.pcd .xpi{width:38px!important;height:38px!important}.pcd .pn{font-size:11px}.pcd .pe{font-size:9px;min-height:0;line-height:1.3}.pcd .pm.wide{width:100%;height:22px;margin-top:auto;font-size:10px;padding:0 2px}}
-.etcb{display:flex;gap:12px;align-items:center;padding:6px 2px}.etcb .xpi{flex:none}.etcb .eci{flex:none;width:56px;height:56px;display:flex;align-items:center;justify-content:center}.etcb .eci svg{width:100%;height:100%}.ett{display:flex;flex-direction:column;gap:4px;min-width:0}.ett .en{font:800 16px var(--ko)}.ett .ed{font-size:12px;line-height:1.45;color:#c9c2b2}.ett .ed b{color:var(--ink)}.ett .eo{color:var(--ink)}.etcm .primary.off{background:#2a2a33;color:var(--ink);border:1px solid var(--line)}.tile .eqb{position:absolute;right:3px;top:3px;font:700 9px var(--ko);color:#fff;background:rgba(40,160,90,.85);border-radius:5px;padding:1px 4px}.iv2it .tile .xpi{display:block;margin:auto}
+.iv2pop .pico.etcpic .xpi,.iv2pop .pico.etcpic svg{width:78%;height:78%}.iv2pop .ivhint{font-size:12.5px;line-height:1.5;color:#c9c2b2;margin-top:4px}.tile .eqb{position:absolute;right:3px;top:3px;font:700 9px var(--ko);color:#fff;background:rgba(40,160,90,.85);border-radius:5px;padding:1px 4px}.iv2it .tile .xpi{display:block;margin:auto}
 .xpt{display:flex;flex-direction:column;gap:8px}.xpl{display:flex;flex-direction:column;gap:6px}
 .rri.xpc{border-color:color-mix(in srgb,var(--pc,#e8dcc4) 70%,transparent);background:color-mix(in srgb,var(--pc,#e8dcc4) 7%,#111116)}
 .rri.xpfx{animation:xpfx 1s ease-out}@keyframes xpfx{0%{filter:brightness(2.1);box-shadow:0 0 18px color-mix(in srgb,var(--pc) 60%,transparent)}100%{filter:none;box-shadow:none}}
@@ -9617,7 +9618,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1044';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1045';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10631,15 +10632,15 @@ function etcList(){const o=[],sc=S.scrolls||[],a=sc.filter(x=>x.v<10).length,b=s
   {/* v841: 없는 재화는 0으로 표기하지 않고 숨김, 정수·불씨·인장은 엔드게임부터 */const cur=(n,v,c,sh,d)=>{if(!TCUR()&&!(v>0))return;o.push({n,c,h:ci(sh,'big'),kt:TCUR()?'∞':fmtKM(v||0),d,cur:1})},eg=refOn();cur('광휘의 파편',S.lumi,'#c890ff','l','재단사 세라에게서 날개 등 부착물·무기·캐릭터 외형 장비를 사는 데 씁니다 · 최대 999개');if(eg){cur('잿불 정수',S.ess,'#ff5a3a','e','잿불 정수와 골드로 올리는 추가 강화와 오라 강화에 씁니다');cur('윤회의 불씨',S.rr,'#ff9a4a','r','조율사 카엘에게서 장비 옵션 수치를 다시 굴리고, 특수 물약을 사는 데 씁니다');cur('성역의 인장',S.seal,'#ff8a2a','s','조율사 카엘에게서 장비 옵션 한 줄을 지키는 데 씁니다')}}
   if(NS()){}/* v639: 물약은 충전식이라 기타 탭에서 뺌 */else for(const [kk,nm,c] of [['hp','체력','#ff7a6a'],['mp','마나','#6aa8ff']])for(const z of PSZ){const q=(S.pots[kk]||{})[z]||0;if(q>0)o.push({n:`${POT[z].n} ${nm} 물약`,k:q,c,i:kk+'_'+z,d:`${nm} ${POT[z].amt} 회복`})}
   return o}
-/* v1044: 기타 아이템 설명창 — 특수 물약은 하단에 장착/해제 버튼, 재화·재료는 설명만 */
-function etcInfo(idx){const old=document.querySelector('.uqm.etcm');if(old)old.remove();const e=etcList()[idx];if(!e)return;
-  let ic,body,btn='';
-  if(e.xp){const id=e.xp,x=xpS(),X=XPOT[id],eq=x.eq.includes(id);ic=xpIco(id,64);xpInit();
-    body=`<b class="en" style="color:${X.c}">${X.n} 물약</b><span class="ed">${xpD(id)}초간 ${X.f(xpE(id))}</span><span class="ed">충전 <b>${Math.floor((P.xch&&P.xch[id])??xpMax(id))}/${xpMax(id)}</b>회 · 몬스터 처치로 충전</span><span class="ed eo">${xpOptN(id)}</span><span class="ed">장착한 물약 <b>${x.eq.filter(Boolean).length}/3</b> · 단축키 3·4·5</span>`;
-    btn=`<button class="primary${eq?' off':''}" data-etcx="${id}">${eq?'해제':'장착'}</button>`}
-  else{ic=e.h?`<span class="eci">${e.h}</span>`:`<span class="eci">${ico(e.i)}</span>`;body=`<b class="en" style="color:${e.c}">${e.n}</b><span class="ed">${e.kt!=null?'보유 '+e.kt:'보유 '+e.k+'개'}</span><span class="ed">${e.d||''}</span>`}
-  const d=document.createElement('div');d.className='uqm etcm';d.innerHTML=`<div class="uqc"><div class="shead"><div><h2>${e.xp?'특수 물약':'아이템 정보'}</h2></div><button class="close">닫기</button></div><div class="etcb">${ic}<div class="ett">${body}</div></div>${btn}</div>`;
-  d.addEventListener('click',ev=>{const t=ev.target.closest('[data-etcx]');if(t){const id=t.dataset.etcx,x=xpS(),k=x.eq.indexOf(id);if(k>=0)x.eq[k]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();etcInfo(idx);renderInv();return}if(ev.target===d||ev.target.closest('.close'))d.remove()});document.body.appendChild(d)}
+/* v1045: 기타 아이템 설명 — 장비 선택 팝업(iv2pop · ivc)과 같은 스타일. 특수 물약은 하단 장착/해제 버튼(누르면 닫힘), 재화·재료는 설명만 */
+let etcSel=null;
+function etcPop(){const e=etcSel!=null?etcList()[etcSel]:null;if(!e){etcSel=null;return ''}
+  const row=(a,b)=>`<div class="ivl"><span>${a}</span><b>${b}</b></div>`;let pic,rows,act='',sub;
+  if(e.xp){const id=e.xp,x=xpS(),X=XPOT[id],eq=x.eq.includes(id);xpInit();pic=xpIco(id,46);sub='특수 물약 · '+(eq?'장착 중':'미장착');
+    rows=row('지속시간',xpD(id)+'초')+row('효과',X.f(xpE(id)))+row('충전',`${Math.floor((P.xch&&P.xch[id])??xpMax(id))} / ${xpMax(id)}회`)+row('옵션',xpOptN(id))+row('장착한 물약',`${x.eq.filter(Boolean).length} / 3`);
+    act=`<div class="ivact"><div class="btns etcbt"><button class="primary" id="iEtcX">${eq?'해제':'장착'}</button></div></div>`}
+  else{pic=e.h||ico(e.i);sub=e.cur?'재화':'재료';rows=row('보유',e.kt!=null?e.kt:e.k+'개')+`<div class="ivhint">${e.d||''}</div>`}
+  return `<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button><span class="pico etcpic" style="--rc:${e.c}">${pic}</span><div class="ivcmp one"><div class="ivc ns3 sel" style="--tc:${e.c}"><span class="k">${sub}</span><b class="ivn" style="color:${e.c}">${e.n}</b><span class="ivs">${e.xp?'':'기타 아이템'}</span>${rows}</div></div>${act}</div></div>`}
 /* v936: 고유 장비 칸 — 테스트 캐릭터는 목록에서 골라 장착·해제, 일반 캐릭터는 장착한 고유 장비 정보만 */
 function uqPicker(){const old=document.querySelector('.uqm');if(old)old.remove();const cur=S.uniq&&UNQ[S.uniq]?S.uniq:null;
   const card=(k,u)=>`<button class="uqi${k===cur?' on':''}" ${S.test||uqOwn()[k]?`data-uqk="${k}"`:'disabled'} style="--rc:${u.c}"><span class="ic">${ico(u.ic)}</span><span class="tx"><b style="color:${u.c}">${u.n}</b><small>${u.d}</small>${u.pw?'<em>전투력에 반영</em>':''}</span>${k===cur?'<i>장착 중</i>':''}</button>`;
@@ -10689,6 +10690,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
   const pico=it=>`<span class="pico" style="--rc:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${ico(icoSlot(it.slot,it))}</span>`;
   if(sel)pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(sel)}<div class="ivcmp one">${ivCard(sel,'sel',cur)}</div>${sel.uid?ivAct(sel,cur).replace('🔒 해제',LKI()+' 해제').replace('🔓 잠금',LKI(1)+' 잠금'):ivAct(sel,cur).replace('<button class="primary" id="iEquip">장착</button>','').replace('</div></div>','<button class="primary" id="iEquip">장착</button></div></div>').replace('🔒 해제',LKI()+' 해제').replace('🔓 잠금',LKI(1)+' 잠금')}</div></div>`;
   else if(eqSel&&S.eq[eqSel])pop=`<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button>${pico(S.eq[eqSel])}<div class="ivcmp one">${ivCard(S.eq[eqSel],'cur')}</div></div></div>`;
+  if(!pop&&invFilter==='etc'&&etcSel!=null)pop=etcPop();
   const keep=sh.querySelector('.iv2bag'),st=keep?keep.scrollTop:0;
   sh.innerHTML=`<div class="iv2 ${port?'p':'l'}${port&&IVS.exp?' exp':''}" style="--ph:${(IVS.ph*100).toFixed(2)}%;--k:${ivK().toFixed(3)}">${stage}${panel}${top}${pop}</div>`;
   const nb=sh.querySelector('.iv2bag');if(nb){nb.scrollTop=st;/* v496: 세로 — 가방을 아래로 내려 보면 가방 영역이 넓어지고(캐릭터 영역 축소), 맨 위로 올리면 원래대로 */
@@ -10718,24 +10720,25 @@ function renderInvOld(){
 }
 addEventListener('resize',()=>{if(invOpen)renderInv()});
 $('invSheet').addEventListener('click',e=>{
-  if(e.target.classList.contains('iv2dim')){invSel=null;eqSel=null;renderInv();return}
+  if(e.target.classList.contains('iv2dim')){invSel=null;eqSel=null;etcSel=null;renderInv();return}
   if(Date.now()-IVS.dragEnd<250)return;
   const b=e.target.closest('button');if(!b)return;
   if(b.id==='iClose'){closeInv();return}
   if(b.dataset.dd){ddOpen=ddOpen===b.dataset.dd?null:b.dataset.dd;renderInv();return}
   if(b.dataset.sub!==undefined){const [k,sl]=b.dataset.sub.split(',');invFilter=k;invSub=sl||null;ddOpen=null;renderInv();return}
-  if(b.id==='iPopX'){invSel=null;eqSel=null;renderInv();return}
+  if(b.id==='iPopX'){invSel=null;eqSel=null;etcSel=null;renderInv();return}
   if(ddOpen&&!b.dataset.if){ddOpen=null}
   if(b.id==='iLockMode'){lockMode=!lockMode;if(lockMode){invSel=null;eqSel=null}renderInv();return}
   if(b.dataset.i&&lockMode){const it=S.inv.find(x=>x.id===+b.dataset.i);if(it){it.lock=!it.lock;save()}renderInv();return}
   if(b.dataset.i){const id=+b.dataset.i;invSel=invSel===id?null:id;eqSel=null;renderInv();return}
-  if(b.dataset.etc!==undefined){etcInfo(+b.dataset.etc);return}
+  if(b.id==='iEtcX'){const L=etcList(),e=L[etcSel];if(e&&e.xp){const id=e.xp,x=xpS(),k=x.eq.indexOf(id);if(k>=0)x.eq[k]=null;else{const j=x.eq.indexOf(null);if(j<0){toast('슬롯이 가득 찼습니다','다른 물약을 먼저 해제하세요');return}x.eq[j]=id}save();etcSel=null;renderInv()}return}
+  if(b.dataset.etc!==undefined){etcSel=+b.dataset.etc;invSel=null;eqSel=null;renderInv();return}
   if(b.dataset.uq){uqPicker();return}
   if(b.dataset.eq){invSel=null;eqSel=eqSel===b.dataset.eq?null:b.dataset.eq;if(eqSel){const k=eqSel;invFilter=k==='weapon'?'weapon':['helm','armor','gloves','boots'].includes(k)?'armor':'acc';invSub=k==='weapon'?null:kSlot(k)}renderInv();return}
   if(b.id==='iEquip'){const i=S.inv.findIndex(x=>x.id===invSel);if(i<0)return;const it=S.inv[i];if(it.uid){toast('감정 필요','옵션을 감정한 뒤 장착할 수 있습니다');return}const ek=it.ns&&NS()&&it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];if(it.ns&&it.slot==='weapon'&&it.wc!==bc(S.cls)){toast('착용 불가',`${wcN(it.wc)}은(는) 다른 직업의 무기입니다 · 창고로 다른 캐릭터에게 옮길 수 있습니다`);return}S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);invSel=null;refreshMax();save();renderInv();return}
   if(b.dataset.look){lookSet(S.look===b.dataset.look?null:b.dataset.look);renderInv();return}
   if(b.dataset.wlook){S.wlook=S.wlook===b.dataset.wlook?null:b.dataset.wlook;save();renderInv();return}
-  if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;renderInv();return}
+  if(b.dataset.if){invFilter=b.dataset.if;invSub=null;ddOpen=null;invSel=null;etcSel=null;renderInv();return}
   if(b.id==='iLock'){const it=S.inv.find(x=>x.id===invSel);if(it){it.lock=!it.lock;save();toast(it.lock?'아이템 잠금':'잠금 해제',it.lock?`${it.name} · 판매·자동 판매에서 제외됩니다`:it.name)}renderInv();return}
   if(b.id==='iDrop'){const it=S.inv.find(x=>x.id===invSel);if(it&&!it.lock){S.gold+=sellPrice(it);S.inv=S.inv.filter(x=>x!==it)}invSel=null;save();renderInv();refreshUpBtn();return}
   if(b.id==='iBagUp'){if(NS()&&(S.bagX||0)<3)bagUpWin();return}
