@@ -5023,11 +5023,42 @@ function buildRefuge(){clearProps();propTheme='refuge';mapKind='town';townSync()
   altarRing.visible=altarLight.visible=false;arenaRing.visible=false;for(const l of arenaLights)l.visible=false;mapKind='town';ptDraw()}
 /* v1049: 화로 둘레의 포탈 — 남은 개수만큼 */
 let ptM=[];
+/* v1061: 포탈 — 소용돌이치는 차원문(셰이더) + 빛나는 테두리 + 룬 받침돌 + 빨려드는 빛 입자 + 바닥 빛 */
+const PTU={t:{value:0}};
+const PT_VS=`varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+const PT_FS=`uniform float t;uniform float ph;varying vec2 vU;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p*=2.1;a*=.5;}return v;}
+void main(){vec2 q=(vU-.5)*2.;q.x*=1.55;float r=length(q);if(r>1.)discard;float a=atan(q.y,q.x);float T=t+ph;
+ float sw=a+2.6/(r+.25)-T*1.6;vec2 P=vec2(cos(sw),sin(sw))*(1.5+r*2.)+vec2(0.,-T*.35);
+ float f=fb(P*1.4)+.5*fb(P*3.1+T*.4);
+ float arms=.5+.5*sin(a*3.-T*2.2+5./(r+.3));
+ vec3 deep=vec3(.03,.02,.12),mid=vec3(.22,.32,.95),hot=vec3(.75,.9,1.);
+ vec3 c=mix(deep,mid,smoothstep(.35,1.05,f+arms*.35));c=mix(c,hot,smoothstep(.95,1.35,f+arms*.3)*.85);
+ c+=vec3(.55,.75,1.)*pow(1.-r,4.)*1.4;
+ float rim=smoothstep(.72,.98,r);c=mix(c,vec3(.7,.55,1.),rim*.6);c+=vec3(.6,.45,1.)*pow(smoothstep(.8,.99,r),3.)*1.6;
+ float al=smoothstep(1.,.93,r)*(.82+.18*f);gl_FragColor=vec4(c,al);}`;
 function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const n=S.pt&&S.pt.t===S.tier&&S.pt.left!=null?S.pt.left:PZ_N;/* v1060: 아직 안 들어간 도전은 6개 */if(n<=0)return;const hp=refH.g.position;
-  for(let i=0;i<PZ_N;i++){if(i>=n)break;const a=-Math.PI/2+i*(Math.PI*2/PZ_N)+.3,x=hp.x+Math.cos(a)*5.2,z=hp.z+Math.sin(a)*5.2,g=new THREE.Group();
-    const rg=new THREE.Mesh(new THREE.TorusGeometry(1,.13,10,36),new THREE.MeshBasicMaterial({color:0xc4acff})),dk=new THREE.Mesh(new THREE.CircleGeometry(1.0,28),new THREE.MeshBasicMaterial({map:refGlowTex,color:0x8ab8ff,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-    rg.position.y=dk.position.y=1.25;g.add(rg,dk);g.position.set(x,groundH(x,z),z);g.rotation.y=Math.atan2(hp.x-x,hp.z-z);scene.add(g);propMeshes.push(g);ptM.push({g,rg,dk,ph:i*1.3});refPool(x,z,2.6,0x8a9aff,.55)}}
-function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;for(const p of ptM){p.rg.rotation.z=t*.6+p.ph;p.dk.material.opacity=.55+.2*Math.sin(t*3+p.ph);p.dk.scale.setScalar(1+.05*Math.sin(t*4+p.ph))}}
+  const stone=SM({color:0x3a3846,roughness:.9}),rune=new THREE.MeshBasicMaterial({color:0x9a8aff});
+  for(let i=0;i<PZ_N;i++){if(i>=n)break;const a=-Math.PI/2+i*(Math.PI*2/PZ_N)+.3,x=hp.x+Math.cos(a)*5.4,z=hp.z+Math.sin(a)*5.4,g=new THREE.Group();
+    const mat=new THREE.ShaderMaterial({uniforms:{t:PTU.t,ph:{value:i*2.7}},vertexShader:PT_VS,fragmentShader:PT_FS,transparent:true,depthWrite:false,side:THREE.DoubleSide});
+    const disk=new THREE.Mesh(new THREE.PlaneGeometry(1.5,2.3),mat);disk.position.y=1.35;g.add(disk);
+    /* 테두리: 가는 빛 고리 두 겹(타원) */
+    const rimM=new THREE.MeshBasicMaterial({color:0xb9a2ff,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}),rim=new THREE.Mesh(new THREE.TorusGeometry(1,.035,8,64),rimM);rim.scale.set(.74,1.16,1);rim.position.y=1.35;g.add(rim);
+    const halo=new THREE.Mesh(new THREE.PlaneGeometry(2.6,3.4),new THREE.MeshBasicMaterial({map:refGlowTex,color:0x6a5cff,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false}));halo.position.set(0,1.35,-.02);g.add(halo);
+    /* 받침돌 두 개 + 위에 떠 있는 룬 조각 */
+    const sh=[];for(const sx of [-1,1]){const st=mesh(new THREE.CylinderGeometry(.13,.2,.7,6),stone,sx*.85,.35,0);st.rotation.y=sx*.4;g.add(st);
+      const rn=new THREE.Mesh(new THREE.OctahedronGeometry(.11,0),rune);rn.position.set(sx*.85,.95,0);g.add(rn);sh.push(rn)}
+    /* 빨려드는 빛 입자 */
+    const pts=[];for(let k=0;k<10;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:k%3?0x9ab8ff:0xd8c8ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.userData={a:Math.random()*6.28,r:.6+Math.random()*.5,p:Math.random(),s:.6+Math.random()*.6};g.add(sp);pts.push(sp)}
+    g.position.set(x,groundH(x,z),z);g.rotation.y=Math.atan2(x-hp.x,z-hp.z)*.3;/* 화면(남쪽)을 향하되 화로 쪽으로 살짝 */scene.add(g);propMeshes.push(g);
+    const lt=new THREE.PointLight(0x7a7aff,.9,6,1.6);lt.position.set(x,1.4,z);scene.add(lt);propMeshes.push(lt);
+    ptM.push({g,disk,rim,halo,sh,pts,lt,ph:i*1.3});refPool(x,z,2.4,0x6a7aff,.5)}}
+function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;PTU.t.value=t%1000;
+  for(const p of ptM){const k=Math.sin(t*2.3+p.ph);p.rim.material.opacity=.75+.2*k;p.halo.material.opacity=.35+.12*k;p.lt.intensity=.8+.25*k;
+    p.sh.forEach((r,j)=>{r.position.y=.95+.06*Math.sin(t*1.7+p.ph+j*2);r.rotation.y=t*1.2+j});
+    for(const s of p.pts){const u=s.userData,q=(u.p+t*.35*u.s)%1,rr=u.r*(1-q),aa=u.a+q*3.5;s.position.set(Math.cos(aa)*rr*.75,1.35+Math.sin(aa)*rr*1.1,.05+.15*(1-q));const sc=.18*(1-q*.6);s.scale.set(sc,sc,1);s.material.opacity=Math.min(1,q*4)*(1-q)*1.3}}}
 /* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
 const HR='쉼터지기 하란',VO='???';
 const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.']];
@@ -9764,7 +9795,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1060';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1061';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
