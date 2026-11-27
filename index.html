@@ -9473,7 +9473,7 @@ function disClick(b){const d=b.dataset;if(disBusy)return true;
     if(!T&&(S.gold||0)<DIS_COST){toast('골드 부족',`${fmtG(DIS_COST)}G가 필요합니다`);return true}
     if(S.inv.length>=bagCap()){disMsg='가방이 가득 차 합성할 수 없습니다';renderDis();return true}
     if(!T)S.gold-=DIS_COST;disAdd(disCat,t,-DIS_N);
-    let out;if(Math.random()<(DIS_P[t]||0)){const sl=C.sl[Math.random()*C.sl.length|0],it=nsMakeItem(sl,t-1,{wc:bc(S.cls)});it.uid=1;S.inv.push(it);out={it}}else out={};
+    let out;const frc=dtForce(t);if(frc||Math.random()<(DIS_P[t]||0)){const sl=C.sl[Math.random()*C.sl.length|0],it=nsMakeItem(sl,t-1,{wc:bc(S.cls)});it.uid=1;S.inv.push(it);out={it};if(frc)S.dtut.ok=1}else out={};/* v1097: 튜토리얼 승급은 반드시 성공 */
     save();if(typeof refreshUpBtn==='function')refreshUpBtn();
     /* v950: 합성 연출 — 재료가 결과 칸으로 날아가 합쳐짐 → 섬광 → 결과 공개 → 중앙 배너 */
     disBusy=true;disMsg='';
@@ -9584,12 +9584,44 @@ function ptTick(){if(!ptutOn()||!(S.ptut&&S.ptut.st)){otHide();clearInterval(ptT
 /* 옵션 변환을 누를 때: 튜토리얼 중이면 정해 둔 결과로, 불씨는 들지 않음 */
 function ptForce(id){if(!ptutOn()||id!=='spd'||!S.ptut||S.ptut.st<3)return null;const n=S.ptut.n||0;if(n>=3)return null;S.ptut.n=n+1;return PT_FORCE[n]}
 function otHide(){const c=$('otCard'),r=$('otRing');if(c){c.hidden=true;c.dataset.k=''}if(r)r.hidden=true}
+/* v1097: 세렌 마을 장비 분해·승급 튜토리얼 — 마을에 처음 도착하면 대장장이 브론 머리 위 보라 화살표 → 말을 걸면 연습 무기(6티어) 3개를 주고
+   분해 창에서 ① 6티어 고르기 → ② 전체 선택 → ③ 분해(확인) → ④ 합성 탭 → ⑤ 조각 모두 넣기 → ⑥ 승급을 직접 누르게 함(누를 때까지 안 넘어감, 승급은 연습이라 반드시 성공).
+   진행 S.dtut={st,ok} → 끝나면 {done:1}. 연습 장비·승급으로 얻은 장비는 그대로 가짐 */
+const dtutOn=()=>!!(S&&NS()&&!S.test&&!S.demo&&!refOn()&&S.dtut&&!S.dtut.done),dtWin=()=>!!(S.dtut&&S.dtut.st&&rrOpen&&nsKind==='dis'),SMN='대장장이 브론';
+const DT_IN=[[SMN,'…새 얼굴이군. 가방에 든 장비, 전부 쓸 만하진 않을 거다.'],[SMN,'쓰지 않는 장비는 분해해라. 부위별 조각이 나온다 — 무기는 무기 조각, 방어구는 방어구 조각, 장신구는 장신구 조각이지.'],[SMN,'같은 티어 조각이 3개 모이면 한 티어 높은 장비로 승급시킬 수 있다. 골드가 들고, 실패하면 조각만 사라진다.'],[SMN,'연습할 무기 셋을 주마. 직접 분해하고, 승급까지 해 봐라.']];
+const DT_END=[[SMN,'됐다. 분해하면 조각이 되고, 조각 셋이 모이면 한 티어 위 장비가 된다.'],[SMN,'티어가 높을수록 승급 확률은 낮아진다. 낮은 티어 조각은 아낌없이 합쳐도 좋지.'],[SMN,'쓸모없는 장비는 장비창의 「분해」로 언제든 정리해라.']];
+const DTS=[{t:'무기 탭',d:'위쪽 <b>무기</b> 탭을 누르세요.'},{t:'티어 고르기',d:'<b>6티어</b> 버튼을 눌러 가방의 6티어 무기를 불러오세요.'},{t:'전체 선택',d:'<b>전체 선택</b>을 눌러 연습 무기 3개를 모두 고르세요.'},{t:'분해',d:'<b>분해</b>를 누르세요. 선택한 장비가 조각으로 바뀝니다.'},{t:'분해 확인',d:'한 번 더 <b>분해</b>를 눌러 확인하세요.'},{t:'조각 확인',d:'6티어 무기 조각 3개를 얻었습니다. <b>확인</b>을 누르세요.'},{t:'합성(승급)',d:'위쪽 <b>합성</b> 탭을 누르세요. 조각 3개를 합치면 한 티어 위 장비가 됩니다.'},{t:'조각 고르기',d:'<b>6티어</b> 조각을 누르세요.'},{t:'조각 넣기',d:'<b>조각 모두 넣기</b>를 누르세요.'},{t:'승급',d:'<b>승급</b>을 누르세요. 연습이라 반드시 성공합니다.'}];
+let dtTm=0;
+const dtPrac=()=>S.inv.filter(x=>x.dt),dtGive=()=>{for(let i=0;i<3;i++){const it=nsMakeItem('weapon',6,{wc:bc(S.cls)});it.dt=1;S.inv.push(it)}save();if(typeof refreshUpBtn==='function')refreshUpBtn()},dtForce=t=>!!(dtutOn()&&S.dtut.st&&t===6&&disCat==='weapon');
+function dtStart(){clearInterval(dtTm);dtTm=setInterval(dtTick,250);dtTick()}
+function dtutSmith(){if(!dtutOn())return openSmith();
+  if(S.dtut.st){openDis('weapon');dtStart();return}
+  if(S.inv.length+3>bagCap()){toast('가방이 가득 찼습니다','연습 장비 3개를 받을 자리를 비워 주세요');return}
+  talk(otLines(DT_IN),()=>{dtGive();S.dtut.st=1;save();toast('연습 장비를 받았습니다','6티어 무기 3개 · 분해하고 승급해 보세요');openDis('weapon');dtStart()})}
+function dtTick(){if(!dtutOn()||!S.dtut.st){otHide();clearInterval(dtTm);return}
+  if(!rrOpen||nsKind!=='dis'){otHide();if(!rrOpen)clearInterval(dtTm);return}
+  if(disBusy)return;const O=S.dtut,fr=disPc('weapon',6),pr=dtPrac(),show=(i,sel)=>otShow(DTS[i],sel,[1,1,2,3,4,5,6,7,7,8][i],'분해·승급 연습',8,()=>{askConfirm('튜토리얼 건너뛰기','분해·승급 연습을 그만둡니다. 받은 장비와 조각은 그대로 가집니다.','건너뛰기',()=>{S.dtut={done:1};save();clearInterval(dtTm);otHide()})});
+  if(O.ok&&disRes){clearInterval(dtTm);otHide();S.dtut={done:1};save();setTimeout(()=>{nsClose();talk(otLines(DT_END),()=>toast('분해·승급 연습 완료','승급한 무기는 가방에 있습니다','#7fe07a'))},700);return}
+  if(disDlg){if(disDlg.t==='ask')show(4,'[data-dyes]');else show(5,'[data-dok]');return}
+  if(disTab==='br'){
+    if(!pr.length&&fr<3){dtGive();renderDis();return}/* 팔았거나 잃었으면 연습 장비를 다시 */
+    if(pr.length){if(disCat!=='weapon'){show(0,'[data-dc="weapon"]');return}
+      if(!disTiers.has(6)){show(1,'[data-dt="6"]');return}
+      if(pr.some(x=>!disSel.has(x.id))){show(2,'[data-dall]');return}
+      show(3,'.xcgo[data-dgo]');return}
+    show(6,'[data-dtab="mk"]');return}
+  if(!TCUR()&&(S.gold||0)<DIS_COST){S.gold=DIS_COST;try{hudMoney()}catch(_){}renderDis()}
+  if(fr<3&&disFill===0&&!disIn&&!pr.length){show(6,'[data-dtab="br"]');return}
+  if(disCat!=='weapon'){show(0,'[data-dc="weapon"]');return}
+  if(disMk!==6){show(7,'[data-dmt="6"]');return}
+  if(!disIn){show(8,'[data-dpin]');return}
+  show(9,'[data-dup]')}
 /* 오린 머리 위 「!」 */
 let otBang=null;
-function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),on=(otutOn()&&!(S.otut&&S.otut.st)||pm)&&inTown&&mapKind==='town';
+function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),dt=dtutOn()&&!dtWin(),on=(otutOn()&&!(S.otut&&S.otut.st)||pm||dt)&&inTown&&mapKind==='town';
   /* v1091: 가야 할 NPC(하란→오린, 오린→미라) 머리 위에 보라 화살표 — 플레이어 발밑 보라 화살표와 같은 색·모양을 2배로 */
   if(!otBang){if(!on)return;const m=new THREE.Mesh(new THREE.ConeGeometry(.5,1.4,6),new THREE.MeshBasicMaterial({color:0x9a6ae0,depthTest:false,transparent:true,opacity:.96}));m.rotation.x=Math.PI;m.renderOrder=999;otBang=new THREE.Group();otBang.add(m);otBang.userData.m=m;scene.add(otBang)}
-  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+5+Math.sin(t*3)*.18,n.z);otBang.userData.m.rotation.y=t*1.6}
+  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(dt?'smith':pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+5+Math.sin(t*3)*.18,n.z);otBang.userData.m.rotation.y=t*1.6}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
@@ -10739,7 +10771,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
-    townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk(SEREN_IN,()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
+    townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk(SEREN_IN,()=>{S.morMet=1;if(NS()&&!S.dtut)S.dtut={st:0};save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 대장장이 브론에게 먼저 가 보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){window.ASHBGMOFF=0;/* 재도전하면 곡을 처음부터 */$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
@@ -11349,7 +11381,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;xpTab='buy';xpSel=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return otutGear();if(NS()&&npcNear.id==='shop'&&ptutOn())return ptutShop();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return otutGear();if(NS()&&npcNear.id==='shop'&&ptutOn())return ptutShop();if(NS()&&npcNear.id==='smith'&&dtutOn())return dtutSmith();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
