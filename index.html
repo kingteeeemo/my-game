@@ -5043,10 +5043,10 @@ const PT_VS=`varying vec2 vU;void main(){vU=uv;gl_Position=projectionMatrix*mode
 const PT_FS=`uniform float t;uniform float ph;varying vec2 vU;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p*=2.1;a*=.5;}return v;}
+float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p*=2.1;a*=.5;}return v;}
 void main(){vec2 q=(vU-.5)*2.;q.x*=1.55;float r=length(q);if(r>1.)discard;float a=atan(q.y,q.x);float T=t+ph;
  float sw=a+2.6/(r+.25)-T*1.6;vec2 P=vec2(cos(sw),sin(sw))*(1.5+r*2.)+vec2(0.,-T*.35);
- float f=fb(P*1.4)+.5*fb(P*3.1+T*.4);
+ float f=fb(P*1.4)*1.35;
  float arms=.5+.5*sin(a*3.-T*2.2+5./(r+.3));
  vec3 deep=vec3(.03,.02,.12),mid=vec3(.22,.32,.95),hot=vec3(.75,.9,1.);
  vec3 c=mix(deep,mid,smoothstep(.35,1.05,f+arms*.35));c=mix(c,hot,smoothstep(.95,1.35,f+arms*.3)*.85);
@@ -5067,12 +5067,12 @@ function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const hp=refH.g.posit
     /* 빨려드는 빛 입자 */
     const pts=[];for(let k=0;k<10;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:k%3?0x9ab8ff:0xd8c8ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.userData={a:Math.random()*6.28,r:.6+Math.random()*.5,p:Math.random(),s:.6+Math.random()*.6};g.add(sp);pts.push(sp)}
     g.position.set(x,groundH(x,z),z);g.rotation.y=Math.atan2(x-hp.x,z-hp.z)*.3;/* 화면(남쪽)을 향하되 화로 쪽으로 살짝 */scene.add(g);propMeshes.push(g);
-    const lt=new THREE.PointLight(0x7a7aff,.9,6,1.6);lt.position.set(x,1.4,z);scene.add(lt);propMeshes.push(lt);
-    const pool=refPool(x,z,2.4,0x6a7aff,.5),P2={g,disk,rim,halo,sh,pts,lt,pool,ph:i*1.3,st:i<pv?'on':'off',t0:0};ptM.push(P2);ptVis(P2,i<pv?1:0)}
+    /* v1063: 포탈마다 넣던 점광원 제거 — 켜고 끌 때마다 장면 전체 셰이더를 다시 만들어 끊김. 바닥 빛만 남김 */
+    const pool=refPool(x,z,2.4,0x6a7aff,.5),P2={g,disk,rim,halo,sh,pts,pool,ph:i*1.3,st:i<pv?'on':'off',t0:0};ptM.push(P2);ptVis(P2,i<pv?1:0)}
   /* 마을에 돌아오면 쓴 포탈이 켜진 역순으로 하나씩 사라짐 (클리어했으면 남은 것 모두) */const now=performance.now()/1000;for(let i=pv-1,k=0;i>=tg;i--,k++){ptM[i].st='out';ptM[i].t0=now+1.1+k*.45}S.ptShow=tg}
 let ptBusy=0;
 const ptBase=()=>ptOn()&&S.pt&&S.pt.t===S.tier&&!S.runClr?Math.max(0,S.pt.left):0;
-function ptVis(p,k){/* k: 0 꺼짐 ~ 1 켜짐 */const on=k>.001;p.g.visible=p.lt.visible=p.pool.visible=on;if(!on)return;const e=Math.min(1,k);p.g.scale.set(.35+.65*e,e,.35+.65*e);p.pool.material.opacity=.5*e;p.lt.intensity=.9*e}
+function ptVis(p,k){/* k: 0 꺼짐 ~ 1 켜짐 */const on=k>.001;p.g.visible=p.pool.visible=on;if(!on)return;const e=Math.min(1,k);p.g.scale.set(.35+.65*e,e,.35+.65*e);p.pool.material.opacity=.6*e}
 function ptLight(cb){ptBusy=1;const now=performance.now()/1000;ptM.forEach((p,i)=>{p.st='in';p.t0=now+.25+i*.32;ptVis(p,0)});S.ptShow=PZ_N;
   setTimeout(()=>{ptBusy=0;cb&&cb()},(0.25+PZ_N*.32+.75)*1000)}
 function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;PTU.t.value=t%1000;
@@ -5080,7 +5080,7 @@ function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;
     if(p.st==='in'){const q=(t-p.t0)/.45;if(q<0){ptVis(p,0);continue}if(q>=1){p.st='on';ptVis(p,1)}else{ptVis(p,1+Math.sin(q*Math.PI)*.25*(1-q)-(1-q)*(1-q));p.halo.material.opacity=1.2*(1-q)+.4;if(!p.fl&&q>0){p.fl=1;try{hitSpark(new THREE.Vector3(p.g.position.x,1.3,p.g.position.z),0x9ab0ff)}catch(_){}}continue}}
     else if(p.st==='out'){const q=(t-p.t0)/.55;if(q<0){}else if(q>=1){p.st='off';ptVis(p,0);continue}else{ptVis(p,1-q*q);p.halo.material.opacity=.4+1.1*Math.sin(q*Math.PI);if(!p.fo){p.fo=1;try{hitSpark(new THREE.Vector3(p.g.position.x,1.3,p.g.position.z),0xb9a2ff)}catch(_){}}continue}}
     else if(p.st==='off'){continue}
-    {const k=Math.sin(t*2.3+p.ph);p.rim.material.opacity=.75+.2*k;p.halo.material.opacity=.35+.12*k;p.lt.intensity=.8+.25*k;
+    {const k=Math.sin(t*2.3+p.ph);p.rim.material.opacity=.75+.2*k;p.halo.material.opacity=.35+.12*k;
     p.sh.forEach((r,j)=>{r.position.y=.95+.06*Math.sin(t*1.7+p.ph+j*2);r.rotation.y=t*1.2+j});
     for(const s of p.pts){const u=s.userData,q=(u.p+t*.35*u.s)%1,rr=u.r*(1-q),aa=u.a+q*3.5;s.position.set(Math.cos(aa)*rr*.75,1.35+Math.sin(aa)*rr*1.1,.05+.15*(1-q));const sc=.18*(1-q*.6);s.scale.set(sc,sc,1);s.material.opacity=Math.min(1,q*4)*(1-q)*1.3}}}}
 /* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
