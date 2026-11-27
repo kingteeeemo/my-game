@@ -2055,7 +2055,7 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
 const patFor=t=>t%5===0?'field':'route';/* v1042: 위험도 5·10·15·20…은 섬멸, 나머지는 돌파 (선택 UI 없음) */
 /* v1049: 포탈 — 새로 도전하면 쉼터 화로 둘레에 포탈 6개. 입장할 때마다 1개 소모, 죽거나 마을로 돌아와도 쓴 포탈은 사라짐. 6개를 다 쓰고도 못 깨면 그 도전은 끝(입장료를 다시 내고 새로 열어야 함) */
 const PZ_N=6,ptOn=()=>NS()&&S.ch>=NCH&&!S.demo,ptLeft=t=>S.pt&&S.pt.t===t?S.pt.left:null,ptOut=t=>ptOn()&&!!S.pt&&S.pt.t===t&&S.pt.left<=0,ptStart=t=>{if(ptOn())S.pt={t,left:PZ_N,d:0}},ptUse=t=>{if(!ptOn())return true;if(!S.pt||S.pt.t!==t)S.pt={t,left:PZ_N,d:0};if(S.pt.left<=0)return false;S.pt.left--;save();return true};
-function townEnter(t,noAsk){if(ptBusy)return;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==patFor(t)||ptOut(t)/* v991: 패턴을 바꿨으면 새 판으로 입장 · v1049: 포탈을 다 썼으면 다시 열기 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}ptStart(t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save();closeStage();/* v1062: 새 도전 — 화로 둘레 포탈 6개가 차례로 켜진 뒤 입장 */if(!noAsk&&inTown&&ptOn()&&ptM.length){ptGo(true,()=>leaveTown(true));return}}closeStage();if(!noAsk&&inTown&&ptOn()&&ptM.length&&S.pt&&S.pt.t===t&&S.pt.left>0){ptGo(false,()=>leaveTown(true));return}leaveTown(true)};if(egRun()&&!patCh&&!noAsk)egRunAsk(()=>{closeStage();if(inTown&&ptOn()&&ptM.length&&S.pt&&S.pt.t===t&&S.pt.left>0)ptGo(false,()=>leaveTown(true));else leaveTown(true)},()=>{S.egFresh=1;run()});else run()}}
+function townEnter(t,noAsk){if(ptBusy)return;if(TALK){afterTalk(()=>townEnter(t,noAsk));return}/* v1086 */if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==patFor(t)||ptOut(t)/* v991: 패턴을 바꿨으면 새 판으로 입장 · v1049: 포탈을 다 썼으면 다시 열기 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}ptStart(t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save();closeStage();/* v1062: 새 도전 — 화로 둘레 포탈 6개가 차례로 켜진 뒤 입장 */if(!noAsk&&inTown&&ptOn()&&ptM.length){ptGo(true,()=>leaveTown(true));return}}closeStage();if(!noAsk&&inTown&&ptOn()&&ptM.length&&S.pt&&S.pt.t===t&&S.pt.left>0){ptGo(false,()=>leaveTown(true));return}leaveTown(true)};if(egRun()&&!patCh&&!noAsk)egRunAsk(()=>{closeStage();if(inTown&&ptOn()&&ptM.length&&S.pt&&S.pt.t===t&&S.pt.left>0)ptGo(false,()=>leaveTown(true));else leaveTown(true)},()=>{S.egFresh=1;run()});else run()}}
 function runPay(t){S.rtRun=patFor(t)==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
 const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?300+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
@@ -5199,6 +5199,7 @@ function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;
 const HR='쉼터지기 하란',VO='???';
 const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.'],[HR,'…아니, 그 전에 언덕 위 조율사 오린부터 찾아가라. 여기선 장비를 손보지 않고는 한 걸음도 못 오른다.']];
 const REF_ALT=[[HR,'또 한 명이 내려왔군. 금빛 화로가 너를 알아보는 걸 보니, 먼저 온 녀석과 같은 길을 걷게 될 모양이야.'],[HR,'여긴 추락자의 쉼터. 올라갈 생각이라면 화로 앞에 서라.'],[HR,'장비 손보는 법을 모르면 언덕 위 조율사 오린부터 찾아가고.']];
+const PT_TUT=[[HR,'화로 둘레에 문이 보이나? 위험도로 이어지는 포탈이다.'],[HR,'위험도에 새로 도전하면 6번의 도전 횟수가 주어진다. 그래서 포탈이 6개 생기지.'],[HR,'들어갈 때마다 포탈이 하나씩 꺼지고, 도전 횟수가 1 차감된다. 쓰러져서 다시 도전해도 마찬가지다.'],[HR,'6번을 다 쓰고도 관문 보스를 꺾지 못하면 그 도전은 끝이다. 입장료를 다시 내고 새로 열어야 하지.'],[HR,'남은 횟수는 사냥터를 고를 때 도전 횟수로 보인다. 아껴 써라.']];
 const REF_LORE=[
   {k:'b5',ok:()=>(S.maxTier||0)>=5,l:[[HR,'바닥을 벗어났다고? …정말로 올라가고 있군.'],[HR,'그 위는 꺾인 칼의 황야. 우리처럼 떨어진 도전자들이 끝까지 싸우다 쓰러진 땅이다.'],[HR,'그 끝에서 길을 막는 검사가 있다. 검귀 카이렌… 한때 우리 대장이었지.'],[HR,'불 앞에 무릎을 꿇고, 이제는 아쉬카르의 칼이 되어 올라오는 자들을 베고 있다.']]},
   {k:'b10',ok:()=>(S.maxTier||0)>=10,l:[[HR,'검귀를 꺾었군. …대장도 이제야 그 불에서 놓여났기를.'],[HR,'위는 얼어붙은 기사단 묘역. 루멘을 지키던 빛의 기사단이 잠든 곳이다. 성역의 불이 닿지 않아 모든 게 얼어붙었지.'],[HR,'기사단은 그 아래 물의 심연을 지키러 내려갔다가 아무도 돌아오지 못했다. 거기엔 용보다 오래된 것이 산다더군.'],[HR,'그런데 요즘 화로에서 목소리가 들린다. 너도 들었나?'],[VO,'「불은 꺼지지 않는다. 다만 옮겨 갈 뿐.」']]},
@@ -5206,11 +5207,12 @@ const REF_LORE=[
   {k:'b20',ok:()=>(S.maxTier||0)>=20,l:[[HR,'잠든 빛의 신전… 성역이 세워지기 전부터 빛을 모시던 옛 신전이다.'],[HR,'화로의 목소리가 거기서 들려온다. 너를 부르고 있어.'],[VO,'「거의 다 왔다. 그대의 불이 내게 닿는구나.」']]},
   {k:'b21',ok:()=>!!S.d20,l:[[HR,'신전 깊은 곳에서 무언가를 봤다고?'],[VO,'「아직 때가 아니다. 그러나 곧, 그대는 다시 저 불 앞에 서게 될 것이다.」']]}];
 const refLv=()=>REF_LORE.filter(b=>b.ok()).length;
-function refLore(force){if(!refOn()||!inTown||(!force&&(S.test||S.demo))||talkOn())return;S.lore=S.lore||{};const L=S.lore;
+function refLore(force){if(!refOn()||!inTown||ptBusy||ldBusy||(!force&&(S.test||S.demo))||talkOn())return;S.lore=S.lore||{};const L=S.lore;
   if(!L.a){L.a=1;const got=REF_LORE.filter(b=>b.ok());got.forEach((b,i)=>{if(i<got.length-1)L[b.k]=1});save();talk(S.skipStart?REF_ALT:REF_IN,()=>refLore(force));return}
+  if(!L.pt&&ptOn()){L.pt=1;save();talk(PT_TUT);return}/* v1088: 도전 횟수(포탈) 안내 — 엔드게임 처음 */
   const b=REF_LORE.find(b=>b.ok()&&!L[b.k]);if(b){L[b.k]=1;save();talk(b.l)}}
 /* 대화창 — 화면 아무 곳이나 누르면 다음 줄 */
-let TALK=null;const talkOn=()=>!!TALK;
+let TALK=null;const talkOn=()=>!!TALK;const afterTalk=fn=>{if(!TALK){fn();return}const iv=setInterval(()=>{if(!TALK){clearInterval(iv);fn()}},120)};/* v1086: 대사 중엔 입장·맵 이동을 대사가 끝날 때까지 미룸 */
 /* v806: 대마법사 모르딘(세렌 마을) — 겉으론 그날 밤 유일한 생존자, 실은 아쉬카르를 조종한 흑막. 대사는 다시 읽으면 다른 뜻이 되게.
    첫 만남은 세렌 도착 장면에 바로 이어서(MOR_FIRST), 이후는 장 진행 대사(MOR_ST: S.ch 이상이면 한 번씩, 순서대로) → 다 보면 평소 대사(MOR_IDLE) */
 const MOR_N='대마법사 모르딘';
@@ -5228,7 +5230,7 @@ function talkPic(nm){const m=talkMesh(nm);if(!m)return '';if(TKPIC.has(m))return
     let ux=hero.position.x-cx,uz=hero.position.z-cz,dl=Math.hypot(ux,uz);if(dl<.3){const f=new THREE.Vector3(0,0,1).applyQuaternion(m.getWorldQuaternion(new THREE.Quaternion()));ux=f.x;uz=f.z;dl=Math.hypot(ux,uz)||1}ux/=dl;uz/=dl;
     cam.position.set(cx+ux*d*.85,ty+h*.55,cz+uz*d*.85);cam.lookAt(cx,ty,cz);const hv=hero.visible,rt=renderer.getRenderTarget();hero.visible=false;renderer.setRenderTarget(null);renderer.setViewport(0,0,S2,S2);renderer.render(scene,cam);hero.visible=hv;
     const o=mkCv(128),x=o.getContext('2d');x.drawImage(c,0,c.height-P2,P2,P2,0,0,128,128);renderer.setViewport(0,0,sz.x,sz.y);renderer.setRenderTarget(rt);const u=o.toDataURL('image/jpeg',.85);TKPIC.set(m,u);return u}catch(e){return ''}}
-function talk(lines,done){let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><img id="talkP" alt="" hidden><div class="tkx"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const T=TALK;if(T&&T.i===0&&!(mapKind==='town'||inTown)&&performance.now()-T.t0<800)return;/* v824: 마을 대화는 즉시 넘김 / 그 밖(사냥터·스토리 현장)은 첫 줄 0.8초 동안만 넘기지 못함(실수로 바로 닫힘 방지) */talkNext()})}
+function talk(lines,done){if(ldBusy||ptBusy){setTimeout(()=>talk(lines,done),250);return}/* v1086: 로딩·포탈 입장 연출 중엔 끝난 뒤에 대사 시작 */let o=$('talkL');if(!o){o=document.createElement('div');o.id='talkL';o.innerHTML='<div id="talkB"><img id="talkP" alt="" hidden><div class="tkx"><div id="talkN"></div><div id="talkT"></div><div id="talkH">눌러서 계속 ▸</div></div></div>';document.body.appendChild(o);o.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const T=TALK;if(T&&T.i===0&&!(mapKind==='town'||inTown)&&performance.now()-T.t0<800)return;/* v824: 마을 대화는 즉시 넘김 / 그 밖(사냥터·스토리 현장)은 첫 줄 0.8초 동안만 넘기지 못함(실수로 바로 닫힘 방지) */talkNext()})}
   TALK={l:lines,i:-1,done,t0:performance.now(),pz:mapKind==='story'};/* v748: 스토리 사냥터 대사(모닥불·흔적·구출 등) 동안 게임 일시정지 */releaseAll&&releaseAll();P.mv=null;o.hidden=false;$('npcAct').classList.add('talkhide');talkNext()}
 function talkNext(){const T=TALK;if(!T)return;T.i++;if(T.i>=T.l.length){$('talkL').hidden=true;$('npcAct').classList.remove('talkhide');TALK=null;if(T.done)T.done();return}
   const [n,t]=T.l[T.i],vo=n===VO;$('talkN').textContent=n;{const pi=$('talkP'),u=vo?'':talkPic(n);pi.hidden=!u;if(u&&pi.getAttribute('src')!==u)pi.src=u}/* v906: 말하는 사람 얼굴 */$('talkN').className=vo?'vo':'';$('talkT').innerHTML=String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/(카이렌|모르딘|오스릭|하란|아쉬카르)/g,'<b class="pn">$1</b>');/* v809: 인물 이름 강조 */$('talkT').className=vo?'vo':'';$('talkH').textContent=T.i===T.l.length-1?'눌러서 닫기 ▸':'눌러서 계속 ▸';const H=$('talkH');if(T.i===0){H.style.opacity=.25;clearTimeout(T.ht);T.ht=setTimeout(()=>{H.style.opacity=''},1500)}else H.style.opacity=''}
@@ -5328,6 +5330,7 @@ function collectAll(){let fxN=0;for(const p of pickups){if(p.kind==='tk')keepBea
 /* v114: 맵 이동 로딩 화면 — 화면을 먼저 덮고 다음 프레임에 맵 생성 → 0.7초 뒤 페이드 아웃, 이후 안내(after) 실행 */
 let ldBusy=false;
 function mapLoad(title,sub,fn,after){
+  if(TALK){afterTalk(()=>mapLoad(title,sub,fn,after));return}/* v1086 */
   if(ldBusy||noML){fn();after&&after();return}
   ldBusy=true;window.BGMNOKEEP=1;try{SFX.stopLoot()}catch(e){}try{window._bgmChk&&_bgmChk()}catch(e){}const f=$('regionFade');
   f.innerHTML=`<div><small>${sub}</small><b>${title}</b><div class="ldbar"><i></i></div><span>불러오는 중…</span></div>`;f.className='rfade hold';P.inv=99;P.mv=null;P.cast=null;
@@ -5335,7 +5338,7 @@ function mapLoad(title,sub,fn,after){
     setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';ldBusy=false;after&&after()},750)},30))}
 const mapTitle=()=>S.ch>=NCH?EGMAPS[egMapFor(S.tier)].n:S.ch===LAST&&S.phase===3?'최종 결전':CH[S.ch].n;
 const vilLock=()=>S&&S.ch===0&&!S.vil&&!S.test&&!S.skipStart;/* v710: 세렌 마을은 1장을 마치고 이야기로 도착한 뒤부터 */
-function goTown(){if(inTown||!S.cls)return;if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
+function goTown(){if(inTown||!S.cls)return;if(TALK){afterTalk(goTown);return}/* v1086 */if(S.tutor){toast('튜토리얼 중에는 마을에 갈 수 없어요','훈련장을 마치고 1장을 지나면 마을에 닿습니다');return}if(vilLock()){toast('아직 마을이 멀다','재가 내리는 들판을 지나 1장 보스를 쓰러뜨리면 세렌 마을에 닿습니다');return}S.fld=(S.duel||bossCtx())?null:fldSnap();/* v452: 사냥터·균열 상황 보존 */if(RZ)riftClear();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();setTimeout(()=>{if(!refOn())guide('town')},900);collectAll();inTown=true;townSync();wipeFx();for(const e of [...enemies])dropEnemy(e);P.mv=null;
   townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{refOn()?toast(TOWN.n,'금빛 화로 앞에서 사냥터로 · 약초꾼 · 조율사 · 대장장이 · 재단사 · 창고'):toast(TOWN.n,NS()?'남쪽 문지기에게서 사냥터로 · 포션 상인 · 조율사 · 대장장이 · 재단사 · 창고':'남쪽 문지기에게서 사냥터로 · 포션 상인 · 무기상 · 대장장이 · 전승사');later(1.4,()=>refLore())})}
 /* v451: 게임에 접속하면 마을에서 시작 (튜토리얼 중·클리어 화면 대기·최종 결전 연출 중이면 제외) */
 function townStart(){if(S.tutor||S.test||S.demo||!S.cls||vilLock())return false;if(S.ch<NCH&&S.phase===2)return false;if(S.ch===LAST&&S.phase===4)return false;
@@ -5377,7 +5380,7 @@ const egRun=()=>!!(S&&S.ch>=NCH&&!S.runClr&&!S.egFresh&&(S.tierKills||0)>0&&!S.d
 function egDrop(){S.fld=null;S.tierKills=0;S.egSp=0;S.egK=0;S.egFresh=1;save()}
 function egRunAsk(yes,no){const B='color:var(--ink)',pts=mutPts(S.mutRun||{}),n=Math.min(S.tierKills||0,tkFor(S.tier));
   askConfirm('진행 중인 사냥터가 있습니다',`<b style="${B}">위험도 ${S.tier} · ${EGMAPS[egMapFor(S.tier)].n}</b><br>처치 ${n.toLocaleString('ko-KR')} / ${tkFor(S.tier).toLocaleString('ko-KR')} · ${pts?`변이 ×${mutRw(pts).toFixed(2)}`:'변이 없음'}<br><br><b style="${B}">예</b> · 이어서 사냥합니다.<br><b style="${B}">아니오</b> · 진행 중인 사냥터는 사라지고, 위험도와 변이를 새로 골라 입장합니다.`,'예',yes,'아니오',no)}
-function leaveTown(force){if(!inTown)return;if(!force&&!ldBusy&&egRun()){egRunAsk(()=>leaveTown(true),()=>{egDrop();openStage()});return}if(ptOn()&&!ptUse(S.tier)){toast('포탈을 모두 썼습니다','위험도를 다시 열어야 들어갈 수 있습니다');openStage();return}S.egFresh=0;if(!force&&!ldBusy&&stRetryAsk()){const lb=S.ch===LAST&&S.phase===3;askConfirm(`${S.ch+1}장 · ${CH[S.ch].n}`,`<b style="color:var(--ink)">이어하기</b> · 떠났던 자리에서${lb?' 최종 결전을':', 보스 체력도 그대로'} 이어서 합니다.<br><b style="color:var(--ink)">재도전</b> · 이 장을 처음부터 다시 합니다. 길 처음 자리에서 시작하고 몬스터·보스가 모두 다시 나옵니다.`,'이어하기',()=>leaveTown(true),'재도전',()=>{stRetry();leaveTown(true)});return}inTown=false;toastOff();$('npcAct').hidden=true;fldFix();const f0=S.fld;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=f0;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
+function leaveTown(force){if(!inTown)return;if(TALK){afterTalk(()=>leaveTown(force));return}/* v1086 */if(!force&&!ldBusy&&egRun()){egRunAsk(()=>leaveTown(true),()=>{egDrop();openStage()});return}if(ptOn()&&!ptUse(S.tier)){toast('도전 횟수를 모두 썼습니다','위험도를 다시 열어야 들어갈 수 있습니다');openStage();return}S.egFresh=0;if(!force&&!ldBusy&&stRetryAsk()){const lb=S.ch===LAST&&S.phase===3;askConfirm(`${S.ch+1}장 · ${CH[S.ch].n}`,`<b style="color:var(--ink)">이어하기</b> · 떠났던 자리에서${lb?' 최종 결전을':', 보스 체력도 그대로'} 이어서 합니다.<br><b style="color:var(--ink)">재도전</b> · 이 장을 처음부터 다시 합니다. 길 처음 자리에서 시작하고 몬스터·보스가 모두 다시 나옵니다.`,'이어하기',()=>leaveTown(true),'재도전',()=>{stRetry();leaveTown(true)});return}inTown=false;toastOff();$('npcAct').hidden=true;fldFix();const f0=S.fld;mapLoad(mapTitle(),'사냥터로 이동합니다',()=>{const f=f0;setMap(true);applyTheme();resetWorld();if(f)applyFld(f,false)},()=>{
   stageBanner()/* v626: 배너와 겹치는 토스트(지역 · 위험도 / 사냥터로 돌아왔습니다) 삭제 */})}
 function toggleTown(){inTown?leaveTown():goTown()}
 /* v131: 마을에서는 아이콘·글자를 「사냥터」(검)로 — PC 상단 버튼 포함 */
@@ -6932,7 +6935,7 @@ function dropEnemy(e,anim){e._rm=true;if(anim){e.lab.remove();const i=enemies.in
 /* v75: 스토리 장은 처음부터 길 전체에 몬스터를 배치하고 다시 생성하지 않음. 총 마릿수는 기존 처치 목표(goal)와 같음 */
 /* v205: 스토리 몬스터 수 ×3 (최종 보스 도착 시 약 31레벨) · 길 +15% · 몬스터는 플레이어 앞 PACK_AHEAD m 안에 들어올 때 생성(한꺼번에 수백 마리 생성 방지) */
 const GOAL_M=3,PACK_AHEAD=55;let packQ=[];
-function packTick(){if(!packQ.length||!pathMap()||inTown)return;const rt=mapKind==='route',pz=W2L(P.pos.x,P.pos.z).z,A=rt?RT_AHEAD:PACK_AHEAD;while(packQ.length&&packQ[0].z>pz-A){const k=packQ.shift();for(const m of k.m){if(rt)S.egSp=(S.egSp||0)+1;if(rt?rtDead(m.id):sKilled(m.id))continue;const w=L2W(m.x,m.z),e=spawnEnemy(m.t,w.x,w.z,m.rk);e.idle=true;e.pkid=m.id;e.lz=m.z;if(rt){e.g.rotation.y=rand(0,6.3);e.ph=rand(0,6)}}}}/* v907: 돌파형도 같은 방식 — 앞쪽 RT_AHEAD 안에 들어온 무리만 생성 */
+function packTick(){if(!packQ.length||!pathMap()||inTown||(S.ch>=NCH&&S.runClr&&!S.duel))return;const rt=mapKind==='route',pz=W2L(P.pos.x,P.pos.z).z,A=rt?RT_AHEAD:PACK_AHEAD;while(packQ.length&&packQ[0].z>pz-A){const k=packQ.shift();for(const m of k.m){if(rt)S.egSp=(S.egSp||0)+1;if(rt?rtDead(m.id):sKilled(m.id))continue;const w=L2W(m.x,m.z),e=spawnEnemy(m.t,w.x,w.z,m.rk);e.idle=true;e.pkid=m.id;e.lz=m.z;if(rt){e.g.rotation.y=rand(0,6.3);e.ph=rand(0,6)}}}}/* v907: 돌파형도 같은 방식 — 앞쪽 RT_AHEAD 안에 들어온 무리만 생성 */
 /* v705: 스토리 몬스터 배치를 장마다 고정 씨앗으로 만들고, 잡은 몬스터 번호를 저장 — 마을에 다녀오거나 쓰러져도 이미 잡은 곳은 다시 생기지 않음 */
 function sKillTab(){if(!S.sKill||S.sKill.ch!==S.ch||S.sKill.seed!==S.sSeed)S.sKill={ch:S.ch,seed:S.sSeed,ids:[]};return S.sKill}
 const sKilled=id=>id!=null&&sKillTab().ids.includes(id);
@@ -8163,20 +8166,27 @@ function die(){{const fb=thOn&&enemies.find(e=>e.perch&&e.a2);if(fb){/* v614: 2�
 /* v1049: 엔드게임에서 죽으면 쓰러짐 연출 뒤 마을(쉼터)로 돌아감. 들어갈 때 쓴 포탈은 이미 사라진 상태 */
 let ptDy=0;
 function ptDie(){if(ptDy)return;ptDy=1;if(mapKind==='route')rtDieMark();/* 돌파형은 죽은 자리 조금 뒤에서 다시 시작 */const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;const t=S.tier,l=ptLeft(t);P.hp=0;P.inv=99;/* v1077: 쓰러지면 체력은 채우지 않음 — 쉼터에 도착하면 채워짐 */S.ptDeaths=(S.ptDeaths||0)+1;save();
-  ptDeathBanner(t,l,loss,()=>{ptDy=0;P.inv=1.5;if(!ptOn()||inTown){return}goTown()})}
+  ptDeathBanner(t,l,loss,()=>{ptDy=0;P.inv=1.5;if(!ptOn()||inTown){return}goTown()},()=>{ptDy=0;P.inv=1.5;if(inTown)return;if(!ptUse(t)){goTown();return}/* v1088: 쓰러진 자리에서 바로 재도전 — 도전 횟수 1 차감, 처치 수 등 진행은 그대로 */mapLoad(`위험도 ${t}`,'다시 도전합니다',()=>{resetWorld();if(NS())nsPotInit(true)/* v1089: 제자리 재도전도 물약 충전 */},()=>stageBanner(true))})}
 /* v1077: 위험도 클리어 배너 — 스토리 장 완료·쓰러짐 배너와 같은 형식(가운데 띠 + 아래 문구·버튼). 떠 있는 동안 게임 멈춤 */
 function gateBanner(t,msg,fb,fn,first){cinePause++;releaseAll();let done=0;const nm=EGMAPS[egMapFor(t)]?EGMAPS[egMapFor(t)].n:'',fc=fb==='maw'?'#b890ff':'#ffb050';
   $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${nm}${tpn(t)?' · '+tpn(t):''}</div><h1>위험도 ${t} 클리어</h1><div class="cb-s">${first?'첫 클리어 · 장비 2개':'관문 보스 처치'}</div></div>
     <div class="cb-low">${msg?`<p>${msg}</p>`:''}<p><b style="color:${fc}">${fragNm(fb)} +1</b> · 보유 <b>${fn}</b>${fn>=BFRAG_N?'개 — 보스에 입장할 수 있습니다':` / ${BFRAG_N}개`}</p><p class="nx">재도전하면 처음부터 다시 · 보상도 다시 받습니다</p>
     <div class="cb-2"><button class="ghost" id="gcRe">재도전</button><button class="primary" id="gcTown">마을로 이동</button></div></div></div>`;
   $('clear').hidden=false;const go=f=>{if(done)return;done=1;cinePause=Math.max(0,cinePause-1);$('clear').hidden=true;f()};
-  $('gcTown').onclick=()=>go(()=>goTown());$('gcRe').onclick=()=>go(()=>{if(runPay(t)){ptStart(t);ptUse(t);setTier(t,false)}})}
+  let iv=0,t0=performance.now();const stop=()=>{clearInterval(iv);iv=0;document.removeEventListener('keydown',poke,true);$('clear').removeEventListener('pointerdown',poke,true)},
+    re=()=>{if(done)return;if(!runPay(t)){t0=performance.now();return}/* 입장료를 못 내면 배너를 그대로 두고 카운트만 처음부터 */stop();go(()=>{ptStart(t);ptUse(t);setTier(t,false)})},
+    poke=()=>{t0=performance.now();const b=$('gcRe');if(b)b.textContent='재도전'};
+  $('gcTown').onclick=()=>{stop();go(()=>goTown())};$('gcRe').onclick=()=>{stop();re()};
+  /* v1087: 3초 가만히 있으면 재도전(5)부터 1초씩 줄어 0이 되면 재입장 — 화면을 누르거나 키를 누르면 다시 3초부터 */
+  $('clear').addEventListener('pointerdown',poke,true);document.addEventListener('keydown',poke,true);
+  iv=setInterval(()=>{const b=$('gcRe');if(done||$('clear').hidden||!b){stop();return}const e=(performance.now()-t0)/1000;if(e<3){if(b.textContent!=='재도전')b.textContent='재도전';return}const n=Math.ceil(8-e);if(n<=0){re();return}b.textContent=`재도전(${n})`},200)}
 /* v1064: 쓰러짐 배너 — 스토리 장 완료 배너(가운데 띠 + 아래 문구·버튼)와 같은 형식 */
-function ptDeathBanner(t,l,loss,cb){cinePause++;releaseAll();shake=Math.max(shake,.35);let done=0;
-  const ex=l!=null&&l<=0,nm=EGMAPS[egMapFor(t)]?EGMAPS[egMapFor(t)].n:'';
-  $('clearSheet').innerHTML=`<div class="cban dead"><div class="cb-band"><div class="cb-l">위험도 ${t}${nm?' · '+nm:''}</div><h1>쓰러졌습니다</h1><div class="cb-s">${loss>0?`경험치 -${fmtG(loss)} (20%)`:'쉼터로 돌아갑니다'}</div></div>
-    <div class="cb-low"><p>${ex?'포탈을 모두 썼습니다.':`남은 포탈 <b style="color:#b9a2ff">${l??0}</b> / ${PZ_N}`}</p><p class="nx">${ex?`위험도 ${t}은(는) 다시 열어야 도전할 수 있습니다 · 깨지 못하면 다음 위험도는 열리지 않습니다`:'쉼터 화로 둘레의 포탈로 다시 도전할 수 있습니다'}</p><button class="primary" id="ptBack">쉼터로</button></div></div>`;
-  $('clear').hidden=false;const go=()=>{if(done)return;done=1;cinePause=Math.max(0,cinePause-1);$('clear').hidden=true;cb&&cb()};$('ptBack').onclick=go}
+function ptDeathBanner(t,l,loss,cb,retry){cinePause++;releaseAll();shake=Math.max(shake,.35);let done=0;
+  const on=ptOn(),L=l??0,ex=on&&L<=0,nm=EGMAPS[egMapFor(t)]?EGMAPS[egMapFor(t)].n:'';
+  $('clearSheet').innerHTML=`<div class="cban dead"><div class="cb-band"><div class="cb-l">위험도 ${t}${nm?' · '+nm:''}</div><h1>쓰러졌습니다</h1><div class="cb-s">${loss>0?`경험치 -${fmtG(loss)} (20%)`:on&&!ex?'다시 도전할 수 있습니다':'쉼터로 돌아갑니다'}</div></div>
+    <div class="cb-low">${on?`<p>${ex?'도전 횟수를 모두 썼습니다.':`남은 도전 횟수 <b style="color:#b9a2ff">${L}</b> / ${PZ_N}`}</p><p class="nx">${ex?`위험도 ${t}은(는) 다시 열어야 도전할 수 있습니다 · 깨지 못하면 다음 위험도는 열리지 않습니다`:`재도전하면 <b style="color:#b9a2ff">도전 횟수가 1 차감</b>됩니다 (${L} → ${L-1})`}</p>
+    <div class="cb-2"${ex?' style="grid-template-columns:1fr"':''}><button class="${ex?'primary':'ghost'}" id="ptBack">마을로 이동</button>${ex?'':'<button class="primary" id="ptRe">재도전 · 도전 횟수 1 차감</button>'}</div>`:`<p class="nx">쉼터 화로에서 다시 도전할 수 있습니다</p><button class="primary" id="ptBack">쉼터로</button>`}</div></div>`;
+  $('clear').hidden=false;const go=f=>{if(done)return;done=1;cinePause=Math.max(0,cinePause-1);$('clear').hidden=true;f&&f()};$('ptBack').onclick=()=>go(cb);const r=$('ptRe');if(r)r.onclick=()=>go(retry)}
 /* v116: 스탯 자동 분배 — 한 스탯에 몰기 또는 「균형」(가장 낮은 스탯부터 1점씩) */
 const autoStatName=k=>k==='bal'?'균형(고르게)':STATS[k]?STATS[k].n:'';
 function spendAutoStat(){const a=S.autoStat;if(!a)return;if(a==='bal'){while(S.statPts>0){const k=Object.keys(STATS).reduce((m,q)=>S.stats[q]<S.stats[m]?q:m);S.stats[k]++;S.statPts--}}else if(STATS[a]){S.stats[a]+=S.statPts;S.statPts=0}}
@@ -8380,7 +8390,7 @@ function riftEnd(win,why){const Z=RZ;if(!Z)return;const c=Z.c,T=Z.bt||0,gr=T<=RI
 function riftResClose(){if($('riftRes').hidden)return;$('riftRes').hidden=true;last=performance.now()}
 $('riftRes').addEventListener('click',e=>{if(e.target.id==='riftResOk'||e.target.id==='riftRes')riftResClose()});
 const RIFT_OFF=true;/* v991: 잿불 균열 이벤트 폐지 — 생성·카운트 모두 중단(남아 있던 균열은 정리) */
-function riftTick(dt){if(RIFT_OFF){riftNow=0;if(RZ)riftClear();return}if(testMap)return;/* v646 */
+function riftTick(dt){if(RIFT_OFF){riftNow=0;if(RZ)riftClear();return}if(testMap)return;if(!RZ&&S.ch>=NCH&&S.runClr&&!S.duel&&mapKind!=='story')return;/* v1086: 클리어 뒤엔 새 균열도 열지 않음 *//* v646 */
   if(riftNow&&riftOk()&&!(P.inv>5)){riftNow=0;riftClear();riftOpen(true);riftCount();return}/* v403: 테스트 — 위험도 입장 즉시 (지역 이동 화면이 걷힌 뒤) */
   if(!RZ){if(!riftOk())return;riftT-=dt;if(riftT<=0){riftT=rand(...RIFT.gap);riftOpen()}return}
   if(!riftOk()){if(RZ.st==='on')riftEnd(false,'균열을 벗어났습니다');riftClear();return}
@@ -10059,7 +10069,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1087';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1088';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10576,7 +10586,7 @@ const willTown=d=>!!(d&&d.cls&&!d.tutor&&!d.test&&!d.demo&&!(d.ch===0&&!d.vil&&!
 let noML=false;
 /* v852: 마을에 도착한 순간 남은 몹·대기 중인 소환·무리를 모두 지움(로딩 중 스토리 사건이 몹을 불러 마을에 남던 문제) */
 function townClean(){clearPools();for(const e of [...enemies])dropEnemy(e);packQ=[];timers.length=0}
-function townLoad(fn,after){/* v810: 마을로 갈 때는 항상 마을 로딩 화면(이름+설명) */
+function townLoad(fn,after){if(TALK){afterTalk(()=>townLoad(fn,after));return}/* v1086 */ /* v810: 마을로 갈 때는 항상 마을 로딩 화면(이름+설명) */
   if(ldBusy||noML){fn();after&&after();return}
   ldBusy=true;window.BGMNOKEEP=1;try{SFX.stopLoot()}catch(e){}/* v865: 마을 로딩은 이전 곡을 바로 끔 */P.inv=99;P.mv=null;P.cast=null;const rf=refOn();
   showLoading(()=>{try{fn()}finally{P.inv=1.5;ldBusy=false}if(after)setTimeout(after,450)},null,{title:TOWN.n,sub:rf?TOWN_DESC.refuge:TOWN_DESC.town,T:1300})}
@@ -11375,7 +11385,7 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
     `<div class="stmut"><div class="stmh"><span>변이</span><span>점수<b>${pts}</b> · 보상<b>×${mutRw(pts).toFixed(2)}</b></span></div>
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
-  const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?(ptOut(t)?`위험도 <b>${t}</b> 다시 열기`:`위험도 <b>${t}</b> 입장${ptOn()?` · 포탈 ${ptLeft(t)??PZ_N}/${PZ_N}`:''}`):t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
+  const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?(ptOut(t)?`위험도 <b>${t}</b> 다시 열기`:`위험도 <b>${t}</b> 입장${ptOn()?` · 도전 횟수 ${ptLeft(t)??PZ_N}/${PZ_N}`:''}`):t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
   const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option><option value="flyv">추격 컷신(영상) 시험</option><option value="isle">용의 섬 전투 공간 시험</option><option value="fly">추격 연출 시험 · 게임 안(예전)</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   const sk=stSeal,so=sk&&BLK[stSeal],sln=sk&&lockNeed(stSeal),sop=sk&&sln&&(S.maxTier||0)>=stSeal&&(S.gates||[]).includes(stSeal),y0=$('stMap')?$('stMap').scrollTop:0;
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>추락자의 지도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
@@ -12112,7 +12122,7 @@ function mvStep(dt){const m=P.mv;if(!m)return;
   const dd=MV_DIST*(ease(k1)-ease(k0));P.pos.x+=m.dx*dd;P.pos.z+=m.dz*dd;m.go+=step;P.inv=Math.max(P.inv,.05);pushOut(P.pos,.45);
   if(Math.random()<.6)ringFx(P.pos,.6,MV[S.cls].c,.18);
   if(m.go>=MV_GO-1e-6){ringFx(P.pos,1,MV[S.cls].c,.2);P.mv=null}}
-let spawnT=1.5,saveT=0,time=0;const egLim=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!S.runClr,/* v131: 자동 상승을 끄거나 이미 해금된 위험도에 머물면 200마리 제한 없음 */egRoom=()=>tkFor(S.tier)-Math.max(S.egSp||0,S.tierKills+enemies.filter(e=>!e.boss&&!e.rift).length);/* v856: 한 판에 생성되는 일반 몹 = 최대 1,500마리(생성 수 기준) *//* v109: 처치+생존이 200을 넘지 않게 */
+let spawnT=1.5,saveT=0,time=0;const egLim=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!S.runClr,egDone=()=>S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!!S.runClr/* v1086: 관문 보스를 잡아 클리어한 판은 몬스터를 더 만들지 않음 */,/* v131: 자동 상승을 끄거나 이미 해금된 위험도에 머물면 200마리 제한 없음 */egRoom=()=>tkFor(S.tier)-Math.max(S.egSp||0,S.tierKills+enemies.filter(e=>!e.boss&&!e.rift).length);/* v856: 한 판에 생성되는 일반 몹 = 최대 1,500마리(생성 수 기준) *//* v109: 처치+생존이 200을 넘지 않게 */
 const EGM=()=>S.ch>=NCH&&mapKind!=='story'?3:1;
 const EG_CAP=100,egCap=d=>{const v=d.cap*EGM()*egR();return S.ch>=NCH&&mapKind!=='story'?Math.min(EG_CAP*Math.min(1,egR()),v):v};/* v826: 엔드게임 동시 생존 일반 몹 최대 100마리 (기존 192) — 생성량 슬라이더 50%면 50마리, 100% 넘겨도 100마리 */
 /* v235: 엔드게임 몬스터 생성량 설정 50~120% (기기별 localStorage egRate) — 생성 간격과 동시 최대 수에 함께 적용 */
@@ -12252,7 +12262,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   /* spawner: 장마다 수와 속도가 일정하게 증가 */
   const d=diff();
   spawnT-=dt;demoTick(dt);riftTick(dt);/* v398 잿불 균열 */
-  if(!testMap&&!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&mapKind!=='route'/* v907: 돌파형은 길에 미리 놓인 무리만 */&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<egCap(d)&&!(egLim()&&egRoom()<=0)){
+  if(!testMap&&!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&mapKind!=='route'/* v907: 돌파형은 길에 미리 놓인 무리만 */&&!egDone()&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<egCap(d)&&!(egLim()&&egRoom()<=0)){
     spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&oT(S.tier)<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
     let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-rand(14,26),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
