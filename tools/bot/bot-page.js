@@ -90,7 +90,9 @@ function navNext(tx,tz,ahead){
 /* 다음 벽(바리케이드·철문·쇠창살·봉인) 앞쪽에서 해야 할 일 → 없으면 길 끝 제단 */
 function nextWallZ(pl){let best=-1e9;for(const c of colliders){if(!c.bar)continue;const z=W2L(c.x,c.z).z;if(z<pl.z+1&&z>best)best=z}return best}
 function taskGoal(){
-  if(mapKind!=='story'){/* 엔드게임: 가장 가까운 적(관문 보스 우선), 없으면 맵 가운데 */const es=enemies.filter(e=>e.hp>0&&!e.air);const g=es.find(e=>e.gate);if(g)return {x:g.pos.x,z:g.pos.z,why:'관문 보스'};let b=null,bd=1e9;for(const e of es){const d=Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z);if(d<bd){bd=d;b=e}}if(b)return {x:b.pos.x,z:b.pos.z,why:'몹 찾기'};if(mapKind==='route'){const pl=W2L(P.pos.x,P.pos.z),z=Math.max(-STORY_L+31,pl.z-25);return Object.assign(L2W(pathC(z),z),{why:'길 따라'})}return {x:0,z:0,why:'가운데'}}
+  if(mapKind!=='story'){/* 엔드게임: 가장 가까운 적(관문 보스 우선), 없으면 맵 가운데 */const es=enemies.filter(e=>e.hp>0&&!e.air);const g=es.find(e=>e.gate);if(g)return {x:g.pos.x,z:g.pos.z,why:'관문 보스'};let b=null,bd=1e9;for(const e of es){const d=Math.hypot(e.pos.x-P.pos.x,e.pos.z-P.pos.z);if(d<bd){bd=d;b=e}}if(mapKind==='route'){const W=BOT.W=BOT.W||{k:-1,t:0};if(S.tierKills!==W.k){W.k=S.tierKills;W.t=BOT.M.t}const idle=BOT.M.t-W.t;
+      if(idle>25){/* 처치가 25초 넘게 멈추면 길을 따라 앞으로 (뒤에 남은 몹은 길 끝에서 몰려옴) — 90초 넘으면 앞쪽으로 10m 옮겨 줌(봇 전용) */const pl=W2L(P.pos.x,P.pos.z),z=Math.max(-STORY_L+31,pl.z-25);if(idle>90&&(W.j||0)<BOT.M.t-20){W.j=BOT.M.t;const z2=Math.max(-STORY_L+31,pl.z-10),p2=L2W(pathC(z2),z2);P.pos.x=p2.x;P.pos.z=p2.z;BOT.M.jump=(BOT.M.jump||0)+1}return Object.assign(L2W(pathC(z),z),{why:'길 따라'})}}
+    if(b)return {x:b.pos.x,z:b.pos.z,why:'몹 찾기'};if(mapKind==='route'){const pl=W2L(P.pos.x,P.pos.z),z=Math.max(-STORY_L+31,pl.z-25);return Object.assign(L2W(pathC(z),z),{why:'길 따라'})}return {x:0,z:0,why:'가운데'}}
   const pl=W2L(P.pos.x,P.pos.z),wz=nextWallZ(pl),T=[];
   const add=(w,why,o)=>{const L=W2L(w.x,w.z);if(L.z<wz-1)return;T.push(Object.assign({x:w.x,z:w.z,why,d:Math.hypot(w.x-P.pos.x,w.z-P.pos.z)},o||{}))};
   if(typeof CHZS!=='undefined'&&CHZS){
@@ -239,7 +241,7 @@ BOT.campCh=function(c){
   try{chevSet('intro')}catch(_){}
   noML=true;try{setMap(true);applyTheme();resetWorld()}finally{noML=false}
   refreshMax();P.hp=P.mhp;P.mp=P.mmp;P.pch=null;nsPotInit(true);try{pcMode=false}catch(_){}
-  NAV.ok=null;BOT.navR=.45;BOT._p8=null;BOT._u=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;
+  NAV.ok=null;BOT.navR=.45;BOT._p8=null;BOT._u=null;BOT.ban={};BOT.W=null;BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;
   CAMP.s0=snap();CAMP.spent0=CAMP.spent;CAMP.eqT=0;
   return {ch:c+1,...CAMP.s0};
 };
@@ -274,7 +276,7 @@ BOT.egSetup=function(o){
   S.xpt={own:{},eq:[null,null,null],opt:{}};if(o.xp){const ids=String(o.xp).split('+').filter(Boolean).slice(0,3);ids.forEach((id,i)=>{S.xpt.own[id]=1;S.xpt.eq[i]=id})}
   inTown=false;noML=true;try{setMap(true);applyTheme();resetWorld()}finally{noML=false}
   refreshMax();P.hp=P.mhp;P.mp=P.mmp;P.pch=null;nsPotInit(true);P.xch={};P.xb={};try{xpInit(true)}catch(_){}try{pcMode=false}catch(_){}
-  BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;
+  BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.W=null;BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;
   BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};
   return {d:o.d,lv:S.lv,tier:o.tier,enh:o.enh,g2:o.g2,mut:mutPts(S.mutRun),dps:Math.round(pwParts().d),ehp:Math.round(pwParts().e),hp:Math.round(P.mhp),map:mapKind};
 };
@@ -340,7 +342,7 @@ function progGear(d){const o=PG.o,sp=progSpec(d);
   refreshMax();PG.gearD=d}
 function progEnh(){let n=0;for(;;){let kk=null,lo=99;for(const k of EQS){const L=enhL(k);if(L<NS_ENH_MAX&&L<lo){lo=L;kk=k}}if(!kk)break;const c=enhCost(lo,kk);if(S.gold<c)break;smithSel=kk;const g0=S.gold;smithTry(true);PG.spent+=g0-S.gold;if(++n>200000)break}return n}
 const progEnhStat=()=>{const a=EQS.map(k=>enhL(k));return {min:Math.min(...a),avg:+(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1),max:Math.max(...a)}};
-function botReset(){const id=C().skills[0];BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};BOT.M.gold0=S.gold||0}
+function botReset(){const id=C().skills[0];BOT.C={skills:id};NAV.ok=null;BOT._u=null;BOT._p8=null;BOT.ban={};BOT.W=null;BOT.M=newMetrics();BOT.zones=[];D={mx:0,mz:0,s1:false,atk:false,roll:false};decT=0;lastZ=null;stuckT=0;BOT.on=true;BOT.EG={items:0,tiers:[0,0,0,0,0,0,0]};BOT.M.gold0=S.gold||0}
 BOT.reset=()=>botReset();
 BOT.progSetup=function(o){
   hookOnce();BOT.cfg=Object.assign({},BOT.PRESETS[o.skill||'normal']);
