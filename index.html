@@ -5882,7 +5882,7 @@ const WLOOKS={wsk_knight:{n:'검귀 카이렌의 대검',cls:['warrior','musa'],
   wsk_moon:{n:'월광의 홀',cls:['mage'],pr:900,file:'models/moon_staff.glb',node:'moon_staff',rel:'sw',ry:.8716,tip:[0,.48,0],gem:1,col:1.725,fb:1.2,cn:'마법사'},
   /* v776: 궁수 「천상의 불사조 활」 — Meshy 모델(5.2만→1.4만 삼각형). 원래 활과 같은 축(활대 +y, 쥐는 곳 = 원점, 시위 −x)으로 미리 맞춰 둠. 진주 구슬만 발광 맵(강화할수록 밝게) */
   /* v1036: 궁수 「서리달의 진혼곡」 — Meshy 모델(Frostmoon Requiem, 3.5만→1.6만 삼각형·텍스처 1k). 불사조 활과 같은 축·크기(높이 1.45, 쥐는 곳 = 원점, 시위 −x)로 미리 맞춤. 짙은 파란 보석만 발광 맵 */
-  wsk_frost:{n:'서리달의 진혼곡',cls:['archer'],pr:900,file:'models/frostmoon_bow.glb',node:'frostmoon_bow',rel:'sw',col:1,fb:1.44,pvB:1.2,/* 필드·판매창 20% 더 밝게 */cn:'궁수'},
+  wsk_frost:{n:'서리달의 진혼곡',cls:['archer'],pr:900,file:'models/frostmoon_bow.glb',node:'frostmoon_bow',rel:'sw',col:1.1,fb:1.309,pvB:1.091,/* 필드·판매창 20% 더 밝게(v1039) · 장비창 10% 더(v1040: col 1.1, 필드·판매창은 그대로가 되게 fb·pvB를 나눔) */cn:'궁수'},
   wsk_phoenix:{n:'천상의 불사조 활',cls:['archer'],pr:900,file:'models/phoenix_bow.glb',node:'phoenix_bow',rel:'sw',col:1.05,fb:1.2,bk:[.2,0,0],cn:'궁수'}};
 const lookGet=k=>LOOKS[k]||WLOOKS[k]||BLOOKS[k];const blookOk=(k,cls)=>{const B=BLOOKS[k];return !!(B&&B.cls.includes(cls))};const lkImg=k=>LKIMG[k]||(BLOOKS[k]&&BLOOKS[k].img);
 const wlookOk=(k,cls)=>{const W=WLOOKS[k];return !!(W&&W.cls.includes(cls))};
@@ -8905,7 +8905,7 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
 /* v508: 재단사 세라 — 외형 장비(능력치 없음). 재화 구매는 추후, 지금은 테스트 캐릭터에서 무료로 착용·해제 */
 let nsKind=null;
 /* 외형 미리보기 — 장비창 전용 공간에서 캐릭터 뒷모습 3/4 각도를 한 번에 그려 이미지로 저장(직업별 캐시). 날개 모양을 고쳐도 항상 최신 모습 */
-let LKIMG={};
+let LKIMG={};const LOOK_PV=[11,5,2.8],LOOK_PVW=[17,7.2,3.1];/* 빛 날개(코드로 그린 큰 날개)는 더 뒤에서 */
 /* v739: 다른 직업 무기 미리보기 — 무기만 세워 둠(가장 긴 축을 세로로, 높이 3.6). pvF:-1이면 위아래 뒤집기 */
 function wlookPv(k){const W=WLOOKS[k],m=wskS(k).src.clone(true);m.position.set(0,0,0);m.quaternion.identity();m.scale.setScalar(1);
   m.traverse(o=>{o.layers.enable(1);if(o.isMesh){o.material=o.material.clone();o.material.color.setScalar((W.col||1.9)*(W.pvB||1));o.material.emissive.setHex(0xffffff);o.material.emissiveIntensity=1.6*(W.pvB||1);/* v1039: pvB = 판매창 사진 밝기 */o.material.metalness=Math.min(o.material.metalness,.6);o.frustumCulled=false}});
@@ -8921,7 +8921,7 @@ function lookShots(){if(!hero||!S.cls||S.demo)return;if(LKIMG._c!==S.cls)LKIMG={
         renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9);scene.remove(pv);hero.visible=true;continue}
       S.look=wp?null:k;S.wlook=wp?k:null;if(KW)wskSync(KW);for(let i=0;i<14;i++)wingTick(.1);if(!wp&&LOOKS[k].mdl&&!(LV.g&&LV.g.userData.ready)){/* v743: 용암 날개는 모델을 내려받는 중이면 빈 사진을 저장하지 않고, 받은 뒤 다시 찍음 */clearTimeout(LKIMG._rt);LKIMG._rt=setTimeout(()=>{if(nsKind==='look'&&!$('nsSheet').hidden)renderLooks();else lookShots()},600);continue}hero.traverse(x=>x.layers.enable(1));
       if(wp){const f2=(P.face||0)+.75;u.key.position.set(Math.sin(f2)*3,9,Math.cos(f2)*3);camera.position.set(P.pos.x+Math.sin(f2)*9.5,Y+7.5,P.pos.z+Math.cos(f2)*9.5);camera.lookAt(P.pos.x,Y+2.1,P.pos.z)}
-      else if(LOOKS[k].pv){const v=LOOKS[k].pv;camera.position.set(P.pos.x+dx*v[0],Y+v[1],P.pos.z+dz*v[0]);camera.lookAt(P.pos.x,Y+v[2],P.pos.z)}/* v1035: 위로 곧게 선 날개(수정 날개)는 위에서 내려다보면 납작하게 보여 → 뒤에서 낮게 */
+      else if(LOOKS[k].pv||LOOK_PV){const v=LOOKS[k].pv||(LOOKS[k].wing?LOOK_PVW:LOOK_PV);/* v1040: 모든 날개를 수정 날개와 같은 각도(뒤에서 낮게)로 */camera.position.set(P.pos.x+dx*v[0],Y+v[1],P.pos.z+dz*v[0]);camera.lookAt(P.pos.x,Y+v[2],P.pos.z)}/* v1035: 위로 곧게 선 날개(수정 날개)는 위에서 내려다보면 납작하게 보여 → 뒤에서 낮게 */
       else camera.position.set(P.pos.x+dx*7.6,Y+12.1,P.pos.z+dz*7.6),camera.lookAt(P.pos.x,Y+1.9,P.pos.z);/* v943: 등 부착물(날개) 미리보기 약 2배 크게(날개 끝이 안 잘리게 1.9배) · 날개가 가운데 오게 */camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
       renderFrame(performance.now()/1000);cx.clearRect(0,0,360,360);cx.drawImage(cv,(Wd-sz)/2,(Hd-sz)/2,sz,sz,0,0,360,360);LKIMG[k]=o.toDataURL('image/jpeg',.9)}
   }catch(e){hero.visible=true}
@@ -9602,7 +9602,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1040';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1041';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
