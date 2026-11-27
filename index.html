@@ -117,6 +117,7 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 #talkL{position:fixed;inset:0;z-index:58;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 50vh;padding-bottom:calc(50dvh + 6px);background:linear-gradient(rgba(0,0,0,.4),transparent 50%)}/* v706: 대사 상자는 화면 세로 가운데 바로 위 */#talkL[hidden]{display:none}#talkB{width:min(560px,100%);background:rgba(12,12,18,.9);border:1px solid #6a5a3a;border-radius:12px;padding:13px 16px 10px;color:#efe8da;font-size:15px;line-height:1.6;box-shadow:0 6px 24px rgba(0,0,0,.5)}#talkB{display:flex;gap:12px;align-items:flex-start}#talkB .tkx{flex:1;min-width:0}#talkP{flex:none;width:76px;height:76px;border-radius:10px;border:1px solid #6a5a3a;object-fit:cover;background:#0b0b10;margin-top:2px}#talkP[hidden]{display:none}/* v906 */#talkN{font-size:12.5px;font-weight:700;color:#ffd27a;margin-bottom:4px;letter-spacing:.02em}#talkN.vo{color:#ffe9a8;opacity:.75}#talkT.vo{color:#ffe08a;font-style:italic}#talkT .pn{color:#ffd166;font-weight:900}#talkT.vo .pn{color:inherit}#talkH{text-align:right;font-size:11px;opacity:.5;margin-top:4px}#npcAct.talkhide{display:none!important}
 body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body.cineui .hud>.top,body.cineui #topStack,body.cineui #lsStrip,body.cineui #acts,body.cineui #npcAct,body.cineui #pchint,body.cineui #autoPop,body.cineui #hmenu{visibility:hidden!important;opacity:0!important}
 .optabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px;border-radius:12px;background:#111116;border:1px solid rgba(255,255,255,.08);flex:none}.optabs button{border:0;border-radius:9px;background:transparent;color:#8a8577;font:800 13px var(--ko);padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}.optabs button small{font:600 10px var(--ko);opacity:.8}.optabs button.on{background:color-mix(in srgb,var(--gc) 26%,#1c1a20);color:#f1ece0;box-shadow:inset 0 0 0 1.5px var(--gc)}
+.opsub{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:none}.opsub button{border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#15151b;color:#8a8577;font:800 13px var(--ko);padding:8px 4px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer}.opsub button small{font:600 10.5px var(--ko);opacity:.8}.opsub button[data-optsub=o].on{color:#ff9a8a;border-color:#ff9a8a;background:rgba(255,154,138,.1)}.opsub button[data-optsub=x].on{color:#7fe0b0;border-color:#7fe0b0;background:rgba(127,224,176,.1)}
 .opscroll{overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:2px;scrollbar-width:thin}.opsec{display:flex;flex-direction:column;gap:3px}.opst{font:800 14px var(--ko);color:#e8c890}.opst.a{color:#ff9a8a}.opst.s{color:#7fe0b0}.opst small{font:600 11px var(--ko);color:#8a8577;margin-left:4px}.opd{margin:0 0 4px;font-size:11.5px;color:#a39f99}
 .oph,.opr{display:grid;grid-template-columns:minmax(0,1fr) 92px 92px;align-items:center;gap:6px}.oph{font:700 10.5px var(--ko);color:#8a8577;padding:0 8px}.oph span,.opv{text-align:right}.oph .t1{color:#ffd27a}
 .opr{background:rgba(255,255,255,.04);border-radius:8px;padding:6px 8px}.opr.mine{background:rgba(255,210,90,.12);box-shadow:inset 0 0 0 1px rgba(255,210,90,.5)}.opr.mine .opn b{color:#ffd27a}
@@ -9225,26 +9226,23 @@ const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['
   x:[['mp'],['regen'],['mreg'],['esrc'],['mspd'],['killH'],['killM'],['mcr'],['res'],['area']]};
 /* v1066: 옵션표 — 공격용(무기·장갑) / 장신구용(목걸이·반지) / 방어용(투구·갑옷·신발·허리띠) 탭. 고정 · 기본(DPS·EHP) · 특수(체력·마나·유틸) 옵션을 세로 목록으로, 6티어·1티어 수치 범위와 함께 */
 const OPT_TABS=[['atk','공격용',['weapon','gloves'],'#c8605a'],['acc','장신구용',['amulet','ring'],'#a07ad0'],['def','방어용',['helm','armor','boots','belt'],'#5a9ad8']];
-let optTabK=null;
-function optTable(it,tab){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
-  if(tab)optTabK=tab;else if(sl)optTabK=(OPT_TABS.find(t=>t[2].includes(sl))||OPT_TABS[0])[0];else optTabK=optTabK||'atk';
+let optTabK=null,optSubK='o';
+function optTable(it,tab,sub){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
+  if(sub)optSubK=sub;if(tab)optTabK=tab;else if(sl)optTabK=(OPT_TABS.find(t=>t[2].includes(sl))||OPT_TABS[0])[0];else optTabK=optTabK||'atk';
   const T=OPT_TABS.find(t=>t[0]===optTabK),SL=T[2],gc=T[3];
   const rg=(R,k,t)=>{const r=R&&R[t-1];if(!r)return '—';const u=(NSO[k]&&NSO[k].u)||'',f=v=>nFmt(k,v).replace(/^[-+]/,''),a=f(r[0]),b=f(r[1]);return a===b?a:`${u&&a.endsWith(u)?a.slice(0,-u.length):a}~${b}`};
   const chips=ss=>ss.length===SL.length?'':`<span class="opsl">${ss.map(x=>SLOTN[x]).join(' · ')}</span>`;
   const row=(nm,k,R,ss,mine)=>`<div class="opr${mine?' mine':''}"><div class="opn"><b>${nm}</b>${chips(ss)}</div><span class="opv">${rg(R,k,6)}</span><span class="opv t1">${rg(R,k,1)}</span></div>`;
-  const fixed=()=>{const by={};for(const x of SL){const B=NSB[x];if(!B)continue;const k=B.k,key=k||'armor';(by[key]=by[key]||{k,B,ss:[]}).ss.push(x)}
-    return Object.values(by).map(o=>o.k?row(NSO[o.k]?.n||'고정',o.k,o.B.r,o.ss,false):o.ss.map(x=>row(`방어구 수치`,'def',NSB[x].r,[x],false)).join('')).join('')};
   const order=kd=>{const ord=OPT_ROWS[kd].flatMap(r=>r.filter(k=>NSO[k])),all=new Set(SL.flatMap(x=>(NSLOT[x]||{})[kd]||[]));return [...ord.filter(k=>all.has(k)),...[...all].filter(k=>!ord.includes(k))]};
   const list=kd=>order(kd).map(k=>row(NSO[k].n,k,NSO[k].r,SL.filter(x=>((NSLOT[x]||{})[kd]||[]).includes(k)),has.has(k))).join('');
   const hd=`<div class="oph"><span></span><span>6티어</span><span class="t1">1티어</span></div>`;
   const d=document.createElement('div');d.className='optm';d.innerHTML=`<div class="optc" style="--gc:${gc}"><div class="shead"><div><h2>장비 옵션표</h2><small>부위마다 붙을 수 있는 옵션과 수치 범위${sl?` · 지금 고른 장비의 옵션은 노란색`:''}</small></div><button class="close">닫기</button></div>
     <div class="optabs">${OPT_TABS.map(t=>`<button data-optab="${t[0]}" class="${t[0]===optTabK?'on':''}" style="--gc:${t[3]}">${t[1]}<small>${t[2].map(x=>SLOTN[x]).join('·')}</small></button>`).join('')}</div>
     <div class="opscroll">
-    <div class="opsec"><div class="opst">고정 옵션</div><p class="opd">강화하면 오르는 맨 윗줄 · 부위마다 하나로 정해져 있습니다${optTabK==='def'?' · 방어구 수치는 장비 베이스에 따라 방어력·회피력·에너지 쉴드 중 하나':''}</p>${hd}${fixed()}</div>
-    <div class="opsec"><div class="opst a">기본 옵션 <small>1~3줄</small></div><p class="opd">DPS와 EHP에 직접 영향을 주는 옵션</p>${hd}${list('o')}</div>
-    <div class="opsec"><div class="opst s">특수 옵션 <small>1~3줄</small></div><p class="opd">체력 · 마나 · 이동 같은 유틸 옵션 (전투력 계산 밖)</p>${hd}${list('x')}</div>
+    <div class="opsub">${[['o','기본 옵션','1~3줄'],['x','특수 옵션','1~3줄']].map(q=>`<button data-optsub="${q[0]}" class="${q[0]===optSubK?'on':''}">${q[1]}<small>${q[2]}</small></button>`).join('')}</div>
+    <div class="opsec"><p class="opd">${optSubK==='o'?'DPS와 EHP에 직접 영향을 주는 옵션':'체력 · 마나 · 이동 같은 유틸 옵션 (전투력 계산 밖)'}</p>${hd}${list(optSubK)}</div>
     <p class="optn">기본+특수 합 3~6줄 · 부위 이름이 붙은 옵션은 그 부위에만 나옵니다 · 수치 조정·변환·승급은 조율사에게서</p></div></div>`;
-  d.addEventListener('click',e=>{const t=e.target.closest('[data-optab]');if(t){optTable(it,t.dataset.optab);return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
+  d.addEventListener('click',e=>{const u=e.target.closest('[data-optsub]');if(u){optTable(it,optTabK,u.dataset.optsub);return}const t=e.target.closest('[data-optab]');if(t){optTable(it,t.dataset.optab);return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
 function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.inv.filter(x=>x.ns)],sel=all.find(x=>x.id===rrSel),T=TCUR();
   const ln=sel&&rrLine!==null?sel.lines[rrLine]:null,lt=ln?(ln.t||sel.tier):0;
   let ct='',btn='';
@@ -10023,7 +10021,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1084';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1085';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
