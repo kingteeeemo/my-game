@@ -6608,7 +6608,7 @@ function spawnEnemy(type,x,z,rank=0,o={}){
   const sc=T.sc*R.sc;g.scale.setScalar(sc);g.add(blob(.6));g.position.set(x,0,z);scene.add(g);
   const base=ek?kindName(ek):type==='shooter'||type==='caster'?(MOB_RNG[ci]||MOB_RNG[0])[type==='caster'?1:0]:CH[ci].mob[type]||'',name=o.name||(rank===3?CH[ci].boss:rank===2?`${UNI_PRE[Math.random()*UNI_PRE.length|0]} ${base}`:rank===1?`${RARE_PRE[Math.random()*RARE_PRE.length|0]} ${base}`:base);
   const xpCh=(S.ch===0?1.3:S.ch===1?1:.6)*.7;/* 1장 +30%, 2장 그대로, 3장~엔드게임 -40%, 전 구간 추가 -30% */
-  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&rank>=2?.8:1)/* v1073: 엔드게임 유니크·보스(관문·메아리 등) 체력 −20% (골드는 그대로) */*(NS()&&S.ch<NCH&&NS_RKHP[rank]?NS_RKHP[rank]/R.hp:1)*(NS()?nsHpMul():1)*(mutA('hp')&&!o.noMut?2.5:1)*(o.noMut?1:mutK()),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
+  const hp0=T.hp*d.hp*R.hp,hp=hp0*(NS()&&S.ch>=NCH&&mapKind!=='story'&&!S.duel?[1,2/2.6,3.5/6,10/(56/2.4)][rank]*(type==='brute'?2.5/3:1):1)/* v1075: 엔드게임 체력 = 구울 기준 브루트 ×2.5 · 레어 ×2 · 유니크 ×3.5 · 메아리 보스 ×10 · 관문 보스 ×30 (골드는 그대로) */*(NS()&&S.ch<NCH&&NS_RKHP[rank]?NS_RKHP[rank]/R.hp:1)*(NS()?nsHpMul():1)*(mutA('hp')&&!o.noMut?2.5:1)*(o.noMut?1:mutK()),xp=(type==='boss'?T.xp*d.xp:T.xp*d.xp*R.xp/3)*xpCh;
   const lab=document.createElement('div');lab.className='nm r'+rank;lab.innerHTML=`<span style="color:${R.c}"></span><i><b></b></i>`;lab.firstChild.textContent=name;namesEl.appendChild(lab);
   const e={type,rank,name,g,mat,lab,labBar:lab.querySelector('b'),h:M.h*sc+.25,pos:g.position,hp,mhp:hp,gHp:hp0,rng:T.rng,spd:(NS()?.7:1)*T.spd*(rank===1?1.08:1)*(rank!==3&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&oT(S.tier)>=30?2:1)*(mutA('spd')&&!o.noMut?1.4:1),/* v277: 위험도 30부터 필드 몬스터 이동 속도 +100% */dmg:T.dmg*d.dmg*R.dmg*1.2*(NS()?nsDmMul():1)*(mutA('dmg')&&!o.noMut?2:1)*(o.noMut?1:mutK()),asp:mutA('spd')&&!o.noMut?1.4:1,r:T.r*R.sc,xp:Math.max(1,Math.round(xp)),acd:1,flash:0,kbT:0,kbx:0,kbz:0,slowT:0,ph:Math.random()*6,
     boss:rank===3,chBoss:!!o.chBoss,aggro:rank!==3||!!o.aggro,skill:3.5,M,wk:Math.random()*6,atk:0};
@@ -7488,7 +7488,7 @@ function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.rtR
 function warmRegion(m){setTimeout(()=>{try{groundSet('eg'+m,EGMAPS[m])}catch(e){}},400)}
 function regionFx(){const f=$('regionFade');if(!f)return;f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}
 function spawnGate(){const rt=mapKind==='route',a=rand(0,Math.PI*2),x=rt?ALTAR.x:clamp(P.pos.x+Math.cos(a)*12,-B+3,B-3),z=rt?ALTAR.z:clamp(P.pos.z+Math.sin(a)*12,-B+3,B-3);/* v907: 돌파형은 길 끝 제단에서 */
-  const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:!rt||Math.hypot(P.pos.x-x,P.pos.z-z)<20});e.gate=S.tier;e.hp=e.mhp=e.mhp*4;e.dmg*=1.2*(S.tier===5?.78:S.tier===6?.88:1)/* v866: 구간이 바뀌는 위험도 5·6 관문 보스 피해 −22%·−12% (봇 측정: 전 직업 최저 체력이 가장 낮은 지점) */;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
+  const e=spawnEnemy('boss',x,z,3,{name:`심연의 관문지기 · 위험도 ${S.tier}`,aggro:!rt||Math.hypot(P.pos.x-x,P.pos.z-z)<20});e.gate=S.tier;e.hp=e.mhp=e.mhp*(NS()?3:4)/* v1075: 엔드게임 관문 보스 = 메아리 보스 ×3 (구울 ×30) */;e.dmg*=1.2*(S.tier===5?.78:S.tier===6?.88:1)/* v866: 구간이 바뀌는 위험도 5·6 관문 보스 피해 −22%·−12% (봇 측정: 전 직업 최저 체력이 가장 낮은 지점) */;e.g.scale.multiplyScalar(1.2);e.r*=1.2;e.h*=1.2;e.mat.color.setHex(0x2a8a8a);
   toast("관문 보스 출현",`${e.name} · 쓰러뜨리면 위험도 ${S.tier} 클리어`)}
 function gateClear(e){const t=e.gate;if(S.runClr)return;S.runClr=1;const first=!(S.gates||[]).includes(t);if(first)S.gates=(S.gates||[]).concat(t);
   for(let i=0;i<(first?2:1);i++)dropItem(e.pos,true,3);dropGold(e.pos,goldOf(e)*2);tele('gate',{g:t});
@@ -9967,7 +9967,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1074';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1075';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
