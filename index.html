@@ -1975,7 +1975,8 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
   mutA=k=>mutZone()&&!!(S.mutRun&&S.mutRun[k]),mutPts=(o=S.mut)=>Object.keys(MUT).reduce((a,k)=>a+(o&&o[k]?MUT[k].p:0),0),mutRw=p=>(1+p/100)*(1+p/200),mutM=()=>mutZone()?mutRw(mutPts(S.mutRun||{})):1,mutT1=()=>mutZone()?1+mutPts(S.mutRun||{})/100:1,mutK=()=>mutZone()?1+mutPts(S.mutRun||{})/200:1,/* v835: 보상 = (1 + 점수÷100) × (1 + 점수÷200) — 공통 배율만큼 보상도 곱함 (200점 ×6) · 1티어 확률 가중은 기존(1 + 점수÷100) 유지 · 몬스터 체력·피해 공통 배율 = 1 + 점수÷200 */
   /* v629: 변이 입장 비용 — 골드. 위험도 20 한 판(1,000마리)의 기본 골드 × 60% × (점수 ÷ 200)² — 전부 켜면 기본 골드의 60%(보상 ×3이라 남는 장사), 적게 켜면 아주 쌈. 골드 드랍을 조정해도 비용이 따라감 */
   runGold=d=>{const t=oT(d);return 1000*AVG_KILL_HP*egHp(t)*.012*goldAdjT(t)},mutCost=(o=S.mut,d=S.tier)=>{const p=mutPts(o),v=runGold(d)*1.0*(p/200)**2*.9/* v835: 보상 ×5에 맞춰 0.6 → 1.0 · v930: 처치 수 900마리로 줄며 10% 할인(섬멸·돌파 공통) */,u=v>=1e6?1e4:v>=1e3?10:1;return p?Math.max(1,Math.round(v/u)*u):0};/* v631: 그 위험도 한 판 기본 골드 기준 */
-function runPay(t){S.rtRun=S.egPat==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
+const patFor=t=>t%5===0?'field':'route';/* v1042: 위험도 5·10·15·20…은 섬멸, 나머지는 돌파 (선택 UI 없음) */
+function runPay(t){S.rtRun=patFor(t)==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
 const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?300+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
 const RAR=[{n:'일반',c:'#c8c4bc',o:[0,0],hex:0xc8c4bc},{n:'마법',c:'#6a9aff',o:[1,2],hex:0x6a9aff},{n:'희귀',c:'#f0d040',o:[3,3],hex:0xf0d040},{n:'전설',c:'#ff8a3a',o:[4,4],hex:0xff8a3a}];
@@ -7214,7 +7215,7 @@ const egCleared=()=>(S.egSp||0)>=tkFor(S.tier)&&!enemies.some(x=>!x.boss&&!x.rif
 const tierMin=()=>1,/* v621: 낮은 위험도 이동 제한 해제 */tierMovable=t=>(t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP))&&t>=tierMin();
 function tierCheck(){if(S.ch<NCH||S.runClr||(S.tierKills<tkFor(S.tier)&&!egCleared()))return;S.tierKills=tkFor(S.tier);if(!S.test&&S.tier>(S.clr||0))S.clr=S.tier;if(!enemies.some(x=>x.gate))spawnGate()}/* v628: 한 판 = 1,000마리 + 관문 보스 (자동 상승 없음) */
 const TEST_TOP=D_MAX;/* v403: 테스트 캐릭터는 해금 없이 위험도 140까지 이동 가능 */
-function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;save();if(S.test){riftClear();riftNow=1}/* v403: 테스트 캐릭터는 위험도에 들어가면 바로 균열 시작 */
+function setTier(t,auto){const m0=egMapFor(S.tier),m1=egMapFor(t);S.tier=t;S.rtRun=patFor(t)==='route'?1:0;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;save();if(S.test){riftClear();riftNow=1}/* v403: 테스트 캐릭터는 위험도에 들어가면 바로 균열 시작 */
   if(m0!==m1){if(!inTown){const f=$('regionFade');f.innerHTML=`<div><small>다음 지역으로 이동합니다</small><b>${EGMAPS[m1].n}</b><span>위험도 ${t}</span></div>`;f.className='rfade hold';P.inv=99;
       /* 이동 화면을 먼저 띄운 뒤 다음 프레임에 지역 생성 (생성 중 끊김을 화면 뒤로 숨김) */
       requestAnimationFrame(()=>setTimeout(()=>{setMap(true);applyTheme();resetWorld();P.inv=1.5;setTimeout(()=>{f.className='rfade';void f.offsetWidth;f.className='rfade on';stageBanner(true)},350)},30))}
@@ -9607,7 +9608,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1041';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1042';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10874,7 +10875,7 @@ function stMapScroll(){const m=$('stMap');if(!m)return;const g=m.querySelector(s
 function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageReq(NCH,t),r=me/req,open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),clr=(S.gates||[]).includes(t),pb=BLK[t-1],seal=!open&&pb&&lockNeed(t-1)&&(S.maxTier||0)>=t-1;
   const stTxt=clr?'<b class="ok">클리어</b>':open?'도전 가능':seal?`<b style="color:#c890ff">봉인 · ${blkName(pb)} 처치 필요</b>`:`잠김 · 위험도 ${t-1} 클리어 필요`;
   const trk=Array.from({length:D_MAX},(_,i)=>{const q=i+1,o=q<=(S.maxTier||0)||(S.test&&q<=TEST_TOP),c=(S.gates||[]).includes(q);return `<button class="sts${c?' c':o?' o':''}${q===t?' on':''}${q===S.tier&&S.ch>=NCH?' cur':''}" data-ss="${q}"></button>${q%5===0&&q<D_MAX?'<i class="stgap"></i>':''}`}).join('');
-  const mutOn=true,pts=mutPts(),mm=pts>0,pat=S.egPat==='route'?'route':'field',patH=`<div class="stpat"><button class="stmc${pat==='field'?' on':''}" data-pat="field"><b>섬멸</b><small>사방에서 몰려오는 적 처치</small></button><button class="stmc${pat==='route'?' on':''}" data-pat="route"><b>돌파</b><small>길 끝까지 나아가며 처치</small></button></div>`;/* v907: 패턴 선택 */
+  const mutOn=true,pts=mutPts(),mm=pts>0,pat=patFor(S.tier),patH='';/* v1042: 패턴 선택 UI 제거 */
   const mut=!mutOn?'':!mutOpen()?`<div class="stmut"><div class="stmh"><span>변이</span></div><p class="hint" style="margin:0">엔드게임(추락자의 길)에서 열립니다.</p></div>`:
     `<div class="stmut"><div class="stmh"><span>변이</span><span>점수<b>${pts}</b> · 보상<b>×${mutRw(pts).toFixed(2)}</b></span></div>
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
@@ -10905,7 +10906,7 @@ $('stageSheet').addEventListener('click',e=>{const mg=e.target.closest('[data-ma
   if(b.id==='tjGo'){testJump($('tjSel').value);return}
   if(b.id==='tmGo'){testMapGo();return}/* v646 */
   if(b.dataset.grp!==undefined){const g=+b.dataset.grp,y=$('stageSheet').scrollTop,y2=$('stage').scrollTop;stageExp.has(g)?stageExp.delete(g):stageExp.add(g);renderStage();$('stageSheet').scrollTop=y;$('stage').scrollTop=y2;return}
-  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==(S.egPat==='route'?'route':'field')/* v991: 패턴을 바꿨으면 새 판으로 입장 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save()}closeStage();leaveTown(true)};if(egRun()&&!patCh)egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
+  if(b.dataset.tier&&inTown){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==patFor(t)/* v991: 패턴을 바꿨으면 새 판으로 입장 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save()}closeStage();leaveTown(true)};if(egRun()&&!patCh)egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}return}/* v628: 마을에서 고르면 그 위험도로 바로 입장 */
   if(b.dataset.tier){const t=+b.dataset.tier;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;if(!runPay(t))return;closeStage();setTier(t,false)}return}});
 $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 /* v73: 테스트 캐릭터 — 스토리 장 · 최종 결전 · 엔드게임 위험도로 바로 이동 */
@@ -10915,7 +10916,7 @@ function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();
   mapLoad('테스트 맵','몬스터 없음 · 스킬 시험',()=>{setMap(true);applyTheme();resetWorld()},()=>toast('테스트 맵','몬스터가 나오지 않습니다 · 사냥터에서 위험도를 고르면 돌아갑니다'))}
 function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
-  else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.mutRun={...(S.mut||{})};S.rtRun=S.egPat==='route'?1:0}
+  else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.mutRun={...(S.mut||{})};S.rtRun=patFor(t)==='route'?1:0}
   else{S.ch=+k;S.phase=0;S.kills=0}
   setMap(true);applyTheme();resetWorld();stageBanner();if(k==='fb'){drgLoad();enterArena2()}/* v607: 테스트 이동도 실제와 같이 계단 → 등장 연출 */
   toast('테스트 이동',k==='fb'?`최종 결전 · ${FINAL.boss}`:k[0]==='t'?`엔드게임 · ${EGMAPS[egMapFor(S.tier)].n} · 위험도 ${S.tier}`:`${S.ch+1}장 · ${CH[S.ch].n}`)}
