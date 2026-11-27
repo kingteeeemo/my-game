@@ -75,6 +75,9 @@ body.invmode .hud,body.invmode .acts,body.invmode .pchint,body.invmode #topStack
 .iv2pop .ivcmp{display:block}
 .iv2pop .ivc{background:rgba(22,22,29,.98);border:1.5px solid rgba(255,255,255,.2);box-shadow:0 14px 44px rgba(0,0,0,.65);border-radius:16px;padding:14px 15px;gap:5px}
 .iv2pop .ivc.sel .ivlab{display:none}
+#otRing{position:fixed;z-index:9998;border:2.5px solid #ffc45a;border-radius:12px;box-shadow:0 0 10px rgba(255,196,90,.7);pointer-events:none;animation:otp 1.2s ease-in-out infinite}@keyframes otp{50%{box-shadow:0 0 16px rgba(255,196,90,.95);border-color:#ffe2a0}}
+#otCard{position:fixed;z-index:9999;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 24px));background:rgba(22,18,12,.97);border:1.5px solid #ffc45a;border-radius:14px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6);pointer-events:auto}#otCard.top{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto}
+#otCard>*{display:block;float:none;text-align:left}#otCard .chap{font:800 10.5px var(--ko);color:#ffc45a;letter-spacing:.04em}#otCard h3{margin:3px 0 4px;font:800 16px var(--ko);color:#f6ead0}#otCard p{margin:0;font-size:12.5px;line-height:1.5;color:#d8ccb4}#otCard p b{color:#ffd27a}#otCard button{margin-top:8px;background:none;border:0;color:#8a8070;font:600 11px var(--ko);padding:0;text-decoration:underline;cursor:pointer}
 .iv2pop.cmp2{width:min(420px,100%);gap:8px}.iv2pop.cmp2 .cmphd{display:flex;justify-content:flex-end;flex:none}.iv2pop.cmp2 .pclose{position:static;width:36px;height:36px;border-radius:10px;border:1px solid #3a3844;background:#1c1c24;color:#e8e0cc;display:flex;align-items:center;justify-content:center;font-size:0}
 .iv2pop.cmp2 .ivcmp.two{display:flex;flex-direction:column;gap:10px}.iv2pop.cmp2 .cmpc{position:relative;min-width:0;flex:1;display:flex}.iv2pop.cmp2 .cmpc>.ivc{flex:1;min-width:0}.iv2pop.cmp2 .pico{top:12px;right:12px}
 .iv2pop.cmp2 .ivc .ivlab{display:inline-block;font-size:11px;padding:3px 9px;margin-bottom:2px}.iv2pop.cmp2 .ivc.cur .ivlab{background:#2d4a8a;color:#dbe6ff}.iv2pop.cmp2 .ivc.sel .ivlab{background:#e8dcc4;color:#1b1710}
@@ -5082,8 +5085,8 @@ function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;
     for(const s of p.pts){const u=s.userData,q=(u.p+t*.35*u.s)%1,rr=u.r*(1-q),aa=u.a+q*3.5;s.position.set(Math.cos(aa)*rr*.75,1.35+Math.sin(aa)*rr*1.1,.05+.15*(1-q));const sc=.18*(1-q*.6);s.scale.set(sc,sc,1);s.material.opacity=Math.min(1,q*4)*(1-q)*1.3}}}}
 /* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
 const HR='쉼터지기 하란',VO='???';
-const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.']];
-const REF_ALT=[[HR,'또 한 명이 내려왔군. 금빛 화로가 너를 알아보는 걸 보니, 먼저 온 녀석과 같은 길을 걷게 될 모양이야.'],[HR,'여긴 추락자의 쉼터. 올라갈 생각이라면 화로 앞에 서라.']];
+const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.'],[HR,'…아니, 그 전에 언덕 위 조율사 오린부터 찾아가라. 여기선 장비를 손보지 않고는 한 걸음도 못 오른다.']];
+const REF_ALT=[[HR,'또 한 명이 내려왔군. 금빛 화로가 너를 알아보는 걸 보니, 먼저 온 녀석과 같은 길을 걷게 될 모양이야.'],[HR,'여긴 추락자의 쉼터. 올라갈 생각이라면 화로 앞에 서라.'],[HR,'장비 손보는 법을 모르면 언덕 위 조율사 오린부터 찾아가고.']];
 const REF_LORE=[
   {k:'b5',ok:()=>(S.maxTier||0)>=5,l:[[HR,'바닥을 벗어났다고? …정말로 올라가고 있군.'],[HR,'그 위는 꺾인 칼의 황야. 우리처럼 떨어진 도전자들이 끝까지 싸우다 쓰러진 땅이다.'],[HR,'그 끝에서 길을 막는 검사가 있다. 검귀 카이렌… 한때 우리 대장이었지.'],[HR,'불 앞에 무릎을 꿇고, 이제는 아쉬카르의 칼이 되어 올라오는 자들을 베고 있다.']]},
   {k:'b10',ok:()=>(S.maxTier||0)>=10,l:[[HR,'검귀를 꺾었군. …대장도 이제야 그 불에서 놓여났기를.'],[HR,'위는 얼어붙은 기사단 묘역. 루멘을 지키던 빛의 기사단이 잠든 곳이다. 성역의 불이 닿지 않아 모든 게 얼어붙었지.'],[HR,'기사단은 그 아래 물의 심연을 지키러 내려갔다가 아무도 돌아오지 못했다. 거기엔 용보다 오래된 것이 산다더군.'],[HR,'그런데 요즘 화로에서 목소리가 들린다. 너도 들었나?'],[VO,'「불은 꺼지지 않는다. 다만 옮겨 갈 뿐.」']]},
@@ -5269,7 +5272,7 @@ function toggleTown(){inTown?leaveTown():goTown()}
 const TOWN_SVG='<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',HUNT_SVG='<path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M14.5 6.5L18 3h3v3l-3.5 3.5"/><path d="M5 14l4 4"/><path d="M7 17l-3 3"/><path d="M3 19l2 2"/>';
 function townIcon(b){const sv=b.querySelector('svg');if(sv)sv.innerHTML=inTown?HUNT_SVG:TOWN_SVG}
 let npcNear=null;
-function townUpd(){if(vilGate&&vilGate.g.parent){const t=performance.now()/1000;vilGate.d2.rotation.z=-t*1.6;vilGate.d1.material.opacity=.7+.15*Math.sin(t*2.3)}if(inTown&&mapKind==='town'&&TLY){P.pos.y+=(refHt(P.pos.x,P.pos.z)-P.pos.y)*.35;const t=performance.now()/1000;for(const m of refA.lava)m.offset.y=t*.35;/* v849: 흐름 방향 반대로 — 용암이 벽에서 웅덩이 쪽으로 내려오게 */for(const q of refA.shroom)q.g.scale.y=1+.025*Math.sin(t*1.3+q.ph);for(const q of (refA.smoke||[])){const k=((t*.22+q.ph)%1);q.m.position.set(q.x+k*.8,q.y+k*3.2,q.z-k*.4);q.m.scale.setScalar(.6+k*1.8);q.m.material.opacity=.32*Math.sin(k*Math.PI)}}else if(P.pos.y&&!inTown&&mapKind==='field')P.pos.y=0;
+function townUpd(){try{otBangUpd()}catch(_){}if(vilGate&&vilGate.g.parent){const t=performance.now()/1000;vilGate.d2.rotation.z=-t*1.6;vilGate.d1.material.opacity=.7+.15*Math.sin(t*2.3)}if(inTown&&mapKind==='town'&&TLY){P.pos.y+=(refHt(P.pos.x,P.pos.z)-P.pos.y)*.35;const t=performance.now()/1000;for(const m of refA.lava)m.offset.y=t*.35;/* v849: 흐름 방향 반대로 — 용암이 벽에서 웅덩이 쪽으로 내려오게 */for(const q of refA.shroom)q.g.scale.y=1+.025*Math.sin(t*1.3+q.ph);for(const q of (refA.smoke||[])){const k=((t*.22+q.ph)%1);q.m.position.set(q.x+k*.8,q.y+k*3.2,q.z-k*.4);q.m.scale.setScalar(.6+k*1.8);q.m.material.opacity=.32*Math.sin(k*Math.PI)}}else if(P.pos.y&&!inTown&&mapKind==='field')P.pos.y=0;
   ptAnim();
   if(refH&&inTown&&mapKind==='town'&&refH.g.parent){const t=performance.now()/1000,lv=refH.lv||0,s=1.1+lv*.2,k=1+.12*Math.sin(t*9)+.07*Math.sin(t*5.3);refH.a.scale.set(1.5*s*k,2.5*s*k,1);refH.a.position.y=.9+s*.9;refH.b.scale.set(.85*s*k,1.4*s*k,1);refH.b.position.y=.7+s*.45;const k2=1+.15*Math.sin(t*11+2);refH.c.scale.set(.6*s*k2,1*s*k2,1);refH.ring.material.opacity=(.12+lv*.03)*(1+.15*Math.sin(t*2.2))}
   let near=null;if(inTown)for(const n of NPCS)if(npcOn(n)&&Math.hypot(P.pos.x-n.x,P.pos.z-n.z)<3)near=n;
@@ -8333,7 +8336,28 @@ function addItem(it){
 /* v603: 반지는 칸이 두 개 — 장착할 칸: 빈 칸 우선, 아니면 평가가 낮은 쪽 */
 function eqKey(it){if(!it||it.slot!=='ring')return it&&it.slot;if(!S.eq.ring)return 'ring';if(!S.eq.ring2)return 'ring2';return score(S.eq.ring)<=score(S.eq.ring2)?'ring':'ring2'}
 const eqCur=it=>S.eq[eqKey(it)];
-function upgrades(){if(NS()){const out=[],save={},used=new Set();try{for(let n=0;n<EQS.length;n++){let best=null;for(const it of S.inv){if(!it.ns||used.has(it))continue;const r=pwGain(it);if(r.k&&r.g>.001&&(!best||r.g>best.g))best={it,...r}}if(!best)break;used.add(best.it);if(!(best.k in save))save[best.k]=S.eq[best.k];best.it._ek=best.k;S.eq[best.k]=best.it;out.push(best.it)}}finally{for(const k in save)S.eq[k]=save[k]}return out}/* v640: 전투력이 가장 많이 오르는 것부터 하나씩 */
+/* v1057: 자동 장착 — ① 하나씩 전투력이 가장 많이 오르는 것부터(v640) ② 방어구(방어·회피·쉴드 베이스) 부위를 유형별로 통째로 맞춘 세트와 비교해 가장 높은 쪽.
+   S.eqCon(방어구 컨셉 고정: def·eva·es)이 켜져 있으면 그 유형 방어구만 쓰고, 다른 유형을 입고 있으면 그 유형으로 바꿈 */
+const EQCON={def:'방어',eva:'회피',es:'쉴드'};
+function nsPlan(){const con=EQCON[S.eqCon]?S.eqCon:null,keep=EQS.map(k=>[k,S.eq[k]]),P=()=>pwV(pwParts()),inEq=it=>EQS.some(k=>S.eq[k]===it),
+  ok=it=>it&&it.ns&&!it.uid&&!(it.slot==='weapon'&&it.wc!==bc(S.cls))&&!(con&&it.bt&&it.bt!==con),
+  armK=EQS.filter(k=>S.inv.some(it=>it.ns&&it.bt&&it.slot===kSlot(k))||(S.eq[k]&&S.eq[k].bt));
+  const greedy=()=>{for(let n=0;n<EQS.length;n++){const b0=P();let best=null;for(const it of S.inv){if(!ok(it)||inEq(it))continue;const ks=it.slot==='ring'?['ring','ring2']:[it.slot];
+      for(const k of ks){if(!EQS.includes(k))continue;const o=S.eq[k];if(con&&o&&o.bt&&o.bt===con&&it.bt!==con)continue;S.eq[k]=it;const g=P()/b0-1;S.eq[k]=o;if(g>.001&&(!best||g>best.g))best={it,k,g}}}
+    if(!best)break;S.eq[best.k]=best.it}};
+  const snap=()=>Object.fromEntries(EQS.map(k=>[k,S.eq[k]])),put=m=>{for(const k of EQS)S.eq[k]=m[k]};
+  let res=null;
+  try{
+    const cands=[];
+    if(!con){greedy();cands.push({m:snap(),p:P(),g:1})}
+    for(const T of con?[con]:['def','eva','es']){put(Object.fromEntries(keep));
+      for(let pass=0;pass<2;pass++)for(const k of armK){const pool=S.inv.filter(it=>it.ns&&!it.uid&&it.bt===T&&it.slot===kSlot(k)&&!inEq(it));const cur=S.eq[k];if(cur&&cur.bt===T)pool.push(cur);if(!pool.length)continue;
+        let bi=null,bp=-1;for(const it of pool){S.eq[k]=it;const p=P();if(p>bp){bp=p;bi=it}}S.eq[k]=bi}
+      greedy();cands.push({m:snap(),p:P()})}
+    const base=cands.find(c=>c.g),sets=cands.filter(c=>!c.g),bs=sets.reduce((a,c)=>!a||c.p>a.p?c:a,null);res=!base?bs:bs&&bs.p>base.p*1.001?bs:base}
+  finally{put(Object.fromEntries(keep))}
+  return res?res.m:null}
+function upgrades(){if(NS()){const m=nsPlan(),out=[];if(m)for(const k of EQS){const it=m[k];if(it&&it!==S.eq[k]&&S.inv.includes(it)){it._ek=k;out.push(it)}}return out}
   const out=[],used=new Set();for(const k of EQS){const ks=kSlot(k);let best=null;for(const it of S.inv)if(it.slot===ks&&!used.has(it)&&isBetter(it,best||S.eq[k]))best=it;if(best){best._ek=k;used.add(best);out.push(best)}}return out}
 function equipBest(){const ups=upgrades();for(const it of ups){const i=S.inv.indexOf(it),k=it._ek||it.slot,old=S.eq[k];delete it._ek;S.eq[k]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1)}
   if(ups.length){refreshMax();save();feed(`장비 ${ups.length}개 자동 장착`,'#7fe07a')}refreshUpBtn();return ups.length}/* v81: 화면 중앙 알림 없음 */
@@ -9321,6 +9345,64 @@ function disDragSetup(){if(disDragInit)return;const bd=$('nsBody');if(!bd)return
   bd.addEventListener('click',e=>{if(disDragged){e.stopPropagation();e.preventDefault()}},true)}
 function openDis(cat){disDragSetup();disAbort();closeAllSheets();nsSheet();rrOpen=true;nsKind='dis';if(cat)disCat=cat;disSub=null;disDd=null;disMsg='';disSel.clear();disTiers.clear();disDlg=null;disRst();renderDis();$('nsSheet').hidden=false;releaseAll()}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrPw0=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
+
+/* v1063: 엔드게임 조율 튜토리얼 — 하란이 조율사 오린에게 보냄 → 오린 머리 위 「!」 → 말을 걸면 연습 장비(4티어 반지, 나머지 줄 5티어)와 불씨·인장을 주고
+   수치 조정 → 옵션 변환 → 티어 승급을 직접 누르게 함(누를 때까지 다음 단계로 안 넘어감). 장비는 그대로 가짐. 진행 S.otut={st,id,snap} → 끝나면 {done:1} */
+const ORN=()=>REF.gear,otutOn=()=>!!(S&&refOn()&&!S.test&&!S.demo&&!(S.otut&&S.otut.done));
+const OT_IN=[[()=>ORN(),'하란이 보냈군. 위로 오를 생각이라면 장비부터 다룰 줄 알아야 한다.'],[()=>ORN(),'여기 떨어진 장비는 줄마다 티어가 제각각이지. 손보지 않으면 쓸모가 반도 안 된다.'],[()=>ORN(),'연습 삼아 이 반지를 다듬어 봐라. 불씨와 인장도 조금 쥐여 주마. 다 쓰고 나면 반지는 네 거다.']];
+const OT_END=[[()=>ORN(),'됐다. 수치를 다시 뽑고, 옵션을 바꾸고, 티어를 올리는 것 — 그게 전부다.'],[()=>ORN(),'윤회의 불씨는 사냥터에서, 성역의 인장은 관문 보스에게서 얻는다. 좋은 줄 하나를 위해 몇 번이고 다시 오게 될 거다.']];
+const otLines=L=>L.map(([n,t])=>[typeof n==='function'?n():n,t]);
+function otItem(){const id=S.otut&&S.otut.id;return id?[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===id):null}
+function otutGear(){if(!otutOn())return openRR();
+  if(S.otut&&S.otut.st&&otItem()){openRR();otStart();return}
+  talk(otLines(OT_IN),()=>{const C_=NSLOT.ring,o=shuffle(C_.o.slice()).slice(0,2),x=shuffle(C_.x.slice()).slice(0,1),it=nsMakeItem('ring',4,{lt:5,o,x,q:.25});it.name='오린의 연습 반지';
+    S.inv.push(it);S.rr=(S.rr||0)+3;S.seal=(S.seal||0)+1;S.otut={st:1,id:it.id};save();try{hudMoney()}catch(_){}toast("연습 장비를 받았습니다",`${it.name} · 윤회의 불씨 3 · 성역의 인장 1`,"#ffb070");openRR();otStart()})}
+const OTS=[null,
+  {t:'연습 반지 고르기',d:'아래 목록에서 방금 받은 <b>연습 반지</b>를 누르세요.'},
+  {t:'수치 조정',d:'<b>수치 재조정</b>을 누르세요. 줄의 티어와 옵션 종류는 그대로, 수치만 그 티어 범위 안에서 다시 뽑습니다.'},
+  {t:'옵션 변환',d:'위쪽 <b>옵션 변환</b> 탭을 누르세요.'},
+  {t:'바꿀 줄 고르기',d:'마음에 안 드는 줄 하나를 누르세요. 고정 옵션(맨 윗줄)은 바꿀 수 없습니다.'},
+  {t:'옵션 변환',d:'<b>옵션 변환</b>을 누르세요. 그 줄의 티어는 그대로, 옵션 종류만 다른 것으로 바뀝니다.'},
+  {t:'티어 승급',d:'위쪽 <b>티어 승급</b> 탭을 누르세요.'},
+  {t:'올릴 줄 고르기',d:'<b>5티어</b> 줄 하나를 누르세요. 줄은 아이템 티어(4티어)까지 올릴 수 있습니다.'},
+  {t:'티어 승급',d:'<b>티어 승급</b>을 누르세요. 성역의 인장을 써서 그 줄을 한 티어 올리고, 수치도 새 티어 범위에서 다시 뽑습니다.'}];
+let otTm=0;
+function otStart(){clearInterval(otTm);otTm=setInterval(otTick,250);otTick()}
+function otSnap(it){return it.lines.map(l=>l.k+'|'+l.t+'|'+l.v).join(';')}
+function otTick(){const it=otItem();if(!otutOn()||!it||!(S.otut&&S.otut.st)){otHide();clearInterval(otTm);return}
+  const O=S.otut;if(!rrOpen||nsKind){otHide();if(!rrOpen){clearInterval(otTm)}return}
+  const sel=rrSel===it.id,need=(k,c)=>{if((S[k]||0)<c){S[k]=c;try{hudMoney()}catch(_){}renderRR()}};
+  if(rrSpin)return;
+  const ls=it.lines;
+  if(O.st>=2&&!sel){otShow(OTS[1],`[data-pick$=",${it.id}"]`,1);return}
+  if(O.st===1){if(sel){O.st=2;O.snap=otSnap(it);save()}else{otShow(OTS[1],`[data-pick$=",${it.id}"]`,1);return}}
+  if(O.st===2){if(rrTab!=='rr'){otShow({t:'수치 조정',d:'위쪽 <b>수치 조정</b> 탭을 누르세요.'},'[data-rt="rr"]',2);return}need('rr',rrCostOf(it));
+    if(O.snap&&otSnap(it)!==O.snap&&ls.every((l,i)=>l.k===O.snap.split(';')[i].split('|')[0])){O.st=3;save()}else{otShow(OTS[2],'.rrgo[data-ns="rr"]',2);return}}
+  if(O.st===3){if(rrTab==='cv'){O.st=4;save()}else{otShow(OTS[3],'[data-rt="cv"]',3);return}}
+  if(O.st===4||O.st===5){if(rrTab!=='cv'){otShow(OTS[3],'[data-rt="cv"]',3);return}
+    if(O.st===5&&O.keys&&ls.map(l=>l.k).join()!==O.keys){O.st=6;save()}
+    else{const ok=rrLine!=null&&ls[rrLine]&&!ls[rrLine].b;if(!ok){O.st=4;O.keys=ls.map(l=>l.k).join();otShow(OTS[4],'.rrlines',4);return}
+      O.st=5;O.keys=O.keys||ls.map(l=>l.k).join();need('rr',convCost(ls[rrLine].t||it.tier));otShow(OTS[5],'.rrgo[data-ns="conv"]',5);return}}
+  if(O.st>=6&&O.st<=8){const tiers=ls.map(l=>l.t).join();if(O.st===8&&O.tiers&&tiers!==O.tiers){O.st=9;save()}
+    else{if(rrTab!=='up'){O.st=6;otShow(OTS[6],'[data-rt="up"]',6);return}
+      const el=ls.findIndex(l=>!l.b&&(l.t||it.tier)>it.tier),ok=rrLine!=null&&ls[rrLine]&&!ls[rrLine].b&&(ls[rrLine].t||it.tier)>it.tier;
+      if(el<0){O.st=9;save()}
+      else if(!ok){O.st=7;O.tiers=tiers;otShow(OTS[7],`[data-rl="${el}"]`,7);return}
+      else{O.st=8;O.tiers=O.tiers||tiers;need('seal',sealCost(ls[rrLine].t));otShow(OTS[8],'.rrgo[data-ns="up"]',8);return}}}
+  if(O.st>=9){clearInterval(otTm);otHide();S.otut={done:1};save();setTimeout(()=>{nsClose();talk(otLines(OT_END),()=>toast('조율 튜토리얼 완료','연습 반지는 가방에 그대로 있습니다','#7fe07a'))},900)}}
+function otShow(st,sel,n){let c=$('otCard'),r=$('otRing');if(!c){c=document.createElement('div');c.id='otCard';document.body.appendChild(c);r=document.createElement('div');r.id='otRing';document.body.appendChild(r)}
+  const el=document.querySelector(sel),R=el&&el.offsetParent?el.getBoundingClientRect():null;
+  const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">조율 연습 · ${n}/8</div><h3>${st.t}</h3><p>${st.d}</p><button id="otSkip">튜토리얼 건너뛰기</button>`;
+    c.querySelector('#otSkip').onclick=()=>{askConfirm('튜토리얼 건너뛰기','조율 연습을 그만둡니다. 받은 장비와 재화는 그대로 가집니다.','건너뛰기',()=>{S.otut={done:1};save();clearInterval(otTm);otHide()})}}
+  c.hidden=false;
+  if(R){const p=6;r.hidden=false;Object.assign(r.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.width+p*2+'px',height:R.height+p*2+'px'});const H=innerHeight;c.classList.remove('top');if((R.top+R.bottom)/2>H*.5){c.style.top='';c.style.bottom=Math.max(8,H-R.top+14)+'px'}else{c.style.bottom='auto';c.style.top=Math.min(H-150,R.bottom+14)+'px'}}else{r.hidden=true;c.style.top='';c.style.bottom='';c.classList.add('top')}}
+function otHide(){const c=$('otCard'),r=$('otRing');if(c){c.hidden=true;c.dataset.k=''}if(r)r.hidden=true}
+/* 오린 머리 위 「!」 */
+let otBang=null;
+function otBangUpd(){const on=otutOn()&&inTown&&mapKind==='town'&&!(S.otut&&S.otut.st);if(!otBang){if(!on)return;const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
+    g.fillStyle='rgba(20,14,6,.85)';g.beginPath();g.arc(64,64,52,0,7);g.fill();g.lineWidth=7;g.strokeStyle='#ffc45a';g.stroke();g.fillStyle='#ffd27a';g.font='900 82px Archivo, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('!',64,68);
+    otBang=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));otBang.scale.set(1.1,1.1,1);otBang.renderOrder=999;scene.add(otBang)}
+  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id==='gear'),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+3.3+Math.sin(t*3)*.12,n.z)}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
@@ -10785,7 +10867,7 @@ ICO.tome="<svg viewBox=\"-8 -8 144 144\" xmlns=\"http://www.w3.org/2000/svg\"><d
 const icoSlot=(s,it)=>it&&it.bt&&ICO[kSlot(s)+'_'+it.bt]?kSlot(s)+'_'+it.bt/* v639: 방어구는 기본옵 종류별 아이콘 — 판금(방어)·가죽(회피)·천(쉴드) */:s==='weapon'?({warrior:'sword',archer:'bow',mage:'staff',priest:'tome'}[S&&S.cls]||'sword'):s==='ring2'?'ring':s;
 /* v900 장비 정보 — 고정 옵션(강화 적용)을 위에 따로, 그 아래 왼쪽 기본 옵션 · 오른쪽 특수 옵션. 비교는 전투력 변화로만 */
 function pwChip(it){const r=pwGain(it),b=pwNow(),g=r.g*100,c=Math.abs(g)<.1?'same':g>0?'good':'bad',dd=r.w?(r.w.d/b.d-1)*100:0,de=r.w?(r.w.e/b.e-1)*100:0,f=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(1)}%`;
-  return `<div class="ivpw ${c}"><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>장착 시 전투력</small><span>DPS ${f(dd)}</span><span>버티기 ${f(de)}</span></div>`}
+  return `<div class="ivpw ${c}"><b>${c==='same'?'변화 없음':`${g>0?'▲':'▼'} ${Math.abs(g).toFixed(1)}%`}</b><small>장착 시 전투력</small><span>DPS ${f(dd)}</span><span>EHP ${f(de)}</span></div>`}
 function ivCardNS(it,role,L,oth){const bl=it.lines.find(l=>l.b),os=it.lines.filter(l=>!l.b&&l.o),xs=it.lines.filter(l=>!l.b&&!l.o);
   /* v1053: 비교 — 선택한 아이템엔 착용 중 대비 ▲▼·새 옵션, 착용 중엔 바꾸면 빠지는 옵션 */
   const cmp=oth&&oth.ns&&!oth.uid&&!it.uid,oL=k=>cmp?oth.lines.find(q=>!q.b&&q.k===k):null,dif=(k,a,b)=>{const x=Math.round((a-b)*100)/100;if(!x)return '<span class="d same">=</span>';const lw=/^(cd|mana|mpc|cost|skc)/i.test(k)||/감소/.test(nName(k));const g=lw?x<0:x>0;return `<span class="d ${g?'good':'bad'}">${x>0?'▲':'▼'} ${nFmt(k,Math.abs(x)).replace(/^[-+]/,'')}</span>`};
@@ -10812,8 +10894,7 @@ function ivCard(it,role,other){
   if(it.ns)return ivCardNS(it,role,L,other);/* v900: 고정 옵션 + 기본·특수 두 칸 */
   return `<div class="ivc ${role}"><span class="ivlab">${role==='cur'?'현재 장착':'선택한 아이템'}</span><span class="k">${SLOTEN[it.slot]} · ${SLOTN[it.slot]}${L?` · 강화 +${L}`:''}</span>
     <b class="ivn" style="color:${it.ns?NT_C[it.tier]:RAR[it.rar].c}">${it.name}</b><span class="ivs">${it.ns?`${it.tier}티어 · ${it.slot==='weapon'?wcN(it.wc):it.bt?NBT[it.bt]:SLOTN[it.slot]}${it.slot==='weapon'&&it.wc!==bc(S.cls)?' · 착용 불가':''}`:`${RAR[it.rar].n} · iLv ${it.ilvl}`}</span>${spl}${keys.map(row).join('')}</div>`}
-function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()&&it.uid)return `<div class="ivact"><div class="ivdps uid"><span>옵션 미확인</span><b>감정하면 옵션이 공개됩니다</b></div>
-  <div class="btns"><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button><button class="primary" id="iIdent" style="white-space:nowrap">감정하기</button></div></div>`;
+function ivAct(it,cur){if(!it)return '';if(it.ns&&NS()&&it.uid)return `<div class="ivact">  <div class="btns"><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button><button class="primary" id="iIdent" style="white-space:nowrap">감정하기</button></div></div>`;
   if(it.ns&&NS()){
     return `<div class="ivact">
   <div class="btns"><button class="primary" id="iEquip">장착</button><button class="ghost${it.lock?' lockon':''}" id="iLock" style="white-space:nowrap">${it.lock?'🔒 해제':'🔓 잠금'}</button><button class="ghost" id="iDrop" ${it.lock?'disabled':''} style="white-space:nowrap">${it.lock?'잠김':`판매 <span class="gp">+${fmtG(sellPrice(it))}G</span>`}</button></div></div>`}
@@ -10868,7 +10949,7 @@ function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (�
     <div class="iv2col R">${slot('helm')}${slot('armor')}${slot('belt')}${slot('boots')}${uqSlot()}</div>`}
     <div class="iv2sum"><span>DPS <b>${fmtKM(dps)}</b></span>${NS()?`<span>${NBT[nsDef().main]} <b>${(nsDef().total*100).toFixed(1)}%</b></span>`:`<span>방어력 <b>${fmtN(g.armor)}</b></span>`}</div></div>`;
   const nU=S.inv.filter(x=>x.uid).length;
-  const top=`<div class="iv2top"><span class="iv2acts"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>${nU?`<button class="iv2auto iv2id" id="iIdAll">🔍 모두 감정 <b>${nU}</b></button>`:''}</span>
+  const top=`<div class="iv2top"><span class="iv2acts"><button class="iv2auto" id="iAuto" ${ups.length?'':'disabled'}>⟳ 자동 장착${ups.length?` <b>${ups.length}</b>`:''}</button>${NS()?`<button class="iv2auto iv2con${EQCON[S.eqCon]?' on':''}" id="iCon" title="자동 장착 방어구 컨셉 고정 (누를 때마다 끔 → 방어 → 회피 → 쉴드)">방어구 ${EQCON[S.eqCon]?`<b>${EQCON[S.eqCon]}</b> 고정`:'자동'}</button>`:''}${nU?`<button class="iv2auto iv2id" id="iIdAll">🔍 모두 감정 <b>${nU}</b></button>`:''}</span>
     <span class="iv2money"><span class="cg">${ci('g')}${fmtG4(S.gold||0)}</span><span class="cl">${ci('l')}${TCUR()?'∞':fmtC(S.lumi||0)}</span>${refOn()?`<span class="ce">${ci('e')}${TCUR()?'∞':fmtC(S.ess||0)}</span><span class="cf">${ci('r')}${TCUR()?'∞':fmtC(S.rr||0)}</span><span class="cs">${ci('s')}${TCUR()?'∞':fmtC(S.seal||0)}</span>`:''}</span><button class="iv2x" id="iClose" aria-label="닫기">✕</button></div>`;
   /* 탭: 무기 · 방어구 ▾ · 장신구 ▾ · 기타 — 화살표는 부위 선택, 글씨는 전부 섞어서 */
   const FG={weapon:['weapon'],armor:['helm','armor','gloves','boots'],acc:['amulet','ring','belt']},cnt=k=>S.inv.filter(x=>FG[k].includes(x.slot)).length;
@@ -10956,6 +11037,7 @@ $('invSheet').addEventListener('click',e=>{
     if(!card){fin();return}window.__idBusy=1;card.classList.add('idgo');let h='<div class="idbeam"></div><div class="idflash"></div>';for(let i=0;i<16;i++){const a=Math.random()*6.283,r=40+Math.random()*90;h+=`<i class="idsp" style="--dx:${Math.cos(a)*r|0}px;--dy:${Math.sin(a)*r|0}px;--z:${1+Math.random()*2.4|0}px"></i>`}card.insertAdjacentHTML('beforeend',h);setTimeout(fin,1250);return}
   if(b.id==='iIdAll'){const n=identifyAll();if(n){toast('감정 완료',`장비 ${n}개의 옵션을 확인했습니다`);save();renderInv()}return}
   if(b.id==='iAuto'){equipBest();invSel=null;renderInv();return}
+  if(b.id==='iCon'){const L=[null,'def','eva','es'];S.eqCon=L[(L.indexOf(EQCON[S.eqCon]?S.eqCon:null)+1)%4];save();toast('방어구 컨셉',EQCON[S.eqCon]?`${EQCON[S.eqCon]} 고정 — 자동 장착이 ${EQCON[S.eqCon]} 방어구만 씁니다`:'자동 — 전투력이 가장 높은 유형으로 맞춥니다');refreshUpBtn();renderInv();return}
   if(b.id==='iHideUp'){S.hideUp=!S.hideUp;save();refreshUpBtn();renderInv();return}
 
 });
@@ -11052,7 +11134,7 @@ function buyFx(sp){if(!sp)return;const f=$('buyFlash');f.className='buyflash';vo
 $('shop').addEventListener('click',e=>{if(e.target.id==='shop')closeShop()});
 function openShop(kind){closeAllSheets();shopKind=kind||'pot';shopOpen=true;shopLast=null;shopSel=null;goldFx=null;xpTab='buy';xpSel=null;renderShop();$('shop').hidden=false;releaseAll();guide(shopKind==='pot'?'pot':'gacha')}
 function closeShop(){shopOpen=false;$('shop').hidden=true}
-$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return openRR();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
+$('npcAct').onclick=()=>{if(!npcNear)return;if(npcNear.id==='mor')return morTalk();if(npcNear.id==='hearth')return openStage();if(npcNear.id==='gate')return leaveTown();if(npcNear.id==='xchg')return openXchg();if(NS()&&npcNear.id==='stash')return openStash();if(NS()&&npcNear.id==='heir')return openLooks();if(NS()&&npcNear.id==='gear')return otutGear();if(npcNear.id==='heir')return openHeir();npcNear.id==='smith'?openSmith():openShop(npcNear.id==='gear'?'gear':'pot')};
 $('openTown').onclick=()=>{if(!paused())townAsk()};
 $('fbGo').onclick=()=>{if(S.ch===LAST&&S.phase===5&&!inTown)enterArena()};
 
