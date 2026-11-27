@@ -5180,7 +5180,11 @@ function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const hp=refH.g.posit
     /* v1063: 포탈마다 넣던 점광원 제거 — 켜고 끌 때마다 장면 전체 셰이더를 다시 만들어 끊김. 바닥 빛만 남김 */
     const pool=refPool(x,z,2.4,0x6a7aff,.5),P2={g,disk,rim,halo,sh,pts,pool,ph:i*1.3,st:i<pv?'on':'off',t0:0};ptM.push(P2);ptVis(P2,i<pv?1:0)}
   /* 마을에 돌아오면 쓴 포탈이 켜진 역순으로 하나씩 사라짐 (클리어했으면 남은 것 모두) */const now=performance.now()/1000;for(let i=pv-1,k=0;i>=tg;i--,k++){ptM[i].st='out';ptM[i].t0=now+1.1+k*.45}S.ptShow=tg}/* 클리어하고 돌아오면 남은 포탈이 역순으로 사라짐 · 입장할 때 쓴 포탈은 입장 전에 이미 사라짐 */
-let ptBusy=0;
+let ptBusy=0,ptSv=null;
+/* v1091: 포탈 튜토리얼 — 대사 동안 6개가 차례로 켜졌다가, 대사가 끝나면 원래대로(꺼져 있던 것은) 하나씩 사라짐 */
+function ptDemo(on){if(!ptM.length||!inTown)return;const now=performance.now()/1000;
+  if(on){ptSv=ptM.map(p=>p.st);ptM.forEach((p,i)=>{if(p.st==='on')return;p.st='in';p.fl=0;p.t0=now+.3+i*.32;ptVis(p,0)})}
+  else{const sv=ptSv||[];ptSv=null;let k=0;ptM.forEach((p,i)=>{if(sv[i]==='on')return;p.st='out';p.fo=0;p.t0=now+.1+k*.18;k++})}}
 const ptBase=()=>ptOn()&&S.pt&&S.pt.t===S.tier&&!S.runClr?Math.max(0,S.pt.left):0;
 function ptVis(p,k){/* k: 0 꺼짐 ~ 1 켜짐 */const on=k>.001;p.g.visible=p.pool.visible=on;if(!on)return;const e=Math.min(1,k);p.g.scale.set(.35+.65*e,e,.35+.65*e);p.pool.material.opacity=.6*e}
 function ptGo(light,cb){/* v1064: 입장 — (새 도전이면 6개가 차례로 켜진 뒤) 이번에 쓸 포탈이 사라지는 걸 보여 주고 들어감 */ptBusy=1;const now=performance.now()/1000;let d=.15;
@@ -5209,7 +5213,7 @@ const REF_LORE=[
 const refLv=()=>REF_LORE.filter(b=>b.ok()).length;
 function refLore(force){if(!refOn()||!inTown||ptBusy||ldBusy||(!force&&(S.test||S.demo))||talkOn())return;S.lore=S.lore||{};const L=S.lore;
   if(!L.a){L.a=1;const got=REF_LORE.filter(b=>b.ok());got.forEach((b,i)=>{if(i<got.length-1)L[b.k]=1});save();talk(S.skipStart?REF_ALT:REF_IN,()=>refLore(force));return}
-  if(!L.pt&&ptOn()){L.pt=1;save();talk(PT_TUT);return}/* v1088: 도전 횟수(포탈) 안내 — 엔드게임 처음 */
+  if(!L.pt&&ptOn()){L.pt=1;save();ptDemo(1);talk(PT_TUT,()=>ptDemo(0));return}/* v1088: 도전 횟수(포탈) 안내 — 엔드게임 처음 */
   const b=REF_LORE.find(b=>b.ok()&&!L[b.k]);if(b){L[b.k]=1;save();talk(b.l)}}
 /* 대화창 — 화면 아무 곳이나 누르면 다음 줄 */
 let TALK=null;const talkOn=()=>!!TALK;const afterTalk=fn=>{if(!TALK){fn();return}const iv=setInterval(()=>{if(!TALK){clearInterval(iv);fn()}},120)};/* v1086: 대사 중엔 입장·맵 이동을 대사가 끝날 때까지 미룸 */
@@ -9544,7 +9548,15 @@ function otShow(st,sel,n,lab,tot,skip){let c=$('otCard'),r=$('otRing');if(!c){c=
   const key=n+'|'+st.t;if(c.dataset.k!==key){c.dataset.k=key;c.innerHTML=`<div class="chap">${lab||'조율 연습'} · ${n}/${tot||8}</div><h3>${st.t}</h3><p>${st.d}</p><button id="otSkip">튜토리얼 건너뛰기</button>`;
     c.querySelector('#otSkip').onclick=skip||(()=>{askConfirm('튜토리얼 건너뛰기','조율 연습을 그만둡니다. 받은 장비와 재화는 그대로 가집니다.','건너뛰기',()=>{S.otut={done:1};save();clearInterval(otTm);otHide()})})}
   c.hidden=false;
-  if(R){const p=6;r.hidden=false;Object.assign(r.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.width+p*2+'px',height:R.height+p*2+'px'});const H=innerHeight;c.classList.remove('top');if((R.top+R.bottom)/2>H*.5){c.style.top='';c.style.bottom=Math.max(8,H-R.top+14)+'px'}else{c.style.bottom='auto';c.style.top=Math.min(H-150,R.bottom+14)+'px'}}else{r.hidden=true;c.style.top='';c.style.bottom='';c.classList.add('top')}}
+  if(R){const p=6;r.hidden=false;Object.assign(r.style,{left:R.left-p+'px',top:R.top-p+'px',width:R.width+p*2+'px',height:R.height+p*2+'px'});
+    /* v1091: 안내 카드는 창 안의 글자·버튼·아이콘을 가리지 않는 빈 자리로 — 후보 자리마다 겹치는 넓이를 재서 가장 덜 가리고 대상과 가까운 곳을 고름 */
+    const W=innerWidth,H=innerHeight,cw=c.offsetWidth,ch=c.offsetHeight,sh=el.closest('.sheet'),occ=[],ov=(a,b)=>{const w=Math.min(a[2],b[2])-Math.max(a[0],b[0]),h=Math.min(a[3],b[3])-Math.max(a[1],b[1]);return w>0&&h>0?w*h:0};
+    if(sh)for(const e of sh.querySelectorAll('*')){if(e===el||el.contains(e)||e.contains(el))continue;const tg=e.tagName,bt=tg==='BUTTON',lf=!e.children.length&&(e.textContent.trim()||/^(IMG|CANVAS|svg)$/i.test(tg));if(!(bt||lf))continue;if(!e.getClientRects().length)continue;const q=e.getBoundingClientRect();if(q.width<2||q.height<2)continue;occ.push([q.left,q.top,q.right,q.bottom,bt?.5:1])}
+    const rg=[R.left-10,R.top-10,R.right+10,R.bottom+10],rcx=(R.left+R.right)/2,rcy=(R.top+R.bottom)/2,xs=new Set(),ys=new Set();
+    if(cw>=W-16)xs.add(Math.max(0,Math.round((W-cw)/2)));else{for(let i=0;i<=12;i++)xs.add(Math.round(8+(W-cw-16)*i/12));const sr=sh&&sh.getBoundingClientRect();if(sr){for(const v of [sr.left-cw-10,sr.right+10])if(v>=4&&v+cw<=W-4)xs.add(Math.round(v))}}
+    for(let i=0;i<=24;i++)ys.add(Math.round(8+(H-ch-16)*i/24));ys.add(Math.round(R.top-ch-14));ys.add(Math.round(R.bottom+14));
+    let best=null;for(const x of xs)for(const y of ys){if(y<4||y+ch>H-4)continue;const cr=[x,y,x+cw,y+ch];let sc=ov(cr,rg)*40;for(const o of occ)sc+=ov(cr,o)*o[4];sc+=Math.hypot(x+cw/2-rcx,y+ch/2-rcy)*8;if(!best||sc<best.sc)best={sc,x,y}}
+    if(best){c.classList.remove('top');c.style.left=best.x+'px';c.style.transform='none';c.style.top=best.y+'px';c.style.bottom='auto'}}else{r.hidden=true;c.style.left='';c.style.transform='';c.style.top='';c.style.bottom='';c.classList.add('top')}}
 /* v1087: 물약 튜토리얼 — 조율 튜토리얼이 끝나면 오린이 약초꾼 미라에게 보냄 → 미라 머리 위 「!」 → 말을 걸면 신속 물약을 공짜로 사게 하고
    옵션 변경을 세 번 직접 누르게 함(1·2번째는 일반 옵션, 3번째는 다시 「옵션 없음」) → 옵션 없는 신속 물약 하나가 남음. 진행 S.ptut={st} → 끝나면 {done:1} */
 const MIRA=()=>REF.shop;
@@ -9572,10 +9584,10 @@ function ptForce(id){if(!ptutOn()||id!=='spd'||!S.ptut||S.ptut.st<3)return null;
 function otHide(){const c=$('otCard'),r=$('otRing');if(c){c.hidden=true;c.dataset.k=''}if(r)r.hidden=true}
 /* 오린 머리 위 「!」 */
 let otBang=null;
-function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),on=(otutOn()&&!(S.otut&&S.otut.st)||pm)&&inTown&&mapKind==='town';if(!otBang){if(!on)return;const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
-    g.fillStyle='rgba(20,14,6,.85)';g.beginPath();g.arc(64,64,52,0,7);g.fill();g.lineWidth=7;g.strokeStyle='#ffc45a';g.stroke();g.fillStyle='#ffd27a';g.font='900 82px Archivo, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('!',64,68);
-    otBang=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));otBang.scale.set(1.1,1.1,1);otBang.renderOrder=999;scene.add(otBang)}
-  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+3.3+Math.sin(t*3)*.12,n.z)}
+function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),on=(otutOn()&&!(S.otut&&S.otut.st)||pm)&&inTown&&mapKind==='town';
+  /* v1091: 가야 할 NPC(하란→오린, 오린→미라) 머리 위에 보라 화살표 — 플레이어 발밑 보라 화살표와 같은 색·모양을 2배로 */
+  if(!otBang){if(!on)return;const m=new THREE.Mesh(new THREE.ConeGeometry(.5,1.4,6),new THREE.MeshBasicMaterial({color:0x9a6ae0,depthTest:false,transparent:true,opacity:.96}));m.rotation.x=Math.PI;m.renderOrder=999;otBang=new THREE.Group();otBang.add(m);otBang.userData.m=m;scene.add(otBang)}
+  otBang.visible=on;if(!on)return;const n=NPCS.find(q=>q.id===(pm?'shop':'gear')),t=performance.now()/1000;otBang.position.set(n.x,(TLY?refHt(n.x,n.z):0)+5+Math.sin(t*3)*.18,n.z);otBang.userData.m.rotation.y=t*1.6}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
   if(nsKind==='dis'&&disClick(b))return;
@@ -10071,7 +10083,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1094';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1092';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
