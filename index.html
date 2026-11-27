@@ -8496,8 +8496,8 @@ const xpOn=id=>!!(P&&P.xb&&P.xb[id]>0)||(uqOn('elixir')&&xpS().own[id]&&xpS().eq
 function xpInit(full){const x=xpS();P.xch=P.xch||{};P.xb=P.xb||{};for(const id of XP_IDS)if(x.own[id]){if(P.xch[id]===undefined||full)P.xch[id]=xpMax(id);P.xch[id]=Math.min(xpMax(id),P.xch[id])}}
 function xpUse(i){if(!NS()||knAppr)return;const x=xpS(),id=x.eq[i];if(!id||!x.own[id]){if(P.mpWarn<=0){toast('빈 슬롯','포션 상인에게서 특수 물약을 사서 장착하세요');P.mpWarn=1.5}return}
   if(uqOn('elixir')){if(P.mpWarn<=0){toast('상시 적용 중','끝없는 연금술사의 피 — 물약을 쓸 필요가 없습니다');P.mpWarn=1.5}return}
-  xpInit();if(P.cd.pot>0)return;const X=XPOT[id];if(!(P.xch[id]>=1)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
-  const D=xpD(id);P.xch[id]--;P.cd.pot=XP_CD;P.xb[id]=D;P.xbm=P.xbm||{};P.xbm[id]=D;if(id==='spd')P.hasteT=D;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
+  xpInit();/* v1080: 특수 물약은 공용 쿨타임 없음 — 종류별로 연달아 사용 */const X=XPOT[id];if(!(P.xch[id]>=1)){if(P.mpWarn<=0){toast(`${X.n} 물약이 비었습니다`,'몬스터를 처치하면 충전됩니다');P.mpWarn=1.5}return}
+  const D=xpD(id);P.xch[id]--;P.xb[id]=D;P.xbm=P.xbm||{};P.xbm[id]=D;if(id==='spd')P.hasteT=D;if(id==='es'){const em=nsShieldMax();if(em>0)P.es=em}
   ringFx(P.pos,1.8,parseInt(X.c.slice(1),16),.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xffffff,c1:parseInt(X.c.slice(1),16),drag:2,tex:1});feed(`${X.n} 물약 · ${D}초간 ${X.f(xpE(id))}`,X.c)}
 function useSpd(){if(!S.spdPot){if(P.mpWarn<=0){toast('신속 물약이 없습니다','포션 상인에게서 살 수 있어요');P.mpWarn=1.5}return}
   S.spdPot--;P.hasteT=SPD_POT.dur;ringFx(P.pos,1.8,0x5ad06a,.4);spray(PADD,P.pos,14,{sp:[1,3],up:[1,3],y:[.2,1],life:[.3,.6],s0:[.4,.6],s1:[.1,.2],c0:0xd0ffd8,c1:0x2a9a3a,drag:2,tex:1});feed('신속 물약 · 4초간 이동 속도 +60%','#8ae08a');save()}
@@ -10010,7 +10010,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1079';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1080';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
