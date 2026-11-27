@@ -3240,9 +3240,11 @@ function rtAt(i){const R=RTC,n=R.n;let a,f;if(i<=0){a=0;f=i}else if(i>=n-1){a=n-
   if(i<=0||i>=n-1)return{x:R.PX[a]+(-R.PS[a])*f,z:R.PZ[a]+(-R.PC[a])*f,c:R.PC[a],sn:R.PS[a]};
   const c=R.PC[a]+(R.PC[a+1]-R.PC[a])*f,sn=R.PS[a]+(R.PS[a+1]-R.PS[a])*f,l=Math.hypot(c,sn)||1;return{x:R.PX[a]+(R.PX[a+1]-R.PX[a])*f,z:R.PZ[a]+(R.PZ[a+1]-R.PZ[a])*f,c:c/l,sn:sn/l}}
 const rtL2W=(x,z)=>{const a=rtAt(STORY_L-z-RTC.s0);return{x:a.x+x*a.c,z:a.z-x*a.sn}};
-function rtW2L(wx,wz){const R=RTC,n=R.n,PX=R.PX,PZ=R.PZ;let bi=0,bd=1e18;for(let i=0;i<n;i+=6){const dx=wx-PX[i],dz=wz-PZ[i],d=dx*dx+dz*dz;if(d<bd){bd=d;bi=i}}
-  const lo=Math.max(0,bi-6),hi=Math.min(n-1,bi+6);bd=1e18;for(let i=lo;i<=hi;i++){const dx=wx-PX[i],dz=wz-PZ[i],d=dx*dx+dz*dz;if(d<bd){bd=d;bi=i}}
+function rtW2L(wx,wz){const R=RTC,n=R.n,PX=R.PX,PZ=R.PZ;let bi=0,bd=1e18;for(let i=0;i<n;i+=3){const dx=wx-PX[i],dz=wz-PZ[i],d=dx*dx+dz*dz;if(d<bd){bd=d;bi=i}}
+  const lo=Math.max(0,bi-8),hi=Math.min(n-1,bi+8);bd=1e18;for(let i=lo;i<=hi;i++){const dx=wx-PX[i],dz=wz-PZ[i],d=dx*dx+dz*dz;if(d<bd){bd=d;bi=i}}
   let bs=bi,bq=1e18;for(const j of [bi-1,bi]){if(j<0||j+1>=n)continue;const vx=PX[j+1]-PX[j],vz=PZ[j+1]-PZ[j],t=Math.max(0,Math.min(1,((wx-PX[j])*vx+(wz-PZ[j])*vz)/(vx*vx+vz*vz||1))),px=PX[j]+vx*t,pz=PZ[j]+vz*t,d=(wx-px)*(wx-px)+(wz-pz)*(wz-pz);if(d<bq){bq=d;bs=j+t}}
+  /* v1051: L2W(보간된 법선)의 정확한 역변환 — 접선 방향 성분이 0이 되는 s를 뉴턴법으로 (길에서 먼 곳의 0.2m+ 어긋남 → 걷다 튕김 제거) */
+  const f=q=>{const a=rtAt(q);return (wx-a.x)*(-a.sn)+(wz-a.z)*(-a.c)};for(let it=0;it<4;it++){const f0=f(bs);if(Math.abs(f0)<1e-4)break;const d=(f(bs+.05)-f0)/.05;bs=clamp(bs-f0/(Math.abs(d)>.05?d:1),bs-3,bs+3)}
   const a=rtAt(bs);return{x:(wx-a.x)*a.c-(wz-a.z)*a.sn,z:STORY_L-(bs+R.s0)}}
 const SRH=z=>{if(!RTC)return SROT;const a=rtAt(STORY_L-z-RTC.s0);return Math.atan2(a.sn,a.c)};
 const L2W=(x,z)=>RTC?rtL2W(x,z):({x:x*SRC+z*SRS,z:-x*SRS+z*SRC}),W2L=(x,z)=>RTC?rtW2L(x,z):({x:x*SRC-z*SRS,z:x*SRS+z*SRC});
@@ -3262,13 +3264,16 @@ function rtCurve(seed,Lh){const tot=2*Lh,E=40;
 /* 돌파 샛길: 길과 수직으로 뻗어 굽이친 뒤 길과 나란히 꺾이는 좁은 길 + 끝 공터. 월드에서 다른 길과 멀리 떨어진 곳만 */
 function rtBranches(){MP.pk=[];if(!RTC)return;const r=srng((S.tier|0)*131+17),nB=Math.max(3,Math.round(STORY_L/62)),used=[],R=RTC;let tries=0;
   const far=(wx,wz,sm,mind)=>{for(let i=0;i<R.n;i+=2){if(Math.abs(i+R.s0-sm)<55)continue;const dx=R.PX[i]-wx,dz=R.PZ[i]-wz;if(dx*dx+dz*dz<mind*mind)return false}return true};
-  while(MP.pk.length<nB&&tries++<120){const zm=-STORY_L+60+r()*(2*STORY_L-135),side=r()<.5?-1:1;if(used.some(u=>Math.abs(u-zm)<52))continue;
-    const c=pathC(zm),w=pathW(zm),x0=c+side*(w-.5),L1=26+r()*16,dir=r()<.5?-1:1,L2=24+r()*16,A1=4+r()*3,A2=3+r()*3,ph=r()*6,pl=[[c,zm]];
+  while(MP.pk.length<nB&&tries++<400){const zm=-STORY_L+60+r()*(2*STORY_L-135),side=tries%2?-1:1;/* v1051: 양쪽을 번갈아 시도 */if(used.some(u=>Math.abs(u-zm)<52))continue;
+    const c=pathC(zm),w=pathW(zm),x0=c+side*(w-.5),L1=18+r()*14,dir=r()<.5?-1:1,L2=24+r()*16,A1=4+r()*3,A2=3+r()*3,ph=r()*6,pl=[[c,zm]];
     for(let t=0;t<=L1;t+=3)pl.push([x0+side*t,zm+A1*Math.sin(t*.22+ph)*Math.min(1,t/8)]);
     const xe=x0+side*L1,ze=pl[pl.length-1][1];for(let t=3;t<=L2;t+=3)pl.push([xe+side*A2*Math.sin(t*.25+ph),ze+dir*t]);
     const q={x:xe,z:ze+dir*L2,r:9,k:'elite',side,pl,ax:c,az:zm},sm=STORY_L-zm;let ok=true;
     for(const [px,pz] of [...pl,[q.x,q.z],[q.x+side*9,q.z],[q.x,q.z+dir*9]]){const w2=L2W(px,pz);if(!far(w2.x,w2.z,sm,40)){ok=false;break}}
     if(ok)for(const o of MP.pk){for(const [px,pz] of pl){const a=L2W(px,pz);for(const [qx,qz] of o.pl){const b=L2W(qx,qz);if(Math.hypot(a.x-b.x,a.z-b.z)<34){ok=false;break}}if(!ok)break}if(!ok)break}
+    if(ok){/* v1051: 굽은 길 안쪽으로 깊이 뻗은 샛길은 좌표 변환이 꼬여 걸을 수 없음 — 샛길 전체(폭 포함)가 왕복 변환에서 어긋나지 않는 것만 */const rt=(px,pz)=>{const w2=L2W(px,pz),b=W2L(w2.x,w2.z);return Math.hypot(b.x-px,b.z-pz)<.25};
+      const P2=[...pl,[q.x,q.z]];for(let i=0;i<P2.length-1&&ok;i++){const[ax,az]=P2[i],[bx,bz]=P2[i+1],L=Math.hypot(bx-ax,bz-az)||1,nx=-(bz-az)/L,nz=(bx-ax)/L;for(let t=0;t<=L&&ok;t+=1)for(const o of [-2.6,0,2.6])if(!rt(ax+(bx-ax)*t/L+nx*o,az+(bz-az)*t/L+nz*o)){ok=false;break}}
+      for(let a2=0;a2<12&&ok;a2++)for(const rr of [q.r*.5,q.r+.5])if(!rt(q.x+Math.cos(a2/12*6.283)*rr,q.z+Math.sin(a2/12*6.283)*rr)){ok=false;break}}
     if(!ok)continue;used.push(zm);MP.pk.push(q)}}
 const endPtL=()=>({x:pathC(-STORY_L+12),z:-STORY_L+12}),startPtL=()=>({x:pathC(STORY_L-8),z:STORY_L-8});
 const endPt=()=>{const q=endPtL();return L2W(q.x,q.z)},startPt=()=>{const q=startPtL();return L2W(q.x,q.z)};
@@ -7283,8 +7288,10 @@ function gateClear(e){const t=e.gate;if(S.runClr)return;S.runClr=1;const first=!
   else if(lockNeed(t)){S.maxTier=Math.max(S.maxTier,t);msg=`위험도 ${t+1}은(는) <b style="color:${BLK[t].m==='u'?'#c890ff':'#ffd24a'}">${blkName(BLK[t])}</b>를 처치하면 열립니다.`}
   else if(S.maxTier<t+1){S.maxTier=t+1;msg=`위험도 ${t+1}이(가) 열렸습니다.`}
   save();later(1.6,()=>{if(S.ch>=NCH&&!inTown&&S.tier===t)askConfirm(`위험도 ${t} 클리어`,`${msg?msg+'<br>':''}<span style="color:${fb==='maw'?'#b890ff':'#ffb050'}">${fragNm(fb)} +1</span> · 보유 ${fn}개${fn>=BFRAG_N?' — 보스에 입장할 수 있습니다':` / ${BFRAG_N}`}<br>재도전하거나 마을로 이동할 수 있습니다.`,'마을로 이동',()=>goTown(),'재도전',()=>{if(runPay(t))setTier(t,false)})})}/* v628: 클리어하면 재도전(처음부터 다시, 보상 다시) 또는 마을로 이동 */
+/* v1051: 길 맵(스토리·돌파)에서는 몬스터를 항상 앞으로 갈 길 위에 — 지나온 길(뒤)에는 생기지 않음 */
+function aheadPt(d0,d1,m=2){const pl=W2L(P.pos.x,P.pos.z),lz=Math.max(-STORY_L+12,pl.z-rand(d0,d1)),w=pathW(lz);return L2W(pathC(lz)+rand(-1,1)*Math.max(0,w-m),lz)}
 function spawnEchoBoss(){if(RZ&&RZ.st==='on'){riftEcho();return}/* v405: 균열 중엔 균열 우두머리로 */
-  const a=rand(0,Math.PI*2),x=clamp(P.pos.x+Math.cos(a)*14,-B,B),z=clamp(P.pos.z+Math.sin(a)*14,-B,B);
+  const a=rand(0,Math.PI*2),ap=pathMap()?aheadPt(16,24,3):null,x=ap?ap.x:clamp(P.pos.x+Math.cos(a)*14,-B,B),z=ap?ap.z:clamp(P.pos.z+Math.sin(a)*14,-B,B);
   const src=CH[Math.random()*5|0];spawnEnemy('boss',x,z,3,{name:`${src.boss}의 메아리`,aggro:true});
   toast('고유 몬스터 출현',`${src.boss}의 메아리가 나타났습니다`);
 }
@@ -9661,7 +9668,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1050';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1051';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11774,7 +11781,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   spawnT-=dt;demoTick(dt);riftTick(dt);/* v398 잿불 균열 */
   if(!testMap&&!riftBusy()&&!inArena()&&!inTown&&!S.demo&&(mapKind!=='story'||S.phase===5)&&mapKind!=='route'/* v907: 돌파형은 길에 미리 놓인 무리만 */&&spawnT<=0&&enemies.length-enemies.filter(e=>e.boss).length<egCap(d)&&!(egLim()&&egRoom()<=0)){
     spawnT=d.spawn/EGM()/egR()*(S.ch>=NCH&&mapKind!=='story'&&!S.duel&&S.tier>=1&&oT(S.tier)<=5?2:1);/* v131: 위험도 1~5 생성률 -50% */
-    let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-(Math.random()<.85?rand(14,26):-rand(12,18)),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
+    let x,z;if(mapKind==='story'){const pl=W2L(P.pos.x,P.pos.z),lz=clamp(pl.z-rand(14,26),-STORY_L+4,STORY_L-4),w=L2W(pathC(lz)+rand(-1,1)*(pathW(lz)-2),lz);x=w.x;z=w.z}
     else{const a=rand(0,Math.PI*2),r=rand(15,19);x=clamp(P.pos.x+Math.cos(a)*r,-B,B);z=clamp(P.pos.z+Math.sin(a)*r,-B,B)}
     const q=Math.random(),ms=mutA('shot'),type=NS()&&S.ch>=2&&d.brute?(q<.25?'runner':q<(ms?.54:.70)?'grunt':q<(ms?.70:.78)?'shooter':q<.86?'caster':'brute'):q<.3?'runner':(q<.86||!d.brute)?'grunt':'brute';/* v624 사수 군단: 원거리 16% → 32% */
     const pack=Math.random()<.25+chE()*.06?3+(Math.random()*3|0):1;
