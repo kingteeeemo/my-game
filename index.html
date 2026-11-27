@@ -2003,7 +2003,7 @@ const mutOpen=()=>!!(S&&S.ch>=NCH),mutZoneAt=()=>!!(S&&mutOpen()&&mutPts()>0),mu
 const patFor=t=>t%5===0?'field':'route';/* v1042: 위험도 5·10·15·20…은 섬멸, 나머지는 돌파 (선택 UI 없음) */
 /* v1049: 포탈 — 새로 도전하면 쉼터 화로 둘레에 포탈 6개. 입장할 때마다 1개 소모, 죽거나 마을로 돌아와도 쓴 포탈은 사라짐. 6개를 다 쓰고도 못 깨면 그 도전은 끝(입장료를 다시 내고 새로 열어야 함) */
 const PZ_N=6,ptOn=()=>NS()&&S.ch>=NCH&&!S.demo,ptLeft=t=>S.pt&&S.pt.t===t?S.pt.left:null,ptOut=t=>ptOn()&&!!S.pt&&S.pt.t===t&&S.pt.left<=0,ptStart=t=>{if(ptOn())S.pt={t,left:PZ_N,d:0}},ptUse=t=>{if(!ptOn())return true;if(!S.pt||S.pt.t!==t)S.pt={t,left:PZ_N,d:0};if(S.pt.left<=0)return false;S.pt.left--;save();return true};
-function townEnter(t,noAsk){if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==patFor(t)||ptOut(t)/* v991: 패턴을 바꿨으면 새 판으로 입장 · v1049: 포탈을 다 썼으면 다시 열기 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}ptStart(t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save()}closeStage();leaveTown(true)};if(egRun()&&!patCh&&!noAsk)egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}}
+function townEnter(t,noAsk){if(ptBusy)return;if(S.ch>=NCH&&tierMovable(t)){if(S.test&&t>S.maxTier)S.maxTier=t;const patCh=(S.rtRun?'route':'field')!==patFor(t)||ptOut(t)/* v991: 패턴을 바꿨으면 새 판으로 입장 · v1049: 포탈을 다 썼으면 다시 열기 */,run=()=>{if(t!==S.tier||S.runClr||S.egFresh||patCh){if(!runPay(t)){if(S.egFresh&&(S.tierKills||0)>0)S.egFresh=0;return}ptStart(t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.egFresh=0;S.fld=null;save();closeStage();/* v1062: 새 도전 — 화로 둘레 포탈 6개가 차례로 켜진 뒤 입장 */if(!noAsk&&inTown&&ptOn()&&ptM.length){ptLight(()=>leaveTown(true));return}}closeStage();leaveTown(true)};if(egRun()&&!patCh&&!noAsk)egRunAsk(()=>{closeStage();leaveTown(true)},()=>{S.egFresh=1;run()});else run()}}
 function runPay(t){S.rtRun=patFor(t)==='route'?1:0;/* v907: 이번 판의 패턴(섬멸 · 돌파) */if(!mutOpen()){S.mutRun={};return true}const c=mutCost(S.mut,t);if(c&&!TCUR()){if((S.gold||0)<c){toast('골드 부족',`변이 입장에 ${fmtG(c)} 골드가 필요합니다`);return false}S.gold-=c;acctSave&&acctSave();toast('변이 입장',`${fmtG(c)} 골드 사용 · 보상 ×${mutRw(mutPts()).toFixed(2)}`)}S.mutRun={...(S.mut||{})};save();return true}
 const tkFor=t=>t>=16?2000:t>=11?1500:RT_KILLS/* v971: 위험도 1~10 900마리 · 11~15 1,500마리 · 16~20 2,000마리 */ /* v856: 1,000 → 1,500마리 · v930: 섬멸·돌파 모두 900마리 */,RT_KILLS=900,/* v628: 위험도마다 1,000마리 고정 — 다 잡으면 관문 보스, 쓰러뜨리면 클리어 *//* v627: 다음 위험도까지 처치 수 — 1~4 1,000 · 5~9 1,500 · 10~14 2,000 · 15~19 3,000 (위험도보다 변이로 보상을 키우는 구조) *//* v277: 위험도 상승에 필요한 처치 수 — 50부터 400 · 70부터 700 · 80부터 900(그 아래 300) *//* v109: 위험도당 200마리 — 정확히 200마리까지만 생성 / v235: 300마리 */EG_BOSS_KILLS=70,B=38,ALTAR={x:0,z:-30},BAG=70,bagCap=()=>NS()?300+100*Math.min(3,S&&S.bagX||0):BAG,BAG_UP=[500000,6000000,100000000]/* v867: 가방 확장 — 골드로 100칸씩 3번(200 → 500칸): 50만 · 600만 · 1억 */;/* v495: 테스트 캐릭터 가방 200칸 *//* ALTAR은 맵마다 바뀜 (스토리: 길 끝) */
 /* ---------- equipment ---------- */
@@ -5051,9 +5051,9 @@ void main(){vec2 q=(vU-.5)*2.;q.x*=1.55;float r=length(q);if(r>1.)discard;float 
  c+=vec3(.55,.75,1.)*pow(1.-r,4.)*1.4;
  float rim=smoothstep(.72,.98,r);c=mix(c,vec3(.7,.55,1.),rim*.6);c+=vec3(.6,.45,1.)*pow(smoothstep(.8,.99,r),3.)*1.6;
  float al=smoothstep(1.,.93,r)*(.82+.18*f);gl_FragColor=vec4(c,al);}`;
-function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const n=S.pt&&S.pt.t===S.tier&&S.pt.left!=null?S.pt.left:PZ_N;/* v1060: 아직 안 들어간 도전은 6개 */if(n<=0)return;const hp=refH.g.position;
+function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const hp=refH.g.position,tg=ptBase(),pv=S.ptShow!=null?Math.min(PZ_N,S.ptShow):tg;
   const stone=SM({color:0x3a3846,roughness:.9}),rune=new THREE.MeshBasicMaterial({color:0x9a8aff});
-  for(let i=0;i<PZ_N;i++){if(i>=n)break;const a=-Math.PI/2+i*(Math.PI*2/PZ_N)+.3,x=hp.x+Math.cos(a)*5.4,z=hp.z+Math.sin(a)*5.4,g=new THREE.Group();
+  for(let i=0;i<PZ_N;i++){const a=-Math.PI/2+i*(Math.PI*2/PZ_N)+.3,x=hp.x+Math.cos(a)*5.4,z=hp.z+Math.sin(a)*5.4,g=new THREE.Group();
     const mat=new THREE.ShaderMaterial({uniforms:{t:PTU.t,ph:{value:i*2.7}},vertexShader:PT_VS,fragmentShader:PT_FS,transparent:true,depthWrite:false,side:THREE.DoubleSide});
     const disk=new THREE.Mesh(new THREE.PlaneGeometry(1.5,2.3),mat);disk.position.y=1.35;g.add(disk);
     /* 테두리: 가는 빛 고리 두 겹(타원) */
@@ -5066,11 +5066,21 @@ function ptDraw(){ptM=[];if(!ptOn()||!refH||!refH.g)return;const n=S.pt&&S.pt.t=
     const pts=[];for(let k=0;k<10;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:refGlowTex,color:k%3?0x9ab8ff:0xd8c8ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));sp.userData={a:Math.random()*6.28,r:.6+Math.random()*.5,p:Math.random(),s:.6+Math.random()*.6};g.add(sp);pts.push(sp)}
     g.position.set(x,groundH(x,z),z);g.rotation.y=Math.atan2(x-hp.x,z-hp.z)*.3;/* 화면(남쪽)을 향하되 화로 쪽으로 살짝 */scene.add(g);propMeshes.push(g);
     const lt=new THREE.PointLight(0x7a7aff,.9,6,1.6);lt.position.set(x,1.4,z);scene.add(lt);propMeshes.push(lt);
-    ptM.push({g,disk,rim,halo,sh,pts,lt,ph:i*1.3});refPool(x,z,2.4,0x6a7aff,.5)}}
+    const pool=refPool(x,z,2.4,0x6a7aff,.5),P2={g,disk,rim,halo,sh,pts,lt,pool,ph:i*1.3,st:i<pv?'on':'off',t0:0};ptM.push(P2);ptVis(P2,i<pv?1:0)}
+  /* 마을에 돌아오면 쓴 포탈이 켜진 역순으로 하나씩 사라짐 (클리어했으면 남은 것 모두) */const now=performance.now()/1000;for(let i=pv-1,k=0;i>=tg;i--,k++){ptM[i].st='out';ptM[i].t0=now+1.1+k*.45}S.ptShow=tg}
+let ptBusy=0;
+const ptBase=()=>ptOn()&&S.pt&&S.pt.t===S.tier&&!S.runClr?Math.max(0,S.pt.left):0;
+function ptVis(p,k){/* k: 0 꺼짐 ~ 1 켜짐 */const on=k>.001;p.g.visible=p.lt.visible=p.pool.visible=on;if(!on)return;const e=Math.min(1,k);p.g.scale.set(.35+.65*e,e,.35+.65*e);p.pool.material.opacity=.5*e;p.lt.intensity=.9*e}
+function ptLight(cb){ptBusy=1;const now=performance.now()/1000;ptM.forEach((p,i)=>{p.st='in';p.t0=now+.25+i*.32;ptVis(p,0)});S.ptShow=PZ_N;
+  setTimeout(()=>{ptBusy=0;cb&&cb()},(0.25+PZ_N*.32+.75)*1000)}
 function ptAnim(){if(!ptM.length||!inTown)return;const t=performance.now()/1000;PTU.t.value=t%1000;
-  for(const p of ptM){const k=Math.sin(t*2.3+p.ph);p.rim.material.opacity=.75+.2*k;p.halo.material.opacity=.35+.12*k;p.lt.intensity=.8+.25*k;
+  for(const p of ptM){
+    if(p.st==='in'){const q=(t-p.t0)/.45;if(q<0){ptVis(p,0);continue}if(q>=1){p.st='on';ptVis(p,1)}else{ptVis(p,1+Math.sin(q*Math.PI)*.25*(1-q)-(1-q)*(1-q));p.halo.material.opacity=1.2*(1-q)+.4;if(!p.fl&&q>0){p.fl=1;try{hitSpark(new THREE.Vector3(p.g.position.x,1.3,p.g.position.z),0x9ab0ff)}catch(_){}}continue}}
+    else if(p.st==='out'){const q=(t-p.t0)/.55;if(q<0){}else if(q>=1){p.st='off';ptVis(p,0);continue}else{ptVis(p,1-q*q);p.halo.material.opacity=.4+1.1*Math.sin(q*Math.PI);if(!p.fo){p.fo=1;try{hitSpark(new THREE.Vector3(p.g.position.x,1.3,p.g.position.z),0xb9a2ff)}catch(_){}}continue}}
+    else if(p.st==='off'){continue}
+    {const k=Math.sin(t*2.3+p.ph);p.rim.material.opacity=.75+.2*k;p.halo.material.opacity=.35+.12*k;p.lt.intensity=.8+.25*k;
     p.sh.forEach((r,j)=>{r.position.y=.95+.06*Math.sin(t*1.7+p.ph+j*2);r.rotation.y=t*1.2+j});
-    for(const s of p.pts){const u=s.userData,q=(u.p+t*.35*u.s)%1,rr=u.r*(1-q),aa=u.a+q*3.5;s.position.set(Math.cos(aa)*rr*.75,1.35+Math.sin(aa)*rr*1.1,.05+.15*(1-q));const sc=.18*(1-q*.6);s.scale.set(sc,sc,1);s.material.opacity=Math.min(1,q*4)*(1-q)*1.3}}}
+    for(const s of p.pts){const u=s.userData,q=(u.p+t*.35*u.s)%1,rr=u.r*(1-q),aa=u.a+q*3.5;s.position.set(Math.cos(aa)*rr*.75,1.35+Math.sin(aa)*rr*1.1,.05+.15*(1-q));const sc=.18*(1-q*.6);s.scale.set(sc,sc,1);s.material.opacity=Math.min(1,q*4)*(1-q)*1.3}}}}
 /* v676: 쉼터 이야기 — 위험도 구간을 넘을 때마다 쉼터로 돌아오면 하란(또는 화로의 목소리)이 한 장면씩 들려줌. 몇 개를 넘었는지가 화로 크기·등불 수 */
 const HR='쉼터지기 하란',VO='???';
 const REF_IN=[[HR,'…깨어났군. 위에서 떨어진 자는 많았지만, 금빛을 두르고 내려온 자는 처음이다.'],[HR,'여긴 추락자의 쉼터. 아쉬카르에게 떨어진 자들이 모여 사는 곳이지.'],[HR,'땅 위로 돌아가는 길은 없다. 위 사람들은 우리가 모두 불에 타 죽은 줄 알 거다. 길은 오직 위로, 저 왕좌로만 나 있지.'],[HR,'네가 두르고 온 금빛이 저 화로에 옮겨 붙었다. 이 밑바닥에서 꺼지지 않은 유일한 불씨다.'],[HR,'다시 올라갈 생각이라면 화로 앞에 서라. 가장 밑바닥, 추락의 심연부터다.']];
