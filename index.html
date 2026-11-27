@@ -6163,7 +6163,7 @@ function lwBuild(){const g=new THREE.Group(),C=LWC,N=C.sp.length,RQ=[-1,-.6,-.25
 /* 날개 색: col 광채, hot 심지, sp 반짝임, fl 화염 일렁임(0~1), em 위로 날리는 불씨 */
 const LOOKS={wings:{n:'빛의 날개',wing:1,col:[.3,.56,1],hot:[.93,.97,1],sp:[.8,.95,1],fl:0},
   wings_gold:{n:'황금 날개',wing:1,col:[1,.62,.12],hot:[1,.95,.72],sp:[1,.92,.6],fl:0,glow:0xffb030},
-  wings_lava:{n:'용사냥꾼 날개',lava:1,mdl:1,boss:'우버 검귀 카이렌 보상'/* v944: 상점 판매 중단 — 우버 검귀 보상에서만 */},
+  wings_lava:{n:'용사냥꾼 날개',lava:1,mdl:1,boss:'우버 심연의 아귀 보상'/* v944: 상점 판매 중단 · v1084: 우버 아귀 보상에서만 */},
   wings_crystal:{n:'수정 날개',lava:1,cw:1,mdl:1,pv:[11,5,2.8]},/* v1027: Meshy 수정 날개 모델 */
   wings_fire:{n:'화염 날개',wing:1,col:[1,.13,.01],hot:[1,.5,.12],sp:[1,.6,.2],fl:1,glow:0xff4a10,em:1}};
 /* v483: 외형 상점(재화 구매)이 생기기 전까지는 테스트 캐릭터에서만 보이고 착용됨 — 일반 캐릭터는 외형 줄 숨김·저장된 착용 값 무시 */
@@ -7394,8 +7394,7 @@ function mawAnim(e,dt){const M=e.M,t=time+e.ph;M.root.position.y=MWP.dy-((e.sink
   if(Math.random()<dt*3*QM()){const a=rnd(0,6.28),r=rnd(1.5,2.9);emit(PNRM,{x:e.pos.x+Math.cos(a)*r,y:MWP.wy+.03,z:e.pos.z+Math.sin(a)*r,vy:rnd(.2,.5),life:rnd(.6,1.1),s0:.3,s1:.9,c0:0x4a2a6a,c1:0x100818,a:.35,drag:1,tex:2})}}
 function duelEnter(m='n',b,dummy){if(S.ch<NCH)return;bossFailed.knight=bossFailed.maw=0;if(b==='maw'&&S.noMaw){toast('입장 불가','만렙 150을 넘긴 세이브는 심연의 아귀에 도전할 수 없습니다');return}if(!dummy&&uberLk(m)){toast('아직 열리지 않았습니다','우버 보스는 위험도 20에 도달하면 도전할 수 있습니다');return}if(!dummy&&!bossPay(b==='maw'?'maw':'knight',m))return;/* v886: 보스 조각 */closeAllSheets();inTown=false;$('npcAct').hidden=true;/* v107: 마을에서 바로 입장해도 보스가 마을에 소환되지 않도록 */const D=duelCfg(m,b);if(b!=='maw')bkLoad();/* v396: 검귀 모델 미리 받기 */S.duel={tier:D.tier,uber:m==='u',m,b:b||'knight'};if(NS())nsPotInit(true);if(dummy&&S.test)S.duel.dummy=1;/* v273: 테스트 허수아비 결투장 */const N=duelDef().n;save();mapLoad(N,(b==='maw'?'심연의 밑바닥으로':'무너진 성채로')+' 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{/* v552: 입장 안내 문구(결투장·저주 −20%)는 띄우지 않음 */stageBanner()})}
 function duelLeave(){collectAll();S.duel=null;bossAuto(false);save();mapLoad('엔드게임','사냥터로 이동합니다',()=>{setMap(true);applyTheme();resetWorld()},()=>{stageBanner();toast('엔드게임으로 돌아왔습니다',`위험도 ${S.tier}`)})}
-function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const req=duelReq(),gold=Math.round(req*11*GOLD_K),U=!!(S.duel&&S.duel.uber);
-  S.gold+=gold;
+function duelWin(e){if(e&&e.dummy){const sec=Math.max(.1,time-(e.t0||time)),dps=e.mhp/sec;later(1.5,()=>victory('허수아비 처치',`${sec.toFixed(1)}초 · 평균 DPS ${fmtN(dps)}`,'90,209,200',()=>showDummyClear(sec,dps,e.mhp)));return}clearPools();const gold=0/* v1084: 결투 보스 골드 보상 없음 */,U=!!(S.duel&&S.duel.uber);
   S.duelWins=(S.duelWins||0)+1;if(S.duel)lockWin(S.duel.b==='maw'?'maw':'knight',S.duel.m||'n');if(!(S.duel&&S.duel.b==='maw')&&!S.test)try{localStorage.setItem('ember-sanctum-skip','1')}catch(e){}/* v228: 검귀 카이렌를 클리어하면 새 캐릭터를 31레벨 엔드게임에서 시작할 수 있음(계정 공통) */const bk=(S.duel&&S.duel.b==='maw'?'m':'k')+(U?'u':'n'),sec=Math.max(.1,time-((e&&e.t0)||time)-((e&&e.sipeOff)||0)),gr=bGrade(bk,sec),rec=S.bossRec=S.bossRec||{},nr=!rec[bk]||sec<rec[bk];if(nr)rec[bk]=+sec.toFixed(1);{const H=S.bossHist=S.bossHist||{};(H[bk]=H[bk]||[]).push(+sec.toFixed(1));if(H[bk].length>5)H[bk].shift()}if(gr[0]==='S')(S.bossS=S.bossS||{})[bk]=1;titleCheck(S);
   duelBonus={m:S.duel&&S.duel.m||'n',U,mb:S.duel&&S.duel.b==='maw',rolled:false,res:[],bk,sec,g:gr[0],rolls:gr[2],nr};
   later(2.3,()=>showDuelBanner(gold))}/* v1033: 격파 컷신 대신 스토리 장 완료와 같은 배너 */
@@ -7408,7 +7407,7 @@ function rollBonus(){const b=duelBonus;if(!b||b.rolled)return;b.rolled=true;b.re
     for(const k in BFOOT)if(BFOOT[k].b===bb&&!S.bcos[k])cand.push([k,p,'b']);
     if(!S.bcos[pk])cand.push([pk,p,'b']);
     if(!b.mb&&!lookOwn('wsk_knight'))cand.push(['wsk_knight',KSW_P[U?'u':'n'],'l']);
-    if(!b.mb&&!lookOwn('wings_lava'))cand.push(['wings_lava',WG_P[U?'u':'n'],'l']);
+    if(b.mb&&!lookOwn('wings_lava'))cand.push(['wings_lava',WG_P[U?'u':'n'],'l']);/* v1084: 용사냥꾼 날개는 우버 아귀 보상 */
     let rv=Math.random();/* 굴림 한 번에 하나만: 한 번 뽑은 값이 어느 항목 구간에 들어가는지로 결정(구간 길이 = 각 확률) */
     for(const c of cand){if(rv<c[1]){if(c[2]==='b')S.bcos[c[0]]=1;else(S.lkOwn=S.lkOwn||{})[c[0]]=1;b.res.push({t:'cos',k:c[0]});break}rv-=c[1]}}
   if(ct){S.cata=(S.cata||0)+ct;b.res.unshift({t:'cata',n:ct})}if(sl){capAdd('seal',sl,'성역의 인장');b.res.unshift({t:'seal',n:sl})}if(rr){rrAdd(rr);b.res.unshift({t:'rr',n:rr})}
@@ -7451,7 +7450,7 @@ function showDummyClear(sec,dps,hp){collectAll();
 let duelGoldV=0;
 function showDuelBanner(gold){collectAll();duelGoldV=gold;const b=duelBonus||{},U=!!(S.duel&&S.duel.uber),gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4';shake=Math.max(shake,.3);
   $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${U?'우버 · ':''}위험도 ${S.duel?S.duel.tier:10}</div><h1>${duelDef().n} 처치</h1><div class="cb-s">${b.g?`처치 시간 ${b.sec.toFixed(1)}초 · <b style="color:${gc}">${b.g}등급</b>${b.nr?' · 최고 기록!':''}`:'격파 완료'}</div></div>
-    <div class="cb-low"><p>기본 보상 <b style="color:#f0d040">골드 ${fmtG(gold)}</b></p><button class="primary" id="duelRw">보상 확인</button></div></div>`;
+    <div class="cb-low"><button class="primary" id="duelRw">보상 확인</button></div></div>`;
   $('clear').hidden=false;releaseAll()}
 /* v1034: 보스 보상 창 — 등급 육각형 + 보상 칸(인벤토리 칸 모양). 칸을 누르면 아래에 설명 */
 let rcInfos=[];
@@ -7463,7 +7462,7 @@ const rwInfo=r=>{if(r.t==='seal')return{ic:ci('s'),c:'#7ad8ff',nm:'성역의 인
   return{ic:'✦',c:'#ffd24a',nm:'확정 강화 주문서',n:r.n||1,d:'대장장이 강화 창에서 「사용」을 켜면 다음 강화가 반드시 성공합니다'}};
 function showDuelClear(gold){collectAll();const b=duelBonus||{U:false,rolled:true,res:[]},bb=S.duel&&S.duel.b==='maw'?'maw':'knight',m=S.duel&&S.duel.m||'n',R=BRW[b.bk]||{},rf=BREF[b.bk]||60,c=bossCost(bb,m),hv=fragHave(bb);
   const gc={S:'#5ae0ff',A:'#7fe07a',B:'#cfc5b4'}[b.g]||'#cfc5b4',pv=R.rr?`${ci('r')} 불씨 ${bwTx(R.rr)} · ${ci('s')} 인장 ${bwTx(R.sl)}`:`✦ 촉매 ${R.ct?bwTx(R.ct):''}`,ga={S:'#5ae0ff',A:'#7fe07a',B:'#e8c870'}[b.g]||'#e8c870',bwH=d=>`<b>${Math.round(d.p*100)}%</b> · ${d.a[0]===d.a[1]?d.a[0]:d.a.join('~')}`,od=R.rr?`<span>${ci('r')}불씨 ${bwH(R.rr)}</span><span>${ci('s')}인장 ${bwH(R.sl)}</span><span>외형 낮은 확률</span>`:`<span>✦ 촉매 ${R.ct?bwH(R.ct):''}</span><span>외형 낮은 확률</span>`;
-  rcInfos=[{ic:ci('g'),c:'#f0d040',nm:'골드',n:fmtG4(gold),d:'기본 보상 — 처치하면 항상 받습니다'}].concat(b.rolled?b.res.map(rwInfo):[]);
+  rcInfos=(gold>0?[{ic:ci('g'),c:'#f0d040',nm:'골드',n:fmtG4(gold),d:'기본 보상 — 처치하면 항상 받습니다'}]:[]).concat(b.rolled?b.res.map(rwInfo):[]);
   const tiles=rcInfos.map((x,k)=>`<button class="rct${k===(rcInfos.length>1?1:0)?' on':''}" data-rc="${k}" style="--c:${x.c}"><span class="rci">${x.ic}<b>${x.n}</b>${x.nw?'<i>NEW</i>':''}</span><small>${x.nm}</small></button>`).join('')+(b.rolled?'':`<div class="rct" style="--c:#4a4a58"><span class="rci" style="color:#6a6a78">?</span><small>보상 굴림 전</small></div>`);
   const f=rcInfos[rcInfos.length>1?1:0];
   $('clearSheet').innerHTML=`<div class="rwc"><div class="rc-mid"><div class="tt">${S.duel&&S.duel.uber?'우버 · ':''}위험도 ${S.duel?S.duel.tier:10}</div><h1>${duelDef().n} 처치</h1>
@@ -7497,7 +7496,7 @@ const BTITLE={t_kn:{n:'잿불을 꺾은 자',c:'#ffb050',how:'일반 검귀 카�
   t_s:{n:'찰나의 검',c:'#5ae0ff',how:'아무 보스나 S등급으로 처치'},t_sall:{n:'보스 정복자',c:'#ffe27a',how:'보스 4종(일반·우버) 모두 S등급으로 처치'},t_100:{n:'보스 사냥꾼',c:'#8aff9a',how:'보스 100회 처치'}};
 const BFOOT={ft_ember:{n:'잿불 발자국',d:'걸을 때마다 불씨 자국이 남습니다',how:'검귀 카이렌 보상에서 낮은 확률',b:'knight'},ft_abyss:{n:'심연 안개',d:'발밑에서 보랏빛 안개가 피어오릅니다',how:'심연의 아귀 보상에서 낮은 확률',b:'maw'}};
 const BPET={pet_kn:{n:'작은 카이렌',how:'일반 검귀 카이렌 보상에서 낮은 확률',b:'knight',U:0},pet_ku:{n:'작은 카이렌 · 우버',how:'우버 검귀 카이렌 보상에서 낮은 확률',b:'knight',U:1},pet_mn:{n:'작은 아귀',how:'일반 심연의 아귀 보상에서 낮은 확률',b:'maw',U:0},pet_mu:{n:'작은 아귀 · 우버',how:'우버 심연의 아귀 보상에서 낮은 확률',b:'maw',U:1}};
-const BCOS_P={n:.05,u:.1},KSW_P={n:0,u:.05},WG_P={n:0,u:.05};/* v944: 굴림 1회당(한 번 굴림에 하나만) — 발밑·동반 일반 5%·우버 10% · 대검·날개(용사냥꾼)는 우버 검귀만 5% *//* 굴림 1회당 외형 확률(이미 가진 것은 나오지 않음) */
+const BCOS_P={n:.05,u:.1},KSW_P={n:0,u:.05},WG_P={n:0,u:.05};/* v944: 굴림 1회당(한 번 굴림에 하나만) — 발밑·동반 일반 5%·우버 10% · 대검은 우버 검귀만 5% · 날개(용사냥꾼)는 우버 아귀만 5% *//* 굴림 1회당 외형 확률(이미 가진 것은 나오지 않음) */
 const BRW={kn:{rr:{p:.4,a:[28,56]},sl:{p:.4,a:[1,2]}},ku:{rr:{p:.4,a:[48,88]},sl:{p:.4,a:[3,6]}},mn:{ct:{p:.4,a:[3,7]}},mu:{ct:{p:.4,a:[9,17]}}};/* 굴림 1회당 확률 드랍(v888): 굴림마다 항목별로 따로 확률 판정, 성공하면 범위 내 수량 */
 const bwTx=d=>`${Math.round(d.p*100)}% · ${d.a[0]===d.a[1]?d.a[0]:d.a.join('~')}`;
 function titleCheck(s,quiet){const c=s.bclr||{},o=s.bcos=s.bcos||{},g=[],add=k=>{if(!o[k]){o[k]=1;g.push(k)}},sx=s.bossS||{};
@@ -10024,7 +10023,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1083';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1084';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
