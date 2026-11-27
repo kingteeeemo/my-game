@@ -644,6 +644,7 @@ button.gsel{width:100%;text-align:left;color:var(--ink);font:inherit}.gselp{flex
 .cb-low p{font:500 15px/1.7 var(--ko);color:#e4dccd;margin:0 0 6px}
 .cb-low .nx{font-size:13px;color:#a89c8c;margin:10px 0 18px}
 #clear .cb-low button{width:100%;height:52px;font-size:16px;font-weight:800}
+#clear .cb-low .cb-2{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}#clear .cb-low .cb-2 button{margin:0}#clear .cb-low .cb-2 .ghost{background:#1c1c24;border:1px solid #3a3844;color:#e8e0cc;border-radius:12px}@media (orientation:landscape){#clear .cb-low .cb-2{width:min(460px,100%);margin:0 auto}#clear .cb-low .cb-2 button{width:100%}}
 @media (orientation:landscape){#clear .cb-low button{display:block;width:max(220px,20vw);max-width:100%;margin:0 auto}}/* v785: 가로 화면(PC·폰 가로)은 버튼 폭을 화면의 20% */
 /* v1034: 보스 보상 창(rwc) */
 .rwc{height:100%;display:flex;flex-direction:column;align-items:center;padding:max(26px,env(safe-area-inset-top)) 18px max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));box-sizing:border-box;text-align:center;max-width:560px;margin:0 auto;animation:cbF .5s both}
@@ -7507,7 +7508,7 @@ function gateClear(e){const t=e.gate;if(S.runClr)return;S.runClr=1;const first=!
   let msg='';if(t>=D_MAX){if(!S.d20){S.d20=1;msg='최고 위험도를 처음 돌파했습니다.'}}
   else if(lockNeed(t)){S.maxTier=Math.max(S.maxTier,t);msg=`위험도 ${t+1}은(는) <b style="color:${BLK[t].m==='u'?'#c890ff':'#ffd24a'}">${blkName(BLK[t])}</b>를 처치하면 열립니다.`}
   else if(S.maxTier<t+1){S.maxTier=t+1;msg=`위험도 ${t+1}이(가) 열렸습니다.`}
-  save();later(1.6,()=>{if(S.ch>=NCH&&!inTown&&S.tier===t)askConfirm(`위험도 ${t} 클리어`,`${msg?msg+'<br>':''}<span style="color:${fb==='maw'?'#b890ff':'#ffb050'}">${fragNm(fb)} +1</span> · 보유 ${fn}개${fn>=BFRAG_N?' — 보스에 입장할 수 있습니다':` / ${BFRAG_N}`}<br>재도전하거나 마을로 이동할 수 있습니다.`,'마을로 이동',()=>goTown(),'재도전',()=>{if(runPay(t)){ptStart(t);ptUse(t);setTier(t,false)}})})}/* v628: 클리어하면 재도전(처음부터 다시, 보상 다시) 또는 마을로 이동 */
+  save();later(1.6,()=>{if(S.ch>=NCH&&!inTown&&S.tier===t)gateBanner(t,msg,fb,fn,first)})}/* v628: 클리어하면 재도전(처음부터 다시, 보상 다시) 또는 마을로 이동 */
 /* v1051: 길 맵(스토리·돌파)에서는 몬스터를 항상 앞으로 갈 길 위에 — 지나온 길(뒤)에는 생기지 않음 */
 function aheadPt(d0,d1,m=2){const pl=W2L(P.pos.x,P.pos.z),lz=Math.max(-STORY_L+12,pl.z-rand(d0,d1)),w=pathW(lz);return L2W(pathC(lz)+rand(-1,1)*Math.max(0,w-m),lz)}
 function spawnEchoBoss(){if(RZ&&RZ.st==='on'){riftEcho();return}/* v405: 균열 중엔 균열 우두머리로 */
@@ -8122,8 +8123,15 @@ function die(){{const fb=thOn&&enemies.find(e=>e.perch&&e.a2);if(fb){/* v614: 2�
 }
 /* v1049: 엔드게임에서 죽으면 쓰러짐 연출 뒤 마을(쉼터)로 돌아감. 들어갈 때 쓴 포탈은 이미 사라진 상태 */
 let ptDy=0;
-function ptDie(){if(ptDy)return;ptDy=1;if(mapKind==='route')rtDieMark();/* 돌파형은 죽은 자리 조금 뒤에서 다시 시작 */const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;const t=S.tier,l=ptLeft(t);P.hp=P.mhp;P.mp=P.mmp;P.inv=99;S.ptDeaths=(S.ptDeaths||0)+1;save();
+function ptDie(){if(ptDy)return;ptDy=1;if(mapKind==='route')rtDieMark();/* 돌파형은 죽은 자리 조금 뒤에서 다시 시작 */const loss=Math.min(S.xp,Math.round(needXp()*.2));S.xp-=loss;const t=S.tier,l=ptLeft(t);P.hp=0;P.inv=99;/* v1077: 쓰러지면 체력은 채우지 않음 — 쉼터에 도착하면 채워짐 */S.ptDeaths=(S.ptDeaths||0)+1;save();
   ptDeathBanner(t,l,loss,()=>{ptDy=0;P.inv=1.5;if(!ptOn()||inTown){return}goTown()})}
+/* v1077: 위험도 클리어 배너 — 스토리 장 완료·쓰러짐 배너와 같은 형식(가운데 띠 + 아래 문구·버튼). 떠 있는 동안 게임 멈춤 */
+function gateBanner(t,msg,fb,fn,first){cinePause++;releaseAll();let done=0;const nm=EGMAPS[egMapFor(t)]?EGMAPS[egMapFor(t)].n:'',fc=fb==='maw'?'#b890ff':'#ffb050';
+  $('clearSheet').innerHTML=`<div class="cban"><div class="cb-band"><div class="cb-l">${nm}${tpn(t)?' · '+tpn(t):''}</div><h1>위험도 ${t} 클리어</h1><div class="cb-s">${first?'첫 클리어 · 장비 2개':'관문 보스 처치'}</div></div>
+    <div class="cb-low">${msg?`<p>${msg}</p>`:''}<p><b style="color:${fc}">${fragNm(fb)} +1</b> · 보유 <b>${fn}</b>${fn>=BFRAG_N?'개 — 보스에 입장할 수 있습니다':` / ${BFRAG_N}개`}</p><p class="nx">재도전하면 처음부터 다시 · 보상도 다시 받습니다</p>
+    <div class="cb-2"><button class="ghost" id="gcRe">재도전</button><button class="primary" id="gcTown">마을로 이동</button></div></div></div>`;
+  $('clear').hidden=false;const go=f=>{if(done)return;done=1;cinePause=Math.max(0,cinePause-1);$('clear').hidden=true;f()};
+  $('gcTown').onclick=()=>go(()=>goTown());$('gcRe').onclick=()=>go(()=>{if(runPay(t)){ptStart(t);ptUse(t);setTier(t,false)}})}
 /* v1064: 쓰러짐 배너 — 스토리 장 완료 배너(가운데 띠 + 아래 문구·버튼)와 같은 형식 */
 function ptDeathBanner(t,l,loss,cb){cinePause++;releaseAll();shake=Math.max(shake,.35);let done=0;
   const ex=l!=null&&l<=0,nm=EGMAPS[egMapFor(t)]?EGMAPS[egMapFor(t)].n:'';
@@ -9991,7 +9999,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1076';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1077';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
