@@ -4694,7 +4694,48 @@ function ashInter(e){if(e.itl)return;ashPilDrop(e);e.pil=null;const I=ASH,s=Math
   ashClearFx();shake=1.3;slowT=.35;ashWarn('숨을 들이쉰다!',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 푸른 원으로 피하라',I.itT);shake=Math.max(shake,.5);ringFx({x:0,z:I.pawZ},10,0xff6a2a,.6)}
 function ashPawSide(e,s,tt){const I=ASH,L=e.itl,c={x:s*I.pawX,z:I.pawZ+I.shZ};L.s=s;L.c=c;L.t=0;L.tt=tt;L.f=0;L.chk=0;L.br=0;L.safe.position.set(c.x,.09,c.z);L.safe.scale.set(I.shR,I.shR,1);L.sr.position.set(c.x,.11,c.z);L.hu.value.set(c.x,c.z,I.shR-.05);L.sr.scale.set(I.shR,I.shR,1);L.big.material.opacity=.22;
   if(!L.n)toast(ashNm(e,'이','가')+' 숨을 들이쉰다',(s>0?'오른쪽':'왼쪽')+' 앞발 뒤 그림자로 숨어라 — 불길에 닿으면 즉사')}
-function ashInterStep(e,dt){if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(!(L.pre>0))ashGuide(L,1);if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);ashGuide(L,1);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
+/* v1054 시험 연출: 엔드게임 최종전 1막 끝 — 아쉬카르가 고향 섬으로 달아나면, 가호의 빛이 모여 등에 황금 날개가 펼쳐지고 날아서 추격.
+   테스트 캐릭터: 왕좌 맵에서 flyChase() (테스트 이동 「추격 연출 시험」). 끝나면 금빛으로 덮이며 「용의 섬으로」 → 왕좌로 되돌림(섬 맵은 아직 없음) */
+const FLY={on:0,t:0,e:null,wing:0,wo:0,drag:0,hx:0,hz:0,d:new THREE.Vector3(),cP:new THREE.Vector3(),cL:new THREE.Vector3(),gc:0};
+const FLYT={rise:2.4,gather:1.3,spread:.45,lift:1.6,fly:5.2,fade:1.6};
+function flyChase(){if(!thOn||FLY.on)return false;const e=enemies.find(q=>q.perch&&q.hp>0);if(!e)return false;
+  if(typeof ashItlDrop==='function')ashItlDrop();e.pil=null;e.brW=0;e.brT=0;e.itl={k:'flee',t:0};e.fw=new THREE.Vector3(0,0,ASH.pz);e.fy=0;if(typeof ashClearFx==='function')ashClearFx();
+  Object.assign(FLY,{on:1,t:0,e,wing:0,wo:0,drag:0,hx:P.pos.x,hz:P.pos.z,gc:0});FLY.d.set(0,0,-1);ASHC.on=1;knAppr=2;P.mv=null;shake=Math.max(shake,.6);ringFx({x:0,z:ASH.pawZ},10,0xff6a2a,.6);SFX.p('wing');
+  const H=hero.position;FLY.cP.set(H.x+4,H.y+3.6,H.z+10);FLY.cL.set(0,6,ASH.pz);return true}
+function ashFleeStep(e,dt){const I=ASH,L=e.itl,T=(L.t+=dt),W=e.fw;e.g.position.set(e.pos.x,0,e.pos.z);
+  if(T<FLYT.rise){/* 앞발을 떼고 크게 날갯짓하며 수직으로 떠오름 */const k=T/FLYT.rise,q=k*(2-k);e.pk=Math.max(0,1-T/.5);W.set(0,26*q,I.pz-6*k);shake=Math.max(shake,.3*(1-k));
+    if(T<.6&&Math.random()<.6)spray(PNRM,{x:rnd(-9,9),z:I.pawZ+rnd(-1,3)},4,{r0:1.5,sp:[2,6],up:[1,4],y:[.1,.5],life:[.6,1.2],s0:[.9,1.5],s1:[2,3],c0:0x6a5a50,c1:0x1a1210,a:.5,drag:2,grav:-1,tex:0})}
+  else{/* 몸을 돌려 북동쪽 하늘(대륙 밖 섬)로 */const k=Math.min(1,(T-FLYT.rise)/5),q=k*k,dx=60,dz=-240;W.set(dx*q,26+22*k,I.pz-6+dz*q);let d=Math.atan2(dx,dz)-e.fy;d=Math.atan2(Math.sin(d),Math.cos(d));e.fy+=d*Math.min(1,dt*1.6);if(k>=1&&e.g.visible){e.g.visible=false;if(e.lab)e.lab.style.visibility='hidden'}}
+  if(Math.floor(T/1.1)!==Math.floor((T-dt)/1.1)&&T<6)SFX.p('wing');enemyAnim(e,dt,false)}
+function flyFade(a,txt){let o=$('flyFade');if(!o){o=document.createElement('div');o.id='flyFade';o.style.cssText='position:fixed;inset:0;z-index:60;pointer-events:none;background:radial-gradient(circle at 50% 45%,#fff8e0 0%,#ffd77a 45%,#c98a2a 100%);opacity:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font:800 28px var(--ko);color:#5a3a10;letter-spacing:.08em;text-shadow:0 0 18px #fff6d0';document.body.appendChild(o)}
+  o.style.opacity=a;if(txt!==undefined)o.innerHTML=txt;if(a<=0&&o.parentNode&&!txt)o.remove()}
+function flyTick(dt){const T=(FLY.t+=dt),R=FLYT,t1=R.rise,t2=t1+R.gather,t3=t2+R.spread,t4=t3+R.lift,t5=t4+R.fly,t6=t5+R.fade,e=FLY.e;P.mv=null;
+  const dx=(e&&e.fw?e.fw.x:0)-P.pos.x,dz=(e&&e.fw?e.fw.z:ASH.pz)-P.pos.z;hero.rotation.order='YXZ';
+  if(T<t4)hero.rotation.y+=(Math.atan2(dx,dz)-hero.rotation.y)*Math.min(1,dt*3);
+  /* 가호의 빛이 모임: 하늘에서 금빛 알갱이가 캐릭터로 빨려 듦 */
+  if(T>=t1-.4&&T<t3){FLY.gc+=dt*90*QM();while(FLY.gc>=1){FLY.gc--;const a=rnd(0,6.28),r=rnd(3,7),y=rnd(1,8);emit(PADD,{x:P.pos.x+Math.cos(a)*r,y:P.pos.y+y,z:P.pos.z+Math.sin(a)*r,vx:-Math.cos(a)*r*1.6,vy:(1.2-y)*1.6,vz:-Math.sin(a)*r*1.6,life:.6,s0:.35,s1:.08,c0:0xfff0b0,c1:0xffa020,a:1,tex:1})}}
+  if(T>=t1&&T-dt<t1){ringFx(P.pos,3,0xffd060,.7);SFX.p('levelup')}
+  /* 날개가 「샥」 펼쳐짐 */
+  if(T>=t2){if(!FLY.wing){FLY.wing=1;FLY.wo=0;shake=Math.max(shake,.35);ringFx(P.pos,5,0xffe08a,.6);for(let i=0;i<70*QM();i++){const a=rnd(0,6.28),v=rnd(4,10);emit(PADD,{x:P.pos.x,y:P.pos.y+1.5,z:P.pos.z,vx:Math.cos(a)*v,vy:rnd(-1,3),vz:Math.sin(a)*v,life:rnd(.4,.8),s0:.4,s1:.05,c0:0xfff6d0,c1:0xffb030,a:1,tex:1})}SFX.p('wing')}
+    const k=Math.min(1,(T-t2)/R.spread);FLY.wo=k<1?1.15*(1-Math.pow(1-k,3)):1.15-.15*Math.min(1,(T-t3)/.4)}
+  let up=0,fw=0;
+  if(T>=t3){const k=Math.min(1,(T-t3)/R.lift);up=3.2*k*k*(3-2*k)+Math.sin(T*3)*.15*k}
+  if(T>=t4){const k=Math.min(1,(T-t4)/R.fly);fw=k*k*55+k*6;up+=k*k*16;FLY.drag=Math.min(1,k*3)}
+  if(T<t4){FLY.d.set(dx,0,dz).normalize()}
+  P.pos.set(FLY.hx+FLY.d.x*fw,up,FLY.hz+FLY.d.z*fw);hero.position.copy(P.pos);
+  const tilt=T>=t4?Math.min(1,(T-t4)/.8):0;hero.rotation.x=-.95*tilt*tilt+(T>=t3&&T<t4?-.12:0);
+  if(T>=t4&&Math.random()<dt*40){const v=new THREE.Vector3(rnd(-1.6,1.6),rnd(.6,2),rnd(-.4,.6));hero.localToWorld(v);emit(PADD,{x:v.x,y:v.y,z:v.z,vx:-FLY.d.x*3,vy:rnd(-.5,.5),vz:-FLY.d.z*3,life:rnd(.4,.8),s0:.3,s1:.05,c0:0xfff0c0,c1:0xffa020,a:.9,tex:1})}
+  if(T>=t5){const k=Math.min(1,(T-t5)/(R.fade*.6));flyFade(k,k>.6?'<div>용의 섬으로</div><div style="font:600 14px var(--ko);letter-spacing:.02em;opacity:.8">가호의 날개가 바다를 건넌다</div>':'')}
+  if(T>=t6+1.4)flyEnd()}
+function flyCam(dt){const H=P.pos,T=FLY.t,R=FLYT,t4=R.rise+R.gather+R.spread+R.lift,port=innerWidth<innerHeight,Q=_dcQ,L=_dcP;
+  if(T<t4){const e=FLY.e,wy=e&&e.fw?e.fw.y:6,lk=Math.min(1,T/R.rise);
+    if(T<R.rise){L.set(H.x+(port?2.5:5),H.y+3+lk*1.5,H.z+(port?11:10));Q.set(H.x*.3,4+wy*.55,(H.z+ASH.pz)*.5)}
+    else{const k=Math.min(1,(T-R.rise)/1.2);L.set(H.x+(port?2.5:5)-k*1.5,H.y+4.2-k*1.4,H.z+(port?11:10)-k*4);Q.set(H.x,H.y+1.6+(T>t4-R.lift?H.y*.5:0),H.z-1)}}
+  else{const d=FLY.d,sx=-d.z,sz=d.x,k=Math.min(1,(T-t4)/1.5);L.set(H.x-d.x*(6+5*k)+sx*2.2,H.y+2.2+1.2*k,H.z-d.z*(6+5*k)+sz*2.2);Q.set(H.x+d.x*12,H.y+1-k*.5,H.z+d.z*12)}
+  const a=Math.min(1,Math.max(dt,.016)*(T<t4?2.4:4));FLY.cP.lerp(L,a);FLY.cL.lerp(Q,a);camera.position.copy(FLY.cP);if(shake>0){camera.position.x+=rand(-.1,.1);camera.position.y+=rand(-.08,.08)}camera.lookAt(FLY.cL);scene.fog.near=60;scene.fog.far=260}
+function flyEnd(){const e=FLY.e;FLY.on=0;FLY.wing=0;FLY.drag=0;ASHC.on=0;knAppr=0;flyFade(0);hero.rotation.x=0;P.pos.set(0,0,4.5);hero.position.copy(P.pos);
+  if(e){e.itl=null;e.fw=null;e.fy=0;e.pk=1;e.g.visible=true;if(e.lab)e.lab.style.visibility=''}toast('추격 연출 시험 끝','섬 맵이 생기면 여기서 이어집니다')}
+function ashInterStep(e,dt){if(e.itl.k==='flee')return ashFleeStep(e,dt);if(e.itl.k==='half')return ashInterBStep(e,dt);const I=ASH,L=e.itl;if(!(L.pre>0))ashGuide(L,1);if(L.pre>0){/* 안내 문구가 떠 있는 동안: 안전 원만 보이고 아직 붉게 차오르지 않음 */L.pre-=dt;const pu=1+Math.sin(time*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);e.g.position.set(e.pos.x,0,e.pos.z);ashGuide(L,1);enemyAnim(e,dt,false);return}const T=(L.t+=dt),c=L.c;e.g.position.set(e.pos.x,0,e.pos.z);e.g.rotation.y+=(0-e.g.rotation.y)*Math.min(1,dt*2);
   if(T<L.tt){L.big.visible=true;L.fl.visible=false;L.big.material.opacity=.2+.08*Math.sin(T*8);const pu=1+Math.sin(T*9)*.06;L.sr.scale.set(I.shR*pu,I.shR*pu,1);if(T>L.tt-1.2)shake=Math.max(shake,.15)}
   else if(T<L.tt+I.itF){if(!L.f){L.f=1;L.br=1;L.big.material.opacity=.55;shake=1.2;SFX.p('dfire');ringFx(c,14,0xff6a2a,.5)}shake=Math.max(shake,.4);
     {const t2=T-L.tt,out=Math.min(1,(I.itF-t2)/.35),r2=(I.shR+.8)*(I.shR+.8);L.fl.visible=true;L.fA.opacity=L.fB.opacity=Math.max(0,out);for(const f of L.fls){const dx=f.x-c.x,dz=f.z-c.z,on=dx*dx+dz*dz>r2;f.a.visible=f.b.visible=on;if(!on)continue;let k=clamp((t2-f.d)/.16,0,1);k=k*k*(3-2*k);const fk=1+.18*Math.sin(time*12+f.ph)+.1*Math.sin(time*25.3+f.ph*2),h=f.s*k*fk*(t2<.35?1.25:1)*1.75;f.a.scale.set(1.8*h,3*h,1);f.a.position.y=1.3*h;f.b.scale.set(1.1*h,1.9*h,1);f.b.position.y=.9*h}}
@@ -5999,18 +6040,18 @@ const lookCoin=()=>TCUR()?Infinity:(S.lumi||0);
 function lookBuy(k){const L=lookGet(k);if(!L||lookOwn(k)||L.boss)return false;const c=L.pr||0;if(lookCoin()<c){toast('재화 부족',`${LCUR} ${fmtG(c)}개가 필요합니다`);return false}
   if(!TCUR())S.lumi-=c;(S.lkOwn=S.lkOwn||{})[k]=1;save();toast('외형 구매',`${L.n}`,'#c890ff');return true}
 const WG={m:null,a:0,open:1,tw:0,v:new THREE.Vector3(),pp:null,pr:0,_v:new THREE.Vector3()};
-function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.wing)&&hero&&!S.demo&&P.hp>0;let m=WG.m;
+function wingTick(dt){lavaTick(dt);const L=FLY.wing?LOOKS.wings_gold:lookOk()&&S.look&&LOOKS[S.look],on=!!(L&&L.wing)&&hero&&!S.demo&&(P.hp>0||FLY.wing);let m=WG.m;
   if(!on&&!(m&&m.parent))return;
   if(!m){m=WG.m=new THREE.Mesh(wingGeo(),wingMat());m.scale.setScalar(WGC.S);m.frustumCulled=false;m.renderOrder=4;
     const g=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex,color:0x5a6cff,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.16}));g.scale.set(3.4,2.2,1);g.position.set(0,.45,-.2);m.add(g);WG.g=g}
-  const U=m.material.uniforms;if(L&&L.wing&&WG.lk!==S.look){WG.lk=S.look;U.uCol.value.set(...L.col);U.uHot.value.set(...L.hot);U.uSp.value.set(...L.sp);U.uFl.value=L.fl||0;WG.g.material.color.setHex(L.glow||0x5a6cff)}
+  const U=m.material.uniforms;const lkK=FLY.wing?'wings_gold':S.look;if(L&&L.wing&&WG.lk!==lkK){WG.lk=lkK;U.uCol.value.set(...L.col);U.uHot.value.set(...L.hot);U.uSp.value.set(...L.sp);U.uFl.value=L.fl||0;WG.g.material.color.setHex(L.glow||0x5a6cff)}
   if(on&&m.parent!==hero){if(m.parent)m.parent.remove(m);hero.add(m);m.position.set(0,WGC.y,WGC.z);WG.pp=null;WG.a=0;WG.v.set(0,0,0);WG.tw=0;WG.open=.25}
-  WG.a=clamp(WG.a+(on?dt*1.6:-dt*3.5),0,1);U.uA.value=WG.a*WG.a*(3-2*WG.a)*(GQS[GUQ].post?.54:1);WG.g.material.opacity=.16*U.uA.value;
+  WG.a=clamp(WG.a+(on?dt*(FLY.wing?7:1.6):-dt*3.5),0,1);U.uA.value=WG.a*WG.a*(3-2*WG.a)*(GQS[GUQ].post?.54:1);WG.g.material.opacity=.16*U.uA.value;
   if(!on){if(WG.a<=0&&m.parent)m.parent.remove(m);U.uT.value+=dt;return}
   /* 붙는 자리: 등 뼈(Spine2)를 따라가되 방향은 몸통 방향 그대로 — 구르기·피격 때 날개가 뒤집히지 않게 */
   let tx=0,ty=WGC.y,tz=WGC.z;const u=hero.userData,K=skOf(hero);
   if(u.sk&&K&&K.st===2){const b=K.spB||(K.spB=u.sk.getObjectByName('mixamorigSpine2'));if(b){b.getWorldPosition(WG._v);hero.worldToLocal(WG._v);tx=WG._v.x;ty=WG._v.y+WGC.dy;tz=WG._v.z+WGC.dz}}
-  const k=dt>0?1-Math.exp(-dt*12):0;m.position.x+=(tx-m.position.x)*k;m.position.y+=(ty-m.position.y)*k;m.position.z+=(tz-m.position.z)*k;m.rotation.x=-hero.rotation.x;
+  const k=dt>0?1-Math.exp(-dt*12):0;m.position.x+=(tx-m.position.x)*k;m.position.y+=(ty-m.position.y)*k;m.position.z+=(tz-m.position.z)*k;m.rotation.x=FLY.on?0:-hero.rotation.x;
   /* 이동·회전에 끌려 뒤로 젖혀짐 */
   if(dt>0){const ry=hero.rotation.y,c=Math.cos(ry),s=Math.sin(ry);let lx=0,lz=0,w=0;
     if(WG.pp){const vx=(P.pos.x-WG.pp.x)/dt,vz=(P.pos.z-WG.pp.z)/dt;lx=vx*c-vz*s;lz=vx*s+vz*c;let d=ry-WG.pr;d=Math.atan2(Math.sin(d),Math.cos(d));w=d/dt}
@@ -6020,6 +6061,7 @@ function wingTick(dt){lavaTick(dt);const L=lookOk()&&S.look&&LOOKS[S.look],on=!!
   /* 화염 날개: 날개 범위에서 불씨가 위로 날림 */
   if(L.em&&dt>0){WG.ec=Math.min(6,(WG.ec||0)+dt*26*QM())}while(L.em&&WG.ec>=1){WG.ec--;const sx=Math.random()<.5?-1:1,r=Math.random(),lx=sx*(.25+2.7*r)*WGC.S,ly=m.position.y+(.9-1.7*r*r)*WGC.S*(.4+.6*Math.random()),lz=m.position.z-.5*r*WGC.S;
     WG._v.set(lx,ly,lz);hero.localToWorld(WG._v);emit(PADD,{x:WG._v.x,y:WG._v.y,z:WG._v.z,vy:rnd(1,2.4),life:rnd(.6,1.1),s0:.32,s1:.05,c0:0xffd070,c1:0x801800,a:1,tex:1})}
+  if(FLY.wing){WG.open=FLY.wo;if(FLY.drag)WG.v.set(0,FLY.drag*.25,-FLY.drag*.5)}/* v1054: 추격 연출 — 날개 펼침·바람에 젖힘을 연출이 직접 */
   U.uDrag.value.copy(WG.v);U.uTw.value=WG.tw;U.uOpen.value=WG.open;U.uT.value+=dt}
 /* v519 용암 날개 = 모델(models/wing_thorn.glb: 양 날개가 나란히 접힌 한 덩어리 → 좌우로 잘라 뿌리 기준으로 벌림).
    v522 불꽃은 코드로 그림: 날개 곳곳에서 나온 불 띠가 지나온 길을 따라 이어짐 — 서 있으면 위로 날름거리고, 달리면 바람에 날리듯 뒤로 길게 흐름. 연기는 플립북(models/flame02.jpg) 모양을 검회색으로.
@@ -9704,7 +9746,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1055';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1056';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10998,7 +11040,7 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
   const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?`위험도 <b>${t}</b> 입장`:t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
-  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
+  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option><option value="fly">추격 연출 시험 · 황금 날개</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   const sk=stSeal,so=sk&&BLK[stSeal],sln=sk&&lockNeed(stSeal),sop=sk&&sln&&(S.maxTier||0)>=stSeal&&(S.gates||[]).includes(stSeal),y0=$('stMap')?$('stMap').scrollTop:0;
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>추락자의 지도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${true?'<div class="stlay"><div class="stL">'+stMapHtml()+'</div><div class="stR">'+(sk?`<div class="stdet"><div><div><b style="color:${so.m==='u'?'#c890ff':'#ffd24a'}">봉인 · ${blkName(so)}</b></div><small>${SEAL_PL[stSeal]} · 쓰러뜨리면 위험도 ${stSeal+1}이 열립니다</small></div><div class="r">${sln?(sop?'도전 가능':'잠김'):'<b class="ok">봉인 해제</b>'}</div></div>${mut?`<div class="stmoff">${mut}<small>봉인 전투에는 변이가 적용되지 않습니다</small></div>`:''}<div class="stsp"></div><button class="rrgo stgo" id="sealGo" ${sln&&!sop&&!S.test?'disabled':''}>${sln?(sop?'봉인에 도전':S.test?'봉인 도전 · 테스트':'잠김'):'다시 도전'}</button>`:`<div class="stmhd"><b>위험도 ${t}</b><span>${tpn(t)} · ${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div>`):`<div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
@@ -11031,7 +11073,7 @@ $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 let testMap=false,testMapK=0;
 function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;if(S.ch<NCH){S.ch=NCH;S.phase=0}riftNow=0;testMapK=1;
   mapLoad('테스트 맵','몬스터 없음 · 스킬 시험',()=>{setMap(true);applyTheme();resetWorld()},()=>toast('테스트 맵','몬스터가 나오지 않습니다 · 사냥터에서 위험도를 고르면 돌아갑니다'))}
-function testJump(k){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;
+function testJump(k){if(!S.test)return;if(k==='fly'){/* v1054 추격 연출 시험: 왕좌 전투로 바로 들어가 잠시 뒤 연출 */bossFailed.dragon=1;k='fb';let n=0;const go=()=>{if(flyChase())return;if(++n<40)setTimeout(go,500)};setTimeout(go,2500)}closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;
   if(k==='fb'){S.ch=LAST;S.phase=3;S.kills=CH[LAST].goal}
   else if(k[0]==='t'){const t=+k.slice(1);riftNow=1;S.ch=NCH;S.phase=0;S.kills=0;S.maxTier=Math.max(S.maxTier||0,t);S.tier=t;S.tierKills=0;S.egSp=0;S.egK=0;S.runClr=0;S.mutRun={...(S.mut||{})};S.rtRun=patFor(t)==='route'?1:0}
   else{S.ch=+k;S.phase=0;S.kills=0}
@@ -11839,7 +11881,7 @@ function update(dt){try{cosTick(dt);uqTick(dt)}catch(e){console.error('[cos]',e)
   hero.position.copy(P.pos);{const bs=uqOn('blood')?1+.07*bloodN():1,cs=hero.scale.x;if(cs!==bs)hero.scale.setScalar(Math.abs(bs-cs)<.004?bs:cs+(bs-cs)*Math.min(1,dt*8))}/* v964→v968: 혈조의 인장 크기 스택당 +5% (부드럽게 변화) */try{auraFx(dt)}catch(_){}
   hero.rotation.order='YXZ';/* v122: 구르기 — 진행 방향으로 앞구르기(몸 중심을 축으로 한 바퀴) */
   if(P.mv&&!hero.userData.sk){const a=Math.PI*2*Math.min(1,P.mv.go/MV_GO),f=P.face,o=-.9*Math.sin(a);hero.rotation.x=a;hero.position.set(P.pos.x+Math.sin(f)*o,P.pos.y+.9-.9*Math.cos(a),P.pos.z+Math.cos(f)*o)}else hero.rotation.x=0;
-  if(ASHC.lie)ashLie();
+  if(ASHC.lie)ashLie();if(FLY.on)flyTick(dt);
   if(P.spin>0)hero.rotation.y+=dt*22;
   else{let da=P.face-hero.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));hero.rotation.y+=da*Math.min(1,dt*18)}
   const piv=hero.userData.piv;
@@ -12070,7 +12112,7 @@ function frameCam(dt,target=P.pos){
   {const L=CAM_OFF.length()*camK(),a=camA(),hz=Math.cos(a)*L,vy=Math.sin(a)*L;camera.position.set(camT.x+hz*Math.sin(camYaw),camT.y+vy,camT.z+hz*Math.cos(camYaw))}/* v779: 거리 + 각도(가까울수록 낮게) */
   if(shake>0&&dt>0){shake-=dt;camera.position.x+=rand(-.25,.25);camera.position.y+=rand(-.2,.2)}
   camera.lookAt(camT.x,camT.y+1+.7*camT01(),camT.z);
-  if(mapKind==='arena')drgCam(dt);if(ASHC.cam&&thOn)ashCineCam(dt);
+  if(mapKind==='arena')drgCam(dt);if(ASHC.cam&&thOn)ashCineCam(dt);if(FLY.on)flyCam(dt);
   if(CHC.on)chCineCam(dt);
 }
 /* v548: 보스 등장 카메라(용 → v550 검귀 카이렌도) — 날아오는 동안은 플레이어 등 뒤 낮은 3인칭 시점으로 용을 따라 보다가, 땅에 닿는 순간부터 1.4초에 걸쳐 원래 쿼터뷰로 부드럽게 돌아감 */
