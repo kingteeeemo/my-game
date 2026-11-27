@@ -5222,6 +5222,7 @@ let TALK=null;const talkOn=()=>!!TALK;const afterTalk=fn=>{if(!TALK){fn();return
    첫 만남은 세렌 도착 장면에 바로 이어서(MOR_FIRST), 이후는 장 진행 대사(MOR_ST: S.ch 이상이면 한 번씩, 순서대로) → 다 보면 평소 대사(MOR_IDLE) */
 const MOR_N='대마법사 모르딘';
 const MOR_FIRST=[['','우물가에 앉아 있던 로브 차림의 노인이 지팡이를 짚고 천천히 일어선다.'],[MOR_N,'「바다 냄새가 나는군. …바다 건너에서 왔소? 그 먼 곳까지 부름이 닿았단 말인가.」'],[MOR_N,'「나는 모르딘. 그날 밤, 빛의 기사단과 함께 성역을 지키던 자요. …그리고 살아남은 유일한 자이기도 하지.」'],[MOR_N,'「용의 불은 빛을 먹고 타오르오. 그 불 앞에선 칼도, 마법도 소용없었소.」'],[MOR_N,'「왕좌로 가지 마시오. 그 길에 오른 자는 모두 불에 삼켜졌소. 카이렌도… 아마 마찬가지일 테지.」'],[MOR_N,'「그래도 가겠다면 막지는 않겠소. 다만, 너무 높이 오르지는 마시오.」']];
+const SEREN_IN=[['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」'],...MOR_FIRST];/* v1098: 세렌 마을 첫 도착 대사(테스트 연출 보기에서도 씀) */
 const MOR_ST=[[4,[[MOR_N,'「봉화를 다시 밝혔다고? …그 불은 오래전에 꺼진 줄 알았건만.」']]],[5,[[MOR_N,'「왕도를 지나왔군. 그날 내가 서 있던 곳이오. …아무것도 남지 않았지.」']]],[7,[[MOR_N,'「카이렌이 그렇게 되었소? …안타깝군. 정말, 안타까워.」']]],[9,[[MOR_N,'「왕좌가 가까워질수록 불은 더 뜨거워지오.」'],[MOR_N,'「그대는 부디… 돌아오지 않기를.」']]]];
 const MOR_IDLE=['「재는 언젠가 그치겠지. 기다리는 것도 용기라오.」','「불에 맞서는 건 어리석은 일이오. 나만큼 그걸 잘 아는 자도 없지.」','「그날 밤의 일은… 떠올리고 싶지 않소.」'];
 function morTalk(){if(!S)return;if(!S.morMet){S.morMet=1;save();return talk(MOR_FIRST.slice(1))}
@@ -10084,7 +10085,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1097';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1098';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10738,7 +10739,7 @@ $('clearSheet').addEventListener('click',e=>{
   if(e.target.id==='tutEnd'){tutEnd();return}
   if(e.target.id==='toVil'){/* v710: 1장을 마치면 세렌 마을에 도착 — 문지기 오스릭이 맞이하고, 남쪽 문에서 2장으로 */tele('chclear',{c:S.ch});S.ch=1;S.phase=0;S.kills=0;S.vil=1;S.fld=null;save();$('clear').hidden=true;
     if(RZ)riftClear();collectAll();inTown=true;townSync();wipeFx();for(const x of [...enemies])dropEnemy(x);P.mv=null;
-    townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk([['','재의 들판을 건너자, 낮은 목책과 희미하게 불 켜진 집들이 나타난다. 창문 너머 사람들이 숨을 죽이고 이쪽을 본다.'],['문지기 오스릭','「멈추시오! …사람이군. 재의 들판을 건너온 건가? 거길 살아서 지나오다니.」'],['문지기 오스릭','「여긴 세렌 마을. 루멘하르에 남은 몇 안 되는 불빛이오. 이제는 다들 고개를 숙이고, 재가 그치기만 기다리고 있지.」'],['문지기 오스릭','「빛의 부름을 듣고 왕좌로 오른 이가 수없이 많았소. 돌아온 자는 하나도 없었지. 며칠 전 카이렌 님이 홀로 나선 뒤로는, 아무도 저 문을 나서려 하지 않소.」'],['문지기 오스릭','「…그래도 가겠다는 눈이군. 상인도, 대장장이도 있으니 채비를 하시오. 준비가 되면 남쪽 문으로. 그 너머가 잊힌 자들의 묘역이오.」'],...MOR_FIRST],()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
+    townLoad(()=>{setMap(true);townClean();applyTheme();P.pos.set(0,0,8.5);camT.copy(P.pos);P.hp=P.mhp;P.mp=P.mmp;if(NS())nsPotInit(true);/* v826: 마을 도착 시 물약 충전 */save()},()=>{later(1.2,()=>talk(SEREN_IN,()=>{S.morMet=1;save();/* v806: 모르딘 첫 만남 */toast(TOWN.n,'남쪽 문지기에게서 2장으로 · 상점과 대장장이를 둘러보세요');setTimeout(()=>guide('town'),600)}))});return}
   if(e.target.id==='toFinal'){$('clear').hidden=true;stairCine();return}
   if(e.target.id==='fbRetry'){window.ASHBGMOFF=0;/* 재도전하면 곡을 처음부터 */$('clear').hidden=true;return}
   if(e.target.id==='fbBack'){$('clear').hidden=true;retreatToCh5();return}
@@ -11367,7 +11368,7 @@ function renderStage(){if(S.ch>=NCH)return renderStageB();$('stageSheet').classL
   for(let t=lo;t<=hi;t++){const open=t<=(S.maxTier||0)||(S.test&&t<=TEST_TOP),low=open&&t<tierMin(),g=(S.gates||[]).includes(t),gc=(S.gates||[]).includes(t);
     const btn=!eg||!open||low?`<span class="lock">${open?(low?'이동 불가':''):'잠김'}</span>`:inTown?`<button class="pm wide${t===S.tier?' on':''}" data-tier="${t}">입장</button>`:t===S.tier?'<span class="lock" style="color:var(--ember)">현재</span>':`<button class="pm wide" data-tier="${t}">이동</button>`;
     const lk=BLK[t],lkn=lk&&lockNeed(t);rows.push(row(`위험도 ${t}${gc?' <span class="gate ok">클리어</span>':''}${lk?` <span class="gate${lkn?'':' ok'}" style="${lkn?'border-color:#c890ff;color:#c890ff':''}">${lkn?'봉인 · '+blkName(lk):'봉인 해제'}</span>`:''}`,stageReq(5,t),{cur:eg&&S.tier===t,btn}))}}
-  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')}<option value="fb" ${S.ch===LAST&&S.phase>=3&&!eg?'selected':''}>최종 결전 · ${FINAL.boss}</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
+  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${tjOpts()}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>위험도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${eg&&inTown?`<button class="rrgo stgo" data-tier="${S.tier}">위험도 ${S.tier} 입장${mutZoneAt()?` · 변이 ×${mutRw(mutPts()).toFixed(2)} · ${fmtG(mutCost())} 골드`:''}</button>`:''}
   <div class="cmp2"><div class="hd"><span>${eg?`위험도 ${S.tier}`:S.ch===LAST&&S.phase>=3&&S.phase<5?'최종 결전':`${Math.min(S.ch,LAST)+1}장`}</span><span style="font-weight:700">내 DPS ${fmtN(me)}</span></div></div>
@@ -11424,7 +11425,7 @@ function renderStageB(){const t=stSel,me=skillDps(C().skills[0]).main,req=stageR
     <div class="stmg">${Object.keys(MUT).map(k=>{const m=MUT[k],on=!!(S.mut&&S.mut[k]);return `<button class="stmc${on?' on':''}" data-mut="${k}"><b>${m.n}</b><small>${m.s}</small><em>+${m.p}</em></button>`}).join('')}</div>
     <div class="stcost"><span>입장 비용</span><b>${fmtG(mutCost(S.mut,t))} G</b></div><div class="stmall"><button data-mutall="1">모두 켜기</button><button data-mutall="0">모두 끄기</button></div></div>`;
   const busy=!inTown&&!testMap&&t===S.tier&&!S.runClr,lbl=!open?(seal?'봉인됨':'잠김'):busy?'지금 사냥 중':inTown?(ptOut(t)?`위험도 <b>${t}</b> 다시 열기`:`위험도 <b>${t}</b> 입장${ptOn()?` · 도전 횟수 ${ptLeft(t)??PZ_N}/${PZ_N}`:''}`):t===S.tier?`위험도 <b>${t}</b> 재도전`:`위험도 <b>${t}</b>으로 이동`;
-  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${CH.map((c,i)=>`<option value="${i}">${i+1}장 ${c.n}</option>`).join('')}<option value="fb">최종 결전 · ${FINAL.boss}</option><option value="slK">카이렌의 불씨 슬라이드 시험</option><option value="slM">삼켜진 빛 슬라이드 시험</option><option value="slB">신전의 가호 슬라이드 시험</option><option value="flyv">추격 컷신(영상) 시험</option><option value="isle">용의 섬 전투 공간 시험</option><option value="fly">추격 연출 시험 · 게임 안(예전)</option>${Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
+  const tj=S.test?`<div class="tjump"><span>테스트 이동</span><select id="tjSel">${tjOpts()}</select><button class="pm wide" id="tjGo">이동</button></div>`:'';
   const sk=stSeal,so=sk&&BLK[stSeal],sln=sk&&lockNeed(stSeal),sop=sk&&sln&&(S.maxTier||0)>=stSeal&&(S.gates||[]).includes(stSeal),y0=$('stMap')?$('stMap').scrollTop:0;
   $('stageSheet').innerHTML=`<div class="shead"><div><h2>추락자의 지도</h2></div><button class="close" id="stClose">닫기</button></div>${tj}
   ${true?'<div class="stlay"><div class="stL">'+stMapHtml2()+'</div><div class="stR">'+(sk?`<div class="stdet"><div><div><b style="color:${so.m==='u'?'#c890ff':'#ffd24a'}">봉인 · ${blkName(so)}</b></div><small>${SEAL_PL[stSeal]} · 쓰러뜨리면 위험도 ${stSeal+1}이 열립니다</small></div><div class="r">${sln?(sop?'도전 가능':'잠김'):'<b class="ok">봉인 해제</b>'}</div></div>${mut?`<div class="stmoff">${mut}<small>봉인 전투에는 변이가 적용되지 않습니다</small></div>`:''}<div class="stsp"></div><button class="rrgo stgo" id="sealGo" ${sln&&!sop&&!S.test?'disabled':''}>${sln?(sop?'봉인에 도전':S.test?'봉인 도전 · 테스트':'잠김'):'다시 도전'}</button>`:`<div class="stmhd"><b>위험도 ${t}</b><span>${tpn(t)} · ${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div>`):`<div class="stbox"><button class="starw" data-ss="${t-1}" ${t<=1?'disabled':''}>‹</button><div class="stbig"><small>위험도${t===S.tier?' · 현재':''}</small><b>${t}</b><span>${EGMAPS[egMapFor(t)].n} · 최고 ${dTop(t)}티어</span></div><button class="starw" data-ss="${t+1}" ${t>=D_MAX?'disabled':''}>›</button></div>
@@ -11457,7 +11458,24 @@ $('stage').addEventListener('click',e=>{if(e.target.id==='stage')closeStage()});
 let testMap=false,testMapK=0;
 function testMapGo(){if(!S.test)return;closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;if(S.ch<NCH){S.ch=NCH;S.phase=0}riftNow=0;testMapK=1;
   mapLoad('테스트 맵','몬스터 없음 · 스킬 시험',()=>{setMap(true);applyTheme();resetWorld()},()=>toast('테스트 맵','몬스터가 나오지 않습니다 · 사냥터에서 위험도를 고르면 돌아갑니다'))}
-function testJump(k){if(!S.test)return;ISLE=k==='isle'?1:0;if(k==='isle'){bossFailed.dragon=1;k='fb'}
+/* v1098: 테스트 이동 목록 — 「이동」(장·최종 결전·위험도)과 「연출 보기」(슬라이드·대화·컷신을 바로 재생) */
+const TJ_LR={b5:'위험도 5 열림',b10:'위험도 10 열림',b15:'위험도 15 열림',b20:'위험도 20 열림',b21:'위험도 20 클리어'};
+function tjCv(){return [['cv:pro','프롤로그'],...CH.map((c,i)=>CHZ[i]&&CHZ[i].intro?['cv:ch'+i,`${i+1}장 시작 연출 · ${c.n}`]:null).filter(Boolean),['cv:seren','세렌 마을 도착 · 오스릭·모르딘'],['cv:mor','모르딘 · 장 진행 대사 전부'],
+  ['cv:sl:kai4','4장 이야기 · 카이렌의 쪽지'],['cv:sl:camp5','5장 이야기 · 등대 야영지'],['cv:sl:kai7','7장 이야기 · 카이렌의 추락'],['cv:fb','최종 결전 · 계단·등장'],['cv:end','최종 결전 · 2막·결말'],
+  ['cv:refin','쉼터 · 첫 도착'],['cv:refalt','쉼터 · 첫 도착(부캐)'],['cv:pt','쉼터 · 포탈 안내'],...REF_LORE.map(b=>['cv:lr:'+b.k,'쉼터 이야기 · '+(TJ_LR[b.k]||b.k)]),
+  ['cv:dk','결투 등장 · 검귀 카이렌'],['cv:dm','결투 등장 · 심연의 아귀'],['slK','최종장 · 카이렌의 불씨'],['slM','최종장 · 삼켜진 빛'],['slB','최종장 · 신전의 가호'],['flyv','최종장 · 추격 컷신(영상)'],['fly','최종장 · 추격 연출(게임 안·예전)'],['isle','최종장 · 용의 섬 전투 공간']]}
+function tjOpts(){const eg=S.ch>=NCH;return '<optgroup label="이동">'+CH.map((c,i)=>`<option value="${i}" ${!eg&&S.ch===i&&S.phase<3?'selected':''}>${i+1}장 ${c.n}</option>`).join('')+`<option value="fb">최종 결전 · ${FINAL.boss}</option>`+Array.from({length:TEST_TOP},(_,i)=>`<option value="t${i+1}" ${eg&&S.tier===i+1?'selected':''}>엔드게임 · 위험도 ${i+1}</option>`).join('')+'</optgroup><optgroup label="연출 보기">'+tjCv().map(([k,n])=>`<option value="${k}">${n}</option>`).join('')+'</optgroup>'}
+function tjCine(k){closeAllSheets();
+  if(k==='cv:pro'){prologPlay(null);return true}
+  if(k.startsWith('cv:sl:')){storySlides(k.slice(6));return true}
+  if(k==='cv:seren'){talk(SEREN_IN);return true}
+  if(k==='cv:mor'){talk(MOR_FIRST.slice(1).concat(...MOR_ST.map(b=>b[1])));return true}
+  if(k==='cv:refin'){talk(REF_IN);return true}if(k==='cv:refalt'){talk(REF_ALT);return true}
+  if(k==='cv:pt'){if(typeof ptDemo==='function'&&inTown){ptDemo(1);talk(PT_TUT,()=>ptDemo(0))}else talk(PT_TUT);return true}
+  if(k.startsWith('cv:lr:')){const b=REF_LORE.find(x=>x.k===k.slice(6));if(b)talk(b.l);return true}
+  if(k==='cv:dk'||k==='cv:dm'){const go=()=>duelEnter('n',k==='cv:dk'?'knight':'maw');if(S.ch<NCH){testJump('t20');setTimeout(go,7000)}else go();return true}
+  return false}
+function testJump(k){if(!S.test)return;if(k.startsWith('cv:')){if(k.startsWith('cv:ch')){const i=+k.slice(5);if(S.chev)delete S.chev[i+':intro'];k=''+i;let n=0;const go=()=>{if(mapKind==='story'&&S.ch===i&&!ldBusy&&!CHC.on){chCineStart();return}if(++n<40)setTimeout(go,400)};setTimeout(go,1500)}else if(k==='cv:fb'){bossFailed.dragon=0;k='fb'}else if(k==='cv:end'){bossFailed.dragon=1;k='fb';let n=0;const go=()=>{const e=enemies.find(q=>q.perch&&q.hp>0&&!q.a2);if(e&&thOn&&!knAppr){e.hp=e.mhp*.8;ashAct2(e);return}if(++n<40)setTimeout(go,500)};setTimeout(go,3000)}else if(tjCine(k))return}ISLE=k==='isle'?1:0;if(k==='isle'){bossFailed.dragon=1;k='fb'}
   if(k==='slK'||k==='slM'||k==='slB'){closeAllSheets();const b=EG_FIN[{slK:0,slM:1,slB:2}[k]];egFinPlay(b);return}/* v1094 시험: 불씨·빛·가호 슬라이드 */
   if(k==='flyv'){closeAllSheets();chaseCine(()=>toast('추격 컷신 시험 끝','섬 맵이 생기면 여기서 이어집니다'));return}/* v1060 영상 컷신 시험 */
   if(k==='fly'){/* v1054 추격 연출 시험: 왕좌 전투로 바로 들어가 잠시 뒤 연출 */bossFailed.dragon=1;k='fb';let n=0;const go=()=>{if(flyChase())return;if(++n<40)setTimeout(go,500)};setTimeout(go,2500)}closeAllSheets();if(S.duel){collectAll();S.duel=null;bossAuto(false)}clearPools();inTown=false;$('npcAct').hidden=true;
