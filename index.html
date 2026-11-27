@@ -2277,10 +2277,10 @@ const nsCd=(u,h)=>(.15+Math.max(0,u-.15)*Math.exp(-gear().cdr/358))/(uqOn('storm
 const UNQ={gale:{n:'질풍의 장화',ic:'u_gale',d:'이동 속도 +100%',c:'#f0e6c8'},
   shadow:{n:'그림자 발걸음',ic:'u_shadow',d:'구르기가 잔상을 남기며 순간이동 (거리 같음) · 5회 충전 · 충전 1.5초',c:'#f0e6c8'},
   greed:{n:'탐욕의 인장',ic:'u_greed',d:'골드·재화 획득량 +30%',c:'#f0e6c8'},
-  chain:{n:'연쇄 폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#f0e6c8'},
-  blood:{n:'혈조의 인장',ic:'u_blood',d:'20마리 처치할 때마다 1스택 — 스택당 이동 속도·캐릭터 크기 +7% · 효과 범위 +5% · 공격 속도 +3% · 쿨타임 −3% (최대 20중, 스택마다 20초 유지 후 개별 소멸)',c:'#f0e6c8'},
+  chain:{n:'폭발의 손길',ic:'u_chain',d:'처치한 적이 폭발해 주변 적에게 그 적 최대 생명력의 35% 피해 — 폭발로 쓰러진 적도 연쇄로 폭발 (보스 제외 · 정화의 오라에는 적용 안 됨)',c:'#f0e6c8'},
+  blood:{n:'헤드헌터 인장',ic:'u_blood',d:'20마리 처치할 때마다 1스택 — 스택당 이동 속도·캐릭터 크기 +7% · 효과 범위 +5% · 공격 속도 +3% · 쿨타임 −3% (최대 20중, 스택마다 20초 유지 후 개별 소멸)',c:'#f0e6c8'},
   storm:{n:'폭풍 소환사의 장갑',ic:'u_storm',d:'공격 속도·시전 속도 ×1.8 · 쿨타임 회복 ×1.8',c:'#f0e6c8',pw:1},
-  elixir:{n:'끝없는 연금술사의 피',ic:'u_elixir',d:'장착한 특수 물약 3종의 효과가 항상 적용됩니다 (지속시간 없음 · 효과 옵션은 그대로 · 물약 사용·충전은 필요 없음) — 수호 물약은 쉴드 최대치만 적용',c:'#f0e6c8'}};
+  elixir:{n:'끝없는 연금술사의 피',ic:'u_elixir',d:'장착한 특수 물약 3종의 효과가 항상 적용됩니다 (지속시간 없음 · 효과 옵션은 그대로 · 물약 사용·충전은 필요 없음) · 물약 효과 +25% — 수호 물약은 쉴드 최대치만 적용',c:'#f0e6c8'}};
 const uqOn=k=>!!(S&&S.uniq===k&&UNQ[k]);
 const bloodN=()=>{if(!uqOn('blood')||!P.bloodS)return 0;const a=P.bloodS;while(a.length&&a[0]<=time)a.shift();return a.length},bloodHit=()=>{};/* v971: 혈조의 인장 — 20마리 처치마다 1스택, 스택마다 얻은 뒤 20초 유지(개별 만료), 최대 20, 피격 감소 없음 */
 const nsGain=k=>(k==='gGold'||k==='gEss'||k==='gReroll'||k==='gLumi'||k==='gSeal')&&uqOn('greed')?1.3:1;/* v603: 획득량 옵션 삭제 */
@@ -8094,7 +8094,7 @@ function kill(e){
   if(mutA('burst')&&!e.boss&&!e.rift&&!e.gate)mutBurst(e);/* v624 유언의 탄막 */
   if(rz)riftAcc(e);else{dropEss(e);
   if(!e.duel)dropGold(e.pos,goldOf(e))}
-  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.dummy&&Math.random()<UQ_P)dropUq(e.pos);/* v988: 고유 장비 — 몬스터 등급·위험도 상관없이 0.008% */
+  if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.dummy){const uk=uqRoll();if(uk)dropUq(e.pos,uk)}/* v1079: 고유 장비 — 종류마다 따로 확률(등급·위험도 무관), 가진 것은 나오지 않음 */
   if(!rz&&S.ch>=NCH&&mapKind!=='story'&&!S.duel&&!e.boss&&Math.random()<pouchP())dropPouch(e.pos,Math.round(pouchAmt(oT(S.tier))*nsGain('gGold')));
   /* v892: 전설 골드 주머니·확정 강화 주문서 필드 드랍 제거 *//* v355: 전설 골드 주머니(일반의 1/10 확률·골드 40배) · 확정 강화 주문서 필드 드랍 0.3% */
   /* 물약 드롭률은 기존의 30% */
@@ -8270,8 +8270,8 @@ function dropSeal(p,n){const q=scatter(p),g=new THREE.Group(),inn=new THREE.Grou
   const gw=new THREE.Sprite(glowMat(0xff7a1a));gw.scale.setScalar(1.1);inn.add(gw);
   const {bm,bms}=mkBeam(0xff3a0a);/* v896: 인장은 붉은 주황 — 골드 주머니 황금빛과 구분 */bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;
   g.position.set(q.x,.5,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'seal',n});ringFx(q,2.6,0xff8a2a,.8);flash(q,0xff8a2a,3);feed('성역의 인장이 떨어졌습니다!','#ff9a4a')}
-const UQ_P=1e-4,UQ_IVORY=0xf0e6c8,uqOwn=()=>S.test?Object.fromEntries(Object.keys(UNQ).map(k=>[k,1])):(acctRead().uq||{})/* v989: 고유 장비 보유는 계정 공용 */;
-function dropUq(p){const ow=uqOwn(),ks=Object.keys(UNQ).filter(k=>!ow[k]);if(!ks.length)return;const k=ks[Math.random()*ks.length|0],u=UNQ[k],col=UQ_IVORY,q=scatter(p),g=new THREE.Group();
+const UQ_P=1e-4,UQ_PK={gale:7e-5,shadow:7e-5,greed:7e-5,chain:1e-5,storm:1e-5,blood:5e-6,elixir:5e-6}/* v1079: 고유 장비별 처치당 확률 — 0.007% · 0.001% · 0.0005% */,uqP=k=>UQ_PK[k]??UQ_P,uqRoll=()=>{const ow=uqOwn(),ks=Object.keys(UNQ).filter(k=>!ow[k]);let r=Math.random();for(const k of ks){r-=uqP(k);if(r<0)return k}return null},UQ_IVORY=0xf0e6c8,uqOwn=()=>S.test?Object.fromEntries(Object.keys(UNQ).map(k=>[k,1])):(acctRead().uq||{})/* v989: 고유 장비 보유는 계정 공용 */;
+function dropUq(p,k0){const ow=uqOwn(),ks=Object.keys(UNQ).filter(k=>!ow[k]);if(!ks.length)return;const k=k0&&!ow[k0]?k0:ks[Math.random()*ks.length|0],u=UNQ[k],col=UQ_IVORY,q=scatter(p),g=new THREE.Group();
   const gw=new THREE.Sprite(glowMat(col));gw.scale.setScalar(1.6);gw.position.y=.6;g.add(gw);const b=new THREE.Mesh(new THREE.OctahedronGeometry(.34),new THREE.MeshBasicMaterial({color:col}));b.position.y=.6;g.add(b);
   const {bm,bms}=mkBeam(col);bm.position.y=11.5;g.add(bm);g.userData.bm=bm;g.userData.bms=bms;g.position.set(q.x,.2,q.z);scene.add(g);pickups.push({m:g,t:0,kind:'uq',k});ringFx(q,3.2,col,.9);flash(q,col,3.5);feed(`고유 장비 「${u.n}」이 떨어졌습니다!`,u.c)}
 function uqGet(k){const u=UNQ[k];if(!S.test&&!S.demo){const a=acctRead();a.uq={...(a.uq||{}),[k]:1};try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}SFX.pd('loot');const el=document.createElement('div');el.className='lootfx l2';el.style.setProperty('--c','#c890ff');el.style.setProperty('--l','#d8b8ff');el.innerHTML=`<i class="h1"></i><small>UNIQUE EQUIPMENT</small><b>고유 장비 획득</b><span>${u.n}</span><em>고유 칸에서 장착할 수 있습니다</em><i class="h2"></i>`;/* v1078: 짧은 띠 */document.body.appendChild(el);setTimeout(()=>el.remove(),3200);shake=Math.max(shake,.2);save()}
@@ -8503,7 +8503,7 @@ function xpOv(id){const x=xpS(),k=xpOpt(id);x.ov=x.ov||{};if(!x.ov[id])xpRoll(id
 function xpOptN(id){const k=xpOpt(id),v=xpOv(id),sg=n=>(n>0?'+':'−')+Math.abs(n)+'%';return k==='long'||k==='short'?`지속시간 ${sg(v.d)} · 효과 ${sg(v.e)}`:k==='max'?`최대 충전 +${v.m}회`:k==='kill'?`처치 시 충전량 +${v.k}%`:XPOPT.none.n}
 function xpOpt(id){const x=xpS();x.opt=x.opt||{};if(!x.opt[id]||!XPOPT[x.opt[id]]){const p=xpPool(id);x.opt[id]=p[Math.floor(Math.random()*p.length)]}return x.opt[id]}
 const xpM=id=>{if(!xpS().own[id])return {d:1,e:1};const k=xpOpt(id);if(k!=='long'&&k!=='short')return {d:1,e:1};const v=xpOv(id);return {d:1+v.d/100,e:1+v.e/100}};
-const xpE=id=>Math.round(XPOT[id].e*xpM(id).e),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?xpOv(id).m:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1+xpOv(id).k/100:1;
+const xpE=id=>Math.round(XPOT[id].e*xpM(id).e*(uqOn('elixir')?1.25:1)),xpD=id=>Math.round(XPOT[id].dur*xpM(id).d*10)/10,xpMax=id=>XP_MAX+(xpS().own[id]&&xpOpt(id)==='max'?xpOv(id).m:0),xpKillM=id=>xpS().own[id]&&xpOpt(id)==='kill'?1+xpOv(id).k/100:1;
 /* v995: 특수 물약 저장소는 S.xpt — 예전엔 S.xp(경험치 숫자)와 이름이 겹쳐 own이 undefined로 터졌음 */
 const xpS=()=>{if(!S.xpt||typeof S.xpt!=='object')S.xpt={own:{},eq:[null,null,null]};S.xpt.own=S.xpt.own||{};if(!Array.isArray(S.xpt.eq))S.xpt.eq=[null,null,null];return S.xpt};
 const xpOn=id=>!!(P&&P.xb&&P.xb[id]>0)||(uqOn('elixir')&&xpS().own[id]&&xpS().eq.includes(id));/* v992: 끝없는 연금술사의 피 — 장착한 특수 물약 효과 상시 */
@@ -9323,7 +9323,7 @@ function dexList(){const o=S.bcos=S.bcos||{},pc=v=>Math.round(v*1000)/10+'%',L=[
   for(const k in BPET){const d=BPET[k];L.push({k,t:'pet',n:d.n,own:!!o[k],on:S.pet===k,how:d.how.replace(' 보상에서 낮은 확률',' 보상'),odds:'굴림당 '+(d.U?'우버 '+pc(BCOS_P.u):'일반 '+pc(BCOS_P.n)),tag:'뒤를 따라다닙니다',bc:'pet'})}
   L.push({k:'wsk_knight',t:'wpn',n:WLOOKS.wsk_knight.n,own:lookOwn('wsk_knight'),on:S.wlook==='wsk_knight',how:'우버 검귀 카이렌 보상',odds:'굴림당 우버 '+pc(KSW_P.u),tag:'전사 · 무사 전용 무기 외형',lk:1,ok:wlookOk('wsk_knight',S.cls)});
   L.push({k:'wings_lava',t:'wing',n:LOOKS.wings_lava.n,own:lookOwn('wings_lava'),on:S.look==='wings_lava',how:'우버 검귀 카이렌 보상',odds:'굴림당 우버 '+pc(WG_P.u),tag:'등 부착물 · 날개',lk:1,ok:true});
-  {const ow=uqOwn();for(const k in UNQ){const u=UNQ[k];L.push({k:'uq:'+k,uk:k,t:'uq',n:u.n,own:!!ow[k],on:S.uniq===k,how:'필드 몬스터 드랍',odds:'처치당 '+Math.round(UQ_P*1e5)/1e3+'% · 하나만 장착',tag:u.d,ic:u.ic})}}
+  {const ow=uqOwn();for(const k in UNQ){const u=UNQ[k];L.push({k:'uq:'+k,uk:k,t:'uq',n:u.n,own:!!ow[k],on:S.uniq===k,how:'필드 몬스터 드랍',odds:'처치당 '+(uqP(k)*100).toFixed(4).replace(/0+$/,'')+'% · 하나만 장착',tag:u.d,ic:u.ic})}}
   return L}
 function renderDex(){const L=dexList();titleCheck(S,true);const all=dexList(),cn=c=>all.filter(x=>c==='all'||x.t===c),got=c=>cn(c).filter(x=>x.own).length;
   const sh=cn(DXCAT);let sel=all.find(x=>x.k===DXSEL);if(!sel||(DXCAT!=='all'&&sel.t!==DXCAT))sel=sh[0];DXSEL=sel&&sel.k;
