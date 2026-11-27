@@ -192,6 +192,17 @@ body.cineui .hud,body.cineui #mini,body.cineui .feed,body.cineui #stageChip,body
 .uqc{background:#1c1a20;border:1px solid #3a3540;border-radius:16px;padding:14px;width:min(440px,100%);max-height:92vh;display:flex;flex-direction:column;gap:10px}
 .uqc .shead small{display:block;font:600 11.5px var(--ko);color:#a89e8c;margin-top:2px}.uqc .close{white-space:nowrap;flex:none}
 .uql{display:flex;flex-direction:column;gap:8px;overflow:auto}
+.uqg{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:10px;margin:4px 0 12px}
+.uqt{position:relative;aspect-ratio:1;border-radius:12px;border:1.5px solid #3a3540;background:#16141a;display:flex;align-items:center;justify-content:center;padding:0}
+.uqt .ico{width:72%;height:72%}
+.uqt.on{border-color:var(--rc)}
+.uqt.sel{border-color:var(--rc);box-shadow:0 0 0 2px color-mix(in srgb,var(--rc) 45%,transparent),0 0 12px color-mix(in srgb,var(--rc) 35%,transparent)}
+.uqt i{position:absolute;left:0;right:0;bottom:-1px;font:800 9.5px var(--ko);font-style:normal;color:#16141a;background:var(--rc);border-radius:0 0 10px 10px;text-align:center;line-height:15px}
+.uqd{display:flex;flex-direction:column;gap:6px;background:#24212a;border:1.5px solid var(--rc);border-radius:12px;padding:12px}
+.uqd b{font:800 15px var(--ko)}
+.uqd small{font:600 12.5px/1.45 var(--ko);color:#cfc5b4}
+.uqd em{font:700 11px var(--ko);font-style:normal;color:#ff9a8a}
+.uqd button{margin-top:6px;height:42px}
 .uqi{display:flex;align-items:center;gap:12px;text-align:left;background:#24212a;border:1.5px solid #3a3540;border-radius:12px;padding:10px;color:#e8e0d0;position:relative}
 .uqi.on{border-color:var(--rc);background:color-mix(in srgb,var(--rc) 10%,#24212a)}.uqi:disabled{opacity:1}
 .uqi .ic{width:52px;height:52px;flex:none;border-radius:10px;border:1.5px solid var(--rc);background:#16141a;display:flex;align-items:center;justify-content:center}.uqi .ic .ico{width:42px;height:42px}
@@ -11054,11 +11065,15 @@ function etcPop(){const e=etcSel!=null?etcList()[etcSel]:null;if(!e){etcSel=null
   else{pic=e.h||ico(e.i);sub=e.cur?'재화':'재료';rows=row('보유',e.kt!=null?e.kt:e.k+'개')+`<div class="ivhint">${e.d||''}</div>`}
   return `<div class="iv2dim"><div class="iv2pop"><button class="pclose" id="iPopX" aria-label="닫기">✕</button><span class="pico etcpic" style="--rc:${e.c}">${pic}</span><div class="ivcmp one"><div class="ivc ns3 sel" style="--tc:${e.c}"><span class="k">${sub}</span><b class="ivn" style="color:${e.c}">${e.n}</b><span class="ivs">${e.xp?'':'기타 아이템'}</span>${rows}</div></div>${act}</div></div>`}
 /* v936: 고유 장비 칸 — 테스트 캐릭터는 목록에서 골라 장착·해제, 일반 캐릭터는 장착한 고유 장비 정보만 */
-function uqPicker(){const old=document.querySelector('.uqm');if(old)old.remove();const cur=S.uniq&&UNQ[S.uniq]?S.uniq:null;
-  const card=(k,u)=>`<button class="uqi${k===cur?' on':''}" ${S.test||uqOwn()[k]?`data-uqk="${k}"`:'disabled'} style="--rc:${u.c}"><span class="ic">${ico(u.ic)}</span><span class="tx"><b style="color:${u.c}">${u.n}</b><small>${u.d}</small>${u.pw?'<em>전투력에 반영</em>':''}</span>${k===cur?'<i>장착 중</i>':''}</button>`;
-  const ow=uqOwn(),own=Object.entries(UNQ).filter(([k])=>ow[k]),list=S.test?Object.entries(UNQ).map(([k,u])=>card(k,u)).join(''):own.length?own.map(([k,u])=>card(k,u)).join(''):'<p class="uqn">장착한 고유 장비가 없습니다. 고유 장비는 하나만 장착할 수 있습니다.</p>';
-  const d=document.createElement('div');d.className='uqm';d.innerHTML=`<div class="uqc"><div class="shead"><div><h2>고유 장비</h2><small>하나만 장착할 수 있습니다${S.test?' · 테스트: 눌러서 장착':' · 눌러서 교체'}</small></div><button class="close">닫기</button></div><div class="uql">${list}</div>${cur?'<button class="ghost uqoff" data-uqk="">고유 장비 해제</button>':''}</div>`;
-  d.addEventListener('click',e=>{const t=e.target.closest('[data-uqk]');if(t&&(S.test||!t.dataset.uqk||uqOwn()[t.dataset.uqk])){S.uniq=t.dataset.uqk||null;P.mvCh=3;refreshMax();save();d.remove();renderInv();return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
+function uqPicker(){const old=document.querySelector('.uqm');if(old)old.remove();const cur=S.uniq&&UNQ[S.uniq]?S.uniq:null,ow=uqOwn();
+  /* v1085: 아이콘만 나열 — 누르면 아래에 설명과 장착 버튼 */
+  const keys=Object.keys(UNQ).filter(k=>S.test||ow[k]);let sel=cur||keys[0]||null;
+  const tiles=()=>keys.map(k=>{const u=UNQ[k];return `<button class="uqt${k===sel?' sel':''}${k===cur?' on':''}" data-uqs="${k}" style="--rc:${u.c}" aria-label="${u.n}">${ico(u.ic)}${k===cur?'<i>장착</i>':''}</button>`}).join('');
+  const det=()=>{if(!sel)return '<p class="uqn">가진 고유 장비가 없습니다. 고유 장비는 하나만 장착할 수 있습니다.</p>';const u=UNQ[sel],on=sel===cur;return `<div class="uqd" style="--rc:${u.c}"><b style="color:${u.c}">${u.n}</b><small>${u.d}</small>${u.pw?'<em>전투력에 반영</em>':''}<button class="${on?'ghost':'primary'}" data-uqk="${on?'':sel}">${on?'장착 해제':'장착'}</button></div>`};
+  const d=document.createElement('div');d.className='uqm';
+  const draw=()=>{d.innerHTML=`<div class="uqc"><div class="shead"><div><h2>고유 장비</h2><small>하나만 장착할 수 있습니다 · 눌러서 보기</small></div><button class="close">닫기</button></div><div class="uqg">${tiles()}</div>${det()}</div>`};draw();
+  d.addEventListener('click',e=>{const sv=e.target.closest('[data-uqs]');if(sv){sel=sv.dataset.uqs;draw();return}
+    const t=e.target.closest('[data-uqk]');if(t&&(S.test||!t.dataset.uqk||uqOwn()[t.dataset.uqk])){S.uniq=t.dataset.uqk||null;P.mvCh=3;refreshMax();save();d.remove();renderInv();return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
 function renderInv(){/* v511: 새 장비창 UI는 일반 모드에도 적용 (장비 시스템만 테스트 캐릭터 전용) */
   /* v484 장비창 개편 — 세로: 위 캐릭터·장착 칸 / 아래 가방, 가로·PC: 왼쪽 캐릭터·장착 칸 / 오른쪽 가방 */
   const sh=$('invSheet'),port=innerWidth<innerHeight;sh.className='sheet inv2';$('inv').classList.add('iv2on');$('inv').classList.remove('center');
