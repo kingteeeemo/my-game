@@ -2653,7 +2653,7 @@ function clsBal(id){if(NS())return nsSkillK(id);const b=BAL[id];if(!b)return 1;c
 /* v58: 2차 강화 단계마다 기본 마나의 +25%p, 무한 피해 증가 1단계마다 ×1.015 (피해 +3%의 절반) */
 const mp2=s=>gems2For(s).reduce((a,g)=>a+g2(g),0);
 const mpLvK=s=>{const L=skillLv(s),max=gemsFor(s).length*GMAX;return L>max?1:L<=10?.6:L<=20?.75:L<=30?.9:1}/* v726: 스킬 레벨 1~10 −40% · 11~20 −25% · 21~30 −10% · 모두 강화하면 그대로 */
-const mpCost=s=>{if(NS()){const max=gemsFor(s).length*GMAX||1,g=gear();return Math.max(1,Math.round(((NS_SKMP[s]||1)*SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+P.mmp*MP_PCT)*mpLvK(s)/(1+g.mcr/100)))}const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
+const mpCost=s=>{if(NS()){const max=gemsFor(s).length*GMAX||1,g=gear();return Math.max(1,Math.round(((NS_SKMP[s]||1)*SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+P.mmp*MP_PCT)*mpLvK(s)/(1+g.mcr/100)*(SK[s].kind==='whirl'?WHF:1)))}const max=gemsFor(s).length*GMAX||1,inf=s===(S.cls&&C().skills[0])?(S.sk2dmg||0):0;const g=gear();return Math.max(1,Math.round((SK[s].mp*(.6+4.4*(skillLv(s)-1)/max+.25*mp2(s))+infMpAdd(inf)+Math.round(g.fdmg)+P.mmp*MP_PCT*SK[s].cd)/(1+g.mcr/100)))};/* v254: + 최대 마나 × 2%(재사용 1초 기준, 스킬 재사용 대기시간에 비례) — 재생과 소모가 모두 최대 마나에 비례해 레벨이 올라도 마나 재생·소모 감소 옵션의 무게가 유지됨 */
 const MP_PCT=.02;/* v253: 무기 최종 피해(%)를 반올림한 값만큼 MP 소모 증가(31.8% → +32 · 128.2% → +128), 그 합에 반지 마나 소모 감소를 나눗셈으로 적용(100% = ½, 200% = ⅓) */
 const gemsFor=s=>SK[s].gems||Object.keys(GEMS).filter(g=>GEMS[g].t==='any'||GEMS[g].t===SK[s].tag);
 /* 레벨업: 먼저 강화할 스킬을 고르고, 그 스킬의 강화 3개 중 하나를 고름 */
@@ -9670,11 +9670,11 @@ function nsClick(b){const a=b.dataset.ns;
       else{const sc=sealCost(t);if(!T&&(S.seal||0)<sc)return;const pv=snap();if(!nsUpgrade(it,i))return;if(!T)S.seal-=sc;rrPrev=pv}rrFlash=i+2}
     if(rrPrev&&rrPrev.id===it.id&&pw0)rrPw0=pw0;refreshMax();save();hudMoney&&hudMoney();renderRR();rrFlash=0;return}}
 /* v484 NS: 회전 베기 채널링 — 누르고 있는 동안 동작 시간마다 타격(타격마다 마나 소모), 화염 폭발은 쿨타임마다 */
-const WHK=6.4;/* 타격당 피해 배율(임시) — 110 스펙·2티어 중간·오라 없음에서 우버 아귀 허수아비(1.075억) 30초 기준. 강화 효과 조정(C안) 때 확정 */
+const WHF=.5;/* v1109: 회전 베기(채널링) 타격 간격 ×0.5 · 타격당 피해 ×0.5 · 타격당 마나 ×0.5 — 초당 피해·마나는 그대로 */const WHK=6.4*WHF;/* 타격당 피해 배율(임시) — 110 스펙·2티어 중간·오라 없음에서 우버 아귀 허수아비(1.075억) 30초 기준. 강화 효과 조정(C안) 때 확정 */
 function nsWhirlTick(dt){if(knAppr)return false;const id=S&&S.cls?C().skills[0]:null;if(!NS()||!id||SK[id].kind!=='whirl')return false;
   const on=(input.held.s1||(S.autoSkSet&&S.autoSkOn&&!!nearestEnemy(P.pos,(skillStats(id).radius||3)+1.5)))/* v769: 스킬 자동 사용을 켜면 가까이 적이 있는 동안 계속 회전 */&&!P.cast&&!P.mv&&!inTown&&P.hp>0&&!paused();P.chanT=Math.max(-.05,(P.chanT||0)-dt);P.flameT=(P.flameT||0)-dt;
   if(!on){if(P.chan&&P.spin>0)cancelWhirl();/* v769: 버튼을 떼면 회전·이펙트가 그 자리에서 바로 끝남 */P.chan=false;return true}
-  const st=skillStats(id),h=1-hasteP()*gl(id,'haste'),act=nsAct(h);
+  const st=skillStats(id),h=1-hasteP()*gl(id,'haste'),act=nsAct(h)*WHF;
   if(P.chanT<=0){const cost=mpCost(id);
     if(!(S.test&&S.testMp)&&P.mp<cost){if(P.mpWarn<=0){toast('마나가 부족합니다','기본 공격으로 싸웁니다');P.mpWarn=4}if(P.chan&&P.spin>0)cancelWhirl();P.chan=false;if(P.cd.atk<=0&&P.spin<=0)basicAttack();return true}
     P.mp-=cost;P.chanT+=act;const base=baseDmg();
@@ -10132,7 +10132,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1108';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1109';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -10841,7 +10841,7 @@ function statLine(id){const s=skillStats(id),b=SK[id];
   else if(b.kind==='pillar'){parts.push(`폭발 반경 ${s.r.toFixed(1)}m`);if(s.twin.n>1)parts.push(`기둥 ${s.twin.n}개`);if(s.pecho)parts.push(`여진 ${s.pecho.n}회`);if(s.pch)parts.push(`연쇄 ${s.pch.n}번`)}
   else if(b.kind==='proj'){parts.push(`화살 ${s.proj}발`);if(s.chain)parts.push(`연쇄 ${s.chain}`);if(s.blast)parts.push(`폭발 ${s.br.toFixed(1)}m`);if(s.ret)parts.push(`회귀 ${Math.round(s.ret.p*100)}%`);if(s.split)parts.push(`분열 ${s.split.n}`)}
   else{parts.push(`범위 ${s.radius.toFixed(1)}m`);if(b.kind==='whirl')parts.push(`보스 피해 ×${(s.bossK||WHIRL_BM).toFixed(2)}`);const nw=NS()&&b.kind==='whirl';if(s.hits&&!nw)parts.push(`${s.hits}회 타격`);if(s.echo&&!nw)parts.push(`메아리 ${s.echo}`);if(s.burn)parts.push('화염 지대');if(s.vortex)parts.push(`끌어당김 ${s.vortex.sp.toFixed(1)}m/초`);if(s.flame)parts.push(nw?`${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*(1-hasteP()*gl(id,'haste')),1-hasteP()*gl(id,'haste')).toFixed(2)}초마다`:`${whEl()==='frost'?'서리':'화염'} 폭발 초당 ${(1/s.flame.iv).toFixed(1)}회`);if(s.dash)parts.push(`질주 +${Math.round((s.dash-1)*100)}%`);if(b.kind==='whirl')parts.push(`회전 중 이동 ${50+5*gl(id,'swift')}%`);if(s.knock)parts.push('충격파');if(b.kind==='nova')parts.push('둔화')}
-  parts.push(NS()&&b.kind==='whirl'?`타격 간격 ${nsAct(1-hasteP()*gl(id,'haste')).toFixed(2)}초 (채널링)`:`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
+  parts.push(NS()&&b.kind==='whirl'?`타격 간격 ${(nsAct(1-hasteP()*gl(id,'haste'))*WHF).toFixed(2)}초 (채널링)`:`대기 ${s.cd.toFixed(2)}초`);return parts.join(' · ')}
 /* DPS 추정: 치명타(1.8배) 기대값 포함, 적이 사거리 안에 있다고 가정 */
 const fmtN=v=>Math.round(v).toLocaleString('ko-KR');
 /* v490: 큰 수 줄임 — 10만 미만 그대로, 1억 미만 K+, 그 이상 M+ (내림) */
@@ -10861,7 +10861,7 @@ function skillDps0(id){
   if(b.kind==='ray'){const h=1-hasteP()*gl(id,'haste'),iv=RAY_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.focus||0);return {main:hit*fk/iv,label:'광선에 맞은 적 1명당 (누르고 있는 동안)',sub:`${iv.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)} · 광선 ${st.beams}줄${st.focus?` · 집속 최대 ×${fk.toFixed(2)}`:''}`}}
   if(b.kind==='purge'){const h=1-hasteP()*gl(id,'haste'),iv=PURGE_TK*h/(1+gear().aspd/100),hit=base*st.dmg*crit,fk=1+(st.brand||0)*.8,nv=st.nova?hit*st.nova/st.nvIv:0;return {main:hit*fk/iv+nv,label:'오라 안의 적 1명당 (켜져 있는 동안)',sub:`${iv.toFixed(2)}초마다 ${fmtN(hit)} · 반경 ${st.r.toFixed(1)}m${st.brand?` · 낙인 최대 ×${(1+st.brand).toFixed(2)}`:''}${st.nova?' · 정화의 파동':''}`}}
   if(b.kind==='pillar'){const hit=base*st.dmg*(st.twin.n>1?st.twin.m:1)*crit,ec=st.pecho?hit*st.pecho.n*st.pecho.m:0,ch=st.pch?hit*st.pch.m*.3:0;return {main:(hit+ec+ch)/cd,label:'기둥에 맞은 적 1명당',sub:`기둥 ${st.twin.n}개 · 반경 ${st.r.toFixed(1)}m · 1회 ${fmtN(hit)}${ec?' · 여진':''}${ch?` · 연쇄 ${st.pch.n}번`:''}`}}
-  if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h),hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
+  if(b.kind==='whirl'&&NS()){const h=1-hasteP()*gl(id,'haste'),act=nsAct(h)*WHF,hit=base*st.dmg*crit*WHK,f=g2('flame')?flameSt(g2('flame')):null,fl=f?base*st.dmg*f.m*crit/nsCd(CD_U*h,h):0;
     return {main:hit/act+fl,label:'범위 안의 적 1명당 (누르고 있는 동안)',sub:`${act.toFixed(2)}초마다 타격 · 타격당 ${fmtN(hit)}${fl?` · ${whEl()==='frost'?'서리':'화염'} 폭발 ${nsCd(CD_U*h,h).toFixed(2)}초마다`:''}`}}
   if(b.kind==='whirl'){
     const hit=base*st.dmg*crit,per=hit*st.hits;
