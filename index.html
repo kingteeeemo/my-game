@@ -1077,7 +1077,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .dismode>.shead{flex:none;flex-wrap:nowrap}.dismode .shead h2{margin:0;font-size:17px;white-space:nowrap}.dismode .shead .close{white-space:nowrap;flex:none}
 .dtabs{display:flex;gap:6px;flex:none}.dtabs button{padding:8px 16px;border-radius:12px;border:1px solid #3a3a46;background:#1c1c24;color:#cfc5b4;font:800 14px var(--ko)}.dtabs button.on{border-color:#ffd24a;background:#2e2818;color:#ffe9a8}
 .dleft{flex:none;display:flex;flex-direction:column;gap:8px;min-height:0}.dright{flex:1 1 0;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px}.dright>*{flex-shrink:0}.dright .iv2tabs{flex-wrap:wrap}
-.dleft .dmrate{margin:0}.dbtns{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.dbtns .rrgo,.dbtns .dgo{height:50px}.dbtns .dauto{grid-column:1/-1;height:46px;border-radius:12px;border:1px solid rgba(232,220,196,.3);background:transparent;color:#cfc8b6;font:800 14px var(--ko);display:flex;align-items:center;justify-content:center;gap:8px}.dbtns .dauto small{font:600 11px var(--ko);color:#8a8577}.dbtns .dauto.on{border-color:#7fe07a;color:#7fe07a;box-shadow:0 0 12px rgba(127,224,122,.3)}.dbtns .dauto.on i{width:12px;height:12px;border-radius:50%;border:2px solid #7fe07a;border-top-color:transparent;animation:dautoSp .8s linear infinite}.dbtns .dauto[disabled]{opacity:.4}@keyframes dautoSp{to{transform:rotate(360deg)}}
+.dleft .dmrate{margin:0}.dbtns{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.dbtns .rrgo,.dbtns .dgo{height:50px}.rrsplit{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rrsplit .rrgo{min-width:0;padding:0 6px;white-space:nowrap}.rrsplit .rrgo small{font:600 10.5px var(--ko);color:#7fe07a;margin-left:2px}.rrsplit .rreq{background:linear-gradient(#f4f0e6,#e8dcc4);border:1.5px solid #fff6dc;color:#1a1812;font-weight:900}.rrsplit .rreq small{color:#2f7a2c;font-weight:800}.rrsplit .rreq.better{box-shadow:0 0 12px rgba(244,240,230,.35)}.rrsplit .rreq[disabled]{opacity:.4}.dbtns .dauto{grid-column:1/-1;height:46px;border-radius:12px;border:1px solid rgba(232,220,196,.3);background:transparent;color:#cfc8b6;font:800 14px var(--ko);display:flex;align-items:center;justify-content:center;gap:8px}.dbtns .dauto small{font:600 11px var(--ko);color:#8a8577}.dbtns .dauto.on{border-color:#7fe07a;color:#7fe07a;box-shadow:0 0 12px rgba(127,224,122,.3)}.dbtns .dauto.on i{width:12px;height:12px;border-radius:50%;border:2px solid #7fe07a;border-top-color:transparent;animation:dautoSp .8s linear infinite}.dbtns .dauto[disabled]{opacity:.4}@keyframes dautoSp{to{transform:rotate(360deg)}}
 .dgo{border-radius:12px;background:linear-gradient(#f4f0e6,#e8dcc4);border:1.5px solid #fff6dc;color:#1a1812;font:900 15px var(--ko);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 0 0 rgba(232,220,196,0);animation:dgoGlow 1.7s ease-in-out infinite}.dgo .dc{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:rgba(26,24,18,.14);color:#1a1812;font:800 14px var(--en);font-stretch:87%}.dgo .dc .ci{width:17px;height:17px}.dgo[disabled]{background:#26262d;border-color:rgba(232,220,196,.3);color:#8f897a;animation:none;box-shadow:none}.dgo[disabled] .dc{background:rgba(255,255,255,.06);color:#8f897a}.dgo[disabled] .dc .ci{opacity:.5}
 @keyframes dgoGlow{0%,100%{box-shadow:0 0 6px rgba(232,220,196,.25)}50%{box-shadow:0 0 22px rgba(232,220,196,.6)}}
 
@@ -9285,6 +9285,10 @@ function optTable(it,tab,sub){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,
     <div class="opsec"><p class="opd">${optSubK==='o'?'DPS와 EHP에 직접 영향을 주는 옵션':'체력 · 마나 · 이동 같은 유틸 옵션 (전투력 계산 밖)'}</p>${hd}${list(optSubK)}</div>
     <p class="optn">기본+특수 합 3~6줄 · 부위 이름이 붙은 옵션은 그 부위에만 나옵니다 · 수치 조정·변환·승급은 조율사에게서</p></div></div>`;
   d.addEventListener('click',e=>{const u=e.target.closest('[data-optsub]');if(u){optTable(it,optTabK,u.dataset.optsub);return}const t=e.target.closest('[data-optab]');if(t){optTable(it,t.dataset.optab);return}if(e.target===d||e.target.closest('.close'))d.remove()});document.body.appendChild(d)}
+/* v1114: 조율 하단 버튼을 반으로 — 왼쪽 조율(수치·옵션 변환·승급), 오른쪽 장착(조율하다 지금 낀 것보다 좋아지면 바로 장착) */
+function rrSplit(sel,btn){const eqd=EQS.some(k=>S.eq[k]===sel);let lab='장착',dis=false,cls='';
+  if(eqd){lab='장착 중';dis=true}else if(sel.uid||(sel.slot==='weapon'&&sel.wc!==bc(S.cls))){dis=true}else if(NS()&&pwGain(sel).g>.001){cls=' better';lab='장착 <small>더 좋음</small>'}
+  return `<div class="rrsplit">${btn}<button class="rrgo rreq${cls}" data-ns="eq" ${dis||rrSpin?'disabled':''}>${lab}</button></div>`}
 function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.inv.filter(x=>x.ns)],sel=all.find(x=>x.id===rrSel),T=TCUR();
   const ln=sel&&rrLine!==null?sel.lines[rrLine]:null,lt=ln?(ln.t||sel.tier):0;
   let ct='',btn='';
@@ -9298,7 +9302,7 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
   let h=`<div class="shead"><div><h2>옵션 조율</h2></div><div class="hdbtns"><button class="close" data-ns="optt">옵션표</button><button class="close" data-ns="close">닫기</button></div></div>
   <div class="rrmain">${sel?`<div class="rrwrap2">${rrCard(sel)}</div>`:`<div class="rrempty"><span class="slotx"></span><p>조율할 아이템을 ${matchMedia('(orientation:landscape)').matches?'오른쪽':'아래'}에서 고르세요<br><small>수치 조정 · 옵션 변환 · 티어 승급</small></p></div>`}</div>
-  ${sel?`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${btn}</div>`:''}
+  ${sel?`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${sel?rrSplit(sel,btn):btn}</div>`:''}
   <div class="rrpk"></div>
   <div class="rrdr${wasUp?' up':''}"><button class="rrdh" data-ns="drw"><i></i><span>${sel?(up?'아이템 선택 · 탭해서 닫기':`<b>${sel.name}</b> · 다른 아이템 고르기`):'아이템 선택'}</span></button>
     <div class="rrdl"><div class="tag">장착 중</div><div class="bag rrbag">${eqI.map(it=>tl(it,'e')).join('')}</div>
@@ -9651,6 +9655,8 @@ function otBangUpd(){const pm=ptutOn()&&!(S.ptut&&S.ptut.st),dt=dtutOn()&&!dtWin
   {const dx=n.x-P.pos.x,dz=n.z-P.pos.z,d=Math.hypot(dx,dz)||1;otNav.visible=d>6&&!talkOn();otNav.scale.setScalar(1.5);otNav.position.set(P.pos.x+dx/d*1.4,P.pos.y+3.4+Math.sin(t*3)*.12,P.pos.z+dz/d*1.4);otNav.rotation.y=Math.atan2(dx,dz)}}
 function nsClick(b){const a=b.dataset.ns;
   if(a==='close'){nsClose();return}
+  if(a==='eq'&&rrOpen){const i=S.inv.findIndex(x=>x.id===rrSel);if(i<0||rrSpin)return;const it=S.inv[i];if(it.uid||(it.slot==='weapon'&&it.wc!==bc(S.cls)))return;
+    const ek=it.slot==='ring'?(pwGain(it).k||eqKey(it)):eqKey(it),old=S.eq[ek];S.eq[ek]=it;if(old)S.inv[i]=old;else S.inv.splice(i,1);refreshMax();save();renderRR();return}
   if(nsKind==='dis'&&disClick(b))return;
   if(b.dataset.dxc!==undefined&&nsKind==='look'){DXCAT=b.dataset.dxc||'uq';DXSEL=null;renderDex();return}
   if(b.dataset.dxu!==undefined&&nsKind==='look'){S.uniq=b.dataset.dxu||null;P.mvCh=3;refreshMax();save();renderDex();return}
@@ -10144,7 +10150,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1113';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1114';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
