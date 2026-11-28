@@ -10132,7 +10132,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1109';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1110';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
@@ -11370,6 +11370,7 @@ $('shopSheet').addEventListener('click',e=>{const b=e.target.closest('button');i
   if(b.dataset.gsel){shopSel=b.dataset.gsel;shopLast=null;renderShop();return}
   if(b.id==='shBack'){shopSel=null;shopLast=null;renderShop();return}
   if(b.dataset.buy){const [k,z,n]=b.dataset.buy.split(','),c=POT[z].price*+n;if(S.gold>=c){S.gold-=c;S.pots[k][z]=(S.pots[k][z]||0)+ +n;goldFx={v:c,t:Date.now()};save()}renderShop();return}
+  if((b.dataset.xbuy||b.dataset.xrr)&&ptutOn()&&S.ptut&&S.ptut.st&&(b.dataset.xbuy||b.dataset.xrr)!=='spd'){toast('지금은 신속의 물약만','튜토리얼이 끝난 뒤에 다른 물약을 살 수 있어요');return}/* v1110: 물약 튜토리얼 중에는 신속의 물약 외 구매·옵션 변경 막음 */
   if(b.dataset.xbuy){const id=b.dataset.xbuy,x=xpS(),ptF=ptutOn()&&id==='spd'&&S.ptut.st===1;if(!x.own[id]&&(ptF||TCUR()||(S.rr||0)>=XP_PRICE)){if(!ptF&&!TCUR())S.rr-=XP_PRICE;/* 튜토리얼 구매는 불씨가 들지 않음 */x.own[id]=1;x.opt=x.opt||{};x.opt[id]='none';/* v1078: 처음 사면 옵션 없음 — 옵션은 다시 굴려서 붙임 */if(x.ov)delete x.ov[id];xpOv(id);if(x.eq.includes(null))x.eq[x.eq.indexOf(null)]=id;xpInit();P.xch[id]=xpMax(id);save();toast(`${XPOT[id].n} 물약`,'구매했습니다')}renderShop();return}
   if(b.dataset.xtab){xpTab=b.dataset.xtab;renderShop();return}
   if(b.dataset.xsel){xpSel=xpSel===b.dataset.xsel?null:b.dataset.xsel;renderShop();return}
