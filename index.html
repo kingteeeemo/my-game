@@ -1077,7 +1077,7 @@ button:focus-visible{outline:2px solid var(--gem);outline-offset:2px}
 .dismode>.shead{flex:none;flex-wrap:nowrap}.dismode .shead h2{margin:0;font-size:17px;white-space:nowrap}.dismode .shead .close{white-space:nowrap;flex:none}
 .dtabs{display:flex;gap:6px;flex:none}.dtabs button{padding:8px 16px;border-radius:12px;border:1px solid #3a3a46;background:#1c1c24;color:#cfc5b4;font:800 14px var(--ko)}.dtabs button.on{border-color:#ffd24a;background:#2e2818;color:#ffe9a8}
 .dleft{flex:none;display:flex;flex-direction:column;gap:8px;min-height:0}.dright{flex:1 1 0;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px}.dright>*{flex-shrink:0}.dright .iv2tabs{flex-wrap:wrap}
-.dleft .dmrate{margin:0}.dbtns{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.dbtns .rrgo,.dbtns .dgo{height:50px}
+.dleft .dmrate{margin:0}.dbtns{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.dbtns .rrgo,.dbtns .dgo{height:50px}.dbtns .dauto{grid-column:1/-1;height:46px;border-radius:12px;border:1px solid rgba(232,220,196,.3);background:transparent;color:#cfc8b6;font:800 14px var(--ko);display:flex;align-items:center;justify-content:center;gap:8px}.dbtns .dauto small{font:600 11px var(--ko);color:#8a8577}.dbtns .dauto.on{border-color:#7fe07a;color:#7fe07a;box-shadow:0 0 12px rgba(127,224,122,.3)}.dbtns .dauto.on i{width:12px;height:12px;border-radius:50%;border:2px solid #7fe07a;border-top-color:transparent;animation:dautoSp .8s linear infinite}.dbtns .dauto[disabled]{opacity:.4}@keyframes dautoSp{to{transform:rotate(360deg)}}
 .dgo{border-radius:12px;background:linear-gradient(#f4f0e6,#e8dcc4);border:1.5px solid #fff6dc;color:#1a1812;font:900 15px var(--ko);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 0 0 rgba(232,220,196,0);animation:dgoGlow 1.7s ease-in-out infinite}.dgo .dc{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:rgba(26,24,18,.14);color:#1a1812;font:800 14px var(--en);font-stretch:87%}.dgo .dc .ci{width:17px;height:17px}.dgo[disabled]{background:#26262d;border-color:rgba(232,220,196,.3);color:#8f897a;animation:none;box-shadow:none}.dgo[disabled] .dc{background:rgba(255,255,255,.06);color:#8f897a}.dgo[disabled] .dc .ci{opacity:.5}
 @keyframes dgoGlow{0%,100%{box-shadow:0 0 6px rgba(232,220,196,.25)}50%{box-shadow:0 0 22px rgba(232,220,196,.6)}}
 
@@ -9415,8 +9415,18 @@ const disPc=(c,t)=>((S.shd||{})[c]||[])[t]||0,disAdd=(c,t,n)=>{S.shd=S.shd||{};c
 const DIS_COST=100;/* v950: 승급(합성) 1회 골드 */
 let disDlg=null,disTiers=new Set(),disCat='weapon',disSub=null,disDd=null,disTab='br',disMk=0,disSel=new Set(),disMsg='',disIn=false,disRes=null;
 let disFill=0;const disRst=()=>{disIn=false;disFill=0;disRes=null};
+/* v1111: 자동 승급 — 고른 티어의 조각이 3개 미만이 될 때까지(골드·가방이 모자라도 멈춤) 연출 없이 연속 승급 */
+let disAuto=null;const disAutoStop=()=>{if(!disAuto)return;clearInterval(disAuto.tm);disAuto=null;
+  save();if(typeof refreshUpBtn==='function')refreshUpBtn();if(rrOpen&&nsKind==='dis')renderDis()};
+function disAutoStep(){const a=disAuto;if(!a)return;if(!(rrOpen&&nsKind==='dis')||disTab!=='mk'||disCat!==a.cat||disMk!==a.t){disAutoStop();return}
+  const T=TCUR(),C=DIS_CAT[a.cat];
+  if(disPc(a.cat,a.t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap()){disAutoStop();return}
+  if(!T)S.gold-=DIS_COST;disAdd(a.cat,a.t,-DIS_N);
+  if(Math.random()<(DIS_P[a.t]||0)){const sl=C.sl[Math.random()*C.sl.length|0],it=nsMakeItem(sl,a.t-1,{wc:bc(S.cls)});it.uid=1;S.inv.push(it)}
+  if(disPc(a.cat,a.t)<DIS_N){disAutoStop();return}
+  renderDis()}
 let disBusy=false;const disT=[],disLater=(ms,f)=>{disT.push(setTimeout(()=>{try{f()}catch(e){}},ms*(window.DIS_TS||1)))};
-let disSkipF=null;function disAbort(){disT.forEach(clearTimeout);disT.length=0;disBusy=false;disDlg=null;if(disSkipF){const b=$('nsBody');b&&b.removeEventListener('click',disSkipF,true);disSkipF=null}}
+let disSkipF=null;function disAbort(){if(disAuto){clearInterval(disAuto.tm);disAuto=null}disT.forEach(clearTimeout);disT.length=0;disBusy=false;disDlg=null;if(disSkipF){const b=$('nsBody');b&&b.removeEventListener('click',disSkipF,true);disSkipF=null}}
 /* v1015: 분해 조각 아이콘 — 장비 모양 대신 룬석(부위별 룬 문양, 테두리·문양 색은 티어색) */
 const PCR={'weapon':'M27 15V49M20 21H27M27 22L41 30L27 38M27 49L40 42M33 15L38 19','armor':'M32 16L45 32L32 48L19 32ZM32 24L38 32L32 40L26 32Z','amulet':'M22 19L42 45V19L22 45Z'};
 const pcIco=rs=>{const g=PCR[rs]||PCR.weapon;return `<svg class="pcr" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3L57.1 17.5V46.5L32 61L6.9 46.5V17.5Z" fill="#1d1d26" stroke="var(--tc,#cbbd9f)" stroke-width="3" stroke-linejoin="round"/><path d="${g}" fill="none" stroke="var(--tc,#cbbd9f)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`};
@@ -9445,13 +9455,16 @@ function renderDis(){const C=DIS_CAT[disCat],elig=k=>S.inv.filter(x=>x.ns&&DIS_C
     left=`<div class="dmk"><div class="dmslots">${[0,1,2].map(i=>disFill>i?`<button class="dmslot on" data-dslot="${i}" aria-label="조각 빼기" style="--tc:${NT_C[t]};--i:${i}"><span class="dmi">${pic}</span></button>`:`<div class="dmslot" style="--tc:${NT_C[t]};--i:${i}"><span class="dmi"></span></div>`).join('')}</div><div class="dmarr">▶</div><div class="dmslot dmres${disRes?' done':''}" style="--tc:${rit?NT_C[rit.tier]:disRes?'#ff6a5a':NT_C[t-1]}"><span class="dmi">${rit?ico(icoSlot(rit.slot,rit)):disRes?'<b>✕</b>':'<b>?</b>'}</span></div></div>
     <div class="dmlab"><span style="color:${NT_C[t]}">${t}티어 ${C.n} 조각 ${DIS_N}개</span><span style="color:${NT_C[t-1]}">${t-1}티어 ${C.n} (부위 무작위)</span></div>
     <div class="dmrate">합성 성공률 <b>${pr}%</b></div>
-    <div class="dbtns"><button class="rrgo" data-dpin="1" ${have>=DIS_N&&disFill<DIS_N?'':'disabled'}>조각 모두 넣기</button><button class="dgo" data-dup="1" ${disIn&&goldOk?'':'disabled'}><span class="dc">${ci('g')}<b>${T?'∞':fmtG(DIS_COST)}</b></span><span>승급</span></button></div>`;
+    <div class="dbtns"><button class="rrgo" data-dpin="1" ${have>=DIS_N&&disFill<DIS_N?'':'disabled'}>조각 모두 넣기</button><button class="dgo" data-dup="1" ${disIn&&goldOk?'':'disabled'}><span class="dc">${ci('g')}<b>${T?'∞':fmtG(DIS_COST)}</b></span><span>승급</span></button><button class="dauto${disAuto?' on':''}" data-dauto="1" ${disAuto||(have>=DIS_N&&!dtutOn())?'':'disabled'}>${disAuto?'<i></i>자동 승급 중':'자동 승급'}</button></div>`;
     right+=`<div class="bag dbag">${[6,5,4,3,2].map(k=>`<button class="tile${k===t?' sel':''}" data-dmt="${k}" style="border-color:${NT_C[k]};--tc:${NT_C[k]}">${pcIco(rs)}<b class="dcnt">${disPc(disCat,k)}</b><small>${k}티어</small></button>`).join('')}</div>`}
   const bd=$('nsBody'),dr0=bd.querySelector('.dright'),top=dr0?dr0.scrollTop:0;
   bd.classList.add('dismode');
   bd.innerHTML=`<div class="shead"><h2>장비 정리 · 합성</h2><div class="dtabs"><button class="${br?'on':''}" data-dtab="br">정리</button><button class="${br?'':'on'}" data-dtab="mk">합성</button></div><button class="close" data-ns="close">닫기</button></div><div class="dleft">${left}${disMsg?`<div class="xcmsg">${disMsg}</div>`:''}</div><div class="dright">${right}</div>${disDlgHtml()}`;
   bd.style.setProperty('--ts',window.DIS_TS||1);const dr=bd.querySelector('.dright');if(dr)dr.scrollTop=top}
 function disClick(b){const d=b.dataset;if(disBusy)return true;
+  if(d.dauto){if(disAuto){disAutoStop();return true}const t=disMk,T=TCUR();if(dtutOn()||disPc(disCat,t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap())return true;
+    disRst();disMsg='';disAuto={cat:disCat,t,tm:setInterval(disAutoStep,150)};renderDis();return true}
+  if(disAuto)disAutoStop();
   if(d.dc){if(disCat!==d.dc){disCat=d.dc;disSub=null;disSel.clear();disMsg='';disMk=0;disRst()}disDd=null;renderDis();return true}
   if(d.ddd){disDd=disDd===d.ddd?null:d.ddd;renderDis();return true}
   if(d.dsub!==undefined){const [k,x]=d.dsub.split(',');if(disCat!==k){disCat=k;disSel.clear();disMsg='';disMk=0;disRst()}disSub=x||null;disDd=null;disSel.clear();renderDis();return true}
@@ -10132,7 +10145,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1110';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1112';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
