@@ -5986,8 +5986,8 @@ const BLOOKS={bsk_valk:{n:'은빛 발키리',head:'',cls:['warrior','mage','arch
   /* v802: 직업별 몸 파일 — 같은 발키리 몸에 그 직업 모델의 동작·무기를 옮겨 담음(뼈마다 기본 자세 방향을 맞춘 뒤 동작 회전을 옮김). 무기 색은 원래 직업 값 */
   per:{mage:{file:'models/valkyrie_mage.glb',swCol:1.9,swRef:0},archer:{file:'models/valkyrie_archer.glb',swCol:1.6,swRef:0},musa:{file:'models/valkyrie_musa.glb',swCol:1.6,swRef:[[-.01291026,.03369423,.06183060],[.91277843,.09348304,.29115931,-.27078166]]}}},
   /* v1: 「은빛 베일」 — Meshy 전신(Silverveil Oracle) 몸 + 흉상(Silver Veil Knight) 얼굴·머리, 믹사모 리깅(망토 뺀 프록시) → 원본에 가중치 옮김(손가락→손, 망토·치마 정리). 직업별 파일은 발키리와 같은 방식 */
-  bsk_sv:{n:'은빛 베일',head:'',cls:['warrior','mage','archer','musa'],pr:4500,file:'models/silverveil.glb',img:'models/silverveil_thumb.jpg',S:1.764,col:1.05,knee:1.15,swCol:1.9,metal:.2,swRef:1,cn:'전 직업',
-    per:{mage:{file:'models/silverveil_mage.glb',swCol:1.9,swRef:0},archer:{file:'models/silverveil_archer.glb',swCol:1.6,swRef:0},musa:{file:'models/silverveil_musa.glb',swCol:1.6,swRef:[[-.01291026,.03369423,.06183060],[.91277843,.09348304,.29115931,-.27078166]]}}}};/* v790: swRef — 무기 외형(rel:'hand')을 손 뼈가 아니라 원래 대검 자리 기준으로(손 뼈 방향이 전사와 달라 검이 옆으로 벌어지던 것) */
+  bsk_sv:{n:'은빛 베일',head:'',cls:['warrior','mage','archer','musa'],pr:4500,file:'models/silverveil.glb',img:'models/silverveil_thumb.jpg',S:1.764,col:1.05,knee:1.15,swCol:1.9,metal:.2,invK:[.8,.8],/* v1104: 장비창 20% 어둡게 */swRef:[[.230507,.293242,-.298424],[.912778,.093483,.291159,-.270782],[.6679,.6679,.6679]],/* v1104: 대검 노드가 압축(양자화) 보정 행렬을 품고 있어 그만큼 되돌린 기준 — 무기 외형이 손 앞으로 뻗던 것 */cn:'전 직업',
+    per:{mage:{file:'models/silverveil_mage.glb',swCol:1.9,swRef:0},archer:{file:'models/silverveil_archer.glb',swCol:1.6,swRef:0},musa:{file:'models/silverveil_musa.glb',swCol:1.6,swRef:[[.236425,.321268,-.295228],[.912778,.093483,.291159,-.270782],[.7305,.7305,.7305]]}}}};/* v790: swRef — 무기 외형(rel:'hand')을 손 뼈가 아니라 원래 대검 자리 기준으로(손 뼈 방향이 전사와 달라 검이 옆으로 벌어지던 것) */
 /* v894: 공용 얼굴(머리) — 스킨은 목 아래 몸만, 얼굴·머리카락은 따로 된 머리 파일(남캐·여캐 얼굴 풀)을 불러 그 몸의 뼈(이름이 같은 mixamorig 뼈)에 묶음. 머리 파일 = 스킨 메시 하나(뼈대 포함), 바인드 기준은 궁수 몸. 다른 몸에 붙이면 그 몸의 뼈 자리를 그대로 따라감 */
 let PFACE=null;const PCACHE={};/* v905: 저장 슬롯 초상화를 그 슬롯 캐릭터의 얼굴로 그릴 때 잠깐 지정 */
 const HEADS={f_silver:{file:'models/heads/f_silver.glb',col:1.265,g:'f',n:'은빛 웨이브'},f_dark:{file:'models/heads/f_dark.glb',col:1,g:'f',n:'흑단 생머리'}},HDG={};let pendFace={};
@@ -6227,7 +6227,7 @@ function wskSync(K){if(!K||K.st!==2||!K.sw||!K.swM)return;const want=S&&S.wlook&
   const W=WLOOKS[want],m=Q.src.clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.castShadow=true;o.frustumCulled=false}});let mm=null;m.traverse(o=>{if(o.isMesh&&!mm)mm=o});
   if(!K.wskHid){K.wskHid=[];K.sw.traverse(o=>{if(o.isMesh)K.wskHid.push(o)})}
   if(W.ry)m.rotation.y=W.ry;/* 막대 축(+y) 둘레로 돌림 */
-  if(W.rel==='hand'){K.sw.updateMatrix();const M=(K.C&&K.C.swRef?(Array.isArray(K.C.swRef)?(K.swRefM||(K.swRefM=new THREE.Matrix4().compose(new THREE.Vector3(...K.C.swRef[0]),new THREE.Quaternion(...K.C.swRef[1]),new THREE.Vector3(1,1,1)))):WSK_REF):K.sw.matrix).clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale)}K.sw.add(m);
+  if(W.rel==='hand'){K.sw.updateMatrix();const M=(K.C&&K.C.swRef?(Array.isArray(K.C.swRef)?(K.swRefM||(K.swRefM=new THREE.Matrix4().compose(new THREE.Vector3(...K.C.swRef[0]),new THREE.Quaternion(...K.C.swRef[1]),new THREE.Vector3(...(K.C.swRef[2]||[1,1,1]))))):WSK_REF):K.sw.matrix).clone().invert().multiply(new THREE.Matrix4().compose(m.position,m.quaternion,m.scale));M.decompose(m.position,m.quaternion,m.scale)}K.sw.add(m);
   if(!K.swM0){K.swM0=K.swM;K.swCrack0=K.swCrack;K.swLift0=K.swLift;K.tip0=K.tip.position.clone();K.gemM0=K.gemM}
   const mt=mm.material;mt.color.setScalar(W.col||1.9);mt.userData.wcol=W.col||1.9;mt.userData.wf=W.fb||1;mt.emissiveIntensity=1.6;mt.metalness=Math.min(mt.metalness,.6);for(const o of K.wskHid)o.material.visible=false;K.swM=mt;K.swCrack=mt.emissiveMap;
   if(W.gem){K.gemM=mt;mt.emissive.setHex(0xffffff);K.swLift=null}
@@ -10129,7 +10129,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1103';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1104';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
