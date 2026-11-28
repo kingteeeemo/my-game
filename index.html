@@ -9420,11 +9420,11 @@ const DIS_COST=100;/* v950: 승급(합성) 1회 골드 */
 let disDlg=null,disTiers=new Set(),disCat='weapon',disSub=null,disDd=null,disTab='br',disMk=0,disSel=new Set(),disMsg='',disIn=false,disRes=null;
 let disFill=0;const disRst=()=>{disIn=false;disFill=0;disRes=null};
 /* v1111: 자동 승급 — 고른 티어의 조각이 3개 미만이 될 때까지(골드·가방이 모자라도 멈춤) 연출 없이 연속 승급 */
-let disAuto=null,disAutoDrv=0;const disAutoStop=()=>{if(!disAuto)return;clearInterval(disAuto.tm);disAuto=null;
+let disAuto=null,disAutoDrv=0;const disAutoStop=()=>{if(!disAuto)return;clearInterval(disAuto.tm);window.DIS_TS=disAuto.ts0;disAuto=null;
   if(disBusy){const b=document.querySelector('.dbtns .dauto');if(b){b.classList.remove('on');b.textContent='자동 승급'}}else if(rrOpen&&nsKind==='dis')renderDis()};
 /* v1113: 자동 승급 — 「조각 모두 넣기」→「승급」 연출을 그대로 반복(고른 티어 조각이 3개 미만이 되면 자동 종료) */
 function disAutoStep(){const a=disAuto;if(!a)return;if(!(rrOpen&&nsKind==='dis')||disTab!=='mk'||disCat!==a.cat||disMk!==a.t){disAutoStop();return}
-  if(disBusy){a.last=Date.now();return}if(Date.now()-a.last<500)return;/* 결과를 잠깐 보여준 뒤 다음 회차 */
+  if(disBusy){a.last=Date.now();return}if(Date.now()-a.last<330)return;/* 결과를 잠깐 보여준 뒤 다음 회차 */
   const T=TCUR(),drv=k=>{disAutoDrv=1;try{disClick({dataset:{[k]:'1'}})}finally{disAutoDrv=0}};
   if(!disIn){if(disPc(a.cat,a.t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap()){disAutoStop();return}drv('dpin');return}
   drv('dup')}
@@ -9466,7 +9466,7 @@ function renderDis(){const C=DIS_CAT[disCat],elig=k=>S.inv.filter(x=>x.ns&&DIS_C
   bd.style.setProperty('--ts',window.DIS_TS||1);const dr=bd.querySelector('.dright');if(dr)dr.scrollTop=top}
 function disClick(b){const d=b.dataset;if(d.dauto&&disAuto){disAutoStop();return true}if(disBusy)return true;
   if(d.dauto){if(disAuto){disAutoStop();return true}const t=disMk,T=TCUR();if(dtutOn()||disPc(disCat,t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap())return true;
-    disAuto={cat:disCat,t,last:0,tm:setInterval(disAutoStep,150)};renderDis();return true}
+    disAuto={cat:disCat,t,last:0,ts0:window.DIS_TS,tm:setInterval(disAutoStep,150)};window.DIS_TS=(window.DIS_TS||1)/1.5;/* v1115: 자동 승급은 연출 1.5배 빠르게 */renderDis();return true}
   if(disAuto&&!disAutoDrv)disAutoStop();
   if(d.dc){if(disCat!==d.dc){disCat=d.dc;disSub=null;disSel.clear();disMsg='';disMk=0;disRst()}disDd=null;renderDis();return true}
   if(d.ddd){disDd=disDd===d.ddd?null:d.ddd;renderDis();return true}
@@ -9524,7 +9524,7 @@ function disDragSetup(){if(disDragInit)return;const bd=$('nsBody');if(!bd)return
   window.addEventListener('pointermove',e=>{if(!el)return;const dy=e.clientY-sy;if(!mv&&Math.abs(dy)>5){mv=true;el.classList.add('dgrab')}if(mv)el.scrollTop=st-dy});
   window.addEventListener('pointerup',()=>{if(!el)return;if(mv){disDragged=true;setTimeout(()=>{disDragged=false},0)}el.classList.remove('dgrab');el=null;mv=false});
   bd.addEventListener('click',e=>{if(disDragged){e.stopPropagation();e.preventDefault()}},true)}
-function openDis(cat){if(disAuto){clearInterval(disAuto.tm);disAuto=null}disDragSetup();disAbort();closeAllSheets();nsSheet();rrOpen=true;nsKind='dis';if(cat)disCat=cat;disSub=null;disDd=null;disMsg='';disSel.clear();disTiers.clear();disDlg=null;disRst();renderDis();$('nsSheet').hidden=false;releaseAll()}
+function openDis(cat){if(disAuto){clearInterval(disAuto.tm);window.DIS_TS=disAuto.ts0;disAuto=null}disDragSetup();disAbort();closeAllSheets();nsSheet();rrOpen=true;nsKind='dis';if(cat)disCat=cat;disSub=null;disDd=null;disMsg='';disSel.clear();disTiers.clear();disDlg=null;disRst();renderDis();$('nsSheet').hidden=false;releaseAll()}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrPw0=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 
 /* v1063: 엔드게임 조율 튜토리얼 — 하란이 조율사 오린에게 보냄 → 오린 머리 위 「!」 → 말을 걸면 연습 장비(4티어 반지, 나머지 줄 5티어)와 불씨·인장을 주고
@@ -10150,7 +10150,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1114';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1115';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
