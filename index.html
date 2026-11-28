@@ -9269,8 +9269,8 @@ const OPT_ROWS={o:[['inc'],['cc'],['cdm'],['aspd'],['cspd'],['bcrit'],['cdr'],['
 /* v1066: 옵션표 — 공격용(무기·장갑) / 장신구용(목걸이·반지) / 방어용(투구·갑옷·신발·허리띠) 탭. 고정 · 기본(DPS·EHP) · 특수(체력·마나·유틸) 옵션을 세로 목록으로, 6티어·1티어 수치 범위와 함께 */
 const OPT_TABS=[['atk','공격용',['weapon','gloves'],'#c8605a'],['acc','장신구용',['amulet','ring'],'#a07ad0'],['def','방어용',['helm','armor','boots','belt'],'#5a9ad8']];
 let optTabK=null,optSubK='o';
-function optTable(it,tab,sub){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
-  if(sub)optSubK=sub;if(tab)optTabK=tab;else if(sl)optTabK=(OPT_TABS.find(t=>t[2].includes(sl))||OPT_TABS[0])[0];else optTabK=optTabK||'atk';
+function optTable(it,tab,sub){if(!it){toast('장비를 먼저 고르세요','옵션표는 조율할 장비를 올린 뒤 볼 수 있습니다');return}/* v1117: 고른 장비의 유형(공격·장신구·방어)만 보여 줌 */const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,has=new Set(it?it.lines.map(l=>l.k):[]),old=document.querySelector('.optm');if(old)old.remove();
+  if(sub)optSubK=sub;if(sl)optTabK=(OPT_TABS.find(t=>t[2].includes(sl))||OPT_TABS[0])[0];else optTabK=optTabK||'atk';
   const T=OPT_TABS.find(t=>t[0]===optTabK),SL=T[2],gc=T[3];
   const rg=(R,k,t)=>{const r=R&&R[t-1];if(!r)return '—';const u=(NSO[k]&&NSO[k].u)||'',f=v=>nFmt(k,v).replace(/^[-+]/,''),a=f(r[0]),b=f(r[1]);return a===b?a:`${u&&a.endsWith(u)?a.slice(0,-u.length):a}~${b}`};
   const chips=ss=>ss.length===SL.length?'':`<span class="opsl">${ss.map(x=>SLOTN[x]).join(' · ')}</span>`;
@@ -9278,8 +9278,7 @@ function optTable(it,tab,sub){const sl=it&&it.slot==='ring2'?'ring':it&&it.slot,
   const order=kd=>{const ord=OPT_ROWS[kd].flatMap(r=>r.filter(k=>NSO[k])),all=new Set(SL.flatMap(x=>(NSLOT[x]||{})[kd]||[]));return [...ord.filter(k=>all.has(k)),...[...all].filter(k=>!ord.includes(k))]};
   const list=kd=>order(kd).map(k=>row(NSO[k].n,k,NSO[k].r,SL.filter(x=>((NSLOT[x]||{})[kd]||[]).includes(k)),has.has(k))).join('');
   const hd=`<div class="oph"><span></span><span>6티어</span><span class="t1">1티어</span></div>`;
-  const d=document.createElement('div');d.className='optm';d.innerHTML=`<div class="optc" style="--gc:${gc}"><div class="shead"><div><h2>장비 옵션표</h2><small>부위마다 붙을 수 있는 옵션과 수치 범위${sl?` · 지금 고른 장비의 옵션은 노란색`:''}</small></div><button class="close">닫기</button></div>
-    <div class="optabs">${OPT_TABS.map(t=>`<button data-optab="${t[0]}" class="${t[0]===optTabK?'on':''}" style="--gc:${t[3]}">${t[1]}<small>${t[2].map(x=>SLOTN[x]).join('·')}</small></button>`).join('')}</div>
+  const d=document.createElement('div');d.className='optm';d.innerHTML=`<div class="optc" style="--gc:${gc}"><div class="shead"><div><h2>${T[1]} 옵션표</h2><small>${T[2].map(x=>SLOTN[x]).join(' · ')}에 붙을 수 있는 옵션과 수치 범위 · 지금 고른 장비의 옵션은 노란색</small></div><button class="close">닫기</button></div>
     <div class="opscroll">
     <div class="opsub">${[['o','기본 옵션','1~3줄'],['x','특수 옵션','1~3줄']].map(q=>`<button data-optsub="${q[0]}" class="${q[0]===optSubK?'on':''}">${q[1]}<small>${q[2]}</small></button>`).join('')}</div>
     <div class="opsec"><p class="opd">${optSubK==='o'?'DPS와 EHP에 직접 영향을 주는 옵션':'체력 · 마나 · 이동 같은 유틸 옵션 (전투력 계산 밖)'}</p>${hd}${list(optSubK)}</div>
@@ -9300,7 +9299,7 @@ function renderRR(){const all=[...EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),...S.in
   const eqI=EQS.map(k=>S.eq[k]).filter(x=>x&&x.ns),bgI=invSort(S.inv.filter(x=>x.ns)),up=rrDrUp||!sel;
   const tl=(it,src)=>`<div class="rrt">${nsTile(it,it.id===rrSel,src)}<span>${SLOTN[it.slot]}${src==='e'&&enhL(nsItSlot(it))?` +${enhL(nsItSlot(it))}`:''}</span></div>`;
   const body=$('nsBody'),old=body.querySelector('.rrdl'),sc=old?old.scrollTop:0,wasUp=body.querySelector('.rrdr.up')!==null||(!old&&true);
-  let h=`<div class="shead"><div><h2>옵션 조율</h2></div><div class="hdbtns"><button class="close" data-ns="optt">옵션표</button><button class="close" data-ns="close">닫기</button></div></div>
+  let h=`<div class="shead"><div><h2>옵션 조율</h2></div><div class="hdbtns">${sel?'<button class="close" data-ns="optt">옵션표</button>':''}<button class="close" data-ns="close">닫기</button></div></div>
   <div class="rrmain">${sel?`<div class="rrwrap2">${rrCard(sel)}</div>`:`<div class="rrempty"><span class="slotx"></span><p>조율할 아이템을 ${matchMedia('(orientation:landscape)').matches?'오른쪽':'아래'}에서 고르세요<br><small>수치 조정 · 옵션 변환 · 티어 승급</small></p></div>`}</div>
   ${sel?`<div class="rrfoot"><div class="rrbal"><span>${ci('r')}<b>${T?'∞':fmtC(S.rr||0)}</b></span><span>${ci('s')}<b>${T?'∞':fmtC(S.seal||0)}</b></span></div><div class="rrct">${ct}</div>${sel?rrSplit(sel,btn):btn}</div>`:''}
   <div class="rrpk"></div>
@@ -9678,7 +9677,7 @@ function nsClick(b){const a=b.dataset.ns;
   if(a==='drw'&&rrOpen){if(rrSpin||!rrSel||performance.now()-drNoClick<400)return;rrDrUp=!rrDrUp;renderRR();return}
   if(b.dataset.rt&&rrOpen){if(rrSpin)return;rrTab=b.dataset.rt;rrLine=null;rrPrev=null;renderRR();return}
   if(b.dataset.rl!==undefined&&rrOpen){if(rrSpin)return;const i=+b.dataset.rl;rrLine=rrLine===i?null:i;renderRR();return}
-  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,/^c:/.test(id)?id:+id)}else{if(rrSpin)return;{const pi=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===+id);if(pi&&pi.uid){toast('감정 필요','가방에서 옵션을 감정한 뒤 조율할 수 있습니다');return}}rrSel=+id;rrPrev=null;rrPw0=null;rrLine=null;rrDrUp=false;renderRR()}return}
+  if(b.dataset.pick){const [src,id]=b.dataset.pick.split(',');if(stashOpen){stashPick(src,/^c:/.test(id)?id:+id)}else{if(rrSpin)return;{const pi=[...EQS.map(k=>S.eq[k]),...S.inv].find(x=>x&&x.id===+id);if(pi&&pi.uid){toast('감정 필요','먼저 가방에서 장비를 감정해 주세요 · 감정한 뒤 조율할 수 있습니다');return}}rrSel=+id;rrPrev=null;rrPw0=null;rrLine=null;rrDrUp=false;renderRR()}return}
   if(stashOpen&&NS()&&(a==='move'||a==='multi')){
     if(a==='multi'){stashMulti=!stashMulti;if(!stashMulti)stashPicks=stashPicks.slice(0,1);renderStash();return}
     if(stashTab==='cur'){const dir=stashSide==='s'?'out':'in';stashPicks.slice().forEach(id=>stashCurMove(dir,id.slice(2)));stashPicks=[];stashSide=null;renderStash();return}
@@ -10157,7 +10156,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1116';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1117';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
