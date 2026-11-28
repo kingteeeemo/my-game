@@ -9416,17 +9416,16 @@ const DIS_COST=100;/* v950: 승급(합성) 1회 골드 */
 let disDlg=null,disTiers=new Set(),disCat='weapon',disSub=null,disDd=null,disTab='br',disMk=0,disSel=new Set(),disMsg='',disIn=false,disRes=null;
 let disFill=0;const disRst=()=>{disIn=false;disFill=0;disRes=null};
 /* v1111: 자동 승급 — 고른 티어의 조각이 3개 미만이 될 때까지(골드·가방이 모자라도 멈춤) 연출 없이 연속 승급 */
-let disAuto=null;const disAutoStop=()=>{if(!disAuto)return;clearInterval(disAuto.tm);disAuto=null;
-  save();if(typeof refreshUpBtn==='function')refreshUpBtn();if(rrOpen&&nsKind==='dis')renderDis()};
+let disAuto=null,disAutoDrv=0;const disAutoStop=()=>{if(!disAuto)return;clearInterval(disAuto.tm);disAuto=null;
+  if(disBusy){const b=document.querySelector('.dbtns .dauto');if(b){b.classList.remove('on');b.textContent='자동 승급'}}else if(rrOpen&&nsKind==='dis')renderDis()};
+/* v1113: 자동 승급 — 「조각 모두 넣기」→「승급」 연출을 그대로 반복(고른 티어 조각이 3개 미만이 되면 자동 종료) */
 function disAutoStep(){const a=disAuto;if(!a)return;if(!(rrOpen&&nsKind==='dis')||disTab!=='mk'||disCat!==a.cat||disMk!==a.t){disAutoStop();return}
-  const T=TCUR(),C=DIS_CAT[a.cat];
-  if(disPc(a.cat,a.t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap()){disAutoStop();return}
-  if(!T)S.gold-=DIS_COST;disAdd(a.cat,a.t,-DIS_N);
-  if(Math.random()<(DIS_P[a.t]||0)){const sl=C.sl[Math.random()*C.sl.length|0],it=nsMakeItem(sl,a.t-1,{wc:bc(S.cls)});it.uid=1;S.inv.push(it)}
-  if(disPc(a.cat,a.t)<DIS_N){disAutoStop();return}
-  renderDis()}
+  if(disBusy){a.last=Date.now();return}if(Date.now()-a.last<500)return;/* 결과를 잠깐 보여준 뒤 다음 회차 */
+  const T=TCUR(),drv=k=>{disAutoDrv=1;try{disClick({dataset:{[k]:'1'}})}finally{disAutoDrv=0}};
+  if(!disIn){if(disPc(a.cat,a.t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap()){disAutoStop();return}drv('dpin');return}
+  drv('dup')}
 let disBusy=false;const disT=[],disLater=(ms,f)=>{disT.push(setTimeout(()=>{try{f()}catch(e){}},ms*(window.DIS_TS||1)))};
-let disSkipF=null;function disAbort(){if(disAuto){clearInterval(disAuto.tm);disAuto=null}disT.forEach(clearTimeout);disT.length=0;disBusy=false;disDlg=null;if(disSkipF){const b=$('nsBody');b&&b.removeEventListener('click',disSkipF,true);disSkipF=null}}
+let disSkipF=null;function disAbort(){disT.forEach(clearTimeout);disT.length=0;disBusy=false;disDlg=null;if(disSkipF){const b=$('nsBody');b&&b.removeEventListener('click',disSkipF,true);disSkipF=null}}
 /* v1015: 분해 조각 아이콘 — 장비 모양 대신 룬석(부위별 룬 문양, 테두리·문양 색은 티어색) */
 const PCR={'weapon':'M27 15V49M20 21H27M27 22L41 30L27 38M27 49L40 42M33 15L38 19','armor':'M32 16L45 32L32 48L19 32ZM32 24L38 32L32 40L26 32Z','amulet':'M22 19L42 45V19L22 45Z'};
 const pcIco=rs=>{const g=PCR[rs]||PCR.weapon;return `<svg class="pcr" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 3L57.1 17.5V46.5L32 61L6.9 46.5V17.5Z" fill="#1d1d26" stroke="var(--tc,#cbbd9f)" stroke-width="3" stroke-linejoin="round"/><path d="${g}" fill="none" stroke="var(--tc,#cbbd9f)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`};
@@ -9461,10 +9460,10 @@ function renderDis(){const C=DIS_CAT[disCat],elig=k=>S.inv.filter(x=>x.ns&&DIS_C
   bd.classList.add('dismode');
   bd.innerHTML=`<div class="shead"><h2>장비 정리 · 합성</h2><div class="dtabs"><button class="${br?'on':''}" data-dtab="br">정리</button><button class="${br?'':'on'}" data-dtab="mk">합성</button></div><button class="close" data-ns="close">닫기</button></div><div class="dleft">${left}${disMsg?`<div class="xcmsg">${disMsg}</div>`:''}</div><div class="dright">${right}</div>${disDlgHtml()}`;
   bd.style.setProperty('--ts',window.DIS_TS||1);const dr=bd.querySelector('.dright');if(dr)dr.scrollTop=top}
-function disClick(b){const d=b.dataset;if(disBusy)return true;
+function disClick(b){const d=b.dataset;if(d.dauto&&disAuto){disAutoStop();return true}if(disBusy)return true;
   if(d.dauto){if(disAuto){disAutoStop();return true}const t=disMk,T=TCUR();if(dtutOn()||disPc(disCat,t)<DIS_N||(!T&&(S.gold||0)<DIS_COST)||S.inv.length>=bagCap())return true;
-    disRst();disMsg='';disAuto={cat:disCat,t,tm:setInterval(disAutoStep,150)};renderDis();return true}
-  if(disAuto)disAutoStop();
+    disAuto={cat:disCat,t,last:0,tm:setInterval(disAutoStep,150)};renderDis();return true}
+  if(disAuto&&!disAutoDrv)disAutoStop();
   if(d.dc){if(disCat!==d.dc){disCat=d.dc;disSub=null;disSel.clear();disMsg='';disMk=0;disRst()}disDd=null;renderDis();return true}
   if(d.ddd){disDd=disDd===d.ddd?null:d.ddd;renderDis();return true}
   if(d.dsub!==undefined){const [k,x]=d.dsub.split(',');if(disCat!==k){disCat=k;disSel.clear();disMsg='';disMk=0;disRst()}disSub=x||null;disDd=null;disSel.clear();renderDis();return true}
@@ -9501,7 +9500,7 @@ function disClick(b){const d=b.dataset;if(disBusy)return true;
     /* v950: 합성 연출 — 재료가 결과 칸으로 날아가 합쳐짐 → 섬광 → 결과 공개 → 중앙 배너 */
     disBusy=true;disMsg='';
     const bd=$('nsBody'),dmk=bd.querySelector('.dmk'),res=dmk.querySelector('.dmres'),sls=[...dmk.querySelectorAll('.dmslots .dmslot')],sc=(bd.getBoundingClientRect().width/bd.offsetWidth)||1,rc=res.getBoundingClientRect();
-    bd.querySelectorAll('.dbtns button').forEach(x=>x.disabled=true);
+    bd.querySelectorAll('.dbtns button:not(.dauto)').forEach(x=>x.disabled=true);
     sls.forEach(el=>{const r=el.getBoundingClientRect();el.style.setProperty('--dx',((rc.left+rc.width/2)-(r.left+r.width/2))/sc+'px');el.style.setProperty('--dy',((rc.top+rc.height/2)-(r.top+r.height/2))/sc+'px');const o=document.createElement('i');o.className='dmorb';el.appendChild(o);el.classList.add('fly')});
     disLater(620,()=>{sls.forEach(el=>{el.classList.remove('on','fly');el.querySelector('.dmi').innerHTML='';el.querySelectorAll('.dmorb').forEach(x=>x.remove())});res.classList.add('charge')});
     disLater(1060,()=>{res.classList.remove('charge');const ok=!!out.it,dmi=res.querySelector('.dmi');
@@ -9509,7 +9508,7 @@ function disClick(b){const d=b.dataset;if(disBusy)return true;
       for(let k=0;k<(ok?14:7);k++){const e=document.createElement('i');e.className='dmsp'+(ok?'':' g');e.style.setProperty('--a',(k*360/(ok?14:7)+Math.random()*20)+'deg');e.style.setProperty('--d',(40+Math.random()*34)+'px');res.appendChild(e)}
       const bn=document.createElement('div');bn.className='dmban '+(ok?'ok':'bad');bn.innerHTML=`<b>${ok?'승급 성공':'승급 실패'}</b><small>${ok?`${out.it.tier}티어 ${SLOTN[out.it.slot]} 획득`:'조각이 사라졌습니다'}</small>`;bd.appendChild(bn)});
     const fin=()=>{disAbort();disIn=false;disFill=0;disRes=out;renderDis()},t0=Date.now();
-    disSkipF=e=>{if(e.target.closest&&e.target.closest('.close'))return;e.stopPropagation();e.preventDefault();if(Date.now()-t0<250)return;
+    disSkipF=e=>{if(e.target.closest&&e.target.closest('.close,.dauto'))return;e.stopPropagation();e.preventDefault();if(Date.now()-t0<250)return;
       bd.removeEventListener('click',disSkipF,true);disSkipF=null;disT.forEach(clearTimeout);disT.length=0;
       const bn=bd.querySelector('.dmban');if(bn){bn.classList.add('out');disLater(160,fin)}else fin()};
     bd.addEventListener('click',disSkipF,true);
@@ -9521,7 +9520,7 @@ function disDragSetup(){if(disDragInit)return;const bd=$('nsBody');if(!bd)return
   window.addEventListener('pointermove',e=>{if(!el)return;const dy=e.clientY-sy;if(!mv&&Math.abs(dy)>5){mv=true;el.classList.add('dgrab')}if(mv)el.scrollTop=st-dy});
   window.addEventListener('pointerup',()=>{if(!el)return;if(mv){disDragged=true;setTimeout(()=>{disDragged=false},0)}el.classList.remove('dgrab');el=null;mv=false});
   bd.addEventListener('click',e=>{if(disDragged){e.stopPropagation();e.preventDefault()}},true)}
-function openDis(cat){disDragSetup();disAbort();closeAllSheets();nsSheet();rrOpen=true;nsKind='dis';if(cat)disCat=cat;disSub=null;disDd=null;disMsg='';disSel.clear();disTiers.clear();disDlg=null;disRst();renderDis();$('nsSheet').hidden=false;releaseAll()}
+function openDis(cat){if(disAuto){clearInterval(disAuto.tm);disAuto=null}disDragSetup();disAbort();closeAllSheets();nsSheet();rrOpen=true;nsKind='dis';if(cat)disCat=cat;disSub=null;disDd=null;disMsg='';disSel.clear();disTiers.clear();disDlg=null;disRst();renderDis();$('nsSheet').hidden=false;releaseAll()}
 function openRR(){closeAllSheets();nsSheet();rrOpen=true;nsKind=null;rrSel=null;rrLine=null;rrPrev=null;rrPw0=null;rrTab='rr';rrDrUp=true;$('nsBody')&&$('nsBody').replaceChildren();renderRR();$('nsSheet').hidden=false;releaseAll()}
 
 /* v1063: 엔드게임 조율 튜토리얼 — 하란이 조율사 오린에게 보냄 → 오린 머리 위 「!」 → 말을 걸면 연습 장비(4티어 반지, 나머지 줄 5티어)와 불씨·인장을 주고
@@ -10145,7 +10144,7 @@ async function verCheck(){const now=Date.now();if(now-verLast<60000)return;verLa
     const h=await fetch('index.html?_='+now,{cache:'no-store'});if(!h.ok)return;const x=/APP_VER='v(\d+)'/.exec(await h.text());const live=x?+x[1]:0;if(live<=cur||live<=verSeen)return;
     verShow(live,msgs)}catch(e){}}
 setTimeout(verCheck,5000);setInterval(verCheck,180000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
-const APP_VER='v1112';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
+const APP_VER='v1113';const XIC='<svg class="xic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9.5 5 13.5l4 4M5 13.5h10a4 4 0 0 0 0-8h-2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';/* v594: 나가기 아이콘을 이모지 대신 SVG로 — 기기마다 파란 이모지 상자로 그려지던 문제 */try{const vt=document.getElementById('verTag');if(vt)vt.textContent=APP_VER}catch(e){}/* v158: 제목 화면 버전 표기 */
 /* v477: 새 버전 알림·강제 재시작 제거 — 플레이 중엔 끊기지 않고, 앱을 직접 껐다 켜면 새 버전 적용 */
 function releaseAll(){for(const k in input.held)input.held[k]=false;input.x=input.z=0;sp=null;knob.hidden=true;document.querySelectorAll('.act').forEach(b=>b.classList.remove('down'))}
 
